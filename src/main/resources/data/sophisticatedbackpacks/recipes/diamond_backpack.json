@@ -1,0 +1,19 @@
+{
+    "type": "sophisticatedbackpacks:backpack_upgrade",
+    "pattern": [
+        "DDD",
+        "DBD",
+        "DDD"
+    ],
+    "key": {
+        "D": {
+            "item": "minecraft:diamond"
+        },
+        "B": {
+            "item": "sophisticatedbackpacks:gold_backpack"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:diamond_backpack"
+    }
+}

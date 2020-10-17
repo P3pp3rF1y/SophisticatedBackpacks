@@ -1,0 +1,151 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.0.+'
+    }
+}
+
+plugins {
+    id "org.sonarqube" version "2.6.2"
+    id "maven-publish"
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+group = 'sophisticatedbackpacks'
+version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
+archivesBaseName = 'SophisticatedBackpacks'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+minecraft {
+    mappings channel: 'snapshot', version: project.mcp_mappings
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        client {
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run')
+            mods {
+                sophisticatedbackpacks {
+                    source sourceSets.main
+                }
+            }
+        }
+        server {
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run')
+            mods {
+                sophisticatedbackpacks {
+                    source sourceSets.main
+                }
+            }
+        }
+        data {
+            properties 'forge.logging.markers': 'REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'debug'
+            properties 'fml.earlyprogresswindow': 'false'
+            workingDirectory project.file('run')
+            mods {
+                sophisticatedbackpacks {
+                    source sourceSets.main
+                }
+            }
+            args '--mod', 'sophisticatedbackpacks', '--all', '--output', file('src/generated/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+}
+
+test {
+    useTestNG()
+}
+
+task generateSources(type: Copy) {
+    from 'src/replaceme/java'
+    into "$buildDir/generated-src"
+    filter { line -> line.replaceAll('@MOD_VERSION@', '${project.version}') }
+}
+
+jar {
+    manifest {
+        attributes(["Specification-Title"     : "sophisticatedbackpacks",
+                    "Specification-Vendor"    : "sophisticatedbackpacks",
+                    "Specification-Version"   : "1",
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : "${version}",
+                    "Implementation-Vendor"   : "sophisticatedbackpacks",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+    }
+}
+
+processResources {
+    // Exclude datagenerator .cache directory
+    exclude '.cache'
+
+    filesMatching('META-INF/mods.toml') {
+        filter {
+            it.replaceAll("project_version", project.version.toString())
+        }
+    }
+}
+
+static def getBuildNumber() {
+    if (System.getenv("BUILD_NUMBER") != null) {
+        return System.getenv("BUILD_NUMBER").toString()
+    }
+    return ""
+}
+
+static def getStable() {
+    if ((System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev"))) {
+        return "unstable"
+    }
+    return ""
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "SophisticatedBackpacks"
+        property "sonar.projectKey", "sophisticatedbackpacks:SophisticatedBackpacks"
+    }
+}
+

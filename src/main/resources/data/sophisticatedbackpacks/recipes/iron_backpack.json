@@ -1,0 +1,19 @@
+{
+    "type": "sophisticatedbackpacks:backpack_upgrade",
+    "pattern": [
+        "III",
+        "IBI",
+        "III"
+    ],
+    "key": {
+        "I": {
+            "item": "minecraft:iron_ingot"
+        },
+        "B": {
+            "item": "sophisticatedbackpacks:backpack"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:iron_backpack"
+    }
+}

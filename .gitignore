@@ -1,0 +1,32 @@
+# exclude all
+/*
+
+# include important folders
+# need gradle
+!gradle/
+!bintray/
+!gradlew
+!gradlew.bat
+!build.gradle
+!build.properties
+!gradle.properties
+!.github/
+
+# include markdowns
+!README.md
+!LICENSE
+!COPYING.txt
+
+# include sourcecode
+!src/
+src/generated/resources/.cache
+
+# include git important files
+!.gitmodules
+!.gitignore
+
+# code format to reduce noise in git commits
+!codeformat/
+
+# include web files
+!web/

@@ -1,0 +1,19 @@
+{
+    "type": "sophisticatedbackpacks:backpack_upgrade",
+    "pattern": [
+        "GGG",
+        "GBG",
+        "GGG"
+    ],
+    "key": {
+        "G": {
+            "item": "minecraft:gold_ingot"
+        },
+        "B": {
+            "item": "sophisticatedbackpacks:iron_backpack"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:gold_backpack"
+    }
+}
