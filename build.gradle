@@ -119,7 +119,7 @@ static def getBuildNumber() {
 
 static def getStable() {
     if ((System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev"))) {
-        return "alpha"
+        return "-alpha"
     }
     return ""
 }
