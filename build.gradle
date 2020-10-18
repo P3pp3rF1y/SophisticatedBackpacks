@@ -137,6 +137,7 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
+            artifactId='sophisticatedbackpacks'
             from(components.java)
         }
     }
