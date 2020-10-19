@@ -42,6 +42,11 @@ public class BackpackUpgradeRecipe extends ShapedRecipe {
 		return Optional.empty();
 	}
 
+	@Override
+	public IRecipeSerializer<?> getSerializer() {
+		return SERIALIZER;
+	}
+
 	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<BackpackUpgradeRecipe> {
 		@Override
 		public BackpackUpgradeRecipe read(ResourceLocation recipeId, JsonObject json) {
