@@ -42,7 +42,7 @@ public class ModItems {
 		reg.register(new BackpackItem("iron_backpack", 54, 2));
 		reg.register(new BackpackItem("gold_backpack", 81, 3, new ScreenProperties().setTextureSize(512)));
 		reg.register(new BackpackItem("diamond_backpack", 108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512)));
-		reg.register(new ItemBase("upgrade_base"));
+		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
 		reg.register(new PickupUpgrade());
 	}
 
