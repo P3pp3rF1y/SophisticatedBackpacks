@@ -11,10 +11,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	public BackpackInventoryHandler(ItemStack backpack) {
 		super(getNumberOfSlots(backpack));
 		this.backpack = backpack;
-		if (backpack.hasTag()) {
-			//noinspection ConstantConditions
-			deserializeNBT(backpack.getTag().getCompound(INVENTORY_TAG) );
-		}
+		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
 	@Override

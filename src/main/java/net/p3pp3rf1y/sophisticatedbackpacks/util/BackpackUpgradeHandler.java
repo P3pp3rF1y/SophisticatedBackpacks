@@ -14,10 +14,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	public BackpackUpgradeHandler(ItemStack backpack) {
 		super(getNumberOfUpgradeSlots(backpack));
 		this.backpack = backpack;
-		if (backpack.hasTag()) {
-			//noinspection ConstantConditions
-			deserializeNBT(backpack.getTag().getCompound(UPGRADE_INVENTORY_TAG));
-		}
+		NBTHelper.getCompound(backpack, UPGRADE_INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
 	@Override

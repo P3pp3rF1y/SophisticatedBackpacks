@@ -26,6 +26,9 @@ public class ModItems {
 	private ModItems() {}
 
 	public static final BackpackItem BACKPACK = InjectionHelper.nullValue();
+	public static final BackpackItem IRON_BACKPACK = InjectionHelper.nullValue();
+	public static final BackpackItem GOLD_BACKPACK = InjectionHelper.nullValue();
+	public static final BackpackItem DIAMOND_BACKPACK = InjectionHelper.nullValue();
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Item.class, ModItems::register);
