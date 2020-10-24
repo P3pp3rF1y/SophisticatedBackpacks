@@ -2,5 +2,7 @@
     "item.sophisticatedbackpacks.backpack": "Backpack",
     "item.sophisticatedbackpacks.iron_backpack": "Iron Backpack",
     "item.sophisticatedbackpacks.gold_backpack": "Gold Backpack",
-    "item.sophisticatedbackpacks.diamond_backpack": "Diamond Backpack"
+    "item.sophisticatedbackpacks.diamond_backpack": "Diamond Backpack",
+    "item.sophisticatedbackpacks.upgrade_base": "Upgrade Base",
+    "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade"
 }

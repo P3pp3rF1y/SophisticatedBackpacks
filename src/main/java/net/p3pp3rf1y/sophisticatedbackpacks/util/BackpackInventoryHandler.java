@@ -28,11 +28,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {
-		for(int slot = 0; slot < getSlots() && slot < otherHandler.getSlots(); slot++) {
-			ItemStack slotStack = getStackInSlot(slot);
-			if (!slotStack.isEmpty()) {
-				otherHandler.setStackInSlot(slot, slotStack);
-			}
-		}
+		InventoryHelper.copyTo(this, otherHandler);
 	}
+
 }

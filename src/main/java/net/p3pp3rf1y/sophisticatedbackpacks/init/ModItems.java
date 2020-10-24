@@ -16,6 +16,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.items.PickupUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
 
@@ -33,10 +35,12 @@ public class ModItems {
 
 	public static void register(RegistryEvent.Register<Item> event) {
 		IForgeRegistry<Item> reg = event.getRegistry();
-		reg.register(new BackpackItem("backpack", 27));
-		reg.register(new BackpackItem("iron_backpack", 54));
-		reg.register(new BackpackItem("gold_backpack", 81, new ScreenProperties().setTextureSize(512)));
-		reg.register(new BackpackItem("diamond_backpack", 108, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512)));
+		reg.register(new BackpackItem("backpack", 27, 1));
+		reg.register(new BackpackItem("iron_backpack", 54, 2));
+		reg.register(new BackpackItem("gold_backpack", 81, 3, new ScreenProperties().setTextureSize(512)));
+		reg.register(new BackpackItem("diamond_backpack", 108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512)));
+		reg.register(new ItemBase("upgrade_base"));
+		reg.register(new PickupUpgrade());
 	}
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {

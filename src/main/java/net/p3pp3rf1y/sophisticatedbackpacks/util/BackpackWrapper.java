@@ -7,6 +7,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 public class BackpackWrapper {
 	private final ItemStack backpack;
 	private BackpackInventoryHandler handler = null;
+	private BackpackUpgradeHandler upgradeHandler = null;
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -28,5 +29,13 @@ public class BackpackWrapper {
 			otherBackpackWrapper.backpack.setDisplayName(backpack.getDisplayName());
 		}
 		getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
+		getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
+	}
+
+	public BackpackUpgradeHandler getUpgradeHandler() {
+		if (upgradeHandler == null) {
+			upgradeHandler = new BackpackUpgradeHandler(backpack);
+		}
+		return upgradeHandler;
 	}
 }

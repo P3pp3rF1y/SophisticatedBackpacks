@@ -14,6 +14,13 @@ import java.util.Map;
 
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final Map<Integer, ResourceLocation> BACKPACK_TEXTURES = new HashMap<>();
+	private static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
+	private static final int UPGRADE_TOP_HEIGHT = 7;
+	private static final int UPGRADE_SLOT_HEIGHT = 18;
+	private static final int UPGRADE_SPACE_BETWEEN_SLOTS = 4;
+	private static final int UPGRADE_BOTTOM_HEIGHT = 7;
+	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
+	private int slots;
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -21,6 +28,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		xSize = getContainer().getScreenProperties().getSlotsOnLine() * 18 + 14;
 		playerInventoryTitleY = ySize - 94;
 		playerInventoryTitleX = 8 + getContainer().getScreenProperties().getPlayerInventoryYOffset();
+		slots = getContainer().getNumberOfUpgradeSlots();
 	}
 
 	@Override
@@ -31,12 +39,45 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y) {
+		drawInventoryBackground(matrixStack);
+		drawUpgradeBackground(matrixStack);
+	}
+
+	private void drawInventoryBackground(MatrixStack matrixStack) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		minecraft.getTextureManager().bindTexture(getBackpackTexture(container.getNumberOfSlots()));
 		int i = (width - xSize) / 2;
 		int j = (height - ySize) / 2;
 		int textureSize = container.getScreenProperties().getTextureSize();
 		blit(matrixStack, i, j, 0, 0, xSize, ySize, textureSize, textureSize);
+	}
+
+	private void drawUpgradeBackground(MatrixStack matrixStack) {
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		minecraft.getTextureManager().bindTexture(UPGRADE_CONTROLS);
+		int i = (width - xSize) / 2;
+		int j = (height - ySize) / 2;
+
+		int firstHalfHeight = getUpgradeHeightWithoutBottom();
+
+		blit(matrixStack, i - getUpgradesOffset(), j + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
+		blit(matrixStack, i - getUpgradesOffset(), j + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
+	}
+
+	public int getUpgradesOffset() {
+		return 26;
+	}
+
+	public int getUpgradeTop() {
+		return ySize - 94 - getUpgradeHeight();
+	}
+
+	public int getUpgradeHeight() {
+		return getUpgradeHeightWithoutBottom() + UPGRADE_TOP_HEIGHT;
+	}
+
+	private int getUpgradeHeightWithoutBottom() {
+		return UPGRADE_BOTTOM_HEIGHT + slots * UPGRADE_SLOT_HEIGHT + (slots - 1) * UPGRADE_SPACE_BETWEEN_SLOTS;
 	}
 
 	private static ResourceLocation getBackpackTexture(int numberOfSlots) {

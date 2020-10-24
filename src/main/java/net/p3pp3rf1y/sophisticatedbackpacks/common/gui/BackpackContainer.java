@@ -14,6 +14,7 @@ import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 
 public class BackpackContainer extends Container {
@@ -27,8 +28,29 @@ public class BackpackContainer extends Container {
 
 		backPackWrapper = new BackpackWrapper(backpack);
 		int yPosition = addBackpackInventorySlots();
-
+		addBackpackUpgradeSlots(yPosition);
 		addPlayerInventorySlots(playerInventory, yPosition);
+	}
+
+	private void addBackpackUpgradeSlots(int lastInventoryRowY) {
+		BackpackUpgradeHandler upgradeHandler = backPackWrapper.getUpgradeHandler();
+
+		int numberOfSlots = upgradeHandler.getSlots();
+
+		if (numberOfSlots == 0) {
+			return;
+		}
+
+		int slotIndex = 0;
+
+		int yPosition = lastInventoryRowY - (22 + 22 * (numberOfSlots - 1));
+
+		while (slotIndex < upgradeHandler.getSlots()) {
+			addSlot(new SlotItemHandler(upgradeHandler, slotIndex, -18, yPosition));
+
+			slotIndex++;
+			yPosition += 22;
+		}
 	}
 
 	private int addBackpackInventorySlots() {
@@ -46,12 +68,13 @@ public class BackpackContainer extends Container {
 			}
 		}
 
-		yPosition += 14;
 		return yPosition;
 	}
 
 	private void addPlayerInventorySlots(PlayerInventory playerInventory, int yPosition) {
 		int playerInventoryYOffset = backPackWrapper.getScreenProperties().getPlayerInventoryYOffset();
+
+		yPosition += 14;
 
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 9; ++j) {
@@ -101,11 +124,13 @@ public class BackpackContainer extends Container {
 			}
 			itemstack = slotStack.copy();
 			int numRows = getNumberOfRows();
-			if (index < numRows * 9) {
-				if (!mergeItemStack(slotStack, numRows * 9, inventorySlots.size(), true)) {
+			int slotsOnLine = getSlotsOnLine();
+			if (index < numRows * slotsOnLine + getNumberOfUpgradeSlots()) {
+				if (!mergeItemStack(slotStack, numRows * slotsOnLine + getNumberOfUpgradeSlots(), inventorySlots.size(), true)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (!mergeItemStack(slotStack, 0, numRows * 9, false)) {
+			} else if (!mergeItemStack(slotStack, numRows * slotsOnLine, numRows * slotsOnLine + getNumberOfUpgradeSlots(), false)
+					&& !mergeItemStack(slotStack, 0, numRows * slotsOnLine, false)) {
 				return ItemStack.EMPTY;
 			}
 
@@ -134,5 +159,9 @@ public class BackpackContainer extends Container {
 
 	public ScreenProperties getScreenProperties() {
 		return backPackWrapper.getScreenProperties();
+	}
+
+	public int getNumberOfUpgradeSlots() {
+		return backPackWrapper.getUpgradeHandler().getSlots();
 	}
 }

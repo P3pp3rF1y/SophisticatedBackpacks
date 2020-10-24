@@ -22,6 +22,7 @@ apply plugin: 'idea'
 
 repositories {
     mavenCentral()
+    maven { url "http://dvs1.progwml6.com/files/maven" }
 }
 
 group = 'sophisticatedbackpacks'
@@ -75,6 +76,9 @@ sourceSets.main.resources {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+
+    compileOnly fg.deobf("mezz.jei:jei-${project.minecraft_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${project.minecraft_version}:${jei_version}")
 }
 
 test {
