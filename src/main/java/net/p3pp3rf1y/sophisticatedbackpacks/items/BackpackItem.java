@@ -38,7 +38,7 @@ public class BackpackItem extends ItemBase {
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
 		super.fillItemGroup(group, items);
 
-		if (this != ModItems.BACKPACK) {
+		if (!isInGroup(group) || this != ModItems.BACKPACK) {
 			return;
 		}
 
