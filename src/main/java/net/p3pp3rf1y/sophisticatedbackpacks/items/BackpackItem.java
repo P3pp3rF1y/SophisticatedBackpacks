@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.items;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemGroup;
@@ -14,6 +15,8 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+
+import javax.annotation.Nullable;
 
 public class BackpackItem extends ItemBase {
 	private final int numberOfSlots;
@@ -71,5 +74,11 @@ public class BackpackItem extends ItemBase {
 
 	public int getNumberOfUpgradeSlots() {
 		return numberOfUpgradeSlots;
+	}
+
+	@Nullable
+	@Override
+	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
+		return EquipmentSlotType.CHEST;
 	}
 }
