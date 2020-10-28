@@ -8,6 +8,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,6 +23,11 @@ public class SophisticatedBackpacks {
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
 		PROXY.registerHandlers();
-		FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLCommonSetupEvent event) -> ModCompat.initCompats());
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(SophisticatedBackpacks::setup);
+	}
+
+	private static void setup(FMLCommonSetupEvent event) {
+		PacketHandler.init();
+		ModCompat.initCompats();
 	}
 }

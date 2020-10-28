@@ -4,5 +4,7 @@
     "item.sophisticatedbackpacks.gold_backpack": "Gold Backpack",
     "item.sophisticatedbackpacks.diamond_backpack": "Diamond Backpack",
     "item.sophisticatedbackpacks.upgrade_base": "Upgrade Base",
-    "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade"
+    "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade",
+    "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
+    "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack"
 }
