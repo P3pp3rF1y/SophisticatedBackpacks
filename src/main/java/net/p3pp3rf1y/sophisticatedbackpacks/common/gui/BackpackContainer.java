@@ -11,12 +11,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackOpenHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.Optional;
 
@@ -29,13 +30,13 @@ public class BackpackContainer extends Container {
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int slot) {
 		super(TYPE, windowId);
 
-		Optional<BackpackOpenHandler.PlayerInventoryHandler> h = BackpackOpenHandler.getBackpackInventoryHandler(handlerName);
+		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
 			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK));
 			return;
 		}
-		BackpackOpenHandler.PlayerInventoryHandler handler = h.get();
+		PlayerInventoryHandler handler = h.get();
 		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, slot));
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);

@@ -12,10 +12,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackOpenHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
 
@@ -59,7 +59,7 @@ public class BackpackItem extends ItemBase {
 		ItemStack stack = player.getHeldItem(hand);
 
 		if (!world.isRemote && player instanceof ServerPlayerEntity) {
-			String handlerName = hand == Hand.MAIN_HAND ? BackpackOpenHandler.MAIN_INVENTORY : BackpackOpenHandler.OFFHAND_INVENTORY;
+			String handlerName = hand == Hand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == Hand.MAIN_HAND ? player.inventory.currentItem : 0;
 			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, handlerName, slot), stack.getDisplayName()),
 					buf -> {

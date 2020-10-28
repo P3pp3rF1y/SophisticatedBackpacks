@@ -1,8 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraftforge.fml.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackOpenHandler;
+import net.minecraftforge.fml.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.function.Supplier;
 
@@ -21,6 +24,12 @@ public class BackpackOpenMessage {
 	}
 
 	private static void handleMessage(ServerPlayerEntity player) {
-		BackpackOpenHandler.handle(player);
+		PlayerInventoryProvider.runOnFirstBackpack(player, (backpack, inventoryName, slot) -> {
+			NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, inventoryName, slot), backpack.getDisplayName()),
+					buf -> {
+						buf.writeString(inventoryName);
+						buf.writeInt(slot);
+					});
+		});
 	}
 }

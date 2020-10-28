@@ -15,10 +15,10 @@ import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackOpenHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotTypeMessage;
@@ -34,7 +34,7 @@ public class CuriosCompat implements ICompat {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.addListener(this::sendImc);
 		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
-		BackpackOpenHandler.addBackpackInventoryHandler(CompatModIds.CURIOS,
+		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
 				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
 				false
