@@ -28,10 +28,15 @@ public class CommonProxy {
 		ItemEntity itemEntity = event.getItem();
 		ItemStack remainingStackSimulated = itemEntity.getItem().copy();
 		PlayerEntity player = event.getPlayer();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> runPickupOnBackpack(remainingStackSimulated, backpack, true));
+		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> runPickupOnBackpack(remainingStackSimulated, new BackpackWrapper(backpack), true));
 		if (remainingStackSimulated.isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
-			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> runPickupOnBackpack(remainingStack, backpack, false));
+			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> {
+						BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
+						backpackWrapper.setNotificationData(player.getUniqueID(), inventoryHandlerName, slot);
+						return runPickupOnBackpack(remainingStack, backpackWrapper, false);
+					}
+			);
 			if (!itemEntity.isSilent()) {
 				Random rand = itemEntity.world.rand;
 				itemEntity.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(rand) * 0.7F + 1.0F) * 2.0F);
@@ -41,11 +46,10 @@ public class CommonProxy {
 		}
 	}
 
-	private boolean runPickupOnBackpack(ItemStack remainingStack, ItemStack backpack, boolean simulate) {
-		BackpackWrapper backpackWrapper = new BackpackWrapper(backpack, false);
+	private boolean runPickupOnBackpack(ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
 		return backpackWrapper.getUpgradeHandler().getUpgrade(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
 				.map(upgrade -> {
-					ItemStack ret = ((IPickupResponseUpgrade) upgrade.getItem()).pickup(remainingStack, backpack, simulate);
+					ItemStack ret = ((IPickupResponseUpgrade) upgrade.getItem()).pickup(remainingStack, backpackWrapper, simulate);
 					remainingStack.setCount(ret.getCount());
 					return remainingStack.isEmpty();
 				}).orElse(false);

@@ -53,8 +53,9 @@ public class BackpackSingleDyeRecipe extends SpecialRecipe {
 		}
 
 		ItemStack coloredBackpack = new ItemStack(backpack.getItem());
-		BackpackWrapper coloredWrapper = new BackpackWrapper(coloredBackpack, true);
-		new BackpackWrapper(backpack, false).copyDataTo(coloredWrapper);
+		BackpackWrapper coloredWrapper = new BackpackWrapper(coloredBackpack);
+		coloredWrapper.setPersistent();
+		new BackpackWrapper(backpack).copyDataTo(coloredWrapper);
 		DyeColor dyeColor = DyeColor.getColor(dye);
 		if (dyeColor == null) {
 			return ItemStack.EMPTY;

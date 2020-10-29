@@ -45,12 +45,12 @@ public class BackpackItem extends ItemBase {
 
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack stack = new ItemStack(this);
-			new BackpackWrapper(stack, true).setColors(color.getColorValue(), color.getColorValue());
+			new BackpackWrapper(stack).setColors(color.getColorValue(), color.getColorValue());
 			items.add(stack);
 		}
 
 		ItemStack stack = new ItemStack(this);
-		new BackpackWrapper(stack, true).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
+		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 		items.add(stack);
 	}
 

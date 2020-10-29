@@ -13,6 +13,7 @@ import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryEventBus;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
@@ -27,20 +28,28 @@ public class BackpackContainer extends Container {
 	private final BackpackWrapper backPackWrapper;
 	private int backpackSlotNumber = -1;
 
-	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int slot) {
+	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
 		super(TYPE, windowId);
 
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
-			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK), false);
+			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK));
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
-		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, slot), !player.world.isRemote);
+		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, backpackSlot));
+		if (!player.world.isRemote) {
+			backPackWrapper.setPersistent();
+			BackpackInventoryEventBus.registerListener(player.getUniqueID(), (hName, backpackInSlot, slot, newStack) -> {
+				if (hName.equals(handlerName) && backpackInSlot == backpackSlot) {
+					backPackWrapper.onInventorySlotUpdate(slot, newStack);
+				}
+			});
+		}
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);
-		addPlayerInventorySlots(player.inventory, yPosition, slot, handler.isVisibleInGui());
+		addPlayerInventorySlots(player.inventory, yPosition, backpackSlot, handler.isVisibleInGui());
 	}
 
 	private void addBackpackUpgradeSlots(int lastInventoryRowY) {
@@ -184,5 +193,11 @@ public class BackpackContainer extends Container {
 
 	public int getNumberOfUpgradeSlots() {
 		return backPackWrapper.getUpgradeHandler().getSlots();
+	}
+
+	@Override
+	public void onContainerClosed(PlayerEntity playerIn) {
+		super.onContainerClosed(playerIn);
+		BackpackInventoryEventBus.unregisterListener(playerIn.getUniqueID());
 	}
 }

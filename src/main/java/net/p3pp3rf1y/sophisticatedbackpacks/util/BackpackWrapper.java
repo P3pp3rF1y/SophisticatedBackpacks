@@ -5,23 +5,42 @@ import net.minecraft.nbt.IntNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
+import javax.annotation.Nullable;
+import java.util.UUID;
+
 public class BackpackWrapper {
 	private static final int DEFAULT_COLOR = 12999733;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private final ItemStack backpack;
-	private final boolean persistent;
+	private boolean persistent = false;
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
+	private UUID playerUuid = null;
+	private String handlerName = null;
+	private int backpackSlot = -1;
 
-	public BackpackWrapper(ItemStack backpack, boolean persistent) {
+	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
-		this.persistent = persistent;
+	}
+
+	public void setPersistent() {
+		persistent = true;
+	}
+
+	public void setNotificationData(@Nullable UUID playerUuid, @Nullable String handlerName, int backpackSlot) {
+		this.playerUuid = playerUuid;
+		this.handlerName = handlerName;
+		this.backpackSlot = backpackSlot;
+		setPersistent();
 	}
 
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(backpack, persistent);
+			handler = new BackpackInventoryHandler(backpack);
+			if (persistent) {
+				handler.setPersistent(playerUuid, handlerName, backpackSlot);
+			}
 		}
 		return handler;
 	}
@@ -57,5 +76,9 @@ public class BackpackWrapper {
 	public void setColors(int clothColor, int borderColor) {
 		backpack.setTagInfo(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
 		backpack.setTagInfo(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
+	}
+
+	public void onInventorySlotUpdate(int slot, ItemStack newStack) {
+		getInventoryHandler().onInventorySlotUpdate(slot, newStack);
 	}
 }
