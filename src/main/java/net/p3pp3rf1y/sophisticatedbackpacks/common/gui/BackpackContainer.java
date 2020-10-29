@@ -71,7 +71,8 @@ public class BackpackContainer extends Container {
 
 		while (slotIndex < inventoryHandler.getSlots()) {
 			int lineIndex = slotIndex % getSlotsOnLine();
-			addSlot(new SlotItemHandler(inventoryHandler, slotIndex, 8 + lineIndex * 18, yPosition));
+			int finalSlotIndex = slotIndex;
+			addSlot(new SlotItemHandler(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition));
 
 			slotIndex++;
 			if (slotIndex % getSlotsOnLine() == 0) {
@@ -133,14 +134,13 @@ public class BackpackContainer extends Container {
 				return ItemStack.EMPTY;
 			}
 			itemstack = slotStack.copy();
-			int numRows = getNumberOfRows();
-			int slotsOnLine = getSlotsOnLine();
-			if (index < numRows * slotsOnLine + getNumberOfUpgradeSlots()) {
-				if (!mergeItemStack(slotStack, numRows * slotsOnLine + getNumberOfUpgradeSlots(), inventorySlots.size(), true)) {
+			int backpackSlots = getBackpackSlotsCount();
+			if (index < backpackSlots + getNumberOfUpgradeSlots()) {
+				if (!mergeItemStack(slotStack, backpackSlots + getNumberOfUpgradeSlots(), inventorySlots.size(), true)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (!mergeItemStack(slotStack, numRows * slotsOnLine, numRows * slotsOnLine + getNumberOfUpgradeSlots(), false)
-					&& !mergeItemStack(slotStack, 0, numRows * slotsOnLine, false)) {
+			} else if (!mergeItemStack(slotStack, backpackSlots, backpackSlots + getNumberOfUpgradeSlots(), false)
+					&& !mergeItemStack(slotStack, 0, backpackSlots, false)) {
 				return ItemStack.EMPTY;
 			}
 
@@ -154,13 +154,24 @@ public class BackpackContainer extends Container {
 		return itemstack;
 	}
 
+	private int getBackpackSlotsCount() {
+		return getNumberOfRows() * getSlotsOnLine();
+	}
+
 	@Override
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
 		if (slotId == backpackSlotNumber) {
 			return ItemStack.EMPTY;
 		}
-
-		return super.slotClick(slotId, dragType, clickType, player);
+		boolean notifyOfChange = false;
+		if (clickType == ClickType.PICKUP && slotId >= 0 && slotId < getBackpackSlotsCount() && getSlot(slotId).getHasStack() && !player.inventory.getItemStack().isEmpty()) {
+			notifyOfChange = true; //fixing an issue where vanilla directly modifies stack and item handler isn't aware of that change in this case
+		}
+		ItemStack ret = super.slotClick(slotId, dragType, clickType, player);
+		if (notifyOfChange) {
+			backPackWrapper.getInventoryHandler().onContentsChanged(slotId);
+		}
+		return ret;
 	}
 
 	public int getNumberOfSlots() {

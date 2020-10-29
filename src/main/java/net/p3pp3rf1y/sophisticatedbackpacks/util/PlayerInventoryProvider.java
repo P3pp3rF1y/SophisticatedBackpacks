@@ -33,15 +33,20 @@ public class PlayerInventoryProvider {
 		return Optional.ofNullable(playerInventoryHandlers.get(name));
 	}
 
-	public static void runOnFirstBackpack(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
-		ArrayList<String> names = new ArrayList<>(PlayerInventoryProvider.playerInventoryHandlers.keySet());
-		Collections.reverse(names);
+	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
+		runOnBackpacks(player, backpackInventorySlotConsumer, false);
+	}
+
+	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean inPriorityOrder) {
+		ArrayList<String> names = new ArrayList<>(playerInventoryHandlers.keySet());
+		if (inPriorityOrder) {
+			Collections.reverse(names);
+		}
 		for (String name : names) {
-			PlayerInventoryHandler invHandler = PlayerInventoryProvider.playerInventoryHandlers.get(name);
+			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(name);
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
-				if (slotStack.getItem() instanceof BackpackItem) {
-					backpackInventorySlotConsumer.accept(slotStack, name, slot);
+				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, name, slot)) {
 					return;
 				}
 			}
@@ -49,6 +54,6 @@ public class PlayerInventoryProvider {
 	}
 
 	public interface BackpackInventorySlotConsumer {
-		void accept(ItemStack backpack, String inventoryHandlerName, int slot);
+		boolean accept(ItemStack backpack, String inventoryHandlerName, int slot);
 	}
 }
