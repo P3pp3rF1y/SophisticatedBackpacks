@@ -22,7 +22,7 @@ public class PlayerInventoryProvider {
 	static {
 		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.mainInventory.size(), (player, slot) -> player.inventory.mainInventory.get(slot), true);
 		PlayerInventoryProvider.addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offHandInventory.size(), (player, slot) -> player.inventory.offHandInventory.get(slot), false);
-		PlayerInventoryProvider.addPlayerInventoryHandler("armor", player -> player.inventory.armorInventory.size(), (player, slot) -> player.inventory.armorInventory.get(slot), true);
+		PlayerInventoryProvider.addPlayerInventoryHandler("armor", player -> player.inventory.armorInventory.size(), (player, slot) -> player.inventory.armorInventory.get(slot), false);
 	}
 
 	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, boolean visibleInGui) {
