@@ -33,7 +33,7 @@ public class DyeRecipesMaker {
 		ingredients.add(Ingredient.fromTag(DyeColor.BLUE.getTag()));
 
 		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK);
-		new BackpackWrapper(backpackOutput).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
+		new BackpackWrapper(backpackOutput, true).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 
 		ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "two_colors");
 		recipes.add(new ShapedRecipe(id, "", 3, 1, ingredients, backpackOutput));
@@ -43,7 +43,7 @@ public class DyeRecipesMaker {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getString());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK);
-			new BackpackWrapper(backpackOutput).setColors(color.getColorValue(), color.getColorValue());
+			new BackpackWrapper(backpackOutput, true).setColors(color.getColorValue(), color.getColorValue());
 			NonNullList<Ingredient> ingredients = NonNullList.create();
 			ingredients.add(Ingredient.fromItems(ModItems.BACKPACK));
 			ingredients.add(Ingredient.fromTag(color.getTag()));

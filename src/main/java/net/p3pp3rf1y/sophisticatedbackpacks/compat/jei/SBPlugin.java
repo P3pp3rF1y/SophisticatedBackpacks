@@ -9,7 +9,6 @@ import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
@@ -30,7 +29,7 @@ public class SBPlugin implements IModPlugin {
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
 		ISubtypeInterpreter backpackNbtInterpreter = itemStack -> {
-			BackpackWrapper wrapper = new BackpackWrapper(itemStack);
+			BackpackWrapper wrapper = new BackpackWrapper(itemStack, false);
 			return "{clothColor:" + wrapper.getClothColor() + ",borderColor:" + wrapper.getBorderColor() + "}";
 		};
 		registration.registerSubtypeInterpreter(ModItems.BACKPACK, backpackNbtInterpreter);

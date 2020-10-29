@@ -20,7 +20,7 @@ public class ModItemColors {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
 				return -1;
 			}
-			BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
+			BackpackWrapper backpackWrapper = new BackpackWrapper(backpack, false);
 			if (layer == 0) {
 				return backpackWrapper.getClothColor();
 			} else if (layer == 1) {

@@ -10,16 +10,18 @@ public class BackpackWrapper {
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private final ItemStack backpack;
+	private final boolean persistent;
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
 
-	public BackpackWrapper(ItemStack backpack) {
+	public BackpackWrapper(ItemStack backpack, boolean persistent) {
 		this.backpack = backpack;
+		this.persistent = persistent;
 	}
 
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(backpack);
+			handler = new BackpackInventoryHandler(backpack, persistent);
 		}
 		return handler;
 	}
@@ -39,7 +41,7 @@ public class BackpackWrapper {
 
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(backpack);
+			upgradeHandler = new BackpackUpgradeHandler(backpack, persistent);
 		}
 		return upgradeHandler;
 	}

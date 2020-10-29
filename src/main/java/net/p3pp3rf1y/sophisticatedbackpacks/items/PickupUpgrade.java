@@ -13,6 +13,6 @@ public class PickupUpgrade extends ItemBase implements IBackpackUpgrade, IPickup
 
 	@Override
 	public ItemStack pickup(ItemStack stack, ItemStack backpack, boolean simulate) {
-		return InventoryHelper.insertIntoInventory(stack, new BackpackWrapper(backpack).getInventoryHandler(), simulate);
+		return InventoryHelper.insertIntoInventory(stack, new BackpackWrapper(backpack, true).getInventoryHandler(), simulate);
 	}
 }

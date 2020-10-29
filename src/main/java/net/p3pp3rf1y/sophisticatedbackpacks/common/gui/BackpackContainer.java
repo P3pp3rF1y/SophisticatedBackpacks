@@ -33,11 +33,11 @@ public class BackpackContainer extends Container {
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
-			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK));
+			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK), false);
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
-		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, slot));
+		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, slot), !player.world.isRemote);
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);
 		addPlayerInventorySlots(player.inventory, yPosition, slot, handler.isVisibleInGui());

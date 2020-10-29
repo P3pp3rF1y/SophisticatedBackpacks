@@ -12,17 +12,21 @@ import java.util.function.Predicate;
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	private static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final ItemStack backpack;
+	private final boolean persistent;
 
-	public BackpackUpgradeHandler(ItemStack backpack) {
+	public BackpackUpgradeHandler(ItemStack backpack, boolean persistent) {
 		super(getNumberOfUpgradeSlots(backpack));
 		this.backpack = backpack;
+		this.persistent = persistent;
 		NBTHelper.getCompound(backpack, UPGRADE_INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
 	@Override
 	protected void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
+		if (persistent) {
+			backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
+		}
 	}
 
 	@Override

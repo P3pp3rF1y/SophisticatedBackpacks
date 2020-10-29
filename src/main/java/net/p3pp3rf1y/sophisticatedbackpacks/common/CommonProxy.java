@@ -42,7 +42,7 @@ public class CommonProxy {
 	}
 
 	private boolean runPickupOnBackpack(ItemStack remainingStack, ItemStack backpack, boolean simulate) {
-		BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
+		BackpackWrapper backpackWrapper = new BackpackWrapper(backpack, false);
 		return backpackWrapper.getUpgradeHandler().getUpgrade(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
 				.map(upgrade -> {
 					ItemStack ret = ((IPickupResponseUpgrade) upgrade.getItem()).pickup(remainingStack, backpack, simulate);
