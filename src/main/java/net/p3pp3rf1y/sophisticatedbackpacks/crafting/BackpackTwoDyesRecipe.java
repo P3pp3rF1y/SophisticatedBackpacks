@@ -88,7 +88,6 @@ public class BackpackTwoDyesRecipe extends SpecialRecipe {
 
 		ItemStack coloredBackpack = new ItemStack(backpack.getItem());
 		BackpackWrapper coloredWrapper = new BackpackWrapper(coloredBackpack);
-		coloredWrapper.setPersistent();
 		new BackpackWrapper(backpack).copyDataTo(coloredWrapper);
 		DyeColor colorOne = DyeColor.getColor(dyeOne);
 		DyeColor colorTwo = DyeColor.getColor(dyeTwo);

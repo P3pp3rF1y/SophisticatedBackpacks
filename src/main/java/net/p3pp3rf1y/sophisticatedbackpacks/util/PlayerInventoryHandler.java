@@ -9,11 +9,13 @@ import java.util.function.Function;
 public class PlayerInventoryHandler {
 	private final Function<PlayerEntity, Integer> getSlotCount;
 	private final BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot;
+	private final IStackInSlotModifier setStackInSlot;
 	private final boolean visibleInGui;
 
-	public PlayerInventoryHandler(Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, boolean visibleInGui) {
+	public PlayerInventoryHandler(Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, IStackInSlotModifier setStackInSlot, boolean visibleInGui) {
 		this.getSlotCount = getSlotCount;
 		this.getStackInSlot = getStackInSlot;
+		this.setStackInSlot = setStackInSlot;
 		this.visibleInGui = visibleInGui;
 	}
 
@@ -27,5 +29,13 @@ public class PlayerInventoryHandler {
 
 	public boolean isVisibleInGui() {
 		return visibleInGui;
+	}
+
+	public void setStackInSlot(PlayerEntity player, int slot, ItemStack stack) {
+		setStackInSlot.accept(player, slot, stack);
+	}
+
+	public interface IStackInSlotModifier {
+		void accept(PlayerEntity player, int slot, ItemStack stack);
 	}
 }

@@ -33,7 +33,7 @@ public class CommonProxy {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> {
 						BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
-						backpackWrapper.setNotificationData(player.getUniqueID(), inventoryHandlerName, slot);
+						backpackWrapper.setPersistent(player, inventoryHandlerName, slot, true);
 						return runPickupOnBackpack(remainingStack, backpackWrapper, false);
 					}
 			);

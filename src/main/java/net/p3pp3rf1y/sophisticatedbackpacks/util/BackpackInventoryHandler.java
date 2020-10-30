@@ -4,39 +4,30 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
-import javax.annotation.Nullable;
-import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
 	private static final String INVENTORY_TAG = "inventory";
 	private final ItemStack backpack;
-	private boolean persistent = false;
-	private UUID playerUuid;
-	private String handlerName;
-	private int backpackSlot;
+	private final Consumer<ItemStack> backpackSaveHandler;
+	private final BiConsumer<Integer, Supplier<ItemStack>> notificationHandler;
 
-	public BackpackInventoryHandler(ItemStack backpack) {
+	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler, BiConsumer<Integer, Supplier<ItemStack>> notificationHandler) {
 		super(getNumberOfSlots(backpack));
 		this.backpack = backpack;
+		this.backpackSaveHandler = backpackSaveHandler;
+		this.notificationHandler = notificationHandler;
 		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
-	}
-
-	public void setPersistent(@Nullable UUID playerUuid, @Nullable String handlerName, int backpackSlot) {
-		this.playerUuid = playerUuid;
-		this.handlerName = handlerName;
-		this.backpackSlot = backpackSlot;
-		persistent = true;
 	}
 
 	@Override
 	public void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		if (persistent) {
-			backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
-			if (playerUuid != null) {
-				BackpackInventoryEventBus.onSlotUpdate(playerUuid, handlerName, backpackSlot, slot, getStackInSlot(slot));
-			}
-		}
+		backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
+		backpackSaveHandler.accept(backpack);
+		notificationHandler.accept(slot, () -> getStackInSlot(slot));
 	}
 
 	private static int getNumberOfSlots(ItemStack backpack) {

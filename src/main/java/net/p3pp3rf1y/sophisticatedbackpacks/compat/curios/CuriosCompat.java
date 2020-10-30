@@ -27,6 +27,7 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class CuriosCompat implements ICompat {
@@ -37,13 +38,18 @@ public class CuriosCompat implements ICompat {
 		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
 				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				false
-		);
+				false,
+				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)));
 	}
 
 	private <T> T getFromBackStackHandler(PlayerEntity player, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
 		return CuriosApi.getCuriosHelper().getCuriosHandler(player)
 				.map(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+	}
+
+	private void runOnBackStackHandler(PlayerEntity player, Consumer<ICurioStacksHandler> runOnHandler) {
+		CuriosApi.getCuriosHelper().getCuriosHandler(player)
+				.ifPresent(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).ifPresent(runOnHandler));
 	}
 
 	private void sendImc(InterModEnqueueEvent evt) {

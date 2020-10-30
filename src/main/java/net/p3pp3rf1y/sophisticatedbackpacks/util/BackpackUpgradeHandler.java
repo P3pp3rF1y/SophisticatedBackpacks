@@ -7,26 +7,26 @@ import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	private static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final ItemStack backpack;
-	private final boolean persistent;
+	private final Consumer<ItemStack> backpackSaveHandler;
 
-	public BackpackUpgradeHandler(ItemStack backpack, boolean persistent) {
+	public BackpackUpgradeHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
 		super(getNumberOfUpgradeSlots(backpack));
 		this.backpack = backpack;
-		this.persistent = persistent;
+		this.backpackSaveHandler = backpackSaveHandler;
 		NBTHelper.getCompound(backpack, UPGRADE_INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
 	@Override
 	protected void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		if (persistent) {
-			backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
-		}
+		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
+		backpackSaveHandler.accept(backpack);
 	}
 
 	@Override

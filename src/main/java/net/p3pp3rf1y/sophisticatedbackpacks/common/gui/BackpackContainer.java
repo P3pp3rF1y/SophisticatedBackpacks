@@ -38,9 +38,9 @@ public class BackpackContainer extends Container {
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
-		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, backpackSlot));
+		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, backpackSlot).copy());
 		if (!player.world.isRemote) {
-			backPackWrapper.setPersistent();
+			backPackWrapper.setPersistent(player, handlerName, backpackSlot, false); //don't notify because notification is only consumed by open gui and we're in it (it would also cause an infinite loop)
 			BackpackInventoryEventBus.registerListener(player.getUniqueID(), (hName, backpackInSlot, slot, newStack) -> {
 				if (hName.equals(handlerName) && backpackInSlot == backpackSlot) {
 					backPackWrapper.onInventorySlotUpdate(slot, newStack);

@@ -28,7 +28,6 @@ public class BackpackUpgradeRecipe extends ShapedRecipe {
 		ItemStack upgradedBackpack = super.getCraftingResult(inv);
 		getBackpack(inv).ifPresent(backpack -> {
 			BackpackWrapper upgradedWrapper = new BackpackWrapper(upgradedBackpack);
-			upgradedWrapper.setPersistent();
 			new BackpackWrapper(backpack).copyDataTo(upgradedWrapper);
 		});
 

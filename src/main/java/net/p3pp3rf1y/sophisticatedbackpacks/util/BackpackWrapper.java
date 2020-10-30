@@ -1,46 +1,39 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.IntNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
-import javax.annotation.Nullable;
-import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class BackpackWrapper {
 	private static final int DEFAULT_COLOR = 12999733;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private final ItemStack backpack;
-	private boolean persistent = false;
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
-	private UUID playerUuid = null;
-	private String handlerName = null;
-	private int backpackSlot = -1;
+	private Consumer<ItemStack> backpackSaveHandler = stack -> {};
+	private BiConsumer<Integer, Supplier<ItemStack>> notificationHandler = (slot, stack) -> {};
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
 	}
 
-	public void setPersistent() {
-		persistent = true;
-	}
-
-	public void setNotificationData(@Nullable UUID playerUuid, @Nullable String handlerName, int backpackSlot) {
-		this.playerUuid = playerUuid;
-		this.handlerName = handlerName;
-		this.backpackSlot = backpackSlot;
-		setPersistent();
+	public void setPersistent(PlayerEntity player, String handlerName, int backpackSlot, boolean notifyOnUpdate) {
+		backpackSaveHandler = stack -> PlayerInventoryProvider.getPlayerInventoryHandler(handlerName).ifPresent(h -> h.setStackInSlot(player, backpackSlot, stack));
+		if (notifyOnUpdate) {
+			notificationHandler = (slot, stack) -> BackpackInventoryEventBus.onSlotUpdate(player.getUniqueID(), handlerName, backpackSlot, slot, stack.get());
+		}
 	}
 
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(backpack);
-			if (persistent) {
-				handler.setPersistent(playerUuid, handlerName, backpackSlot);
-			}
+			handler = new BackpackInventoryHandler(backpack, backpackSaveHandler, notificationHandler);
 		}
 		return handler;
 	}
@@ -60,7 +53,7 @@ public class BackpackWrapper {
 
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(backpack, persistent);
+			upgradeHandler = new BackpackUpgradeHandler(backpack, backpackSaveHandler);
 		}
 		return upgradeHandler;
 	}
@@ -76,6 +69,7 @@ public class BackpackWrapper {
 	public void setColors(int clothColor, int borderColor) {
 		backpack.setTagInfo(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
 		backpack.setTagInfo(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
+		backpackSaveHandler.accept(backpack);
 	}
 
 	public void onInventorySlotUpdate(int slot, ItemStack newStack) {
