@@ -40,10 +40,12 @@ public class ModItems {
 
 	public static void register(RegistryEvent.Register<Item> event) {
 		IForgeRegistry<Item> reg = event.getRegistry();
-		reg.register(new BackpackItem("backpack", 27, 1));
-		reg.register(new BackpackItem("iron_backpack", 54, 2));
-		reg.register(new BackpackItem("gold_backpack", 81, 3, new ScreenProperties().setTextureSize(512)));
-		reg.register(new BackpackItem("diamond_backpack", 108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512)));
+		reg.register(new BackpackItem("backpack", 27, 1, () -> ModBlocks.BACKPACK));
+		reg.register(new BackpackItem("iron_backpack", 54, 2, () -> ModBlocks.IRON_BACKPACK));
+		reg.register(new BackpackItem("gold_backpack", 81, 3,
+				new ScreenProperties().setTextureSize(512), () -> ModBlocks.GOLD_BACKPACK));
+		reg.register(new BackpackItem("diamond_backpack", 108, 5,
+				new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), () -> ModBlocks.DIAMOND_BACKPACK));
 		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
 		reg.register(new PickupUpgrade());
 	}

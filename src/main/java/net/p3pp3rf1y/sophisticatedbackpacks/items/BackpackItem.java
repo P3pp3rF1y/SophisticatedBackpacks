@@ -4,35 +4,42 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class BackpackItem extends ItemBase {
 	private final int numberOfSlots;
 	private final int numberOfUpgradeSlots;
 	private final ScreenProperties screenProperties;
+	private final Supplier<BackpackBlock> blockSupplier;
 
-	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots) {
-		this(registryName, numberOfSlots, numberOfUpgradeSlots, new ScreenProperties());
+	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
+		this(registryName, numberOfSlots, numberOfUpgradeSlots, new ScreenProperties(), blockSupplier);
 	}
 
-	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots, ScreenProperties screenProperties) {
+	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots, ScreenProperties screenProperties, Supplier<BackpackBlock> blockSupplier) {
 		super(registryName, new Properties().maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.screenProperties = screenProperties;
+		this.blockSupplier = blockSupplier;
 	}
 
 	@Override
@@ -52,6 +59,21 @@ public class BackpackItem extends ItemBase {
 		ItemStack stack = new ItemStack(this);
 		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 		items.add(stack);
+	}
+
+	@Override
+	public ActionResultType onItemUse(ItemUseContext context) {
+		PlayerEntity player = context.getPlayer();
+		if (player == null || !player.isSneaking()) {
+			return ActionResultType.PASS;
+		}
+
+		BlockItemUseContext blockItemUseContext = new BlockItemUseContext(context);
+		if (!blockItemUseContext.canPlace()) {
+			return ActionResultType.FAIL;
+		}
+		context.getWorld().setBlockState(context.getPos().offset(context.getFace()), blockSupplier.get().getDefaultState(), 11);
+		return super.onItemUse(context);
 	}
 
 	@Override

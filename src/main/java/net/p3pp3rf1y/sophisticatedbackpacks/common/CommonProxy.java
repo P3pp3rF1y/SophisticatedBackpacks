@@ -10,6 +10,7 @@ import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -21,6 +22,7 @@ public class CommonProxy {
 	public void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
+		ModBlocks.registerHandlers(modBus);
 		MinecraftForge.EVENT_BUS.addListener(this::onItemPickup);
 	}
 
