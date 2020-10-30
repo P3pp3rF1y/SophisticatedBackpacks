@@ -4,8 +4,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,15 +19,18 @@ public class PlayerInventoryProvider {
 
 	static {
 		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.mainInventory.size(),
-				(player, slot) -> player.inventory.mainInventory.get(slot), true, (player, slot, stack) -> player.inventory.mainInventory.set(slot, stack));
+				(player, slot) -> player.inventory.mainInventory.get(slot), (player, slot, stack) -> player.inventory.mainInventory.set(slot, stack), true);
 		PlayerInventoryProvider.addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offHandInventory.size(),
-				(player, slot) -> player.inventory.offHandInventory.get(slot), false, (player, slot, stack) -> player.inventory.offHandInventory.set(slot, stack));
+				(player, slot) -> player.inventory.offHandInventory.get(slot), (player, slot, stack) -> player.inventory.offHandInventory.set(slot, stack), false);
 		PlayerInventoryProvider.addPlayerInventoryHandler("armor", player -> player.inventory.armorInventory.size(),
-				(player, slot) -> player.inventory.armorInventory.get(slot), false, (player, slot, stack) -> player.inventory.armorInventory.set(slot, stack));
+				(player, slot) -> player.inventory.armorInventory.get(slot), (player, slot, stack) -> player.inventory.armorInventory.set(slot, stack), false);
 	}
 
-	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, boolean visibleInGui, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot) {
+	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui) {
+		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
+		playerInventoryHandlers.clear();
 		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui));
+		playerInventoryHandlers.putAll(temp);
 	}
 
 	public static Optional<PlayerInventoryHandler> getPlayerInventoryHandler(String name) {
@@ -37,19 +38,11 @@ public class PlayerInventoryProvider {
 	}
 
 	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
-		runOnBackpacks(player, backpackInventorySlotConsumer, false);
-	}
-
-	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean inPriorityOrder) {
-		ArrayList<String> names = new ArrayList<>(playerInventoryHandlers.keySet());
-		if (inPriorityOrder) {
-			Collections.reverse(names);
-		}
-		for (String name : names) {
-			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(name);
+		for (Map.Entry<String, PlayerInventoryHandler> entry : playerInventoryHandlers.entrySet()) {
+			PlayerInventoryHandler invHandler = entry.getValue();
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
-				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack.copy(), name, slot)) {
+				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack.copy(), entry.getKey(), slot)) {
 					return;
 				}
 			}

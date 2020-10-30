@@ -38,8 +38,8 @@ public class CuriosCompat implements ICompat {
 		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
 				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				false,
-				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)));
+				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false
+		);
 	}
 
 	private <T> T getFromBackStackHandler(PlayerEntity player, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {

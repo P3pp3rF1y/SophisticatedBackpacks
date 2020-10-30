@@ -31,6 +31,6 @@ public class BackpackOpenMessage {
 						buf.writeInt(slot);
 					});
 			return true;
-		}, true);
+		});
 	}
 }
