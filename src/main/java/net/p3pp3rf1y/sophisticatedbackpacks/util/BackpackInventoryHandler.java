@@ -25,9 +25,13 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	@Override
 	public void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
+		saveInventory();
+		notificationHandler.accept(slot, () -> getStackInSlot(slot));
+	}
+
+	public void saveInventory() {
 		backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);
-		notificationHandler.accept(slot, () -> getStackInSlot(slot));
 	}
 
 	private static int getNumberOfSlots(ItemStack backpack) {

@@ -81,7 +81,15 @@ public class BackpackContainer extends Container {
 		while (slotIndex < inventoryHandler.getSlots()) {
 			int lineIndex = slotIndex % getSlotsOnLine();
 			int finalSlotIndex = slotIndex;
-			addSlot(new SlotItemHandler(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition));
+			addSlot(new SlotItemHandler(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition) {
+				@Override
+				public void onSlotChanged() {
+					super.onSlotChanged();
+					// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
+					// however it does notify the slot of change
+					backPackWrapper.getInventoryHandler().saveInventory();
+				}
+			});
 
 			slotIndex++;
 			if (slotIndex % getSlotsOnLine() == 0) {
@@ -172,15 +180,7 @@ public class BackpackContainer extends Container {
 		if (slotId == backpackSlotNumber) {
 			return ItemStack.EMPTY;
 		}
-		boolean notifyOfChange = false;
-		if (clickType == ClickType.PICKUP && slotId >= 0 && slotId < getBackpackSlotsCount() && getSlot(slotId).getHasStack() && !player.inventory.getItemStack().isEmpty()) {
-			notifyOfChange = true; //fixing an issue where vanilla directly modifies stack and item handler isn't aware of that change in this case
-		}
-		ItemStack ret = super.slotClick(slotId, dragType, clickType, player);
-		if (notifyOfChange) {
-			backPackWrapper.getInventoryHandler().onContentsChanged(slotId);
-		}
-		return ret;
+		return super.slotClick(slotId, dragType, clickType, player);
 	}
 
 	public int getNumberOfSlots() {
