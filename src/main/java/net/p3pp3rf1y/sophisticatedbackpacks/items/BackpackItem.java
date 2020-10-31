@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.items;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -13,13 +15,17 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -72,7 +78,21 @@ public class BackpackItem extends ItemBase {
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
 		}
-		context.getWorld().setBlockState(context.getPos().offset(context.getFace()), blockSupplier.get().getDefaultState(), 11);
+		World world = context.getWorld();
+		BlockPos pos = context.getPos().offset(context.getFace());
+		BlockState placementState = blockSupplier.get().getDefaultState();
+		if (world.setBlockState(pos, placementState, 11)) {
+			ItemStack backpack = context.getItem();
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(new BackpackWrapper(backpack.copy())));
+
+			SoundType soundtype = placementState.getSoundType(world, pos, player);
+			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+			if (!player.abilities.isCreativeMode) {
+				backpack.shrink(1);
+			}
+
+			return ActionResultType.SUCCESS;
+		}
 		return super.onItemUse(context);
 	}
 

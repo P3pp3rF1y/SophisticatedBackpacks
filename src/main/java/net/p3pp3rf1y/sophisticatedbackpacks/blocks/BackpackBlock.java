@@ -3,11 +3,15 @@ package net.p3pp3rf1y.sophisticatedbackpacks.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+
+import javax.annotation.Nullable;
 
 public class BackpackBlock extends Block {
 	private static final VoxelShape SHAPE = makeCuboidShape(2, 0, 2, 14, 12, 14);
@@ -20,5 +24,16 @@ public class BackpackBlock extends Block {
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		return SHAPE;
+	}
+
+	@Override
+	public boolean hasTileEntity(BlockState state) {
+		return true;
+	}
+
+	@Nullable
+	@Override
+	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+		return new BackpackTileEntity();
 	}
 }

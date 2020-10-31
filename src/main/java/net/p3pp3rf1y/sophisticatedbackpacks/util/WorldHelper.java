@@ -1,0 +1,26 @@
+package net.p3pp3rf1y.sophisticatedbackpacks.util;
+
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
+
+public class WorldHelper {
+	private WorldHelper() {}
+
+	public static <T> Optional<T> getTile(@Nullable IBlockReader world, BlockPos pos, Class<T> teClass) {
+		if (world == null) {
+			return Optional.empty();
+		}
+
+		TileEntity te = world.getTileEntity(pos);
+
+		if (teClass.isInstance(te)) {
+			return Optional.of(teClass.cast(te));
+		}
+
+		return Optional.empty();
+	}
+}

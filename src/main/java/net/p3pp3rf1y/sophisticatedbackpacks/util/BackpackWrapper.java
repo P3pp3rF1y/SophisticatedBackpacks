@@ -75,4 +75,8 @@ public class BackpackWrapper {
 	public void onInventorySlotUpdate(int slot, ItemStack newStack) {
 		getInventoryHandler().onInventorySlotUpdate(slot, newStack);
 	}
+
+	public ItemStack getBackpack() {
+		return backpack;
+	}
 }

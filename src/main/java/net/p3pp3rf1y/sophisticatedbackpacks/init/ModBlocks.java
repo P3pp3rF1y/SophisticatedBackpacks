@@ -1,12 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
 
 @ObjectHolder(SophisticatedBackpacks.MOD_ID)
@@ -20,6 +22,7 @@ public class ModBlocks {
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Block.class, ModBlocks::register);
+		modBus.addGenericListener(TileEntityType.class, ModBlocks::registerTileEntities);
 	}
 
 	public static void register(RegistryEvent.Register<Block> event) {
@@ -28,5 +31,10 @@ public class ModBlocks {
 		reg.register(new BackpackBlock("iron_backpack"));
 		reg.register(new BackpackBlock("gold_backpack"));
 		reg.register(new BackpackBlock("diamond_backpack"));
+	}
+
+	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
+		event.getRegistry().register(TileEntityType.Builder.create(BackpackTileEntity::new, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK)
+				.build(null).setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
 	}
 }
