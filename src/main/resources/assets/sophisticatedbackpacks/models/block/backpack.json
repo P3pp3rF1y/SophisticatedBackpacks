@@ -4,7 +4,8 @@
     "textures": {
         "border": "sophisticatedbackpacks:block/backpack_border",
         "cloth": "sophisticatedbackpacks:block/backpack_cloth",
-        "clips": "sophisticatedbackpacks:block/leather_clips"
+        "clips": "sophisticatedbackpacks:block/leather_clips",
+        "particle": "sophisticatedbackpacks:block/particle"
     },
     "elements": [
         {

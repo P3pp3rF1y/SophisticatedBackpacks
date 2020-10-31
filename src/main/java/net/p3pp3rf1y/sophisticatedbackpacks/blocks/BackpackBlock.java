@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -17,7 +18,7 @@ public class BackpackBlock extends Block {
 	private static final VoxelShape SHAPE = makeCuboidShape(2, 0, 2, 14, 12, 14);
 
 	public BackpackBlock(String regName) {
-		super(Properties.create(Material.WOOL).setOpaque((s, r, p) -> false).notSolid());
+		super(Properties.create(Material.WOOL).notSolid().hardnessAndResistance(0.8F).sound(SoundType.CLOTH));
 		setRegistryName(SophisticatedBackpacks.MOD_ID, regName);
 	}
 
