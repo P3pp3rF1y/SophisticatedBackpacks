@@ -1,13 +1,16 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.item.ItemGroup;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +26,11 @@ public class SophisticatedBackpacks {
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
 		PROXY.registerHandlers();
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(SophisticatedBackpacks::setup);
+		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modBus.addListener(SophisticatedBackpacks::setup);
+		modBus.addListener(DataGenerators::gatherData);
+
+		ModLoot.init();
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
