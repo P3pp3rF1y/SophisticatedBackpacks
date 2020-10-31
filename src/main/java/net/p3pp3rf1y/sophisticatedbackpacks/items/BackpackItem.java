@@ -17,6 +17,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
@@ -78,11 +79,16 @@ public class BackpackItem extends ItemBase {
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
 		}
-		World world = context.getWorld();
-		BlockPos pos = context.getPos().offset(context.getFace());
+		World world = blockItemUseContext.getWorld();
+		BlockPos pos = blockItemUseContext.getPos();
+
 		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite());
+		if (!canPlace(blockItemUseContext, placementState)) {
+			return ActionResultType.FAIL;
+		}
+
 		if (world.setBlockState(pos, placementState, 11)) {
-			ItemStack backpack = context.getItem();
+			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(new BackpackWrapper(backpack.copy())));
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
@@ -94,6 +100,12 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 		return super.onItemUse(context);
+	}
+
+	protected boolean canPlace(BlockItemUseContext context, BlockState state) {
+		PlayerEntity playerentity = context.getPlayer();
+		ISelectionContext iselectioncontext = playerentity == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(playerentity);
+		return (state.isValidPosition(context.getWorld(), context.getPos())) && context.getWorld().placedBlockCollides(state, context.getPos(), iselectioncontext);
 	}
 
 	@Override
