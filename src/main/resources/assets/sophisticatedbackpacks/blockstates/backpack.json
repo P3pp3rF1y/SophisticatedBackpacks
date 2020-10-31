@@ -1,5 +1,19 @@
 {
-  "variants": {
-    "": {"model": "sophisticatedbackpacks:block/backpack"}
-  }
+    "variants": {
+        "facing=east": {
+            "model": "sophisticatedbackpacks:block/backpack",
+            "y": 90
+        },
+        "facing=north": {
+            "model": "sophisticatedbackpacks:block/backpack"
+        },
+        "facing=south": {
+            "model": "sophisticatedbackpacks:block/backpack",
+            "y": 180
+        },
+        "facing=west": {
+            "model": "sophisticatedbackpacks:block/backpack",
+            "y": 270
+        }
+    }
 }

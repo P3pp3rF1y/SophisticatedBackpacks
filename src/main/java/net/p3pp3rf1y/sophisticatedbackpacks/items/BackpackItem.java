@@ -80,7 +80,7 @@ public class BackpackItem extends ItemBase {
 		}
 		World world = context.getWorld();
 		BlockPos pos = context.getPos().offset(context.getFace());
-		BlockState placementState = blockSupplier.get().getDefaultState();
+		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite());
 		if (world.setBlockState(pos, placementState, 11)) {
 			ItemStack backpack = context.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(new BackpackWrapper(backpack.copy())));
