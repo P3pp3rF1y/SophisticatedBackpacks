@@ -4,17 +4,27 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
@@ -47,5 +57,47 @@ public class BackpackBlock extends Block {
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader world) {
 		return new BackpackTileEntity();
+	}
+
+	@Override
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+		if (!player.isSneaking() || !player.getHeldItem(hand).isEmpty() || world.isRemote) {
+			return super.onBlockActivated(state, world, pos, player, hand, hit);
+		}
+
+		putInPlayersHandAndRemove(state, world, pos, player, hand);
+		return ActionResultType.SUCCESS;
+	}
+
+	private static void putInPlayersHandAndRemove(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand) {
+		player.setHeldItem(hand, WorldHelper.getTile(world, pos, BackpackTileEntity.class)
+				.map(te -> te.getBackpackWrapper().map(BackpackWrapper::getBackpack).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY));
+		world.removeBlock(pos, false);
+
+		SoundType soundType = state.getSoundType();
+		world.playSound(null, pos, soundType.getBreakSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
+	}
+
+	public static void playerInteract(PlayerInteractEvent.RightClickBlock event) {
+		PlayerEntity player = event.getPlayer();
+		World world = player.world;
+		BlockPos pos = event.getPos();
+
+		if (world.isRemote || !player.isSneaking() || !hasEmptyMainHandAndSomethingInOffhand(player)) {
+			return;
+		}
+
+		BlockState state = world.getBlockState(pos);
+		if (!(state.getBlock() instanceof BackpackBlock)) {
+			return;
+		}
+
+		putInPlayersHandAndRemove(state, world, pos, player, player.getHeldItemMainhand().isEmpty() ? Hand.MAIN_HAND : Hand.OFF_HAND);
+
+		event.setCanceled(true);
+	}
+
+	private static boolean hasEmptyMainHandAndSomethingInOffhand(PlayerEntity player) {
+		return player.getHeldItemMainhand().isEmpty() && !player.getHeldItemOffhand().isEmpty();
 	}
 }

@@ -2,7 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
@@ -31,6 +33,7 @@ public class ModBlocks {
 		reg.register(new BackpackBlock("iron_backpack"));
 		reg.register(new BackpackBlock("gold_backpack"));
 		reg.register(new BackpackBlock("diamond_backpack"));
+		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, BackpackBlock::playerInteract);
 	}
 
 	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
