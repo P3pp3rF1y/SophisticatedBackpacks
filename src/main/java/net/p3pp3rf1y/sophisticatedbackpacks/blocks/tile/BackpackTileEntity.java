@@ -35,7 +35,18 @@ public class BackpackTileEntity extends TileEntity {
 	@Override
 	public CompoundNBT write(CompoundNBT compound) {
 		CompoundNBT ret = super.write(compound);
+		writeBackpack(ret);
+		return ret;
+	}
+
+	private void writeBackpack(CompoundNBT ret) {
 		ret.put("backpackData", backpackWrapper.getBackpack().write(new CompoundNBT()));
+	}
+
+	@Override
+	public CompoundNBT getUpdateTag() {
+		CompoundNBT ret = super.getUpdateTag();
+		writeBackpack(ret);
 		return ret;
 	}
 
