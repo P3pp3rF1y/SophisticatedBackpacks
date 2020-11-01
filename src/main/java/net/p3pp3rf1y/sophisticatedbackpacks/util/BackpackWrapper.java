@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BackpackWrapper {
-	private static final int DEFAULT_COLOR = 12999733;
+	public static final int DEFAULT_COLOR = 13394234;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private final ItemStack backpack;

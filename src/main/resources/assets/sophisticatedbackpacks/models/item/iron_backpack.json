@@ -1,8 +1,3 @@
 {
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "sophisticatedbackpacks:item/backpack_cloth",
-    "layer1": "sophisticatedbackpacks:item/backpack_border",
-    "layer2": "sophisticatedbackpacks:item/iron_clips"
-  }
+  "parent": "sophisticatedbackpacks:block/iron_backpack"
 }
