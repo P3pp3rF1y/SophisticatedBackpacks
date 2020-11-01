@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.IntNBT;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
@@ -30,6 +31,10 @@ public class BackpackWrapper {
 		if (notifyOnUpdate) {
 			notificationHandler = (slot, stack) -> BackpackInventoryEventBus.onSlotUpdate(player.getUniqueID(), handlerName, backpackSlot, slot, stack.get());
 		}
+	}
+
+	public void setPersistent(BackpackTileEntity te) {
+		backpackSaveHandler = stack -> te.markDirty();
 	}
 
 	public BackpackInventoryHandler getInventoryHandler() {
