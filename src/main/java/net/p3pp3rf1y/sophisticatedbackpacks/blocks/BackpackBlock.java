@@ -35,8 +35,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 import javax.annotation.Nullable;
 
 public class BackpackBlock extends Block {
-	private static final VoxelShape SHAPE = makeCuboidShape(2, 0, 2, 14, 12, 14);
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+	private static final VoxelShape NORTH_SHAPE = makeCuboidShape(2, 0, 5, 14, 14, 10);
+	private static final VoxelShape SOUTH_SHAPE = makeCuboidShape(2, 0, 6, 14, 14, 11);
+	private static final VoxelShape WEST_SHAPE = makeCuboidShape(5, 0, 2, 10, 14, 14);
+	private static final VoxelShape EAST_SHAPE = makeCuboidShape(6, 0, 2, 11, 14, 14);
 
 	public BackpackBlock(String regName) {
 		super(Properties.create(Material.WOOL).notSolid().hardnessAndResistance(0.8F).sound(SoundType.CLOTH));
@@ -51,7 +54,19 @@ public class BackpackBlock extends Block {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		return SHAPE;
+		Direction facing = state.get(FACING);
+
+		switch (facing) {
+			case NORTH:
+				return NORTH_SHAPE;
+			case SOUTH:
+				return SOUTH_SHAPE;
+			case WEST:
+				return WEST_SHAPE;
+			case EAST:
+			default:
+				return EAST_SHAPE;
+		}
 	}
 
 	@Override
