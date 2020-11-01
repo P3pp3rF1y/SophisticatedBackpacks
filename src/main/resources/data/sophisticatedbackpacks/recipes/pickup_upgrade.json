@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " P ",
+        "SBS",
+        "RRR"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "S": {
+            "tag": "forge:string"
+        },
+        "P": {
+            "item": "minecraft:sticky_piston"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:pickup_upgrade"
+    }
+}

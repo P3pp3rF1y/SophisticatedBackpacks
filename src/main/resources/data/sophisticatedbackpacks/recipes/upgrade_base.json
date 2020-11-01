@@ -1,22 +1,22 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "SLS",
-        "SCS",
-        "LLL"
+        "SIS",
+        "ILI",
+        "SIS"
     ],
     "key": {
         "L": {
             "tag": "forge:leather"
         },
-        "C": {
-            "tag": "forge:chests/wooden"
+        "I": {
+            "tag": "forge:ingots/iron"
         },
         "S": {
             "tag": "forge:string"
         }
     },
     "result": {
-        "item": "sophisticatedbackpacks:backpack"
+        "item": "sophisticatedbackpacks:upgrade_base"
     }
 }

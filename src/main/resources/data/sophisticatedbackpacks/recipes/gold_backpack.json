@@ -7,7 +7,7 @@
     ],
     "key": {
         "G": {
-            "item": "minecraft:gold_ingot"
+            "tag": "forge:ingots/gold"
         },
         "B": {
             "item": "sophisticatedbackpacks:iron_backpack"

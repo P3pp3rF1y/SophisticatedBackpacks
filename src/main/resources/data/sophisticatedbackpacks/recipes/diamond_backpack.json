@@ -7,7 +7,7 @@
     ],
     "key": {
         "D": {
-            "item": "minecraft:diamond"
+            "tag": "forge:gems/diamond"
         },
         "B": {
             "item": "sophisticatedbackpacks:gold_backpack"
