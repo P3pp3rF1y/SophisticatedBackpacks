@@ -4,6 +4,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
@@ -30,6 +32,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -132,5 +135,24 @@ public class BackpackBlock extends Block {
 
 	private static boolean hasEmptyMainHandAndSomethingInOffhand(PlayerEntity player) {
 		return player.getHeldItemMainhand().isEmpty() && !player.getHeldItemOffhand().isEmpty();
+	}
+
+	@Override
+	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+		super.onEntityCollision(state, world, pos, entity);
+		if (entity instanceof ItemEntity) {
+			ItemEntity itemEntity = (ItemEntity) entity;
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).flatMap(BackpackTileEntity::getBackpackWrapper).ifPresent(w -> tryToPickup(world, itemEntity, w));
+		}
+	}
+
+	private void tryToPickup(World world, ItemEntity itemEntity, BackpackWrapper w) {
+		ItemStack remainingStack = itemEntity.getItem().copy();
+		InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
+		if (remainingStack.isEmpty()) {
+			itemEntity.remove();
+		} else if (remainingStack.getCount() < itemEntity.getItem().getCount()) {
+			itemEntity.getItem().setCount(remainingStack.getCount());
+		}
 	}
 }

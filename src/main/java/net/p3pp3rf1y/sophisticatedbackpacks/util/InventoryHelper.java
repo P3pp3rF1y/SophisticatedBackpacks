@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 
 public class InventoryHelper {
 	private InventoryHelper() {}
@@ -22,5 +24,18 @@ public class InventoryHelper {
 			remainingStack = inventory.insertItem(slot, remainingStack, simulate);
 		}
 		return remainingStack;
+	}
+
+	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
+		return backpackWrapper.getUpgradeHandler().getUpgrade(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
+				.map(upgrade -> {
+					IPickupResponseUpgrade pickupUpgrade = (IPickupResponseUpgrade) upgrade.getItem();
+					if (pickupUpgrade.getCooldownTime(backpackWrapper.getBackpack()) <= world.getGameTime()) {
+						ItemStack ret = pickupUpgrade.pickup(world, remainingStack, backpackWrapper, simulate);
+						remainingStack.setCount(ret.getCount());
+						return remainingStack.isEmpty();
+					}
+					return false;
+				}).orElse(false);
 	}
 }

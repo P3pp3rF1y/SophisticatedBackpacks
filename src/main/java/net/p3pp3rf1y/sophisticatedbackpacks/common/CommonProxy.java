@@ -5,14 +5,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
@@ -30,13 +31,14 @@ public class CommonProxy {
 		ItemEntity itemEntity = event.getItem();
 		ItemStack remainingStackSimulated = itemEntity.getItem().copy();
 		PlayerEntity player = event.getPlayer();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> runPickupOnBackpack(remainingStackSimulated, new BackpackWrapper(backpack), true));
+		World world = player.getEntityWorld();
+		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated, new BackpackWrapper(backpack), true));
 		if (remainingStackSimulated.isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> {
 						BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
 						backpackWrapper.setPersistent(player, inventoryHandlerName, slot, true);
-						return runPickupOnBackpack(remainingStack, backpackWrapper, false);
+						return InventoryHelper.runPickupOnBackpack(world, remainingStack, backpackWrapper, false);
 					}
 			);
 			if (!itemEntity.isSilent()) {
@@ -48,12 +50,4 @@ public class CommonProxy {
 		}
 	}
 
-	private boolean runPickupOnBackpack(ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
-		return backpackWrapper.getUpgradeHandler().getUpgrade(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
-				.map(upgrade -> {
-					ItemStack ret = ((IPickupResponseUpgrade) upgrade.getItem()).pickup(remainingStack, backpackWrapper, simulate);
-					remainingStack.setCount(ret.getCount());
-					return remainingStack.isEmpty();
-				}).orElse(false);
-	}
 }
