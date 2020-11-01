@@ -8,10 +8,11 @@ import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryEventBus;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
@@ -19,22 +20,25 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.Optional;
 
 public class BackpackContainer extends Container {
 	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack")
 	public static ContainerType<BackpackContainer> TYPE;
+
+	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack_block")
+	public static ContainerType<BackpackContainer> BLOCK_TYPE;
 	private final BackpackWrapper backPackWrapper;
 	private int backpackSlotNumber = -1;
 
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
 		super(TYPE, windowId);
-
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
-			backPackWrapper = new BackpackWrapper(new ItemStack(ModItems.BACKPACK));
+			backPackWrapper = BackpackWrapper.getEmpty();
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
@@ -50,6 +54,14 @@ public class BackpackContainer extends Container {
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);
 		addPlayerInventorySlots(player.inventory, yPosition, backpackSlot, handler.isVisibleInGui());
+	}
+
+	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
+		super(BLOCK_TYPE, windowId);
+		backPackWrapper = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().orElse(BackpackWrapper.getEmpty())).orElse(BackpackWrapper.getEmpty());
+		int yPosition = addBackpackInventorySlots();
+		addBackpackUpgradeSlots(yPosition);
+		addPlayerInventorySlots(player.inventory, yPosition, -1, false);
 	}
 
 	private void addBackpackUpgradeSlots(int lastInventoryRowY) {
@@ -136,8 +148,12 @@ public class BackpackContainer extends Container {
 		return true;
 	}
 
-	public static BackpackContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
 		return new BackpackContainer(windowId, playerInventory.player, packetBuffer.readString(), packetBuffer.readInt());
+	}
+
+	public static BackpackContainer fromBufferBlock(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BlockPos.fromLong(packetBuffer.readLong()));
 	}
 
 	@Override

@@ -5,6 +5,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -18,11 +20,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
@@ -61,12 +67,24 @@ public class BackpackBlock extends Block {
 
 	@Override
 	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-		if (!player.isSneaking() || !player.getHeldItem(hand).isEmpty() || world.isRemote) {
+		if (world.isRemote) {
 			return super.onBlockActivated(state, world, pos, player, hand, hit);
 		}
 
-		putInPlayersHandAndRemove(state, world, pos, player, hand);
+		if (player.isSneaking() && player.getHeldItem(hand).isEmpty()) {
+			putInPlayersHandAndRemove(state, world, pos, player, hand);
+			return ActionResultType.SUCCESS;
+		}
+
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, pos),
+				getBackpackDisplayName(world, pos)), buf -> buf.writeLong(pos.toLong()));
 		return ActionResultType.SUCCESS;
+	}
+
+	private ITextComponent getBackpackDisplayName(World world, BlockPos pos) {
+		ITextComponent defaultDisplayName = new ItemStack(ModItems.BACKPACK).getDisplayName();
+		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> w.getBackpack().getDisplayName())
+				.orElse(defaultDisplayName)).orElse(defaultDisplayName);
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand) {

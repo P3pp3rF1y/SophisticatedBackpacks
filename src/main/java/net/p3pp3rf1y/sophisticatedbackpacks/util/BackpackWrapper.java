@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.IntNBT;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
@@ -78,5 +79,9 @@ public class BackpackWrapper {
 
 	public ItemStack getBackpack() {
 		return backpack;
+	}
+
+	public static BackpackWrapper getEmpty() {
+		return new BackpackWrapper(new ItemStack(ModItems.BACKPACK));
 	}
 }

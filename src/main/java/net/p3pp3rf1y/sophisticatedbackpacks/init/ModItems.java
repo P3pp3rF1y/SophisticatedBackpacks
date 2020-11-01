@@ -52,11 +52,15 @@ public class ModItems {
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		IForgeRegistry<ContainerType<?>> r = evt.getRegistry();
-		ContainerType<BackpackContainer> backpackContainerType = IForgeContainerType.create(BackpackContainer::fromBuffer);
-		//noinspection ConstantConditions
-		r.register(backpackContainerType.setRegistryName(BACKPACK.getRegistryName()));
+		ContainerType<BackpackContainer> backpackContainerType = IForgeContainerType.create(BackpackContainer::fromBufferItem);
+		ContainerType<BackpackContainer> backpackBlockContainerType = IForgeContainerType.create(BackpackContainer::fromBufferBlock);
+		r.register(backpackContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
+		r.register(backpackBlockContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_block"));
 
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new));
+		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);
+			ScreenManager.registerFactory(backpackBlockContainerType, BackpackScreen::new);
+		});
 	}
 
 	public static void registerRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> evt) {
