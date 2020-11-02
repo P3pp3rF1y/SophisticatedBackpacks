@@ -12,7 +12,9 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -38,7 +40,7 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 
 	@Override
 	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-		PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpack -> {
+		PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 			matrixStack.push();
 			if (player.isCrouching()) {
 				matrixStack.translate(0D, 0.2D, 0D);
@@ -46,8 +48,10 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 			}
 
 			matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
-			matrixStack.translate(0, -0.7f, -0.2f);
+			float zOffset = backpackRenderInfo.isArmorSlot() || player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()).isEmpty() ? -0.2f : -0.25f;
+			matrixStack.translate(0, -0.75f, zOffset);
 
+			ItemStack backpack = backpackRenderInfo.getBackpack();
 			BackpackWrapper wrapper = new BackpackWrapper(backpack);
 
 			IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
