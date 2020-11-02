@@ -37,7 +37,7 @@ authors="P3pp3rF1y, WinDanesz" #optional
 modId="sophisticatedbackpacks" #mandatory
 
 # The version number of the mod
-version="project_version" #mandatory
+version="${file.jarVersion}" #mandatory
 
 # A display name for the mod
 displayName="Sophisticated Backpacks" #mandatory
@@ -51,7 +51,7 @@ Fancy and functional backpacks.
 [[dependencies.xreliquary]]
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[28.1.0,)" #mandatory
+    versionRange="[34.0.0,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER

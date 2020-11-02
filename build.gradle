@@ -95,13 +95,17 @@ task generateSources(type: Copy) {
 }
 
 jar {
+    from('/') {
+        include 'LICENSE'
+    }
+
     manifest {
         attributes(["Specification-Title"     : "sophisticatedbackpacks",
-                    "Specification-Vendor"    : "sophisticatedbackpacks",
+                    "Specification-Vendor"    : "p3pp3rf1y",
                     "Specification-Version"   : "1",
                     "Implementation-Title"    : project.name,
                     "Implementation-Version"  : "${version}",
-                    "Implementation-Vendor"   : "sophisticatedbackpacks",
+                    "Implementation-Vendor"   : "p3pp3rf1y",
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
 }
@@ -109,12 +113,6 @@ jar {
 processResources {
     // Exclude datagenerator .cache directory
     exclude '.cache'
-
-    filesMatching('META-INF/mods.toml') {
-        filter {
-            it.replaceAll("project_version", project.version.toString())
-        }
-    }
 }
 
 static def getBuildNumber() {
