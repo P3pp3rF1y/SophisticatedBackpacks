@@ -86,7 +86,7 @@ public class BackpackBlock extends Block {
 	@Override
 	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
 		if (world.isRemote) {
-			return super.onBlockActivated(state, world, pos, player, hand, hit);
+			return ActionResultType.SUCCESS;
 		}
 
 		if (player.isSneaking() && player.getHeldItem(hand).isEmpty()) {
@@ -119,7 +119,13 @@ public class BackpackBlock extends Block {
 		World world = player.world;
 		BlockPos pos = event.getPos();
 
-		if (world.isRemote || !player.isSneaking() || !hasEmptyMainHandAndSomethingInOffhand(player)) {
+		if (!player.isSneaking() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(event)) {
+			return;
+		}
+
+		if (world.isRemote) {
+			event.setCanceled(true);
+			event.setCancellationResult(ActionResultType.SUCCESS);
 			return;
 		}
 
@@ -131,6 +137,11 @@ public class BackpackBlock extends Block {
 		putInPlayersHandAndRemove(state, world, pos, player, player.getHeldItemMainhand().isEmpty() ? Hand.MAIN_HAND : Hand.OFF_HAND);
 
 		event.setCanceled(true);
+		event.setCancellationResult(ActionResultType.SUCCESS);
+	}
+
+	private static boolean didntInteractWithBackpack(PlayerInteractEvent.RightClickBlock event) {
+		return !(event.getWorld().getBlockState(event.getPos()).getBlock() instanceof BackpackBlock);
 	}
 
 	private static boolean hasEmptyMainHandAndSomethingInOffhand(PlayerEntity player) {
