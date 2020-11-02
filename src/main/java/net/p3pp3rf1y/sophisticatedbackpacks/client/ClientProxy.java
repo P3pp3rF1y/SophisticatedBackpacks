@@ -25,7 +25,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import java.util.Map;
 
 public class ClientProxy extends CommonProxy {
-	private static final int KEY_B = 48;
+	private static final int KEY_B = 66;
 	public static final KeyBinding BACKPACK_OPEN_KEYBIND = new KeyBinding("keybind.sophisticatedbackpacks.backpack.open",
 			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), "keybind.sophisticatedbackpacks.category");
 
