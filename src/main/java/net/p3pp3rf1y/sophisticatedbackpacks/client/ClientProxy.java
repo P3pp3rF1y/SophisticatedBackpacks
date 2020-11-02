@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
-import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -42,13 +41,15 @@ public class ClientProxy extends CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(this::loadComplete);
 		modBus.addListener(this::clientSetup);
-		modBus.addListener(this::registerModels);
+		MinecraftForge.EVENT_BUS.addListener(ClientProxy::handleKeyInputEvent);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
-		ModItemColors.init();
-		ModBlockColors.init();
-		MinecraftForge.EVENT_BUS.addListener(ClientProxy::handleKeyInputEvent);
+		event.enqueueWork(() -> {
+			ModItemColors.init();
+			ModBlockColors.init();
+			registerBackpackLayer();
+		});
 	}
 
 	private void clientSetup(FMLClientSetupEvent event) {
@@ -59,7 +60,7 @@ public class ClientProxy extends CommonProxy {
 		RenderTypeLookup.setRenderLayer(ModBlocks.DIAMOND_BACKPACK, RenderType.getCutout());
 	}
 
-	private void registerModels(ModelRegistryEvent event) {
+	private void registerBackpackLayer() {
 		Map<String, PlayerRenderer> skinMap = Minecraft.getInstance().getRenderManager().getSkinMap();
 		PlayerRenderer render = skinMap.get("default");
 		render.addLayer(new BackpackLayerRenderer(render));
