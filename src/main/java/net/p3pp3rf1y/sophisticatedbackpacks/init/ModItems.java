@@ -13,13 +13,17 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.upgradetabs.PickupTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.PickupUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.PickupUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.items.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
 
@@ -31,6 +35,7 @@ public class ModItems {
 	public static final BackpackItem IRON_BACKPACK = InjectionHelper.nullValue();
 	public static final BackpackItem GOLD_BACKPACK = InjectionHelper.nullValue();
 	public static final BackpackItem DIAMOND_BACKPACK = InjectionHelper.nullValue();
+	public static final PickupUpgradeItem PICKUP_UPGRADE = InjectionHelper.nullValue();
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Item.class, ModItems::register);
@@ -47,7 +52,7 @@ public class ModItems {
 		reg.register(new BackpackItem("diamond_backpack", 108, 5,
 				new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), () -> ModBlocks.DIAMOND_BACKPACK));
 		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
-		reg.register(new PickupUpgrade());
+		reg.register(new PickupUpgradeItem());
 	}
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
@@ -57,10 +62,15 @@ public class ModItems {
 		r.register(backpackContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
 		r.register(backpackBlockContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_block"));
 
+		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.TYPE);
+
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);
 			ScreenManager.registerFactory(backpackBlockContainerType, BackpackScreen::new);
+
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.TYPE, PickupTab.SecondTier::new);
 		});
+
 	}
 
 	public static void registerRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> evt) {

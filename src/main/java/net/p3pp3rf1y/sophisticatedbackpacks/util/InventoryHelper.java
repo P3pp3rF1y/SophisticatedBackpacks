@@ -6,6 +6,8 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 
+import java.util.function.BiConsumer;
+
 public class InventoryHelper {
 	private InventoryHelper() {}
 
@@ -27,7 +29,7 @@ public class InventoryHelper {
 	}
 
 	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
-		return backpackWrapper.getUpgradeHandler().getUpgrade(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
+		return backpackWrapper.getUpgradeHandler().getUpgradeStack(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
 				.map(upgrade -> {
 					IPickupResponseUpgrade pickupUpgrade = (IPickupResponseUpgrade) upgrade.getItem();
 					if (pickupUpgrade.getCooldownTime(backpackWrapper.getBackpack()) <= world.getGameTime()) {
@@ -37,5 +39,12 @@ public class InventoryHelper {
 					}
 					return false;
 				}).orElse(false);
+	}
+
+	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn) {
+		for (int slot = 0; slot < handler.getSlots(); slot++) {
+			ItemStack stack = handler.getStackInSlot(slot);
+			actOn.accept(slot, stack);
+		}
 	}
 }

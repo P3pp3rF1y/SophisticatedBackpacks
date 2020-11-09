@@ -8,10 +8,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
-public class PickupUpgrade extends ItemBase implements IBackpackUpgrade, IPickupResponseUpgrade {
+public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPickupResponseUpgrade {
 	private static final int FULL_COOLDOWN = 60;
 
-	public PickupUpgrade() {
+	public PickupUpgradeItem() {
 		super("pickup_upgrade", new Properties().maxStackSize(1));
 	}
 

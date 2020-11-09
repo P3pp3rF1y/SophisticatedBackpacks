@@ -42,7 +42,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		InventoryHelper.copyTo(this, otherHandler);
 	}
 
-	public Optional<ItemStack> getUpgrade(Predicate<ItemStack> matches) {
+	public Optional<ItemStack> getUpgradeStack(Predicate<ItemStack> matches) {
 		for (int slot = 0; slot < getSlots(); slot++) {
 			ItemStack slotStack = getStackInSlot(slot);
 			if (!slotStack.isEmpty() && matches.test(slotStack)) {

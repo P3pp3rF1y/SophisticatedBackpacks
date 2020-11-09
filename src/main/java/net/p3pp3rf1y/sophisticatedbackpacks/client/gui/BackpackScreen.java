@@ -20,7 +20,10 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int UPGRADE_SPACE_BETWEEN_SLOTS = 4;
 	private static final int UPGRADE_BOTTOM_HEIGHT = 7;
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
-	private int slots;
+	public static final int UPGRADE_INVENTORY_OFFSET = 26;
+	private UpgradeSettingsControl upgradeControl;
+
+	private final int slots;
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -32,8 +35,24 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	@Override
+	protected void init() {
+		super.init();
+		initUpgradeControl();
+		getContainer().setUpgradeChangeListener(c -> {
+			children.remove(upgradeControl);
+			initUpgradeControl();
+		});
+	}
+
+	private void initUpgradeControl() {
+		upgradeControl = new UpgradeSettingsControl(guiLeft + xSize, guiTop + 4, this);
+		addListener(upgradeControl);
+	}
+
+	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
+		upgradeControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
@@ -60,12 +79,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 		int firstHalfHeight = getUpgradeHeightWithoutBottom();
 
-		blit(matrixStack, i - getUpgradesOffset(), j + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
-		blit(matrixStack, i - getUpgradesOffset(), j + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
-	}
-
-	public int getUpgradesOffset() {
-		return 26;
+		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
+		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
 	}
 
 	public int getUpgradeTop() {
@@ -86,5 +101,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		}
 
 		return BACKPACK_TEXTURES.get(numberOfSlots);
+	}
+
+	public UpgradeSettingsControl getUpgradeControl() {
+		if (upgradeControl == null) {
+			upgradeControl = new UpgradeSettingsControl(guiLeft + xSize, guiTop + 4, this);
+		}
+		return upgradeControl;
 	}
 }

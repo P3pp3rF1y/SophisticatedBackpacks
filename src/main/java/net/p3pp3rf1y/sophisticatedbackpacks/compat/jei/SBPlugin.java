@@ -15,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -43,7 +43,10 @@ public class SBPlugin implements IModPlugin {
 		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<BackpackScreen>() {
 			@Override
 			public List<Rectangle2d> getGuiExtraAreas(BackpackScreen gui) {
-				return Collections.singletonList(new Rectangle2d(gui.getGuiLeft() - gui.getUpgradesOffset(), gui.getGuiTop() + gui.getUpgradeTop(), 32, gui.getUpgradeHeight()));
+				List<Rectangle2d> ret = new ArrayList<>();
+				ret.add(new Rectangle2d(gui.getGuiLeft() - BackpackScreen.UPGRADE_INVENTORY_OFFSET, gui.getGuiTop() + gui.getUpgradeTop(), 32, gui.getUpgradeHeight()));
+				ret.addAll(gui.getUpgradeControl().getTabRectangles());
+				return ret;
 			}
 		});
 	}
