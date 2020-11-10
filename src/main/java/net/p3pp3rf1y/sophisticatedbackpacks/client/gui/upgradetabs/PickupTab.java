@@ -31,13 +31,15 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 		this.screen = screen;
 		this.onOpen = onOpen;
 		this.onClose = onClose;
-		addHideableChild(new ToggleButton<>(x + 3, y + 24, 18, 18, button -> whitelistValue = !whitelistValue,
+		ToggleButton<Boolean> whitelistButton = new ToggleButton<>(x + 3, y + 24, 18, 18, button -> whitelistValue = !whitelistValue,
 				new TextureBlitData(UPGRADE_CONTROLS, 29, 0, 18, 18),
 				ImmutableMap.of(
 						true, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 32, 32, 16, 16),
 						false, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 48, 32, 16, 16)
 				),
-				() -> whitelistValue));
+				() -> whitelistValue);
+		whitelistButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, 47, 0, 18, 18));
+		addHideableChild(whitelistButton);
 		slotsLeftX = x + 4;
 		slotsTopY = y + 46;
 	}

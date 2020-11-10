@@ -10,10 +10,19 @@ import java.util.function.Predicate;
 
 public class Button extends ButtonBase {
 	private final TextureBlitData backgroundTexture;
-	private final TextureBlitData foregroundTexture;
+	private TextureBlitData hoveredBackgroundTexture = null;
+	private TextureBlitData foregroundTexture = null;
 
 	public Button(int x, int y, int width, int height, Predicate<Integer> onClick, TextureBlitData backgroundTexture) {
 		this(x, y, width, height, onClick, backgroundTexture, null);
+	}
+
+	public void setHoveredBackgroundTexture(TextureBlitData hoveredBackgroundTexture) {
+		this.hoveredBackgroundTexture = hoveredBackgroundTexture;
+	}
+
+	public void setForegroundTexture(TextureBlitData foregroundTexture) {
+		this.foregroundTexture = foregroundTexture;
 	}
 
 	public Button(int x, int y, int width, int height, Predicate<Integer> onClick, TextureBlitData backgroundTexture,
@@ -25,7 +34,15 @@ public class Button extends ButtonBase {
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.blit(minecraft, matrixStack, x, y, backgroundTexture);
+		if (isHovered(mouseX, mouseY)) {
+			GuiHelper.blit(minecraft, matrixStack, x, y, hoveredBackgroundTexture);
+		} else {
+			GuiHelper.blit(minecraft, matrixStack, x, y, backgroundTexture);
+		}
+	}
+
+	private boolean isHovered(int mouseX, int mouseY) {
+		return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
 	}
 
 	@Override
@@ -34,5 +51,4 @@ public class Button extends ButtonBase {
 			GuiHelper.blit(minecraft, matrixStack, x, y, foregroundTexture);
 		}
 	}
-
 }
