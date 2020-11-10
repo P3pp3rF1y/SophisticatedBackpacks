@@ -10,15 +10,15 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab> {
+public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?>> {
 	private static final int VERTICAL_SPACE = 1;
-	private UpgradeSettingsTab openTab = null;
+	private UpgradeSettingsTab<?> openTab = null;
 
 	public UpgradeSettingsControl(int x, int y, BackpackScreen screen) {
 		super(x, y);
 		setZOffset(-200);
 		int i = 0;
-		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers().values()) {
+		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers()) {
 			addChild(UpgradeSettingsTabManager.getTab(container, x, getTopY(i), screen, tab -> {
 						if (differentTabIsOpen(tab)) {
 							openTab.changeZOffset(-200);

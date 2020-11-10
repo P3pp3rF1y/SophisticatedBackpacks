@@ -9,7 +9,6 @@ import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.registries.ObjectHolder;
@@ -26,9 +25,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -44,7 +41,7 @@ public class BackpackContainer extends Container {
 	private final BackpackWrapper backPackWrapper;
 	private int backpackSlotNumber = -1;
 
-	private final Map<ResourceLocation, UpgradeContainerBase> upgradeContainers = new HashMap<>(); //TODO perhaps remove ResourceLocation from here
+	private final List<UpgradeContainerBase> upgradeContainers = new ArrayList<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
@@ -82,7 +79,7 @@ public class BackpackContainer extends Container {
 
 	private void removeUpgradeSettingsSlots() {
 		List<Integer> slotNumbersToRemove = new ArrayList<>();
-		for (UpgradeContainerBase container : upgradeContainers.values()) {
+		for (UpgradeContainerBase container : upgradeContainers) {
 			container.getSlots().forEach(slot -> {
 				slotNumbersToRemove.add(slot.slotNumber);
 				inventorySlots.remove(slot);
@@ -95,12 +92,11 @@ public class BackpackContainer extends Container {
 	}
 
 	private void addUpgradeSettingsContainers() {
-		InventoryHelper.iterate(backPackWrapper.getUpgradeHandler(), (slot, stack) -> {
-			ResourceLocation registryName = stack.getItem().getRegistryName();
-			UpgradeContainerRegistry.instantiateContainer(stack).ifPresent(container -> upgradeContainers.put(registryName, container));
-		});
+		BackpackUpgradeHandler upgradeHandler = backPackWrapper.getUpgradeHandler();
+		InventoryHelper.iterate(upgradeHandler, (slot, stack) ->
+				UpgradeContainerRegistry.instantiateContainer(stack, upgrade -> upgradeHandler.setStackInSlot(slot, upgrade)).ifPresent(upgradeContainers::add));
 
-		for (UpgradeContainerBase container : upgradeContainers.values()) {
+		for (UpgradeContainerBase container : upgradeContainers) {
 			container.getSlots().forEach(this::addSlot);
 		}
 	}
@@ -294,7 +290,7 @@ public class BackpackContainer extends Container {
 		return getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	public Map<ResourceLocation, UpgradeContainerBase> getUpgradeContainers() {
+	public List<UpgradeContainerBase> getUpgradeContainers() {
 		return upgradeContainers;
 	}
 }

@@ -6,6 +6,7 @@ import net.minecraft.util.ResourceLocation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class UpgradeContainerRegistry {
 	private UpgradeContainerRegistry() {}
@@ -16,10 +17,10 @@ public class UpgradeContainerRegistry {
 		UPGRADE_CONTAINERS.put(upgradeName, containerFactory);
 	}
 
-	public static Optional<UpgradeContainerBase> instantiateContainer(ItemStack upgrade) {
+	public static Optional<UpgradeContainerBase> instantiateContainer(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		ResourceLocation upgradeName = upgrade.getItem().getRegistryName();
 		if (UPGRADE_CONTAINERS.containsKey(upgradeName)) {
-			return Optional.of(UPGRADE_CONTAINERS.get(upgradeName).create(upgrade));
+			return Optional.of(UPGRADE_CONTAINERS.get(upgradeName).create(upgrade, upgradeSaveHandler));
 		}
 		return Optional.empty();
 	}
