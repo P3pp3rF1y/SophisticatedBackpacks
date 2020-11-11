@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	private final int slotsLeftX;
 	private final int slotsTopY;
-	private boolean whitelistValue = false;
+	private final boolean whitelistValue = false;
 	private final Consumer<PickupTab> onOpen;
 	private final Consumer<PickupTab> onClose;
 	private final BackpackScreen screen;
@@ -31,13 +31,16 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 		this.screen = screen;
 		this.onOpen = onOpen;
 		this.onClose = onClose;
-		ToggleButton<Boolean> whitelistButton = new ToggleButton<>(x + 3, y + 24, 18, 18, button -> whitelistValue = !whitelistValue,
+		ToggleButton<Boolean> whitelistButton = new ToggleButton<>(x + 3, y + 24, 18, 18, button -> {
+			getContainer().setWhitelist(!getContainer().isWhitelist());
+			return true;
+		},
 				new TextureBlitData(UPGRADE_CONTROLS, 29, 0, 18, 18),
 				ImmutableMap.of(
 						true, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 32, 32, 16, 16),
 						false, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 48, 32, 16, 16)
 				),
-				() -> whitelistValue);
+				() -> getContainer().isWhitelist());
 		whitelistButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, 47, 0, 18, 18));
 		addHideableChild(whitelistButton);
 		slotsLeftX = x + 4;

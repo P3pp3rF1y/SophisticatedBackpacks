@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.ByteNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.function.Consumer;
@@ -11,6 +13,10 @@ public class PickupUpgradeWrapper {
 	private final ItemStack upgrade;
 	private final Consumer<ItemStack> upgradeSaveHandler;
 	private FilterItemStackHandler filterHandler = null;
+
+	public PickupUpgradeWrapper(ItemStack upgrade) {
+		this(upgrade, stack -> {});
+	}
 
 	public PickupUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		this.upgrade = upgrade;
@@ -24,12 +30,33 @@ public class PickupUpgradeWrapper {
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
 					upgrade.setTagInfo("filters", serializeNBT());
-					upgradeSaveHandler.accept(upgrade);
+					save();
 				}
 			};
 			NBTHelper.getCompound(upgrade, "filters").ifPresent(filterHandler::deserializeNBT);
 		}
 
 		return filterHandler;
+	}
+
+	public boolean matchesFilter(ItemStack stack) {
+		if (isWhitelist()) {
+			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> ItemStack.areItemsEqual(stack, filter), () -> false, returnValue -> returnValue);
+		} else {
+			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !ItemStack.areItemsEqual(stack, filter), () -> true, returnValue -> !returnValue);
+		}
+	}
+
+	public void setWhitelist(boolean isWhitelist) {
+		upgrade.setTagInfo("isWhitelist", ByteNBT.valueOf(isWhitelist));
+		save();
+	}
+
+	public boolean isWhitelist() {
+		return NBTHelper.getBoolean(upgrade, "isWhitelist").orElse(false);
+	}
+
+	private void save() {
+		upgradeSaveHandler.accept(upgrade);
 	}
 }

@@ -7,6 +7,9 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class InventoryHelper {
 	private InventoryHelper() {}
@@ -33,7 +36,7 @@ public class InventoryHelper {
 				.map(upgrade -> {
 					IPickupResponseUpgrade pickupUpgrade = (IPickupResponseUpgrade) upgrade.getItem();
 					if (pickupUpgrade.getCooldownTime(backpackWrapper.getBackpack()) <= world.getGameTime()) {
-						ItemStack ret = pickupUpgrade.pickup(world, remainingStack, backpackWrapper, simulate);
+						ItemStack ret = pickupUpgrade.pickup(world, upgrade, remainingStack, backpackWrapper, simulate);
 						remainingStack.setCount(ret.getCount());
 						return remainingStack.isEmpty();
 					}
@@ -46,5 +49,17 @@ public class InventoryHelper {
 			ItemStack stack = handler.getStackInSlot(slot);
 			actOn.accept(slot, stack);
 		}
+	}
+
+	public static <T> T iterate(IItemHandler handler, BiFunction<Integer, ItemStack, T> getFromSlotStack, Supplier<T> supplyDefault, Predicate<T> shouldExit) {
+		T ret = supplyDefault.get();
+		for (int slot = 0; slot < handler.getSlots(); slot++) {
+			ItemStack stack = handler.getStackInSlot(slot);
+			ret = getFromSlotStack.apply(slot, stack);
+			if (shouldExit.test(ret)) {
+				break;
+			}
+		}
+		return ret;
 	}
 }

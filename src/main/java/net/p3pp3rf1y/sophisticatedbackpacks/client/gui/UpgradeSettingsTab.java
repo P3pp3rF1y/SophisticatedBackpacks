@@ -46,7 +46,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 		return true;
 	}
 
-	protected UpgradeContainerBase getContainer() {
+	protected C getContainer() {
 		return upgradeContainer;
 	}
 
