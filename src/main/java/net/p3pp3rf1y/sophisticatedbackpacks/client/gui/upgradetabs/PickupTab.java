@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
@@ -20,14 +21,13 @@ import java.util.function.Consumer;
 public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	private final int slotsLeftX;
 	private final int slotsTopY;
-	private final boolean whitelistValue = false;
 	private final Consumer<PickupTab> onOpen;
 	private final Consumer<PickupTab> onClose;
 	private final BackpackScreen screen;
-	private final TextureBlitData slotBackground = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png"), 7, 17, 54, 54); //TODO make into static
+	private static final TextureBlitData SLOT_BACKGROUND = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png"), 7, 17, 54, 54);
 
 	public PickupTab(PickupUpgradeContainer upgradeContainer, int x, int y, int openWidth, int openHeight, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
-		super(upgradeContainer, x, y, openWidth, openHeight, new ItemStack(ModItems.PICKUP_UPGRADE), "Pickup"); //TODO translation
+		super(upgradeContainer, x, y, openWidth, openHeight, new ItemStack(ModItems.PICKUP_UPGRADE), new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup"));
 		this.screen = screen;
 		this.onOpen = onOpen;
 		this.onClose = onClose;
@@ -59,7 +59,7 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, minecraft, mouseX, mouseY);
 		if (isOpen()) {
-			GuiHelper.blit(minecraft, matrixStack, slotsLeftX - 1, slotsTopY - 1, slotBackground);
+			GuiHelper.blit(minecraft, matrixStack, slotsLeftX - 1, slotsTopY - 1, SLOT_BACKGROUND);
 		}
 	}
 

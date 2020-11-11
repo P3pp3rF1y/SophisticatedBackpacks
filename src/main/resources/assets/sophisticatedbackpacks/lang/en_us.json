@@ -6,5 +6,6 @@
     "item.sophisticatedbackpacks.upgrade_base": "Upgrade Base",
     "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
-    "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack"
+    "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
+    "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup"
 }

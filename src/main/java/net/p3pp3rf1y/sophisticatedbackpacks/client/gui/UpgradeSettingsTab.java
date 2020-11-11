@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ItemButton;
@@ -29,7 +30,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private final int openHeight;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	public UpgradeSettingsTab(C upgradeContainer, int x, int y, int openWidth, int openHeight, ItemStack iconStack, String tabLabel) {
+	public UpgradeSettingsTab(C upgradeContainer, int x, int y, int openWidth, int openHeight, ItemStack iconStack, ITextComponent tabLabel) {
 		super(x, y);
 		this.upgradeContainer = upgradeContainer;
 		this.openWidth = openWidth;
