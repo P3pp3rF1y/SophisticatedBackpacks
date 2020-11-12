@@ -14,17 +14,17 @@ import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.upgradetabs.PickupTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
 
 @ObjectHolder(SophisticatedBackpacks.MOD_ID)
@@ -68,7 +68,7 @@ public class ModItems {
 			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);
 			ScreenManager.registerFactory(backpackBlockContainerType, BackpackScreen::new);
 
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.TYPE, PickupTab.SecondTier::new);
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.TYPE, PickupUpgradeTab.SecondTier::new);
 		});
 
 	}

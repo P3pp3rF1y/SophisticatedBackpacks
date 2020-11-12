@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteNBT;

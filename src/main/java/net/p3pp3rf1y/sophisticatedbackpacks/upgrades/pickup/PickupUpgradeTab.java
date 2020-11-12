@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.upgradetabs;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -13,20 +13,19 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.function.Consumer;
 
-public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
+public class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	private final int slotsLeftX;
 	private final int slotsTopY;
-	private final Consumer<PickupTab> onOpen;
-	private final Consumer<PickupTab> onClose;
+	private final Consumer<PickupUpgradeTab> onOpen;
+	private final Consumer<PickupUpgradeTab> onClose;
 	private final BackpackScreen screen;
 	private static final TextureBlitData SLOT_BACKGROUND = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png"), 7, 17, 54, 54);
 
-	public PickupTab(PickupUpgradeContainer upgradeContainer, int x, int y, TabDimensions openTabDimensions, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
+	public PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, int x, int y, TabDimensions openTabDimensions, BackpackScreen screen, Consumer<PickupUpgradeTab> onOpen, Consumer<PickupUpgradeTab> onClose) {
 		super(upgradeContainer, x, y, openTabDimensions, new ItemStack(ModItems.PICKUP_UPGRADE), new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup"),
 				new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup.tooltip"));
 		this.screen = screen;
@@ -93,8 +92,8 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 		onClose.accept(this);
 	}
 
-	public static class SecondTier extends PickupTab {
-		public SecondTier(PickupUpgradeContainer upgradeContainer, int x, int y, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
+	public static class SecondTier extends PickupUpgradeTab {
+		public SecondTier(PickupUpgradeContainer upgradeContainer, int x, int y, BackpackScreen screen, Consumer<PickupUpgradeTab> onOpen, Consumer<PickupUpgradeTab> onClose) {
 			super(upgradeContainer, x, y, new TabDimensions(63, 105), screen, onOpen, onClose);
 		}
 

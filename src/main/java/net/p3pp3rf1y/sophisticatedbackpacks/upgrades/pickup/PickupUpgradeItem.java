@@ -1,11 +1,11 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.items;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.LongNBT;
 import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.PickupUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 

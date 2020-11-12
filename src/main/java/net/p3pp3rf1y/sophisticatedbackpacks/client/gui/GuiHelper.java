@@ -97,6 +97,8 @@ public class GuiHelper {
 
 		renderTypeBuffer.finish();
 		matrixStack.pop();
+
+		tooltipToRender = Collections.emptyList();
 	}
 
 	private static int getMaxLineWidth(List<? extends IReorderingProcessor> tooltips, FontRenderer font) {

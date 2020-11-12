@@ -1,9 +1,11 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.PickupUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
