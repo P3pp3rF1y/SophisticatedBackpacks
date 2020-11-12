@@ -25,17 +25,17 @@ public class PickupUpgradeContainer extends UpgradeContainerBase {
 		return TYPE;
 	}
 
-	public void setWhitelist(boolean isWhitelist) {
-		pickupWrapper.setWhitelist(isWhitelist);
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), "isWhitelist", isWhitelist));
+	public void setAllowList(boolean isAllowList) {
+		pickupWrapper.setAllowList(isAllowList);
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), "isAllowList", isAllowList));
 	}
 
 	@Override
 	public void handleMessage(CompoundNBT data) {
-		setWhitelist(data.getBoolean("isWhitelist"));
+		setAllowList(data.getBoolean("isAllowList"));
 	}
 
-	public boolean isWhitelist() {
-		return pickupWrapper.isWhitelist();
+	public boolean isAllowList() {
+		return pickupWrapper.isAllowList();
 	}
 }

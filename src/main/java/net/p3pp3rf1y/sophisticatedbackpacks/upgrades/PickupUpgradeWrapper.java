@@ -40,20 +40,20 @@ public class PickupUpgradeWrapper {
 	}
 
 	public boolean matchesFilter(ItemStack stack) {
-		if (isWhitelist()) {
+		if (isAllowList()) {
 			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> ItemStack.areItemsEqual(stack, filter), () -> false, returnValue -> returnValue);
 		} else {
 			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !ItemStack.areItemsEqual(stack, filter), () -> true, returnValue -> !returnValue);
 		}
 	}
 
-	public void setWhitelist(boolean isWhitelist) {
-		upgrade.setTagInfo("isWhitelist", ByteNBT.valueOf(isWhitelist));
+	public void setAllowList(boolean isAllowList) {
+		upgrade.setTagInfo("isAllowList", ByteNBT.valueOf(isAllowList));
 		save();
 	}
 
-	public boolean isWhitelist() {
-		return NBTHelper.getBoolean(upgrade, "isWhitelist").orElse(false);
+	public boolean isAllowList() {
+		return NBTHelper.getBoolean(upgrade, "isAllowList").orElse(false);
 	}
 
 	private void save() {

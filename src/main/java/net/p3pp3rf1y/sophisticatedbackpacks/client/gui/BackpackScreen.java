@@ -62,6 +62,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		drawUpgradeBackground(matrixStack);
 	}
 
+	@Override
+	protected void renderHoveredTooltip(MatrixStack matrixStack, int x, int y) {
+		super.renderHoveredTooltip(matrixStack, x, y);
+		GuiHelper.renderToolTip(minecraft, matrixStack, x, y);
+	}
+
 	private void drawInventoryBackground(MatrixStack matrixStack) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		minecraft.getTextureManager().bindTexture(getBackpackTexture(container.getNumberOfSlots()));

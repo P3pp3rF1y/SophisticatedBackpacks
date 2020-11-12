@@ -26,23 +26,28 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	private final BackpackScreen screen;
 	private static final TextureBlitData SLOT_BACKGROUND = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png"), 7, 17, 54, 54);
 
-	public PickupTab(PickupUpgradeContainer upgradeContainer, int x, int y, int openWidth, int openHeight, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
-		super(upgradeContainer, x, y, openWidth, openHeight, new ItemStack(ModItems.PICKUP_UPGRADE), new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup"));
+	public PickupTab(PickupUpgradeContainer upgradeContainer, int x, int y, TabDimensions openTabDimensions, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
+		super(upgradeContainer, x, y, openTabDimensions, new ItemStack(ModItems.PICKUP_UPGRADE), new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup"),
+				new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.pickup.tooltip"));
 		this.screen = screen;
 		this.onOpen = onOpen;
 		this.onClose = onClose;
-		ToggleButton<Boolean> whitelistButton = new ToggleButton<>(x + 3, y + 24, 18, 18, button -> {
-			getContainer().setWhitelist(!getContainer().isWhitelist());
+		ToggleButton<Boolean> blockAllowButton = new ToggleButton<>(x + 3, y + 24, 18, 18, button -> {
+			getContainer().setAllowList(!getContainer().isAllowList());
 			return true;
 		},
 				new TextureBlitData(UPGRADE_CONTROLS, 29, 0, 18, 18),
 				ImmutableMap.of(
-						true, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 32, 32, 16, 16),
-						false, new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 48, 32, 16, 16)
+						true, new ToggleButton.StateData(new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 32, 32, 16, 16),
+								new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.buttons.allow")
+						),
+						false, new ToggleButton.StateData(new TextureBlitData(UPGRADE_CONTROLS, 1, 1, 256, 256, 48, 32, 16, 16),
+								new TranslationTextComponent("gui.sophisticatedbackpacks.upgrades.buttons.block")
+						)
 				),
-				() -> getContainer().isWhitelist());
-		whitelistButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, 47, 0, 18, 18));
-		addHideableChild(whitelistButton);
+				() -> getContainer().isAllowList());
+		blockAllowButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, 47, 0, 18, 18));
+		addHideableChild(blockAllowButton);
 		slotsLeftX = x + 4;
 		slotsTopY = y + 46;
 	}
@@ -90,7 +95,7 @@ public class PickupTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 
 	public static class SecondTier extends PickupTab {
 		public SecondTier(PickupUpgradeContainer upgradeContainer, int x, int y, BackpackScreen screen, Consumer<PickupTab> onOpen, Consumer<PickupTab> onClose) {
-			super(upgradeContainer, x, y, 63, 105, screen, onOpen, onClose);
+			super(upgradeContainer, x, y, new TabDimensions(63, 105), screen, onOpen, onClose);
 		}
 
 		@Override
