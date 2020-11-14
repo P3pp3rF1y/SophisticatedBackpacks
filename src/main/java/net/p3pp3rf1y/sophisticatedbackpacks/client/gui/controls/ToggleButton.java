@@ -3,7 +3,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 
 import java.util.Collections;
@@ -13,12 +15,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ToggleButton<T extends Comparable<T>> extends Button {
-
 	private final Map<T, StateData> stateData;
 	private final Supplier<T> getState;
 
-	public ToggleButton(int x, int y, int width, int height, Predicate<Integer> onClick, TextureBlitData backgroundTexture, Map<T, StateData> stateData, Supplier<T> getState) {
-		super(x, y, width, height, onClick, backgroundTexture);
+	public ToggleButton(Position position, Dimension dimension, Predicate<Integer> onClick, TextureBlitData backgroundTexture, Map<T, StateData> stateData, Supplier<T> getState) {
+		super(position, dimension, onClick, backgroundTexture);
 
 		this.stateData = stateData;
 		this.getState = getState;

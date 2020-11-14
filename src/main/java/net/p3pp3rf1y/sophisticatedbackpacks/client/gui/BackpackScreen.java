@@ -45,7 +45,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void initUpgradeControl() {
-		upgradeControl = new UpgradeSettingsControl(guiLeft + xSize, guiTop + 4, this);
+		upgradeControl = new UpgradeSettingsControl(new Position(guiLeft + xSize, guiTop + 4), this);
 		addListener(upgradeControl);
 	}
 
@@ -111,7 +111,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	public UpgradeSettingsControl getUpgradeControl() {
 		if (upgradeControl == null) {
-			upgradeControl = new UpgradeSettingsControl(guiLeft + xSize, guiTop + 4, this);
+			upgradeControl = new UpgradeSettingsControl(new Position(guiLeft + xSize, guiTop + 4), this);
 		}
 		return upgradeControl;
 	}

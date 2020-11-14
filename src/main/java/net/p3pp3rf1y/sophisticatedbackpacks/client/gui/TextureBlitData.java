@@ -13,28 +13,24 @@ public class TextureBlitData {
 	private final int width;
 	private final int height;
 
-	public TextureBlitData(ResourceLocation textureName, int width, int height) {
-		this(textureName, width, height, 0, 0, width, height);
+	public TextureBlitData(ResourceLocation textureName, Dimension textureDimension, UV uv, Dimension dimension) {
+		this(textureName, new Position(0, 0), textureDimension, uv, dimension);
 	}
 
-	public TextureBlitData(ResourceLocation textureName, int textureWidth, int textureHeight, int u, int v, int width, int height) {
-		this(textureName, 0, 0, textureWidth, textureHeight, u, v, width, height);
+	public TextureBlitData(ResourceLocation textureName, UV uv, Dimension dimension) {
+		this(textureName, new Dimension(256, 256), uv, dimension);
 	}
 
-	public TextureBlitData(ResourceLocation textureName, int u, int v, int width, int height) {
-		this(textureName, 256, 256, u, v, width, height);
-	}
-
-	public TextureBlitData(ResourceLocation textureName, int xOffset, int yOffset, int textureWidth, int textureHeight, int u, int v, int width, int height) {
+	public TextureBlitData(ResourceLocation textureName, Position offset, Dimension textureDimension, UV uv, Dimension dimension) {
 		this.textureName = textureName;
-		this.xOffset = xOffset;
-		this.yOffset = yOffset;
-		this.textureWidth = textureWidth;
-		this.textureHeight = textureHeight;
-		this.u = u;
-		this.v = v;
-		this.width = width;
-		this.height = height;
+		xOffset = offset.getX();
+		yOffset = offset.getY();
+		textureWidth = textureDimension.getWidth();
+		textureHeight = textureDimension.getHeight();
+		u = uv.getU();
+		v = uv.getV();
+		width = dimension.getWidth();
+		height = dimension.getHeight();
 	}
 
 	public ResourceLocation getTextureName() {

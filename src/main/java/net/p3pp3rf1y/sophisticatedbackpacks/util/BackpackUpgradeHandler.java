@@ -6,7 +6,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -42,14 +43,15 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		InventoryHelper.copyTo(this, otherHandler);
 	}
 
-	public Optional<ItemStack> getUpgradeStack(Predicate<ItemStack> matches) {
+	public List<ItemStack> getUpgradeStacks(Predicate<ItemStack> matches) {
+		List<ItemStack> ret = new ArrayList<>();
 		for (int slot = 0; slot < getSlots(); slot++) {
 			ItemStack slotStack = getStackInSlot(slot);
 			if (!slotStack.isEmpty() && matches.test(slotStack)) {
-				return Optional.of(slotStack);
+				ret.add(slotStack);
 			}
 		}
-		return Optional.empty();
+		return ret;
 	}
 }
 

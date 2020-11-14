@@ -2,7 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 
 import javax.annotation.Nullable;
@@ -13,8 +15,8 @@ public class Button extends ButtonBase {
 	private TextureBlitData hoveredBackgroundTexture = null;
 	private TextureBlitData foregroundTexture = null;
 
-	public Button(int x, int y, int width, int height, Predicate<Integer> onClick, TextureBlitData backgroundTexture) {
-		this(x, y, width, height, onClick, backgroundTexture, null);
+	public Button(Position position, Dimension dimension, Predicate<Integer> onClick, TextureBlitData backgroundTexture) {
+		this(position, dimension, onClick, backgroundTexture, null);
 	}
 
 	public void setHoveredBackgroundTexture(TextureBlitData hoveredBackgroundTexture) {
@@ -25,9 +27,9 @@ public class Button extends ButtonBase {
 		this.foregroundTexture = foregroundTexture;
 	}
 
-	public Button(int x, int y, int width, int height, Predicate<Integer> onClick, TextureBlitData backgroundTexture,
+	public Button(Position position, Dimension dimension, Predicate<Integer> onClick, TextureBlitData backgroundTexture,
 			@Nullable TextureBlitData foregroundTexture) {
-		super(x, y, width, height, onClick);
+		super(position, dimension, onClick);
 		this.backgroundTexture = backgroundTexture;
 		this.foregroundTexture = foregroundTexture;
 	}

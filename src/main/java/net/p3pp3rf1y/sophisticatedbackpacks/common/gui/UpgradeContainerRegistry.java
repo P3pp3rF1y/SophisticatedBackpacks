@@ -17,10 +17,10 @@ public class UpgradeContainerRegistry {
 		UPGRADE_CONTAINERS.put(upgradeName, containerFactory);
 	}
 
-	public static Optional<UpgradeContainerBase> instantiateContainer(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
+	public static Optional<UpgradeContainerBase> instantiateContainer(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
 		ResourceLocation upgradeName = upgrade.getItem().getRegistryName();
 		if (UPGRADE_CONTAINERS.containsKey(upgradeName)) {
-			return Optional.of(UPGRADE_CONTAINERS.get(upgradeName).create(upgrade, upgradeSaveHandler, isClientSide));
+			return Optional.of(UPGRADE_CONTAINERS.get(upgradeName).create(containerId, upgrade, upgradeSaveHandler, isClientSide));
 		}
 		return Optional.empty();
 	}

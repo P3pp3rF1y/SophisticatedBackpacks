@@ -7,6 +7,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 
 public abstract class Widget extends AbstractGui implements IRenderable, IGuiEventListener {
 	protected final int x;
@@ -15,9 +16,9 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 	protected final Minecraft minecraft;
 	protected final FontRenderer font;
 
-	public Widget(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public Widget(Position position) {
+		x = position.getX();
+		y = position.getY();
 		minecraft = Minecraft.getInstance();
 		font = minecraft.fontRenderer;
 	}

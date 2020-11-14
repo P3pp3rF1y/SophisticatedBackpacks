@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -29,24 +28,24 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private int height = DEFAULT_HEIGHT;
 	private boolean isOpen = false;
 	private final C upgradeContainer;
-	private final TabDimensions openTabDimensions;
+	private final Dimension openTabDimension;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	public UpgradeSettingsTab(C upgradeContainer, int x, int y, TabDimensions openTabDimensions, ItemStack iconStack, ITextComponent tabLabel, ITextComponent closedTooltip) {
-		super(x, y);
+	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension) {
+		super(position);
 		this.upgradeContainer = upgradeContainer;
-		this.openTabDimensions = openTabDimensions;
-		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
-		addChild(new ItemButton(x + 1, y + 4, this::onTabIconClicked, iconStack) {
+		this.openTabDimension = openTabDimension;
+		closedTooltip = ImmutableList.of(getClosedTooltip().func_241878_f());
+		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 				super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 				if (!isOpen && isMouseOver(mouseX, mouseY)) {
-					GuiHelper.setTooltipToRender(UpgradeSettingsTab.this.closedTooltip);
+					GuiHelper.setTooltipToRender(closedTooltip);
 				}
 			}
 		});
-		addHideableChild(new Label(x + 20, y + 8, tabLabel));
+		addHideableChild(new Label(new Position(x + 20, y + 8), getTabLabel()));
 	}
 
 	private boolean onTabIconClicked(int button) {
@@ -75,6 +74,10 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 		blit(matrixStack, x - 3, y, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - height, 3, height);
 	}
 
+	protected abstract ITextComponent getTabLabel();
+
+	protected abstract ITextComponent getClosedTooltip();
+
 	@Override
 	public int getWidth() {
 		return width;
@@ -95,8 +98,8 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	}
 
 	protected void onTabOpen() {
-		width = openTabDimensions.getWidth();
-		height = openTabDimensions.getHeight();
+		width = openTabDimension.getWidth();
+		height = openTabDimension.getHeight();
 
 		hideableChildren.forEach(this::addChild);
 	}
@@ -123,23 +126,5 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 
 	public Rectangle2d getRectangle() {
 		return new Rectangle2d(x, y, width, height);
-	}
-
-	public static class TabDimensions {
-		private final int width;
-		private final int height;
-
-		public TabDimensions(int width, int height) {
-			this.width = width;
-			this.height = height;
-		}
-
-		public int getWidth() {
-			return width;
-		}
-
-		public int getHeight() {
-			return height;
-		}
 	}
 }

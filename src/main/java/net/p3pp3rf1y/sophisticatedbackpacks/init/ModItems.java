@@ -36,6 +36,7 @@ public class ModItems {
 	public static final BackpackItem GOLD_BACKPACK = InjectionHelper.nullValue();
 	public static final BackpackItem DIAMOND_BACKPACK = InjectionHelper.nullValue();
 	public static final PickupUpgradeItem PICKUP_UPGRADE = InjectionHelper.nullValue();
+	public static final PickupUpgradeItem ADVANCED_PICKUP = InjectionHelper.nullValue();
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Item.class, ModItems::register);
@@ -52,7 +53,8 @@ public class ModItems {
 		reg.register(new BackpackItem("diamond_backpack", 108, 5,
 				new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), () -> ModBlocks.DIAMOND_BACKPACK));
 		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
-		reg.register(new PickupUpgradeItem());
+		reg.register(new PickupUpgradeItem("pickup_upgrade"));
+		reg.register(new PickupUpgradeItem("advanced_pickup", 16));
 	}
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
@@ -62,13 +64,15 @@ public class ModItems {
 		r.register(backpackContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
 		r.register(backpackBlockContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_block"));
 
-		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.TYPE);
+		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.Basic.TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_PICKUP.getRegistryName(), PickupUpgradeContainer.Advanced.TYPE);
 
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);
 			ScreenManager.registerFactory(backpackBlockContainerType, BackpackScreen::new);
 
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.TYPE, PickupUpgradeTab.SecondTier::new);
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Basic.TYPE, PickupUpgradeTab.Basic::new);
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Advanced.TYPE, PickupUpgradeTab.Advanced::new);
 		});
 
 	}

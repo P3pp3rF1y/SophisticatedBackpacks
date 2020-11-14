@@ -16,9 +16,9 @@ public class UpgradeSettingsTabManager {
 		UPGRADE_TABS.put(containerType, upgradeSettingsFactory);
 	}
 
-	public static <C extends UpgradeContainerBase> UpgradeSettingsTab<C> getTab(C container, int x, int y, BackpackScreen screen,
+	public static <C extends UpgradeContainerBase> UpgradeSettingsTab<C> getTab(C container, Position position, BackpackScreen screen,
 			Consumer<UpgradeSettingsTab<C>> onOpen, Consumer<UpgradeSettingsTab<C>> onClose) {
-		return getFactory(container).create(container, x, y, screen, onOpen, onClose);
+		return getFactory(container).create(container, position, screen, onOpen, onClose);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,6 +32,6 @@ public class UpgradeSettingsTabManager {
 	}
 
 	public interface IUpgradeSettingsFactory<C extends UpgradeContainerBase, S extends UpgradeSettingsTab<C>> {
-		S create(C container, int x, int y, BackpackScreen screen, Consumer<S> onOpen, Consumer<S> onClose);
+		S create(C container, Position position, BackpackScreen screen, Consumer<S> onOpen, Consumer<S> onClose);
 	}
 }

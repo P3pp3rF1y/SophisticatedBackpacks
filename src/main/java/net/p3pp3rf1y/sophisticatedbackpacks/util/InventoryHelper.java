@@ -6,6 +6,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -32,16 +33,20 @@ public class InventoryHelper {
 	}
 
 	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
-		return backpackWrapper.getUpgradeHandler().getUpgradeStack(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade)
-				.map(upgrade -> {
-					IPickupResponseUpgrade pickupUpgrade = (IPickupResponseUpgrade) upgrade.getItem();
-					if (pickupUpgrade.getCooldownTime(backpackWrapper.getBackpack()) <= world.getGameTime()) {
-						ItemStack ret = pickupUpgrade.pickup(world, upgrade, remainingStack, backpackWrapper, simulate);
-						remainingStack.setCount(ret.getCount());
-						return remainingStack.isEmpty();
-					}
-					return false;
-				}).orElse(false);
+		List<ItemStack> pickupUpgrades = backpackWrapper.getUpgradeHandler().getUpgradeStacks(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade);
+
+		for (ItemStack upgrade : pickupUpgrades) {
+			IPickupResponseUpgrade pickupUpgrade = (IPickupResponseUpgrade) upgrade.getItem();
+			if (pickupUpgrade.getCooldownTime(backpackWrapper.getBackpack()) <= world.getGameTime()) {
+				ItemStack ret = pickupUpgrade.pickup(world, upgrade, remainingStack, backpackWrapper, simulate);
+				remainingStack.setCount(ret.getCount());
+				if (remainingStack.isEmpty()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn) {

@@ -11,11 +11,11 @@ public class UpgradeContainerType<T extends UpgradeContainerBase> {
 		this.factory = factory;
 	}
 
-	public T create(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
-		return factory.create(upgrade, upgradeSaveHandler, isClientSide);
+	public T create(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
+		return factory.create(containerId, upgrade, upgradeSaveHandler, isClientSide);
 	}
 
 	public interface IFactory<T extends UpgradeContainerBase> {
-		T create(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide);
+		T create(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide);
 	}
 }

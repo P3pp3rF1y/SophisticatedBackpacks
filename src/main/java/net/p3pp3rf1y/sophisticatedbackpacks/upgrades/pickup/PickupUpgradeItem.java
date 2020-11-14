@@ -8,12 +8,20 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPickupResponseUpgrade {
 	private static final int FULL_COOLDOWN = 60;
 
-	public PickupUpgradeItem() {
-		super("pickup_upgrade", new Properties().maxStackSize(1));
+	private final int filterSlotCount;
+
+	public PickupUpgradeItem(String regName) {
+		this(regName, 9);
+	}
+
+	public PickupUpgradeItem(String regName, int filterSlotCount) {
+		super(regName, new Properties().maxStackSize(1));
+		this.filterSlotCount = filterSlotCount;
 	}
 
 	@Override
@@ -37,6 +45,10 @@ public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPi
 
 	@Override
 	public long getCooldownTime(ItemStack backpack) {
-		return backpack.hasTag() ? backpack.getTag().getLong("cooldownTime") : 0;
+		return NBTHelper.getLong(backpack, "cooldownTime").orElse(0L);
+	}
+
+	public int getFilterSlotCount() {
+		return filterSlotCount;
 	}
 }

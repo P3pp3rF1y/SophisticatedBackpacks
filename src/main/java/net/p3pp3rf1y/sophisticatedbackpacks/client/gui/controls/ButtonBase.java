@@ -1,5 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+
 import java.util.function.Predicate;
 
 public abstract class ButtonBase extends Widget {
@@ -7,10 +10,10 @@ public abstract class ButtonBase extends Widget {
 	protected final int height;
 	protected final Predicate<Integer> onClick;
 
-	public ButtonBase(int x, int y, int width, int height, Predicate<Integer> onClick) {
-		super(x, y);
-		this.width = width;
-		this.height = height;
+	public ButtonBase(Position position, Dimension dimension, Predicate<Integer> onClick) {
+		super(position);
+		width = dimension.getWidth();
+		height = dimension.getHeight();
 		this.onClick = onClick;
 	}
 

@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	private IGuiEventListener listener;
 
-	public CompositeWidget(int x, int y) {
-		super(x, y);
+	public CompositeWidget(Position position) {
+		super(position);
 	}
 
 	@Override
@@ -22,10 +23,9 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 		children.forEach(child -> child.render(matrixStack, mouseX, mouseY, partialTicks));
 	}
 
-	protected <U extends T> U addChild(U child) {
+	protected <U extends T> void addChild(U child) {
 		children.add(child);
 		child.setZOffset(zOffset);
-		return child;
 	}
 
 	@Override

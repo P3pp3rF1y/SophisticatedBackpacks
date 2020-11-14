@@ -45,7 +45,7 @@ public class BackpackContainer extends Container {
 	private final BackpackWrapper backPackWrapper;
 	private int backpackSlotNumber = -1;
 
-	private final Map<String, UpgradeContainerBase> upgradeContainers = new LinkedHashMap<>();
+	private final Map<Integer, UpgradeContainerBase> upgradeContainers = new LinkedHashMap<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
@@ -97,10 +97,9 @@ public class BackpackContainer extends Container {
 
 	private void addUpgradeSettingsContainers(boolean isClientSide) {
 		BackpackUpgradeHandler upgradeHandler = backPackWrapper.getUpgradeHandler();
-		//noinspection ConstantConditions
 		InventoryHelper.iterate(upgradeHandler, (slot, stack) ->
-				UpgradeContainerRegistry.instantiateContainer(stack, upgrade -> upgradeHandler.setStackInSlot(slot, upgrade), isClientSide)
-						.ifPresent(container -> upgradeContainers.put(stack.getItem().getRegistryName().toString(), container)));
+				UpgradeContainerRegistry.instantiateContainer(slot, stack, upgrade -> upgradeHandler.setStackInSlot(slot, upgrade), isClientSide)
+						.ifPresent(container -> upgradeContainers.put(slot, container)));
 
 		for (UpgradeContainerBase container : upgradeContainers.values()) {
 			container.getSlots().forEach(this::addSlot);
@@ -301,7 +300,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public void handleMessage(CompoundNBT data) {
-		String containerId = data.getString("containerId");
+		int containerId = data.getInt("containerId");
 		if (upgradeContainers.containsKey(containerId)) {
 			upgradeContainers.get(containerId).handleMessage(data);
 		}

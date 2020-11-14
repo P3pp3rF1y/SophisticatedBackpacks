@@ -5,10 +5,20 @@
     "item.sophisticatedbackpacks.diamond_backpack": "Diamond Backpack",
     "item.sophisticatedbackpacks.upgrade_base": "Upgrade Base",
     "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade",
+    "item.sophisticatedbackpacks.advanced_pickup": "Advanced Pickup Upgrade",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
     "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup",
+    "gui.sophisticatedbackpacks.upgrades.advanced_pickup": "Adv. Pickup",
     "gui.sophisticatedbackpacks.upgrades.pickup.tooltip": "Pickup Settings",
+    "gui.sophisticatedbackpacks.upgrades.advanced_pickup.tooltip": "Advanced Pickup Settings",
     "gui.sophisticatedbackpacks.upgrades.buttons.allow": "Allow",
-    "gui.sophisticatedbackpacks.upgrades.buttons.block": "Block"
+    "gui.sophisticatedbackpacks.upgrades.buttons.block": "Block",
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_durability": "Match Durability",
+    "gui.sophisticatedbackpacks.upgrades.buttons.ignore_durability": "Ignore Durability",
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_nbt": "Match NBT",
+    "gui.sophisticatedbackpacks.upgrades.buttons.ignore_nbt": "Ignore NBT",
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_mod": "Match Mod",
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_item": "Match Item",
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_tags": "Match Tags"
 }
