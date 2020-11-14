@@ -27,18 +27,14 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	protected final int slotsLeftX;
 	protected int slotsTopY;
-	private final Consumer<PickupUpgradeTab> onOpen;
-	private final Consumer<PickupUpgradeTab> onClose;
 	private final BackpackScreen screen;
 	private static final String BACKPACK_54 = "textures/gui/backpack_54.png";
 	private static final TextureBlitData SLOT_BACKGROUND_9_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(54, 54));
 	private static final TextureBlitData SLOT_BACKGROUND_16_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(72, 72));
 
-	public PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, Consumer<PickupUpgradeTab> onOpen, Consumer<PickupUpgradeTab> onClose) {
-		super(upgradeContainer, position, openTabDimension);
+	public PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
+		super(upgradeContainer, position, openTabDimension, onOpen, onClose);
 		this.screen = screen;
-		this.onOpen = onOpen;
-		this.onClose = onClose;
 		addHideableChild(getButton(new Position(x + 3, y + 24), button -> {
 			getContainer().setAllowList(!getContainer().isAllowList());
 			return true;
@@ -66,8 +62,6 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	protected void onTabOpen() {
 		super.onTabOpen();
 		moveSlotsToTab();
-
-		onOpen.accept(this);
 	}
 
 	private void moveSlotsToTab() {
@@ -94,11 +88,10 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 		super.onTabClose();
 
 		moveSlotsOutOfView();
-		onClose.accept(this);
 	}
 
 	public static class Basic extends PickupUpgradeTab {
-		public Basic(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<PickupUpgradeTab> onOpen, Consumer<PickupUpgradeTab> onClose) {
+		public Basic(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen, onOpen, onClose);
 		}
 
@@ -127,7 +120,7 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	}
 
 	public static class Advanced extends PickupUpgradeTab {
-		public Advanced(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<PickupUpgradeTab> onOpen, Consumer<PickupUpgradeTab> onClose) {
+		public Advanced(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen, onOpen, onClose);
 
 			addHideableChild(getPrimaryMatchButton());

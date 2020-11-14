@@ -16,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends CompositeWidget<Widget> {
 	protected static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
@@ -29,12 +30,16 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private boolean isOpen = false;
 	private final C upgradeContainer;
 	private final Dimension openTabDimension;
+	private final Consumer<UpgradeSettingsTab<C>> onOpen;
+	private final Consumer<UpgradeSettingsTab<C>> onClose;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension) {
+	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, Consumer<UpgradeSettingsTab<C>> onOpen, Consumer<UpgradeSettingsTab<C>> onClose) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
 		this.openTabDimension = openTabDimension;
+		this.onOpen = onOpen;
+		this.onClose = onClose;
 		closedTooltip = ImmutableList.of(getClosedTooltip().func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
@@ -102,6 +107,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 		height = openTabDimension.getHeight();
 
 		hideableChildren.forEach(this::addChild);
+		onOpen.accept(this);
 	}
 
 	protected void onTabClose() {
@@ -109,6 +115,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 		height = DEFAULT_HEIGHT;
 
 		children.removeAll(hideableChildren);
+		onClose.accept(this);
 	}
 
 	private void setOpen(boolean isOpen) {

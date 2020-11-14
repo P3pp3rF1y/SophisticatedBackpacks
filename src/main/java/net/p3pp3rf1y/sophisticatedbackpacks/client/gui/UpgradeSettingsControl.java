@@ -21,7 +21,6 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers()) {
 			addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen, tab -> {
 						if (differentTabIsOpen(tab)) {
-							openTab.changeZOffset(-200);
 							openTab.close();
 						}
 						tab.changeZOffset(200);
