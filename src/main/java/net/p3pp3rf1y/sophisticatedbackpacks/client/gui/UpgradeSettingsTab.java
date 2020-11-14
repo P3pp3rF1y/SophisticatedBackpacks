@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -24,7 +25,10 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
 	private static final int DEFAULT_WIDTH = 21;
+	protected final int slotsLeftX;
+	protected final BackpackScreen screen;
 	private final List<IReorderingProcessor> closedTooltip;
+	protected int slotsTopY;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
 	private boolean isOpen = false;
@@ -34,7 +38,8 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private final Consumer<UpgradeSettingsTab<C>> onClose;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, Consumer<UpgradeSettingsTab<C>> onOpen, Consumer<UpgradeSettingsTab<C>> onClose) {
+	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, Consumer<UpgradeSettingsTab<C>> onOpen,
+			Consumer<UpgradeSettingsTab<C>> onClose, BackpackScreen screen) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
 		this.openTabDimension = openTabDimension;
@@ -51,6 +56,10 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 			}
 		});
 		addHideableChild(new Label(new Position(x + 20, y + 8), getTabLabel()));
+		slotsLeftX = x + 4;
+		slotsTopY = y + 46;
+		this.screen = screen;
+		moveSlotsOutOfView();
 	}
 
 	private boolean onTabIconClicked(int button) {
@@ -108,6 +117,25 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 
 		hideableChildren.forEach(this::addChild);
 		onOpen.accept(this);
+	}
+
+	protected void moveSlotsToTab() {
+		int upgradeSlotNumber = 0;
+		for (Slot slot : getContainer().getSlots()) {
+			slot.xPos = slotsLeftX - screen.getGuiLeft() + (upgradeSlotNumber % getSlotsPerRow()) * 18;
+			slot.yPos = slotsTopY - screen.getGuiTop() + (upgradeSlotNumber / getSlotsPerRow()) * 18;
+			upgradeSlotNumber++;
+		}
+	}
+
+	protected abstract int getSlotsPerRow();
+
+	protected void moveSlotsOutOfView() {
+		getContainer().getSlots().forEach(slot -> {
+			slot.xPos = -100;
+			slot.yPos = -100;
+		});
+
 	}
 
 	protected void onTabClose() {

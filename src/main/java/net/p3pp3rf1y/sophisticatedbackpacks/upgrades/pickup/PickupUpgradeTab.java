@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -25,22 +24,16 @@ import java.util.function.Supplier;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
 
 public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
-	protected final int slotsLeftX;
-	protected int slotsTopY;
-	private final BackpackScreen screen;
 	private static final String BACKPACK_54 = "textures/gui/backpack_54.png";
 	private static final TextureBlitData SLOT_BACKGROUND_9_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(54, 54));
 	private static final TextureBlitData SLOT_BACKGROUND_16_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(72, 72));
 
 	public PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
-		super(upgradeContainer, position, openTabDimension, onOpen, onClose);
-		this.screen = screen;
+		super(upgradeContainer, position, openTabDimension, onOpen, onClose, screen);
 		addHideableChild(getButton(new Position(x + 3, y + 24), button -> {
 			getContainer().setAllowList(!getContainer().isAllowList());
 			return true;
 		}, new UV(32, 32), new UV(48, 32), () -> getContainer().isAllowList(), translUpgradeButton("allow"), translUpgradeButton("block")));
-		slotsLeftX = x + 4;
-		slotsTopY = y + 46;
 	}
 
 	protected ToggleButton<Boolean> getButton(Position pos, Predicate<Integer> onClick, UV onUV, UV offUV, Supplier<Boolean> getState, String onTooltip, String offTooltip) {
@@ -62,25 +55,6 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	protected void onTabOpen() {
 		super.onTabOpen();
 		moveSlotsToTab();
-	}
-
-	private void moveSlotsToTab() {
-		int upgradeSlotNumber = 0;
-		for (Slot slot : getContainer().getSlots()) {
-			slot.xPos = slotsLeftX - screen.getGuiLeft() + (upgradeSlotNumber % getSlotsPerRow()) * 18;
-			slot.yPos = slotsTopY - screen.getGuiTop() + (upgradeSlotNumber / getSlotsPerRow()) * 18;
-			upgradeSlotNumber++;
-		}
-	}
-
-	protected abstract int getSlotsPerRow();
-
-	private void moveSlotsOutOfView() {
-		getContainer().getSlots().forEach(slot -> {
-			slot.xPos = -100;
-			slot.yPos = -100;
-		});
-
 	}
 
 	@Override
