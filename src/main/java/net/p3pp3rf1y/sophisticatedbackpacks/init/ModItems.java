@@ -25,18 +25,20 @@ import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 @ObjectHolder(SophisticatedBackpacks.MOD_ID)
 public class ModItems {
+
 	private ModItems() {}
 
-	public static final BackpackItem BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackItem IRON_BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackItem GOLD_BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackItem DIAMOND_BACKPACK = InjectionHelper.nullValue();
-	public static final PickupUpgradeItem PICKUP_UPGRADE = InjectionHelper.nullValue();
-	public static final PickupUpgradeItem ADVANCED_PICKUP = InjectionHelper.nullValue();
+	public static final BackpackItem BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackItem IRON_BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackItem GOLD_BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackItem DIAMOND_BACKPACK = RegistryHelper.nullValue();
+	public static final PickupUpgradeItem PICKUP_UPGRADE = RegistryHelper.nullValue();
+	public static final PickupUpgradeItem ADVANCED_PICKUP_UPGRADE = RegistryHelper.nullValue();
+	public static final ItemBase UPGRADE_BASE = RegistryHelper.nullValue();
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Item.class, ModItems::register);
@@ -54,7 +56,7 @@ public class ModItems {
 				new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), () -> ModBlocks.DIAMOND_BACKPACK));
 		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
 		reg.register(new PickupUpgradeItem("pickup_upgrade"));
-		reg.register(new PickupUpgradeItem("advanced_pickup", 16));
+		reg.register(new PickupUpgradeItem("advanced_pickup_upgrade", 16));
 	}
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
@@ -65,7 +67,7 @@ public class ModItems {
 		r.register(backpackBlockContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_block"));
 
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.Basic.TYPE);
-		UpgradeContainerRegistry.register(ADVANCED_PICKUP.getRegistryName(), PickupUpgradeContainer.Advanced.TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.Advanced.TYPE);
 
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);

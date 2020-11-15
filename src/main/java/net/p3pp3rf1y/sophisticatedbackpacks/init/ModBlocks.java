@@ -11,16 +11,16 @@ import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 @ObjectHolder(SophisticatedBackpacks.MOD_ID)
 public class ModBlocks {
 	private ModBlocks() {}
 
-	public static final BackpackBlock BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackBlock IRON_BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackBlock GOLD_BACKPACK = InjectionHelper.nullValue();
-	public static final BackpackBlock DIAMOND_BACKPACK = InjectionHelper.nullValue();
+	public static final BackpackBlock BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackBlock IRON_BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackBlock GOLD_BACKPACK = RegistryHelper.nullValue();
+	public static final BackpackBlock DIAMOND_BACKPACK = RegistryHelper.nullValue();
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addGenericListener(Block.class, ModBlocks::register);

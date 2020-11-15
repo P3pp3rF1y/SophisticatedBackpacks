@@ -23,11 +23,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BlockLootProvider implements IDataProvider {
+public class BlockLoot implements IDataProvider {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private final DataGenerator generator;
 
-	BlockLootProvider(DataGenerator generator) {
+	BlockLoot(DataGenerator generator) {
 		this.generator = generator;
 	}
 

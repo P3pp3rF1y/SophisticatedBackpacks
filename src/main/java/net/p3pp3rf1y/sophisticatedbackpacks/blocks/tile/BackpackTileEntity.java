@@ -9,13 +9,13 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InjectionHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.Optional;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
 	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack")
-	public static final TileEntityType<BackpackTileEntity> TYPE = InjectionHelper.nullValue();
+	public static final TileEntityType<BackpackTileEntity> TYPE = RegistryHelper.nullValue();
 
 	private BackpackWrapper backpackWrapper;
 	private boolean persistentSet = false;

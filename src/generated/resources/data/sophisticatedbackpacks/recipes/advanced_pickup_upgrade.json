@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " D ",
+        "GPG",
+        "RRR"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "P": {
+            "item": "sophisticatedbackpacks:pickup_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+    }
+}

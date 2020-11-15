@@ -35,7 +35,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe {
 	}
 
 	private Optional<ItemStack> getBackpack(CraftingInventory inv) {
-		for(int slot = 0; slot < inv.getSizeInventory(); slot++) {
+		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
 			ItemStack slotStack = inv.getStackInSlot(slot);
 			if (slotStack.getItem() instanceof BackpackItem) {
 				return Optional.of(slotStack);
