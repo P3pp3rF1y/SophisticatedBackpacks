@@ -1,11 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@OnlyIn(Dist.CLIENT)
 public class UpgradeSettingsTabManager {
 	private UpgradeSettingsTabManager() {}
 

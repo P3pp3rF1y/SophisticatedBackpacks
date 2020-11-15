@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -10,6 +12,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import java.util.ArrayList;
 import java.util.List;
 
+@OnlyIn(Dist.CLIENT)
 public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?>> {
 	private static final int VERTICAL_SPACE = 1;
 	private UpgradeSettingsTab<?> openTab = null;

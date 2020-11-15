@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
 	private static final String BACKPACK_54 = "textures/gui/backpack_54.png";
 	private static final TextureBlitData SLOT_BACKGROUND_9_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(54, 54));

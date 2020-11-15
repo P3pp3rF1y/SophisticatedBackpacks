@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
@@ -8,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+@OnlyIn(Dist.CLIENT)
 public class BooleanToggleButton extends ToggleButton<Boolean> {
 	public BooleanToggleButton(Position position, Dimension dimension, Predicate<Integer> onClick, TextureBlitData backgroundTexture, ToggleButton.StateData onStateData,
 			ToggleButton.StateData offStateData, Supplier<Boolean> getState) {

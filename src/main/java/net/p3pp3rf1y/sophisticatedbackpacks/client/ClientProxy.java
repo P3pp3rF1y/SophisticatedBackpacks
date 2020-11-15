@@ -6,6 +6,8 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -24,6 +26,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import java.util.Map;
 
+@OnlyIn(Dist.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
 	public static final KeyBinding BACKPACK_OPEN_KEYBIND = new KeyBinding("keybind.sophisticatedbackpacks.backpack.open",

@@ -1,5 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
 public class TranslationHelper {
 	private TranslationHelper() {}
 

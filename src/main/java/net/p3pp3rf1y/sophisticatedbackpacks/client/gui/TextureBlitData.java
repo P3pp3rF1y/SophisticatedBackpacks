@@ -1,7 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class TextureBlitData {
 	private final ResourceLocation textureName;
 	private final int xOffset;
