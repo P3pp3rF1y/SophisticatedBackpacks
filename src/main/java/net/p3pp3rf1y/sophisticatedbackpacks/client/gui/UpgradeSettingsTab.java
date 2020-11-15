@@ -18,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends CompositeWidget<Widget> {
 	protected static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
@@ -34,23 +35,22 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	private boolean isOpen = false;
 	private final C upgradeContainer;
 	private final Dimension openTabDimension;
-	private final Consumer<UpgradeSettingsTab<C>> onOpen;
-	private final Consumer<UpgradeSettingsTab<C>> onClose;
+	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
+	private Consumer<UpgradeSettingsTab<C>> onClose = t -> {};
+	private Predicate<UpgradeSettingsTab<C>> shouldRender = t -> true;
+	private Predicate<UpgradeSettingsTab<C>> shouldShowTooltip = t -> true;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	public UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, Consumer<UpgradeSettingsTab<C>> onOpen,
-			Consumer<UpgradeSettingsTab<C>> onClose, BackpackScreen screen) {
+	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
 		this.openTabDimension = openTabDimension;
-		this.onOpen = onOpen;
-		this.onClose = onClose;
 		closedTooltip = ImmutableList.of(getClosedTooltip().func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 				super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
-				if (!isOpen && isMouseOver(mouseX, mouseY)) {
+				if (!isOpen && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
 					GuiHelper.setTooltipToRender(closedTooltip);
 				}
 			}
@@ -60,6 +60,14 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 		slotsTopY = y + 46;
 		this.screen = screen;
 		moveSlotsOutOfView();
+	}
+
+	public void setHandlers(Consumer<UpgradeSettingsTab<C>> onOpen, Consumer<UpgradeSettingsTab<C>> onClose, Predicate<UpgradeSettingsTab<C>> shouldRender,
+			Predicate<UpgradeSettingsTab<C>> shouldShowTooltip) {
+		this.onOpen = onOpen;
+		this.onClose = onClose;
+		this.shouldRender = shouldRender;
+		this.shouldShowTooltip = shouldShowTooltip;
 	}
 
 	private boolean onTabIconClicked(int button) {
@@ -76,6 +84,14 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 
 	protected <U extends Widget> void addHideableChild(U widget) {
 		hideableChildren.add(widget);
+	}
+
+	@Override
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		if (!shouldRender.test(this)) {
+			return;
+		}
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
@@ -100,6 +116,10 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends
 	@Override
 	public int getHeight() {
 		return height;
+	}
+
+	public int getTopY() {
+		return y;
 	}
 
 	public int getBottomY() {

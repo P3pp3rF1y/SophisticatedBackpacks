@@ -17,7 +17,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BooleanToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -28,8 +27,8 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	private static final TextureBlitData SLOT_BACKGROUND_9_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(54, 54));
 	private static final TextureBlitData SLOT_BACKGROUND_16_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(72, 72));
 
-	public PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
-		super(upgradeContainer, position, openTabDimension, onOpen, onClose, screen);
+	protected PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen) {
+		super(upgradeContainer, position, openTabDimension, screen);
 		addHideableChild(getButton(new Position(x + 3, y + 24), button -> {
 			getContainer().setAllowList(!getContainer().isAllowList());
 			return true;
@@ -65,8 +64,8 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	}
 
 	public static class Basic extends PickupUpgradeTab {
-		public Basic(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
-			super(upgradeContainer, position, new Dimension(63, 106), screen, onOpen, onClose);
+		public Basic(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
+			super(upgradeContainer, position, new Dimension(63, 106), screen);
 		}
 
 		@Override
@@ -94,8 +93,8 @@ public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeC
 	}
 
 	public static class Advanced extends PickupUpgradeTab {
-		public Advanced(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onOpen, Consumer<UpgradeSettingsTab<PickupUpgradeContainer>> onClose) {
-			super(upgradeContainer, position, new Dimension(81, 124), screen, onOpen, onClose);
+		public Advanced(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
+			super(upgradeContainer, position, new Dimension(81, 124), screen);
 
 			addHideableChild(getPrimaryMatchButton());
 			addHideableChild(getDurabilityButton());

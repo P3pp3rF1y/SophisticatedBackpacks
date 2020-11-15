@@ -5,7 +5,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class UpgradeSettingsTabManager {
 	private UpgradeSettingsTabManager() {}
@@ -16,9 +15,8 @@ public class UpgradeSettingsTabManager {
 		UPGRADE_TABS.put(containerType, upgradeSettingsFactory);
 	}
 
-	public static <C extends UpgradeContainerBase> UpgradeSettingsTab<C> getTab(C container, Position position, BackpackScreen screen,
-			Consumer<UpgradeSettingsTab<C>> onOpen, Consumer<UpgradeSettingsTab<C>> onClose) {
-		return getFactory(container).create(container, position, screen, onOpen, onClose);
+	public static <C extends UpgradeContainerBase> UpgradeSettingsTab<C> getTab(C container, Position position, BackpackScreen screen) {
+		return getFactory(container).create(container, position, screen);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,6 +30,6 @@ public class UpgradeSettingsTabManager {
 	}
 
 	public interface IUpgradeSettingsFactory<C extends UpgradeContainerBase, S extends UpgradeSettingsTab<C>> {
-		S create(C container, Position position, BackpackScreen screen, Consumer<S> onOpen, Consumer<S> onClose);
+		S create(C container, Position position, BackpackScreen screen);
 	}
 }

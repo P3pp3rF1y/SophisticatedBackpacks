@@ -19,22 +19,40 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		setZOffset(-200);
 		int i = 0;
 		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers()) {
-			addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen, tab -> {
-						if (differentTabIsOpen(tab)) {
+			UpgradeSettingsTab<UpgradeContainerBase> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
+			tab.setHandlers(t -> {
+						if (differentTabIsOpen(t)) {
 							openTab.close();
 						}
-						tab.changeZOffset(200);
-						openTab = tab;
-					}, tab -> {
+						t.changeZOffset(200);
+						openTab = t;
+					},
+					t -> {
 						if (openTab != null) {
 							openTab.changeZOffset(-200);
 							openTab = null;
 						}
-					}
-			));
+					},
+					t -> !differentTabIsOpen(t) || isNotCovered(t, true),
+					t -> openTab == null || isNotCovered(t, false)
+			);
 			i++;
 		}
 	}
+
+	private boolean isNotCovered(UpgradeSettingsTab<UpgradeContainerBase> t, boolean checkFullyCovered) {
+		if (checkFullyCovered) {
+			return openTab.getBottomY() < t.getBottomY() || openTab.getTopY() > t.getTopY();
+		} else {
+			return openTab.getBottomY() < t.getTopY() || openTab.getTopY() > t.getTopY();
+		}
+	}
+
+/*
+	should show tooltip and should render methods - will be passed in as predicates to the tab
+	- if the tab that asks for response is either open or isn't covered in the place of mouse by open tab (or fully for render) these predicates will return true
+	then just use it inside of the base tab and that's it
+*/
 
 	private boolean differentTabIsOpen(UpgradeSettingsTab<?> tab) {
 		return openTab != null && openTab != tab;

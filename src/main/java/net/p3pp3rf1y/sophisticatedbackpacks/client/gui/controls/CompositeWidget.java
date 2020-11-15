@@ -14,7 +14,7 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	private IGuiEventListener listener;
 
-	public CompositeWidget(Position position) {
+	protected CompositeWidget(Position position) {
 		super(position);
 	}
 
@@ -23,9 +23,10 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 		children.forEach(child -> child.render(matrixStack, mouseX, mouseY, partialTicks));
 	}
 
-	protected <U extends T> void addChild(U child) {
+	protected <U extends T> U addChild(U child) {
 		children.add(child);
 		child.setZOffset(zOffset);
+		return child;
 	}
 
 	@Override
