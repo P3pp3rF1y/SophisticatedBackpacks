@@ -19,7 +19,6 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 
 	public UpgradeSettingsControl(Position position, BackpackScreen screen) {
 		super(position);
-		setZOffset(-200);
 		int i = 0;
 		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers()) {
 			UpgradeSettingsTab<UpgradeContainerBase> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));

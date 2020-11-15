@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
 public class ItemButton extends ButtonBase {
-	private static final int CORRECTION_OFFSET = -200; //because vanilla code renders item much higher than gui
 	private final ItemStack stack;
 
 	public ItemButton(Position position, Predicate<Integer> onClick, ItemStack stack) {
@@ -28,6 +27,6 @@ public class ItemButton extends ButtonBase {
 
 	@Override
 	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		GuiHelper.renderItemInGUI(minecraft, stack, x, y, zOffset + CORRECTION_OFFSET);
+		GuiHelper.renderItemInGUI(minecraft, stack, x, y, zOffset);
 	}
 }

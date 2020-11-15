@@ -56,6 +56,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
 		upgradeControl.render(matrixStack, mouseX, mouseY, partialTicks);
+		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
