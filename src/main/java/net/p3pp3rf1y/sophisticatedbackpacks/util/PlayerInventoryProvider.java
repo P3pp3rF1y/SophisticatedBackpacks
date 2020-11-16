@@ -67,7 +67,7 @@ public class PlayerInventoryProvider {
 			PlayerInventoryHandler invHandler = entry.getValue();
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
-				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack.copy(), entry.getKey(), slot)) {
+				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), slot)) {
 					return;
 				}
 			}

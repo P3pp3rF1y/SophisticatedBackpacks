@@ -31,7 +31,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
@@ -107,7 +107,7 @@ public class BackpackBlock extends Block {
 
 	private static void putInPlayersHandAndRemove(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand) {
 		player.setHeldItem(hand, WorldHelper.getTile(world, pos, BackpackTileEntity.class)
-				.map(te -> te.getBackpackWrapper().map(BackpackWrapper::getBackpack).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY));
+				.map(te -> te.getBackpackWrapper().map(IBackpackWrapper::getBackpack).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY));
 		world.removeBlock(pos, false);
 
 		SoundType soundType = state.getSoundType();
@@ -157,7 +157,7 @@ public class BackpackBlock extends Block {
 		}
 	}
 
-	private void tryToPickup(World world, ItemEntity itemEntity, BackpackWrapper w) {
+	private void tryToPickup(World world, ItemEntity itemEntity, IBackpackWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();
 		InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
 		if (remainingStack.isEmpty()) {

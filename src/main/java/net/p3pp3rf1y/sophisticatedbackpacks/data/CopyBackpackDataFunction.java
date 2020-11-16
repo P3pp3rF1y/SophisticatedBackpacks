@@ -12,7 +12,7 @@ import net.minecraft.loot.functions.ILootFunction;
 import net.minecraft.tileentity.TileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
 public class CopyBackpackDataFunction extends LootFunction {
 	protected CopyBackpackDataFunction(ILootCondition[] conditionsIn) {
@@ -23,7 +23,7 @@ public class CopyBackpackDataFunction extends LootFunction {
 	protected ItemStack doApply(ItemStack stack, LootContext context) {
 		TileEntity te = context.get(LootParameters.BLOCK_ENTITY);
 		if (te instanceof BackpackTileEntity) {
-			return ((BackpackTileEntity) te).getBackpackWrapper().map(BackpackWrapper::getBackpack).orElse(stack);
+			return ((BackpackTileEntity) te).getBackpackWrapper().map(IBackpackWrapper::getBackpack).orElse(stack);
 		}
 
 		return stack;

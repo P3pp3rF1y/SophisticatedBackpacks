@@ -11,20 +11,26 @@ import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
@@ -59,12 +65,14 @@ public class BackpackItem extends ItemBase {
 
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack stack = new ItemStack(this);
-			new BackpackWrapper(stack).setColors(color.getColorValue(), color.getColorValue());
+			stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+					.ifPresent(wrapper -> wrapper.setColors(color.getColorValue(), color.getColorValue()));
 			items.add(stack);
 		}
 
 		ItemStack stack = new ItemStack(this);
-		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
+		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				.ifPresent(wrapper -> wrapper.setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue()));
 		items.add(stack);
 	}
 
@@ -89,7 +97,7 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockState(pos, placementState, 11)) {
 			ItemStack backpack = blockItemUseContext.getItem();
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(new BackpackWrapper(backpack.copy())));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
@@ -122,6 +130,21 @@ public class BackpackItem extends ItemBase {
 					});
 		}
 		return ActionResult.resultSuccess(stack);
+	}
+
+	@Override
+	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
+		return new ICapabilityProvider() {
+			private final IBackpackWrapper wrapper = new BackpackWrapper(stack);
+
+			@Override
+			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+				if (cap == BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY) {
+					return LazyOptional.of(() -> wrapper).cast();
+				}
+				return LazyOptional.empty();
+			}
+		};
 	}
 
 	public ScreenProperties getScreenProperties() {

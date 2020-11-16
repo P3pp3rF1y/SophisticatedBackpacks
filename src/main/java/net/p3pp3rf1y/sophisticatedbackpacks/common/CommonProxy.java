@@ -32,14 +32,12 @@ public class CommonProxy {
 		ItemStack remainingStackSimulated = itemEntity.getItem().copy();
 		PlayerEntity player = event.getPlayer();
 		World world = player.getEntityWorld();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated, new BackpackWrapper(backpack), true));
+		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated, wrapper, true)).orElse(false));
 		if (remainingStackSimulated.isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
-			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> {
-						BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
-						backpackWrapper.setPersistent(player, inventoryHandlerName, slot, true);
-						return InventoryHelper.runPickupOnBackpack(world, remainingStack, backpackWrapper, false);
-					}
+			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStack, wrapper, false)).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
 				Random rand = itemEntity.world.rand;

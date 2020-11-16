@@ -26,10 +26,10 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRe
 	@Override
 	public ItemStack getCraftingResult(CraftingInventory inv) {
 		ItemStack upgradedBackpack = super.getCraftingResult(inv);
-		getBackpack(inv).ifPresent(backpack -> {
-			BackpackWrapper upgradedWrapper = new BackpackWrapper(upgradedBackpack);
-			new BackpackWrapper(backpack).copyDataTo(upgradedWrapper);
-		});
+		getBackpack(inv).ifPresent(backpack ->
+				backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+						.ifPresent(wrapper -> upgradedBackpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+								.ifPresent(wrapper::copyDataTo)));
 
 		return upgradedBackpack;
 	}

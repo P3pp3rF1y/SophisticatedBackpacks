@@ -5,7 +5,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,7 +30,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	}
 
 	@Override
-	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+	public boolean isItemValid(int slot, ItemStack stack) {
 		return stack.getItem() instanceof IBackpackUpgrade;
 	}
 

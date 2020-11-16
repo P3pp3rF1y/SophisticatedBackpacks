@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryEventBus;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -42,7 +43,7 @@ public class BackpackContainer extends Container {
 
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 
-	private final BackpackWrapper backPackWrapper;
+	private final IBackpackWrapper backpackWrapper;
 	private int backpackSlotNumber = -1;
 
 	private final Map<Integer, UpgradeContainerBase> upgradeContainers = new LinkedHashMap<>();
@@ -53,19 +54,11 @@ public class BackpackContainer extends Container {
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
-			backPackWrapper = BackpackWrapper.getEmpty();
+			backpackWrapper = BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance();
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
-		backPackWrapper = new BackpackWrapper(handler.getStackInSlot(player, backpackSlot).copy());
-		if (!player.world.isRemote) {
-			backPackWrapper.setPersistent(player, handlerName, backpackSlot, false); //don't notify because notification is only consumed by open gui and we're in it (it would also cause an infinite loop)
-			BackpackInventoryEventBus.registerListener(player.getUniqueID(), (hName, backpackInSlot, slot, newStack) -> {
-				if (hName.equals(handlerName) && backpackInSlot == backpackSlot) {
-					backPackWrapper.onInventorySlotUpdate(slot, newStack);
-				}
-			});
-		}
+		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance());
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition, player.world.isRemote);
 		addPlayerInventorySlots(player.inventory, yPosition, backpackSlot, handler.isVisibleInGui());
@@ -74,7 +67,9 @@ public class BackpackContainer extends Container {
 
 	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
 		super(BLOCK_TYPE, windowId);
-		backPackWrapper = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().orElse(BackpackWrapper.getEmpty())).orElse(BackpackWrapper.getEmpty());
+		backpackWrapper = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class)
+				.map(te -> te.getBackpackWrapper().orElse(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance()))
+				.orElse(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance());
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition, player.world.isRemote);
 		addPlayerInventorySlots(player.inventory, yPosition, -1, false);
@@ -96,7 +91,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private void addUpgradeSettingsContainers(boolean isClientSide) {
-		BackpackUpgradeHandler upgradeHandler = backPackWrapper.getUpgradeHandler();
+		BackpackUpgradeHandler upgradeHandler = backpackWrapper.getUpgradeHandler();
 		InventoryHelper.iterate(upgradeHandler, (slot, stack) ->
 				UpgradeContainerRegistry.instantiateContainer(slot, stack, upgrade -> upgradeHandler.setStackInSlot(slot, upgrade), isClientSide)
 						.ifPresent(container -> upgradeContainers.put(slot, container)));
@@ -107,7 +102,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private void addBackpackUpgradeSlots(int lastInventoryRowY, boolean isClientSide) {
-		BackpackUpgradeHandler upgradeHandler = backPackWrapper.getUpgradeHandler();
+		BackpackUpgradeHandler upgradeHandler = backpackWrapper.getUpgradeHandler();
 
 		int numberOfSlots = upgradeHandler.getSlots();
 
@@ -148,7 +143,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private int addBackpackInventorySlots() {
-		BackpackInventoryHandler inventoryHandler = backPackWrapper.getInventoryHandler();
+		BackpackInventoryHandler inventoryHandler = backpackWrapper.getInventoryHandler();
 		int slotIndex = 0;
 		int yPosition = 18;
 
@@ -161,7 +156,7 @@ public class BackpackContainer extends Container {
 					super.onSlotChanged();
 					// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
 					// however it does notify the slot of change
-					backPackWrapper.getInventoryHandler().saveInventory();
+					backpackWrapper.getInventoryHandler().saveInventory();
 				}
 			});
 
@@ -175,7 +170,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private void addPlayerInventorySlots(PlayerInventory playerInventory, int yPosition, int slotIndex, boolean lockBackpackSlot) {
-		int playerInventoryYOffset = backPackWrapper.getScreenProperties().getPlayerInventoryYOffset();
+		int playerInventoryYOffset = backpackWrapper.getScreenProperties().getPlayerInventoryYOffset();
 
 		yPosition += 14;
 
@@ -197,12 +192,12 @@ public class BackpackContainer extends Container {
 	}
 
 	public int getNumberOfRows() {
-		BackpackInventoryHandler invHandler = backPackWrapper.getInventoryHandler();
+		BackpackInventoryHandler invHandler = backpackWrapper.getInventoryHandler();
 		return (int) Math.ceil((double) invHandler.getSlots() / getSlotsOnLine());
 	}
 
 	private int getSlotsOnLine() {
-		return backPackWrapper.getScreenProperties().getSlotsOnLine();
+		return backpackWrapper.getScreenProperties().getSlotsOnLine();
 	}
 
 	@Override
@@ -274,15 +269,15 @@ public class BackpackContainer extends Container {
 	}
 
 	public int getNumberOfSlots() {
-		return backPackWrapper.getInventoryHandler().getSlots();
+		return backpackWrapper.getInventoryHandler().getSlots();
 	}
 
 	public ScreenProperties getScreenProperties() {
-		return backPackWrapper.getScreenProperties();
+		return backpackWrapper.getScreenProperties();
 	}
 
 	public int getNumberOfUpgradeSlots() {
-		return backPackWrapper.getUpgradeHandler().getSlots();
+		return backpackWrapper.getUpgradeHandler().getSlots();
 	}
 
 	@Override

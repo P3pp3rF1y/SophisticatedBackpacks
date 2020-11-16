@@ -32,7 +32,7 @@ public class InventoryHelper {
 		return remainingStack;
 	}
 
-	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, BackpackWrapper backpackWrapper, boolean simulate) {
+	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
 		List<ItemStack> pickupUpgrades = backpackWrapper.getUpgradeHandler().getUpgradeStacks(upgrade -> upgrade.getItem() instanceof IPickupResponseUpgrade);
 
 		for (ItemStack upgrade : pickupUpgrades) {

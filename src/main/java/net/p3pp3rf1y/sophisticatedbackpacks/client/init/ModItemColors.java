@@ -20,14 +20,14 @@ public class ModItemColors {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
 				return -1;
 			}
-			BackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
-			if (layer == 0) {
-				return backpackWrapper.getClothColor();
-			} else if (layer == 1) {
-				return backpackWrapper.getBorderColor();
-			}
-
-			return -1;
+			return backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(backpackWrapper -> {
+				if (layer == 0) {
+					return backpackWrapper.getClothColor();
+				} else if (layer == 1) {
+					return backpackWrapper.getBorderColor();
+				}
+				return -1;
+			}).orElse(-1);
 		}, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK);
 	}
 }

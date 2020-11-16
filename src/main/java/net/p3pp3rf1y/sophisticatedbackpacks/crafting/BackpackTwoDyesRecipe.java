@@ -87,16 +87,21 @@ public class BackpackTwoDyesRecipe extends SpecialRecipe {
 		}
 
 		ItemStack coloredBackpack = new ItemStack(backpack.getItem());
-		BackpackWrapper coloredWrapper = new BackpackWrapper(coloredBackpack);
-		new BackpackWrapper(backpack).copyDataTo(coloredWrapper);
-		DyeColor colorOne = DyeColor.getColor(dyeOne);
-		DyeColor colorTwo = DyeColor.getColor(dyeTwo);
-		if (colorOne == null || colorTwo == null) {
-			return ItemStack.EMPTY;
-		}
-
-		coloredWrapper.setColors(colorOne.getColorValue(), colorTwo.getColorValue());
-		return coloredBackpack;
+		ItemStack finalDyeOne = dyeOne;
+		ItemStack finalDyeTwo = dyeTwo;
+		boolean result = backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				.map(wrapper -> coloredBackpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+						.map(coloredWrapper -> {
+							wrapper.copyDataTo(coloredWrapper);
+							DyeColor colorOne = DyeColor.getColor(finalDyeOne);
+							DyeColor colorTwo = DyeColor.getColor(finalDyeTwo);
+							if (colorOne == null || colorTwo == null) {
+								return false;
+							}
+							coloredWrapper.setColors(colorOne.getColorValue(), colorTwo.getColorValue());
+							return true;
+						}).orElse(false)).orElse(false);
+		return result ? coloredBackpack : ItemStack.EMPTY;
 	}
 
 	@Override

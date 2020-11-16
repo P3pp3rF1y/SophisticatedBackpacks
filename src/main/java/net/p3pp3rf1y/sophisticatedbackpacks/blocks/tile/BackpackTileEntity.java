@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.Optional;
@@ -17,21 +18,20 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack")
 	public static final TileEntityType<BackpackTileEntity> TYPE = RegistryHelper.nullValue();
 
-	private BackpackWrapper backpackWrapper;
-	private boolean persistentSet = false;
+	private IBackpackWrapper IBackpackWrapper;
 
 	public BackpackTileEntity() {
 		super(TYPE);
 	}
 
-	public void setBackpack(BackpackWrapper backpackWrapper) {
-		this.backpackWrapper = backpackWrapper;
+	public void setBackpack(ItemStack backpack) {
+		IBackpackWrapper = new BackpackWrapper(backpack, this);
 	}
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
-		backpackWrapper = new BackpackWrapper(ItemStack.read(nbt.getCompound("backpackData")));
+		IBackpackWrapper = new BackpackWrapper(ItemStack.read(nbt.getCompound("backpackData")), this);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	private void writeBackpack(CompoundNBT ret) {
-		ret.put("backpackData", backpackWrapper.getBackpack().write(new CompoundNBT()));
+		ret.put("backpackData", IBackpackWrapper.getBackpack().write(new CompoundNBT()));
 	}
 
 	@Override
@@ -52,19 +52,12 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		return ret;
 	}
 
-	public Optional<BackpackWrapper> getBackpackWrapper() {
-		return Optional.ofNullable(backpackWrapper);
+	public Optional<IBackpackWrapper> getBackpackWrapper() {
+		return Optional.ofNullable(IBackpackWrapper);
 	}
 
 	@Override
 	public void tick() {
-		setPersistent();
-	}
-
-	private void setPersistent() {
-		if (!persistentSet && !world.isRemote && backpackWrapper != null) {
-			persistentSet = true;
-			backpackWrapper.setPersistent(this);
-		}
+		//noop for now
 	}
 }

@@ -6,7 +6,7 @@ import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -25,7 +25,7 @@ public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPi
 	}
 
 	@Override
-	public ItemStack pickup(World world, ItemStack upgrade, ItemStack stack, BackpackWrapper backpackWrapper, boolean simulate) {
+	public ItemStack pickup(World world, ItemStack upgrade, ItemStack stack, IBackpackWrapper backpackWrapper, boolean simulate) {
 		PickupUpgradeWrapper pickupWrapper = new PickupUpgradeWrapper(upgrade);
 		if (!pickupWrapper.matchesFilter(stack)) {
 			return stack;

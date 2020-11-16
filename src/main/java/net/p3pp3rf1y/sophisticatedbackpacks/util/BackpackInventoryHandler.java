@@ -4,21 +4,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
 	private static final String INVENTORY_TAG = "inventory";
 	private final ItemStack backpack;
 	private final Consumer<ItemStack> backpackSaveHandler;
-	private final BiConsumer<Integer, Supplier<ItemStack>> notificationHandler;
 
-	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler, BiConsumer<Integer, Supplier<ItemStack>> notificationHandler) {
+	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
 		super(getNumberOfSlots(backpack));
 		this.backpack = backpack;
 		this.backpackSaveHandler = backpackSaveHandler;
-		this.notificationHandler = notificationHandler;
 		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
@@ -26,7 +22,6 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	public void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
 		saveInventory();
-		notificationHandler.accept(slot, () -> getStackInSlot(slot));
 	}
 
 	public void saveInventory() {
@@ -40,9 +35,5 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
-	}
-
-	public void onInventorySlotUpdate(int slot, ItemStack newStack) {
-		setStackInSlot(slot, newStack);
 	}
 }

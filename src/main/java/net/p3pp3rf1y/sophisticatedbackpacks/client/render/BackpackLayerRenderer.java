@@ -55,25 +55,25 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 			matrixStack.translate(0, -0.75f, zOffset);
 
 			ItemStack backpack = backpackRenderInfo.getBackpack();
-			BackpackWrapper wrapper = new BackpackWrapper(backpack);
+			backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(wrapper -> {
+				IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
 
-			IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
+				int color = wrapper.getClothColor();
+				float red = (color >> 16 & 255) / 255.0F;
+				float green = (color >> 8 & 255) / 255.0F;
+				float blue = (color & 255) / 255.0F;
+				MODEL.cloth.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
 
-			int color = wrapper.getClothColor();
-			float red = (color >> 16 & 255) / 255.0F;
-			float green = (color >> 8 & 255) / 255.0F;
-			float blue = (color & 255) / 255.0F;
-			MODEL.cloth.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+				color = wrapper.getBorderColor();
+				red = (color >> 16 & 255) / 255.0F;
+				green = (color >> 8 & 255) / 255.0F;
+				blue = (color & 255) / 255.0F;
+				MODEL.border.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
 
-			color = wrapper.getBorderColor();
-			red = (color >> 16 & 255) / 255.0F;
-			green = (color >> 8 & 255) / 255.0F;
-			blue = (color & 255) / 255.0F;
-			MODEL.border.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+				BACKPACK_CLIPS.getOrDefault(backpack.getItem(), MODEL.leatherClips).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 
-			BACKPACK_CLIPS.getOrDefault(backpack.getItem(), MODEL.leatherClips).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
-
-			matrixStack.pop();
+				matrixStack.pop();
+			});
 		});
 	}
 }

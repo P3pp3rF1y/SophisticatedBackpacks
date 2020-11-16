@@ -2,10 +2,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
 public interface IPickupResponseUpgrade {
-	ItemStack pickup(World world, ItemStack upgrade, ItemStack stack, BackpackWrapper backpack, boolean simulate);
+	ItemStack pickup(World world, ItemStack upgrade, ItemStack stack, IBackpackWrapper backpack, boolean simulate);
 
 	long getCooldownTime(ItemStack stack);
 }

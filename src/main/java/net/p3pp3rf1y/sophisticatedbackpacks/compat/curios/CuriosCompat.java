@@ -25,7 +25,6 @@ import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.SlotTypePreset;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -61,9 +60,8 @@ public class CuriosCompat implements ICompat {
 		Item item = stack.getItem();
 		if (item.getRegistryName() != null && item.getRegistryName().getNamespace().equals(SophisticatedBackpacks.MOD_ID) && item instanceof BackpackItem) {
 			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, item.getRegistryName().getPath() + "_curios"), new ICapabilityProvider() {
-				@Nonnull
 				@Override
-				public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+				public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(() -> new CuriosBackpackWrapper(item)));
 				}
 			});
