@@ -8,7 +8,9 @@ import net.minecraft.data.ShapedRecipeBuilder;
 import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipeBuilder;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.function.Consumer;
@@ -35,7 +37,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 		CustomRecipeBuilder.customRecipe(BackpackSingleDyeRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_single_dye"));
 		CustomRecipeBuilder.customRecipe(BackpackTwoDyesRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_two_dyes"));
 
-		BackpackUpgradeRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")
 				.patternLine("DBD")
 				.patternLine("DDD")
@@ -43,7 +45,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('B', ModItems.GOLD_BACKPACK)
 				.build(consumer);
 
-		BackpackUpgradeRecipeBuilder.shapedRecipe(ModItems.GOLD_BACKPACK)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.GOLD_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("GGG")
 				.patternLine("GBG")
 				.patternLine("GGG")
@@ -51,7 +53,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('B', ModItems.IRON_BACKPACK)
 				.build(consumer);
 
-		BackpackUpgradeRecipeBuilder.shapedRecipe(ModItems.IRON_BACKPACK)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.IRON_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("III")
 				.patternLine("IBI")
 				.patternLine("III")
@@ -80,7 +82,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion("has_leather", hasItem(Tags.Items.LEATHER))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_PICKUP_UPGRADE)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_PICKUP_UPGRADE, UpgradeNextTierRecipe.SERIALIZER)
 				.patternLine(" D ")
 				.patternLine("GPG")
 				.patternLine("RRR")
@@ -88,7 +90,6 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', ModItems.PICKUP_UPGRADE)
-				.addCriterion("has_pickup_upgrade", hasItem(ModItems.PICKUP_UPGRADE))
 				.build(consumer);
 	}
 }

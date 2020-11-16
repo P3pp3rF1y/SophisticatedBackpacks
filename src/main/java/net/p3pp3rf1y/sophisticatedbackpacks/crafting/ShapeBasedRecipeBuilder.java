@@ -20,28 +20,30 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class BackpackUpgradeRecipeBuilder {
+public class ShapeBasedRecipeBuilder {
 	private final Item itemResult;
 	private final List<String> pattern = Lists.newArrayList();
 	private final Map<Character, Ingredient> keyIngredients = Maps.newLinkedHashMap();
+	private final ShapedSerializer<?> serializer;
 
-	public BackpackUpgradeRecipeBuilder(IItemProvider itemResult) {
+	public ShapeBasedRecipeBuilder(IItemProvider itemResult, ShapedSerializer<?> serializer) {
 		this.itemResult = itemResult.asItem();
+		this.serializer = serializer;
 	}
 
-	public static BackpackUpgradeRecipeBuilder shapedRecipe(IItemProvider itemResult) {
-		return new BackpackUpgradeRecipeBuilder(itemResult);
+	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult, ShapedSerializer<?> serializer) {
+		return new ShapeBasedRecipeBuilder(itemResult, serializer);
 	}
 
-	public BackpackUpgradeRecipeBuilder key(Character symbol, ITag<Item> tagIn) {
+	public ShapeBasedRecipeBuilder key(Character symbol, ITag<Item> tagIn) {
 		return key(symbol, Ingredient.fromTag(tagIn));
 	}
 
-	public BackpackUpgradeRecipeBuilder key(Character symbol, IItemProvider itemIn) {
+	public ShapeBasedRecipeBuilder key(Character symbol, IItemProvider itemIn) {
 		return key(symbol, Ingredient.fromItems(itemIn));
 	}
 
-	public BackpackUpgradeRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
+	public ShapeBasedRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
 		if (keyIngredients.containsKey(symbol)) {
 			throw new IllegalArgumentException("Symbol '" + symbol + "' is already defined!");
 		} else if (symbol == ' ') {
@@ -52,7 +54,7 @@ public class BackpackUpgradeRecipeBuilder {
 		}
 	}
 
-	public BackpackUpgradeRecipeBuilder patternLine(String patternIn) {
+	public ShapeBasedRecipeBuilder patternLine(String patternIn) {
 		if (!pattern.isEmpty() && patternIn.length() != pattern.get(0).length()) {
 			throw new IllegalArgumentException("Pattern must be the same width on every line!");
 		} else {
@@ -65,18 +67,9 @@ public class BackpackUpgradeRecipeBuilder {
 		build(consumerIn, Registry.ITEM.getKey(itemResult));
 	}
 
-	public void build(Consumer<IFinishedRecipe> consumerIn, String save) {
-		ResourceLocation resourcelocation = Registry.ITEM.getKey(itemResult);
-		if ((new ResourceLocation(save)).equals(resourcelocation)) {
-			throw new IllegalStateException("Backpack Upgrade Recipe " + save + " should remove its 'save' argument");
-		} else {
-			build(consumerIn, new ResourceLocation(save));
-		}
-	}
-
 	public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
 		validate(id);
-		consumerIn.accept(new Result(id, itemResult, pattern, keyIngredients));
+		consumerIn.accept(new Result(id, itemResult, pattern, keyIngredients, serializer));
 	}
 
 	private void validate(ResourceLocation id) {
@@ -110,12 +103,14 @@ public class BackpackUpgradeRecipeBuilder {
 		private final Item itemResult;
 		private final List<String> pattern;
 		private final Map<Character, Ingredient> key;
+		private final ShapedSerializer<?> serializer;
 
-		public Result(ResourceLocation id, Item itemResult, List<String> pattern, Map<Character, Ingredient> keyIngredients) {
+		public Result(ResourceLocation id, Item itemResult, List<String> pattern, Map<Character, Ingredient> keyIngredients, ShapedSerializer<?> serializer) {
 			this.id = id;
 			this.itemResult = itemResult;
 			this.pattern = pattern;
 			key = keyIngredients;
+			this.serializer = serializer;
 		}
 
 		public void serialize(JsonObject json) {
@@ -140,7 +135,7 @@ public class BackpackUpgradeRecipeBuilder {
 		}
 
 		public IRecipeSerializer<?> getSerializer() {
-			return BackpackUpgradeRecipe.SERIALIZER;
+			return serializer;
 		}
 
 		public ResourceLocation getID() {

@@ -1,5 +1,5 @@
 {
-    "type": "minecraft:crafting_shaped",
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
     "pattern": [
         " D ",
         "GPG",

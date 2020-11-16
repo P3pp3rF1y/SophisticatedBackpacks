@@ -4,16 +4,15 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.ShapedRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
 
 import java.util.Optional;
 
-public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRecipe {
+public class UpgradeNextTierRecipe extends ShapedRecipe implements IShapeBasedRecipe {
 	public static final Serializer SERIALIZER = new Serializer();
 	private final ShapedRecipe compose;
 
-	public BackpackUpgradeRecipe(ShapedRecipe compose) {
+	public UpgradeNextTierRecipe(ShapedRecipe compose) {
 		super(compose.getId(), compose.getGroup(), compose.getRecipeWidth(), compose.getRecipeHeight(), compose.getIngredients(), compose.getRecipeOutput());
 		this.compose = compose;
 	}
@@ -25,23 +24,18 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRe
 
 	@Override
 	public ItemStack getCraftingResult(CraftingInventory inv) {
-		ItemStack upgradedBackpack = super.getCraftingResult(inv);
-		getBackpack(inv).ifPresent(backpack -> {
-			BackpackWrapper upgradedWrapper = new BackpackWrapper(upgradedBackpack);
-			new BackpackWrapper(backpack).copyDataTo(upgradedWrapper);
-		});
-
-		return upgradedBackpack;
+		ItemStack nextTier = super.getCraftingResult(inv);
+		getUpgrade(inv).ifPresent(upgrade -> nextTier.setTag(upgrade.getTag()));
+		return nextTier;
 	}
 
-	private Optional<ItemStack> getBackpack(CraftingInventory inv) {
+	private Optional<ItemStack> getUpgrade(CraftingInventory inv) {
 		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
 			ItemStack slotStack = inv.getStackInSlot(slot);
-			if (slotStack.getItem() instanceof BackpackItem) {
+			if (slotStack.getItem() instanceof IBackpackUpgrade) {
 				return Optional.of(slotStack);
 			}
 		}
-
 		return Optional.empty();
 	}
 
@@ -50,9 +44,9 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRe
 		return SERIALIZER;
 	}
 
-	public static class Serializer extends ShapedSerializer<BackpackUpgradeRecipe> {
+	public static class Serializer extends ShapedSerializer<UpgradeNextTierRecipe> {
 		public Serializer() {
-			super(BackpackUpgradeRecipe::new);
+			super(UpgradeNextTierRecipe::new);
 		}
 	}
 }
