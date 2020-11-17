@@ -16,7 +16,6 @@ import net.minecraftforge.registries.ObjectHolder;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryEventBus;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
@@ -278,12 +277,6 @@ public class BackpackContainer extends Container {
 
 	public int getNumberOfUpgradeSlots() {
 		return backpackWrapper.getUpgradeHandler().getSlots();
-	}
-
-	@Override
-	public void onContainerClosed(PlayerEntity playerIn) {
-		super.onContainerClosed(playerIn);
-		BackpackInventoryEventBus.unregisterListener(playerIn.getUniqueID());
 	}
 
 	public int getFirstUpgradeSettingsSlot() {
