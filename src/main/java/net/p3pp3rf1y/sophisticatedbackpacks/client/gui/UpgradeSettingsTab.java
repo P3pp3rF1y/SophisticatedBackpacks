@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase> extends CompositeWidget<Widget> {
+public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> extends CompositeWidget<Widget> {
 	protected static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;

@@ -4,7 +4,7 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.ShapedRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ public class UpgradeNextTierRecipe extends ShapedRecipe implements IShapeBasedRe
 	private Optional<ItemStack> getUpgrade(CraftingInventory inv) {
 		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
 			ItemStack slotStack = inv.getStackInSlot(slot);
-			if (slotStack.getItem() instanceof IBackpackUpgrade) {
+			if (slotStack.getItem() instanceof IBackpackUpgradeItem) {
 				return Optional.of(slotStack);
 			}
 		}

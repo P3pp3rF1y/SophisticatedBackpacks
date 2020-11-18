@@ -1,24 +1,27 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.LongNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.function.Consumer;
 
-public class PickupUpgradeWrapper {
+public class PickupUpgradeWrapper implements IUpgradeWrapper, IPickupResponseUpgrade {
+	private static final int FULL_COOLDOWN = 60;
+
 	private final ItemStack upgrade;
 	private final PickupUpgradeItem upgradeItem;
 	private final Consumer<ItemStack> upgradeSaveHandler;
 	private FilterItemStackHandler filterHandler = null;
-
-	public PickupUpgradeWrapper(ItemStack upgrade) {
-		this(upgrade, stack -> {});
-	}
 
 	public PickupUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		this.upgrade = upgrade;
@@ -42,12 +45,35 @@ public class PickupUpgradeWrapper {
 		return filterHandler;
 	}
 
-	public boolean matchesFilter(ItemStack stack) {
+	private boolean matchesFilter(ItemStack stack) {
 		if (isAllowList()) {
 			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> stackMatchesFilter(stack, filter), () -> false, returnValue -> returnValue);
 		} else {
 			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !stackMatchesFilter(stack, filter), () -> true, returnValue -> !returnValue);
 		}
+	}
+
+	@Override
+	public ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpackWrapper, boolean simulate) {
+		if (!matchesFilter(stack)) {
+			return stack;
+		}
+		int originalCount = stack.getCount();
+		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryHandler(), simulate);
+		if (originalCount == ret.getCount()) {
+			setCooldown(world.getGameTime() + FULL_COOLDOWN);
+		}
+
+		return ret;
+	}
+
+	private void setCooldown(long time) {
+		upgrade.setTagInfo("cooldownTime", LongNBT.valueOf(time));
+	}
+
+	@Override
+	public long getCooldownTime() {
+		return NBTHelper.getLong(upgrade, "cooldownTime").orElse(0L);
 	}
 
 	private boolean stackMatchesFilter(ItemStack stack, ItemStack filter) {
@@ -129,4 +155,8 @@ public class PickupUpgradeWrapper {
 		return upgradeItem.getFilterSlotCount();
 	}
 
+	@Override
+	public ItemStack getUpgradeStack() {
+		return upgrade;
+	}
 }

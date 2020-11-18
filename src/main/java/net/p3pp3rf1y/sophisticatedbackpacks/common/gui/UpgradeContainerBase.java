@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -11,15 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public abstract class UpgradeContainerBase {
+public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> {
 	protected final ArrayList<Slot> slots = new ArrayList<>();
 	private final int containerId;
-	private final ItemStack upgradeStack;
+	protected final T upgradeWrapper;
 	protected final boolean isClientSide;
 
-	public UpgradeContainerBase(int containerId, ItemStack upgrade, boolean isClientSide) {
+	protected UpgradeContainerBase(int containerId, T upgradeWrapper, boolean isClientSide) {
 		this.containerId = containerId;
-		upgradeStack = upgrade;
+		this.upgradeWrapper = upgradeWrapper;
 		this.isClientSide = isClientSide;
 	}
 
@@ -27,7 +28,7 @@ public abstract class UpgradeContainerBase {
 		return slots;
 	}
 
-	public abstract UpgradeContainerType<?> getType();
+	public abstract UpgradeContainerType<T, ? extends UpgradeContainerBase<T>> getType();
 
 	protected void sendBooleanToServer(String key, boolean value) {
 		if (!isClientSide) {
@@ -50,6 +51,6 @@ public abstract class UpgradeContainerBase {
 	}
 
 	public ItemStack getUpgradeStack() {
-		return upgradeStack;
+		return upgradeWrapper.getUpgradeStack();
 	}
 }

@@ -1,17 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.LongNBT;
-import net.minecraft.world.World;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPickupResponseUpgrade {
-	private static final int FULL_COOLDOWN = 60;
+public class PickupUpgradeItem extends ItemBase implements IBackpackUpgradeItem<PickupUpgradeWrapper> {
+	public static final UpgradeType<PickupUpgradeWrapper> TYPE = new UpgradeType<>(PickupUpgradeWrapper::new);
 
 	private final int filterSlotCount;
 
@@ -24,31 +18,12 @@ public class PickupUpgradeItem extends ItemBase implements IBackpackUpgrade, IPi
 		this.filterSlotCount = filterSlotCount;
 	}
 
-	@Override
-	public ItemStack pickup(World world, ItemStack upgrade, ItemStack stack, IBackpackWrapper backpackWrapper, boolean simulate) {
-		PickupUpgradeWrapper pickupWrapper = new PickupUpgradeWrapper(upgrade);
-		if (!pickupWrapper.matchesFilter(stack)) {
-			return stack;
-		}
-		int originalCount = stack.getCount();
-		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryHandler(), simulate);
-		if (originalCount == ret.getCount()) {
-			setCooldown(backpackWrapper.getBackpack(), world.getGameTime() + FULL_COOLDOWN);
-		}
-
-		return ret;
-	}
-
-	private void setCooldown(ItemStack backpack, long time) {
-		backpack.setTagInfo("cooldownTime", LongNBT.valueOf(time));
-	}
-
-	@Override
-	public long getCooldownTime(ItemStack backpack) {
-		return NBTHelper.getLong(backpack, "cooldownTime").orElse(0L);
-	}
-
 	public int getFilterSlotCount() {
 		return filterSlotCount;
+	}
+
+	@Override
+	public UpgradeType<PickupUpgradeWrapper> getType() {
+		return TYPE;
 	}
 }

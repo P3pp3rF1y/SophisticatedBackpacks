@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
@@ -9,55 +8,51 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import java.util.function.Consumer;
-
-public abstract class PickupUpgradeContainer extends UpgradeContainerBase {
+public abstract class PickupUpgradeContainer extends UpgradeContainerBase<PickupUpgradeWrapper> {
 	private static final String DATA_IS_ALLOW_LIST = "isAllowList";
 	private static final String DATA_MATCH_DURABILITY = "matchDurability";
 	private static final String DATA_MATCH_NBT = "matchNbt";
 	private static final String DATA_PRIMARY_MATCH = "primaryMatch";
-	private final PickupUpgradeWrapper pickupWrapper;
 
-	private PickupUpgradeContainer(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
-		super(containerId, upgrade, isClientSide);
-		pickupWrapper = new PickupUpgradeWrapper(upgrade, upgradeSaveHandler);
-		ItemStackHandler filterHandler = pickupWrapper.getFilterHandler();
+	private PickupUpgradeContainer(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
+		super(containerId, wrapper, isClientSide);
+		ItemStackHandler filterHandler = upgradeWrapper.getFilterHandler();
 		InventoryHelper.iterate(filterHandler, (slot, stack) -> slots.add(new FilterSlotItemHandler(filterHandler, slot, -100, -100)));
 	}
 
 	public boolean isAllowList() {
-		return pickupWrapper.isAllowList();
+		return upgradeWrapper.isAllowList();
 	}
 
 	public boolean shouldMatchDurability() {
-		return pickupWrapper.shouldMatchDurability();
+		return upgradeWrapper.shouldMatchDurability();
 	}
 
 	public boolean shouldMatchNbt() {
-		return pickupWrapper.shouldMatchNbt();
+		return upgradeWrapper.shouldMatchNbt();
 	}
 
 	public PrimaryMatch getPrimaryMatch() {
-		return pickupWrapper.getPrimaryMatch();
+		return upgradeWrapper.getPrimaryMatch();
 	}
 
 	public void setAllowList(boolean isAllowList) {
-		pickupWrapper.setAllowList(isAllowList);
+		upgradeWrapper.setAllowList(isAllowList);
 		sendBooleanToServer(DATA_IS_ALLOW_LIST, isAllowList);
 	}
 
 	public void setMatchDurability(boolean matchDurability) {
-		pickupWrapper.setMatchDurability(matchDurability);
+		upgradeWrapper.setMatchDurability(matchDurability);
 		sendBooleanToServer(DATA_MATCH_DURABILITY, matchDurability);
 	}
 
 	public void setMatchNbt(boolean matchNbt) {
-		pickupWrapper.setMatchNbt(matchNbt);
+		upgradeWrapper.setMatchNbt(matchNbt);
 		sendBooleanToServer(DATA_MATCH_NBT, matchNbt);
 	}
 
 	public void setPrimaryMatch(PrimaryMatch primaryMatch) {
-		pickupWrapper.setPrimaryMatch(primaryMatch);
+		upgradeWrapper.setPrimaryMatch(primaryMatch);
 		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_PRIMARY_MATCH, primaryMatch));
 	}
 
@@ -85,27 +80,27 @@ public abstract class PickupUpgradeContainer extends UpgradeContainerBase {
 
 	public static class Basic extends PickupUpgradeContainer {
 
-		public static final UpgradeContainerType<PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Basic::new);
+		public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Basic::new);
 
-		private Basic(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
-			super(containerId, upgrade, upgradeSaveHandler, isClientSide);
+		private Basic(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
+			super(containerId, wrapper, isClientSide);
 		}
 
 		@Override
-		public UpgradeContainerType<?> getType() {
+		public UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> getType() {
 			return TYPE;
 		}
 	}
 
 	public static class Advanced extends PickupUpgradeContainer {
-		public static final UpgradeContainerType<PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Advanced::new);
+		public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Advanced::new);
 
-		private Advanced(int containerId, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler, boolean isClientSide) {
-			super(containerId, upgrade, upgradeSaveHandler, isClientSide);
+		private Advanced(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
+			super(containerId, wrapper, isClientSide);
 		}
 
 		@Override
-		public UpgradeContainerType<?> getType() {
+		public UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> getType() {
 			return TYPE;
 		}
 	}

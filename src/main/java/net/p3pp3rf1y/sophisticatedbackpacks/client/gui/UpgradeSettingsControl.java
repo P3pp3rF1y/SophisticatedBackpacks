@@ -9,19 +9,21 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?>> {
 	private static final int VERTICAL_SPACE = 1;
+	@Nullable
 	private UpgradeSettingsTab<?> openTab = null;
 
 	public UpgradeSettingsControl(Position position, BackpackScreen screen) {
 		super(position);
 		int i = 0;
-		for (UpgradeContainerBase container : screen.getContainer().getUpgradeContainers()) {
-			UpgradeSettingsTab<UpgradeContainerBase> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
+		for (UpgradeContainerBase<?> container : screen.getContainer().getUpgradeContainers()) {
+			UpgradeSettingsTab<UpgradeContainerBase<?>> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
 			tab.setHandlers(t -> {
 						if (differentTabIsOpen(t)) {
 							openTab.close();
@@ -35,18 +37,18 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 							openTab = null;
 						}
 					},
-					t -> !differentTabIsOpen(t) || isNotCovered(t, true),
-					t -> openTab == null || isNotCovered(t, false)
+					t -> !differentTabIsOpen(t) || isNotCovered(openTab, t, true),
+					t -> openTab == null || isNotCovered(openTab, t, false)
 			);
 			i++;
 		}
 	}
 
-	private boolean isNotCovered(UpgradeSettingsTab<UpgradeContainerBase> t, boolean checkFullyCovered) {
+	private boolean isNotCovered(UpgradeSettingsTab<?> open, UpgradeSettingsTab<UpgradeContainerBase<?>> t, boolean checkFullyCovered) {
 		if (checkFullyCovered) {
-			return openTab.getBottomY() < t.getBottomY() || openTab.getTopY() > t.getTopY();
+			return open.getBottomY() < t.getBottomY() || open.getTopY() > t.getTopY();
 		} else {
-			return openTab.getBottomY() < t.getTopY() || openTab.getTopY() > t.getTopY();
+			return open.getBottomY() < t.getTopY() || open.getTopY() > t.getTopY();
 		}
 	}
 
