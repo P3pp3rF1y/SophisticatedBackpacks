@@ -25,6 +25,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -135,14 +136,23 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
 		return new ICapabilityProvider() {
-			private final IBackpackWrapper wrapper = new BackpackWrapper(stack);
+			private IBackpackWrapper wrapper = null;
 
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+				initWrapper();
 				if (cap == BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY) {
 					return LazyOptional.of(() -> wrapper).cast();
+				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+					return LazyOptional.of(() -> wrapper.getInventoryHandler()).cast();
 				}
 				return LazyOptional.empty();
+			}
+
+			private void initWrapper() {
+				if (wrapper == null) {
+					wrapper = new BackpackWrapper(stack);
+				}
 			}
 		};
 	}

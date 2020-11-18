@@ -5,15 +5,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
-
 	private IBackpackWrapper backpackWrapper;
 
 	public BackpackTileEntity() {
@@ -55,5 +60,14 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public void tick() {
 		//noop for now
+	}
+
+	@Nonnull
+	@Override
+	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+			return LazyOptional.of(() -> backpackWrapper.getInventoryHandler()).cast();
+		}
+		return super.getCapability(cap, side);
 	}
 }
