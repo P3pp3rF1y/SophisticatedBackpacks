@@ -27,7 +27,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -44,9 +43,8 @@ public class BackpackBlock extends Block {
 	private static final VoxelShape WEST_SHAPE = makeCuboidShape(5, 0, 2, 10, 14, 14);
 	private static final VoxelShape EAST_SHAPE = makeCuboidShape(6, 0, 2, 11, 14, 14);
 
-	public BackpackBlock(String regName) {
+	public BackpackBlock() {
 		super(Properties.create(Material.WOOL).notSolid().hardnessAndResistance(0.8F).sound(SoundType.CLOTH));
-		setRegistryName(SophisticatedBackpacks.MOD_ID, regName);
 		setDefaultState(stateContainer.getBaseState().with(FACING, Direction.NORTH));
 	}
 
@@ -100,7 +98,7 @@ public class BackpackBlock extends Block {
 	}
 
 	private ITextComponent getBackpackDisplayName(World world, BlockPos pos) {
-		ITextComponent defaultDisplayName = new ItemStack(ModItems.BACKPACK).getDisplayName();
+		ITextComponent defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getDisplayName();
 		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> w.getBackpack().getDisplayName())
 				.orElse(defaultDisplayName)).orElse(defaultDisplayName);
 	}

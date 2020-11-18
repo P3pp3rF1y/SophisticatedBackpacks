@@ -5,33 +5,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.registries.ObjectHolder;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.Optional;
 
-public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
-	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack")
-	public static final TileEntityType<BackpackTileEntity> TYPE = RegistryHelper.nullValue();
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-	private IBackpackWrapper IBackpackWrapper;
+public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
+
+	private IBackpackWrapper backpackWrapper;
 
 	public BackpackTileEntity() {
-		super(TYPE);
+		super(BACKPACK_TILE_TYPE.get());
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		IBackpackWrapper = new BackpackWrapper(backpack, this);
+		backpackWrapper = new BackpackWrapper(backpack, this);
 	}
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
-		IBackpackWrapper = new BackpackWrapper(ItemStack.read(nbt.getCompound("backpackData")), this);
+		backpackWrapper = new BackpackWrapper(ItemStack.read(nbt.getCompound("backpackData")), this);
 	}
 
 	@Override
@@ -42,7 +38,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	private void writeBackpack(CompoundNBT ret) {
-		ret.put("backpackData", IBackpackWrapper.getBackpack().write(new CompoundNBT()));
+		ret.put("backpackData", backpackWrapper.getBackpack().write(new CompoundNBT()));
 	}
 
 	@Override
@@ -53,7 +49,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	public Optional<IBackpackWrapper> getBackpackWrapper() {
-		return Optional.ofNullable(IBackpackWrapper);
+		return Optional.ofNullable(backpackWrapper);
 	}
 
 	@Override

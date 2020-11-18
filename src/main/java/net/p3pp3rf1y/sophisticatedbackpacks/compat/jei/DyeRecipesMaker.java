@@ -29,10 +29,10 @@ public class DyeRecipesMaker {
 	private static void addTwoColorsRecipe(Set<ICraftingRecipe> recipes) {
 		NonNullList<Ingredient> ingredients = NonNullList.create();
 		ingredients.add(Ingredient.fromTag(DyeColor.YELLOW.getTag()));
-		ingredients.add(Ingredient.fromItems(ModItems.BACKPACK));
+		ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
 		ingredients.add(Ingredient.fromTag(DyeColor.BLUE.getTag()));
 
-		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK);
+		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 		backpackOutput.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(wrapper -> wrapper.setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue()));
 
 		ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "two_colors");
@@ -42,10 +42,10 @@ public class DyeRecipesMaker {
 	private static void addSingleColorRecipes(Set<ICraftingRecipe> recipes) {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getString());
-			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK);
+			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 			backpackOutput.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(wrapper -> wrapper.setColors(color.getColorValue(), color.getColorValue()));
 			NonNullList<Ingredient> ingredients = NonNullList.create();
-			ingredients.add(Ingredient.fromItems(ModItems.BACKPACK));
+			ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
 			ingredients.add(Ingredient.fromTag(color.getTag()));
 			recipes.add(new ShapelessRecipe(id, "", backpackOutput, ingredients));
 		}

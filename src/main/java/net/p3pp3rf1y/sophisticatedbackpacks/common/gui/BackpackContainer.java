@@ -5,15 +5,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.SlotItemHandler;
-import net.minecraftforge.registries.ObjectHolder;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
@@ -32,13 +29,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_BLOCK_CONTAINER_TYPE;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_ITEM_CONTAINER_TYPE;
+
 public class BackpackContainer extends Container {
-	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack")
-	public static ContainerType<BackpackContainer> TYPE;
-
-	@ObjectHolder(SophisticatedBackpacks.MOD_ID + ":backpack_block")
-	public static ContainerType<BackpackContainer> BLOCK_TYPE;
-
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 
 	private final IBackpackWrapper backpackWrapper;
@@ -48,7 +42,7 @@ public class BackpackContainer extends Container {
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
-		super(TYPE, windowId);
+		super(BACKPACK_ITEM_CONTAINER_TYPE.get(), windowId);
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 
 		if (!h.isPresent()) {
@@ -64,7 +58,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
-		super(BLOCK_TYPE, windowId);
+		super(BACKPACK_BLOCK_CONTAINER_TYPE.get(), windowId);
 		backpackWrapper = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class)
 				.map(te -> te.getBackpackWrapper().orElse(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance()))
 				.orElse(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY.getDefaultInstance());

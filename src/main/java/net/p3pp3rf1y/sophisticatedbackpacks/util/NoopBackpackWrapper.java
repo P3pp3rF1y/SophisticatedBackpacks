@@ -9,7 +9,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	private NoopBackpackWrapper() {}
 
-	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK);
+	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
 
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {

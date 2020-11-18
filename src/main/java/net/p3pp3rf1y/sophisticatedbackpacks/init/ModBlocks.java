@@ -3,41 +3,32 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
-@ObjectHolder(SophisticatedBackpacks.MOD_ID)
 public class ModBlocks {
+	private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<TileEntityType<?>> TILE_ENTITIES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, SophisticatedBackpacks.MOD_ID);
+
 	private ModBlocks() {}
 
-	public static final BackpackBlock BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackBlock IRON_BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackBlock GOLD_BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackBlock DIAMOND_BACKPACK = RegistryHelper.nullValue();
+	public static final RegistryObject<BackpackBlock> BACKPACK = BLOCKS.register("backpack", BackpackBlock::new);
+	public static final RegistryObject<BackpackBlock> IRON_BACKPACK = BLOCKS.register("iron_backpack", BackpackBlock::new);
+	public static final RegistryObject<BackpackBlock> GOLD_BACKPACK = BLOCKS.register("gold_backpack", BackpackBlock::new);
+	public static final RegistryObject<BackpackBlock> DIAMOND_BACKPACK = BLOCKS.register("diamond_backpack", BackpackBlock::new);
+
+	public static final RegistryObject<TileEntityType<BackpackTileEntity>> BACKPACK_TILE_TYPE = TILE_ENTITIES.register("backpack", () ->
+			TileEntityType.Builder.create(BackpackTileEntity::new, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get()).build(null));
 
 	public static void registerHandlers(IEventBus modBus) {
-		modBus.addGenericListener(Block.class, ModBlocks::register);
-		modBus.addGenericListener(TileEntityType.class, ModBlocks::registerTileEntities);
-	}
-
-	public static void register(RegistryEvent.Register<Block> event) {
-		IForgeRegistry<Block> reg = event.getRegistry();
-		reg.register(new BackpackBlock("backpack"));
-		reg.register(new BackpackBlock("iron_backpack"));
-		reg.register(new BackpackBlock("gold_backpack"));
-		reg.register(new BackpackBlock("diamond_backpack"));
+		BLOCKS.register(modBus);
+		TILE_ENTITIES.register(modBus);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, BackpackBlock::playerInteract);
-	}
-
-	public static void registerTileEntities(RegistryEvent.Register<TileEntityType<?>> event) {
-		event.getRegistry().register(TileEntityType.Builder.create(BackpackTileEntity::new, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK)
-				.build(null).setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
 	}
 }

@@ -31,10 +31,10 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 	private static final ResourceLocation BACKPACK_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
 	private static final BackpackModel MODEL = new BackpackModel();
 	private static final Map<Item, ModelRenderer> BACKPACK_CLIPS = ImmutableMap.of(
-			ModItems.BACKPACK, MODEL.leatherClips,
-			ModItems.IRON_BACKPACK, MODEL.ironClips,
-			ModItems.GOLD_BACKPACK, MODEL.goldClips,
-			ModItems.DIAMOND_BACKPACK, MODEL.diamondClips
+			ModItems.BACKPACK.get(), MODEL.leatherClips,
+			ModItems.IRON_BACKPACK.get(), MODEL.ironClips,
+			ModItems.GOLD_BACKPACK.get(), MODEL.goldClips,
+			ModItems.DIAMOND_BACKPACK.get(), MODEL.diamondClips
 	);
 
 	public BackpackLayerRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {

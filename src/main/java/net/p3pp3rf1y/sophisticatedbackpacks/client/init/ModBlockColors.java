@@ -18,12 +18,12 @@ public class ModBlockColors {
 		BlockColors blockColors = Minecraft.getInstance().getBlockColors();
 
 		blockColors.register((state, blockDisplayReader, pos, tintIndex) -> {
-			if (tintIndex < 0 || tintIndex > 1) {
+			if (tintIndex < 0 || tintIndex > 1 || pos == null) {
 				return -1;
 			}
 			return WorldHelper.getTile(blockDisplayReader, pos, BackpackTileEntity.class)
 					.map(te -> te.getBackpackWrapper().map(w -> tintIndex == 0 ? w.getClothColor() : w.getBorderColor()).orElse(BackpackWrapper.DEFAULT_COLOR))
 					.orElse(BackpackWrapper.DEFAULT_COLOR);
-		}, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK);
+		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get());
 	}
 }

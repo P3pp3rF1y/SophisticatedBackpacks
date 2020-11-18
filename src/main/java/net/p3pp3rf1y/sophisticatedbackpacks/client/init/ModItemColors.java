@@ -28,6 +28,6 @@ public class ModItemColors {
 				}
 				return -1;
 			}).orElse(-1);
-		}, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK);
+		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get());
 	}
 }

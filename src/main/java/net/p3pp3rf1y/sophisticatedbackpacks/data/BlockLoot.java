@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
@@ -33,15 +32,15 @@ public class BlockLoot implements IDataProvider {
 
 	@Override
 	public void act(DirectoryCache cache) throws IOException {
-		Map<Block, LootTable.Builder> tables = new HashMap<>();
+		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
-		tables.put(ModBlocks.BACKPACK, getBackpack(ModItems.BACKPACK));
-		tables.put(ModBlocks.IRON_BACKPACK, getBackpack(ModItems.IRON_BACKPACK));
-		tables.put(ModBlocks.GOLD_BACKPACK, getBackpack(ModItems.GOLD_BACKPACK));
-		tables.put(ModBlocks.DIAMOND_BACKPACK, getBackpack(ModItems.DIAMOND_BACKPACK));
+		tables.put(ModBlocks.BACKPACK.getId(), getBackpack(ModItems.BACKPACK.get()));
+		tables.put(ModBlocks.IRON_BACKPACK.getId(), getBackpack(ModItems.IRON_BACKPACK.get()));
+		tables.put(ModBlocks.GOLD_BACKPACK.getId(), getBackpack(ModItems.GOLD_BACKPACK.get()));
+		tables.put(ModBlocks.DIAMOND_BACKPACK.getId(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));
 
-		for (Map.Entry<Block, LootTable.Builder> e : tables.entrySet()) {
-			Path path = getPath(generator.getOutputFolder(), e.getKey().getRegistryName());
+		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
+			Path path = getPath(generator.getOutputFolder(), e.getKey());
 			IDataProvider.save(GSON, cache, LootTableManager.toJson(e.getValue().setParameterSet(LootParameterSets.BLOCK).build()), path);
 		}
 	}

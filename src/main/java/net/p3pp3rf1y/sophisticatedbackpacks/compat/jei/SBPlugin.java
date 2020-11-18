@@ -31,10 +31,10 @@ public class SBPlugin implements IModPlugin {
 		ISubtypeInterpreter backpackNbtInterpreter = itemStack -> itemStack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
 				.map(wrapper -> "{clothColor:" + wrapper.getClothColor() + ",borderColor:" + wrapper.getBorderColor() + "}")
 				.orElse("");
-		registration.registerSubtypeInterpreter(ModItems.BACKPACK, backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK, backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.GOLD_BACKPACK, backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.DIAMOND_BACKPACK, backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(ModItems.BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(ModItems.DIAMOND_BACKPACK.get(), backpackNbtInterpreter);
 	}
 
 	@Override

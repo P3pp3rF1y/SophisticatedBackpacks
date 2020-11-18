@@ -25,7 +25,7 @@ public class PickupUpgradeWrapper implements IUpgradeWrapper, IPickupResponseUpg
 
 	public PickupUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		this.upgrade = upgrade;
-		upgradeItem = upgrade.getItem() instanceof PickupUpgradeItem ? (PickupUpgradeItem) upgrade.getItem() : ModItems.PICKUP_UPGRADE;
+		upgradeItem = upgrade.getItem() instanceof PickupUpgradeItem ? (PickupUpgradeItem) upgrade.getItem() : ModItems.PICKUP_UPGRADE.get();
 		this.upgradeSaveHandler = upgradeSaveHandler;
 	}
 

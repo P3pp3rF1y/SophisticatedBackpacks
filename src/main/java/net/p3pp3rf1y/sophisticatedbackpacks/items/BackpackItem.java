@@ -43,12 +43,12 @@ public class BackpackItem extends ItemBase {
 	private final ScreenProperties screenProperties;
 	private final Supplier<BackpackBlock> blockSupplier;
 
-	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
-		this(registryName, numberOfSlots, numberOfUpgradeSlots, new ScreenProperties(), blockSupplier);
+	public BackpackItem(int numberOfSlots, int numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
+		this(numberOfSlots, numberOfUpgradeSlots, new ScreenProperties(), blockSupplier);
 	}
 
-	public BackpackItem(String registryName, int numberOfSlots, int numberOfUpgradeSlots, ScreenProperties screenProperties, Supplier<BackpackBlock> blockSupplier) {
-		super(registryName, new Properties().maxStackSize(1));
+	public BackpackItem(int numberOfSlots, int numberOfUpgradeSlots, ScreenProperties screenProperties, Supplier<BackpackBlock> blockSupplier) {
+		super(new Properties().maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.screenProperties = screenProperties;
@@ -59,7 +59,7 @@ public class BackpackItem extends ItemBase {
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
 		super.fillItemGroup(group, items);
 
-		if (!isInGroup(group) || this != ModItems.BACKPACK) {
+		if (!isInGroup(group) || this != ModItems.BACKPACK.get()) {
 			return;
 		}
 

@@ -24,7 +24,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 
 	@Override
 	protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-		ShapedRecipeBuilder.shapedRecipe(ModItems.BACKPACK)
+		ShapedRecipeBuilder.shapedRecipe(ModItems.BACKPACK.get())
 				.patternLine("SLS")
 				.patternLine("SCS")
 				.patternLine("LLL")
@@ -37,42 +37,42 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 		CustomRecipeBuilder.customRecipe(BackpackSingleDyeRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_single_dye"));
 		CustomRecipeBuilder.customRecipe(BackpackTwoDyesRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_two_dyes"));
 
-		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")
 				.patternLine("DBD")
 				.patternLine("DDD")
 				.key('D', Tags.Items.GEMS_DIAMOND)
-				.key('B', ModItems.GOLD_BACKPACK)
+				.key('B', ModItems.GOLD_BACKPACK.get())
 				.build(consumer);
 
-		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.GOLD_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.GOLD_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("GGG")
 				.patternLine("GBG")
 				.patternLine("GGG")
 				.key('G', Tags.Items.INGOTS_GOLD)
-				.key('B', ModItems.IRON_BACKPACK)
+				.key('B', ModItems.IRON_BACKPACK.get())
 				.build(consumer);
 
-		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.IRON_BACKPACK, BackpackUpgradeRecipe.SERIALIZER)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.IRON_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("III")
 				.patternLine("IBI")
 				.patternLine("III")
 				.key('I', Tags.Items.INGOTS_IRON)
-				.key('B', ModItems.BACKPACK)
+				.key('B', ModItems.BACKPACK.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.PICKUP_UPGRADE)
+		ShapedRecipeBuilder.shapedRecipe(ModItems.PICKUP_UPGRADE.get())
 				.patternLine(" P ")
 				.patternLine("SBS")
 				.patternLine("RRR")
-				.key('B', ModItems.UPGRADE_BASE)
+				.key('B', ModItems.UPGRADE_BASE.get())
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('S', Tags.Items.STRING)
 				.key('P', Blocks.STICKY_PISTON)
-				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE))
+				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE)
+		ShapedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE.get())
 				.patternLine("SIS")
 				.patternLine("ILI")
 				.patternLine("SIS")
@@ -82,14 +82,14 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion("has_leather", hasItem(Tags.Items.LEATHER))
 				.build(consumer);
 
-		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_PICKUP_UPGRADE, UpgradeNextTierRecipe.SERIALIZER)
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_PICKUP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
 				.patternLine(" D ")
 				.patternLine("GPG")
 				.patternLine("RRR")
 				.key('D', Tags.Items.GEMS_DIAMOND)
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
-				.key('P', ModItems.PICKUP_UPGRADE)
+				.key('P', ModItems.PICKUP_UPGRADE.get())
 				.build(consumer);
 	}
 }

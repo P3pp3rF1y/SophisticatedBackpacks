@@ -9,12 +9,12 @@ public class PickupUpgradeItem extends ItemBase implements IBackpackUpgradeItem<
 
 	private final int filterSlotCount;
 
-	public PickupUpgradeItem(String regName) {
-		this(regName, 9);
+	public PickupUpgradeItem() {
+		this(9);
 	}
 
-	public PickupUpgradeItem(String regName, int filterSlotCount) {
-		super(regName, new Properties().maxStackSize(1));
+	public PickupUpgradeItem(int filterSlotCount) {
+		super(new Properties().maxStackSize(1));
 		this.filterSlotCount = filterSlotCount;
 	}
 

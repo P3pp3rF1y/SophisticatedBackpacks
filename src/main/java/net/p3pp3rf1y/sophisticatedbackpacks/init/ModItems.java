@@ -9,8 +9,9 @@ import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
@@ -26,53 +27,45 @@ import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
-@ObjectHolder(SophisticatedBackpacks.MOD_ID)
 public class ModItems {
+	private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SophisticatedBackpacks.MOD_ID);
+
+	private static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, SophisticatedBackpacks.MOD_ID);
 
 	private ModItems() {}
 
-	public static final BackpackItem BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackItem IRON_BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackItem GOLD_BACKPACK = RegistryHelper.nullValue();
-	public static final BackpackItem DIAMOND_BACKPACK = RegistryHelper.nullValue();
-	public static final PickupUpgradeItem PICKUP_UPGRADE = RegistryHelper.nullValue();
-	public static final PickupUpgradeItem ADVANCED_PICKUP_UPGRADE = RegistryHelper.nullValue();
-	public static final ItemBase UPGRADE_BASE = RegistryHelper.nullValue();
+	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
+			() -> new BackpackItem(27, 1, ModBlocks.BACKPACK));
+	public static final RegistryObject<BackpackItem> IRON_BACKPACK = ITEMS.register("iron_backpack",
+			() -> new BackpackItem(54, 2, ModBlocks.IRON_BACKPACK));
+	public static final RegistryObject<BackpackItem> GOLD_BACKPACK = ITEMS.register("gold_backpack",
+			() -> new BackpackItem(81, 3, new ScreenProperties().setTextureSize(512), ModBlocks.GOLD_BACKPACK));
+	public static final RegistryObject<BackpackItem> DIAMOND_BACKPACK = ITEMS.register("diamond_backpack",
+			() -> new BackpackItem(108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), ModBlocks.DIAMOND_BACKPACK));
+	public static final RegistryObject<PickupUpgradeItem> PICKUP_UPGRADE = ITEMS.register("pickup_upgrade", PickupUpgradeItem::new);
+	public static final RegistryObject<PickupUpgradeItem> ADVANCED_PICKUP_UPGRADE = ITEMS.register("advanced_pickup_upgrade", () -> new PickupUpgradeItem(16));
+	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
+
+	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
+			() -> IForgeContainerType.create(BackpackContainer::fromBufferItem));
+	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_BLOCK_CONTAINER_TYPE = CONTAINERS.register("backpack_block",
+			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlock));
 
 	public static void registerHandlers(IEventBus modBus) {
-		modBus.addGenericListener(Item.class, ModItems::register);
+		ITEMS.register(modBus);
+		CONTAINERS.register(modBus);
 		modBus.addGenericListener(ContainerType.class, ModItems::registerContainers);
 		modBus.addGenericListener(IRecipeSerializer.class, ModItems::registerRecipeSerializers);
 	}
 
-	public static void register(RegistryEvent.Register<Item> event) {
-		IForgeRegistry<Item> reg = event.getRegistry();
-		reg.register(new BackpackItem("backpack", 27, 1, () -> ModBlocks.BACKPACK));
-		reg.register(new BackpackItem("iron_backpack", 54, 2, () -> ModBlocks.IRON_BACKPACK));
-		reg.register(new BackpackItem("gold_backpack", 81, 3,
-				new ScreenProperties().setTextureSize(512), () -> ModBlocks.GOLD_BACKPACK));
-		reg.register(new BackpackItem("diamond_backpack", 108, 5,
-				new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), () -> ModBlocks.DIAMOND_BACKPACK));
-		reg.register(new ItemBase("upgrade_base", new Item.Properties().maxStackSize(16)));
-		reg.register(new PickupUpgradeItem("pickup_upgrade"));
-		reg.register(new PickupUpgradeItem("advanced_pickup_upgrade", 16));
-	}
-
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
-		IForgeRegistry<ContainerType<?>> r = evt.getRegistry();
-		ContainerType<BackpackContainer> backpackContainerType = IForgeContainerType.create(BackpackContainer::fromBufferItem);
-		ContainerType<BackpackContainer> backpackBlockContainerType = IForgeContainerType.create(BackpackContainer::fromBufferBlock);
-		r.register(backpackContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack"));
-		r.register(backpackBlockContainerType.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_block"));
+		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Basic.TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Advanced.TYPE);
 
-		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.Basic.TYPE);
-		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getRegistryName(), PickupUpgradeContainer.Advanced.TYPE);
-
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-			ScreenManager.registerFactory(backpackContainerType, BackpackScreen::new);
-			ScreenManager.registerFactory(backpackBlockContainerType, BackpackScreen::new);
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
+			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::new);
 
 			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Basic.TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Advanced.TYPE, PickupUpgradeTab.Advanced::new);

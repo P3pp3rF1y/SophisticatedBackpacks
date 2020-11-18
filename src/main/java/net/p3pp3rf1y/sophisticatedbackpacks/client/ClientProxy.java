@@ -57,10 +57,10 @@ public class ClientProxy extends CommonProxy {
 
 	private void clientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND));
-		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK, RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(ModBlocks.IRON_BACKPACK, RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(ModBlocks.GOLD_BACKPACK, RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(ModBlocks.DIAMOND_BACKPACK, RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(ModBlocks.IRON_BACKPACK.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(ModBlocks.GOLD_BACKPACK.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(ModBlocks.DIAMOND_BACKPACK.get(), RenderType.getCutout());
 	}
 
 	private void registerBackpackLayer() {
