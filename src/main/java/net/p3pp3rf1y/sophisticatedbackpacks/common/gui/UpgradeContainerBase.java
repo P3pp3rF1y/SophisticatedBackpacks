@@ -6,13 +6,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> {
+public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> implements IServerUpdater {
 	protected final ArrayList<Slot> slots = new ArrayList<>();
 	private final int containerId;
 	protected final T upgradeWrapper;
@@ -30,14 +31,16 @@ public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> {
 
 	public abstract UpgradeContainerType<T, ? extends UpgradeContainerBase<T>> getType();
 
-	protected void sendBooleanToServer(String key, boolean value) {
+	@Override
+	public void sendBooleanToServer(String key, boolean value) {
 		if (!isClientSide) {
 			return;
 		}
 		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), key, value));
 	}
 
-	protected void sendDataToServer(Supplier<CompoundNBT> supplyData) {
+	@Override
+	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
 		if (!isClientSide) {
 			return;
 		}
@@ -46,9 +49,7 @@ public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> {
 		PacketHandler.sendToServer(new UpgradeDataMessage(data));
 	}
 
-	public void handleMessage(@SuppressWarnings("unused") CompoundNBT data) {
-		//noop
-	}
+	public abstract void handleMessage(CompoundNBT data);
 
 	public ItemStack getUpgradeStack() {
 		return upgradeWrapper.getUpgradeStack();

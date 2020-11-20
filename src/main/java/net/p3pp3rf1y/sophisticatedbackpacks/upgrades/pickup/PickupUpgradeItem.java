@@ -1,10 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
 
-public class PickupUpgradeItem extends ItemBase implements IBackpackUpgradeItem<PickupUpgradeWrapper> {
+public class PickupUpgradeItem extends UpgradeItemBase<PickupUpgradeWrapper> {
 	public static final UpgradeType<PickupUpgradeWrapper> TYPE = new UpgradeType<>(PickupUpgradeWrapper::new);
 
 	private final int filterSlotCount;
@@ -14,7 +13,6 @@ public class PickupUpgradeItem extends ItemBase implements IBackpackUpgradeItem<
 	}
 
 	public PickupUpgradeItem(int filterSlotCount) {
-		super(new Properties().maxStackSize(1));
 		this.filterSlotCount = filterSlotCount;
 	}
 

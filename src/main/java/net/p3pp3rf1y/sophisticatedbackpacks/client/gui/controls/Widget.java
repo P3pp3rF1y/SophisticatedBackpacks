@@ -50,11 +50,7 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
-		return mouseX >= x && mouseX <= x + getWidth() && mouseY >= y && mouseY <= y + getHeight();
-	}
-
-	protected void changeZOffset(int zOffsetDiff) {
-		zOffset += zOffsetDiff;
+		return mouseX >= x && mouseX < x + getWidth() && mouseY >= y && mouseY < y + getHeight();
 	}
 
 	public void setZOffset(int zOffset) {

@@ -28,7 +28,6 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	protected <U extends T> U addChild(U child) {
 		children.add(child);
-		child.setZOffset(zOffset);
 		return child;
 	}
 
@@ -75,18 +74,5 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	@Override
 	public void setListener(@Nullable IGuiEventListener listener) {
 		this.listener = listener;
-	}
-
-	@Override
-	public void changeZOffset(int zOffsetDiff) {
-		super.changeZOffset(zOffsetDiff);
-		children.forEach(child -> child.changeZOffset(zOffsetDiff));
-	}
-
-	@Override
-	public void setZOffset(int zOffset) {
-		int prevZOffset = this.zOffset;
-		super.setZOffset(zOffset);
-		children.forEach(child -> child.changeZOffset(zOffset - prevZOffset));
 	}
 }

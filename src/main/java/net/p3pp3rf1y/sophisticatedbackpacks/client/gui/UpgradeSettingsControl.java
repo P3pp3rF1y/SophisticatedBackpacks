@@ -28,12 +28,12 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 						if (differentTabIsOpen(t)) {
 							openTab.close();
 						}
-						t.changeZOffset(200);
+						t.setZOffset(200);
 						openTab = t;
 					},
 					t -> {
 						if (openTab != null) {
-							openTab.changeZOffset(-200);
+							openTab.setZOffset(0);
 							openTab = null;
 						}
 					},

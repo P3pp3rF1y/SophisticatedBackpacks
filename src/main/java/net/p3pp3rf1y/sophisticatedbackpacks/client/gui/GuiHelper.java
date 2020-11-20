@@ -13,15 +13,19 @@ import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
 import java.util.Collections;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiHelper {
+	public static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
+
 	private GuiHelper() {}
 
 	public static void renderItemInGUI(Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, int zLevelOffset) {

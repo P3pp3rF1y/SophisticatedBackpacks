@@ -6,11 +6,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ItemButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Label;
@@ -24,7 +22,6 @@ import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> extends CompositeWidget<Widget> {
-	protected static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
@@ -99,7 +96,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		minecraft.getTextureManager().bindTexture(UPGRADE_CONTROLS);
+		minecraft.getTextureManager().bindTexture(GuiHelper.UPGRADE_CONTROLS);
 
 		int halfHeight = height / 2;
 		blit(matrixStack, x, y, (float) TEXTURE_WIDTH - width, 0, width, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -140,6 +137,8 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 
 		hideableChildren.forEach(this::addChild);
 		onOpen.accept(this);
+
+		moveSlotsToTab();
 	}
 
 	protected void moveSlotsToTab() {
@@ -167,6 +166,8 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 
 		children.removeAll(hideableChildren);
 		onClose.accept(this);
+
+		moveSlotsOutOfView();
 	}
 
 	private void setOpen(boolean isOpen) {

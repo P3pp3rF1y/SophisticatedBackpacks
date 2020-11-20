@@ -39,15 +39,11 @@ public class Button extends ButtonBase {
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		if (isHovered(mouseX, mouseY)) {
+		if (isMouseOver(mouseX, mouseY)) {
 			GuiHelper.blit(minecraft, matrixStack, x, y, hoveredBackgroundTexture);
 		} else {
 			GuiHelper.blit(minecraft, matrixStack, x, y, backgroundTexture);
 		}
-	}
-
-	private boolean isHovered(int mouseX, int mouseY) {
-		return mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
 	}
 
 	@Override
