@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.IStringSerializable;

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
@@ -13,6 +14,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
+		return new BackpackInventoryHandler(backpack, s -> {});
+	}
+
+	@Override
+	public IItemHandler getFilteredHandler() {
 		return new BackpackInventoryHandler(backpack, s -> {});
 	}
 

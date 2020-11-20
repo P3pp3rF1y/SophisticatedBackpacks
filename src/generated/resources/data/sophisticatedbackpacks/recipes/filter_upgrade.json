@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "RSR",
+        "SBS",
+        "RSR"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "S": {
+            "tag": "forge:string"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:filter_upgrade"
+    }
+}

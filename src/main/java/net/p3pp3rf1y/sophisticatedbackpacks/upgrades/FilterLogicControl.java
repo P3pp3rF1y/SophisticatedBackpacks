@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -17,7 +16,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BooleanToggleBut
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PrimaryMatch;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -44,17 +42,11 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 
 	protected ToggleButton<Boolean> getButton(Position pos, Predicate<Integer> onClick, UV onUV, UV offUV, Supplier<Boolean> getState, String onTooltip, String offTooltip) {
 		ToggleButton<Boolean> blockAllowButton = new BooleanToggleButton(pos, Dimension.SQUARE_18, onClick, new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18),
-				getButtonStateData(onUV, onTooltip),
-				getButtonStateData(offUV, offTooltip),
+				GuiHelper.getButtonStateData(onUV, onTooltip),
+				GuiHelper.getButtonStateData(offUV, offTooltip),
 				getState);
 		blockAllowButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18)));
 		return blockAllowButton;
-	}
-
-	private static ToggleButton.StateData getButtonStateData(UV uv, String tooltip) {
-		return new ToggleButton.StateData(new TextureBlitData(UPGRADE_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, uv, Dimension.SQUARE_16),
-				new TranslationTextComponent(tooltip)
-		);
 	}
 
 	@Override
@@ -73,6 +65,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	}
 
 	public static class Advanced extends FilterLogicControl {
+
 		public Advanced(Position position, IFilteredUpgradeContainer container) {
 			super(position, container);
 
@@ -106,14 +99,14 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 			ToggleButton<PrimaryMatch> blockAllowButton = new ToggleButton<>(new Position(x + 18, y), Dimension.SQUARE_18, button -> {
 				container.setPrimaryMatch(container.getPrimaryMatch().next());
 				return true;
-			}, new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18),
+			}, GuiHelper.DEFAULT_BUTTON_BACKGROUND,
 					ImmutableMap.of(
-							PrimaryMatch.ITEM, getButtonStateData(new UV(80, 48), translUpgradeButton("match_item")),
-							PrimaryMatch.MOD, getButtonStateData(new UV(64, 48), translUpgradeButton("match_mod")),
-							PrimaryMatch.TAGS, getButtonStateData(new UV(96, 32), translUpgradeButton("match_tags"))
+							PrimaryMatch.ITEM, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("match_item")),
+							PrimaryMatch.MOD, GuiHelper.getButtonStateData(new UV(64, 48), translUpgradeButton("match_mod")),
+							PrimaryMatch.TAGS, GuiHelper.getButtonStateData(new UV(96, 32), translUpgradeButton("match_tags"))
 					),
 					container::getPrimaryMatch);
-			blockAllowButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18)));
+			blockAllowButton.setHoveredBackgroundTexture(GuiHelper.DEFAULT_BUTTON_HOVERED_BACKGROUND);
 			return blockAllowButton;
 		}
 

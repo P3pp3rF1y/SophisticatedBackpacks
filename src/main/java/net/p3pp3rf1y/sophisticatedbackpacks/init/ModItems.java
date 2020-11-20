@@ -24,6 +24,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
@@ -45,6 +48,8 @@ public class ModItems {
 			() -> new BackpackItem(108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), ModBlocks.DIAMOND_BACKPACK));
 	public static final RegistryObject<PickupUpgradeItem> PICKUP_UPGRADE = ITEMS.register("pickup_upgrade", PickupUpgradeItem::new);
 	public static final RegistryObject<PickupUpgradeItem> ADVANCED_PICKUP_UPGRADE = ITEMS.register("advanced_pickup_upgrade", () -> new PickupUpgradeItem(16));
+	public static final RegistryObject<FilterUpgradeItem> FILTER_UPGRADE = ITEMS.register("filter_upgrade", FilterUpgradeItem::new);
+	public static final RegistryObject<FilterUpgradeItem> ADVANCED_FILTER_UPGRADE = ITEMS.register("advanced_filter_upgrade", () -> new FilterUpgradeItem(16));
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
@@ -62,6 +67,8 @@ public class ModItems {
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Basic.TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Advanced.TYPE);
+		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.Basic.TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_FILTER_UPGRADE.getId(), FilterUpgradeContainer.Advanced.TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
@@ -69,6 +76,8 @@ public class ModItems {
 
 			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Basic.TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Advanced.TYPE, PickupUpgradeTab.Advanced::new);
+			UpgradeSettingsTabManager.register(FilterUpgradeContainer.Basic.TYPE, FilterUpgradeTab.Basic::new);
+			UpgradeSettingsTabManager.register(FilterUpgradeContainer.Advanced.TYPE, FilterUpgradeTab.Advanced::new);
 		});
 
 	}

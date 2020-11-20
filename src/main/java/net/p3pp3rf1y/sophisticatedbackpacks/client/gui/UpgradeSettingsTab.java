@@ -82,8 +82,9 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 		return upgradeContainer;
 	}
 
-	protected <U extends Widget> void addHideableChild(U widget) {
+	protected <U extends Widget> U addHideableChild(U widget) {
 		hideableChildren.add(widget);
+		return widget;
 	}
 
 	@Override

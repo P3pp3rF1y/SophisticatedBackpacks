@@ -6,12 +6,18 @@
     "item.sophisticatedbackpacks.upgrade_base": "Upgrade Base",
     "item.sophisticatedbackpacks.pickup_upgrade": "Pickup Upgrade",
     "item.sophisticatedbackpacks.advanced_pickup_upgrade": "Advanced Pickup Upgrade",
+    "item.sophisticatedbackpacks.filter_upgrade": "Filter Upgrade",
+    "item.sophisticatedbackpacks.advanced_filter_upgrade": "Advanced Filter Upgrade",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
     "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup",
     "gui.sophisticatedbackpacks.upgrades.advanced_pickup": "Adv. Pickup",
+    "gui.sophisticatedbackpacks.upgrades.filter": "Filter",
+    "gui.sophisticatedbackpacks.upgrades.advanced_filter": "Adv. Filter",
     "gui.sophisticatedbackpacks.upgrades.pickup.tooltip": "Pickup Settings",
     "gui.sophisticatedbackpacks.upgrades.advanced_pickup.tooltip": "Advanced Pickup Settings",
+    "gui.sophisticatedbackpacks.upgrades.filter.tooltip": "Filter Settings",
+    "gui.sophisticatedbackpacks.upgrades.advanced_filter.tooltip": "Advanced Filter Settings",
     "gui.sophisticatedbackpacks.upgrades.buttons.allow": "Allow",
     "gui.sophisticatedbackpacks.upgrades.buttons.block": "Block",
     "gui.sophisticatedbackpacks.upgrades.buttons.match_durability": "Match Durability",
@@ -20,5 +26,8 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.ignore_nbt": "Ignore NBT",
     "gui.sophisticatedbackpacks.upgrades.buttons.match_mod": "Match Mod",
     "gui.sophisticatedbackpacks.upgrades.buttons.match_item": "Match Item",
-    "gui.sophisticatedbackpacks.upgrades.buttons.match_tags": "Match Tags"
+    "gui.sophisticatedbackpacks.upgrades.buttons.match_tags": "Match Tags",
+    "gui.sophisticatedbackpacks.upgrades.buttons.direction_both": "Input & Output",
+    "gui.sophisticatedbackpacks.upgrades.buttons.direction_input": "Input",
+    "gui.sophisticatedbackpacks.upgrades.buttons.direction_output": "Output"
 }

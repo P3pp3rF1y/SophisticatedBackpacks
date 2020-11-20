@@ -1,13 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.Direction;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeWrapper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +27,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
 	private boolean wrappersInitialized = false;
+	@Nullable
+	private IItemHandler filteredHandler = null;
 
 	public BackpackUpgradeHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
 		super(getNumberOfUpgradeSlots(backpack));
@@ -34,6 +43,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);
 		wrappersInitialized = false;
+		filteredHandler = null;
 	}
 
 	private void initializeWrappers() {
@@ -61,6 +71,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		}
 		//noinspection unchecked
 		((List<T>) typeWrappers.get(type)).add(wrapper);
+	}
+
+	private <T extends IUpgradeWrapper> List<T> getTypeWrapper(UpgradeType<T> type) {
+		//noinspection unchecked
+		return (List<T>) typeWrappers.getOrDefault(type, Collections.emptyList());
 	}
 
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
@@ -91,6 +106,52 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public void copyTo(BackpackUpgradeHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
+	}
+
+	public IItemHandler getFilteredHandler(IItemHandler inventoryHandler) {
+		initializeFilteredHandler(inventoryHandler);
+		//noinspection ConstantConditions - can't be null as it gets initialized in the line above
+		return filteredHandler;
+	}
+
+	private void initializeFilteredHandler(IItemHandler inventoryHandler) {
+		initializeWrappers();
+		if (filteredHandler != null) {
+			return;
+		}
+
+		List<FilterLogic> inputFilters = new ArrayList<>();
+		List<FilterLogic> outputFilters = new ArrayList<>();
+
+		addFilters(inputFilters, outputFilters);
+
+		if (inputFilters.isEmpty() && outputFilters.isEmpty()) {
+			filteredHandler = inventoryHandler;
+		} else {
+			filteredHandler = new FilteredItemHandler(inventoryHandler, inputFilters, outputFilters);
+		}
+	}
+
+	private void addFilters(List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
+		List<FilterUpgradeWrapper> filterWrappers = getTypeWrapper(FilterUpgradeItem.TYPE);
+
+		for (FilterUpgradeWrapper wrapper : filterWrappers) {
+			Direction dir = wrapper.getDirection();
+
+			FilterLogic filterLogic = wrapper.getFilterLogic();
+			switch (dir) {
+				case BOTH:
+					inputFilters.add(filterLogic);
+					outputFilters.add(filterLogic);
+					break;
+				case INPUT:
+					inputFilters.add(filterLogic);
+					break;
+				case OUTPUT:
+					outputFilters.add(filterLogic);
+					break;
+			}
+		}
 	}
 }
 

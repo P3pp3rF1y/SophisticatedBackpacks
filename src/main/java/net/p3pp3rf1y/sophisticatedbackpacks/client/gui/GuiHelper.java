@@ -15,9 +15,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +27,8 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class GuiHelper {
 	public static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
+	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18));
+	public static final TextureBlitData DEFAULT_BUTTON_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18);
 
 	private GuiHelper() {}
 
@@ -147,5 +151,11 @@ public class GuiHelper {
 		builder.pos(matrix, (float) x1, (float) y1, (float) z).color(f1, f2, f3, f).endVertex();
 		builder.pos(matrix, (float) x1, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
 		builder.pos(matrix, (float) x2, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
+	}
+
+	public static ToggleButton.StateData getButtonStateData(UV uv, String tooltip) {
+		return new ToggleButton.StateData(new TextureBlitData(UPGRADE_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, uv, Dimension.SQUARE_16),
+				new TranslationTextComponent(tooltip)
+		);
 	}
 }

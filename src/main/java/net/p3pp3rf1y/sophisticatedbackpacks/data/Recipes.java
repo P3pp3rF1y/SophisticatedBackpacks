@@ -91,5 +91,23 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', ModItems.PICKUP_UPGRADE.get())
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.FILTER_UPGRADE.get())
+				.patternLine("RSR")
+				.patternLine("SBS")
+				.patternLine("RSR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('S', Tags.Items.STRING)
+				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_FILTER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("GPG")
+				.patternLine("RRR")
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('P', ModItems.FILTER_UPGRADE.get())
+				.build(consumer);
 	}
 }

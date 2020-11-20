@@ -144,7 +144,7 @@ public class BackpackItem extends ItemBase {
 				if (cap == BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY) {
 					return LazyOptional.of(() -> wrapper).cast();
 				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-					return LazyOptional.of(() -> wrapper.getInventoryHandler()).cast();
+					return LazyOptional.of(() -> wrapper.getFilteredHandler()).cast();
 				}
 				return LazyOptional.empty();
 			}

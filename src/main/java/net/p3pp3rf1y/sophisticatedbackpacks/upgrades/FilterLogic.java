@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemStackHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PrimaryMatch;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;

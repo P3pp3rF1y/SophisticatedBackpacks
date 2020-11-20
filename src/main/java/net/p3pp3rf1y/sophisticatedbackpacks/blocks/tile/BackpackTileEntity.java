@@ -66,7 +66,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> backpackWrapper.getInventoryHandler()).cast();
+			return LazyOptional.of(() -> backpackWrapper.getFilteredHandler()).cast();
 		}
 		return super.getCapability(cap, side);
 	}
