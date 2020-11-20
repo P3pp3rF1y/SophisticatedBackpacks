@@ -13,23 +13,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public abstract class UpgradeContainerBase<T extends IUpgradeWrapper> implements IServerUpdater {
+public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> implements IServerUpdater {
 	protected final ArrayList<Slot> slots = new ArrayList<>();
 	private final int containerId;
-	protected final T upgradeWrapper;
+	protected final W upgradeWrapper;
 	protected final boolean isClientSide;
+	private final UpgradeContainerType<W, C> type;
 
-	protected UpgradeContainerBase(int containerId, T upgradeWrapper, boolean isClientSide) {
+	protected UpgradeContainerBase(int containerId, W upgradeWrapper, boolean isClientSide, UpgradeContainerType<W, C> type) {
 		this.containerId = containerId;
 		this.upgradeWrapper = upgradeWrapper;
 		this.isClientSide = isClientSide;
+		this.type = type;
 	}
 
 	public List<Slot> getSlots() {
 		return slots;
 	}
 
-	public abstract UpgradeContainerType<T, ? extends UpgradeContainerBase<T>> getType();
+	public UpgradeContainerType<W, C> getType() {
+		return type;
+	}
 
 	@Override
 	public void sendBooleanToServer(String key, boolean value) {

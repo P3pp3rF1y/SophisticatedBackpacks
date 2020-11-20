@@ -14,53 +14,24 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
-	protected PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen) {
-		super(upgradeContainer, position, openTabDimension, screen);
+public class PickupUpgradeTab extends UpgradeSettingsTab<PickupUpgradeContainer> {
+	protected PickupUpgradeTab(PickupUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
+		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
 	}
 
 	public static class Basic extends PickupUpgradeTab {
 		public Basic(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 106), screen);
+			super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
+					new TranslationTextComponent(translUpgrade("pickup")), new TranslationTextComponent(translUpgradeTooltip("pickup")));
 			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer()));
-		}
-
-		@Override
-		protected int getSlotsPerRow() {
-			return 3;
-		}
-
-		@Override
-		protected ITextComponent getTabLabel() {
-			return new TranslationTextComponent(translUpgrade("pickup"));
-		}
-
-		@Override
-		protected ITextComponent getClosedTooltip() {
-			return new TranslationTextComponent(translUpgradeTooltip("pickup"));
 		}
 	}
 
 	public static class Advanced extends PickupUpgradeTab {
 		public Advanced(PickupUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 124), screen);
-
+			super(upgradeContainer, position, new Dimension(81, 124), screen, 4,
+					new TranslationTextComponent(translUpgrade("advanced_pickup")), new TranslationTextComponent(translUpgradeTooltip("advanced_pickup")));
 			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer()));
-		}
-
-		@Override
-		protected int getSlotsPerRow() {
-			return 4;
-		}
-
-		@Override
-		protected ITextComponent getTabLabel() {
-			return new TranslationTextComponent(translUpgrade("advanced_pickup"));
-		}
-
-		@Override
-		protected ITextComponent getClosedTooltip() {
-			return new TranslationTextComponent(translUpgradeTooltip("advanced_pickup"));
 		}
 	}
 }

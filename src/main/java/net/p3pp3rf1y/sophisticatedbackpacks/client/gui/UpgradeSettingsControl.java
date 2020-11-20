@@ -22,8 +22,8 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 	public UpgradeSettingsControl(Position position, BackpackScreen screen) {
 		super(position);
 		int i = 0;
-		for (UpgradeContainerBase<?> container : screen.getContainer().getUpgradeContainers()) {
-			UpgradeSettingsTab<UpgradeContainerBase<?>> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
+		for (UpgradeContainerBase<?, ?> container : screen.getContainer().getUpgradeContainers()) {
+			UpgradeSettingsTab<UpgradeContainerBase<?, ?>> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
 			tab.setHandlers(t -> {
 						if (differentTabIsOpen(t)) {
 							openTab.close();
@@ -44,7 +44,7 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		}
 	}
 
-	private boolean isNotCovered(UpgradeSettingsTab<?> open, UpgradeSettingsTab<UpgradeContainerBase<?>> t, boolean checkFullyCovered) {
+	private boolean isNotCovered(UpgradeSettingsTab<?> open, UpgradeSettingsTab<UpgradeContainerBase<?, ?>> t, boolean checkFullyCovered) {
 		if (checkFullyCovered) {
 			return open.getBottomY() < t.getBottomY() || open.getTopY() > t.getTopY();
 		} else {

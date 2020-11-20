@@ -6,11 +6,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgradeContainer;
 
-public abstract class PickupUpgradeContainer extends UpgradeContainerBase<PickupUpgradeWrapper> implements IFilteredUpgradeContainer {
+public class PickupUpgradeContainer extends UpgradeContainerBase<PickupUpgradeWrapper, PickupUpgradeContainer> implements IFilteredUpgradeContainer {
+	public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> BASIC_TYPE = new UpgradeContainerType<>(PickupUpgradeContainer::new);
+	public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> ADVANCED_TYPE = new UpgradeContainerType<>(PickupUpgradeContainer::new);
 	private final FilterLogicContainer filterLogicContainer;
 
-	private PickupUpgradeContainer(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
-		super(containerId, wrapper, isClientSide);
+	private PickupUpgradeContainer(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> type) {
+		super(containerId, wrapper, isClientSide, type);
 		filterLogicContainer = new FilterLogicContainer(wrapper.getFilterLogic(), this, slots::add);
 	}
 
@@ -22,31 +24,5 @@ public abstract class PickupUpgradeContainer extends UpgradeContainerBase<Pickup
 	@Override
 	public void handleMessage(CompoundNBT data) {
 		filterLogicContainer.handleMessage(data);
-	}
-
-	public static class Basic extends PickupUpgradeContainer {
-		public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Basic::new);
-
-		private Basic(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
-			super(containerId, wrapper, isClientSide);
-		}
-
-		@Override
-		public UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> getType() {
-			return TYPE;
-		}
-	}
-
-	public static class Advanced extends PickupUpgradeContainer {
-		public static final UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> TYPE = new UpgradeContainerType<>(Advanced::new);
-
-		private Advanced(int containerId, PickupUpgradeWrapper wrapper, boolean isClientSide) {
-			super(containerId, wrapper, isClientSide);
-		}
-
-		@Override
-		public UpgradeContainerType<PickupUpgradeWrapper, PickupUpgradeContainer> getType() {
-			return TYPE;
-		}
 	}
 }

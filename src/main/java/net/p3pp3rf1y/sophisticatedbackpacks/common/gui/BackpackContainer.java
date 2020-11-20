@@ -38,7 +38,7 @@ public class BackpackContainer extends Container {
 	private final IBackpackWrapper backpackWrapper;
 	private int backpackSlotNumber = -1;
 
-	private final Map<Integer, UpgradeContainerBase<?>> upgradeContainers = new LinkedHashMap<>();
+	private final Map<Integer, UpgradeContainerBase<?, ?>> upgradeContainers = new LinkedHashMap<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
@@ -70,7 +70,7 @@ public class BackpackContainer extends Container {
 
 	private void removeUpgradeSettingsSlots() {
 		List<Integer> slotNumbersToRemove = new ArrayList<>();
-		for (UpgradeContainerBase<?> container : upgradeContainers.values()) {
+		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
 			container.getSlots().forEach(slot -> {
 				slotNumbersToRemove.add(slot.slotNumber);
 				inventorySlots.remove(slot);
@@ -87,7 +87,7 @@ public class BackpackContainer extends Container {
 		upgradeHandler.getSlotWrappers().forEach((slot, wrapper) -> UpgradeContainerRegistry.instantiateContainer(slot, wrapper, isClientSide)
 				.ifPresent(container -> upgradeContainers.put(slot, container)));
 
-		for (UpgradeContainerBase<?> container : upgradeContainers.values()) {
+		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
 			container.getSlots().forEach(this::addSlot);
 		}
 	}
@@ -275,7 +275,7 @@ public class BackpackContainer extends Container {
 		return getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	public Collection<UpgradeContainerBase<?>> getUpgradeContainers() {
+	public Collection<UpgradeContainerBase<?, ?>> getUpgradeContainers() {
 		return upgradeContainers.values();
 	}
 

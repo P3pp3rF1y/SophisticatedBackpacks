@@ -7,12 +7,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-public abstract class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWrapper> implements IFilteredUpgradeContainer {
+public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWrapper, FilterUpgradeContainer> implements IFilteredUpgradeContainer {
+	public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> BASIC_TYPE = new UpgradeContainerType<>(FilterUpgradeContainer::new);
+	public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> ADVANCED_TYPE = new UpgradeContainerType<>(FilterUpgradeContainer::new);
 	private static final String DATA_DIRECTION = "direction";
 	private final FilterLogicContainer filterLogicContainer;
 
-	private FilterUpgradeContainer(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide) {
-		super(containerId, wrapper, isClientSide);
+	private FilterUpgradeContainer(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
+		super(containerId, wrapper, isClientSide, type);
 		filterLogicContainer = new FilterLogicContainer(wrapper.getFilterLogic(), this, slots::add);
 	}
 
@@ -38,32 +40,6 @@ public abstract class FilterUpgradeContainer extends UpgradeContainerBase<Filter
 
 		if (data.contains(DATA_DIRECTION)) {
 			setDirection(Direction.fromName(data.getString(DATA_DIRECTION)));
-		}
-	}
-
-	public static class Basic extends FilterUpgradeContainer {
-		public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> TYPE = new UpgradeContainerType<>(Basic::new);
-
-		private Basic(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide) {
-			super(containerId, wrapper, isClientSide);
-		}
-
-		@Override
-		public UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> getType() {
-			return TYPE;
-		}
-	}
-
-	public static class Advanced extends FilterUpgradeContainer {
-		public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> TYPE = new UpgradeContainerType<>(Advanced::new);
-
-		private Advanced(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide) {
-			super(containerId, wrapper, isClientSide);
-		}
-
-		@Override
-		public UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> getType() {
-			return TYPE;
 		}
 	}
 }

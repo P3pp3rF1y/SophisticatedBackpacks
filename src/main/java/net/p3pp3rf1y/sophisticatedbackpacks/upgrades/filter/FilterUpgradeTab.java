@@ -18,8 +18,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 
 @OnlyIn(Dist.CLIENT)
 public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeContainer> {
-	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen) {
-		super(upgradeContainer, position, openTabDimension, screen);
+	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen,
+			int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
+		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
 
 		ToggleButton<Direction> directionButton = addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), new Dimension(18, 18),
 				button -> {
@@ -39,46 +40,18 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 126), screen);
+			super(upgradeContainer, position, new Dimension(63, 126), screen, 3,
+					new TranslationTextComponent(translUpgrade("filter")), new TranslationTextComponent(translUpgradeTooltip("filter")));
 			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 44), getContainer()));
-		}
-
-		@Override
-		protected int getSlotsPerRow() {
-			return 3;
-		}
-
-		@Override
-		protected ITextComponent getTabLabel() {
-			return new TranslationTextComponent(translUpgrade("filter"));
-		}
-
-		@Override
-		protected ITextComponent getClosedTooltip() {
-			return new TranslationTextComponent(translUpgradeTooltip("filter"));
 		}
 	}
 
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 144), screen);
+			super(upgradeContainer, position, new Dimension(81, 144), screen, 4,
+					new TranslationTextComponent(translUpgrade("advanced_filter")), new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
 
 			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer()));
-		}
-
-		@Override
-		protected int getSlotsPerRow() {
-			return 4;
-		}
-
-		@Override
-		protected ITextComponent getTabLabel() {
-			return new TranslationTextComponent(translUpgrade("advanced_filter"));
-		}
-
-		@Override
-		protected ITextComponent getClosedTooltip() {
-			return new TranslationTextComponent(translUpgradeTooltip("advanced_filter"));
 		}
 	}
 }

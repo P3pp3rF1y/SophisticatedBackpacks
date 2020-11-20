@@ -65,19 +65,19 @@ public class ModItems {
 	}
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
-		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Basic.TYPE);
-		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PickupUpgradeContainer.Advanced.TYPE);
-		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.Basic.TYPE);
-		UpgradeContainerRegistry.register(ADVANCED_FILTER_UPGRADE.getId(), FilterUpgradeContainer.Advanced.TYPE);
+		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PickupUpgradeContainer.BASIC_TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PickupUpgradeContainer.ADVANCED_TYPE);
+		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.BASIC_TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_FILTER_UPGRADE.getId(), FilterUpgradeContainer.ADVANCED_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
 			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::new);
 
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Basic.TYPE, PickupUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.Advanced.TYPE, PickupUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.Basic.TYPE, FilterUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.Advanced.TYPE, FilterUpgradeTab.Advanced::new);
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.BASIC_TYPE, PickupUpgradeTab.Basic::new);
+			UpgradeSettingsTabManager.register(PickupUpgradeContainer.ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
+			UpgradeSettingsTabManager.register(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
+			UpgradeSettingsTabManager.register(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
 		});
 
 	}

@@ -1,7 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -29,6 +32,21 @@ public class FilterLogic {
 					super.onContentsChanged(slot);
 					upgrade.setTagInfo("filters", serializeNBT());
 					save();
+				}
+
+				@Override
+				public void deserializeNBT(CompoundNBT nbt) {
+					setSize(filterSlotCount);
+					ListNBT tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
+					for (int i = 0; i < tagList.size(); i++) {
+						CompoundNBT itemTags = tagList.getCompound(i);
+						int slot = itemTags.getInt("Slot");
+
+						if (slot >= 0 && slot < stacks.size()) {
+							stacks.set(slot, ItemStack.read(itemTags));
+						}
+					}
+					onLoad();
 				}
 			};
 			NBTHelper.getCompound(upgrade, "filters").ifPresent(filterHandler::deserializeNBT);

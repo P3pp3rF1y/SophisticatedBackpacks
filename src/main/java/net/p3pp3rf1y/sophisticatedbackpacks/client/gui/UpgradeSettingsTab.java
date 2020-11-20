@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> extends CompositeWidget<Widget> {
+public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> extends CompositeWidget<Widget> {
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
@@ -35,27 +35,31 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 	private boolean isOpen = false;
 	private final C upgradeContainer;
 	private final Dimension openTabDimension;
+	private final int slotsPerRow;
+	private final ITextComponent tabLabel;
 	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
 	private Consumer<UpgradeSettingsTab<C>> onClose = t -> {};
 	private Predicate<UpgradeSettingsTab<C>> shouldRender = t -> true;
 	private Predicate<UpgradeSettingsTab<C>> shouldShowTooltip = t -> true;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen) {
+	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
 		this.openTabDimension = openTabDimension;
-		closedTooltip = ImmutableList.of(getClosedTooltip().func_241878_f());
+		this.slotsPerRow = slotsPerRow;
+		this.tabLabel = tabLabel;
+		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 				super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 				if (!isOpen && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
-					GuiHelper.setTooltipToRender(closedTooltip);
+					GuiHelper.setTooltipToRender(UpgradeSettingsTab.this.closedTooltip);
 				}
 			}
 		});
-		addHideableChild(new Label(new Position(x + 20, y + 8), getTabLabel()));
+		addHideableChild(new Label(new Position(x + 20, y + 8), tabLabel));
 		slotsLeftX = x + 4;
 		slotsTopY = y + 46;
 		this.screen = screen;
@@ -105,10 +109,6 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 		blit(matrixStack, x - 3, y, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - height, 3, height);
 	}
 
-	protected abstract ITextComponent getTabLabel();
-
-	protected abstract ITextComponent getClosedTooltip();
-
 	@Override
 	public int getWidth() {
 		return width;
@@ -145,13 +145,11 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 	protected void moveSlotsToTab() {
 		int upgradeSlotNumber = 0;
 		for (Slot slot : getContainer().getSlots()) {
-			slot.xPos = slotsLeftX - screen.getGuiLeft() + (upgradeSlotNumber % getSlotsPerRow()) * 18;
-			slot.yPos = slotsTopY - screen.getGuiTop() + (upgradeSlotNumber / getSlotsPerRow()) * 18;
+			slot.xPos = slotsLeftX - screen.getGuiLeft() + (upgradeSlotNumber % slotsPerRow) * 18;
+			slot.yPos = slotsTopY - screen.getGuiTop() + (upgradeSlotNumber / slotsPerRow) * 18;
 			upgradeSlotNumber++;
 		}
 	}
-
-	protected abstract int getSlotsPerRow();
 
 	protected void moveSlotsOutOfView() {
 		getContainer().getSlots().forEach(slot -> {
@@ -178,10 +176,6 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?>> exte
 		} else {
 			onTabClose();
 		}
-	}
-
-	public boolean isOpen() {
-		return isOpen;
 	}
 
 	public Rectangle2d getRectangle() {
