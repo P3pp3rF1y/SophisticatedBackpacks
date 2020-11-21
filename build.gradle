@@ -116,8 +116,8 @@ processResources {
 }
 
 static def getBuildNumber() {
-    if (System.getenv("BUILD_NUMBER") != null) {
-        return System.getenv("BUILD_NUMBER").toString()
+    if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+        return System.getenv("GITHUB_RUN_NUMBER").toString()
     }
     return ""
 }

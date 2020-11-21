@@ -13,10 +13,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.11
-    - name: Generate build number
-      uses: einaregilsson/build-number@v1 
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}    
     - name: Build with Gradle
       run: ./gradlew build
     - name: Publish to Github Packages
