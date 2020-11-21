@@ -5,6 +5,7 @@ import net.minecraft.data.CustomRecipeBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.data.ShapedRecipeBuilder;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
@@ -12,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.function.Consumer;
 
@@ -109,5 +111,37 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', ModItems.FILTER_UPGRADE.get())
 				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DID")
+				.patternLine("IPI")
+				.patternLine("R L")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('L', Tags.Items.GEMS_LAPIS)
+				.key('P', ModItems.PICKUP_UPGRADE.get())
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DID")
+				.patternLine("IPI")
+				.patternLine("R L")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('L', Tags.Items.GEMS_LAPIS)
+				.key('P', ModItems.ADVANCED_PICKUP_UPGRADE.get())
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine(" D ")
+				.patternLine("GMG")
+				.patternLine("RRR")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('M', ModItems.MAGNET_UPGRADE.get())
+				.build(consumer, new ResourceLocation(RegistryHelper.getModRegistryName("advanced_magnet_upgrade_from_basic")));
 	}
 }

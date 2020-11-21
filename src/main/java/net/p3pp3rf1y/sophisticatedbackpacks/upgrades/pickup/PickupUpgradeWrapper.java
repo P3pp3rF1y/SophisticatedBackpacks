@@ -22,13 +22,18 @@ public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrappe
 
 	@Override
 	public ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpackWrapper, boolean simulate) {
+		if (isInCooldown(world)) {
+			return stack;
+		}
+
 		if (!filterLogic.matchesFilter(stack)) {
 			return stack;
 		}
+
 		int originalCount = stack.getCount();
 		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryHandler(), simulate);
 		if (originalCount == ret.getCount()) {
-			setCooldown(world.getGameTime() + FULL_COOLDOWN);
+			setCooldown(world, FULL_COOLDOWN);
 		}
 
 		return ret;

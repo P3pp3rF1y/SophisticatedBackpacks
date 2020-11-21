@@ -6,6 +6,4 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
 public interface IPickupResponseUpgrade {
 	ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpack, boolean simulate);
-
-	long getCooldownTime();
 }

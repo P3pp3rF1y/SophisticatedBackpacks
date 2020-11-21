@@ -1,0 +1,28 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "pattern": [
+        "DID",
+        "IPI",
+        "R L"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "L": {
+            "tag": "forge:gems/lapis"
+        },
+        "P": {
+            "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:advanced_magnet_upgrade"
+    }
+}

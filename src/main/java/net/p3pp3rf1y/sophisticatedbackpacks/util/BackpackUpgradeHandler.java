@@ -26,6 +26,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final Consumer<ItemStack> backpackSaveHandler;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
+	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
 	private boolean wrappersInitialized = false;
 	@Nullable
 	private IItemHandler filteredHandler = null;
@@ -53,6 +54,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		wrappersInitialized = true;
 		slotWrappers.clear();
 		typeWrappers.clear();
+		interfaceWrappers.clear();
 
 		InventoryHelper.iterate(this, (slot, upgrade) -> {
 			if (upgrade.isEmpty() || !(upgrade.getItem() instanceof IBackpackUpgradeItem<?>)) {
@@ -80,14 +82,18 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
 		initializeWrappers();
-		List<T> ret = new ArrayList<>();
-		for (IUpgradeWrapper wrapper : slotWrappers.values()) {
-			if (upgradeClass.isInstance(wrapper)) {
-				//noinspection unchecked
-				ret.add((T) wrapper);
+		if (!interfaceWrappers.containsKey(upgradeClass)) {
+			List<T> ret = new ArrayList<>();
+			for (IUpgradeWrapper wrapper : slotWrappers.values()) {
+				if (upgradeClass.isInstance(wrapper)) {
+					//noinspection unchecked
+					ret.add((T) wrapper);
+				}
 			}
+			interfaceWrappers.put(upgradeClass, ret);
 		}
-		return ret;
+		//noinspection unchecked
+		return (List<T>) interfaceWrappers.get(upgradeClass);
 	}
 
 	public Map<Integer, IUpgradeWrapper> getSlotWrappers() {

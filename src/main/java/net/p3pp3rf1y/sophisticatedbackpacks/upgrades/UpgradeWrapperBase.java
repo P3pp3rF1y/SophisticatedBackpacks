@@ -1,9 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.LongNBT;
+import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.function.Consumer;
 
@@ -11,6 +10,8 @@ public class UpgradeWrapperBase<W extends IUpgradeWrapper, T extends UpgradeItem
 	protected final Consumer<ItemStack> upgradeSaveHandler;
 	protected ItemStack upgrade;
 	protected T upgradeItem;
+
+	private long cooldown = 0;
 
 	public UpgradeWrapperBase(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		this.upgrade = upgrade;
@@ -28,11 +29,15 @@ public class UpgradeWrapperBase<W extends IUpgradeWrapper, T extends UpgradeItem
 		upgradeSaveHandler.accept(upgrade);
 	}
 
-	protected void setCooldown(long time) {
-		upgrade.setTagInfo("cooldownTime", LongNBT.valueOf(time));
+	protected void setCooldown(World world, int time) {
+		cooldown = world.getGameTime() + time;
 	}
 
 	public long getCooldownTime() {
-		return NBTHelper.getLong(upgrade, "cooldownTime").orElse(0L);
+		return cooldown;
+	}
+
+	public boolean isInCooldown(World world) {
+		return getCooldownTime() > world.getGameTime();
 	}
 }

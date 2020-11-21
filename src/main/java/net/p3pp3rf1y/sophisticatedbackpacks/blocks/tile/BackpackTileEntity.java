@@ -9,6 +9,7 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
@@ -59,7 +60,8 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	@Override
 	public void tick() {
-		//noop for now
+		//noinspection ConstantConditions - world is always non null at this point
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(world, getPos(), backpackWrapper));
 	}
 
 	@Nonnull

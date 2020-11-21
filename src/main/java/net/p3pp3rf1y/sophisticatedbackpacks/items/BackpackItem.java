@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.items;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -26,6 +27,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -155,6 +157,18 @@ public class BackpackItem extends ItemBase {
 				}
 			}
 		};
+	}
+
+	@Override
+	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+		if (!(entityIn instanceof PlayerEntity)) {
+			return;
+		}
+		PlayerEntity player = (PlayerEntity) entityIn;
+		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(
+				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(player.world, player.getPosition(), wrapper))
+		);
+		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
 
 	public ScreenProperties getScreenProperties() {

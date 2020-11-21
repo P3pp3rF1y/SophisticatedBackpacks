@@ -110,7 +110,6 @@ public class BackpackContainer extends Container {
 				@Override
 				public void onSlotChanged() {
 					super.onSlotChanged();
-
 					removeUpgradeSettingsSlots();
 					upgradeContainers.clear();
 					addUpgradeSettingsContainers(isClientSide);
