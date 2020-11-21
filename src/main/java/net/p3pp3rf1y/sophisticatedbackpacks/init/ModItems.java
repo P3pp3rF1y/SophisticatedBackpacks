@@ -17,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
@@ -24,19 +25,20 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeWrapper;
 
 public class ModItems {
 	private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SophisticatedBackpacks.MOD_ID);
 
 	private static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, SophisticatedBackpacks.MOD_ID);
-
 	private ModItems() {}
+
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
 			() -> new BackpackItem(27, 1, ModBlocks.BACKPACK));
@@ -64,9 +66,12 @@ public class ModItems {
 		modBus.addGenericListener(IRecipeSerializer.class, ModItems::registerRecipeSerializers);
 	}
 
+	private static final UpgradeContainerType<PickupUpgradeWrapper, FilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+	private static final UpgradeContainerType<PickupUpgradeWrapper, FilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_ADVANCED_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
-		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PickupUpgradeContainer.BASIC_TYPE);
-		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PickupUpgradeContainer.ADVANCED_TYPE);
+		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PICKUP_ADVANCED_TYPE);
 		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.BASIC_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_FILTER_UPGRADE.getId(), FilterUpgradeContainer.ADVANCED_TYPE);
 
@@ -74,8 +79,8 @@ public class ModItems {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
 			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::new);
 
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.BASIC_TYPE, PickupUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(PickupUpgradeContainer.ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
+			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
+			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
 			UpgradeSettingsTabManager.register(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
 		});
