@@ -1,13 +1,13 @@
 {
     "type": "sophisticatedbackpacks:upgrade_next_tier",
     "pattern": [
-        "DID",
+        "EIE",
         "IPI",
         "R L"
     ],
     "key": {
-        "D": {
-            "tag": "forge:gems/diamond"
+        "E": {
+            "tag": "forge:ender_pearls"
         },
         "I": {
             "tag": "forge:ingots/iron"

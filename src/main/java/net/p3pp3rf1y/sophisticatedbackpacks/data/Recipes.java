@@ -113,10 +113,10 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
-				.patternLine("DID")
+				.patternLine("EIE")
 				.patternLine("IPI")
 				.patternLine("R L")
-				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('E', Tags.Items.ENDER_PEARLS)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('L', Tags.Items.GEMS_LAPIS)
@@ -124,10 +124,10 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
-				.patternLine("DID")
+				.patternLine("EIE")
 				.patternLine("IPI")
 				.patternLine("R L")
-				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('E', Tags.Items.ENDER_PEARLS)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('L', Tags.Items.GEMS_LAPIS)
