@@ -10,18 +10,26 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class FilterLogic {
 	private final ItemStack upgrade;
 	private final Consumer<ItemStack> saveHandler;
 	private final int filterSlotCount;
+	private final Predicate<ItemStack> isItemValid;
 	private FilterItemStackHandler filterHandler = null;
 
 	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
+		this(upgrade, saveHandler, filterSlotCount, s -> true);
+	}
+
+	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Predicate<ItemStack> isItemValid) {
 		this.upgrade = upgrade;
 		this.saveHandler = saveHandler;
 		this.filterSlotCount = filterSlotCount;
+		this.isItemValid = isItemValid;
 	}
 
 	public ItemStackHandler getFilterHandler() {
@@ -47,6 +55,11 @@ public class FilterLogic {
 						}
 					}
 					onLoad();
+				}
+
+				@Override
+				public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+					return stack.isEmpty() || isItemValid.test(stack);
 				}
 			};
 			NBTHelper.getCompound(upgrade, "filters").ifPresent(filterHandler::deserializeNBT);

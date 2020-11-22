@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -13,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,7 +34,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	@Override
-	public void tick(World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
 		if (isInCooldown(world)) {
 			return;
 		}

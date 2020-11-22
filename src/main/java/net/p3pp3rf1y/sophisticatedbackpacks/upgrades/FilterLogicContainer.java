@@ -1,12 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class FilterLogicContainer {
@@ -21,7 +23,12 @@ public class FilterLogicContainer {
 		this.filterLogic = filterLogic;
 		this.serverUpdater = serverUpdater;
 		ItemStackHandler filterHandler = filterLogic.getFilterHandler();
-		InventoryHelper.iterate(filterHandler, (slot, stack) -> addSlot.accept(new FilterSlotItemHandler(filterHandler, slot, -100, -100)));
+		InventoryHelper.iterate(filterHandler, (slot, stack) -> addSlot.accept(new FilterSlotItemHandler(filterHandler, slot, -100, -100) {
+			@Override
+			public boolean isItemValid(@Nonnull ItemStack stack) {
+				return filterHandler.isItemValid(slot, stack);
+			}
+		}));
 	}
 
 	public boolean isAllowList() {

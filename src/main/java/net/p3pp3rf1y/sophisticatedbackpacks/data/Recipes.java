@@ -5,6 +5,7 @@ import net.minecraft.data.CustomRecipeBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.data.ShapedRecipeBuilder;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
@@ -143,5 +144,18 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('M', ModItems.MAGNET_UPGRADE.get())
 				.build(consumer, new ResourceLocation(RegistryHelper.getModRegistryName("advanced_magnet_upgrade_from_basic")));
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.FEEDING_UPGRADE.get())
+				.patternLine(" C ")
+				.patternLine("ABM")
+				.patternLine(" E ")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('C', Items.GOLDEN_CARROT)
+				.key('A', Items.GOLDEN_APPLE)
+				.key('M', Items.GLISTERING_MELON_SLICE)
+				.key('E', Tags.Items.ENDER_PEARLS)
+				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
 	}
 }

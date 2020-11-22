@@ -242,11 +242,12 @@ public class BackpackContainer extends Container {
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
 		if (slotId == backpackSlotNumber) {
 			return ItemStack.EMPTY;
-		} else if (slotId >= getFirstUpgradeSettingsSlot()) {
+		} else if (slotId >= getFirstUpgradeSettingsSlot() && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
 			ItemStack currentStack = player.inventory.getItemStack().copy();
 			if (currentStack.getCount() > 1) {
 				currentStack.setCount(1);
 			}
+
 			getSlot(slotId).putStack(currentStack);
 			return ItemStack.EMPTY;
 		}

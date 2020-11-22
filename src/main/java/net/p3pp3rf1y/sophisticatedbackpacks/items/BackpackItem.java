@@ -161,12 +161,13 @@ public class BackpackItem extends ItemBase {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (!(entityIn instanceof PlayerEntity)) {
+		if (worldIn.isRemote || !(entityIn instanceof PlayerEntity)) {
 			return;
 		}
 		PlayerEntity player = (PlayerEntity) entityIn;
 		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(
-				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(player.world, player.getPosition(), wrapper))
+				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition(), wrapper))
 		);
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
