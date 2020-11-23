@@ -40,6 +40,11 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		}, new UV(32, 32), new UV(48, 32), container::isAllowList, translUpgradeButton("allow"), translUpgradeButton("block")));
 	}
 
+	public FilterLogicControl showPrimaryMatchButton() {
+		addChild(getPrimaryMatchButton());
+		return this;
+	}
+
 	protected ToggleButton<Boolean> getButton(Position pos, Predicate<Integer> onClick, UV onUV, UV offUV, Supplier<Boolean> getState, String onTooltip, String offTooltip) {
 		ToggleButton<Boolean> blockAllowButton = new BooleanToggleButton(pos, Dimension.SQUARE_18, onClick, new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18),
 				GuiHelper.getButtonStateData(onUV, onTooltip),
@@ -49,9 +54,24 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		return blockAllowButton;
 	}
 
+	private ToggleButton<PrimaryMatch> getPrimaryMatchButton() {
+		ToggleButton<PrimaryMatch> blockAllowButton = new ToggleButton<>(new Position(x + 18, y), Dimension.SQUARE_18, button -> {
+			container.setPrimaryMatch(container.getPrimaryMatch().next());
+			return true;
+		}, GuiHelper.DEFAULT_BUTTON_BACKGROUND,
+				ImmutableMap.of(
+						PrimaryMatch.ITEM, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("match_item")),
+						PrimaryMatch.MOD, GuiHelper.getButtonStateData(new UV(64, 48), translUpgradeButton("match_mod")),
+						PrimaryMatch.TAGS, GuiHelper.getButtonStateData(new UV(96, 32), translUpgradeButton("match_tags"))
+				),
+				container::getPrimaryMatch);
+		blockAllowButton.setHoveredBackgroundTexture(GuiHelper.DEFAULT_BUTTON_HOVERED_BACKGROUND);
+		return blockAllowButton;
+	}
+
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.blit(minecraft, matrixStack, x, y + 21, SLOT_BACKGROUND_9_SLOTS);
+		GuiHelper.blit(minecraft, matrixStack, x, y + 21, container.getFilterSlots() == 9 ? SLOT_BACKGROUND_9_SLOTS : SLOT_BACKGROUND_16_SLOTS);
 	}
 
 	@Override
@@ -69,14 +89,9 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		public Advanced(Position position, IFilteredUpgradeContainer container) {
 			super(position, container);
 
-			addChild(getPrimaryMatchButton());
+			showPrimaryMatchButton();
 			addChild(getDurabilityButton());
 			addChild(getNbtButton());
-		}
-
-		@Override
-		protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-			GuiHelper.blit(minecraft, matrixStack, x, y + 21, SLOT_BACKGROUND_16_SLOTS);
 		}
 
 		private ToggleButton<Boolean> getDurabilityButton() {
@@ -93,21 +108,6 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 						return true;
 					}, new UV(64, 32), new UV(80, 32), container::shouldMatchNbt,
 					translUpgradeButton("match_nbt"), translUpgradeButton("ignore_nbt"));
-		}
-
-		private ToggleButton<PrimaryMatch> getPrimaryMatchButton() {
-			ToggleButton<PrimaryMatch> blockAllowButton = new ToggleButton<>(new Position(x + 18, y), Dimension.SQUARE_18, button -> {
-				container.setPrimaryMatch(container.getPrimaryMatch().next());
-				return true;
-			}, GuiHelper.DEFAULT_BUTTON_BACKGROUND,
-					ImmutableMap.of(
-							PrimaryMatch.ITEM, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("match_item")),
-							PrimaryMatch.MOD, GuiHelper.getButtonStateData(new UV(64, 48), translUpgradeButton("match_mod")),
-							PrimaryMatch.TAGS, GuiHelper.getButtonStateData(new UV(96, 32), translUpgradeButton("match_tags"))
-					),
-					container::getPrimaryMatch);
-			blockAllowButton.setHoveredBackgroundTexture(GuiHelper.DEFAULT_BUTTON_HOVERED_BACKGROUND);
-			return blockAllowButton;
 		}
 
 		@Override

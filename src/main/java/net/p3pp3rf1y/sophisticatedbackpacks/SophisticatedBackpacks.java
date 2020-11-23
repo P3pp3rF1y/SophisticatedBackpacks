@@ -1,11 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.item.ItemGroup;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
@@ -13,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopStorage;
@@ -33,8 +38,9 @@ public class SophisticatedBackpacks {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
-
 		ModLoot.init();
+
+		MinecraftForge.EVENT_BUS.addListener(SophisticatedBackpacks::serverStarted);
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
@@ -43,4 +49,10 @@ public class SophisticatedBackpacks {
 		ModCompat.initCompats();
 	}
 
+	private static void serverStarted(FMLServerStartedEvent event) {
+		ServerWorld world = event.getServer().getWorld(World.OVERWORLD);
+		if (world != null) {
+			CraftingHelper.setWorld(world);
+		}
+	}
 }

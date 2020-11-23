@@ -1,9 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 
 import java.util.List;
@@ -30,6 +33,43 @@ public class InventoryHelper {
 			remainingStack = inventory.insertItem(slot, remainingStack, simulate);
 		}
 		return remainingStack;
+	}
+
+	public static ItemStack extractFromInventory(Item item, int count, IItemHandler inventory, boolean simulate) {
+		ItemStack ret = ItemStack.EMPTY;
+		for (int slot = 0; slot < inventory.getSlots() && ret.getCount() < count; slot++) {
+			ItemStack slotStack = inventory.getStackInSlot(slot);
+			if (slotStack.getItem() == item && (ret.isEmpty() || ItemHandlerHelper.canItemStacksStack(ret, slotStack))) {
+				int toExtract = Math.min(slotStack.getCount(), count - ret.getCount());
+				ItemStack extractedStack = inventory.extractItem(slot, toExtract, simulate);
+				if (ret.isEmpty()) {
+					ret = extractedStack;
+				} else {
+					ret.setCount(ret.getCount() + extractedStack.getCount());
+				}
+			}
+		}
+		return ret;
+	}
+
+	public static ItemStack extractFromInventory(ItemStack stack, IItemHandler inventory, boolean simulate) {
+		int extractedCount = 0;
+		for (int slot = 0; slot < inventory.getSlots() && extractedCount < stack.getCount(); slot++) {
+			ItemStack slotStack = inventory.getStackInSlot(slot);
+			if (ItemHandlerHelper.canItemStacksStack(stack, slotStack)) {
+				int toExtract = Math.min(slotStack.getCount(), stack.getCount() - extractedCount);
+				extractedCount += inventory.extractItem(slot, toExtract, simulate).getCount();
+			}
+		}
+
+		if (extractedCount == 0) {
+			return ItemStack.EMPTY;
+		}
+
+		ItemStack result = stack.copy();
+		result.setCount(extractedCount);
+
+		return result;
 	}
 
 	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
@@ -64,4 +104,18 @@ public class InventoryHelper {
 		}
 		return ret;
 	}
+
+	public static boolean anyStackTagMatches(ItemStack stackA, ItemStack stackB) {
+		return anyItemTagMatches(stackA.getItem(), stackB.getItem());
+	}
+
+	public static boolean anyItemTagMatches(Item itemA, Item itemB) {
+		for (ResourceLocation tag : itemA.getTags()) {
+			if (itemB.getTags().contains(tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

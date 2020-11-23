@@ -2,8 +2,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
@@ -35,5 +37,22 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+		ItemStack ret = super.insertItem(slot, stack, simulate);
+
+		if (ret == stack) {
+			return ret;
+		}
+
+		if (!simulate) {
+			backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+					.ifPresent(wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class).forEach(u -> u.onInsert(this, slot)));
+		}
+
+		return ret;
 	}
 }

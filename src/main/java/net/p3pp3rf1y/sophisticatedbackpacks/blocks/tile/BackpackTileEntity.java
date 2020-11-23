@@ -27,13 +27,14 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = new BackpackWrapper(backpack, this);
+		backpackWrapper = new BackpackWrapper(backpack);
+		backpackWrapper.linkToTileEntity(this);
 	}
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
-		backpackWrapper = new BackpackWrapper(ItemStack.read(nbt.getCompound("backpackData")), this);
+		setBackpack(ItemStack.read(nbt.getCompound("backpackData")));
 	}
 
 	@Override

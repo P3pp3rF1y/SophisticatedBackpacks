@@ -1,0 +1,25 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "pattern": [
+        " D ",
+        "GCG",
+        "RRR"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "C": {
+            "item": "sophisticatedbackpacks:compacting_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:advanced_compacting_upgrade"
+    }
+}

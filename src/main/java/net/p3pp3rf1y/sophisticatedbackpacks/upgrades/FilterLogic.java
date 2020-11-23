@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
@@ -95,7 +94,7 @@ public class FilterLogic {
 			if (!ItemStack.areItemsEqual(stack, filter)) {
 				return false;
 			}
-		} else if (primaryMatch == PrimaryMatch.TAGS && !anyTagMatches(stack, filter)) {
+		} else if (primaryMatch == PrimaryMatch.TAGS && !InventoryHelper.anyStackTagMatches(stack, filter)) {
 			return false;
 		}
 
@@ -104,15 +103,6 @@ public class FilterLogic {
 		}
 
 		return !shouldMatchNbt() || ItemStack.areItemStackTagsEqual(stack, filter);
-	}
-
-	public boolean anyTagMatches(ItemStack stack, ItemStack filter) {
-		for (ResourceLocation tag : stack.getItem().getTags()) {
-			if (filter.getItem().getTags().contains(tag)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public void setAllowList(boolean isAllowList) {

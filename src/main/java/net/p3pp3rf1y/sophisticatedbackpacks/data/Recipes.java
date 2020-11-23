@@ -21,6 +21,9 @@ import java.util.function.Consumer;
 import static net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper.getModRegistryName;
 
 public class Recipes extends net.minecraft.data.RecipeProvider {
+
+	private static final String HAS_UPGRADE_BASE_CRITERION = "has_upgrade_base";
+
 	public Recipes(DataGenerator generatorIn) {
 		super(generatorIn);
 	}
@@ -72,7 +75,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('S', Tags.Items.STRING)
 				.key('P', Blocks.STICKY_PISTON)
-				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE.get())
@@ -102,7 +105,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('B', ModItems.UPGRADE_BASE.get())
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('S', Tags.Items.STRING)
-				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_FILTER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -154,8 +157,28 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('A', Items.GOLDEN_APPLE)
 				.key('M', Items.GLISTERING_MELON_SLICE)
 				.key('E', Tags.Items.ENDER_PEARLS)
-				.addCriterion("has_upgrade_base", hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
+		ShapedRecipeBuilder.shapedRecipe(ModItems.COMPACTING_UPGRADE.get())
+				.patternLine("IPI")
+				.patternLine("PBP")
+				.patternLine("RPR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('P', Items.PISTON)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_COMPACTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine(" D ")
+				.patternLine("GCG")
+				.patternLine("RRR")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('C', ModItems.COMPACTING_UPGRADE.get())
+				.build(consumer);
 	}
 }

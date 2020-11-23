@@ -27,8 +27,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 		this.backpack = backpack;
 	}
 
-	public BackpackWrapper(ItemStack backpack, BackpackTileEntity te) {
-		this(backpack);
+	@Override
+	public void linkToTileEntity(BackpackTileEntity te) {
 		backpackSaveHandler = stack -> te.markDirty();
 	}
 

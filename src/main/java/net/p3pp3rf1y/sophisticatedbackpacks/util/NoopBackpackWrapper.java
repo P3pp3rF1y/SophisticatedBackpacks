@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
@@ -11,6 +12,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	private NoopBackpackWrapper() {}
 
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
+
+	@Override
+	public void linkToTileEntity(BackpackTileEntity te) {
+		//noop
+	}
 
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {

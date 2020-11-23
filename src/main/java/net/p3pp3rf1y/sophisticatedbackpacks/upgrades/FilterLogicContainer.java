@@ -47,6 +47,10 @@ public class FilterLogicContainer {
 		return filterLogic.getPrimaryMatch();
 	}
 
+	public int getFilterSlots() {
+		return filterLogic.getFilterHandler().getSlots();
+	}
+
 	public void setAllowList(boolean isAllowList) {
 		filterLogic.setAllowList(isAllowList);
 		serverUpdater.sendBooleanToServer(DATA_IS_ALLOW_LIST, isAllowList);
