@@ -180,5 +180,26 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('C', ModItems.COMPACTING_UPGRADE.get())
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.VOID_UPGRADE.get())
+				.patternLine(" E ")
+				.patternLine("OBO")
+				.patternLine("ROR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('E', Tags.Items.ENDER_PEARLS)
+				.key('O', Tags.Items.OBSIDIAN)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_VOID_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine(" D ")
+				.patternLine("GVG")
+				.patternLine("RRR")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('V', ModItems.VOID_UPGRADE.get())
+				.build(consumer);
 	}
 }

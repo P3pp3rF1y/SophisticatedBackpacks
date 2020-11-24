@@ -12,6 +12,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopBackpackWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +28,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = new BackpackWrapper(backpack);
+		backpackWrapper = backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper.linkToTileEntity(this);
 	}
 

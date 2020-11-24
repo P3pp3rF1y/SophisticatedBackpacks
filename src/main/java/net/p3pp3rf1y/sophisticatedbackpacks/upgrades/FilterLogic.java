@@ -19,6 +19,7 @@ public class FilterLogic {
 	private final int filterSlotCount;
 	private final Predicate<ItemStack> isItemValid;
 	private FilterItemStackHandler filterHandler = null;
+	private boolean allowListDefault = false;
 
 	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
 		this(upgrade, saveHandler, filterSlotCount, s -> true);
@@ -29,6 +30,10 @@ public class FilterLogic {
 		this.saveHandler = saveHandler;
 		this.filterSlotCount = filterSlotCount;
 		this.isItemValid = isItemValid;
+	}
+
+	public void setAllowByDefault() {
+		allowListDefault = true;
 	}
 
 	public ItemStackHandler getFilterHandler() {
@@ -111,7 +116,7 @@ public class FilterLogic {
 	}
 
 	public boolean isAllowList() {
-		return NBTHelper.getBoolean(upgrade, "isAllowList").orElse(false);
+		return NBTHelper.getBoolean(upgrade, "isAllowList").orElse(allowListDefault);
 	}
 
 	public boolean shouldMatchDurability() {

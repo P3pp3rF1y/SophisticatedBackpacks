@@ -25,7 +25,12 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 	}
 
 	@Override
-	public void onInsert(BackpackInventoryHandler inventoryHandler, int slot) {
+	public ItemStack onBeforeInsert(BackpackInventoryHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+		return stack;
+	}
+
+	@Override
+	public void onAfterInsert(BackpackInventoryHandler inventoryHandler, int slot) {
 		ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 
 		if (!filterLogic.matchesFilter(slotStack)) {

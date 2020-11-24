@@ -6,6 +6,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
@@ -42,7 +43,23 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	@Nonnull
 	@Override
 	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-		ItemStack ret = super.insertItem(slot, stack, simulate);
+		ItemStack ret = backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				.map(wrapper -> {
+					List<IInsertResponseUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class);
+					ItemStack remaining = stack;
+					for (IInsertResponseUpgrade upgrade : wrappers) {
+						remaining = upgrade.onBeforeInsert(this, slot, remaining, simulate);
+						if (remaining.isEmpty()) {
+							return ItemStack.EMPTY;
+						}
+					}
+					return remaining;
+				}).orElse(stack);
+		if (ret.isEmpty()) {
+			return ret;
+		}
+
+		ret = super.insertItem(slot, ret, simulate);
 
 		if (ret == stack) {
 			return ret;
@@ -50,7 +67,8 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 		if (!simulate) {
 			backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-					.ifPresent(wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class).forEach(u -> u.onInsert(this, slot)));
+					.ifPresent(wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class)
+							.forEach(u -> u.onAfterInsert(this, slot)));
 		}
 
 		return ret;
