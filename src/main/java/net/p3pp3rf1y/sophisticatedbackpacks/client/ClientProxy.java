@@ -8,6 +8,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -23,6 +24,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper;
 
 import java.util.Map;
 
@@ -44,7 +46,9 @@ public class ClientProxy extends CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(this::loadComplete);
 		modBus.addListener(this::clientSetup);
-		MinecraftForge.EVENT_BUS.addListener(ClientProxy::handleKeyInputEvent);
+		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addListener(ClientProxy::handleKeyInputEvent);
+		eventBus.addListener(ClientProxy::onPlayerJoinServer);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
@@ -67,5 +71,9 @@ public class ClientProxy extends CommonProxy {
 		Map<String, PlayerRenderer> skinMap = Minecraft.getInstance().getRenderManager().getSkinMap();
 		PlayerRenderer render = skinMap.get("default");
 		render.addLayer(new BackpackLayerRenderer(render));
+	}
+
+	private static void onPlayerJoinServer(ClientPlayerNetworkEvent.LoggedInEvent evt) {
+		CraftingHelper.setWorld(Minecraft.getInstance().world);
 	}
 }
