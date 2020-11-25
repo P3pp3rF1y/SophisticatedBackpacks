@@ -27,6 +27,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
@@ -37,7 +38,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class BackpackItem extends ItemBase {
@@ -86,6 +89,10 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.PASS;
 		}
 
+		if (tryInventoryInteraction(context)) {
+			return ActionResultType.SUCCESS;
+		}
+
 		BlockItemUseContext blockItemUseContext = new BlockItemUseContext(context);
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
@@ -111,6 +118,28 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 		return super.onItemUse(context);
+	}
+
+	private boolean tryInventoryInteraction(ItemUseContext context) {
+		return WorldHelper.getTile(context.getWorld(), context.getPos())
+				.map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, context.getFace())
+						.map(itemHandler -> {
+							ItemStack backpack = context.getItem();
+							return backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+									.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper))
+									.orElse(false);
+						}).orElse(false)
+				).orElse(false);
+	}
+
+	@Nonnull
+	private Boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
+		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
+		if (wrappers.isEmpty()) {
+			return false;
+		}
+		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(wrapper, itemHandler));
+		return true;
 	}
 
 	protected boolean canPlace(BlockItemUseContext context, BlockState state) {

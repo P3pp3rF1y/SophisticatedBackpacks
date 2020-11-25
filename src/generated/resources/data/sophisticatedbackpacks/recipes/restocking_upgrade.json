@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " P ",
+        "IBI",
+        "RCR"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "C": {
+            "tag": "forge:chests/wooden"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "P": {
+            "item": "minecraft:sticky_piston"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:restocking_upgrade"
+    }
+}

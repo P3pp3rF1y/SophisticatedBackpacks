@@ -201,5 +201,27 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.VOID_UPGRADE.get())
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.RESTOCKING_UPGRADE.get())
+				.patternLine(" P ")
+				.patternLine("IBI")
+				.patternLine("RCR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('C', Tags.Items.CHESTS_WOODEN)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('P', Items.STICKY_PISTON)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_RESTOCKING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine(" D ")
+				.patternLine("GVG")
+				.patternLine("RRR")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('V', ModItems.RESTOCKING_UPGRADE.get())
+				.build(consumer);
 	}
 }

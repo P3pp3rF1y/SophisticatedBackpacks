@@ -118,4 +118,14 @@ public class InventoryHelper {
 		return false;
 	}
 
+	public static void transfer(IItemHandler handlerA, IItemHandler handlerB) {
+		for (int slot = 0; slot < handlerA.getSlots(); slot++) {
+			ItemStack slotStack = handlerA.getStackInSlot(slot);
+			ItemStack resultStack = insertIntoInventory(slotStack, handlerB, true);
+			int countToExtract = slotStack.getCount() - resultStack.getCount();
+			if (countToExtract > 0 && handlerA.extractItem(slot, countToExtract, true).getCount() == countToExtract) {
+				InventoryHelper.insertIntoInventory(handlerA.extractItem(slot, countToExtract, false), handlerB, false);
+			}
+		}
+	}
 }

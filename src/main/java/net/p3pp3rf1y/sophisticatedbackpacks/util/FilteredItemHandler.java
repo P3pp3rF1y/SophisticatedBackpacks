@@ -7,7 +7,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-class FilteredItemHandler implements IItemHandler {
+public class FilteredItemHandler implements IItemHandler {
 	private final IItemHandler inventoryHandler;
 	private final List<FilterLogic> inputFilters;
 	private final List<FilterLogic> outputFilters;
