@@ -16,10 +16,10 @@
             "tag": "forge:dusts/redstone"
         },
         "V": {
-            "item": "sophisticatedbackpacks:restocking_upgrade"
+            "item": "sophisticatedbackpacks:deposit_upgrade"
         }
     },
     "result": {
-        "item": "sophisticatedbackpacks:advanced_restocking_upgrade"
+        "item": "sophisticatedbackpacks:advanced_deposit_upgrade"
     }
 }
