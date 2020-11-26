@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.depositing.restocking;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;

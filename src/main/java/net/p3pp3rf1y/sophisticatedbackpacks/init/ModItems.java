@@ -29,9 +29,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.depositing.restocking.DepositUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.depositing.restocking.DepositUpgradeTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.depositing.restocking.DepositUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeWrapper;
@@ -44,6 +44,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet.MagnetUpgradeWrapper
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup.PickupUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeWrapper;
@@ -80,6 +83,7 @@ public class ModItems {
 	public static final RegistryObject<RestockUpgradeItem> ADVANCED_RESTOCK_UPGRADE = ITEMS.register("advanced_restock_upgrade", () -> new RestockUpgradeItem(16));
 	public static final RegistryObject<DepositUpgradeItem> DEPOSIT_UPGRADE = ITEMS.register("deposit_upgrade", DepositUpgradeItem::new);
 	public static final RegistryObject<DepositUpgradeItem> ADVANCED_DEPOSIT_UPGRADE = ITEMS.register("advanced_deposit_upgrade", () -> new DepositUpgradeItem(16));
+	public static final RegistryObject<RefillUpgradeItem> REFILL_UPGRADE = ITEMS.register("refill_upgrade", RefillUpgradeItem::new);
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
@@ -107,6 +111,7 @@ public class ModItems {
 	private static final UpgradeContainerType<RestockUpgradeWrapper, FilteredUpgradeContainer<RestockUpgradeWrapper>> ADVANCED_RESTOCK_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<DepositUpgradeWrapper, FilteredUpgradeContainer<DepositUpgradeWrapper>> DEPOSIT_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<DepositUpgradeWrapper, FilteredUpgradeContainer<DepositUpgradeWrapper>> ADVANCED_DEPOSIT_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+	private static final UpgradeContainerType<RefillUpgradeWrapper, FilteredUpgradeContainer<RefillUpgradeWrapper>> REFILL_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -124,6 +129,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(ADVANCED_RESTOCK_UPGRADE.getId(), ADVANCED_RESTOCK_TYPE);
 		UpgradeContainerRegistry.register(DEPOSIT_UPGRADE.getId(), DEPOSIT_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_DEPOSIT_UPGRADE.getId(), ADVANCED_DEPOSIT_TYPE);
+		UpgradeContainerRegistry.register(REFILL_UPGRADE.getId(), REFILL_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
@@ -144,6 +150,7 @@ public class ModItems {
 			UpgradeSettingsTabManager.register(ADVANCED_RESTOCK_TYPE, RestockUpgradeTab.Advanced::new);
 			UpgradeSettingsTabManager.register(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
+			UpgradeSettingsTabManager.register(REFILL_TYPE, RefillUpgradeTab::new);
 		});
 
 	}

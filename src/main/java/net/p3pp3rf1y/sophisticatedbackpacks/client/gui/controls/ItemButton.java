@@ -11,13 +11,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
 public class ItemButton extends ButtonBase {
 	private final ItemStack stack;
 
-	public ItemButton(Position position, Predicate<Integer> onClick, ItemStack stack) {
+	public ItemButton(Position position, Consumer<Integer> onClick, ItemStack stack) {
 		super(position, new Dimension(16, 16), onClick);
 		this.stack = stack;
 	}

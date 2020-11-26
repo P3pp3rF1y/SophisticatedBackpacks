@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.depositing.restocking;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -24,7 +24,7 @@ public class DepositUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContain
 		public Basic(FilteredUpgradeContainer<DepositUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
 					new TranslationTextComponent(translUpgrade("deposit")), new TranslationTextComponent(translUpgradeTooltip("deposit")));
-			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer()));
+			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
 		}
 	}
 
@@ -32,7 +32,7 @@ public class DepositUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContain
 		public Advanced(FilteredUpgradeContainer<DepositUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen, 4,
 					new TranslationTextComponent(translUpgrade("advanced_deposit")), new TranslationTextComponent(translUpgradeTooltip("advanced_deposit")));
-			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer()));
+			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer(), 4));
 		}
 	}
 }
