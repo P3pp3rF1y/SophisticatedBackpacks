@@ -106,16 +106,7 @@ public class BackpackContainer extends Container {
 		int yPosition = lastInventoryRowY - (22 + 22 * (numberOfSlots - 1));
 
 		while (slotIndex < upgradeHandler.getSlots()) {
-			addSlot(new SlotItemHandler(upgradeHandler, slotIndex, -18, yPosition) {
-				@Override
-				public void onSlotChanged() {
-					super.onSlotChanged();
-					removeUpgradeSettingsSlots();
-					upgradeContainers.clear();
-					addUpgradeSettingsContainers(isClientSide);
-					onUpgradesChanged();
-				}
-			});
+			addSlot(new BackpackUpgradeSlot(upgradeHandler, slotIndex, yPosition, isClientSide));
 
 			slotIndex++;
 			yPosition += 22;
@@ -140,15 +131,7 @@ public class BackpackContainer extends Container {
 		while (slotIndex < inventoryHandler.getSlots()) {
 			int lineIndex = slotIndex % getSlotsOnLine();
 			int finalSlotIndex = slotIndex;
-			addSlot(new SlotItemHandler(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition) {
-				@Override
-				public void onSlotChanged() {
-					super.onSlotChanged();
-					// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
-					// however it does notify the slot of change
-					backpackWrapper.getInventoryHandler().saveInventory();
-				}
-			});
+			addSlot(new BackpackInventorySlot(inventoryHandler, finalSlotIndex, lineIndex, yPosition));
 
 			slotIndex++;
 			if (slotIndex % getSlotsOnLine() == 0) {
@@ -283,6 +266,36 @@ public class BackpackContainer extends Container {
 		int containerId = data.getInt("containerId");
 		if (upgradeContainers.containsKey(containerId)) {
 			upgradeContainers.get(containerId).handleMessage(data);
+		}
+	}
+
+	public class BackpackUpgradeSlot extends SlotItemHandler {
+		private final boolean isClientSide;
+
+		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition, boolean isClientSide) {
+			super(upgradeHandler, slotIndex, -18, yPosition);
+			this.isClientSide = isClientSide;
+		}
+
+		@Override
+		public void onSlotChanged() {
+			super.onSlotChanged();
+			removeUpgradeSettingsSlots();
+			upgradeContainers.clear();
+			addUpgradeSettingsContainers(isClientSide);
+			onUpgradesChanged();
+		}
+	}
+
+	private class BackpackInventorySlot extends SlotItemHandler {
+		public BackpackInventorySlot(BackpackInventoryHandler inventoryHandler, int finalSlotIndex, int lineIndex, int yPosition) {super(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition);}
+
+		@Override
+		public void onSlotChanged() {
+			super.onSlotChanged();
+			// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
+			// however it does notify the slot of change
+			backpackWrapper.getInventoryHandler().saveInventory();
 		}
 	}
 }
