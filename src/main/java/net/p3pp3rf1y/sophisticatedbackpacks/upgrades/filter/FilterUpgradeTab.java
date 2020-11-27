@@ -11,29 +11,28 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeContainer> {
+	private static final ButtonDefinition.Toggle<Direction> DIRECTION = createToggleButtonDefinition(
+			ImmutableMap.of(
+					Direction.BOTH, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("direction_both")),
+					Direction.INPUT, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("direction_input")),
+					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"))
+			));
+
 	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen,
 			int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
 
-		ToggleButton<Direction> directionButton = addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), new Dimension(18, 18),
-				button -> {
-					getContainer().setDirection(getContainer().getDirection().next());
-					return true;
-				}, GuiHelper.DEFAULT_BUTTON_BACKGROUND,
-				ImmutableMap.of(
-						Direction.BOTH, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("direction_both")),
-						Direction.INPUT, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("direction_input")),
-						Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"))
-				),
-				() -> getContainer().getDirection()));
-		directionButton.setHoveredBackgroundTexture(GuiHelper.DEFAULT_BUTTON_HOVERED_BACKGROUND);
+		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), DIRECTION,
+				button -> getContainer().setDirection(getContainer().getDirection().next()), () -> getContainer().getDirection()));
 
 		slotsTopY = y + 66;
 	}
@@ -42,7 +41,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 126), screen, 3,
 					new TranslationTextComponent(translUpgrade("filter")), new TranslationTextComponent(translUpgradeTooltip("filter")));
-			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 44), getContainer()));
+			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer(), 3));
 		}
 	}
 
@@ -51,7 +50,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 			super(upgradeContainer, position, new Dimension(81, 144), screen, 4,
 					new TranslationTextComponent(translUpgrade("advanced_filter")), new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
 
-			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer()));
+			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer(), 4));
 		}
 	}
 }

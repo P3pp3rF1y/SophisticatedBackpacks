@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,10 +14,12 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 @OnlyIn(Dist.CLIENT)
-public class FeedingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<FeedingUpgradeWrapper>> {
-	public FeedingUpgradeTab(FilteredUpgradeContainer<FeedingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
-				new TranslationTextComponent(translUpgrade("feeding")), new TranslationTextComponent(translUpgradeTooltip("feeding")));
-		addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+public class RefillUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<RefillUpgradeWrapper>> {
+	public RefillUpgradeTab(FilteredUpgradeContainer<RefillUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
+		super(upgradeContainer, position, new Dimension(63, 67), screen, 3, new TranslationTextComponent(translUpgrade("refill")), new TranslationTextComponent(translUpgradeTooltip("refill")));
+
+		addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 3));
+
+		slotsTopY = y + 25;
 	}
 }

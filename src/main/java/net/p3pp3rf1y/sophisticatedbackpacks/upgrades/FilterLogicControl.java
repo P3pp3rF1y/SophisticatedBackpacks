@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -12,112 +11,104 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BooleanToggleButton;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.HashMap;
+import java.util.Map;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.UPGRADE_CONTROLS;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeButton;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.*;
 
 @OnlyIn(Dist.CLIENT)
 public class FilterLogicControl extends CompositeWidget<Widget> {
-	private static final String BACKPACK_54 = "textures/gui/backpack_54.png";
-	private static final TextureBlitData SLOT_BACKGROUND_9_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(54, 54));
-	private static final TextureBlitData SLOT_BACKGROUND_16_SLOTS = new TextureBlitData(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_54), new UV(7, 17), new Dimension(72, 72));
+	private static final ResourceLocation BACKPACK_54 = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png");
+	private static final Map<Integer, TextureBlitData> SLOT_BACKGROUNDS = new HashMap<>();
 
 	protected final FilterLogicContainer container;
+	private final TextureBlitData slotsBackground;
+	private final Button[] showButtons;
+	private final int height;
+	private final int width;
+	private final int slotsTopYOffset;
 
-	public FilterLogicControl(Position position, IFilteredUpgradeContainer filteredContainer) {
+	public FilterLogicControl(Position position, IFilteredUpgradeContainer filteredContainer, int slotsPerRow, Button... showButtons) {
 		super(position);
 		container = filteredContainer.getFilterLogicContainer();
-		addChild(getButton(new Position(x, y), button -> {
-			container.setAllowList(!container.isAllowList());
-			return true;
-		}, new UV(32, 32), new UV(48, 32), container::isAllowList, translUpgradeButton("allow"), translUpgradeButton("block")));
+		slotsBackground = getSlotBackground(container.getFilterSlots(), slotsPerRow);
+		this.showButtons = showButtons;
+
+		if (shouldShow(ALLOW_LIST)) {
+			addChild(new ToggleButton<>(new Position(x, y), ButtonDefinitions.ALLOW_LIST, button -> container.setAllowList(!container.isAllowList()), container::isAllowList));
+		}
+		if (shouldShow(PRIMARY_MATCH)) {
+			addChild(new ToggleButton<>(new Position(x + 18, y), ButtonDefinitions.PRIMARY_MATCH,
+					button -> container.setPrimaryMatch(container.getPrimaryMatch().next()), container::getPrimaryMatch));
+		}
+		if (shouldShow(DURABILITY)) {
+			addChild(new ToggleButton<>(new Position(x + 36, y), ButtonDefinitions.MATCH_DURABILITY,
+					button -> container.setMatchDurability(!container.shouldMatchDurability()), container::shouldMatchDurability));
+		}
+		if (shouldShow(NBT)) {
+			addChild(new ToggleButton<>(new Position(x + 54, y), ButtonDefinitions.MATCH_NBT,
+					button -> container.setMatchNbt(!container.shouldMatchNbt()), container::shouldMatchNbt));
+		}
+
+		width = slotsPerRow * 18;
+		slotsTopYOffset = showButtons.length > 0 ? 21 : 0;
+		height = container.getFilterSlots() / slotsPerRow * 18 + slotsTopYOffset;
 	}
 
-	public FilterLogicControl showPrimaryMatchButton() {
-		addChild(getPrimaryMatchButton());
-		return this;
-	}
-
-	protected ToggleButton<Boolean> getButton(Position pos, Predicate<Integer> onClick, UV onUV, UV offUV, Supplier<Boolean> getState, String onTooltip, String offTooltip) {
-		ToggleButton<Boolean> blockAllowButton = new BooleanToggleButton(pos, Dimension.SQUARE_18, onClick, new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18),
-				GuiHelper.getButtonStateData(onUV, onTooltip),
-				GuiHelper.getButtonStateData(offUV, offTooltip),
-				getState);
-		blockAllowButton.setHoveredBackgroundTexture(new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18)));
-		return blockAllowButton;
-	}
-
-	private ToggleButton<PrimaryMatch> getPrimaryMatchButton() {
-		ToggleButton<PrimaryMatch> blockAllowButton = new ToggleButton<>(new Position(x + 18, y), Dimension.SQUARE_18, button -> {
-			container.setPrimaryMatch(container.getPrimaryMatch().next());
-			return true;
-		}, GuiHelper.DEFAULT_BUTTON_BACKGROUND,
-				ImmutableMap.of(
-						PrimaryMatch.ITEM, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("match_item")),
-						PrimaryMatch.MOD, GuiHelper.getButtonStateData(new UV(64, 48), translUpgradeButton("match_mod")),
-						PrimaryMatch.TAGS, GuiHelper.getButtonStateData(new UV(96, 32), translUpgradeButton("match_tags"))
-				),
-				container::getPrimaryMatch);
-		blockAllowButton.setHoveredBackgroundTexture(GuiHelper.DEFAULT_BUTTON_HOVERED_BACKGROUND);
-		return blockAllowButton;
+	private boolean shouldShow(Button button) {
+		for (Button showButton : showButtons) {
+			if (showButton == button) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.blit(minecraft, matrixStack, x, y + 21, container.getFilterSlots() == 9 ? SLOT_BACKGROUND_9_SLOTS : SLOT_BACKGROUND_16_SLOTS);
+		GuiHelper.blit(minecraft, matrixStack, x, y + slotsTopYOffset, slotsBackground);
+	}
+
+	private static TextureBlitData getSlotBackground(int filterSlots, int slotsPerRow) {
+		int key = filterSlots * 31 + slotsPerRow;
+		if (!SLOT_BACKGROUNDS.containsKey(key)) {
+			int rows = filterSlots / slotsPerRow + (filterSlots % slotsPerRow > 0 ? 1 : 0);
+			SLOT_BACKGROUNDS.put(key, new TextureBlitData(BACKPACK_54, new UV(7, 17), new Dimension(slotsPerRow * 18, rows * 18)));
+		}
+		return SLOT_BACKGROUNDS.get(key);
 	}
 
 	@Override
 	public int getWidth() {
-		return 54;
+		return width;
 	}
 
 	@Override
 	public int getHeight() {
-		return 75;
+		return height;
+	}
+
+	public static class Basic extends FilterLogicControl {
+		public Basic(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
+			super(position, container, slotsPerRow, ALLOW_LIST);
+		}
 	}
 
 	public static class Advanced extends FilterLogicControl {
-
-		public Advanced(Position position, IFilteredUpgradeContainer container) {
-			super(position, container);
-
-			showPrimaryMatchButton();
-			addChild(getDurabilityButton());
-			addChild(getNbtButton());
+		public Advanced(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
+			super(position, container, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
 		}
+	}
 
-		private ToggleButton<Boolean> getDurabilityButton() {
-			return getButton(new Position(x + 36, y), button -> {
-						container.setMatchDurability(!container.shouldMatchDurability());
-						return true;
-					}, new UV(32, 48), new UV(48, 48), container::shouldMatchDurability,
-					translUpgradeButton("match_durability"), translUpgradeButton("ignore_durability"));
-		}
-
-		private ToggleButton<Boolean> getNbtButton() {
-			return getButton(new Position(x + 54, y), button -> {
-						container.setMatchNbt(!container.shouldMatchNbt());
-						return true;
-					}, new UV(64, 32), new UV(80, 32), container::shouldMatchNbt,
-					translUpgradeButton("match_nbt"), translUpgradeButton("ignore_nbt"));
-		}
-
-		@Override
-		public int getWidth() {
-			return 72;
-		}
-
-		@Override
-		public int getHeight() {
-			return 93;
-		}
+	public enum Button {
+		ALLOW_LIST,
+		PRIMARY_MATCH,
+		DURABILITY,
+		NBT
 	}
 }

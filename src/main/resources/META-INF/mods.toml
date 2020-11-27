@@ -7,25 +7,25 @@
 modLoader="javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the minecraft version (without the 1.)
-loaderVersion="[14,)" #mandatory
+loaderVersion = "[14,)" #mandatory
 
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="" #optional
 
 # A URL to refer people to when problems occur with this mod
-issueTrackerURL="https://github.com/P3pp3rF1y/SophisticatedBackpacks/issues" #optional
+issueTrackerURL = "https://github.com/P3pp3rF1y/SophisticatedBackpacks/issues" #optional
 
 # A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="" #optional
+displayURL = "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks" #optional
 
 # License
-license="GNU General Public License v3.0"
+license = "GNU General Public License v3.0"
 
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="logo.png" #optional
+logoFile = "logo.png" #optional
 
 # A text field displayed in the mod UI
-credits="Created by P3pp3rF1y with art help from WinDanesz." #optional
+credits = "Created by P3pp3rF1y with art help from WinDanesz." #optional
 
 # A text field displayed in the mod UI
 authors="P3pp3rF1y, WinDanesz" #optional

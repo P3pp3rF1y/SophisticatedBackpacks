@@ -13,6 +13,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgrade;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.ALLOW_LIST;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.PRIMARY_MATCH;
 
 @OnlyIn(Dist.CLIENT)
 public class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<CompactingUpgradeWrapper>> {
@@ -24,7 +26,7 @@ public class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeCont
 		public Basic(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
 					new TranslationTextComponent(translUpgrade("compacting")), new TranslationTextComponent(translUpgradeTooltip("compacting")));
-			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer()));
+			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
 		}
 	}
 
@@ -32,7 +34,7 @@ public class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeCont
 		public Advanced(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen, 4,
 					new TranslationTextComponent(translUpgrade("advanced_compacting")), new TranslationTextComponent(translUpgradeTooltip("advanced_compacting")));
-			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer()).showPrimaryMatchButton());
+			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 4, ALLOW_LIST, PRIMARY_MATCH));
 		}
 	}
 }

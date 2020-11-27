@@ -8,10 +8,12 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -87,10 +89,27 @@ public class InventoryHelper {
 	}
 
 	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn) {
+		iterate(handler, actOn, () -> false);
+	}
+
+	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn, BooleanSupplier shouldExit) {
 		for (int slot = 0; slot < handler.getSlots(); slot++) {
 			ItemStack stack = handler.getStackInSlot(slot);
 			actOn.accept(slot, stack);
+			if (shouldExit.getAsBoolean()) {
+				break;
+			}
 		}
+	}
+
+	public static int getCountMissingInHandler(IItemHandler itemHandler, ItemStack filter, int expectedCount) {
+		MutableInt missingCount = new MutableInt(expectedCount);
+		iterate(itemHandler, (slot, stack) -> {
+			if (ItemHandlerHelper.canItemStacksStack(stack, filter)) {
+				missingCount.subtract(Math.min(stack.getCount(), missingCount.getValue()));
+			}
+		}, () -> missingCount.getValue() == 0);
+		return missingCount.getValue();
 	}
 
 	public static <T> T iterate(IItemHandler handler, BiFunction<Integer, ItemStack, T> getFromSlotStack, Supplier<T> supplyDefault, Predicate<T> shouldExit) {
@@ -118,4 +137,33 @@ public class InventoryHelper {
 		return false;
 	}
 
+	public static void transfer(IItemHandler handlerA, IItemHandler handlerB) {
+		for (int slot = 0; slot < handlerA.getSlots(); slot++) {
+			ItemStack slotStack = handlerA.getStackInSlot(slot);
+			if (slotStack.isEmpty()) {
+				continue;
+			}
+
+			ItemStack resultStack = insertIntoInventory(slotStack, handlerB, true);
+			int countToExtract = slotStack.getCount() - resultStack.getCount();
+			if (countToExtract > 0 && handlerA.extractItem(slot, countToExtract, true).getCount() == countToExtract) {
+				InventoryHelper.insertIntoInventory(handlerA.extractItem(slot, countToExtract, false), handlerB, false);
+			}
+		}
+	}
+
+	public static void moveBetweenInventories(IItemHandler extractFromHandler, IItemHandler insertIntoHandler, ItemStack filter, int count) {
+		ItemStack toMove = filter.copy();
+		toMove.setCount(count);
+		ItemStack extracted = extractFromInventory(toMove, extractFromHandler, true);
+		if (extracted.isEmpty()) {
+			return;
+		}
+		ItemStack remaining = insertIntoInventory(extracted, insertIntoHandler, true);
+		if (remaining.getCount() == extracted.getCount()) {
+			return;
+		}
+		toMove.setCount(extracted.getCount() - remaining.getCount());
+		insertIntoInventory(extractFromInventory(toMove, extractFromHandler, false), insertIntoHandler, false);
+	}
 }

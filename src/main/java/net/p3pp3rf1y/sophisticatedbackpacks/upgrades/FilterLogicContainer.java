@@ -23,12 +23,7 @@ public class FilterLogicContainer {
 		this.filterLogic = filterLogic;
 		this.serverUpdater = serverUpdater;
 		ItemStackHandler filterHandler = filterLogic.getFilterHandler();
-		InventoryHelper.iterate(filterHandler, (slot, stack) -> addSlot.accept(new FilterSlotItemHandler(filterHandler, slot, -100, -100) {
-			@Override
-			public boolean isItemValid(@Nonnull ItemStack stack) {
-				return filterHandler.isItemValid(slot, stack);
-			}
-		}));
+		InventoryHelper.iterate(filterHandler, (slot, stack) -> addSlot.accept(new FilterLogicSlot(filterHandler, slot)));
 	}
 
 	public boolean isAllowList() {
@@ -92,4 +87,19 @@ public class FilterLogicContainer {
 		return false;
 	}
 
+	public static class FilterLogicSlot extends FilterSlotItemHandler {
+		private final ItemStackHandler filterHandler;
+		private final Integer slot;
+
+		public FilterLogicSlot(ItemStackHandler filterHandler, Integer slot) {
+			super(filterHandler, slot, -100, -100);
+			this.filterHandler = filterHandler;
+			this.slot = slot;
+		}
+
+		@Override
+		public boolean isItemValid(@Nonnull ItemStack stack) {
+			return filterHandler.isItemValid(slot, stack);
+		}
+	}
 }

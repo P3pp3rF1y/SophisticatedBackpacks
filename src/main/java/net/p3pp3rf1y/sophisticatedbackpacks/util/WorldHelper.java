@@ -10,6 +10,10 @@ import java.util.Optional;
 public class WorldHelper {
 	private WorldHelper() {}
 
+	public static Optional<TileEntity> getTile(@Nullable IBlockReader world, BlockPos pos) {
+		return getTile(world, pos, TileEntity.class);
+	}
+
 	public static <T> Optional<T> getTile(@Nullable IBlockReader world, BlockPos pos, Class<T> teClass) {
 		if (world == null) {
 			return Optional.empty();

@@ -18,9 +18,11 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,12 +34,24 @@ public class GuiHelper {
 
 	private GuiHelper() {}
 
-	public static void renderItemInGUI(Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, int zLevelOffset) {
+	public static void renderItemInGUI(MatrixStack matrixStack, Minecraft minecraft, ItemStack stack, int xPosition, int yPosition) {
+		renderItemInGUI(matrixStack, minecraft, stack, xPosition, yPosition, false);
+	}
+
+	public static void renderItemInGUI(MatrixStack matrixStack, Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, boolean renderOverlay) {
 		ItemRenderer itemRenderer = minecraft.getItemRenderer();
 		float originalZLevel = itemRenderer.zLevel;
-		itemRenderer.zLevel += zLevelOffset;
+		itemRenderer.zLevel += getZOffset(matrixStack);
 		itemRenderer.renderItemAndEffectIntoGUI(stack, xPosition, yPosition);
+		if (renderOverlay) {
+			itemRenderer.renderItemOverlayIntoGUI(minecraft.fontRenderer, stack, xPosition, yPosition, null);
+		}
 		itemRenderer.zLevel = originalZLevel;
+	}
+
+	private static int getZOffset(MatrixStack matrixStack) {
+		Float zOffset = ObfuscationReflectionHelper.getPrivateValue(Matrix4f.class, matrixStack.getLast().getMatrix(), "field_226586_l_");
+		return zOffset == null ? 0 : zOffset.intValue();
 	}
 
 	public static void blit(Minecraft minecraft, MatrixStack matrixStack, int x, int y, TextureBlitData texData) {
@@ -46,9 +60,16 @@ public class GuiHelper {
 	}
 
 	private static List<? extends IReorderingProcessor> tooltipToRender = Collections.emptyList();
+	@Nullable
+	private static FontRenderer tooltipRenderFont = null;
 
 	public static void setTooltipToRender(List<IReorderingProcessor> tooltip) {
+		setTooltipToRender(tooltip, null);
+	}
+
+	public static void setTooltipToRender(List<IReorderingProcessor> tooltip, @Nullable FontRenderer font) {
 		tooltipToRender = tooltip;
+		tooltipRenderFont = font;
 	}
 
 	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY) {
@@ -56,7 +77,7 @@ public class GuiHelper {
 			return;
 		}
 
-		FontRenderer font = minecraft.fontRenderer;
+		FontRenderer font = tooltipRenderFont == null ? minecraft.fontRenderer : tooltipRenderFont;
 		int windowWidth = minecraft.getMainWindow().getScaledWidth();
 		int windowHeight = minecraft.getMainWindow().getScaledHeight();
 
@@ -110,6 +131,7 @@ public class GuiHelper {
 		matrixStack.pop();
 
 		tooltipToRender = Collections.emptyList();
+		tooltipRenderFont = null;
 	}
 
 	private static int getMaxLineWidth(List<? extends IReorderingProcessor> tooltips, FontRenderer font) {

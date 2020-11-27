@@ -27,6 +27,11 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		saveInventory();
 	}
 
+	@Override
+	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+		return !(stack.getItem() instanceof BackpackItem);
+	}
+
 	public void saveInventory() {
 		backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);

@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
@@ -39,9 +40,16 @@ public class FilterLogic {
 	public ItemStackHandler getFilterHandler() {
 		if (filterHandler == null) {
 			filterHandler = new FilterItemStackHandler(filterSlotCount) {
+				//Added here only as a way to prevent inventory tweaks renewed from duplicating upgrades should really be removed
+				private final NonNullList<ItemStack> stacksPreviousState = NonNullList.withSize(filterSlotCount, ItemStack.EMPTY);
+
 				@Override
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
+					if (stacksPreviousState.get(slot).isEmpty() && stacks.get(slot).isEmpty()) {
+						return;
+					}
+					stacksPreviousState.set(slot, stacks.get(slot));
 					upgrade.setTagInfo("filters", serializeNBT());
 					save();
 				}
@@ -55,7 +63,9 @@ public class FilterLogic {
 						int slot = itemTags.getInt("Slot");
 
 						if (slot >= 0 && slot < stacks.size()) {
-							stacks.set(slot, ItemStack.read(itemTags));
+							ItemStack stack = ItemStack.read(itemTags);
+							stacks.set(slot, stack);
+							stacksPreviousState.set(slot, stack);
 						}
 					}
 					onLoad();
