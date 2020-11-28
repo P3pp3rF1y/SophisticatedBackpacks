@@ -36,6 +36,8 @@
     "item.sophisticatedbackpacks.advanced_deposit_upgrade.tooltip": "Deposits items from backpack into shift right clicked inventory\nHas more filtering options",
     "item.sophisticatedbackpacks.refill_upgrade": "Refill Upgrade",
     "item.sophisticatedbackpacks.refill_upgrade.tooltip": "Keeps refilling stack of selected items in players inventory",
+    "item.sophisticatedbackpacks.inception_upgrade": "Inception Upgrade",
+    "item.sophisticatedbackpacks.inception_upgrade.tooltip": "Makes it possible to put backpacks into the backpack",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
     "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup",

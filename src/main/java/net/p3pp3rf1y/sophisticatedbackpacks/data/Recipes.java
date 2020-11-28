@@ -245,5 +245,16 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.DEPOSIT_UPGRADE.get())
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.INCEPTION_UPGRADE.get())
+				.patternLine("ESE")
+				.patternLine("DBD")
+				.patternLine("EDE")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('S', Tags.Items.NETHER_STARS)
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('E', Items.ENDER_EYE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
 	}
 }
