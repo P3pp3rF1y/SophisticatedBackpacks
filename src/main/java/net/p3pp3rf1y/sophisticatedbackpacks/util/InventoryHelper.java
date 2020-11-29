@@ -20,18 +20,21 @@ import java.util.function.Supplier;
 public class InventoryHelper {
 	private InventoryHelper() {}
 
-	public static void copyTo(IItemHandlerModifiable handler, IItemHandlerModifiable otherHandler) {
-		for (int slot = 0; slot < handler.getSlots() && slot < otherHandler.getSlots(); slot++) {
-			ItemStack slotStack = handler.getStackInSlot(slot);
+	public static void copyTo(IItemHandlerModifiable handlerA, IItemHandlerModifiable handlerB) {
+		int slotsA = handlerA.getSlots();
+		int slotsB = handlerB.getSlots();
+		for (int slot = 0; slot < slotsA && slot < slotsB; slot++) {
+			ItemStack slotStack = handlerA.getStackInSlot(slot);
 			if (!slotStack.isEmpty()) {
-				otherHandler.setStackInSlot(slot, slotStack);
+				handlerB.setStackInSlot(slot, slotStack);
 			}
 		}
 	}
 
 	public static ItemStack insertIntoInventory(ItemStack stack, IItemHandler inventory, boolean simulate) {
 		ItemStack remainingStack = stack.copy();
-		for (int slot = 0; slot < inventory.getSlots() && !remainingStack.isEmpty(); slot++) {
+		int slots = inventory.getSlots();
+		for (int slot = 0; slot < slots && !remainingStack.isEmpty(); slot++) {
 			remainingStack = inventory.insertItem(slot, remainingStack, simulate);
 		}
 		return remainingStack;
@@ -39,7 +42,8 @@ public class InventoryHelper {
 
 	public static ItemStack extractFromInventory(Item item, int count, IItemHandler inventory, boolean simulate) {
 		ItemStack ret = ItemStack.EMPTY;
-		for (int slot = 0; slot < inventory.getSlots() && ret.getCount() < count; slot++) {
+		int slots = inventory.getSlots();
+		for (int slot = 0; slot < slots && ret.getCount() < count; slot++) {
 			ItemStack slotStack = inventory.getStackInSlot(slot);
 			if (slotStack.getItem() == item && (ret.isEmpty() || ItemHandlerHelper.canItemStacksStack(ret, slotStack))) {
 				int toExtract = Math.min(slotStack.getCount(), count - ret.getCount());
@@ -56,7 +60,8 @@ public class InventoryHelper {
 
 	public static ItemStack extractFromInventory(ItemStack stack, IItemHandler inventory, boolean simulate) {
 		int extractedCount = 0;
-		for (int slot = 0; slot < inventory.getSlots() && extractedCount < stack.getCount(); slot++) {
+		int slots = inventory.getSlots();
+		for (int slot = 0; slot < slots && extractedCount < stack.getCount(); slot++) {
 			ItemStack slotStack = inventory.getStackInSlot(slot);
 			if (ItemHandlerHelper.canItemStacksStack(stack, slotStack)) {
 				int toExtract = Math.min(slotStack.getCount(), stack.getCount() - extractedCount);
@@ -93,7 +98,8 @@ public class InventoryHelper {
 	}
 
 	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn, BooleanSupplier shouldExit) {
-		for (int slot = 0; slot < handler.getSlots(); slot++) {
+		int slots = handler.getSlots();
+		for (int slot = 0; slot < slots; slot++) {
 			ItemStack stack = handler.getStackInSlot(slot);
 			actOn.accept(slot, stack);
 			if (shouldExit.getAsBoolean()) {
@@ -114,7 +120,8 @@ public class InventoryHelper {
 
 	public static <T> T iterate(IItemHandler handler, BiFunction<Integer, ItemStack, T> getFromSlotStack, Supplier<T> supplyDefault, Predicate<T> shouldExit) {
 		T ret = supplyDefault.get();
-		for (int slot = 0; slot < handler.getSlots(); slot++) {
+		int slots = handler.getSlots();
+		for (int slot = 0; slot < slots; slot++) {
 			ItemStack stack = handler.getStackInSlot(slot);
 			ret = getFromSlotStack.apply(slot, stack);
 			if (shouldExit.test(ret)) {
@@ -138,7 +145,8 @@ public class InventoryHelper {
 	}
 
 	public static void transfer(IItemHandler handlerA, IItemHandler handlerB) {
-		for (int slot = 0; slot < handlerA.getSlots(); slot++) {
+		int slotsA = handlerA.getSlots();
+		for (int slot = 0; slot < slotsA; slot++) {
 			ItemStack slotStack = handlerA.getStackInSlot(slot);
 			if (slotStack.isEmpty()) {
 				continue;
