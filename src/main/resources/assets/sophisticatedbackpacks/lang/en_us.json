@@ -38,6 +38,8 @@
     "item.sophisticatedbackpacks.refill_upgrade.tooltip": "Keeps refilling stack of selected items in players inventory",
     "item.sophisticatedbackpacks.inception_upgrade": "Inception Upgrade",
     "item.sophisticatedbackpacks.inception_upgrade.tooltip": "Makes it possible to put backpacks into the backpack",
+    "item.sophisticatedbackpacks.everlasting_upgrade": "Everlasting Upgrade",
+    "item.sophisticatedbackpacks.everlasting_upgrade.tooltip": "Backpack becomes indestructible\nCan't despawn or fall into void",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
     "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup",

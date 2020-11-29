@@ -256,5 +256,15 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('E', Items.ENDER_EYE)
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.EVERLASTING_UPGRADE.get())
+				.patternLine("CSC")
+				.patternLine("SBS")
+				.patternLine("CSC")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('S', Tags.Items.NETHER_STARS)
+				.key('C', Items.END_CRYSTAL)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
 	}
 }
