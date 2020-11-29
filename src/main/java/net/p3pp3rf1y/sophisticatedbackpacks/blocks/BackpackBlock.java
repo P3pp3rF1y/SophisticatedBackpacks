@@ -54,6 +54,11 @@ public class BackpackBlock extends Block {
 	}
 
 	@Override
+	public float getExplosionResistance() {
+		return super.getExplosionResistance();
+	}
+
+	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
 		Direction facing = state.get(FACING);
 

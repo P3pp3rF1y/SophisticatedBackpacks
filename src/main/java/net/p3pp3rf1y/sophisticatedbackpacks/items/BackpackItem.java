@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.items;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -25,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
@@ -33,6 +35,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -80,6 +84,34 @@ public class BackpackItem extends ItemBase {
 		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
 				.ifPresent(wrapper -> wrapper.setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue()));
 		items.add(stack);
+	}
+
+	@Override
+	public boolean hasCustomEntity(ItemStack stack) {
+		return hasEverlastingUpgrade(stack);
+	}
+
+	private boolean hasEverlastingUpgrade(ItemStack stack) {
+		return stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+	}
+
+	@Nullable
+	@Override
+	public Entity createEntity(World world, Entity entity, ItemStack itemstack) {
+		if (!(entity instanceof ItemEntity)) {
+			return null;
+		}
+		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
+	}
+
+	private EverlastingBackpackItemEntity createEverlastingBackpack(World world, ItemEntity itemEntity, ItemStack itemstack) {
+		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.get().create(world);
+		backpackItemEntity.setPosition(itemEntity.getPosX(), itemEntity.getPosY(), itemEntity.getPosZ());
+		backpackItemEntity.setItem(itemstack);
+		backpackItemEntity.setPickupDelay(ObfuscationReflectionHelper.getPrivateValue(ItemEntity.class, itemEntity, "field_145804_b"));
+		backpackItemEntity.setThrowerId(itemEntity.getThrowerId());
+		backpackItemEntity.setMotion(itemEntity.getMotion());
+		return backpackItemEntity;
 	}
 
 	@Override

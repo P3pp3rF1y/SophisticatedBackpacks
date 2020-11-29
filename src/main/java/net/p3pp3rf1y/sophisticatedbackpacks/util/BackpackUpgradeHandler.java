@@ -75,7 +75,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		((List<T>) typeWrappers.get(type)).add(wrapper);
 	}
 
-	private <T extends IUpgradeWrapper> List<T> getTypeWrapper(UpgradeType<T> type) {
+	public <T extends IUpgradeWrapper> List<T> getTypeWrappers(UpgradeType<T> type) {
+		initializeWrappers();
 		//noinspection unchecked
 		return (List<T>) typeWrappers.getOrDefault(type, Collections.emptyList());
 	}
@@ -139,7 +140,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	}
 
 	private void addFilters(List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
-		List<FilterUpgradeWrapper> filterWrappers = getTypeWrapper(FilterUpgradeItem.TYPE);
+		List<FilterUpgradeWrapper> filterWrappers = getTypeWrappers(FilterUpgradeItem.TYPE);
 
 		for (FilterUpgradeWrapper wrapper : filterWrappers) {
 			Direction dir = wrapper.getDirection();
