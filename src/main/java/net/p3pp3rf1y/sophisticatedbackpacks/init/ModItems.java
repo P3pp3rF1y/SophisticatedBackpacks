@@ -42,6 +42,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeWrapp
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace.FurnaceUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace.FurnaceUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace.FurnaceUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace.FurnaceUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet.MagnetUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet.MagnetUpgradeTab;
@@ -92,6 +96,7 @@ public class ModItems {
 	public static final RegistryObject<RefillUpgradeItem> REFILL_UPGRADE = ITEMS.register("refill_upgrade", RefillUpgradeItem::new);
 	public static final RegistryObject<InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.register("inception_upgrade", InceptionUpgradeItem::new);
 	public static final RegistryObject<EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.register("everlasting_upgrade", EverlastingUpgradeItem::new);
+	public static final RegistryObject<FurnaceUpgradeItem> FURNACE_UPGRADE = ITEMS.register("furnace_upgrade", FurnaceUpgradeItem::new);
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
@@ -126,6 +131,7 @@ public class ModItems {
 	private static final UpgradeContainerType<DepositUpgradeWrapper, FilteredUpgradeContainer<DepositUpgradeWrapper>> DEPOSIT_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<DepositUpgradeWrapper, FilteredUpgradeContainer<DepositUpgradeWrapper>> ADVANCED_DEPOSIT_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<RefillUpgradeWrapper, FilteredUpgradeContainer<RefillUpgradeWrapper>> REFILL_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+	private static final UpgradeContainerType<FurnaceUpgradeWrapper, FurnaceUpgradeContainer> FURNACE_TYPE = new UpgradeContainerType<>(FurnaceUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -144,6 +150,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(DEPOSIT_UPGRADE.getId(), DEPOSIT_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_DEPOSIT_UPGRADE.getId(), ADVANCED_DEPOSIT_TYPE);
 		UpgradeContainerRegistry.register(REFILL_UPGRADE.getId(), REFILL_TYPE);
+		UpgradeContainerRegistry.register(FURNACE_UPGRADE.getId(), FURNACE_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
@@ -165,6 +172,7 @@ public class ModItems {
 			UpgradeSettingsTabManager.register(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
 			UpgradeSettingsTabManager.register(REFILL_TYPE, RefillUpgradeTab::new);
+			UpgradeSettingsTabManager.register(FURNACE_TYPE, FurnaceUpgradeTab::new);
 		});
 	}
 

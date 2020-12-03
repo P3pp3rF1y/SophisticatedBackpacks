@@ -27,6 +27,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
 	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
+	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
 	@Nullable
 	private IItemHandler filteredHandler = null;
@@ -43,8 +44,10 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		super.onContentsChanged(slot);
 		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);
-		wrappersInitialized = false;
-		filteredHandler = null;
+		if (!justSavingNbtChange) {
+			wrappersInitialized = false;
+			filteredHandler = null;
+		}
 	}
 
 	private void initializeWrappers() {
@@ -61,7 +64,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				return;
 			}
 			UpgradeType<?> type = ((IBackpackUpgradeItem<?>) upgrade.getItem()).getType();
-			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> setStackInSlot(slot, upgradeStack));
+			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> {
+				justSavingNbtChange = true;
+				setStackInSlot(slot, upgradeStack);
+				justSavingNbtChange = false;
+			});
 			slotWrappers.put(slot, wrapper);
 			addTypeWrapper(type, wrapper);
 		});

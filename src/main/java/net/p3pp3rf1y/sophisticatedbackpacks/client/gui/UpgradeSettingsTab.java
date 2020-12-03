@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -26,29 +25,23 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
 	private static final int DEFAULT_WIDTH = 21;
-	protected final int slotsLeftX;
 	protected final BackpackScreen screen;
 	private final List<IReorderingProcessor> closedTooltip;
-	protected int slotsTopY;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
-	private boolean isOpen = false;
+	protected boolean isOpen = false;
 	private final C upgradeContainer;
 	private final Dimension openTabDimension;
-	private final int slotsPerRow;
-	private final ITextComponent tabLabel;
 	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
 	private Consumer<UpgradeSettingsTab<C>> onClose = t -> {};
 	private Predicate<UpgradeSettingsTab<C>> shouldRender = t -> true;
 	private Predicate<UpgradeSettingsTab<C>> shouldShowTooltip = t -> true;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
+	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
 		this.openTabDimension = openTabDimension;
-		this.slotsPerRow = slotsPerRow;
-		this.tabLabel = tabLabel;
 		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
@@ -60,8 +53,6 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 			}
 		});
 		addHideableChild(new Label(new Position(x + 20, y + 8), tabLabel));
-		slotsLeftX = x + 4;
-		slotsTopY = y + 46;
 		this.screen = screen;
 		moveSlotsOutOfView();
 	}
@@ -74,12 +65,11 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 		this.shouldShowTooltip = shouldShowTooltip;
 	}
 
-	private boolean onTabIconClicked(int button) {
+	private void onTabIconClicked(int button) {
 		if (button != 0) {
-			return false;
+			return;
 		}
 		setOpen(!isOpen);
-		return true;
 	}
 
 	protected C getContainer() {
@@ -142,14 +132,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 		moveSlotsToTab();
 	}
 
-	protected void moveSlotsToTab() {
-		int upgradeSlotNumber = 0;
-		for (Slot slot : getContainer().getSlots()) {
-			slot.xPos = slotsLeftX - screen.getGuiLeft() + (upgradeSlotNumber % slotsPerRow) * 18;
-			slot.yPos = slotsTopY - screen.getGuiTop() + (upgradeSlotNumber / slotsPerRow) * 18;
-			upgradeSlotNumber++;
-		}
-	}
+	protected abstract void moveSlotsToTab();
 
 	protected void moveSlotsOutOfView() {
 		getContainer().getSlots().forEach(slot -> {

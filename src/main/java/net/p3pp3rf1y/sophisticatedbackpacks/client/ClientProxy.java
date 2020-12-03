@@ -26,7 +26,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
 import java.util.Map;
 
@@ -82,6 +82,6 @@ public class ClientProxy extends CommonProxy {
 
 	private static void onPlayerJoinServer(ClientPlayerNetworkEvent.LoggedInEvent evt) {
 		//noinspection ConstantConditions - by the time player is joining the world is not null
-		CraftingHelper.setWorld(Minecraft.getInstance().world);
+		RecipeHelper.setWorld(Minecraft.getInstance().world);
 	}
 }

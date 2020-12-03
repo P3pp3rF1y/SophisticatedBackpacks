@@ -15,7 +15,7 @@ public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWr
 
 	private FilterUpgradeContainer(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
 		super(containerId, wrapper, isClientSide, type);
-		filterLogicContainer = new FilterLogicContainer(wrapper.getFilterLogic(), this, slots::add);
+		filterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
 
 	@Override

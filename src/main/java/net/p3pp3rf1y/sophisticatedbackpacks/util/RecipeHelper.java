@@ -5,19 +5,23 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.RecipeWrapper;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class CraftingHelper {
+public class RecipeHelper {
 	private static final Map<Item, CompactingShape> ITEM_COMPACTING_SHAPES = new HashMap<>();
 	private static WeakReference<World> world;
 
-	private CraftingHelper() {}
+	private RecipeHelper() {}
 
 	public static void setWorld(World w) {
 		world = new WeakReference<>(w);
@@ -30,11 +34,11 @@ public class CraftingHelper {
 	private static void tryCompatingRecipes(Item item) {
 		getWorld().ifPresent(w -> {
 			if (tryCompactingRecipe(item, w, 2, 2)) {
-				CraftingHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.TWO_BY_TWO);
+				RecipeHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.TWO_BY_TWO);
 				return;
 			}
 			if (tryCompactingRecipe(item, w, 3, 3)) {
-				CraftingHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.THREE_BY_THREE);
+				RecipeHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.THREE_BY_THREE);
 			}
 		});
 	}
@@ -68,6 +72,10 @@ public class CraftingHelper {
 			craftinginventory.setInventorySlotContents(i, new ItemStack(item));
 		}
 		return craftinginventory;
+	}
+
+	public static Optional<FurnaceRecipe> getSmeltingRecipe(ItemStack stack) {
+		return getWorld().flatMap(w -> w.getRecipeManager().getRecipe(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.from(ItemStack.EMPTY, stack))), w));
 	}
 
 	public static CompactingShape getItemCompactingShape(Item item) {

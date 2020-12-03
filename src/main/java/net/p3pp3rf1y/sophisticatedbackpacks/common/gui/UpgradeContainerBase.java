@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerUpgradeDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> implements IServerUpdater {
 	protected final ArrayList<Slot> slots = new ArrayList<>();
 	private final int containerId;
-	protected final W upgradeWrapper;
+	protected W upgradeWrapper;
 	protected final boolean isClientSide;
 	private final UpgradeContainerType<W, C> type;
 
@@ -50,12 +50,21 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		}
 		CompoundNBT data = supplyData.get();
 		data.putInt("containerId", containerId);
-		PacketHandler.sendToServer(new UpgradeDataMessage(data));
+		PacketHandler.sendToServer(new ServerUpgradeDataMessage(data));
 	}
 
 	public abstract void handleMessage(CompoundNBT data);
 
 	public ItemStack getUpgradeStack() {
 		return upgradeWrapper.getUpgradeStack();
+	}
+
+	public W getUpgradeWrapper() {
+		return upgradeWrapper;
+	}
+
+	public void setUpgradeWrapper(IUpgradeWrapper updatedUpgradeWrapper) {
+		//noinspection unchecked - only used in logic that makes sure the item is the same and the same item will have a wrapper with the same (W) class
+		upgradeWrapper = (W) updatedUpgradeWrapper;
 	}
 }

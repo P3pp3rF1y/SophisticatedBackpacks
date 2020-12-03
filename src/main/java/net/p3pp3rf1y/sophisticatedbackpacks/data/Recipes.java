@@ -266,5 +266,16 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('C', Items.END_CRYSTAL)
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.FURNACE_UPGRADE.get())
+				.patternLine("RIR")
+				.patternLine("IBI")
+				.patternLine("RFR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('F', Items.FURNACE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
 	}
 }

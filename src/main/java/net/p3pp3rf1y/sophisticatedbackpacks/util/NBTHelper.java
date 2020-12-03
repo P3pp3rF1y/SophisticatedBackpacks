@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.LongNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.IStringSerializable;
 
@@ -61,5 +63,13 @@ public class NBTHelper {
 	public static <T extends Enum<T> & IStringSerializable> CompoundNBT putEnumConstant(CompoundNBT tag, String key, T enumConstant) {
 		tag.putString(key, enumConstant.getString());
 		return tag;
+	}
+
+	public static void setLong(ItemStack stack, String key, long value) {
+		stack.setTagInfo(key, LongNBT.valueOf(value));
+	}
+
+	public static void setInteger(ItemStack stack, String key, int value) {
+		stack.setTagInfo(key, IntNBT.valueOf(value));
 	}
 }

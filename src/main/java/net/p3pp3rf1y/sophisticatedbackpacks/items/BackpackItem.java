@@ -29,6 +29,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
@@ -104,14 +105,26 @@ public class BackpackItem extends ItemBase {
 		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
 	}
 
+	@Nullable
 	private EverlastingBackpackItemEntity createEverlastingBackpack(World world, ItemEntity itemEntity, ItemStack itemstack) {
 		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.get().create(world);
-		backpackItemEntity.setPosition(itemEntity.getPosX(), itemEntity.getPosY(), itemEntity.getPosZ());
-		backpackItemEntity.setItem(itemstack);
-		backpackItemEntity.setPickupDelay(ObfuscationReflectionHelper.getPrivateValue(ItemEntity.class, itemEntity, "field_145804_b"));
-		backpackItemEntity.setThrowerId(itemEntity.getThrowerId());
-		backpackItemEntity.setMotion(itemEntity.getMotion());
+		if (backpackItemEntity != null) {
+			backpackItemEntity.setPosition(itemEntity.getPosX(), itemEntity.getPosY(), itemEntity.getPosZ());
+			backpackItemEntity.setItem(itemstack);
+			backpackItemEntity.setPickupDelay(getPickupDelay(itemEntity));
+			backpackItemEntity.setThrowerId(itemEntity.getThrowerId());
+			backpackItemEntity.setMotion(itemEntity.getMotion());
+		}
 		return backpackItemEntity;
+	}
+
+	private int getPickupDelay(ItemEntity itemEntity) {
+		Integer result = ObfuscationReflectionHelper.getPrivateValue(ItemEntity.class, itemEntity, "field_145804_b");
+		if (result == null) {
+			SophisticatedBackpacks.LOGGER.error("Reflection get of pickupDelay (field_145804_b) from ItemEntity returned null");
+			return 20;
+		}
+		return result;
 	}
 
 	@Override
@@ -249,5 +262,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
+	}
+
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return slotChanged;
 	}
 }
