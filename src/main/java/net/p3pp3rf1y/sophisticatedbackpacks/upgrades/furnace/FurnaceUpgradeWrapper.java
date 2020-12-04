@@ -2,17 +2,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RecipeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
@@ -25,11 +22,14 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrapper, FurnaceUpgradeItem> implements ITickableUpgrade {
+	private static final int NOTHING_TO_DO_COOLDOWN = 10;
 	private ItemStackHandler furnaceInventory = null;
 	public static final int COOK_INPUT_SLOT = 0;
 	public static final int COOK_OUTPUT_SLOT = 2;
 	public static final int FUEL_SLOT = 1;
-	private RecipeWrapper recipeWrapper = null;
+	@Nullable
+	private FurnaceRecipe furnaceRecipe = null;
+	private boolean furnaceRecipeInitialized = false;
 
 	public FurnaceUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(upgrade, upgradeSaveHandler);
@@ -41,25 +41,37 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 
 	@Override
 	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
-		if (world.isRemote) {
+		if (isInCooldown(world)) {
 			return;
 		}
-		if (isBurning(world) || readyToStartCooking()) {
-			FurnaceRecipe furnaceRecipe = getSmeltingRecipe(world).orElse(null);
-			if (furnaceRecipe == null) {
-				if (isCooking()) {
-					setIsCooking(false);
-				}
-				return;
-			}
-			updateFuel(world, furnaceRecipe);
 
-			if (isBurning(world) && canSmelt(furnaceRecipe)) {
-				updateCookingProgress(world, furnaceRecipe);
+		if (isBurning(world) || readyToStartCooking()) {
+			Optional<FurnaceRecipe> fr = getFurnaceRecipe();
+			if (!fr.isPresent() && isCooking()) {
+				setIsCooking(false);
 			}
+			fr.ifPresent(recipe -> {
+				updateFuel(world, recipe);
+
+				if (isBurning(world) && canSmelt(recipe)) {
+					updateCookingProgress(world, recipe);
+				} else if (!isBurning(world)) {
+					setCooldown(world, NOTHING_TO_DO_COOLDOWN);
+				}
+			});
 		} else if (!isBurning(world) && isCooking()) {
 			updateCookingCooldown(world);
+		} else {
+			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
 		}
+	}
+
+	private Optional<FurnaceRecipe> getFurnaceRecipe() {
+		if (!furnaceRecipeInitialized) {
+			furnaceRecipe = RecipeHelper.getSmeltingRecipe(getCookInput()).orElse(null);
+			furnaceRecipeInitialized = true;
+		}
+		return Optional.ofNullable(furnaceRecipe);
 	}
 
 	private void updateCookingCooldown(World world) {
@@ -72,8 +84,12 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 
 	private void updateCookingProgress(World world, FurnaceRecipe furnaceRecipe) {
 		if (isCooking() && finishedCooking(world)) {
-			setCookTime(world, furnaceRecipe.getCookTime());
 			smelt(furnaceRecipe);
+			if (canSmelt(furnaceRecipe)) {
+				setCookTime(world, furnaceRecipe.getCookTime());
+			} else {
+				setIsCooking(false);
+			}
 		} else if (!isCooking()) {
 			setIsCooking(true);
 			setCookTime(world, furnaceRecipe.getCookTime());
@@ -88,10 +104,6 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		return !getFuel().isEmpty() && !getCookInput().isEmpty();
 	}
 
-	private Optional<FurnaceRecipe> getSmeltingRecipe(World world) {
-		return world.getRecipeManager().getRecipe(IRecipeType.SMELTING, getRecipeWrapper(), world);
-	}
-
 	private void smelt(IRecipe<?> recipe) {
 		if (!canSmelt(recipe)) {
 			return;
@@ -104,6 +116,7 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 			setCookOutput(recipeOutput.copy());
 		} else if (output.getItem() == recipeOutput.getItem()) {
 			output.grow(recipeOutput.getCount());
+			setCookOutput(output);
 		}
 
 		if (input.getItem() == Blocks.WET_SPONGE.asItem() && !getFuel().isEmpty() && getFuel().getItem() == Items.BUCKET) {
@@ -207,6 +220,9 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 					super.onContentsChanged(slot);
 					upgrade.setTagInfo("furnaceInventory", serializeNBT());
 					save();
+					if (slot == COOK_INPUT_SLOT) {
+						furnaceRecipeInitialized = false;
+					}
 				}
 
 				@Override
@@ -224,13 +240,6 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 			NBTHelper.getCompound(upgrade, "furnaceInventory").ifPresent(furnaceInventory::deserializeNBT);
 		}
 		return furnaceInventory;
-	}
-
-	public IInventory getRecipeWrapper() {
-		if (recipeWrapper == null) {
-			recipeWrapper = new RecipeWrapper(getFurnaceInventory());
-		}
-		return recipeWrapper;
 	}
 
 	public long getBurnTimeFinish() {
