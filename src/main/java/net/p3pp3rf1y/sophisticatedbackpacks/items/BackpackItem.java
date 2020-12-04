@@ -6,6 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
@@ -47,6 +49,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
 	private final int numberOfSlots;
@@ -145,7 +149,9 @@ public class BackpackItem extends ItemBase {
 		World world = blockItemUseContext.getWorld();
 		BlockPos pos = blockItemUseContext.getPos();
 
-		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite());
+		FluidState fluidstate = context.getWorld().getFluidState(pos);
+		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite())
+				.with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
 		if (!canPlace(blockItemUseContext, placementState)) {
 			return ActionResultType.FAIL;
 		}
