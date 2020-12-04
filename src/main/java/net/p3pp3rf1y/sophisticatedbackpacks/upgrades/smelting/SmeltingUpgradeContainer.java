@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -7,14 +7,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
-public class FurnaceUpgradeContainer extends UpgradeContainerBase<FurnaceUpgradeWrapper, FurnaceUpgradeContainer> {
-	public static final UpgradeContainerType<FurnaceUpgradeWrapper, FurnaceUpgradeContainer> TYPE = new UpgradeContainerType<>(FurnaceUpgradeContainer::new);
+public class SmeltingUpgradeContainer extends UpgradeContainerBase<SmeltingUpgradeWrapper, SmeltingUpgradeContainer> {
+	public static final UpgradeContainerType<SmeltingUpgradeWrapper, SmeltingUpgradeContainer> TYPE = new UpgradeContainerType<>(SmeltingUpgradeContainer::new);
 
-	public FurnaceUpgradeContainer(int containerId, FurnaceUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<FurnaceUpgradeWrapper, FurnaceUpgradeContainer> type) {
+	public SmeltingUpgradeContainer(int containerId, SmeltingUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<SmeltingUpgradeWrapper, SmeltingUpgradeContainer> type) {
 		super(containerId, wrapper, isClientSide, type);
-		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getFurnaceInventory(), FurnaceUpgradeWrapper.COOK_INPUT_SLOT, -100, -100));
-		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getFurnaceInventory(), FurnaceUpgradeWrapper.FUEL_SLOT, -100, -100));
-		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getFurnaceInventory(), FurnaceUpgradeWrapper.COOK_OUTPUT_SLOT, -100, -100) {
+		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getSmeltingInventory(), SmeltingUpgradeWrapper.COOK_INPUT_SLOT, -100, -100));
+		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getSmeltingInventory(), SmeltingUpgradeWrapper.FUEL_SLOT, -100, -100));
+		slots.add(new SlotSuppliedHandler(() -> upgradeWrapper.getSmeltingInventory(), SmeltingUpgradeWrapper.COOK_OUTPUT_SLOT, -100, -100) {
 			@Override
 			public boolean isItemValid(ItemStack stack) {
 				return false; //needs to not allow player putting anything in

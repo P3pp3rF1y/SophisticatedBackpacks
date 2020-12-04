@@ -267,7 +267,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.FURNACE_UPGRADE.get())
+		ShapedRecipeBuilder.shapedRecipe(ModItems.SMELTING_UPGRADE.get())
 				.patternLine("RIR")
 				.patternLine("IBI")
 				.patternLine("RFR")

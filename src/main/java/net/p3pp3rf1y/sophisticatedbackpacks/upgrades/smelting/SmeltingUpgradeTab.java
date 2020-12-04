@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
@@ -23,14 +23,14 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 @OnlyIn(Dist.CLIENT)
-public class FurnaceUpgradeTab extends UpgradeSettingsTab<FurnaceUpgradeContainer> {
+public class SmeltingUpgradeTab extends UpgradeSettingsTab<SmeltingUpgradeContainer> {
 	private static final TextureBlitData FURNACE_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(29, 202), new Dimension(68, 54));
 	private static final TextureBlitData COOK_PROGRESS = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(100, 239), new Dimension(22, 16));
 	private static final TextureBlitData BURN_PROGRESS = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(99, 225), new Dimension(14, 14));
 
-	public FurnaceUpgradeTab(FurnaceUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(78, 85), screen, new TranslationTextComponent(translUpgrade("furnace")),
-				new TranslationTextComponent(translUpgradeTooltip("furnace")));
+	public SmeltingUpgradeTab(SmeltingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
+		super(upgradeContainer, position, new Dimension(78, 85), screen, new TranslationTextComponent(translUpgrade("smelting")),
+				new TranslationTextComponent(translUpgradeTooltip("smelting")));
 		addHideableChild(new ProgressBar(new Position(x + 22, y + 42), COOK_PROGRESS, this::getCookProgress, ProgressBar.ProgressDirection.LEFT_RIGHT));
 		addHideableChild(new ProgressBar(new Position(x + 4, y + 44), BURN_PROGRESS, this::getBurnProgress, ProgressBar.ProgressDirection.BOTTOM_UP));
 	}
@@ -55,9 +55,9 @@ public class FurnaceUpgradeTab extends UpgradeSettingsTab<FurnaceUpgradeContaine
 	@Override
 	protected void moveSlotsToTab() {
 		List<Slot> slots = getContainer().getSlots();
-		positionSlot(slots.get(FurnaceUpgradeWrapper.COOK_INPUT_SLOT), 4, 25);
-		positionSlot(slots.get(FurnaceUpgradeWrapper.COOK_OUTPUT_SLOT), 50, 43);
-		positionSlot(slots.get(FurnaceUpgradeWrapper.FUEL_SLOT), 4, 61);
+		positionSlot(slots.get(SmeltingUpgradeWrapper.COOK_INPUT_SLOT), 4, 25);
+		positionSlot(slots.get(SmeltingUpgradeWrapper.COOK_OUTPUT_SLOT), 50, 43);
+		positionSlot(slots.get(SmeltingUpgradeWrapper.FUEL_SLOT), 4, 61);
 	}
 
 	private void positionSlot(Slot slot, int xOffset, int yOffset) {

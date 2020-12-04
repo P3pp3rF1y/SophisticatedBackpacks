@@ -2,7 +2,7 @@
     "parent": "minecraft:recipes/root",
     "rewards": {
         "recipes": [
-            "sophisticatedbackpacks:furnace_upgrade"
+            "sophisticatedbackpacks:smelting_upgrade"
         ]
     },
     "criteria": {
@@ -19,7 +19,7 @@
         "has_the_recipe": {
             "trigger": "minecraft:recipe_unlocked",
             "conditions": {
-                "recipe": "sophisticatedbackpacks:furnace_upgrade"
+                "recipe": "sophisticatedbackpacks:smelting_upgrade"
             }
         }
     },

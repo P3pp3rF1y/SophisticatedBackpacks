@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.furnace;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,17 +21,17 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrapper, FurnaceUpgradeItem> implements ITickableUpgrade {
+public class SmeltingUpgradeWrapper extends UpgradeWrapperBase<SmeltingUpgradeWrapper, SmeltingUpgradeItem> implements ITickableUpgrade {
 	private static final int NOTHING_TO_DO_COOLDOWN = 10;
-	private ItemStackHandler furnaceInventory = null;
+	private ItemStackHandler smeltingInventory = null;
 	public static final int COOK_INPUT_SLOT = 0;
 	public static final int COOK_OUTPUT_SLOT = 2;
 	public static final int FUEL_SLOT = 1;
 	@Nullable
-	private FurnaceRecipe furnaceRecipe = null;
-	private boolean furnaceRecipeInitialized = false;
+	private FurnaceRecipe smeltingRecipe = null;
+	private boolean smeltingRecipeInitialized = false;
 
-	public FurnaceUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+	public SmeltingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(upgrade, upgradeSaveHandler);
 	}
 
@@ -46,7 +46,7 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		}
 
 		if (isBurning(world) || readyToStartCooking()) {
-			Optional<FurnaceRecipe> fr = getFurnaceRecipe();
+			Optional<FurnaceRecipe> fr = getSmeltingRecipe();
 			if (!fr.isPresent() && isCooking()) {
 				setIsCooking(false);
 			}
@@ -66,12 +66,12 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		}
 	}
 
-	private Optional<FurnaceRecipe> getFurnaceRecipe() {
-		if (!furnaceRecipeInitialized) {
-			furnaceRecipe = RecipeHelper.getSmeltingRecipe(getCookInput()).orElse(null);
-			furnaceRecipeInitialized = true;
+	private Optional<FurnaceRecipe> getSmeltingRecipe() {
+		if (!smeltingRecipeInitialized) {
+			smeltingRecipe = RecipeHelper.getSmeltingRecipe(getCookInput()).orElse(null);
+			smeltingRecipeInitialized = true;
 		}
-		return Optional.ofNullable(furnaceRecipe);
+		return Optional.ofNullable(smeltingRecipe);
 	}
 
 	private void updateCookingCooldown(World world) {
@@ -82,17 +82,17 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		}
 	}
 
-	private void updateCookingProgress(World world, FurnaceRecipe furnaceRecipe) {
+	private void updateCookingProgress(World world, FurnaceRecipe smeltingRecipe) {
 		if (isCooking() && finishedCooking(world)) {
-			smelt(furnaceRecipe);
-			if (canSmelt(furnaceRecipe)) {
-				setCookTime(world, furnaceRecipe.getCookTime());
+			smelt(smeltingRecipe);
+			if (canSmelt(smeltingRecipe)) {
+				setCookTime(world, smeltingRecipe.getCookTime());
 			} else {
 				setIsCooking(false);
 			}
 		} else if (!isCooking()) {
 			setIsCooking(true);
-			setCookTime(world, furnaceRecipe.getCookTime());
+			setCookTime(world, smeltingRecipe.getCookTime());
 		}
 	}
 
@@ -128,11 +128,11 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 	}
 
 	private void setCookInput(ItemStack input) {
-		furnaceInventory.setStackInSlot(COOK_INPUT_SLOT, input);
+		smeltingInventory.setStackInSlot(COOK_INPUT_SLOT, input);
 	}
 
 	private void setCookOutput(ItemStack stack) {
-		getFurnaceInventory().setStackInSlot(COOK_OUTPUT_SLOT, stack);
+		getSmeltingInventory().setStackInSlot(COOK_OUTPUT_SLOT, stack);
 	}
 
 	private int getRemainingCookTime(World world) {
@@ -144,9 +144,9 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		setCookTimeTotal(cookTime);
 	}
 
-	private void updateFuel(World world, FurnaceRecipe furnaceRecipe) {
+	private void updateFuel(World world, FurnaceRecipe smeltingRecipe) {
 		ItemStack fuel = getFuel();
-		if (!isBurning(world) && canSmelt(furnaceRecipe)) {
+		if (!isBurning(world) && canSmelt(smeltingRecipe)) {
 			setBurnTime(world, getBurnTime(fuel));
 			if (isBurning(world)) {
 				if (fuel.hasContainerItem()) {
@@ -167,11 +167,11 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 		setBurnTimeTotal(burnTime);
 	}
 
-	protected boolean canSmelt(IRecipe<?> furnaceRecipe) {
+	protected boolean canSmelt(IRecipe<?> smeltingRecipe) {
 		if (getCookInput().isEmpty()) {
 			return false;
 		}
-		ItemStack recipeOutput = furnaceRecipe.getRecipeOutput();
+		ItemStack recipeOutput = smeltingRecipe.getRecipeOutput();
 		if (recipeOutput.isEmpty()) {
 			return false;
 		} else {
@@ -197,31 +197,31 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 	}
 
 	private ItemStack getCookOutput() {
-		return getFurnaceInventory().getStackInSlot(COOK_OUTPUT_SLOT);
+		return getSmeltingInventory().getStackInSlot(COOK_OUTPUT_SLOT);
 	}
 
 	private ItemStack getCookInput() {
-		return getFurnaceInventory().getStackInSlot(COOK_INPUT_SLOT);
+		return getSmeltingInventory().getStackInSlot(COOK_INPUT_SLOT);
 	}
 
 	private ItemStack getFuel() {
-		return getFurnaceInventory().getStackInSlot(FUEL_SLOT);
+		return getSmeltingInventory().getStackInSlot(FUEL_SLOT);
 	}
 
 	private void setFuel(ItemStack fuel) {
-		getFurnaceInventory().setStackInSlot(FUEL_SLOT, fuel);
+		getSmeltingInventory().setStackInSlot(FUEL_SLOT, fuel);
 	}
 
-	public ItemStackHandler getFurnaceInventory() {
-		if (furnaceInventory == null) {
-			furnaceInventory = new ItemStackHandler(3) {
+	public ItemStackHandler getSmeltingInventory() {
+		if (smeltingInventory == null) {
+			smeltingInventory = new ItemStackHandler(3) {
 				@Override
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
-					upgrade.setTagInfo("furnaceInventory", serializeNBT());
+					upgrade.setTagInfo("smeltingInventory", serializeNBT());
 					save();
 					if (slot == COOK_INPUT_SLOT) {
-						furnaceRecipeInitialized = false;
+						smeltingRecipeInitialized = false;
 					}
 				}
 
@@ -237,9 +237,9 @@ public class FurnaceUpgradeWrapper extends UpgradeWrapperBase<FurnaceUpgradeWrap
 					}
 				}
 			};
-			NBTHelper.getCompound(upgrade, "furnaceInventory").ifPresent(furnaceInventory::deserializeNBT);
+			NBTHelper.getCompound(upgrade, "smeltingInventory").ifPresent(smeltingInventory::deserializeNBT);
 		}
-		return furnaceInventory;
+		return smeltingInventory;
 	}
 
 	public long getBurnTimeFinish() {
