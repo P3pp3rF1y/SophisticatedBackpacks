@@ -22,17 +22,28 @@ public class BackpackSingleDyeRecipe extends SpecialRecipe {
 
 	@Override
 	public boolean matches(CraftingInventory inv, World worldIn) {
-		int ingredientCount = 0;
+		int dyeCount = 0;
+		int backpackCount = 0;
 
 		for (int j = 0; j < inv.getSizeInventory(); ++j) {
 			ItemStack itemstack = inv.getStackInSlot(j);
-			if (!itemstack.isEmpty()
-					&& (++ingredientCount > 2 || !(itemstack.getItem().isIn(Tags.Items.DYES) || itemstack.getItem() instanceof BackpackItem))) {
+			if (itemstack.isEmpty()) {
+				continue;
+			}
+			if (itemstack.getItem().isIn(Tags.Items.DYES)) {
+				if (++dyeCount > 1) {
+					return false;
+				}
+			} else if (itemstack.getItem() instanceof BackpackItem) {
+				if (++backpackCount > 1) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		}
 
-		return ingredientCount == 2;
+		return dyeCount == 1 && backpackCount == 1;
 	}
 
 	@Override
