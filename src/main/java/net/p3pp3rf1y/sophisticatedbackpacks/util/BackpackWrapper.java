@@ -15,7 +15,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@CapabilityInject(IBackpackWrapper.class)
 	public static Capability<IBackpackWrapper> BACKPACK_WRAPPER_CAPABILITY = null;
 
-	public static final int DEFAULT_COLOR = 13394234;
+	public static final int DEFAULT_CLOTH_COLOR = 13394234;
+	public static final int DEFAULT_BORDER_COLOR = 6434330;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private final ItemStack backpack;
@@ -70,12 +71,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getClothColor() {
-		return NBTHelper.getInt(backpack, CLOTH_COLOR_TAG).orElse(DEFAULT_COLOR);
+		return NBTHelper.getInt(backpack, CLOTH_COLOR_TAG).orElse(DEFAULT_CLOTH_COLOR);
 	}
 
 	@Override
 	public int getBorderColor() {
-		return NBTHelper.getInt(backpack, BORDER_COLOR_TAG).orElse(DEFAULT_COLOR);
+		return NBTHelper.getInt(backpack, BORDER_COLOR_TAG).orElse(DEFAULT_BORDER_COLOR);
 	}
 
 	@Override
