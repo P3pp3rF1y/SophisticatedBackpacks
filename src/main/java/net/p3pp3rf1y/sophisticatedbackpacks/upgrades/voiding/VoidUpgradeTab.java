@@ -16,23 +16,30 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 
 @OnlyIn(Dist.CLIENT)
 public class VoidUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<VoidUpgradeWrapper>> {
-	protected VoidUpgradeTab(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
-		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
+	protected FilterLogicControl filterLogicControl;
+
+	protected VoidUpgradeTab(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+		super(upgradeContainer, position, openTabDimension, screen, tabLabel, closedTooltip);
+	}
+
+	@Override
+	protected void moveSlotsToTab() {
+		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
 	}
 
 	public static class Basic extends VoidUpgradeTab {
 		public Basic(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
+			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("void")), new TranslationTextComponent(translUpgradeTooltip("void")));
-			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
 	public static class Advanced extends VoidUpgradeTab {
 		public Advanced(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 124), screen, 4,
+			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_void")), new TranslationTextComponent(translUpgradeTooltip("advanced_void")));
-			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4));
 		}
 	}
 }

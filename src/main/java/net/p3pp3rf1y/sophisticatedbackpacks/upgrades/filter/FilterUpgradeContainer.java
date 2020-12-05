@@ -4,10 +4,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWrapper, FilterUpgradeContainer> implements IFilteredUpgradeContainer {
+public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWrapper, FilterUpgradeContainer> {
 	public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> BASIC_TYPE = new UpgradeContainerType<>(FilterUpgradeContainer::new);
 	public static final UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> ADVANCED_TYPE = new UpgradeContainerType<>(FilterUpgradeContainer::new);
 	private static final String DATA_DIRECTION = "direction";
@@ -15,10 +14,9 @@ public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWr
 
 	private FilterUpgradeContainer(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
 		super(containerId, wrapper, isClientSide, type);
-		filterLogicContainer = new FilterLogicContainer(wrapper.getFilterLogic(), this, slots::add);
+		filterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
 
-	@Override
 	public FilterLogicContainer getFilterLogicContainer() {
 		return filterLogicContainer;
 	}

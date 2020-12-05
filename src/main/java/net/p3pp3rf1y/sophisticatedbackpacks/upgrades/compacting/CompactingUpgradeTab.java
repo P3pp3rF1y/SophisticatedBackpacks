@@ -17,24 +17,32 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.B
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.PRIMARY_MATCH;
 
 @OnlyIn(Dist.CLIENT)
-public class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<CompactingUpgradeWrapper>> {
-	protected CompactingUpgradeTab(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
-		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
+public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<CompactingUpgradeWrapper>> {
+	protected FilterLogicControl filterLogicControl;
+
+	protected CompactingUpgradeTab(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, Dimension openTabDimension,
+			BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+		super(upgradeContainer, position, openTabDimension, screen, tabLabel, closedTooltip);
+	}
+
+	@Override
+	protected void moveSlotsToTab() {
+		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
 	}
 
 	public static class Basic extends CompactingUpgradeTab {
 		public Basic(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
+			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("compacting")), new TranslationTextComponent(translUpgradeTooltip("compacting")));
-			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
 	public static class Advanced extends CompactingUpgradeTab {
 		public Advanced(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 124), screen, 4,
+			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_compacting")), new TranslationTextComponent(translUpgradeTooltip("advanced_compacting")));
-			addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 4, ALLOW_LIST, PRIMARY_MATCH));
+			filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4, ALLOW_LIST, PRIMARY_MATCH));
 		}
 	}
 }

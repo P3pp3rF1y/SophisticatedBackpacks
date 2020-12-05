@@ -15,9 +15,16 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 
 @OnlyIn(Dist.CLIENT)
 public class FeedingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<FeedingUpgradeWrapper>> {
+	private final FilterLogicControl.Basic filterLogicControl;
+
 	public FeedingUpgradeTab(FilteredUpgradeContainer<FeedingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(63, 106), screen, 3,
+		super(upgradeContainer, position, new Dimension(63, 106), screen,
 				new TranslationTextComponent(translUpgrade("feeding")), new TranslationTextComponent(translUpgradeTooltip("feeding")));
-		addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
+	}
+
+	@Override
+	protected void moveSlotsToTab() {
+		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
 	}
 }

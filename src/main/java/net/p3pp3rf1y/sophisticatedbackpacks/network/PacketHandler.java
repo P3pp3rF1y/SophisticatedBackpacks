@@ -23,7 +23,7 @@ public class PacketHandler {
 				() -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
 
 		registerMessage(BackpackOpenMessage.class, (m, b) -> {}, packetBuffer -> BackpackOpenMessage.getInstance(), (msg, sup) -> BackpackOpenMessage.onMessage(sup));
-		registerMessage(UpgradeDataMessage.class, UpgradeDataMessage::encode, UpgradeDataMessage::decode, UpgradeDataMessage::onMessage);
+		registerMessage(ServerUpgradeDataMessage.class, ServerUpgradeDataMessage::encode, ServerUpgradeDataMessage::decode, ServerUpgradeDataMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

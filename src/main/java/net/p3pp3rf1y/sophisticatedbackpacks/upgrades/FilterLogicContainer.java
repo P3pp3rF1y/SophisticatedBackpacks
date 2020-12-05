@@ -1,15 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class FilterLogicContainer {
 	private static final String DATA_IS_ALLOW_LIST = "isAllowList";
@@ -17,52 +19,53 @@ public class FilterLogicContainer {
 	private static final String DATA_MATCH_NBT = "matchNbt";
 	private static final String DATA_PRIMARY_MATCH = "primaryMatch";
 	private final IServerUpdater serverUpdater;
-	private final FilterLogic filterLogic;
+	private final Supplier<FilterLogic> filterLogic;
+	private final List<Slot> filterSlots = new ArrayList<>();
 
-	public FilterLogicContainer(FilterLogic filterLogic, IServerUpdater serverUpdater, Consumer<Slot> addSlot) {
+	public FilterLogicContainer(Supplier<FilterLogic> filterLogic, IServerUpdater serverUpdater, Consumer<Slot> addSlot) {
 		this.filterLogic = filterLogic;
 		this.serverUpdater = serverUpdater;
-		ItemStackHandler filterHandler = filterLogic.getFilterHandler();
-		InventoryHelper.iterate(filterHandler, (slot, stack) -> addSlot.accept(new FilterLogicSlot(filterHandler, slot)));
+		ItemStackHandler filterHandler = filterLogic.get().getFilterHandler();
+		InventoryHelper.iterate(filterHandler, (slot, stack) -> {
+			FilterLogicSlot filterSlot = new FilterLogicSlot(() -> filterLogic.get().getFilterHandler(), slot);
+			addSlot.accept(filterSlot);
+			filterSlots.add(filterSlot);
+		});
 	}
 
 	public boolean isAllowList() {
-		return filterLogic.isAllowList();
+		return filterLogic.get().isAllowList();
 	}
 
 	public boolean shouldMatchDurability() {
-		return filterLogic.shouldMatchDurability();
+		return filterLogic.get().shouldMatchDurability();
 	}
 
 	public boolean shouldMatchNbt() {
-		return filterLogic.shouldMatchNbt();
+		return filterLogic.get().shouldMatchNbt();
 	}
 
 	public PrimaryMatch getPrimaryMatch() {
-		return filterLogic.getPrimaryMatch();
-	}
-
-	public int getFilterSlots() {
-		return filterLogic.getFilterHandler().getSlots();
+		return filterLogic.get().getPrimaryMatch();
 	}
 
 	public void setAllowList(boolean isAllowList) {
-		filterLogic.setAllowList(isAllowList);
+		filterLogic.get().setAllowList(isAllowList);
 		serverUpdater.sendBooleanToServer(DATA_IS_ALLOW_LIST, isAllowList);
 	}
 
 	public void setMatchDurability(boolean matchDurability) {
-		filterLogic.setMatchDurability(matchDurability);
+		filterLogic.get().setMatchDurability(matchDurability);
 		serverUpdater.sendBooleanToServer(DATA_MATCH_DURABILITY, matchDurability);
 	}
 
 	public void setMatchNbt(boolean matchNbt) {
-		filterLogic.setMatchNbt(matchNbt);
+		filterLogic.get().setMatchNbt(matchNbt);
 		serverUpdater.sendBooleanToServer(DATA_MATCH_NBT, matchNbt);
 	}
 
 	public void setPrimaryMatch(PrimaryMatch primaryMatch) {
-		filterLogic.setPrimaryMatch(primaryMatch);
+		filterLogic.get().setPrimaryMatch(primaryMatch);
 		serverUpdater.sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_PRIMARY_MATCH, primaryMatch));
 	}
 
@@ -87,19 +90,13 @@ public class FilterLogicContainer {
 		return false;
 	}
 
+	public List<Slot> getFilterSlots() {
+		return filterSlots;
+	}
+
 	public static class FilterLogicSlot extends FilterSlotItemHandler {
-		private final ItemStackHandler filterHandler;
-		private final Integer slot;
-
-		public FilterLogicSlot(ItemStackHandler filterHandler, Integer slot) {
+		public FilterLogicSlot(Supplier<IItemHandler> filterHandler, Integer slot) {
 			super(filterHandler, slot, -100, -100);
-			this.filterHandler = filterHandler;
-			this.slot = slot;
-		}
-
-		@Override
-		public boolean isItemValid(@Nonnull ItemStack stack) {
-			return filterHandler.isItemValid(slot, stack);
 		}
 	}
 }

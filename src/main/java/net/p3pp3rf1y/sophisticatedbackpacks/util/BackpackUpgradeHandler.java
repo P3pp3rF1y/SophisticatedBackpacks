@@ -27,6 +27,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
 	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
+	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
 	@Nullable
 	private IItemHandler filteredHandler = null;
@@ -43,8 +44,10 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		super.onContentsChanged(slot);
 		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);
-		wrappersInitialized = false;
-		filteredHandler = null;
+		if (!justSavingNbtChange) {
+			wrappersInitialized = false;
+			filteredHandler = null;
+		}
 	}
 
 	private void initializeWrappers() {
@@ -61,7 +64,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				return;
 			}
 			UpgradeType<?> type = ((IBackpackUpgradeItem<?>) upgrade.getItem()).getType();
-			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> setStackInSlot(slot, upgradeStack));
+			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> {
+				justSavingNbtChange = true;
+				setStackInSlot(slot, upgradeStack);
+				justSavingNbtChange = false;
+			});
 			slotWrappers.put(slot, wrapper);
 			addTypeWrapper(type, wrapper);
 		});
@@ -75,7 +82,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		((List<T>) typeWrappers.get(type)).add(wrapper);
 	}
 
-	private <T extends IUpgradeWrapper> List<T> getTypeWrapper(UpgradeType<T> type) {
+	public <T extends IUpgradeWrapper> List<T> getTypeWrappers(UpgradeType<T> type) {
+		initializeWrappers();
 		//noinspection unchecked
 		return (List<T>) typeWrappers.getOrDefault(type, Collections.emptyList());
 	}
@@ -139,7 +147,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	}
 
 	private void addFilters(List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
-		List<FilterUpgradeWrapper> filterWrappers = getTypeWrapper(FilterUpgradeItem.TYPE);
+		List<FilterUpgradeWrapper> filterWrappers = getTypeWrappers(FilterUpgradeItem.TYPE);
 
 		for (FilterUpgradeWrapper wrapper : filterWrappers) {
 			Direction dir = wrapper.getDirection();

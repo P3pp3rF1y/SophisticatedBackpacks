@@ -27,30 +27,35 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"))
 			));
 
+	protected FilterLogicControl filterLogicControl;
+
 	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen,
-			int slotsPerRow, ITextComponent tabLabel, ITextComponent closedTooltip) {
-		super(upgradeContainer, position, openTabDimension, screen, slotsPerRow, tabLabel, closedTooltip);
+			ITextComponent tabLabel, ITextComponent closedTooltip) {
+		super(upgradeContainer, position, openTabDimension, screen, tabLabel, closedTooltip);
 
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), DIRECTION,
 				button -> getContainer().setDirection(getContainer().getDirection().next()), () -> getContainer().getDirection()));
+	}
 
-		slotsTopY = y + 66;
+	@Override
+	protected void moveSlotsToTab() {
+		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
 	}
 
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 126), screen, 3,
+			super(upgradeContainer, position, new Dimension(63, 126), screen,
 					new TranslationTextComponent(translUpgrade("filter")), new TranslationTextComponent(translUpgradeTooltip("filter")));
-			addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 144), screen, 4,
+			super(upgradeContainer, position, new Dimension(81, 144), screen,
 					new TranslationTextComponent(translUpgrade("advanced_filter")), new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
 
-			addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 4));
 		}
 	}
 }

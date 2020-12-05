@@ -15,11 +15,16 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 
 @OnlyIn(Dist.CLIENT)
 public class RefillUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<RefillUpgradeWrapper>> {
+	private final FilterLogicControl filterLogicControl;
+
 	public RefillUpgradeTab(FilteredUpgradeContainer<RefillUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(63, 67), screen, 3, new TranslationTextComponent(translUpgrade("refill")), new TranslationTextComponent(translUpgradeTooltip("refill")));
+		super(upgradeContainer, position, new Dimension(63, 67), screen, new TranslationTextComponent(translUpgrade("refill")), new TranslationTextComponent(translUpgradeTooltip("refill")));
 
-		addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 3));
+		filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
+	}
 
-		slotsTopY = y + 25;
+	@Override
+	protected void moveSlotsToTab() {
+		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
 	}
 }

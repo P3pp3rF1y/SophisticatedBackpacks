@@ -2,11 +2,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
-public class FilterSlotItemHandler extends SlotItemHandler {
-	public FilterSlotItemHandler(ItemStackHandler itemHandler, int i, int xPosition, int yPosition) {super(itemHandler, i, xPosition, yPosition);}
+import java.util.function.Supplier;
+
+public class FilterSlotItemHandler extends SlotSuppliedHandler {
+	public FilterSlotItemHandler(Supplier<IItemHandler> itemHandlerSupplier, int slot, int xPosition, int yPosition) {
+		super(itemHandlerSupplier, slot, xPosition, yPosition);
+	}
 
 	@Override
 	public boolean canTakeStack(PlayerEntity playerIn) {
@@ -17,4 +20,5 @@ public class FilterSlotItemHandler extends SlotItemHandler {
 	public int getItemStackLimit(ItemStack stack) {
 		return 1;
 	}
+
 }

@@ -245,5 +245,49 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.DEPOSIT_UPGRADE.get())
 				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.INCEPTION_UPGRADE.get())
+				.patternLine("ESE")
+				.patternLine("DBD")
+				.patternLine("EDE")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('S', Tags.Items.NETHER_STARS)
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('E', Items.ENDER_EYE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.EVERLASTING_UPGRADE.get())
+				.patternLine("CSC")
+				.patternLine("SBS")
+				.patternLine("CSC")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('S', Tags.Items.NETHER_STARS)
+				.key('C', Items.END_CRYSTAL)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapedRecipeBuilder.shapedRecipe(ModItems.SMELTING_UPGRADE.get())
+				.patternLine("RIR")
+				.patternLine("IBI")
+				.patternLine("RFR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('F', Items.FURNACE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMELTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DHD")
+				.patternLine("RSH")
+				.patternLine("GHG")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('H', Items.HOPPER)
+				.key('S', ModItems.SMELTING_UPGRADE.get())
+				.build(consumer);
+
 	}
 }

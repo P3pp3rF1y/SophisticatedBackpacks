@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "RIR",
+        "IBI",
+        "RFR"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "F": {
+            "item": "minecraft:furnace"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:smelting_upgrade"
+    }
+}

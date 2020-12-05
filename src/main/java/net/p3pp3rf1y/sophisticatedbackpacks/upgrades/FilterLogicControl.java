@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -32,11 +33,13 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	private final int height;
 	private final int width;
 	private final int slotsTopYOffset;
+	private final int slotsPerRow;
 
-	public FilterLogicControl(Position position, IFilteredUpgradeContainer filteredContainer, int slotsPerRow, Button... showButtons) {
+	public FilterLogicControl(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow, Button... showButtons) {
 		super(position);
-		container = filteredContainer.getFilterLogicContainer();
-		slotsBackground = getSlotBackground(container.getFilterSlots(), slotsPerRow);
+		container = filterLogicContainer;
+		this.slotsPerRow = slotsPerRow;
+		slotsBackground = getSlotBackground(container.getFilterSlots().size(), slotsPerRow);
 		this.showButtons = showButtons;
 
 		if (shouldShow(ALLOW_LIST)) {
@@ -57,7 +60,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 
 		width = slotsPerRow * 18;
 		slotsTopYOffset = showButtons.length > 0 ? 21 : 0;
-		height = container.getFilterSlots() / slotsPerRow * 18 + slotsTopYOffset;
+		height = container.getFilterSlots().size() / slotsPerRow * 18 + slotsTopYOffset;
 	}
 
 	private boolean shouldShow(Button button) {
@@ -94,14 +97,23 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	}
 
 	public static class Basic extends FilterLogicControl {
-		public Basic(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
-			super(position, container, slotsPerRow, ALLOW_LIST);
+		public Basic(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST);
 		}
 	}
 
 	public static class Advanced extends FilterLogicControl {
-		public Advanced(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
-			super(position, container, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
+		public Advanced(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
+		}
+	}
+
+	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {
+		int upgradeSlotNumber = 0;
+		for (Slot slot : container.getFilterSlots()) {
+			slot.xPos = x - screenGuiLeft + 1 + (upgradeSlotNumber % slotsPerRow) * 18;
+			slot.yPos = y - screenGuiTop + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
+			upgradeSlotNumber++;
 		}
 	}
 

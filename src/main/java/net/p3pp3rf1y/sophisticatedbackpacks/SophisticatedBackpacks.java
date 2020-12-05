@@ -17,10 +17,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,7 +52,7 @@ public class SophisticatedBackpacks {
 	private static void serverStarted(FMLServerStartedEvent event) {
 		ServerWorld world = event.getServer().getWorld(World.OVERWORLD);
 		if (world != null) {
-			CraftingHelper.setWorld(world);
+			RecipeHelper.setWorld(world);
 		}
 	}
 }

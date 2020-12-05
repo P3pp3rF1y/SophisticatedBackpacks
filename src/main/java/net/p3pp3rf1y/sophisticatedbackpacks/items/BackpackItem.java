@@ -3,8 +3,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.items;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
@@ -25,14 +28,18 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -42,6 +49,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
 	private final int numberOfSlots;
@@ -83,6 +92,46 @@ public class BackpackItem extends ItemBase {
 	}
 
 	@Override
+	public boolean hasCustomEntity(ItemStack stack) {
+		return hasEverlastingUpgrade(stack);
+	}
+
+	private boolean hasEverlastingUpgrade(ItemStack stack) {
+		return stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+	}
+
+	@Nullable
+	@Override
+	public Entity createEntity(World world, Entity entity, ItemStack itemstack) {
+		if (!(entity instanceof ItemEntity)) {
+			return null;
+		}
+		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
+	}
+
+	@Nullable
+	private EverlastingBackpackItemEntity createEverlastingBackpack(World world, ItemEntity itemEntity, ItemStack itemstack) {
+		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.get().create(world);
+		if (backpackItemEntity != null) {
+			backpackItemEntity.setPosition(itemEntity.getPosX(), itemEntity.getPosY(), itemEntity.getPosZ());
+			backpackItemEntity.setItem(itemstack);
+			backpackItemEntity.setPickupDelay(getPickupDelay(itemEntity));
+			backpackItemEntity.setThrowerId(itemEntity.getThrowerId());
+			backpackItemEntity.setMotion(itemEntity.getMotion());
+		}
+		return backpackItemEntity;
+	}
+
+	private int getPickupDelay(ItemEntity itemEntity) {
+		Integer result = ObfuscationReflectionHelper.getPrivateValue(ItemEntity.class, itemEntity, "field_145804_b");
+		if (result == null) {
+			SophisticatedBackpacks.LOGGER.error("Reflection get of pickupDelay (field_145804_b) from ItemEntity returned null");
+			return 20;
+		}
+		return result;
+	}
+
+	@Override
 	public ActionResultType onItemUse(ItemUseContext context) {
 		PlayerEntity player = context.getPlayer();
 		if (player == null || !player.isSneaking()) {
@@ -100,7 +149,9 @@ public class BackpackItem extends ItemBase {
 		World world = blockItemUseContext.getWorld();
 		BlockPos pos = blockItemUseContext.getPos();
 
-		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite());
+		FluidState fluidstate = context.getWorld().getFluidState(pos);
+		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite())
+				.with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
 		if (!canPlace(blockItemUseContext, placementState)) {
 			return ActionResultType.FAIL;
 		}
@@ -217,5 +268,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
+	}
+
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return slotChanged;
 	}
 }

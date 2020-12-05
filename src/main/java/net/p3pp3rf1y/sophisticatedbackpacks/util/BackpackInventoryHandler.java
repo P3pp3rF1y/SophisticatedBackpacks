@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,7 +30,12 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	@Override
 	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-		return !(stack.getItem() instanceof BackpackItem);
+		return !(stack.getItem() instanceof BackpackItem) || hasInceptionUpgrade();
+	}
+
+	private boolean hasInceptionUpgrade() {
+		return backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				.map(w -> !w.getUpgradeHandler().getTypeWrappers(InceptionUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	public void saveInventory() {

@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -19,25 +18,36 @@ public class FilterLogic {
 	private final Consumer<ItemStack> saveHandler;
 	private final int filterSlotCount;
 	private final Predicate<ItemStack> isItemValid;
+	private final String parentTagKey;
 	private FilterItemStackHandler filterHandler = null;
 	private boolean allowListDefault = false;
+	private boolean emptyAllowListMatchesEverything = false;
 
 	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
-		this(upgrade, saveHandler, filterSlotCount, s -> true);
+		this(upgrade, saveHandler, filterSlotCount, s -> true, "");
 	}
 
 	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Predicate<ItemStack> isItemValid) {
+		this(upgrade, saveHandler, filterSlotCount, isItemValid, "");
+	}
+
+	public FilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Predicate<ItemStack> isItemValid, String parentTagKey) {
 		this.upgrade = upgrade;
 		this.saveHandler = saveHandler;
 		this.filterSlotCount = filterSlotCount;
 		this.isItemValid = isItemValid;
+		this.parentTagKey = parentTagKey;
+	}
+
+	public void setEmptyAllowListMatchesEverything() {
+		emptyAllowListMatchesEverything = true;
 	}
 
 	public void setAllowByDefault() {
 		allowListDefault = true;
 	}
 
-	public ItemStackHandler getFilterHandler() {
+	public FilterItemStackHandler getFilterHandler() {
 		if (filterHandler == null) {
 			filterHandler = new FilterItemStackHandler(filterSlotCount) {
 				//Added here only as a way to prevent inventory tweaks renewed from duplicating upgrades should really be removed
@@ -50,7 +60,7 @@ public class FilterLogic {
 						return;
 					}
 					stacksPreviousState.set(slot, stacks.get(slot));
-					upgrade.setTagInfo("filters", serializeNBT());
+					NBTHelper.setCompoundNBT(upgrade, parentTagKey, "filters", serializeNBT());
 					save();
 				}
 
@@ -76,7 +86,7 @@ public class FilterLogic {
 					return stack.isEmpty() || isItemValid.test(stack);
 				}
 			};
-			NBTHelper.getCompound(upgrade, "filters").ifPresent(filterHandler::deserializeNBT);
+			NBTHelper.getCompound(upgrade, parentTagKey, "filters").ifPresent(filterHandler::deserializeNBT);
 		}
 
 		return filterHandler;
@@ -88,9 +98,11 @@ public class FilterLogic {
 
 	public boolean matchesFilter(ItemStack stack) {
 		if (isAllowList()) {
-			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> stackMatchesFilter(stack, filter), () -> false, returnValue -> returnValue);
+			return (getFilterHandler().hasOnlyEmptyFilters() && emptyAllowListMatchesEverything)
+					|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> stackMatchesFilter(stack, filter), () -> false, returnValue -> returnValue);
 		} else {
-			return InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !stackMatchesFilter(stack, filter), () -> true, returnValue -> !returnValue);
+			return getFilterHandler().hasOnlyEmptyFilters()
+					|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !stackMatchesFilter(stack, filter), () -> true, returnValue -> !returnValue);
 		}
 	}
 
@@ -121,38 +133,38 @@ public class FilterLogic {
 	}
 
 	public void setAllowList(boolean isAllowList) {
-		NBTHelper.setBoolean(upgrade, "isAllowList", isAllowList);
+		NBTHelper.setBoolean(upgrade, parentTagKey, "isAllowList", isAllowList);
 		save();
 	}
 
 	public boolean isAllowList() {
-		return NBTHelper.getBoolean(upgrade, "isAllowList").orElse(allowListDefault);
+		return NBTHelper.getBoolean(upgrade, parentTagKey, "isAllowList").orElse(allowListDefault);
 	}
 
 	public boolean shouldMatchDurability() {
-		return NBTHelper.getBoolean(upgrade, "matchDurability").orElse(false);
+		return NBTHelper.getBoolean(upgrade, parentTagKey, "matchDurability").orElse(false);
 	}
 
 	public void setMatchDurability(boolean matchDurability) {
-		NBTHelper.setBoolean(upgrade, "matchDurability", matchDurability);
+		NBTHelper.setBoolean(upgrade, parentTagKey, "matchDurability", matchDurability);
 		save();
 	}
 
 	public void setMatchNbt(boolean matchNbt) {
-		NBTHelper.setBoolean(upgrade, "matchNbt", matchNbt);
+		NBTHelper.setBoolean(upgrade, parentTagKey, "matchNbt", matchNbt);
 		save();
 	}
 
 	public boolean shouldMatchNbt() {
-		return NBTHelper.getBoolean(upgrade, "matchNbt").orElse(false);
+		return NBTHelper.getBoolean(upgrade, parentTagKey, "matchNbt").orElse(false);
 	}
 
 	public void setPrimaryMatch(PrimaryMatch primaryMatch) {
-		NBTHelper.setEnumConstant(upgrade, "primaryMatch", primaryMatch);
+		NBTHelper.setEnumConstant(upgrade, parentTagKey, "primaryMatch", primaryMatch);
 		save();
 	}
 
 	public PrimaryMatch getPrimaryMatch() {
-		return NBTHelper.getEnumConstant(upgrade, "primaryMatch", PrimaryMatch::fromName).orElse(PrimaryMatch.ITEM);
+		return NBTHelper.getEnumConstant(upgrade, parentTagKey, "primaryMatch", PrimaryMatch::fromName).orElse(PrimaryMatch.ITEM);
 	}
 }

@@ -7,9 +7,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.CraftingHelper.CompactingShape;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper.CompactingShape;
 
 import java.util.function.Consumer;
 
@@ -21,7 +21,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 		super(upgrade, upgradeSaveHandler);
 
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(),
-				stack -> CraftingHelper.getItemCompactingShape(stack.getItem()) != CompactingShape.NONE);
+				stack -> RecipeHelper.getItemCompactingShape(stack.getItem()) != CompactingShape.NONE);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 
 		Item item = slotStack.getItem();
 
-		CompactingShape shape = CraftingHelper.getItemCompactingShape(item);
+		CompactingShape shape = RecipeHelper.getItemCompactingShape(item);
 
 		if (shape == CompactingShape.TWO_BY_TWO) {
 			tryCompacting(inventoryHandler, item, 2, 2);
@@ -50,7 +50,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 
 	private void tryCompacting(BackpackInventoryHandler inventoryHandler, Item item, int width, int height) {
 		int totalCount = width * height;
-		ItemStack result = CraftingHelper.getCraftingResult(item, width, height);
+		ItemStack result = RecipeHelper.getCraftingResult(item, width, height);
 		if (!result.isEmpty()) {
 			ItemStack extractedStack = InventoryHelper.extractFromInventory(item, totalCount, inventoryHandler, true);
 			while (extractedStack.getCount() == totalCount && InventoryHelper.insertIntoInventory(result, inventoryHandler, true).isEmpty()) {
