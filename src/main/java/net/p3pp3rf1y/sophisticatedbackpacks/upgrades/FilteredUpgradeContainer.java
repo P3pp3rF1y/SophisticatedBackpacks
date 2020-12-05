@@ -5,8 +5,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
-public class FilteredUpgradeContainer<W extends IUpgradeWrapper & IFilteredUpgrade> extends UpgradeContainerBase<W, FilteredUpgradeContainer<W>>
-		implements IFilteredUpgradeContainer {
+public class FilteredUpgradeContainer<W extends IUpgradeWrapper & IFilteredUpgrade> extends UpgradeContainerBase<W, FilteredUpgradeContainer<W>> {
 	protected final FilterLogicContainer filterLogicContainer;
 
 	public FilteredUpgradeContainer(int containerId, W wrapper, boolean isClientSide, UpgradeContainerType<W, FilteredUpgradeContainer<W>> type) {
@@ -14,7 +13,6 @@ public class FilteredUpgradeContainer<W extends IUpgradeWrapper & IFilteredUpgra
 		filterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
 
-	@Override
 	public FilterLogicContainer getFilterLogicContainer() {
 		return filterLogicContainer;
 	}

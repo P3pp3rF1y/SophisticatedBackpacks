@@ -277,5 +277,17 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('F', Items.FURNACE)
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMELTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DHD")
+				.patternLine("RSH")
+				.patternLine("GHG")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('H', Items.HOPPER)
+				.key('S', ModItems.SMELTING_UPGRADE.get())
+				.build(consumer);
+
 	}
 }

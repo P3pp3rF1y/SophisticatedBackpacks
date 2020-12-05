@@ -35,9 +35,9 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	private final int slotsTopYOffset;
 	private final int slotsPerRow;
 
-	public FilterLogicControl(Position position, IFilteredUpgradeContainer filteredContainer, int slotsPerRow, Button... showButtons) {
+	public FilterLogicControl(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow, Button... showButtons) {
 		super(position);
-		container = filteredContainer.getFilterLogicContainer();
+		container = filterLogicContainer;
 		this.slotsPerRow = slotsPerRow;
 		slotsBackground = getSlotBackground(container.getFilterSlots().size(), slotsPerRow);
 		this.showButtons = showButtons;
@@ -97,14 +97,14 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	}
 
 	public static class Basic extends FilterLogicControl {
-		public Basic(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
-			super(position, container, slotsPerRow, ALLOW_LIST);
+		public Basic(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST);
 		}
 	}
 
 	public static class Advanced extends FilterLogicControl {
-		public Advanced(Position position, IFilteredUpgradeContainer container, int slotsPerRow) {
-			super(position, container, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
+		public Advanced(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}
 

@@ -1,0 +1,39 @@
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
+
+import net.minecraft.nbt.CompoundNBT;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
+
+public class AutoSmeltingUpgradeContainer extends UpgradeContainerBase<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> {
+	public static final UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> TYPE = new UpgradeContainerType<>(AutoSmeltingUpgradeContainer::new);
+
+	private final FilterLogicContainer inputFilterLogicContainer;
+
+	private final FilterLogicContainer fuelFilterLogicContainer;
+	private final SmeltingLogicContainer smeltingLogicContainer;
+
+	public AutoSmeltingUpgradeContainer(int containerId, AutoSmeltingUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> type) {
+		super(containerId, wrapper, isClientSide, type);
+		inputFilterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getInputFilterLogic(), this, slots::add);
+		fuelFilterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFuelFilterLogic(), this, slots::add);
+		smeltingLogicContainer = new SmeltingLogicContainer(() -> upgradeWrapper.getSmeltingLogic(), slots::add);
+	}
+
+	@Override
+	public void handleMessage(CompoundNBT data) {
+		inputFilterLogicContainer.handleMessage(data);
+	}
+
+	public SmeltingLogicContainer getSmeltingLogicContainer() {
+		return smeltingLogicContainer;
+	}
+
+	public FilterLogicContainer getInputFilterLogicContainer() {
+		return inputFilterLogicContainer;
+	}
+
+	public FilterLogicContainer getFuelFilterLogicContainer() {
+		return fuelFilterLogicContainer;
+	}
+}

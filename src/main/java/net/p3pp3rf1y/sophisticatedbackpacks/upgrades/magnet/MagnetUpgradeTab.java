@@ -31,7 +31,7 @@ public class MagnetUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 		public Basic(FilteredUpgradeContainer<MagnetUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("magnet")), new TranslationTextComponent(translUpgradeTooltip("magnet")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
@@ -39,7 +39,7 @@ public class MagnetUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 		public Advanced(FilteredUpgradeContainer<MagnetUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_magnet")), new TranslationTextComponent(translUpgradeTooltip("advanced_magnet")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4));
 		}
 	}
 }

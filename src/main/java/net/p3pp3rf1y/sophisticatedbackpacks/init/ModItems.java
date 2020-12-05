@@ -55,6 +55,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.AutoSmeltingUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.AutoSmeltingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.AutoSmeltingUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.AutoSmeltingUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeTab;
@@ -97,6 +101,7 @@ public class ModItems {
 	public static final RegistryObject<InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.register("inception_upgrade", InceptionUpgradeItem::new);
 	public static final RegistryObject<EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.register("everlasting_upgrade", EverlastingUpgradeItem::new);
 	public static final RegistryObject<SmeltingUpgradeItem> SMELTING_UPGRADE = ITEMS.register("smelting_upgrade", SmeltingUpgradeItem::new);
+	public static final RegistryObject<AutoSmeltingUpgradeItem> AUTO_SMELTING_UPGRADE = ITEMS.register("auto_smelting_upgrade", AutoSmeltingUpgradeItem::new);
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
@@ -132,6 +137,7 @@ public class ModItems {
 	private static final UpgradeContainerType<DepositUpgradeWrapper, FilteredUpgradeContainer<DepositUpgradeWrapper>> ADVANCED_DEPOSIT_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<RefillUpgradeWrapper, FilteredUpgradeContainer<RefillUpgradeWrapper>> REFILL_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<SmeltingUpgradeWrapper, SmeltingUpgradeContainer> SMELTING_TYPE = new UpgradeContainerType<>(SmeltingUpgradeContainer::new);
+	private static final UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> AUTO_SMELTING_TYPE = new UpgradeContainerType<>(AutoSmeltingUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -151,6 +157,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(ADVANCED_DEPOSIT_UPGRADE.getId(), ADVANCED_DEPOSIT_TYPE);
 		UpgradeContainerRegistry.register(REFILL_UPGRADE.getId(), REFILL_TYPE);
 		UpgradeContainerRegistry.register(SMELTING_UPGRADE.getId(), SMELTING_TYPE);
+		UpgradeContainerRegistry.register(AUTO_SMELTING_UPGRADE.getId(), AUTO_SMELTING_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
@@ -173,6 +180,7 @@ public class ModItems {
 			UpgradeSettingsTabManager.register(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
 			UpgradeSettingsTabManager.register(REFILL_TYPE, RefillUpgradeTab::new);
 			UpgradeSettingsTabManager.register(SMELTING_TYPE, SmeltingUpgradeTab::new);
+			UpgradeSettingsTabManager.register(AUTO_SMELTING_TYPE, AutoSmeltingUpgradeTab::new);
 		});
 	}
 

@@ -20,7 +20,7 @@ public class RefillUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 	public RefillUpgradeTab(FilteredUpgradeContainer<RefillUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, new Dimension(63, 67), screen, new TranslationTextComponent(translUpgrade("refill")), new TranslationTextComponent(translUpgradeTooltip("refill")));
 
-		filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 3));
+		filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 	}
 
 	@Override

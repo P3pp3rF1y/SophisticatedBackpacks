@@ -31,7 +31,7 @@ public class PickupUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 		public Basic(FilteredUpgradeContainer<PickupUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("pickup")), new TranslationTextComponent(translUpgradeTooltip("pickup")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
@@ -39,7 +39,7 @@ public class PickupUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 		public Advanced(FilteredUpgradeContainer<PickupUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_pickup")), new TranslationTextComponent(translUpgradeTooltip("advanced_pickup")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4));
 		}
 	}
 }

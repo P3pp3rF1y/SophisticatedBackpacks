@@ -34,7 +34,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUp
 		public Basic(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("compacting")), new TranslationTextComponent(translUpgradeTooltip("compacting")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
@@ -42,7 +42,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUp
 		public Advanced(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_compacting")), new TranslationTextComponent(translUpgradeTooltip("advanced_compacting")));
-			filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer(), 4, ALLOW_LIST, PRIMARY_MATCH));
+			filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4, ALLOW_LIST, PRIMARY_MATCH));
 		}
 	}
 }

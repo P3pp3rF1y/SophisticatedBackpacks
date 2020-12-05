@@ -20,7 +20,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContain
 	public FeedingUpgradeTab(FilteredUpgradeContainer<FeedingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, new Dimension(63, 106), screen,
 				new TranslationTextComponent(translUpgrade("feeding")), new TranslationTextComponent(translUpgradeTooltip("feeding")));
-		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 	}
 
 	@Override

@@ -31,7 +31,7 @@ public class VoidUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<
 		public Basic(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(63, 106), screen,
 					new TranslationTextComponent(translUpgrade("void")), new TranslationTextComponent(translUpgradeTooltip("void")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer(), 3));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
 		}
 	}
 
@@ -39,7 +39,7 @@ public class VoidUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<
 		public Advanced(FilteredUpgradeContainer<VoidUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, new Dimension(81, 124), screen,
 					new TranslationTextComponent(translUpgrade("advanced_void")), new TranslationTextComponent(translUpgradeTooltip("advanced_void")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 4));
 		}
 	}
 }

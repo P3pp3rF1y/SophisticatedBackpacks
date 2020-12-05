@@ -1,0 +1,28 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "pattern": [
+        "DHD",
+        "RSH",
+        "GHG"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "H": {
+            "item": "minecraft:hopper"
+        },
+        "S": {
+            "item": "sophisticatedbackpacks:smelting_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:auto_smelting_upgrade"
+    }
+}
