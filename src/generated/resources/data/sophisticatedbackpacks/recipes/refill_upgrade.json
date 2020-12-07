@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " E ",
+        "IBI",
+        "RCR"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "C": {
+            "tag": "forge:chests/wooden"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "E": {
+            "tag": "forge:ender_pearls"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:refill_upgrade"
+    }
+}
