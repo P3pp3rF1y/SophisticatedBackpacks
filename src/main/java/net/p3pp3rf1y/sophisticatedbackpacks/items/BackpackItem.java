@@ -156,9 +156,10 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.FAIL;
 		}
 
-		if (world.setBlockState(pos, placementState, 11)) {
+		if (world.setBlockState(pos, placementState, 27)) {
 			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
+			placementState.updateNeighbours(world, pos, 3);
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
