@@ -68,7 +68,7 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		tryPullingFuel(wrapper);
 		tryPullingInput(wrapper);
 
-		if (!smeltingLogic.tick(world)) {
+		if (!smeltingLogic.tick(world) && outputCooldown <= 0 && fuelCooldown <= 0 && inputCooldown <= 0) {
 			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
 		}
 	}
@@ -101,7 +101,7 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 			AtomicReference<ItemStack> ret = new AtomicReference<>(ItemStack.EMPTY);
 			InventoryHelper.iterate(wrapper.getInventoryHandler(), (slot, st) -> {
 				if (isItemValid.test(st)) {
-					ret.set(st);
+					ret.set(st.copy());
 				}
 			}, () -> !ret.get().isEmpty());
 			if (!ret.get().isEmpty()) {
