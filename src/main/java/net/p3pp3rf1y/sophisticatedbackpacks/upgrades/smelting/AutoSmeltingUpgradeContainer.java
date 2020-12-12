@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
@@ -13,8 +14,8 @@ public class AutoSmeltingUpgradeContainer extends UpgradeContainerBase<AutoSmelt
 	private final FilterLogicContainer fuelFilterLogicContainer;
 	private final SmeltingLogicContainer smeltingLogicContainer;
 
-	public AutoSmeltingUpgradeContainer(int containerId, AutoSmeltingUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> type) {
-		super(containerId, wrapper, isClientSide, type);
+	public AutoSmeltingUpgradeContainer(PlayerEntity player, int containerId, AutoSmeltingUpgradeWrapper wrapper, UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> type) {
+		super(player, containerId, wrapper, type);
 		inputFilterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getInputFilterLogic(), this, slots::add);
 		fuelFilterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFuelFilterLogic(), this, slots::add);
 		smeltingLogicContainer = new SmeltingLogicContainer(() -> upgradeWrapper.getSmeltingLogic(), slots::add);

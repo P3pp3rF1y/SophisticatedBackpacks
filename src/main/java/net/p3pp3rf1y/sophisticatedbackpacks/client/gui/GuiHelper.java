@@ -31,6 +31,7 @@ public class GuiHelper {
 	public static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
 	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18));
 	public static final TextureBlitData DEFAULT_BUTTON_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18);
+	public static final ResourceLocation BACKPACK_54 = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png");
 
 	private GuiHelper() {}
 

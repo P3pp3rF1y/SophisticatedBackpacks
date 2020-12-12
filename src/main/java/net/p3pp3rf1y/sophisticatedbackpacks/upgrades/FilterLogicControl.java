@@ -3,10 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
@@ -24,7 +22,6 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.B
 
 @OnlyIn(Dist.CLIENT)
 public class FilterLogicControl extends CompositeWidget<Widget> {
-	private static final ResourceLocation BACKPACK_54 = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/backpack_54.png");
 	private static final Map<Integer, TextureBlitData> SLOT_BACKGROUNDS = new HashMap<>();
 
 	protected final FilterLogicContainer container;
@@ -81,7 +78,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		int key = filterSlots * 31 + slotsPerRow;
 		if (!SLOT_BACKGROUNDS.containsKey(key)) {
 			int rows = filterSlots / slotsPerRow + (filterSlots % slotsPerRow > 0 ? 1 : 0);
-			SLOT_BACKGROUNDS.put(key, new TextureBlitData(BACKPACK_54, new UV(7, 17), new Dimension(slotsPerRow * 18, rows * 18)));
+			SLOT_BACKGROUNDS.put(key, new TextureBlitData(GuiHelper.BACKPACK_54, new UV(7, 17), new Dimension(slotsPerRow * 18, rows * 18)));
 		}
 		return SLOT_BACKGROUNDS.get(key);
 	}

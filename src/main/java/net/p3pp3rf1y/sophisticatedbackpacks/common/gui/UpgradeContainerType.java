@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 
 public class UpgradeContainerType<W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> {
@@ -9,11 +10,11 @@ public class UpgradeContainerType<W extends IUpgradeWrapper, C extends UpgradeCo
 		this.factory = factory;
 	}
 
-	public C create(int containerId, W wrapper, boolean isClientSide) {
-		return factory.create(containerId, wrapper, isClientSide, this);
+	public C create(PlayerEntity player, int containerId, W wrapper) {
+		return factory.create(player, containerId, wrapper, this);
 	}
 
 	public interface IFactory<W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> {
-		C create(int containerId, W upgrade, boolean isClientSide, UpgradeContainerType<W, C> type);
+		C create(PlayerEntity player, int containerId, W upgrade, UpgradeContainerType<W, C> type);
 	}
 }

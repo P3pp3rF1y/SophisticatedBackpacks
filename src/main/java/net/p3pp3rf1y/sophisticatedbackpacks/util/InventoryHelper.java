@@ -174,4 +174,21 @@ public class InventoryHelper {
 		toMove.setCount(extracted.getCount() - remaining.getCount());
 		insertIntoInventory(extractFromInventory(toMove, extractFromHandler, false), insertIntoHandler, false);
 	}
+
+	public static boolean isEmpty(IItemHandler itemHandler) {
+		int slots = itemHandler.getSlots();
+		for (int slot = 0; slot < slots; slot++) {
+			if (!itemHandler.getStackInSlot(slot).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static ItemStack getAndRemove(IItemHandler itemHandler, int slot) {
+		if (slot >= itemHandler.getSlots()) {
+			return ItemStack.EMPTY;
+		}
+		return itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), false);
+	}
 }

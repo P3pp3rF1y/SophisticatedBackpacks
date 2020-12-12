@@ -14,6 +14,8 @@ import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
@@ -36,17 +38,23 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_ITEM_C
 
 public class BackpackContainer extends Container {
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
+	private static final String OPEN_TAB_ID_TAG = "openTabId";
 
 	private final IBackpackWrapper backpackWrapper;
+	private final PlayerEntity player;
 	private int backpackSlotNumber = -1;
 
 	private final Map<Integer, UpgradeContainerBase<?, ?>> upgradeContainers = new LinkedHashMap<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
+	private final List<Slot> backpackInventorySlots = new ArrayList<>();
+	private final List<Slot> playerSlots = new ArrayList<>();
+
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
 		super(BACKPACK_ITEM_CONTAINER_TYPE.get(), windowId);
-		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
+		this.player = player;
 
+		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 		if (!h.isPresent()) {
 			backpackWrapper = NoopBackpackWrapper.INSTANCE;
 			return;
@@ -55,34 +63,41 @@ public class BackpackContainer extends Container {
 		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(NoopBackpackWrapper.INSTANCE);
 
 		int yPosition = addBackpackInventorySlots();
-		addBackpackUpgradeSlots(yPosition, player.world.isRemote);
+		addBackpackUpgradeSlots(yPosition);
 		addPlayerInventorySlots(player.inventory, yPosition, backpackSlot, handler.isVisibleInGui());
-		addUpgradeSettingsContainers(player.world.isRemote);
+		addUpgradeSettingsContainers(player);
 	}
 
 	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
 		super(BACKPACK_BLOCK_CONTAINER_TYPE.get(), windowId);
+		this.player = player;
 		Optional<BackpackTileEntity> backpackTile = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class);
 		backpackWrapper = backpackTile.map(te -> te.getBackpackWrapper().orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
 
 		int yPosition = addBackpackInventorySlots();
-		addBackpackUpgradeSlots(yPosition, player.world.isRemote);
+		addBackpackUpgradeSlots(yPosition);
 		addPlayerInventorySlots(player.inventory, yPosition, -1, false);
-		addUpgradeSettingsContainers(player.world.isRemote);
-
+		addUpgradeSettingsContainers(player);
 	}
 
-	private void addUpgradeSettingsContainers(boolean isClientSide) {
+	private void addUpgradeSettingsContainers(PlayerEntity player) {
 		BackpackUpgradeHandler upgradeHandler = backpackWrapper.getUpgradeHandler();
-		upgradeHandler.getSlotWrappers().forEach((slot, wrapper) -> UpgradeContainerRegistry.instantiateContainer(slot, wrapper, isClientSide)
+		upgradeHandler.getSlotWrappers().forEach((slot, wrapper) -> UpgradeContainerRegistry.instantiateContainer(player, slot, wrapper)
 				.ifPresent(container -> upgradeContainers.put(slot, container)));
 
 		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
 			container.getSlots().forEach(this::addSlot);
+			container.onInit();
 		}
+
+		backpackWrapper.getOpenTabId().ifPresent(id -> {
+			if (upgradeContainers.containsKey(id)) {
+				upgradeContainers.get(id).setIsOpen(true);
+			}
+		});
 	}
 
-	private void addBackpackUpgradeSlots(int lastInventoryRowY, boolean isClientSide) {
+	private void addBackpackUpgradeSlots(int lastInventoryRowY) {
 		BackpackUpgradeHandler upgradeHandler = backpackWrapper.getUpgradeHandler();
 
 		int numberOfSlots = upgradeHandler.getSlots();
@@ -96,7 +111,7 @@ public class BackpackContainer extends Container {
 		int yPosition = lastInventoryRowY - (22 + 22 * (numberOfSlots - 1));
 
 		while (slotIndex < upgradeHandler.getSlots()) {
-			addSlot(new BackpackUpgradeSlot(upgradeHandler, slotIndex, yPosition, isClientSide));
+			addSlot(new BackpackUpgradeSlot(upgradeHandler, slotIndex, yPosition));
 
 			slotIndex++;
 			yPosition += 22;
@@ -115,7 +130,7 @@ public class BackpackContainer extends Container {
 		while (slotIndex < inventoryHandler.getSlots()) {
 			int lineIndex = slotIndex % getSlotsOnLine();
 			int finalSlotIndex = slotIndex;
-			addSlot(new BackpackInventorySlot(inventoryHandler, finalSlotIndex, lineIndex, yPosition));
+			backpackInventorySlots.add(addSlot(new BackpackInventorySlot(inventoryHandler, finalSlotIndex, lineIndex, yPosition)));
 
 			slotIndex++;
 			if (slotIndex % getSlotsOnLine() == 0) {
@@ -133,7 +148,7 @@ public class BackpackContainer extends Container {
 
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 9; ++j) {
-				addSlot(new Slot(playerInventory, j + i * 9 + 9, playerInventoryYOffset + 8 + j * 18, yPosition));
+				playerSlots.add(addSlot(new Slot(playerInventory, j + i * 9 + 9, playerInventoryYOffset + 8 + j * 18, yPosition)));
 			}
 			yPosition += 18;
 		}
@@ -144,6 +159,8 @@ public class BackpackContainer extends Container {
 			Slot slot = addSlot(new Slot(playerInventory, k, playerInventoryYOffset + 8 + k * 18, yPosition));
 			if (lockBackpackSlot && k == slotIndex) {
 				backpackSlotNumber = slot.slotNumber;
+			} else {
+				playerSlots.add(slot);
 			}
 		}
 	}
@@ -175,19 +192,15 @@ public class BackpackContainer extends Container {
 		ItemStack itemstack = ItemStack.EMPTY;
 		Slot slot = inventorySlots.get(index);
 		if (slot != null && slot.getHasStack()) {
-			ItemStack slotStack = slot.getStack();
-
 			if (index == backpackSlotNumber) {
 				return ItemStack.EMPTY;
 			}
+
+			Optional<UpgradeContainerBase<?, ?>> upgradeContainer = getSlotUpgradeContainer(slot);
+			ItemStack slotStack = upgradeContainer.map(c -> c.getSlotStackToTransfer(slot)).orElse(slot.getStack());
 			itemstack = slotStack.copy();
-			int backpackSlots = getBackpackSlotsCount();
-			if (index < backpackSlots + getNumberOfUpgradeSlots()) {
-				if (!mergeItemStack(slotStack, backpackSlots + getNumberOfUpgradeSlots(), getFirstUpgradeSettingsSlot(), true)) {
-					return ItemStack.EMPTY;
-				}
-			} else if (!mergeItemStack(slotStack, backpackSlots, backpackSlots + getNumberOfUpgradeSlots(), false)
-					&& !mergeItemStack(slotStack, 0, backpackSlots, false)) {
+
+			if (!mergeSlotStack(index, slotStack)) {
 				return ItemStack.EMPTY;
 			}
 
@@ -196,9 +209,58 @@ public class BackpackContainer extends Container {
 			} else {
 				slot.onSlotChanged();
 			}
+			slot.onSlotChange(slotStack, itemstack);
+
+			if (upgradeContainer.isPresent()) {
+				upgradeContainer.ifPresent(c -> c.onTakeFromSlot(slot, player, slotStack));
+			} else {
+				slot.onTake(player, slotStack);
+			}
 		}
 
 		return itemstack;
+	}
+
+	private boolean mergeSlotStack(int index, ItemStack slotStack) {
+		if (isBackpackInventoryOrUpgradeSlot(index)) {
+			return mergeStackToPlayersInventory(slotStack);
+		} else if (isUpgradeSettingsSlot(index)) {
+			return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack);
+		} else {
+			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
+		}
+	}
+
+	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
+		int backpackSlots = getBackpackSlotsCount();
+		return mergeItemStack(slotStack, backpackSlots, backpackSlots + getNumberOfUpgradeSlots(), false);
+	}
+
+	private boolean mergeStackToBackpack(ItemStack slotStack) {
+		return mergeItemStack(slotStack, 0, getBackpackSlotsCount(), false);
+	}
+
+	private boolean mergeStackToPlayersInventory(ItemStack slotStack) {
+		return mergeItemStack(slotStack, getBackpackSlotsCount() + getNumberOfUpgradeSlots(), getFirstUpgradeSettingsSlot(), true);
+	}
+
+	private boolean isUpgradeSettingsSlot(int index) {
+		return index >= getBackpackSlotsCount() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
+	}
+
+	private boolean isBackpackInventoryOrUpgradeSlot(int index) {
+		return index < getBackpackSlotsCount() + getNumberOfUpgradeSlots();
+	}
+
+	private Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
+		if (slot.slotNumber >= getFirstUpgradeSettingsSlot()) {
+			for (UpgradeContainerBase<?, ?> upgradeContainer : upgradeContainers.values()) {
+				if (upgradeContainer.containsSlot(slot)) {
+					return Optional.of(upgradeContainer);
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	private int getBackpackSlotsCount() {
@@ -209,7 +271,7 @@ public class BackpackContainer extends Container {
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
 		if (slotId == backpackSlotNumber) {
 			return ItemStack.EMPTY;
-		} else if (slotId >= getFirstUpgradeSettingsSlot() && (getSlot(slotId) instanceof FilterSlotItemHandler) && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
+		} else if (slotId >= getFirstUpgradeSettingsSlot() && getSlot(slotId) instanceof FilterSlotItemHandler && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
 			ItemStack currentStack = player.inventory.getItemStack().copy();
 			if (currentStack.getCount() > 1) {
 				currentStack.setCount(1);
@@ -218,6 +280,7 @@ public class BackpackContainer extends Container {
 			getSlot(slotId).putStack(currentStack);
 			return ItemStack.EMPTY;
 		}
+
 		return super.slotClick(slotId, dragType, clickType, player);
 	}
 
@@ -247,18 +310,45 @@ public class BackpackContainer extends Container {
 	}
 
 	public void handleMessage(CompoundNBT data) {
-		int containerId = data.getInt("containerId");
-		if (upgradeContainers.containsKey(containerId)) {
-			upgradeContainers.get(containerId).handleMessage(data);
+		if (data.contains("containerId")) {
+			int containerId = data.getInt("containerId");
+			if (upgradeContainers.containsKey(containerId)) {
+				upgradeContainers.get(containerId).handleMessage(data);
+			}
+		} else if (data.contains(OPEN_TAB_ID_TAG)) {
+			setOpenTabId(data.getInt(OPEN_TAB_ID_TAG));
 		}
 	}
 
-	public class BackpackUpgradeSlot extends SlotItemHandler {
-		private final boolean isClientSide;
+	public List<Slot> getBackpackInventorySlots() {
+		return backpackInventorySlots;
+	}
 
-		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition, boolean isClientSide) {
+	public Collection<? extends Slot> getPlayerInventorySlots() {
+		return playerSlots;
+	}
+
+	public void setOpenTabId(int tabId) {
+		if (player.world.isRemote) {
+			CompoundNBT data = new CompoundNBT();
+			data.putInt(OPEN_TAB_ID_TAG, tabId);
+			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		}
+
+		if (tabId == -1) {
+			backpackWrapper.removeOpenTabId();
+		} else {
+			backpackWrapper.setOpenTabId(tabId);
+		}
+	}
+
+	public void removeOpenTabId() {
+		setOpenTabId(-1);
+	}
+
+	public class BackpackUpgradeSlot extends SlotItemHandler {
+		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
 			super(upgradeHandler, slotIndex, -18, yPosition);
-			this.isClientSide = isClientSide;
 		}
 
 		@Override
@@ -286,9 +376,10 @@ public class BackpackContainer extends Container {
 		}
 
 		private void reloadUpgradeControl() {
+			backpackWrapper.removeOpenTabId();
 			removeUpgradeSettingsSlots();
 			upgradeContainers.clear();
-			addUpgradeSettingsContainers(isClientSide);
+			addUpgradeSettingsContainers(player);
 			onUpgradesChanged();
 		}
 
@@ -323,5 +414,14 @@ public class BackpackContainer extends Container {
 			// however it does notify the slot of change
 			backpackWrapper.getInventoryHandler().saveInventory();
 		}
+	}
+
+	public Optional<ICraftingContainer> getCraftingContainer() {
+		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
+			if (container instanceof ICraftingContainer) {
+				return Optional.of((ICraftingContainer) container);
+			}
+		}
+		return Optional.empty();
 	}
 }

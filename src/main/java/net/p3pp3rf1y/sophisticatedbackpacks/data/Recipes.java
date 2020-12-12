@@ -301,5 +301,15 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('S', ModItems.SMELTING_UPGRADE.get())
 				.build(consumer);
 
+		ShapedRecipeBuilder.shapedRecipe(ModItems.CRAFTING_UPGRADE.get())
+				.patternLine(" T ")
+				.patternLine("IBI")
+				.patternLine(" C ")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('C', Tags.Items.CHESTS)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('T', Items.CRAFTING_TABLE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
 	}
 }

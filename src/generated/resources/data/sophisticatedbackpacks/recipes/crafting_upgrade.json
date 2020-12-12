@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " T ",
+        "IBI",
+        " C "
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "C": {
+            "tag": "forge:chests"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "T": {
+            "item": "minecraft:crafting_table"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:crafting_upgrade"
+    }
+}

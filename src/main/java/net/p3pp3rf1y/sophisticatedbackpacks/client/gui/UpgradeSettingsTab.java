@@ -29,7 +29,6 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	private final List<IReorderingProcessor> closedTooltip;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
-	protected boolean isOpen = false;
 	private final C upgradeContainer;
 	private final Dimension openTabDimension;
 	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
@@ -47,7 +46,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 				super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
-				if (!isOpen && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
+				if (!upgradeContainer.isOpen() && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
 					GuiHelper.setTooltipToRender(UpgradeSettingsTab.this.closedTooltip);
 				}
 			}
@@ -69,7 +68,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 		if (button != 0) {
 			return;
 		}
-		setOpen(!isOpen);
+		setOpen(!upgradeContainer.isOpen());
 	}
 
 	protected C getContainer() {
@@ -153,7 +152,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	}
 
 	private void setOpen(boolean isOpen) {
-		this.isOpen = isOpen;
+		upgradeContainer.setIsOpen(isOpen);
 		if (isOpen) {
 			onTabOpen();
 		} else {
@@ -163,5 +162,11 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 
 	public Rectangle2d getRectangle() {
 		return new Rectangle2d(x, y, width, height);
+	}
+
+	public void onAfterInit() {
+		if (upgradeContainer.isOpen()) {
+			setOpen(true);
+		}
 	}
 }

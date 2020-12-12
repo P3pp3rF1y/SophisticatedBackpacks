@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
@@ -12,8 +13,8 @@ public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWr
 	private static final String DATA_DIRECTION = "direction";
 	private final FilterLogicContainer filterLogicContainer;
 
-	private FilterUpgradeContainer(int containerId, FilterUpgradeWrapper wrapper, boolean isClientSide, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
-		super(containerId, wrapper, isClientSide, type);
+	private FilterUpgradeContainer(PlayerEntity player, int containerId, FilterUpgradeWrapper wrapper, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
+		super(player, containerId, wrapper, type);
 		filterLogicContainer = new FilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
 

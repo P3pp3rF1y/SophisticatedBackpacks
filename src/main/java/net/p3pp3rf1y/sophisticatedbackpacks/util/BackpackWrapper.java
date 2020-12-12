@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -19,6 +20,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
+	private static final String OPEN_TAB_ID_TAG = "openTabId";
 	private final ItemStack backpack;
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
@@ -77,6 +79,23 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public int getBorderColor() {
 		return NBTHelper.getInt(backpack, BORDER_COLOR_TAG).orElse(DEFAULT_BORDER_COLOR);
+	}
+
+	@Override
+	public Optional<Integer> getOpenTabId() {
+		return NBTHelper.getInt(backpack, OPEN_TAB_ID_TAG);
+	}
+
+	@Override
+	public void setOpenTabId(int openTabId) {
+		NBTHelper.setInteger(backpack, OPEN_TAB_ID_TAG, openTabId);
+		backpackSaveHandler.accept(backpack);
+	}
+
+	@Override
+	public void removeOpenTabId() {
+		backpack.getOrCreateTag().remove(OPEN_TAB_ID_TAG);
+		backpackSaveHandler.accept(backpack);
 	}
 
 	@Override

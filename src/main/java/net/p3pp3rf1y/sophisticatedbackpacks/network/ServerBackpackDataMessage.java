@@ -9,29 +9,29 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public class ServerUpgradeDataMessage {
+public class ServerBackpackDataMessage {
 	@Nullable
 	private final CompoundNBT data;
 
-	public ServerUpgradeDataMessage(@Nullable CompoundNBT data) {
+	public ServerBackpackDataMessage(@Nullable CompoundNBT data) {
 		this.data = data;
 	}
 
-	public static void encode(ServerUpgradeDataMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(ServerBackpackDataMessage msg, PacketBuffer packetBuffer) {
 		packetBuffer.writeCompoundTag(msg.data);
 	}
 
-	public static ServerUpgradeDataMessage decode(PacketBuffer packetBuffer) {
-		return new ServerUpgradeDataMessage(packetBuffer.readCompoundTag());
+	public static ServerBackpackDataMessage decode(PacketBuffer packetBuffer) {
+		return new ServerBackpackDataMessage(packetBuffer.readCompoundTag());
 	}
 
-	public static void onMessage(ServerUpgradeDataMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
+	public static void onMessage(ServerBackpackDataMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
 		NetworkEvent.Context context = contextSupplier.get();
 		context.enqueueWork(() -> handleMessage(contextSupplier.get().getSender(), msg));
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity sender, ServerUpgradeDataMessage message) {
+	private static void handleMessage(@Nullable ServerPlayerEntity sender, ServerBackpackDataMessage message) {
 		if (sender == null || message.data == null) {
 			return;
 		}
