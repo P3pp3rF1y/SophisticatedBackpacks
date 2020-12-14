@@ -1,0 +1,21 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:iron_backpack"
+        ]
+    },
+    "criteria": {
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:iron_backpack"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_the_recipe"
+        ]
+    ]
+}

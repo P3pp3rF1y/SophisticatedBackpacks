@@ -1,5 +1,11 @@
 {
     "type": "sophisticatedbackpacks:backpack_upgrade",
+    "conditions": [
+        {
+            "itemRegistryName": "iron_backpack",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
     "pattern": [
         "III",
         "IBI",

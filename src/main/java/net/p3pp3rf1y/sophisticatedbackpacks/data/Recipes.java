@@ -4,7 +4,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.data.CustomRecipeBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.data.ShapedRecipeBuilder;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
@@ -30,7 +29,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 
 	@Override
 	protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-		ShapedRecipeBuilder.shapedRecipe(ModItems.BACKPACK.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BACKPACK.get())
 				.patternLine("SLS")
 				.patternLine("SCS")
 				.patternLine("LLL")
@@ -67,7 +66,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('B', ModItems.BACKPACK.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.PICKUP_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.PICKUP_UPGRADE.get())
 				.patternLine(" P ")
 				.patternLine("SBS")
 				.patternLine("RRR")
@@ -78,7 +77,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE.get())
 				.patternLine("SIS")
 				.patternLine("ILI")
 				.patternLine("SIS")
@@ -98,7 +97,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('P', ModItems.PICKUP_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.FILTER_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.FILTER_UPGRADE.get())
 				.patternLine("RSR")
 				.patternLine("SBS")
 				.patternLine("RSR")
@@ -148,7 +147,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('M', ModItems.MAGNET_UPGRADE.get())
 				.build(consumer, new ResourceLocation(RegistryHelper.getModRegistryName("advanced_magnet_upgrade_from_basic")));
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.FEEDING_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.FEEDING_UPGRADE.get())
 				.patternLine(" C ")
 				.patternLine("ABM")
 				.patternLine(" E ")
@@ -160,7 +159,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.COMPACTING_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.COMPACTING_UPGRADE.get())
 				.patternLine("IPI")
 				.patternLine("PBP")
 				.patternLine("RPR")
@@ -181,7 +180,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('C', ModItems.COMPACTING_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.VOID_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.VOID_UPGRADE.get())
 				.patternLine(" E ")
 				.patternLine("OBO")
 				.patternLine("ROR")
@@ -202,7 +201,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('V', ModItems.VOID_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.RESTOCK_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.RESTOCK_UPGRADE.get())
 				.patternLine(" P ")
 				.patternLine("IBI")
 				.patternLine("RCR")
@@ -224,7 +223,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('V', ModItems.RESTOCK_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.DEPOSIT_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DEPOSIT_UPGRADE.get())
 				.patternLine(" P ")
 				.patternLine("IBI")
 				.patternLine("RCR")
@@ -246,7 +245,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('V', ModItems.DEPOSIT_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.REFILL_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.REFILL_UPGRADE.get())
 				.patternLine(" E ")
 				.patternLine("IBI")
 				.patternLine("RCR")
@@ -258,7 +257,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.INCEPTION_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.INCEPTION_UPGRADE.get())
 				.patternLine("ESE")
 				.patternLine("DBD")
 				.patternLine("EDE")
@@ -269,7 +268,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.EVERLASTING_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.EVERLASTING_UPGRADE.get())
 				.patternLine("CSC")
 				.patternLine("SBS")
 				.patternLine("CSC")
@@ -279,7 +278,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.SMELTING_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.SMELTING_UPGRADE.get())
 				.patternLine("RIR")
 				.patternLine("IBI")
 				.patternLine("RFR")
@@ -301,7 +300,7 @@ public class Recipes extends net.minecraft.data.RecipeProvider {
 				.key('S', ModItems.SMELTING_UPGRADE.get())
 				.build(consumer);
 
-		ShapedRecipeBuilder.shapedRecipe(ModItems.CRAFTING_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.CRAFTING_UPGRADE.get())
 				.patternLine(" T ")
 				.patternLine("IBI")
 				.patternLine(" C ")

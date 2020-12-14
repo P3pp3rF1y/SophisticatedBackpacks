@@ -1,5 +1,11 @@
 {
     "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "filter_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
     "pattern": [
         "RSR",
         "SBS",

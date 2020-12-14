@@ -1,5 +1,11 @@
 {
     "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "everlasting_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
     "pattern": [
         "CSC",
         "SBS",
