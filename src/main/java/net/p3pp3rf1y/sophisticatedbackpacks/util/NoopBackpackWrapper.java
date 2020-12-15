@@ -4,7 +4,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
 import java.util.Optional;
 
@@ -28,11 +27,6 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IItemHandler getFilteredHandler() {
 		return new BackpackInventoryHandler(backpack, s -> {});
-	}
-
-	@Override
-	public ScreenProperties getScreenProperties() {
-		return new ScreenProperties();
 	}
 
 	@Override

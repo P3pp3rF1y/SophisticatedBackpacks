@@ -35,21 +35,42 @@ public class Config {
 
 	public static class Common {
 		public final EnabledItems enabledItems;
+		public final BackpackConfig leatherBackpack;
+		public final BackpackConfig ironBackpack;
+		public final BackpackConfig goldBackpack;
+		public final BackpackConfig diamondBackpack;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
 
 			enabledItems = new EnabledItems(builder);
 
+			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
+			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
+			goldBackpack = new BackpackConfig(builder, "Gold", 81, 3);
+			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);
+
 			builder.pop();
 		}
 
+		public static class BackpackConfig {
+			public final ForgeConfigSpec.IntValue inventorySlotCount;
+			public final ForgeConfigSpec.IntValue upgradeSlotCount;
+
+			public BackpackConfig(ForgeConfigSpec.Builder builder, String backpackPrefix, int inventorySlotCountDefault, int upgradeSlotCountDefault) {
+				builder.comment(backpackPrefix + " Backpack Settings").push(backpackPrefix.toLowerCase() + "Backpack");
+				inventorySlotCount = builder.comment("Number of inventory slots in the backpack").defineInRange("inventorySlotCount", inventorySlotCountDefault, 1, 144);
+				upgradeSlotCount = builder.comment("Number of upgrade slots in the backpack").defineInRange("upgradeSlotCount", upgradeSlotCountDefault, 0, 10);
+				builder.pop();
+			}
+		}
+
 		public static class EnabledItems {
-			private final ForgeConfigSpec.ConfigValue<List<String>> enabledItems;
+			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
 			private final Map<String, Boolean> enabledMap = new HashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
-				enabledItems = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
+				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
 			}
 
 			public boolean isItemEnabled(String itemRegistryName) {
@@ -64,12 +85,12 @@ public class Config {
 			}
 
 			private void addEnabledItemToConfig(String itemRegistryName) {
-				enabledItems.get().add(itemRegistryName + ":true");
+				itemsEnableList.get().add(itemRegistryName + ":true");
 				COMMON_SPEC.save();
 			}
 
 			private void loadEnabledMap() {
-				for (String itemEnabled : enabledItems.get()) {
+				for (String itemEnabled : itemsEnableList.get()) {
 					String[] data = itemEnabled.split(":");
 					if (data.length == 2) {
 						enabledMap.put(data[0], Boolean.valueOf(data[1]));

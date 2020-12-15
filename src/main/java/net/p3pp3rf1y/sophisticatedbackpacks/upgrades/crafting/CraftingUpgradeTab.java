@@ -16,7 +16,6 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContainer> {
-	private static final TextureBlitData GRID_BACKGROUND = new TextureBlitData(GuiHelper.BACKPACK_54, new UV(7, 17), new Dimension(54, 54));
 	private static final TextureBlitData CRAFTING_SLOT = new TextureBlitData(GuiHelper.UPGRADE_CONTROLS, new UV(71, 216), new Dimension(26, 26));
 	private static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.UPGRADE_CONTROLS, new UV(97, 216), new Dimension(15, 8));
 
@@ -29,7 +28,7 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, minecraft, mouseX, mouseY);
 		if (getContainer().isOpen()) {
-			GuiHelper.blit(minecraft, matrixStack, x + 3, y + 22, GRID_BACKGROUND);
+			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 3, y + 22, 3, 3);
 			GuiHelper.blit(minecraft, matrixStack, x + 3 + 19, y + 79, ARROW);
 			GuiHelper.blit(minecraft, matrixStack, x + 3 + 14, y + 89, CRAFTING_SLOT);
 		}

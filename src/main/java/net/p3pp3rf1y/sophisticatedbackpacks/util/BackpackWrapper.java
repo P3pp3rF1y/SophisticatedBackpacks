@@ -6,8 +6,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -46,11 +44,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IItemHandler getFilteredHandler() {
 		return getUpgradeHandler().getFilteredHandler(getInventoryHandler());
-	}
-
-	@Override
-	public ScreenProperties getScreenProperties() {
-		return ((BackpackItem) backpack.getItem()).getScreenProperties();
 	}
 
 	@Override

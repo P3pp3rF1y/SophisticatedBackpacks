@@ -5,27 +5,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.*;
 
 @OnlyIn(Dist.CLIENT)
 public class FilterLogicControl extends CompositeWidget<Widget> {
-	private static final Map<Integer, TextureBlitData> SLOT_BACKGROUNDS = new HashMap<>();
-
 	protected final FilterLogicContainer container;
-	private final TextureBlitData slotsBackground;
 	private final Button[] showButtons;
 	private final int height;
 	private final int width;
@@ -36,7 +27,6 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		super(position);
 		container = filterLogicContainer;
 		this.slotsPerRow = slotsPerRow;
-		slotsBackground = getSlotBackground(container.getFilterSlots().size(), slotsPerRow);
 		this.showButtons = showButtons;
 
 		if (shouldShow(ALLOW_LIST)) {
@@ -71,16 +61,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.blit(minecraft, matrixStack, x, y + slotsTopYOffset, slotsBackground);
-	}
-
-	private static TextureBlitData getSlotBackground(int filterSlots, int slotsPerRow) {
-		int key = filterSlots * 31 + slotsPerRow;
-		if (!SLOT_BACKGROUNDS.containsKey(key)) {
-			int rows = filterSlots / slotsPerRow + (filterSlots % slotsPerRow > 0 ? 1 : 0);
-			SLOT_BACKGROUNDS.put(key, new TextureBlitData(GuiHelper.BACKPACK_54, new UV(7, 17), new Dimension(slotsPerRow * 18, rows * 18)));
-		}
-		return SLOT_BACKGROUNDS.get(key);
+		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, container.getFilterSlots().size() / slotsPerRow);
 	}
 
 	@Override

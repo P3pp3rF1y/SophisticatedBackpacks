@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
@@ -50,6 +50,8 @@ public class BackpackContainer extends Container {
 	private final List<Slot> backpackInventorySlots = new ArrayList<>();
 	private final List<Slot> playerSlots = new ArrayList<>();
 
+	private final BackpackBackgroundProperties backpackBackgroundProperties;
+
 	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
 		super(BACKPACK_ITEM_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
@@ -57,10 +59,13 @@ public class BackpackContainer extends Container {
 		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
 		if (!h.isPresent()) {
 			backpackWrapper = NoopBackpackWrapper.INSTANCE;
+			backpackBackgroundProperties = BackpackBackgroundProperties.REGULAR;
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
 		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(NoopBackpackWrapper.INSTANCE);
+
+		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);
@@ -73,6 +78,8 @@ public class BackpackContainer extends Container {
 		this.player = player;
 		Optional<BackpackTileEntity> backpackTile = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class);
 		backpackWrapper = backpackTile.map(te -> te.getBackpackWrapper().orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
+
+		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		int yPosition = addBackpackInventorySlots();
 		addBackpackUpgradeSlots(yPosition);
@@ -138,17 +145,21 @@ public class BackpackContainer extends Container {
 			}
 		}
 
+		if (slotIndex % getSlotsOnLine() > 0) {
+			yPosition += 18;
+		}
+
 		return yPosition;
 	}
 
 	private void addPlayerInventorySlots(PlayerInventory playerInventory, int yPosition, int slotIndex, boolean lockBackpackSlot) {
-		int playerInventoryYOffset = backpackWrapper.getScreenProperties().getPlayerInventoryYOffset();
+		int playerInventoryXOffset = backpackBackgroundProperties.getPlayerInventoryXOffset();
 
 		yPosition += 14;
 
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 9; ++j) {
-				playerSlots.add(addSlot(new Slot(playerInventory, j + i * 9 + 9, playerInventoryYOffset + 8 + j * 18, yPosition)));
+				playerSlots.add(addSlot(new Slot(playerInventory, j + i * 9 + 9, playerInventoryXOffset + 8 + j * 18, yPosition)));
 			}
 			yPosition += 18;
 		}
@@ -156,7 +167,7 @@ public class BackpackContainer extends Container {
 		yPosition += 4;
 
 		for (int k = 0; k < 9; ++k) {
-			Slot slot = addSlot(new Slot(playerInventory, k, playerInventoryYOffset + 8 + k * 18, yPosition));
+			Slot slot = addSlot(new Slot(playerInventory, k, playerInventoryXOffset + 8 + k * 18, yPosition));
 			if (lockBackpackSlot && k == slotIndex) {
 				backpackSlotNumber = slot.slotNumber;
 			} else {
@@ -171,7 +182,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private int getSlotsOnLine() {
-		return backpackWrapper.getScreenProperties().getSlotsOnLine();
+		return backpackBackgroundProperties.getSlotsOnLine();
 	}
 
 	@Override
@@ -293,8 +304,8 @@ public class BackpackContainer extends Container {
 		return backpackWrapper.getInventoryHandler().getSlots();
 	}
 
-	public ScreenProperties getScreenProperties() {
-		return backpackWrapper.getScreenProperties();
+	public BackpackBackgroundProperties getBackpackBackgroundProperties() {
+		return backpackBackgroundProperties;
 	}
 
 	public int getNumberOfUpgradeSlots() {

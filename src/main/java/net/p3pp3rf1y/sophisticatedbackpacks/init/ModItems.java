@@ -15,6 +15,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
@@ -28,7 +29,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ItemEnabledCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.items.ItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeTab;
@@ -81,13 +81,13 @@ public class ModItems {
 	private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, SophisticatedBackpacks.MOD_ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
-			() -> new BackpackItem(27, 1, ModBlocks.BACKPACK));
+			() -> new BackpackItem(Config.COMMON.leatherBackpack.inventorySlotCount::get, Config.COMMON.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
 	public static final RegistryObject<BackpackItem> IRON_BACKPACK = ITEMS.register("iron_backpack",
-			() -> new BackpackItem(54, 2, ModBlocks.IRON_BACKPACK));
+			() -> new BackpackItem(Config.COMMON.ironBackpack.inventorySlotCount::get, Config.COMMON.ironBackpack.upgradeSlotCount::get, ModBlocks.IRON_BACKPACK));
 	public static final RegistryObject<BackpackItem> GOLD_BACKPACK = ITEMS.register("gold_backpack",
-			() -> new BackpackItem(81, 3, new ScreenProperties().setTextureSize(512), ModBlocks.GOLD_BACKPACK));
+			() -> new BackpackItem(Config.COMMON.goldBackpack.inventorySlotCount::get, Config.COMMON.goldBackpack.upgradeSlotCount::get, ModBlocks.GOLD_BACKPACK));
 	public static final RegistryObject<BackpackItem> DIAMOND_BACKPACK = ITEMS.register("diamond_backpack",
-			() -> new BackpackItem(108, 5, new ScreenProperties().setSlotsOnLine(12).setPlayerInventoryYOffset(27).setTextureSize(512), ModBlocks.DIAMOND_BACKPACK));
+			() -> new BackpackItem(Config.COMMON.diamondBackpack.inventorySlotCount::get, Config.COMMON.diamondBackpack.upgradeSlotCount::get, ModBlocks.DIAMOND_BACKPACK));
 	public static final RegistryObject<PickupUpgradeItem> PICKUP_UPGRADE = ITEMS.register("pickup_upgrade", PickupUpgradeItem::new);
 	public static final RegistryObject<PickupUpgradeItem> ADVANCED_PICKUP_UPGRADE = ITEMS.register("advanced_pickup_upgrade",
 			() -> new PickupUpgradeItem(16));

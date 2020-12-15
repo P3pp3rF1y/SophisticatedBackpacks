@@ -48,25 +48,20 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
-	private final int numberOfSlots;
-	private final int numberOfUpgradeSlots;
-	private final ScreenProperties screenProperties;
+	private final IntSupplier numberOfSlots;
+	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
 
-	public BackpackItem(int numberOfSlots, int numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
-		this(numberOfSlots, numberOfUpgradeSlots, new ScreenProperties(), blockSupplier);
-	}
-
-	public BackpackItem(int numberOfSlots, int numberOfUpgradeSlots, ScreenProperties screenProperties, Supplier<BackpackBlock> blockSupplier) {
+	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
 		super(new Properties().maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
-		this.screenProperties = screenProperties;
 		this.blockSupplier = blockSupplier;
 	}
 
@@ -253,16 +248,12 @@ public class BackpackItem extends ItemBase {
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
 
-	public ScreenProperties getScreenProperties() {
-		return screenProperties;
-	}
-
 	public int getNumberOfSlots() {
-		return numberOfSlots;
+		return numberOfSlots.getAsInt();
 	}
 
 	public int getNumberOfUpgradeSlots() {
-		return numberOfUpgradeSlots;
+		return numberOfUpgradeSlots.getAsInt();
 	}
 
 	@Nullable
