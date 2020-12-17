@@ -4,6 +4,7 @@ public class Dimension {
 	public static final Dimension SQUARE_256 = new Dimension(256, 256);
 	public static final Dimension SQUARE_16 = new Dimension(16, 16);
 	public static final Dimension SQUARE_18 = new Dimension(18, 18);
+	public static final Dimension EMPTY = new Dimension(0, 0);
 
 	private final int width;
 	private final int height;

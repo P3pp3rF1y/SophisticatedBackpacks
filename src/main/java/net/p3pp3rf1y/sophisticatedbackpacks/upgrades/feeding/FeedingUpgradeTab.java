@@ -3,8 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
@@ -18,9 +18,9 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContain
 	private final FilterLogicControl.Basic filterLogicControl;
 
 	public FeedingUpgradeTab(FilteredUpgradeContainer<FeedingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(63, 106), screen,
+		super(upgradeContainer, position, screen,
 				new TranslationTextComponent(translUpgrade("feeding")), new TranslationTextComponent(translUpgradeTooltip("feeding")));
-		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), 3));
+		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), Config.COMMON.feedingUpgrade.slotsInRow.get()));
 	}
 
 	@Override

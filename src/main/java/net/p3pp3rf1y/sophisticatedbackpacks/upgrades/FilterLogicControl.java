@@ -22,6 +22,8 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	private final int width;
 	private final int slotsTopYOffset;
 	private final int slotsPerRow;
+	private final int slotsInExtraRow;
+	private final int fullSlotRows;
 
 	public FilterLogicControl(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow, Button... showButtons) {
 		super(position);
@@ -45,9 +47,22 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 					button -> container.setMatchNbt(!container.shouldMatchNbt()), container::shouldMatchNbt));
 		}
 
-		width = slotsPerRow * 18;
+		width = Math.max(slotsPerRow * 18, getMaxButtonWidth());
 		slotsTopYOffset = showButtons.length > 0 ? 21 : 0;
-		height = container.getFilterSlots().size() / slotsPerRow * 18 + slotsTopYOffset;
+		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
+		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
+		height = (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset;
+	}
+
+	private int getMaxButtonWidth() {
+		int maxWidth = 0;
+		for (Widget w : children) {
+			int buttonWidth = w.getX() + w.getWidth() - x;
+			if (buttonWidth > maxWidth) {
+				maxWidth = buttonWidth;
+			}
+		}
+		return maxWidth;
 	}
 
 	private boolean shouldShow(Button button) {
@@ -61,7 +76,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, container.getFilterSlots().size() / slotsPerRow);
+		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, fullSlotRows, slotsInExtraRow);
 	}
 
 	@Override

@@ -39,6 +39,24 @@ public class Config {
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
 		public final BackpackConfig diamondBackpack;
+		public final FilteredUpgradeConfig compactingUpgrade;
+		public final FilteredUpgradeConfig advancedCompactingUpgrade;
+		public final FilteredUpgradeConfig depositUpgrade;
+		public final FilteredUpgradeConfig advancedDepositUpgrade;
+		public final FilteredUpgradeConfig feedingUpgrade;
+		public final FilteredUpgradeConfig filterUpgrade;
+		public final FilteredUpgradeConfig advancedFilterUpgrade;
+		public final MagnetUpgradeConfig magnetUpgrade;
+		public final MagnetUpgradeConfig advancedMagnetUpgrade;
+		public final FilteredUpgradeConfig pickupUpgrade;
+		public final FilteredUpgradeConfig advancedPickupUpgrade;
+		public final FilteredUpgradeConfig refillUpgrade;
+		public final FilteredUpgradeConfig restockUpgrade;
+		public final FilteredUpgradeConfig advancedRestockUpgrade;
+		public final FilteredUpgradeConfig voidUpgrade;
+		public final FilteredUpgradeConfig advancedVoidUpgrade;
+		public final SmeltingUpgradeConfig smeltingUpgrade;
+		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -50,7 +68,90 @@ public class Config {
 			goldBackpack = new BackpackConfig(builder, "Gold", 81, 3);
 			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);
 
+			compactingUpgrade = new FilteredUpgradeConfig(builder, "Compacting Upgrade", "compactingUpgrade", 9, 3);
+			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
+			depositUpgrade = new FilteredUpgradeConfig(builder, "Deposit Upgrade", "depositUpgrade", 9, 3);
+			advancedDepositUpgrade = new FilteredUpgradeConfig(builder, "Advanced Deposit Upgrade", "advancedDepositUpgrade", 16, 4);
+			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 4);
+			filterUpgrade = new FilteredUpgradeConfig(builder, "Filter Upgrade", "filterUpgrade", 9, 3);
+			advancedFilterUpgrade = new FilteredUpgradeConfig(builder, "Advanced Filter Upgrade", "advancedFilterUpgrade", 16, 4);
+			magnetUpgrade = new MagnetUpgradeConfig(builder, "Magnet Upgrade", "magnetUpgrade", 9, 3, 3);
+			advancedMagnetUpgrade = new MagnetUpgradeConfig(builder, "Advanced Magnet Upgrade", "advancedMagnetUpgrade", 16, 4, 5);
+			pickupUpgrade = new FilteredUpgradeConfig(builder, "Pickup Upgrade", "pickupUpgrade", 9, 3);
+			advancedPickupUpgrade = new FilteredUpgradeConfig(builder, "Advanced Pickup Upgrade", "advancedPickupUpgrade", 16, 4);
+			refillUpgrade = new FilteredUpgradeConfig(builder, "Refill Upgrade", "refillUpgrade", 6, 3);
+			restockUpgrade = new FilteredUpgradeConfig(builder, "Restock Upgrade", "restockUpgrade", 9, 3);
+			advancedRestockUpgrade = new FilteredUpgradeConfig(builder, "Advanced Restock Upgrade", "advancedRestockUpgrade", 16, 4);
+			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
+			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
+			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
+			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
+
 			builder.pop();
+		}
+
+		public static class AutoSmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {
+			public final ForgeConfigSpec.IntValue inputFilterSlots;
+			public final ForgeConfigSpec.IntValue inputFilterSlotsInRow;
+			public final ForgeConfigSpec.IntValue fuelFilterSlots;
+			public final ForgeConfigSpec.IntValue fuelFilterSlotsInRow;
+
+			public AutoSmeltingUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				super(builder, "Auto-Smelting Upgrade", "autoSmeltingUpgrade");
+				inputFilterSlots = builder.comment("Number of input filter slots").defineInRange("inputFilterSlots", 8, 1, 20);
+				inputFilterSlotsInRow = builder.comment("Number of input filter slots displayed in a row").defineInRange("inputFilterSlotsInRow", 4, 1, 6);
+				fuelFilterSlots = builder.comment("Number of fuel filter slots").defineInRange("fuelFilterSlots", 4, 1, 20);
+				fuelFilterSlotsInRow = builder.comment("Number of fuel filter slots displayed in a row").defineInRange("fuelFilterSlotsInRow", 4, 1, 6);
+				builder.pop();
+			}
+		}
+
+		public static class SmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {
+			public SmeltingUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				super(builder, "Smelting Upgrade", "smeltingUpgrade");
+				builder.pop();
+			}
+		}
+
+		public static class SmeltingUpgradeConfigBase {
+			public final ForgeConfigSpec.DoubleValue smeltingSpeedMultiplier;
+			public final ForgeConfigSpec.DoubleValue fuelEfficiencyMultiplier;
+
+			protected SmeltingUpgradeConfigBase(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
+				builder.comment(upgradeName + " Settings").push(path);
+				smeltingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
+						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
+				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
+						.defineInRange("fuelEfficiencyMultiplier", 1.0D, 0.25D, 4.0D);
+			}
+		}
+
+		public static class MagnetUpgradeConfig extends FilteredUpgradeConfigBase {
+			public final ForgeConfigSpec.IntValue magnetRange;
+
+			public MagnetUpgradeConfig(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow, int defaultMagnetRange) {
+				super(builder, name, path, defaultFilterSlots, defaultSlotsInRow);
+				magnetRange = builder.comment("Range around backpack in blocks at which magnet will pickup items").defineInRange("magnetRange", defaultMagnetRange, 1, 20);
+				builder.pop();
+			}
+		}
+
+		public static class FilteredUpgradeConfig extends FilteredUpgradeConfigBase {
+			public FilteredUpgradeConfig(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
+				super(builder, name, path, defaultFilterSlots, defaultSlotsInRow);
+				builder.pop();
+			}
+		}
+
+		public static class FilteredUpgradeConfigBase {
+			public final ForgeConfigSpec.IntValue filterSlots;
+			public final ForgeConfigSpec.IntValue slotsInRow;
+
+			protected FilteredUpgradeConfigBase(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
+				builder.comment(name + " Settings").push(path);
+				filterSlots = builder.comment("Number of " + name + "'s filter slots").defineInRange("filterSlots", defaultFilterSlots, 1, 20);
+				slotsInRow = builder.comment("Number of filter slots displayed in a row").defineInRange("slotsInRow", defaultSlotsInRow, 1, 6);
+			}
 		}
 
 		public static class BackpackConfig {

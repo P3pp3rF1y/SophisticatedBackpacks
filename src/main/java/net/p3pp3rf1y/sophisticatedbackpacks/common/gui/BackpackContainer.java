@@ -365,25 +365,29 @@ public class BackpackContainer extends Container {
 		@Override
 		public void onSlotChanged() {
 			super.onSlotChanged();
-			boolean upgradeControlNeedsReloading = false;
-			if (upgradeContainers.size() != backpackWrapper.getUpgradeHandler().getSlotWrappers().size()) {
-				upgradeControlNeedsReloading = true;
-			} else {
-				for (Map.Entry<Integer, IUpgradeWrapper> slotWrapper : backpackWrapper.getUpgradeHandler().getSlotWrappers().entrySet()) {
-					UpgradeContainerBase<?, ?> container = upgradeContainers.get(slotWrapper.getKey());
-					if (container == null || container.getUpgradeWrapper() != slotWrapper.getValue()) {
-						if (container == null || container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
-							upgradeControlNeedsReloading = true;
-							break;
-						} else {
-							container.setUpgradeWrapper(slotWrapper.getValue());
-						}
+			if (updateWrappersAndCheckForReloadNeeded()) {
+				reloadUpgradeControl();
+			}
+		}
+
+		private boolean updateWrappersAndCheckForReloadNeeded() {
+			int checkedContainersCount = 0;
+			for (Map.Entry<Integer, IUpgradeWrapper> slotWrapper : backpackWrapper.getUpgradeHandler().getSlotWrappers().entrySet()) {
+				UpgradeContainerBase<?, ?> container = upgradeContainers.get(slotWrapper.getKey());
+				if (!slotWrapper.getValue().displaysSettingsTab()) {
+					if (container != null) {
+						return true;
+					}
+				} else if (container == null || container.getUpgradeWrapper() != slotWrapper.getValue()) {
+					if (container == null || container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
+						return true;
+					} else {
+						container.setUpgradeWrapper(slotWrapper.getValue());
+						checkedContainersCount++;
 					}
 				}
 			}
-			if (upgradeControlNeedsReloading) {
-				reloadUpgradeControl();
-			}
+			return checkedContainersCount != upgradeContainers.size();
 		}
 
 		private void reloadUpgradeControl() {

@@ -25,22 +25,24 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
 	private static final int DEFAULT_WIDTH = 21;
+	private static final int RIGHT_BORDER_WIDTH = 6;
+	private static final int BOTTOM_BORDER_HEIGHT = 7;
+
 	protected final BackpackScreen screen;
 	private final List<IReorderingProcessor> closedTooltip;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
 	private final C upgradeContainer;
-	private final Dimension openTabDimension;
+	protected Dimension openTabDimension = new Dimension(0, 0);
 	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
 	private Consumer<UpgradeSettingsTab<C>> onClose = t -> {};
 	private Predicate<UpgradeSettingsTab<C>> shouldRender = t -> true;
 	private Predicate<UpgradeSettingsTab<C>> shouldShowTooltip = t -> true;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+	protected UpgradeSettingsTab(C upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
-		this.openTabDimension = openTabDimension;
 		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
@@ -77,7 +79,14 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 
 	protected <U extends Widget> U addHideableChild(U widget) {
 		hideableChildren.add(widget);
+		updateOpenTabDimension(widget);
 		return widget;
+	}
+
+	private <U extends Widget> void updateOpenTabDimension(U widget) {
+		int widgetMaxWidthExtension = widget.getX() + widget.getWidth() + RIGHT_BORDER_WIDTH - x;
+		int widgetMaxHeightExtension = widget.getY() + widget.getHeight() + BOTTOM_BORDER_HEIGHT - y;
+		openTabDimension = new Dimension(Math.max(openTabDimension.getWidth(), widgetMaxWidthExtension), Math.max(openTabDimension.getHeight(), widgetMaxHeightExtension));
 	}
 
 	@Override

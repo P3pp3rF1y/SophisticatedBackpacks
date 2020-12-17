@@ -4,6 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
@@ -18,7 +19,8 @@ public class SmeltingUpgradeWrapper extends UpgradeWrapperBase<SmeltingUpgradeWr
 
 	public SmeltingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(upgrade, upgradeSaveHandler);
-		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler);
+		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, Config.COMMON.smeltingUpgrade.smeltingSpeedMultiplier.get(),
+				Config.COMMON.smeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
 
 	@Override

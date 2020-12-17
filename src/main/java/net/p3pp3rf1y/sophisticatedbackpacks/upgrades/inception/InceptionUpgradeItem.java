@@ -19,5 +19,10 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeItem.W
 		public Wrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 			super(upgrade, upgradeSaveHandler);
 		}
+
+		@Override
+		public boolean displaysSettingsTab() {
+			return false;
+		}
 	}
 }

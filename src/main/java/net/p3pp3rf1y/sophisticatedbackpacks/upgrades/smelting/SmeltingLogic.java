@@ -32,16 +32,20 @@ public class SmeltingLogic {
 
 	private final Predicate<ItemStack> isFuel;
 	private final Predicate<ItemStack> isInput;
+	private final double smeltingSpeedMultiplier;
+	private final double fuelEfficiencyMultiplier;
 
-	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler) {
-		this(upgrade, saveHandler, s -> getBurnTime(s) > 0, s -> RecipeHelper.getSmeltingRecipe(s).isPresent());
+	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, double smeltingSpeedMultiplier, double fuelEfficiencyMultiplier) {
+		this(upgrade, saveHandler, s -> getBurnTime(s) > 0, s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), smeltingSpeedMultiplier, fuelEfficiencyMultiplier);
 	}
 
-	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Predicate<ItemStack> isFuel, Predicate<ItemStack> isInput) {
+	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Predicate<ItemStack> isFuel, Predicate<ItemStack> isInput, double smeltingSpeedMultiplier, double fuelEfficiencyMultiplier) {
 		this.upgrade = upgrade;
 		this.saveHandler = saveHandler;
 		this.isFuel = isFuel;
 		this.isInput = isInput;
+		this.smeltingSpeedMultiplier = smeltingSpeedMultiplier;
+		this.fuelEfficiencyMultiplier = fuelEfficiencyMultiplier;
 	}
 
 	private void save() {
@@ -73,7 +77,7 @@ public class SmeltingLogic {
 	}
 
 	public boolean isBurning(World world) {
-		return getBurnTimeFinish() > world.getGameTime();
+		return getBurnTimeFinish() >= world.getGameTime();
 	}
 
 	private Optional<FurnaceRecipe> getSmeltingRecipe() {
@@ -96,13 +100,13 @@ public class SmeltingLogic {
 		if (isCooking() && finishedCooking(world)) {
 			smelt(smeltingRecipe);
 			if (canSmelt(smeltingRecipe)) {
-				setCookTime(world, smeltingRecipe.getCookTime());
+				setCookTime(world, (int) (smeltingRecipe.getCookTime() * (1 / smeltingSpeedMultiplier)));
 			} else {
 				setIsCooking(false);
 			}
 		} else if (!isCooking()) {
 			setIsCooking(true);
-			setCookTime(world, smeltingRecipe.getCookTime());
+			setCookTime(world, (int) (smeltingRecipe.getCookTime() * (1 / smeltingSpeedMultiplier)));
 		}
 	}
 
@@ -157,7 +161,7 @@ public class SmeltingLogic {
 	private void updateFuel(World world, FurnaceRecipe smeltingRecipe) {
 		ItemStack fuel = getFuel();
 		if (!isBurning(world) && canSmelt(smeltingRecipe)) {
-			setBurnTime(world, getBurnTime(fuel));
+			setBurnTime(world, (int) (getBurnTime(fuel) * fuelEfficiencyMultiplier / smeltingSpeedMultiplier));
 			if (isBurning(world)) {
 				if (fuel.hasContainerItem()) {
 					setFuel(fuel.getContainerItem());

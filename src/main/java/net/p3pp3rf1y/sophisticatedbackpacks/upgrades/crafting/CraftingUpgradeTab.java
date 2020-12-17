@@ -20,8 +20,10 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 	private static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.UPGRADE_CONTROLS, new UV(97, 216), new Dimension(15, 8));
 
 	public CraftingUpgradeTab(CraftingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, new Dimension(63, 120), screen, new TranslationTextComponent(translUpgrade("crafting")),
+		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("crafting")),
 				new TranslationTextComponent(translUpgradeTooltip("crafting")));
+
+		openTabDimension = new Dimension(63, 120);
 	}
 
 	@Override

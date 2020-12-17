@@ -198,4 +198,11 @@ public class GuiHelper {
 				new TranslationTextComponent(tooltip)
 		);
 	}
+
+	public static void renderSlotsBackground(Minecraft minecraft, MatrixStack matrixStack, int x, int y, int slotsInRow, int fullSlotRows, int extraRowSlots) {
+		renderSlotsBackground(minecraft, matrixStack, x, y, slotsInRow, fullSlotRows);
+		if (extraRowSlots > 0) {
+			renderSlotsBackground(minecraft, matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
+		}
+	}
 }

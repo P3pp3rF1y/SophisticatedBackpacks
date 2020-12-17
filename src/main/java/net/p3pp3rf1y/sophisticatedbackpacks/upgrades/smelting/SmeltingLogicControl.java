@@ -54,12 +54,12 @@ public class SmeltingLogicControl extends CompositeWidget<Widget> {
 
 	@Override
 	public int getWidth() {
-		return 0;
+		return 68;
 	}
 
 	@Override
 	public int getHeight() {
-		return 0;
+		return 54;
 	}
 
 	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {

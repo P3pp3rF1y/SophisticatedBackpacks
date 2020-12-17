@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
@@ -23,7 +24,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 	public RefillUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(upgrade, upgradeSaveHandler);
-		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, 6);
+		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.refillUpgrade.filterSlots.get());
 		filterLogic.setAllowByDefault();
 	}
 
@@ -37,18 +38,16 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		if (player == null /*not supported in block form*/ || isInCooldown(world)) {
 			return;
 		}
-		player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(playerInvHandler -> {
-			InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
-				if (filter.isEmpty()) {
-					return;
-				}
-				int missingCount = InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize());
-				if (missingCount == 0) {
-					return;
-				}
-				InventoryHelper.moveBetweenInventories(wrapper.getInventoryHandler(), playerInvHandler, filter, missingCount);
-			});
-		});
+		player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
+			if (filter.isEmpty()) {
+				return;
+			}
+			int missingCount = InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize());
+			if (missingCount == 0) {
+				return;
+			}
+			InventoryHelper.moveBetweenInventories(wrapper.getInventoryHandler(), playerInvHandler, filter, missingCount);
+		}));
 		setCooldown(world, COOLDOWN);
 	}
 }

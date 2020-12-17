@@ -84,14 +84,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		int playerInventoryHeight = 97;
 		blit(matrixStack, x, y + SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
 
-		renderSlotsBackground(matrixStack, x, y, slotsOnLine, slotRows, remainingSlots);
-	}
-
-	private void renderSlotsBackground(MatrixStack matrixStack, int x, int y, int slotsOnLine, int slotRows, int remainingSlots) {
-		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 7, y + SLOTS_Y_OFFSET, slotsOnLine, slotRows);
-		if (remainingSlots > 0) {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 7, y + SLOTS_Y_OFFSET + slotRows * 18, remainingSlots, 1);
-		}
+		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 7, y + SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
 	}
 
 	private void drawUpgradeBackground(MatrixStack matrixStack) {

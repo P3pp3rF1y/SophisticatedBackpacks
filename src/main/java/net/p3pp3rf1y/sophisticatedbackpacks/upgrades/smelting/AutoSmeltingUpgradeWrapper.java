@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
@@ -33,14 +34,17 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 
 	public AutoSmeltingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(upgrade, upgradeSaveHandler);
-		inputFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, 8, s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), "inputFilter");
-		fuelFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, 4, s -> ForgeHooks.getBurnTime(s) > 0, "fuelFilter");
+		inputFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.inputFilterSlots.get(),
+				s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), "inputFilter");
+		fuelFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.fuelFilterSlots.get(),
+				s -> ForgeHooks.getBurnTime(s) > 0, "fuelFilter");
 		fuelFilterLogic.setAllowByDefault();
 		fuelFilterLogic.setEmptyAllowListMatchesEverything();
 
 		isValidInput = s -> RecipeHelper.getSmeltingRecipe(s).isPresent() && inputFilterLogic.matchesFilter(s);
 		isValidFuel = s -> ForgeHooks.getBurnTime(s) > 0 && fuelFilterLogic.matchesFilter(s);
-		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, isValidFuel, isValidInput);
+		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, isValidFuel, isValidInput, Config.COMMON.autoSmeltingUpgrade.smeltingSpeedMultiplier.get(),
+				Config.COMMON.autoSmeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
 
 	private void tryPushingOutput(IBackpackWrapper wrapper) {
