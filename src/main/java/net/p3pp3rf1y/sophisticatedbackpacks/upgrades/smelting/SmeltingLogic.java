@@ -161,6 +161,9 @@ public class SmeltingLogic {
 	private void updateFuel(World world, FurnaceRecipe smeltingRecipe) {
 		ItemStack fuel = getFuel();
 		if (!isBurning(world) && canSmelt(smeltingRecipe)) {
+			if (getBurnTime(fuel) <= 0) {
+				return;
+			}
 			setBurnTime(world, (int) (getBurnTime(fuel) * fuelEfficiencyMultiplier / smeltingSpeedMultiplier));
 			if (isBurning(world)) {
 				if (fuel.hasContainerItem()) {

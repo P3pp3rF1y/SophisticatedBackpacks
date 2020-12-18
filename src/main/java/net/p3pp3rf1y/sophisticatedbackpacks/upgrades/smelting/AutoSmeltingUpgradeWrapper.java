@@ -57,9 +57,14 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, wrapper.getInventoryHandler(), true).getCount() < output.getCount()) {
 			ItemStack ret = InventoryHelper.insertIntoInventory(output, wrapper.getInventoryHandler(), false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.COOK_OUTPUT_SLOT, output.getCount() - ret.getCount(), false);
-
 		} else {
 			outputCooldown = NO_INVENTORY_SPACE_COOLDOWN;
+		}
+
+		ItemStack fuel = smeltingLogic.getFuel();
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryHandler(), true).getCount() < fuel.getCount()) {
+			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryHandler(), false);
+			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
 	}
 
