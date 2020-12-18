@@ -16,8 +16,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContainer> {
-	private static final TextureBlitData CRAFTING_SLOT = new TextureBlitData(GuiHelper.UPGRADE_CONTROLS, new UV(71, 216), new Dimension(26, 26));
-	private static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.UPGRADE_CONTROLS, new UV(97, 216), new Dimension(15, 8));
+	private static final TextureBlitData CRAFTING_SLOT = new TextureBlitData(GuiHelper.GUI_CONTROLS, new UV(71, 216), new Dimension(26, 26));
+	private static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.GUI_CONTROLS, new UV(97, 216), new Dimension(15, 8));
 
 	public CraftingUpgradeTab(CraftingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("crafting")),

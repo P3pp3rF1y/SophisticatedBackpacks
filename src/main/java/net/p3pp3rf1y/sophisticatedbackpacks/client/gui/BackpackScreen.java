@@ -4,16 +4,19 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
 @OnlyIn(Dist.CLIENT)
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
-	private static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
 	private static final int UPGRADE_TOP_HEIGHT = 7;
 	private static final int UPGRADE_SLOT_HEIGHT = 18;
 	private static final int UPGRADE_SPACE_BETWEEN_SLOTS = 4;
@@ -22,8 +25,9 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	private static final int SLOTS_Y_OFFSET = 17;
 	private UpgradeSettingsControl upgradeControl;
-
 	private final int slots;
+	private Button sortButton;
+	private ToggleButton<SortBy> sortByButton;
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -42,6 +46,18 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			children.remove(upgradeControl);
 			initUpgradeControl();
 		});
+		sortButton = new Button(new Position(guiLeft + xSize - 34, guiTop + 4), ButtonDefinitions.SORT, button -> {
+			if (button == 0) {
+				getContainer().sort();
+			}
+		});
+		addListener(sortButton);
+		sortByButton = new ToggleButton<>(new Position(guiLeft + xSize - 20, guiTop + 4), ButtonDefinitions.SORT_BY, button -> {
+			if (button == 0) {
+				getContainer().setSortBy(getContainer().getSortBy().next());
+			}
+		}, () -> getContainer().getSortBy());
+		addListener(sortByButton);
 	}
 
 	private void initUpgradeControl() {
@@ -55,6 +71,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		upgradeControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
+		sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
 
@@ -89,7 +107,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	private void drawUpgradeBackground(MatrixStack matrixStack) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		minecraft.getTextureManager().bindTexture(UPGRADE_CONTROLS);
+		minecraft.getTextureManager().bindTexture(GUI_CONTROLS);
 		int i = (width - xSize) / 2;
 		int j = (height - ySize) / 2;
 

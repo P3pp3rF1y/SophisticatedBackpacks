@@ -97,5 +97,9 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.match_tags": "Match Tags",
     "gui.sophisticatedbackpacks.upgrades.buttons.direction_both": "Input & Output",
     "gui.sophisticatedbackpacks.upgrades.buttons.direction_input": "Input",
-    "gui.sophisticatedbackpacks.upgrades.buttons.direction_output": "Output"
+    "gui.sophisticatedbackpacks.upgrades.buttons.direction_output": "Output",
+    "gui.sophisticatedbackpacks.buttons.sort_by_name": "By Name",
+    "gui.sophisticatedbackpacks.buttons.sort_by_count": "By Count",
+    "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",
+    "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack"
 }

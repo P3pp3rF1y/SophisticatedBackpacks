@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.Optional;
@@ -70,7 +71,22 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public void setSortBy(SortBy sortBy) {
+		//noop
+	}
+
+	@Override
+	public SortBy getSortBy() {
+		return SortBy.NAME;
+	}
+
+	@Override
 	public ItemStack getBackpack() {
 		return backpack;
+	}
+
+	@Override
+	public void sort() {
+		//noop
 	}
 }

@@ -30,9 +30,11 @@ import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class GuiHelper {
-	public static final ResourceLocation UPGRADE_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/upgrade_controls.png");
-	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(47, 0), new Dimension(18, 18));
-	public static final TextureBlitData DEFAULT_BUTTON_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, new UV(29, 0), Dimension.SQUARE_18);
+	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
+	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(47, 0), Dimension.SQUARE_18);
+	public static final TextureBlitData DEFAULT_BUTTON_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(29, 0), Dimension.SQUARE_18);
+	public static final TextureBlitData SMALL_BUTTON_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 18), Dimension.SQUARE_12);
+	public static final TextureBlitData SMALL_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(41, 18), Dimension.SQUARE_12);
 	public static final ResourceLocation SLOTS_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/slots_background.png");
 
 	private static final Map<Integer, TextureBlitData> SLOTS_BACKGROUNDS = new HashMap<>();
@@ -193,8 +195,12 @@ public class GuiHelper {
 		builder.pos(matrix, (float) x2, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
 	}
 
-	public static ToggleButton.StateData getButtonStateData(UV uv, String tooltip) {
-		return new ToggleButton.StateData(new TextureBlitData(UPGRADE_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, uv, Dimension.SQUARE_16),
+	public static ToggleButton.StateData getButtonStateData(UV uv, String tooltip, Dimension dimension) {
+		return getButtonStateData(uv, tooltip, dimension, new Position(0, 0));
+	}
+
+	public static ToggleButton.StateData getButtonStateData(UV uv, String tooltip, Dimension dimension, Position offset) {
+		return new ToggleButton.StateData(new TextureBlitData(GUI_CONTROLS, offset, Dimension.SQUARE_256, uv, dimension),
 				new TranslationTextComponent(tooltip)
 		);
 	}

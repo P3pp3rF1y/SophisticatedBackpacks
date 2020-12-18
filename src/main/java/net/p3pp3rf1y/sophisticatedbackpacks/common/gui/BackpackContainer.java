@@ -39,6 +39,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_ITEM_C
 public class BackpackContainer extends Container {
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
+	private static final String SORT_BY_TAG = "sortBy";
+	private static final String ACTION_TAG = "action";
 
 	private final IBackpackWrapper backpackWrapper;
 	private final PlayerEntity player;
@@ -328,6 +330,10 @@ public class BackpackContainer extends Container {
 			}
 		} else if (data.contains(OPEN_TAB_ID_TAG)) {
 			setOpenTabId(data.getInt(OPEN_TAB_ID_TAG));
+		} else if (data.contains(SORT_BY_TAG)) {
+			setSortBy(SortBy.fromName(data.getString(SORT_BY_TAG)));
+		} else if (data.contains(ACTION_TAG) && data.getString(ACTION_TAG).equals("sort")) {
+			sort();
 		}
 	}
 
@@ -355,6 +361,30 @@ public class BackpackContainer extends Container {
 
 	public void removeOpenTabId() {
 		setOpenTabId(-1);
+	}
+
+	public SortBy getSortBy() {
+		return backpackWrapper.getSortBy();
+	}
+
+	public void setSortBy(SortBy sortBy) {
+		if (player.world.isRemote) {
+			CompoundNBT data = new CompoundNBT();
+			data.putString(SORT_BY_TAG, sortBy.getString());
+			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		}
+		backpackWrapper.setSortBy(sortBy);
+	}
+
+	public void sort() {
+		if (player.world.isRemote) {
+			CompoundNBT data = new CompoundNBT();
+			data.putString(ACTION_TAG, "sort");
+			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+			return;
+		}
+
+		backpackWrapper.sort();
 	}
 
 	public class BackpackUpgradeSlot extends SlotItemHandler {
