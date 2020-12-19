@@ -4,4 +4,8 @@ import net.minecraft.item.ItemStack;
 
 public interface IUpgradeWrapper {
 	ItemStack getUpgradeStack();
+
+	default boolean displaysSettingsTab() {
+		return true;
+	}
 }

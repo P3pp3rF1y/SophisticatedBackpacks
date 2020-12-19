@@ -5,6 +5,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
@@ -22,16 +23,16 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDef
 public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeContainer> {
 	private static final ButtonDefinition.Toggle<Direction> DIRECTION = createToggleButtonDefinition(
 			ImmutableMap.of(
-					Direction.BOTH, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("direction_both")),
-					Direction.INPUT, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("direction_input")),
-					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"))
+					Direction.BOTH, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("direction_both"), Dimension.SQUARE_16, new Position(1, 1)),
+					Direction.INPUT, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("direction_input"), Dimension.SQUARE_16, new Position(1, 1)),
+					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
 	protected FilterLogicControl filterLogicControl;
 
-	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen,
+	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen,
 			ITextComponent tabLabel, ITextComponent closedTooltip) {
-		super(upgradeContainer, position, openTabDimension, screen, tabLabel, closedTooltip);
+		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), DIRECTION,
 				button -> getContainer().setDirection(getContainer().getDirection().next()), () -> getContainer().getDirection()));
@@ -44,18 +45,20 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(63, 126), screen,
-					new TranslationTextComponent(translUpgrade("filter")), new TranslationTextComponent(translUpgradeTooltip("filter")));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 3));
+			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("filter")),
+					new TranslationTextComponent(translUpgradeTooltip("filter")));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+					Config.COMMON.filterUpgrade.slotsInRow.get()));
 		}
 	}
 
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, new Dimension(81, 144), screen,
-					new TranslationTextComponent(translUpgrade("advanced_filter")), new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
+			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("advanced_filter")),
+					new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
 
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 4));
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+					Config.COMMON.advancedFilterUpgrade.slotsInRow.get()));
 		}
 	}
 }

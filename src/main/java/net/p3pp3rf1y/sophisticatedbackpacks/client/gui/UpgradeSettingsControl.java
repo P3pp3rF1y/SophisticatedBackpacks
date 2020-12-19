@@ -24,22 +24,26 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		int i = 0;
 		for (UpgradeContainerBase<?, ?> container : screen.getContainer().getUpgradeContainers()) {
 			UpgradeSettingsTab<UpgradeContainerBase<?, ?>> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
+			int tabId = i;
 			tab.setHandlers(t -> {
 						if (differentTabIsOpen(t)) {
 							openTab.close();
 						}
 						t.setZOffset(200);
 						openTab = t;
+						screen.getContainer().setOpenTabId(tabId);
 					},
 					t -> {
 						if (openTab != null) {
 							openTab.setZOffset(0);
 							openTab = null;
+							screen.getContainer().removeOpenTabId();
 						}
 					},
 					t -> !differentTabIsOpen(t) || isNotCovered(openTab, t, true),
 					t -> openTab == null || isNotCovered(openTab, t, false)
 			);
+			tab.onAfterInit();
 			i++;
 		}
 	}

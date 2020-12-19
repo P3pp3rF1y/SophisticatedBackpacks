@@ -1,0 +1,21 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:magnet_upgrade"
+        ]
+    },
+    "criteria": {
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:magnet_upgrade"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_the_recipe"
+        ]
+    ]
+}

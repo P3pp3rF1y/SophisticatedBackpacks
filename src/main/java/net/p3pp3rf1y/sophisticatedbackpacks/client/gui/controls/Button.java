@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
@@ -9,6 +10,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
@@ -17,21 +20,15 @@ public class Button extends ButtonBase {
 	@Nullable
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
-	private TextureBlitData foregroundTexture;
+	private final TextureBlitData foregroundTexture;
+	private final List<IReorderingProcessor> tooltip;
 
 	public Button(Position position, ButtonDefinition buttonDefinition, Consumer<Integer> onClick) {
-		this(position, buttonDefinition, onClick, null);
-	}
-
-	public void setForegroundTexture(TextureBlitData foregroundTexture) {
-		this.foregroundTexture = foregroundTexture;
-	}
-
-	public Button(Position position, ButtonDefinition buttonDefinition, Consumer<Integer> onClick, @Nullable TextureBlitData foregroundTexture) {
 		super(position, buttonDefinition.getDimension(), onClick);
 		backgroundTexture = buttonDefinition.getBackgroundTexture();
-		this.foregroundTexture = foregroundTexture;
+		foregroundTexture = buttonDefinition.getForegroundTexture();
 		hoveredBackgroundTexture = buttonDefinition.getHoveredBackgroundTexture();
+		tooltip = Collections.singletonList(buttonDefinition.getTooltip().func_241878_f());
 	}
 
 	@Override
@@ -49,6 +46,9 @@ public class Button extends ButtonBase {
 	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (foregroundTexture != null) {
 			GuiHelper.blit(minecraft, matrixStack, x, y, foregroundTexture);
+		}
+		if (isMouseOver(mouseX, mouseY)) {
+			GuiHelper.setTooltipToRender(tooltip);
 		}
 	}
 }

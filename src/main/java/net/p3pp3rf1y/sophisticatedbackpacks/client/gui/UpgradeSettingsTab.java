@@ -25,29 +25,30 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
 	private static final int DEFAULT_WIDTH = 21;
+	private static final int RIGHT_BORDER_WIDTH = 6;
+	private static final int BOTTOM_BORDER_HEIGHT = 7;
+
 	protected final BackpackScreen screen;
 	private final List<IReorderingProcessor> closedTooltip;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
-	protected boolean isOpen = false;
 	private final C upgradeContainer;
-	private final Dimension openTabDimension;
+	protected Dimension openTabDimension = new Dimension(0, 0);
 	private Consumer<UpgradeSettingsTab<C>> onOpen = t -> {};
 	private Consumer<UpgradeSettingsTab<C>> onClose = t -> {};
 	private Predicate<UpgradeSettingsTab<C>> shouldRender = t -> true;
 	private Predicate<UpgradeSettingsTab<C>> shouldShowTooltip = t -> true;
 	private final List<Widget> hideableChildren = new ArrayList<>();
 
-	protected UpgradeSettingsTab(C upgradeContainer, Position position, Dimension openTabDimension, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+	protected UpgradeSettingsTab(C upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
-		this.openTabDimension = openTabDimension;
 		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 				super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
-				if (!isOpen && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
+				if (!upgradeContainer.isOpen() && shouldShowTooltip.test(UpgradeSettingsTab.this) && isMouseOver(mouseX, mouseY)) {
 					GuiHelper.setTooltipToRender(UpgradeSettingsTab.this.closedTooltip);
 				}
 			}
@@ -69,7 +70,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 		if (button != 0) {
 			return;
 		}
-		setOpen(!isOpen);
+		setOpen(!upgradeContainer.isOpen());
 	}
 
 	protected C getContainer() {
@@ -78,7 +79,14 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 
 	protected <U extends Widget> U addHideableChild(U widget) {
 		hideableChildren.add(widget);
+		updateOpenTabDimension(widget);
 		return widget;
+	}
+
+	private <U extends Widget> void updateOpenTabDimension(U widget) {
+		int widgetMaxWidthExtension = widget.getX() + widget.getWidth() + RIGHT_BORDER_WIDTH - x;
+		int widgetMaxHeightExtension = widget.getY() + widget.getHeight() + BOTTOM_BORDER_HEIGHT - y;
+		openTabDimension = new Dimension(Math.max(openTabDimension.getWidth(), widgetMaxWidthExtension), Math.max(openTabDimension.getHeight(), widgetMaxHeightExtension));
 	}
 
 	@Override
@@ -91,7 +99,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		minecraft.getTextureManager().bindTexture(GuiHelper.UPGRADE_CONTROLS);
+		minecraft.getTextureManager().bindTexture(GuiHelper.GUI_CONTROLS);
 
 		int halfHeight = height / 2;
 		blit(matrixStack, x, y, (float) TEXTURE_WIDTH - width, 0, width, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -153,7 +161,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	}
 
 	private void setOpen(boolean isOpen) {
-		this.isOpen = isOpen;
+		upgradeContainer.setIsOpen(isOpen);
 		if (isOpen) {
 			onTabOpen();
 		} else {
@@ -163,5 +171,11 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 
 	public Rectangle2d getRectangle() {
 		return new Rectangle2d(x, y, width, height);
+	}
+
+	public void onAfterInit() {
+		if (upgradeContainer.isOpen()) {
+			setOpen(true);
+		}
 	}
 }

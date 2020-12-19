@@ -1,5 +1,11 @@
 {
     "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "advanced_restock_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
     "pattern": [
         " D ",
         "GVG",

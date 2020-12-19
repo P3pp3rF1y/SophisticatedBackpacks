@@ -1,5 +1,11 @@
 {
     "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "auto_smelting_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
     "pattern": [
         "DHD",
         "RSH",

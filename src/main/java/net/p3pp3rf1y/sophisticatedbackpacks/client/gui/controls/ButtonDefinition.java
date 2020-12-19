@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 
@@ -11,15 +13,21 @@ public class ButtonDefinition {
 	private final TextureBlitData backgroundTexture;
 	@Nullable
 	private final TextureBlitData hoveredBackgroundTexture;
+	@Nullable
+	private final TextureBlitData foregroundTexture;
+	private final ITextComponent tooltip;
 
-	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture) {
-		this(dimension, backgroundTexture, null);
+	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture, TextureBlitData hoveredBackgroundTexture) {
+		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new StringTextComponent(""));
 	}
 
-	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
+	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture,
+			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, ITextComponent tooltip) {
 		this.dimension = dimension;
 		this.backgroundTexture = backgroundTexture;
 		this.hoveredBackgroundTexture = hoveredBackgroundTexture;
+		this.foregroundTexture = foregroundTexture;
+		this.tooltip = tooltip;
 	}
 
 	public Dimension getDimension() {
@@ -33,6 +41,15 @@ public class ButtonDefinition {
 	@Nullable
 	public TextureBlitData getHoveredBackgroundTexture() {
 		return hoveredBackgroundTexture;
+	}
+
+	@Nullable
+	public TextureBlitData getForegroundTexture() {
+		return foregroundTexture;
+	}
+
+	public ITextComponent getTooltip() {
+		return tooltip;
 	}
 
 	public static class Toggle<T extends Comparable<T>> extends ButtonDefinition {

@@ -14,12 +14,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 @OnlyIn(Dist.CLIENT)
 public abstract class Widget extends AbstractGui implements IRenderable, IGuiEventListener {
 	protected final int x;
+
 	protected final int y;
 	protected int zOffset;
 	protected final Minecraft minecraft;
 	protected final FontRenderer font;
 
-	public Widget(Position position) {
+	protected Widget(Position position) {
 		x = position.getX();
 		y = position.getY();
 		minecraft = Minecraft.getInstance();
@@ -55,5 +56,13 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 
 	public void setZOffset(int zOffset) {
 		this.zOffset = zOffset;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
 	}
 }

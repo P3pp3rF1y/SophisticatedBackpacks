@@ -15,12 +15,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 
 import java.util.List;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.UPGRADE_CONTROLS;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
 public class SmeltingLogicControl extends CompositeWidget<Widget> {
-	private static final TextureBlitData FURNACE_BACKGROUND = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(29, 202), new Dimension(68, 54));
-	private static final TextureBlitData COOK_PROGRESS = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(100, 239), new Dimension(22, 16));
-	private static final TextureBlitData BURN_PROGRESS = new TextureBlitData(UPGRADE_CONTROLS, Dimension.SQUARE_256, new UV(99, 225), new Dimension(14, 14));
+	private static final TextureBlitData FURNACE_BACKGROUND = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 202), new Dimension(68, 54));
+	private static final TextureBlitData COOK_PROGRESS = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(100, 239), new Dimension(22, 16));
+	private static final TextureBlitData BURN_PROGRESS = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(99, 225), new Dimension(14, 14));
 	private final SmeltingLogicContainer smeltingLogicContainer;
 
 	public SmeltingLogicControl(Position position, SmeltingLogicContainer smeltingLogicContainer) {
@@ -54,12 +54,12 @@ public class SmeltingLogicControl extends CompositeWidget<Widget> {
 
 	@Override
 	public int getWidth() {
-		return 0;
+		return 68;
 	}
 
 	@Override
 	public int getHeight() {
-		return 0;
+		return 54;
 	}
 
 	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {

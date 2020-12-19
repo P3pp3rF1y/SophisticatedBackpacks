@@ -1,10 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.IRequirementsStrategy;
+import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipeSerializer;
@@ -13,8 +17,11 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,16 +29,22 @@ import java.util.function.Consumer;
 
 public class ShapeBasedRecipeBuilder {
 	private final Item itemResult;
-	private final List<String> pattern = Lists.newArrayList();
+	private final List<ICondition> conditions = new ArrayList<>();
+	private final List<String> pattern = new ArrayList<>();
 	private final Map<Character, Ingredient> keyIngredients = Maps.newLinkedHashMap();
-	private final ShapedSerializer<?> serializer;
+	private final IRecipeSerializer<?> serializer;
+	private final Advancement.Builder advancementBuilder = Advancement.Builder.builder();
 
-	public ShapeBasedRecipeBuilder(IItemProvider itemResult, ShapedSerializer<?> serializer) {
+	public ShapeBasedRecipeBuilder(IItemProvider itemResult, IRecipeSerializer<?> serializer) {
 		this.itemResult = itemResult.asItem();
 		this.serializer = serializer;
 	}
 
-	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult, ShapedSerializer<?> serializer) {
+	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult) {
+		return shapedRecipe(itemResult, IRecipeSerializer.CRAFTING_SHAPED);
+	}
+
+	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult, IRecipeSerializer<?> serializer) {
 		return new ShapeBasedRecipeBuilder(itemResult, serializer);
 	}
 
@@ -63,13 +76,24 @@ public class ShapeBasedRecipeBuilder {
 		}
 	}
 
+	public ShapeBasedRecipeBuilder addCriterion(String name, ICriterionInstance criterion) {
+		advancementBuilder.withCriterion(name, criterion);
+		return this;
+	}
+
+	public ShapeBasedRecipeBuilder addCondition(ICondition condition) {
+		conditions.add(condition);
+		return this;
+	}
+
 	public void build(Consumer<IFinishedRecipe> consumerIn) {
 		build(consumerIn, Registry.ITEM.getKey(itemResult));
 	}
 
 	public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
 		validate(id);
-		consumerIn.accept(new Result(id, itemResult, pattern, keyIngredients, serializer));
+		advancementBuilder.withParentId(new ResourceLocation("recipes/root")).withCriterion("has_the_recipe", RecipeUnlockedTrigger.create(id)).withRewards(AdvancementRewards.Builder.recipe(id)).withRequirementsStrategy(IRequirementsStrategy.OR);
+		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + itemResult.getGroup().getPath() + "/" + id.getPath()), serializer));
 	}
 
 	private void validate(ResourceLocation id) {
@@ -100,20 +124,32 @@ public class ShapeBasedRecipeBuilder {
 
 	public static class Result implements IFinishedRecipe {
 		private final ResourceLocation id;
+		private final List<ICondition> conditions;
 		private final Item itemResult;
 		private final List<String> pattern;
 		private final Map<Character, Ingredient> key;
-		private final ShapedSerializer<?> serializer;
+		private final ResourceLocation advancementId;
+		private final IRecipeSerializer<?> serializer;
+		private final Advancement.Builder advancementBuilder;
 
-		public Result(ResourceLocation id, Item itemResult, List<String> pattern, Map<Character, Ingredient> keyIngredients, ShapedSerializer<?> serializer) {
+		@SuppressWarnings("java:S107") //the only way of reducing number of parameters here means adding pretty much unnecessary objec parameter
+		public Result(ResourceLocation id, List<ICondition> conditions, Item itemResult, List<String> pattern, Map<Character, Ingredient> keyIngredients, Advancement.Builder advancementBuilder, ResourceLocation advancementId, IRecipeSerializer<?> serializer) {
 			this.id = id;
+			this.conditions = conditions;
 			this.itemResult = itemResult;
 			this.pattern = pattern;
 			key = keyIngredients;
+			this.advancementId = advancementId;
 			this.serializer = serializer;
+			this.advancementBuilder = advancementBuilder;
+			conditions.add(new ItemEnabledCondition(itemResult));
 		}
 
 		public void serialize(JsonObject json) {
+			JsonArray conditionsArray = new JsonArray();
+			conditions.forEach(c -> conditionsArray.add(CraftingHelper.serialize(c)));
+			json.add("conditions", conditionsArray);
+
 			JsonArray jsonarray = new JsonArray();
 
 			for (String s : pattern) {
@@ -144,12 +180,12 @@ public class ShapeBasedRecipeBuilder {
 
 		@Nullable
 		public JsonObject getAdvancementJson() {
-			return null;
+			return advancementBuilder.serialize();
 		}
 
 		@Nullable
 		public ResourceLocation getAdvancementID() {
-			return null;
+			return advancementId;
 		}
 	}
 }

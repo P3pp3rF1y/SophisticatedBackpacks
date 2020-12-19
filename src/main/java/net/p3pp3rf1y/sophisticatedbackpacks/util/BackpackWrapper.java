@@ -2,13 +2,16 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -19,6 +22,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
 	private static final String BORDER_COLOR_TAG = "borderColor";
+	private static final String OPEN_TAB_ID_TAG = "openTabId";
+	private static final String SORT_BY_TAG = "sortBy";
 	private final ItemStack backpack;
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
@@ -44,11 +49,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IItemHandler getFilteredHandler() {
 		return getUpgradeHandler().getFilteredHandler(getInventoryHandler());
-	}
-
-	@Override
-	public ScreenProperties getScreenProperties() {
-		return ((BackpackItem) backpack.getItem()).getScreenProperties();
 	}
 
 	@Override
@@ -80,10 +80,55 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public Optional<Integer> getOpenTabId() {
+		return NBTHelper.getInt(backpack, OPEN_TAB_ID_TAG);
+	}
+
+	@Override
+	public void setOpenTabId(int openTabId) {
+		NBTHelper.setInteger(backpack, OPEN_TAB_ID_TAG, openTabId);
+		backpackSaveHandler.accept(backpack);
+	}
+
+	@Override
+	public void removeOpenTabId() {
+		backpack.getOrCreateTag().remove(OPEN_TAB_ID_TAG);
+		backpackSaveHandler.accept(backpack);
+	}
+
+	@Override
 	public void setColors(int clothColor, int borderColor) {
 		backpack.setTagInfo(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
 		backpack.setTagInfo(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
 		backpackSaveHandler.accept(backpack);
+	}
+
+	@Override
+	public void setSortBy(SortBy sortBy) {
+		backpack.setTagInfo(SORT_BY_TAG, StringNBT.valueOf(sortBy.getString()));
+		backpackSaveHandler.accept(backpack);
+	}
+
+	@Override
+	public SortBy getSortBy() {
+		return NBTHelper.getEnumConstant(backpack, SORT_BY_TAG, SortBy::fromName).orElse(SortBy.NAME);
+	}
+
+	@Override
+	public void sort() {
+		InventorySorter.sortHandler(getInventoryHandler(), getComparator());
+	}
+
+	private Comparator<Map.Entry<InventorySorter.FilterStack, Integer>> getComparator() {
+		switch (getSortBy()) {
+			case COUNT:
+				return InventorySorter.BY_COUNT;
+			case TAGS:
+				return InventorySorter.BY_TAGS;
+			case NAME:
+			default:
+				return InventorySorter.BY_NAME;
+		}
 	}
 
 	@Override

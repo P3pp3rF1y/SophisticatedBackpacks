@@ -22,6 +22,9 @@ public abstract class ButtonBase extends Widget {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (!isMouseOver(mouseX, mouseY)) {
+			return false;
+		}
 		onClick.accept(button);
 		return true;
 	}

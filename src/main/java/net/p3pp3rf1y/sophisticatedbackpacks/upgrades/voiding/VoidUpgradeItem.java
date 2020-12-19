@@ -3,15 +3,13 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
 
+import java.util.function.IntSupplier;
+
 public class VoidUpgradeItem extends UpgradeItemBase<VoidUpgradeWrapper> {
 	private static final UpgradeType<VoidUpgradeWrapper> TYPE = new UpgradeType<>(VoidUpgradeWrapper::new);
-	private final int filterSlotCount;
+	private final IntSupplier filterSlotCount;
 
-	public VoidUpgradeItem() {
-		this(9);
-	}
-
-	public VoidUpgradeItem(int filterSlotCount) {
+	public VoidUpgradeItem(IntSupplier filterSlotCount) {
 		this.filterSlotCount = filterSlotCount;
 	}
 
@@ -21,6 +19,6 @@ public class VoidUpgradeItem extends UpgradeItemBase<VoidUpgradeWrapper> {
 	}
 
 	public int getFilterSlotCount() {
-		return filterSlotCount;
+		return filterSlotCount.getAsInt();
 	}
 }

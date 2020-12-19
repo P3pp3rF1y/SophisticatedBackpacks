@@ -14,7 +14,9 @@ import java.util.List;
 public class TranslationHelper {
 	private TranslationHelper() {}
 
-	private static final String GUI_UPGRADE_PREFIX = "gui.sophisticatedbackpacks.upgrades.";
+	private static final String GUI_PREFIX = "gui.sophisticatedbackpacks.";
+	private static final String GUI_UPGRADE_PREFIX = GUI_PREFIX + "upgrades.";
+	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
 	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + "buttons.";
 
@@ -24,6 +26,10 @@ public class TranslationHelper {
 
 	public static String translUpgradeTooltip(String upgradeName) {
 		return translUpgrade(upgradeName) + ".tooltip";
+	}
+
+	public static String translButton(String buttonName) {
+		return BUTTONS_PREFIX + buttonName;
 	}
 
 	public static String translUpgradeButton(String buttonName) {

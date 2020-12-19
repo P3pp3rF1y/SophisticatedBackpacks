@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
@@ -17,13 +18,13 @@ public class UpgradeContainerRegistry {
 		UPGRADE_CONTAINERS.put(upgradeName, containerFactory);
 	}
 
-	public static <W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> Optional<UpgradeContainerBase<W, C>> instantiateContainer(int containerId, W wrapper, boolean isClientSide) {
+	public static <W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> Optional<UpgradeContainerBase<W, C>> instantiateContainer(PlayerEntity player, int containerId, W wrapper) {
 		ResourceLocation upgradeName = wrapper.getUpgradeStack().getItem().getRegistryName();
 		if (!(wrapper.getUpgradeStack().getItem() instanceof IBackpackUpgradeItem<?>) || !UPGRADE_CONTAINERS.containsKey(upgradeName)) {
 			return Optional.empty();
 		}
 		//noinspection unchecked,ConstantConditions
-		return Optional.of((UpgradeContainerBase<W, C>) getContainerType(upgradeName).create(containerId, wrapper, isClientSide));
+		return Optional.of((UpgradeContainerBase<W, C>) getContainerType(upgradeName).create(player, containerId, wrapper));
 	}
 
 	private static <W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> UpgradeContainerType<W, C> getContainerType(ResourceLocation upgradeName) {

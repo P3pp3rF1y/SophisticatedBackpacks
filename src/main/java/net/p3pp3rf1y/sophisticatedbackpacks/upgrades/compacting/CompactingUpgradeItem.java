@@ -3,16 +3,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
 
+import java.util.function.IntSupplier;
+
 public class CompactingUpgradeItem extends UpgradeItemBase<CompactingUpgradeWrapper> {
 	private static final UpgradeType<CompactingUpgradeWrapper> TYPE = new UpgradeType<>(CompactingUpgradeWrapper::new);
 	private final boolean shouldCompactNineByNine;
-	private final int filterSlotCount;
+	private final IntSupplier filterSlotCount;
 
-	public CompactingUpgradeItem() {
-		this(false, 9);
-	}
-
-	public CompactingUpgradeItem(boolean shouldCompactNineByNine, int filterSlotCount) {
+	public CompactingUpgradeItem(boolean shouldCompactNineByNine, IntSupplier filterSlotCount) {
 		this.shouldCompactNineByNine = shouldCompactNineByNine;
 		this.filterSlotCount = filterSlotCount;
 	}
@@ -27,6 +25,6 @@ public class CompactingUpgradeItem extends UpgradeItemBase<CompactingUpgradeWrap
 	}
 
 	public int getFilterSlotCount() {
-		return filterSlotCount;
+		return filterSlotCount.getAsInt();
 	}
 }

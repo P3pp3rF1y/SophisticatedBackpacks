@@ -3,7 +3,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.ScreenProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+
+import java.util.Optional;
 
 public interface IBackpackWrapper {
 	void linkToTileEntity(BackpackTileEntity te);
@@ -11,8 +13,6 @@ public interface IBackpackWrapper {
 	BackpackInventoryHandler getInventoryHandler();
 
 	IItemHandler getFilteredHandler();
-
-	ScreenProperties getScreenProperties();
 
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
 
@@ -22,7 +22,19 @@ public interface IBackpackWrapper {
 
 	int getBorderColor();
 
+	Optional<Integer> getOpenTabId();
+
+	void setOpenTabId(int openTabId);
+
+	void removeOpenTabId();
+
 	void setColors(int clothColor, int borderColor);
 
+	void setSortBy(SortBy sortBy);
+
+	SortBy getSortBy();
+
 	ItemStack getBackpack();
+
+	void sort();
 }
