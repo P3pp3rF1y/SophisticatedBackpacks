@@ -68,7 +68,9 @@ public class SmeltingLogic {
 					didSomething.set(false);
 				}
 			});
-		} else if (!isBurning(world) && isCooking()) {
+		}
+
+		if (!isBurning(world) && isCooking()) {
 			updateCookingCooldown(world);
 		} else {
 			didSomething.set(false);
