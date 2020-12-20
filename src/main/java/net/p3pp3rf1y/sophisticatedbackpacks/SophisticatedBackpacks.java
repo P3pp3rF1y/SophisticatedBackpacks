@@ -37,6 +37,7 @@ public class SophisticatedBackpacks {
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC);
 		PROXY.registerHandlers();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);

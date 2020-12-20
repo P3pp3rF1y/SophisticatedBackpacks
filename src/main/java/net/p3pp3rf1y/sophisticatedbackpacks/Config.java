@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -27,8 +28,11 @@ public class Config {
 	}
 
 	public static class Client {
+		public final ForgeConfigSpec.EnumValue<SortButtonsPosition> sortButtonsPosition;
+
 		Client(ForgeConfigSpec.Builder builder) {
 			builder.comment("Client Settings").push("client");
+			sortButtonsPosition = builder.comment("Positions where sort buttons can display to help with conflicts with controls from other mods").defineEnum("sortButtonsPosition", SortButtonsPosition.TITLE_LINE_RIGHT);
 			builder.pop();
 		}
 	}
@@ -72,7 +76,7 @@ public class Config {
 			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
 			depositUpgrade = new FilteredUpgradeConfig(builder, "Deposit Upgrade", "depositUpgrade", 9, 3);
 			advancedDepositUpgrade = new FilteredUpgradeConfig(builder, "Advanced Deposit Upgrade", "advancedDepositUpgrade", 16, 4);
-			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 4);
+			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 3);
 			filterUpgrade = new FilteredUpgradeConfig(builder, "Filter Upgrade", "filterUpgrade", 9, 3);
 			advancedFilterUpgrade = new FilteredUpgradeConfig(builder, "Advanced Filter Upgrade", "advancedFilterUpgrade", 16, 4);
 			magnetUpgrade = new MagnetUpgradeConfig(builder, "Magnet Upgrade", "magnetUpgrade", 9, 3, 3);
