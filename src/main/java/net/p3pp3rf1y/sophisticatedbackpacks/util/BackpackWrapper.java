@@ -5,7 +5,7 @@ import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
@@ -39,6 +39,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public IItemHandlerModifiable getInceptionInventoryHandler() {
+		return getUpgradeHandler().getInceptionInventoryHandler(getInventoryHandler());
+	}
+
+	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
 			handler = new BackpackInventoryHandler(backpack, backpackSaveHandler);
@@ -47,8 +52,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandler getFilteredHandler() {
-		return getUpgradeHandler().getFilteredHandler(getInventoryHandler());
+	public IItemHandlerModifiable getFilteredHandler() {
+		return getUpgradeHandler().getFilteredHandler(getInceptionInventoryHandler());
 	}
 
 	@Override

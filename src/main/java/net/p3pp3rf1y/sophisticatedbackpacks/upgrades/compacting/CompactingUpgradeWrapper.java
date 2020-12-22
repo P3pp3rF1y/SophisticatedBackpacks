@@ -2,11 +2,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper.CompactingShape;
@@ -25,12 +25,12 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 	}
 
 	@Override
-	public ItemStack onBeforeInsert(BackpackInventoryHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+	public ItemStack onBeforeInsert(IItemHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
 		return stack;
 	}
 
 	@Override
-	public void onAfterInsert(BackpackInventoryHandler inventoryHandler, int slot) {
+	public void onAfterInsert(IItemHandler inventoryHandler, int slot) {
 		ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 
 		if (!filterLogic.matchesFilter(slotStack)) {
@@ -48,7 +48,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 		}
 	}
 
-	private void tryCompacting(BackpackInventoryHandler inventoryHandler, Item item, int width, int height) {
+	private void tryCompacting(IItemHandler inventoryHandler, Item item, int width, int height) {
 		int totalCount = width * height;
 		ItemStack result = RecipeHelper.getCraftingResult(item, width, height);
 		if (!result.isEmpty()) {

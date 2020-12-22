@@ -2,12 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
 import java.util.function.Consumer;
@@ -31,7 +31,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	}
 
 	@Override
-	public ItemStack onBeforeInsert(BackpackInventoryHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+	public ItemStack onBeforeInsert(IItemHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
 		if (filterLogic.matchesFilter(stack)) {
 			return ItemStack.EMPTY;
 		}
@@ -39,7 +39,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	}
 
 	@Override
-	public void onAfterInsert(BackpackInventoryHandler inventoryHandler, int slot) {
+	public void onAfterInsert(IItemHandler inventoryHandler, int slot) {
 		//noop
 	}
 

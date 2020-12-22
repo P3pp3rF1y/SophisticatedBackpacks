@@ -450,14 +450,19 @@ public class BackpackContainer extends Container {
 	}
 
 	private class BackpackInventorySlot extends SlotItemHandler {
-		public BackpackInventorySlot(BackpackInventoryHandler inventoryHandler, int finalSlotIndex, int lineIndex, int yPosition) {super(inventoryHandler, finalSlotIndex, 8 + lineIndex * 18, yPosition);}
+		private final int slotIndex;
+
+		public BackpackInventorySlot(BackpackInventoryHandler inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
+			super(inventoryHandler, slotIndex, 8 + lineIndex * 18, yPosition);
+			this.slotIndex = slotIndex;
+		}
 
 		@Override
 		public void onSlotChanged() {
 			super.onSlotChanged();
 			// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
 			// however it does notify the slot of change
-			backpackWrapper.getInventoryHandler().saveInventory();
+			backpackWrapper.getInventoryHandler().onContentsChanged(slotIndex);
 		}
 	}
 

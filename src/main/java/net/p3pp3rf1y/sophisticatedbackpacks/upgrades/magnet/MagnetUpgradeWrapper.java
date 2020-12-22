@@ -59,11 +59,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	private boolean tryToInsertItem(IBackpackWrapper wrapper, ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryHandler(), true);
+		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryHandler(), false);
+			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), false);
 			if (remaining.isEmpty()) {
 				itemEntity.remove();
 			} else {

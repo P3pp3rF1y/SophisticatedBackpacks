@@ -29,6 +29,6 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IBackpackWrapper wrapper, IItemHandler itemHandler) {
-		InventoryHelper.transfer(wrapper.getInventoryHandler(), new FilteredItemHandler(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()));
+		InventoryHelper.transfer(wrapper.getInceptionInventoryHandler(), new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()));
 	}
 }

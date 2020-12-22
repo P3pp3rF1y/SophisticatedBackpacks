@@ -46,7 +46,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			if (missingCount == 0) {
 				return;
 			}
-			InventoryHelper.moveBetweenInventories(wrapper.getInventoryHandler(), playerInvHandler, filter, missingCount);
+			InventoryHelper.moveBetweenInventories(wrapper.getInceptionInventoryHandler(), playerInvHandler, filter, missingCount);
 		}));
 		setCooldown(world, COOLDOWN);
 	}

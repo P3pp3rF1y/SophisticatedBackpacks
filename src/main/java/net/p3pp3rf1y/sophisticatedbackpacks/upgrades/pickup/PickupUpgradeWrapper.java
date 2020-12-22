@@ -31,7 +31,7 @@ public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrappe
 		}
 
 		int originalCount = stack.getCount();
-		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryHandler(), simulate);
+		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInceptionInventoryHandler(), simulate);
 		if (originalCount == ret.getCount()) {
 			setCooldown(world, FULL_COOLDOWN);
 		}
