@@ -21,7 +21,7 @@ import java.util.Optional;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
-	private IBackpackWrapper backpackWrapper;
+	private IBackpackWrapper backpackWrapper = NoopBackpackWrapper.INSTANCE;
 
 	public BackpackTileEntity() {
 		super(BACKPACK_TILE_TYPE.get());
