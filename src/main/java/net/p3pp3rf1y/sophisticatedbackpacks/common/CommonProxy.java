@@ -43,7 +43,7 @@ public class CommonProxy {
 				Random rand = itemEntity.world.rand;
 				itemEntity.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(rand) * 0.7F + 1.0F) * 2.0F);
 			}
-			itemEntity.remove();
+			itemEntity.setItem(ItemStack.EMPTY);
 			event.setCanceled(true);
 		}
 	}
