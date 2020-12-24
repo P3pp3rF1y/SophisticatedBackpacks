@@ -9,11 +9,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @OnlyIn(Dist.CLIENT)
 public class ToggleButton<T extends Comparable<T>> extends Button {
@@ -40,9 +41,14 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 		private final TextureBlitData texture;
 		private final List<IReorderingProcessor> tooltip;
 
-		public StateData(TextureBlitData texture, ITextComponent tooltip) {
+		public StateData(TextureBlitData texture, List<? extends ITextComponent> tooltip) {
 			this.texture = texture;
-			this.tooltip = Collections.singletonList(tooltip.func_241878_f());
+			this.tooltip = tooltip.stream().map(ITextComponent::func_241878_f).collect(Collectors.toList());
+		}
+
+		public StateData(TextureBlitData texture, ITextComponent... tooltip) {
+			this.texture = texture;
+			this.tooltip = Arrays.stream(tooltip).map(ITextComponent::func_241878_f).collect(Collectors.toList());
 		}
 
 		public TextureBlitData getTexture() {

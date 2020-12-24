@@ -61,6 +61,7 @@ public class Config {
 		public final FilteredUpgradeConfig advancedVoidUpgrade;
 		public final SmeltingUpgradeConfig smeltingUpgrade;
 		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
+		public final InceptionUpgradeConfig inceptionUpgrade;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -90,8 +91,20 @@ public class Config {
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
+			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 
 			builder.pop();
+		}
+
+		public static class InceptionUpgradeConfig {
+			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
+
+			public InceptionUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Inception Upgrade Settings").push("inceptionUpgrade");
+				upgradesUseInventoriesOfBackpacksInBackpack = builder.comment("Allows / Disallows backpack upgrades to work with inventories of Backpacks in the Backpack with Inception Upgrade")
+						.define("upgradesUseInventoriesOfBackpacksInBackpack", true);
+				builder.pop();
+			}
 		}
 
 		public static class AutoSmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {

@@ -35,11 +35,11 @@ public class Label extends Widget {
 
 	@Override
 	public int getWidth() {
-		return 0;
+		return minecraft.fontRenderer.getStringPropertyWidth(labelText);
 	}
 
 	@Override
 	public int getHeight() {
-		return 0;
+		return 8;
 	}
 }

@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -203,6 +204,10 @@ public class GuiHelper {
 		return new ToggleButton.StateData(new TextureBlitData(GUI_CONTROLS, offset, Dimension.SQUARE_256, uv, dimension),
 				new TranslationTextComponent(tooltip)
 		);
+	}
+
+	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, Position offset, List<? extends ITextComponent> tooltip) {
+		return new ToggleButton.StateData(new TextureBlitData(GUI_CONTROLS, offset, Dimension.SQUARE_256, uv, dimension), tooltip);
 	}
 
 	public static void renderSlotsBackground(Minecraft minecraft, MatrixStack matrixStack, int x, int y, int slotsInRow, int fullSlotRows, int extraRowSlots) {

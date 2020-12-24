@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -71,6 +72,9 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> {
 				justSavingNbtChange = true;
 				setStackInSlot(slot, upgradeStack);
+				if (type == InceptionUpgradeItem.TYPE) {
+					refreshInceptionInventoryHandler();
+				}
 				justSavingNbtChange = false;
 			});
 			slotWrappers.put(slot, wrapper);
@@ -176,10 +180,16 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		return !getTypeWrappers(InceptionUpgradeItem.TYPE).isEmpty();
 	}
 
+	public void refreshInceptionInventoryHandler() {
+		inceptionInventoryHandler = null;
+	}
+
 	public IItemHandlerModifiable getInceptionInventoryHandler(BackpackInventoryHandler inventoryHandler) {
 		if (inceptionInventoryHandler == null) {
-			if (hasInceptionUpgrade()) {
-				inceptionInventoryHandler = new InceptionInventoryHandler(backpack, inventoryHandler);
+			List<InceptionUpgradeItem.Wrapper> inceptionUpgrades = getTypeWrappers(InceptionUpgradeItem.TYPE);
+			if (!inceptionUpgrades.isEmpty() && Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get())) {
+				InceptionUpgradeItem.Wrapper firstUpgrade = inceptionUpgrades.get(0);
+				inceptionInventoryHandler = new InceptionInventoryHandler(backpack, inventoryHandler, firstUpgrade.getInventoryOrder());
 				inventoryHandler.setMainInventoryHandlerWrappedByInception(true);
 			} else {
 				inceptionInventoryHandler = inventoryHandler;

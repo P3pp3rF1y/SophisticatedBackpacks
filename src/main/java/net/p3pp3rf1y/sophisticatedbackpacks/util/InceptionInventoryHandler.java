@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InventoryOrder;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -15,11 +16,13 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 	private IItemHandlerModifiable invHandlerDelegate;
 	private final ItemStack backpack;
 	private final BackpackInventoryHandler backpackInventoryHandler;
+	private final InventoryOrder inventoryOrder;
 	private final Map<Integer, IBackpackWrapper> subBackpacks = new HashMap<>();
 
-	public InceptionInventoryHandler(ItemStack backpack, BackpackInventoryHandler backpackInventoryHandler) {
+	public InceptionInventoryHandler(ItemStack backpack, BackpackInventoryHandler backpackInventoryHandler, InventoryOrder inventoryOrder) {
 		this.backpack = backpack;
 		this.backpackInventoryHandler = backpackInventoryHandler;
+		this.inventoryOrder = inventoryOrder;
 		backpackInventoryHandler.setParentContentsChangeHandler(this::onContentsChanged);
 
 		refreshHandlerDelegate();
@@ -36,7 +39,9 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 		subBackpacks.clear();
 
 		List<IItemHandlerModifiable> handlers = new ArrayList<>();
-		handlers.add(backpackInventoryHandler);
+		if (inventoryOrder == InventoryOrder.MAIN_FIRST) {
+			handlers.add(backpackInventoryHandler);
+		}
 
 		for (int slot = 0; slot < backpackInventoryHandler.getSlots(); slot++) {
 			int finalSlot = slot;
@@ -46,7 +51,9 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 						handlers.add(wrapper.getFilteredHandler());
 					});
 		}
-
+		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
+			handlers.add(backpackInventoryHandler);
+		}
 		invHandlerDelegate = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {}));
 	}
 
