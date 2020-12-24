@@ -279,7 +279,7 @@ public class BackpackContainer extends Container {
 	public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
 		ItemStack itemstack = ItemStack.EMPTY;
 		Slot slot = getSlot(index);
-		if (slot != null && slot.getHasStack()) {
+		if (slot.getHasStack()) {
 			Optional<UpgradeContainerBase<?, ?>> upgradeContainer = getSlotUpgradeContainer(slot);
 			ItemStack slotStack = upgradeContainer.map(c -> c.getSlotStackToTransfer(slot)).orElse(slot.getStack());
 			itemstack = slotStack.copy();
@@ -316,8 +316,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
-		int backpackSlots = getBackpackSlotsCount();
-		return mergeItemStack(slotStack, backpackSlots, backpackSlots + getNumberOfUpgradeSlots(), false);
+		return mergeItemStack(slotStack, inventorySlots.size(), inventorySlots.size() + getNumberOfUpgradeSlots(), false);
 	}
 
 	private boolean mergeStackToBackpack(ItemStack slotStack) {
@@ -325,7 +324,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean mergeStackToPlayersInventory(ItemStack slotStack) {
-		return mergeItemStack(slotStack, getBackpackSlotsCount() + getNumberOfUpgradeSlots(), getFirstUpgradeSettingsSlot(), true);
+		return mergeItemStack(slotStack, getBackpackSlotsCount(), inventorySlots.size(), true);
 	}
 
 	private boolean isUpgradeSettingsSlot(int index) {
@@ -333,7 +332,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean isBackpackInventoryOrUpgradeSlot(int index) {
-		return index < getBackpackSlotsCount() + getNumberOfUpgradeSlots();
+		return index < getBackpackSlotsCount() || (index >= inventorySlots.size() && (index - inventorySlots.size() < getNumberOfUpgradeSlots()));
 	}
 
 	private Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
