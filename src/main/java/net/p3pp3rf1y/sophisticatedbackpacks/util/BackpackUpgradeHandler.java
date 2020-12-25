@@ -74,6 +74,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				setStackInSlot(slot, upgradeStack);
 				if (type == InceptionUpgradeItem.TYPE) {
 					refreshInceptionInventoryHandler();
+				} else if (type == FilterUpgradeItem.TYPE) {
+					refreshFilteredInventoryHandler();
 				}
 				justSavingNbtChange = false;
 			});
@@ -178,6 +180,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public boolean hasInceptionUpgrade() {
 		return !getTypeWrappers(InceptionUpgradeItem.TYPE).isEmpty();
+	}
+
+	private void refreshFilteredInventoryHandler() {
+		filteredHandler = null;
+		refreshInceptionInventoryHandler();
 	}
 
 	public void refreshInceptionInventoryHandler() {
