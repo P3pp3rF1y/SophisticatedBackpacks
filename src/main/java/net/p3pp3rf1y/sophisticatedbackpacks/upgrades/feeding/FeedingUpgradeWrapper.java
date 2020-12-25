@@ -52,11 +52,11 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 
 	private void tryFeedingFoodFromBackpack(World world, IBackpackWrapper wrapper, int hungerLevel, PlayerEntity player) {
 		boolean isHurt = player.getHealth() < player.getMaxHealth() - 1;
-		InventoryHelper.iterate(wrapper.getInventoryHandler(), (slot, stack) -> {
+		InventoryHelper.iterate(wrapper.getInceptionInventoryHandler(), (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
 				player.onFoodEaten(world, stack.copy());
-				wrapper.getInventoryHandler().extractItem(slot, 1, false);
+				wrapper.getInceptionInventoryHandler().extractItem(slot, 1, false);
 
 				return true;
 			}

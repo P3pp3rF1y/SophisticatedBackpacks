@@ -2,17 +2,18 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class FilteredItemHandler implements IItemHandler {
-	private final IItemHandler inventoryHandler;
+public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler {
+	protected final T inventoryHandler;
 	private final List<FilterLogic> inputFilters;
 	private final List<FilterLogic> outputFilters;
 
-	public FilteredItemHandler(IItemHandler inventoryHandler, List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
+	public FilteredItemHandler(T inventoryHandler, List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
 		this.inventoryHandler = inventoryHandler;
 		this.inputFilters = inputFilters;
 		this.outputFilters = outputFilters;
@@ -67,5 +68,16 @@ public class FilteredItemHandler implements IItemHandler {
 	@Override
 	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
 		return inventoryHandler.isItemValid(slot, stack);
+	}
+
+	public static class Modifiable extends FilteredItemHandler<IItemHandlerModifiable> implements IItemHandlerModifiable {
+		public Modifiable(IItemHandlerModifiable inventoryHandler, List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
+			super(inventoryHandler, inputFilters, outputFilters);
+		}
+
+		@Override
+		public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+			inventoryHandler.setStackInSlot(slot, stack);
+		}
 	}
 }

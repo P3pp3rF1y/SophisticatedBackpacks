@@ -20,7 +20,7 @@ public class UpgradeContainerRegistry {
 
 	public static <W extends IUpgradeWrapper, C extends UpgradeContainerBase<W, C>> Optional<UpgradeContainerBase<W, C>> instantiateContainer(PlayerEntity player, int containerId, W wrapper) {
 		ResourceLocation upgradeName = wrapper.getUpgradeStack().getItem().getRegistryName();
-		if (!(wrapper.getUpgradeStack().getItem() instanceof IBackpackUpgradeItem<?>) || !UPGRADE_CONTAINERS.containsKey(upgradeName)) {
+		if (!(wrapper.getUpgradeStack().getItem() instanceof IBackpackUpgradeItem<?>) || !wrapper.displaysSettingsTab() || !UPGRADE_CONTAINERS.containsKey(upgradeName)) {
 			return Optional.empty();
 		}
 		//noinspection unchecked,ConstantConditions

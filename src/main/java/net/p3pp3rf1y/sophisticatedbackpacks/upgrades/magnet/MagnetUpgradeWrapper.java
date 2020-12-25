@@ -47,7 +47,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 		int cooldown = FULL_COOLDOWN_TICKS;
 		for (ItemEntity itemEntity : itemEntities) {
-			if (!filterLogic.matchesFilter(itemEntity.getItem())) {
+			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem())) {
 				continue;
 			}
 			if (tryToInsertItem(wrapper, itemEntity)) {
@@ -59,16 +59,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	private boolean tryToInsertItem(IBackpackWrapper wrapper, ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryHandler(), true);
+		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryHandler(), false);
-			if (remaining.isEmpty()) {
-				itemEntity.remove();
-			} else {
-				itemEntity.setItem(remaining);
-			}
+			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), false);
+			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;
 	}

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -27,8 +28,11 @@ public class Config {
 	}
 
 	public static class Client {
+		public final ForgeConfigSpec.EnumValue<SortButtonsPosition> sortButtonsPosition;
+
 		Client(ForgeConfigSpec.Builder builder) {
 			builder.comment("Client Settings").push("client");
+			sortButtonsPosition = builder.comment("Positions where sort buttons can display to help with conflicts with controls from other mods").defineEnum("sortButtonsPosition", SortButtonsPosition.TITLE_LINE_RIGHT);
 			builder.pop();
 		}
 	}
@@ -57,6 +61,7 @@ public class Config {
 		public final FilteredUpgradeConfig advancedVoidUpgrade;
 		public final SmeltingUpgradeConfig smeltingUpgrade;
 		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
+		public final InceptionUpgradeConfig inceptionUpgrade;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -72,7 +77,7 @@ public class Config {
 			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
 			depositUpgrade = new FilteredUpgradeConfig(builder, "Deposit Upgrade", "depositUpgrade", 9, 3);
 			advancedDepositUpgrade = new FilteredUpgradeConfig(builder, "Advanced Deposit Upgrade", "advancedDepositUpgrade", 16, 4);
-			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 4);
+			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 3);
 			filterUpgrade = new FilteredUpgradeConfig(builder, "Filter Upgrade", "filterUpgrade", 9, 3);
 			advancedFilterUpgrade = new FilteredUpgradeConfig(builder, "Advanced Filter Upgrade", "advancedFilterUpgrade", 16, 4);
 			magnetUpgrade = new MagnetUpgradeConfig(builder, "Magnet Upgrade", "magnetUpgrade", 9, 3, 3);
@@ -86,8 +91,20 @@ public class Config {
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
+			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 
 			builder.pop();
+		}
+
+		public static class InceptionUpgradeConfig {
+			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
+
+			public InceptionUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Inception Upgrade Settings").push("inceptionUpgrade");
+				upgradesUseInventoriesOfBackpacksInBackpack = builder.comment("Allows / Disallows backpack upgrades to work with inventories of Backpacks in the Backpack with Inception Upgrade")
+						.define("upgradesUseInventoriesOfBackpacksInBackpack", true);
+				builder.pop();
+			}
 		}
 
 		public static class AutoSmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {

@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -21,12 +21,17 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public BackpackInventoryHandler getInceptionInventoryHandler() {
+		return new BackpackInventoryHandler(backpack, s -> {});
+	}
+
+	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
 		return new BackpackInventoryHandler(backpack, s -> {});
 	}
 
 	@Override
-	public IItemHandler getFilteredHandler() {
+	public IItemHandlerModifiable getFilteredHandler() {
 		return new BackpackInventoryHandler(backpack, s -> {});
 	}
 

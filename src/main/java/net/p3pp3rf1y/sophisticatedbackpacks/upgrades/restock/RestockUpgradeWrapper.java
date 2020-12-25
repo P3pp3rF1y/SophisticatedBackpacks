@@ -29,6 +29,6 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IBackpackWrapper wrapper, IItemHandler itemHandler) {
-		InventoryHelper.transfer(itemHandler, new FilteredItemHandler(wrapper.getInventoryHandler(), Collections.singletonList(filterLogic), Collections.emptyList()));
+		InventoryHelper.transfer(itemHandler, new FilteredItemHandler<>(wrapper.getInceptionInventoryHandler(), Collections.singletonList(filterLogic), Collections.emptyList()));
 	}
 }
