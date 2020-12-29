@@ -195,11 +195,10 @@ public class Config {
 				if (enabledMap.isEmpty()) {
 					loadEnabledMap();
 				}
-				if (!enabledMap.containsKey(itemRegistryName)) {
-					enabledMap.put(itemRegistryName, true);
+				return enabledMap.computeIfAbsent(itemRegistryName, irn -> {
 					addEnabledItemToConfig(itemRegistryName);
-				}
-				return enabledMap.get(itemRegistryName);
+					return true;
+				});
 			}
 
 			private void addEnabledItemToConfig(String itemRegistryName) {

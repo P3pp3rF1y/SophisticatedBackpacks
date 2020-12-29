@@ -74,11 +74,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	}
 
 	private <T extends IUpgradeWrapper> void addTypeWrapper(UpgradeType<?> type, T wrapper) {
-		if (!typeWrappers.containsKey(type)) {
-			typeWrappers.put(type, new ArrayList<>());
-		}
 		//noinspection unchecked
-		((List<T>) typeWrappers.get(type)).add(wrapper);
+		((List<T>) typeWrappers.computeIfAbsent(type, t -> new ArrayList<>())).add(wrapper);
 	}
 
 	public <T extends IUpgradeWrapper> List<T> getTypeWrappers(UpgradeType<T> type) {
@@ -93,18 +90,19 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
 		initializeWrappers();
-		if (!interfaceWrappers.containsKey(upgradeClass)) {
-			List<T> ret = new ArrayList<>();
-			for (IUpgradeWrapper wrapper : slotWrappers.values()) {
-				if (upgradeClass.isInstance(wrapper)) {
-					//noinspection unchecked
-					ret.add((T) wrapper);
-				}
-			}
-			interfaceWrappers.put(upgradeClass, ret);
-		}
 		//noinspection unchecked
-		return (List<T>) interfaceWrappers.get(upgradeClass);
+		return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, this::getListOfWrappersThatImplement);
+	}
+
+	private <T> List<?> getListOfWrappersThatImplement(Class<T> uc) {
+		List<T> ret = new ArrayList<>();
+		for (IUpgradeWrapper wrapper : slotWrappers.values()) {
+			if (uc.isInstance(wrapper)) {
+				//noinspection unchecked
+				ret.add((T) wrapper);
+			}
+		}
+		return ret;
 	}
 
 	public Map<Integer, IUpgradeWrapper> getSlotWrappers() {

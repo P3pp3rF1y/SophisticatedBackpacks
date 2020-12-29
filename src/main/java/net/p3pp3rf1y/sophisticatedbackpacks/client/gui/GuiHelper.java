@@ -48,11 +48,9 @@ public class GuiHelper {
 
 	public static void renderSlotsBackground(Minecraft minecraft, MatrixStack matrixStack, int x, int y, int slotWidth, int slotHeight) {
 		int key = getSlotsBackgroundKey(slotWidth, slotHeight);
-		if (!SLOTS_BACKGROUNDS.containsKey(key)) {
-			SLOTS_BACKGROUNDS.put(key, new TextureBlitData(SLOTS_BACKGROUND, Dimension.SQUARE_256, new UV(0, 0), new Dimension(slotWidth * 18, slotHeight * 18)));
-		}
-
-		blit(minecraft, matrixStack, x, y, SLOTS_BACKGROUNDS.get(key));
+		blit(minecraft, matrixStack, x, y, SLOTS_BACKGROUNDS.computeIfAbsent(key, k ->
+				new TextureBlitData(SLOTS_BACKGROUND, Dimension.SQUARE_256, new UV(0, 0), new Dimension(slotWidth * 18, slotHeight * 18))
+		));
 	}
 
 	private static int getSlotsBackgroundKey(int slotWidth, int slotHeight) {
