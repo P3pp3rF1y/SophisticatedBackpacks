@@ -2,14 +2,16 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
 import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IIOFilterUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrapper, FilterUpgradeItem> implements IFilteredUpgrade {
+public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrapper, FilterUpgradeItem> implements IFilteredUpgrade, IIOFilterUpgrade {
 	private final FilterLogic filterLogic;
 
 	public FilterUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -34,5 +36,17 @@ public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrappe
 	@Override
 	public void onNbtChange(IBackpackWrapper backpackWrapper) {
 		backpackWrapper.refreshInventoryForInputOutput();
+	}
+
+	@Override
+	public Optional<FilterLogic> getInputFilter() {
+		Direction direction = getDirection();
+		return direction == Direction.INPUT || direction == Direction.BOTH ? Optional.of(getFilterLogic()) : Optional.empty();
+	}
+
+	@Override
+	public Optional<FilterLogic> getOutputFilter() {
+		Direction direction = getDirection();
+		return direction == Direction.OUTPUT || direction == Direction.BOTH ? Optional.of(getFilterLogic()) : Optional.empty();
 	}
 }

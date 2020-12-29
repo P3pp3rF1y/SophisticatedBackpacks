@@ -2,10 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IIOFilterUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.Direction;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter.FilterUpgradeWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,24 +30,11 @@ public class InventoryIOHandler {
 	}
 
 	private void addFilters(IBackpackWrapper backpackWrapper, List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
-		List<FilterUpgradeWrapper> filterWrappers = backpackWrapper.getUpgradeHandler().getTypeWrappers(FilterUpgradeItem.TYPE);
+		List<IIOFilterUpgrade> filterWrappers = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IIOFilterUpgrade.class);
 
-		for (FilterUpgradeWrapper wrapper : filterWrappers) {
-			Direction dir = wrapper.getDirection();
-
-			FilterLogic filterLogic = wrapper.getFilterLogic();
-			switch (dir) {
-				case BOTH:
-					inputFilters.add(filterLogic);
-					outputFilters.add(filterLogic);
-					break;
-				case INPUT:
-					inputFilters.add(filterLogic);
-					break;
-				case OUTPUT:
-					outputFilters.add(filterLogic);
-					break;
-			}
+		for (IIOFilterUpgrade wrapper : filterWrappers) {
+			wrapper.getInputFilter().ifPresent(inputFilters::add);
+			wrapper.getOutputFilter().ifPresent(outputFilters::add);
 		}
 	}
 }
