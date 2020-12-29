@@ -8,7 +8,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InventoryOrder;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +59,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 	}
 
 	@Override
-	public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+	public void setStackInSlot(int slot, ItemStack stack) {
 		invHandlerDelegate.setStackInSlot(slot, stack);
 	}
 
@@ -75,7 +74,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 	}
 
 	@Override
-	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		ItemStack ret = InsertResponseInventoryWrapper.runOnBeforeInsert(slot, stack, simulate, this, backpack);
 		if (ret.isEmpty()) {
 			return ret;
@@ -104,7 +103,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 	}
 
 	@Override
-	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+	public boolean isItemValid(int slot, ItemStack stack) {
 		return invHandlerDelegate.isItemValid(slot, stack);
 	}
 }

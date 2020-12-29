@@ -8,7 +8,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeI
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -37,11 +36,11 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	@Override
-	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+	public boolean isItemValid(int slot, ItemStack stack) {
 		return !(stack.getItem() instanceof BackpackItem) || isBackpackWithoutInceptionUpgrade(stack);
 	}
 
-	private boolean isBackpackWithoutInceptionUpgrade(@Nonnull ItemStack stack) {
+	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
 		return (stack.getItem() instanceof BackpackItem) && !stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
 	}

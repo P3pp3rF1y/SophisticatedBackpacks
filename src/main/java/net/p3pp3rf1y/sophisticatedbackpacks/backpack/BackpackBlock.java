@@ -39,7 +39,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
@@ -84,7 +83,6 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		return super.getExplosionResistance(state, world, pos, explosion);
 	}
 
-	@Nonnull
 	private Boolean hasEverlastingUpgrade(IBlockReader world, BlockPos pos) {
 		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false)).orElse(false);
 	}

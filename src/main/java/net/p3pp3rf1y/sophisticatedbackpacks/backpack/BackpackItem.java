@@ -45,7 +45,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -177,8 +176,7 @@ public class BackpackItem extends ItemBase {
 				).orElse(false);
 	}
 
-	@Nonnull
-	private Boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
+	private boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
 		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;

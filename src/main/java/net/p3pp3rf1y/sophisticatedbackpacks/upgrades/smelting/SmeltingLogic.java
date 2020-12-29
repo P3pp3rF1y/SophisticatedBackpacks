@@ -11,7 +11,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -241,7 +240,7 @@ public class SmeltingLogic {
 				}
 
 				@Override
-				public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+				public boolean isItemValid(int slot, ItemStack stack) {
 					switch (slot) {
 						case COOK_INPUT_SLOT:
 							return isInput.test(stack);

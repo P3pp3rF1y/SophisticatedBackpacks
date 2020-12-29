@@ -6,7 +6,6 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
@@ -19,7 +18,7 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 	}
 
 	@Override
-	public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+	public void setStackInSlot(int slot, ItemStack stack) {
 		inventory.setStackInSlot(slot, stack);
 	}
 
@@ -28,15 +27,13 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 		return inventory.getSlots();
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		return inventory.getStackInSlot(slot);
 	}
 
-	@Nonnull
 	@Override
-	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		ItemStack ret = runOnBeforeInsert(slot, stack, simulate, this, backpack);
 		if (ret.isEmpty()) {
 			return ret;
@@ -53,7 +50,6 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 		return ret;
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		return inventory.extractItem(slot, amount, simulate);
@@ -65,7 +61,7 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 	}
 
 	@Override
-	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+	public boolean isItemValid(int slot, ItemStack stack) {
 		return inventory.isItemValid(slot, stack);
 	}
 

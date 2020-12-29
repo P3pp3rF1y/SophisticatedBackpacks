@@ -5,7 +5,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler {
@@ -24,15 +23,13 @@ public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler
 		return inventoryHandler.getSlots();
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		return inventoryHandler.getStackInSlot(slot);
 	}
 
-	@Nonnull
 	@Override
-	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		if (inputFilters.isEmpty()) {
 			return inventoryHandler.insertItem(slot, stack, simulate);
 		}
@@ -45,7 +42,6 @@ public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler
 		return stack;
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		if (outputFilters.isEmpty()) {
@@ -66,7 +62,7 @@ public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler
 	}
 
 	@Override
-	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+	public boolean isItemValid(int slot, ItemStack stack) {
 		return inventoryHandler.isItemValid(slot, stack);
 	}
 
@@ -76,7 +72,7 @@ public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler
 		}
 
 		@Override
-		public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+		public void setStackInSlot(int slot, ItemStack stack) {
 			inventoryHandler.setStackInSlot(slot, stack);
 		}
 	}

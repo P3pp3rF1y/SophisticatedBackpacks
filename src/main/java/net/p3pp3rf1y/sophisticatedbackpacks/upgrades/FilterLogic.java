@@ -8,7 +8,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -73,7 +72,7 @@ public class FilterLogic {
 				}
 
 				@Override
-				public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+				public boolean isItemValid(int slot, ItemStack stack) {
 					return stack.isEmpty() || isItemValid.test(stack);
 				}
 			};
