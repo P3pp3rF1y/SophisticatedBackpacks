@@ -1,20 +1,23 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
 import java.util.Optional;
 
 public interface IBackpackWrapper {
+
 	void linkToTileEntity(BackpackTileEntity te);
 
-	IItemHandlerModifiable getInceptionInventoryHandler();
+	IItemHandlerModifiable getInventoryForUpgradeProcessing();
 
 	BackpackInventoryHandler getInventoryHandler();
 
-	IItemHandlerModifiable getFilteredHandler();
+	IItemHandlerModifiable getInventoryForInputOutput();
 
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
 
@@ -39,4 +42,8 @@ public interface IBackpackWrapper {
 	ItemStack getBackpack();
 
 	void sort();
+
+	void refreshInventoryForUpgradeProcessing();
+
+	void refreshInventoryForInputOutput();
 }

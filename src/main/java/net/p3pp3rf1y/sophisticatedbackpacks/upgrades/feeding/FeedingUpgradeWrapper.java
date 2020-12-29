@@ -7,11 +7,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
@@ -52,11 +52,11 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 
 	private void tryFeedingFoodFromBackpack(World world, IBackpackWrapper wrapper, int hungerLevel, PlayerEntity player) {
 		boolean isHurt = player.getHealth() < player.getMaxHealth() - 1;
-		InventoryHelper.iterate(wrapper.getInceptionInventoryHandler(), (slot, stack) -> {
+		InventoryHelper.iterate(wrapper.getInventoryForUpgradeProcessing(), (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
 				player.onFoodEaten(world, stack.copy());
-				wrapper.getInceptionInventoryHandler().extractItem(slot, 1, false);
+				wrapper.getInventoryForUpgradeProcessing().extractItem(slot, 1, false);
 
 				return true;
 			}

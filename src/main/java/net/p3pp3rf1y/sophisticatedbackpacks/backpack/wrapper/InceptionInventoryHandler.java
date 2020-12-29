@@ -1,9 +1,11 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InventoryOrder;
 
 import javax.annotation.Nonnull;
@@ -29,7 +31,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 	}
 
 	private void onContentsChanged(int slot) {
-		LazyOptional<IBackpackWrapper> backpackWrapper = backpackInventoryHandler.getStackInSlot(slot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY);
+		LazyOptional<IBackpackWrapper> backpackWrapper = backpackInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
 		if (subBackpacks.containsKey(slot) != backpackWrapper.isPresent() || backpackWrapper.map(w -> w != subBackpacks.get(slot)).orElse(false)) {
 			refreshHandlerDelegate();
 		}
@@ -45,10 +47,10 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 
 		for (int slot = 0; slot < backpackInventoryHandler.getSlots(); slot++) {
 			int finalSlot = slot;
-			backpackInventoryHandler.getStackInSlot(slot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+			backpackInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.ifPresent(wrapper -> {
 						subBackpacks.put(finalSlot, wrapper);
-						handlers.add(wrapper.getFilteredHandler());
+						handlers.add(wrapper.getInventoryForInputOutput());
 					});
 		}
 		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
@@ -74,7 +76,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 
 	@Override
 	public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-		ItemStack ret = InsertResponseHelper.runOnBeforeInsert(slot, stack, simulate, this, backpack);
+		ItemStack ret = InsertResponseInventoryWrapper.runOnBeforeInsert(slot, stack, simulate, this, backpack);
 		if (ret.isEmpty()) {
 			return ret;
 		}
@@ -85,7 +87,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 			return ret;
 		}
 
-		InsertResponseHelper.runOnAfterInsert(slot, simulate, this, backpack);
+		InsertResponseInventoryWrapper.runOnAfterInsert(slot, simulate, this, backpack);
 
 		return ret;
 

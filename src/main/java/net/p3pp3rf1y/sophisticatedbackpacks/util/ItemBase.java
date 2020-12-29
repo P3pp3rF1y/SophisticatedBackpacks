@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.items;
+package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.item.Item;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;

@@ -4,8 +4,8 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.ShapedRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.Optional;
 
@@ -27,8 +27,8 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRe
 	public ItemStack getCraftingResult(CraftingInventory inv) {
 		ItemStack upgradedBackpack = super.getCraftingResult(inv);
 		getBackpack(inv).ifPresent(backpack ->
-				backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-						.ifPresent(wrapper -> upgradedBackpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+				backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+						.ifPresent(wrapper -> upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 								.ifPresent(wrapper::copyDataTo)));
 
 		return upgradedBackpack;

@@ -10,9 +10,9 @@ import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.loot.functions.ILootFunction;
 import net.minecraft.tileentity.TileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 
 public class CopyBackpackDataFunction extends LootFunction {
 	protected CopyBackpackDataFunction(ILootCondition[] conditionsIn) {

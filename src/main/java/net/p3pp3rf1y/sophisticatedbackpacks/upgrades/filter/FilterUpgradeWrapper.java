@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
 import net.minecraft.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
@@ -28,5 +29,10 @@ public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrappe
 	@Override
 	public FilterLogic getFilterLogic() {
 		return filterLogic;
+	}
+
+	@Override
+	public void onNbtChange(IBackpackWrapper backpackWrapper) {
+		backpackWrapper.refreshInventoryForInputOutput();
 	}
 }

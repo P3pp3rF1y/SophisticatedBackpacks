@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

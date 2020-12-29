@@ -2,12 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.FilteredItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.FilteredItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import java.util.Collections;
@@ -29,6 +29,6 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IBackpackWrapper wrapper, IItemHandler itemHandler) {
-		InventoryHelper.transfer(itemHandler, new FilteredItemHandler<>(wrapper.getInceptionInventoryHandler(), Collections.singletonList(filterLogic), Collections.emptyList()));
+		InventoryHelper.transfer(itemHandler, new FilteredItemHandler<>(wrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList()));
 	}
 }

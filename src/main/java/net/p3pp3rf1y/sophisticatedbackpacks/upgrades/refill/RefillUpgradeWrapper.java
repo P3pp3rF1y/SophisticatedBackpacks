@@ -6,11 +6,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
@@ -46,7 +46,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			if (missingCount == 0) {
 				return;
 			}
-			InventoryHelper.moveBetweenInventories(wrapper.getInceptionInventoryHandler(), playerInvHandler, filter, missingCount);
+			InventoryHelper.moveBetweenInventories(wrapper.getInventoryForUpgradeProcessing(), playerInvHandler, filter, missingCount);
 		}));
 		setCooldown(world, COOLDOWN);
 	}

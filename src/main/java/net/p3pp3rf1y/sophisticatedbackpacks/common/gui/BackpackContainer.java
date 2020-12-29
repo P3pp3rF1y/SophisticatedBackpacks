@@ -16,16 +16,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackUpgradeHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
@@ -76,7 +76,7 @@ public class BackpackContainer extends Container {
 			return;
 		}
 		PlayerInventoryHandler handler = h.get();
-		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(NoopBackpackWrapper.INSTANCE);
+		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		initSlotsAndContainers(player, backpackSlot, handler.isVisibleInGui());
@@ -97,28 +97,6 @@ public class BackpackContainer extends Container {
 		addPlayerInventorySlots(player.inventory, yPosition, backpackSlotIndex, shouldLockBackpackSlot);
 		addBackpackUpgradeSlots(yPosition);
 		addUpgradeSettingsContainers(player);
-		addBackpackStackChangeListener();
-	}
-
-	private void addBackpackStackChangeListener() {
-		addListener(new IContainerListener() {
-			@Override
-			public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList) {
-				//noop
-			}
-
-			@Override
-			public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-				if (slotInd == backpackSlotNumber) {
-					closeBackpackScreenIfSomethingMessedWithBackpackStack(getSlot(backpackSlotNumber).getStack());
-				}
-			}
-
-			@Override
-			public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue) {
-				//noop
-			}
-		});
 	}
 
 	private void addUpgradeSettingsContainers(PlayerEntity player) {
@@ -240,7 +218,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public void closeBackpackScreenIfSomethingMessedWithBackpackStack(ItemStack supposedToBeBackpackStack) {
-		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(w -> w != backpackWrapper).orElse(true)) {
+		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w != backpackWrapper).orElse(true)) {
 			player.closeScreen();
 		}
 	}
@@ -467,7 +445,7 @@ public class BackpackContainer extends Container {
 			int checkedContainersCount = 0;
 			for (Map.Entry<Integer, IUpgradeWrapper> slotWrapper : backpackWrapper.getUpgradeHandler().getSlotWrappers().entrySet()) {
 				UpgradeContainerBase<?, ?> container = upgradeContainers.get(slotWrapper.getKey());
-				if (!slotWrapper.getValue().displaysSettingsTab()) {
+				if (slotWrapper.getValue().hideSettingsTab()) {
 					if (container != null) {
 						return true;
 					}
@@ -548,6 +526,9 @@ public class BackpackContainer extends Container {
 
 	@Override
 	public void detectAndSendChanges() {
+		if (backpackSlotNumber != -1) {
+			closeBackpackScreenIfSomethingMessedWithBackpackStack(getSlot(backpackSlotNumber).getStack());
+		}
 		super.detectAndSendChanges();
 		for (int i = 0; i < upgradeSlots.size(); ++i) {
 			Slot slot = upgradeSlots.get(i);

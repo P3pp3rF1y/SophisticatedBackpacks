@@ -4,8 +4,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
 
@@ -20,7 +20,7 @@ public class ModItemColors {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
 				return -1;
 			}
-			return backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(backpackWrapper -> {
+			return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(backpackWrapper -> {
 				if (layer == 0) {
 					return backpackWrapper.getClothColor();
 				} else if (layer == 1) {

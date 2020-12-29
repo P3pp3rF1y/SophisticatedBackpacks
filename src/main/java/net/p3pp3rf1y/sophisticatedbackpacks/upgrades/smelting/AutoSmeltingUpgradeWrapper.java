@@ -6,10 +6,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
@@ -54,16 +54,16 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		}
 
 		ItemStack output = smeltingLogic.getCookOutput();
-		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, wrapper.getInceptionInventoryHandler(), true).getCount() < output.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(output, wrapper.getInceptionInventoryHandler(), false);
+		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, wrapper.getInventoryForUpgradeProcessing(), true).getCount() < output.getCount()) {
+			ItemStack ret = InventoryHelper.insertIntoInventory(output, wrapper.getInventoryForUpgradeProcessing(), false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.COOK_OUTPUT_SLOT, output.getCount() - ret.getCount(), false);
 		} else {
 			outputCooldown = NO_INVENTORY_SPACE_COOLDOWN;
 		}
 
 		ItemStack fuel = smeltingLogic.getFuel();
-		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, wrapper.getInceptionInventoryHandler(), true).getCount() < fuel.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, wrapper.getInceptionInventoryHandler(), false);
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryForUpgradeProcessing(), true).getCount() < fuel.getCount()) {
+			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryForUpgradeProcessing(), false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
 	}
@@ -108,7 +108,7 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		ItemStack toExtract;
 		if (stack.isEmpty()) {
 			AtomicReference<ItemStack> ret = new AtomicReference<>(ItemStack.EMPTY);
-			InventoryHelper.iterate(wrapper.getInceptionInventoryHandler(), (slot, st) -> {
+			InventoryHelper.iterate(wrapper.getInventoryForUpgradeProcessing(), (slot, st) -> {
 				if (isItemValid.test(st)) {
 					ret.set(st.copy());
 				}
@@ -126,8 +126,8 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 			toExtract.setCount(stack.getMaxStackSize() - stack.getCount());
 		}
 
-		if (InventoryHelper.extractFromInventory(toExtract, wrapper.getInceptionInventoryHandler(), true).getCount() > 0) {
-			ItemStack toSet = InventoryHelper.extractFromInventory(toExtract, wrapper.getInceptionInventoryHandler(), false);
+		if (InventoryHelper.extractFromInventory(toExtract, wrapper.getInventoryForUpgradeProcessing(), true).getCount() > 0) {
+			ItemStack toSet = InventoryHelper.extractFromInventory(toExtract, wrapper.getInventoryForUpgradeProcessing(), false);
 			toSet.grow(stack.getCount());
 			setSlot.accept(toSet);
 		} else {

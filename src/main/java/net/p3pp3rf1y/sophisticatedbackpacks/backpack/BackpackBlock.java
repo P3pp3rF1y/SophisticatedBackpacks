@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.blocks;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -32,11 +32,10 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 

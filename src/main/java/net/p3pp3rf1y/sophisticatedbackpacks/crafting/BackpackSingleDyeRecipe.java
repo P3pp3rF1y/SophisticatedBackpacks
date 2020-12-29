@@ -10,8 +10,8 @@ import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 public class BackpackSingleDyeRecipe extends SpecialRecipe {
 	public static final SpecialRecipeSerializer<BackpackSingleDyeRecipe> SERIALIZER = new SpecialRecipeSerializer<>(BackpackSingleDyeRecipe::new);
@@ -65,7 +65,7 @@ public class BackpackSingleDyeRecipe extends SpecialRecipe {
 
 		ItemStack coloredBackpack = new ItemStack(backpack.getItem());
 		ItemStack finalDye = dye;
-		boolean result = backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(wrapper -> coloredBackpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+		boolean result = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> coloredBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(coloredWrapper -> {
 					wrapper.copyDataTo(coloredWrapper);
 					DyeColor dyeColor = DyeColor.getColor(finalDye);

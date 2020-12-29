@@ -7,11 +7,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
@@ -59,11 +59,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	private boolean tryToInsertItem(IBackpackWrapper wrapper, ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), true);
+		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryForUpgradeProcessing(), true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), false);
+			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInventoryForUpgradeProcessing(), false);
 			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;

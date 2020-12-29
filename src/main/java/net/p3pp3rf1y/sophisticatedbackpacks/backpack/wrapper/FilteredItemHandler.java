@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;

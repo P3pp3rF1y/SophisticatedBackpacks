@@ -20,8 +20,8 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.Map;
@@ -55,7 +55,7 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 			matrixStack.translate(0, -0.75f, zOffset);
 
 			ItemStack backpack = backpackRenderInfo.getBackpack();
-			backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(wrapper -> {
+			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 				IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
 
 				int color = wrapper.getClothColor();

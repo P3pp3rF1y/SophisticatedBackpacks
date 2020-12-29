@@ -5,7 +5,11 @@ import net.minecraft.item.ItemStack;
 public interface IUpgradeWrapper {
 	ItemStack getUpgradeStack();
 
-	default boolean displaysSettingsTab() {
-		return true;
+	default boolean hideSettingsTab() {
+		return false;
+	}
+
+	default void onNbtChange(IBackpackWrapper backpackWrapper) {
+		//noop
 	}
 }
