@@ -380,7 +380,7 @@ public class BackpackContainer extends Container {
 		return backpackInventorySlots;
 	}
 
-	public Collection<? extends Slot> getPlayerInventorySlots() {
+	public Collection<Slot> getPlayerInventorySlots() {
 		return playerSlots;
 	}
 
