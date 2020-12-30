@@ -83,7 +83,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		return super.getExplosionResistance(state, world, pos, explosion);
 	}
 
-	private Boolean hasEverlastingUpgrade(IBlockReader world, BlockPos pos) {
+	private boolean hasEverlastingUpgrade(IBlockReader world, BlockPos pos) {
 		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false)).orElse(false);
 	}
 
