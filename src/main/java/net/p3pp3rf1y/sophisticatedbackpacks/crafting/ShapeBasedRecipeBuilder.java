@@ -16,10 +16,11 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,19 +82,19 @@ public class ShapeBasedRecipeBuilder {
 		return this;
 	}
 
-	public ShapeBasedRecipeBuilder addCondition(ICondition condition) {
-		conditions.add(condition);
-		return this;
-	}
-
 	public void build(Consumer<IFinishedRecipe> consumerIn) {
-		build(consumerIn, Registry.ITEM.getKey(itemResult));
+		build(consumerIn, RegistryHelper.getItemKey(itemResult));
 	}
 
 	public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
 		validate(id);
 		advancementBuilder.withParentId(new ResourceLocation("recipes/root")).withCriterion("has_the_recipe", RecipeUnlockedTrigger.create(id)).withRewards(AdvancementRewards.Builder.recipe(id)).withRequirementsStrategy(IRequirementsStrategy.OR);
-		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + itemResult.getGroup().getPath() + "/" + id.getPath()), serializer));
+		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + getGroup() + "/" + id.getPath()), serializer));
+	}
+
+	@Nonnull
+	private String getGroup() {
+		return itemResult.getGroup() == null ? "" : itemResult.getGroup().getPath();
 	}
 
 	private void validate(ResourceLocation id) {
@@ -165,7 +166,7 @@ public class ShapeBasedRecipeBuilder {
 
 			json.add("key", jsonobject);
 			JsonObject jsonobject1 = new JsonObject();
-			jsonobject1.addProperty("item", Registry.ITEM.getKey(itemResult).toString());
+			jsonobject1.addProperty("item", RegistryHelper.getItemKey(itemResult).toString());
 
 			json.add("result", jsonobject1);
 		}

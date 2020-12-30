@@ -80,14 +80,8 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 		return ImmutableList.of(cloth, border, leatherClips);
 	}
 
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.rotateAngleX = x;
-		modelRenderer.rotateAngleY = y;
-		modelRenderer.rotateAngleZ = z;
-	}
-
 	@Override
 	public void setRotationAngles(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-
+		//noop
 	}
 }

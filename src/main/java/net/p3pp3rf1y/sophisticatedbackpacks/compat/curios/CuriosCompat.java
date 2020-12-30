@@ -62,7 +62,7 @@ public class CuriosCompat implements ICompat {
 			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, item.getRegistryName().getPath() + "_curios"), new ICapabilityProvider() {
 				@Override
 				public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(() -> new CuriosBackpackWrapper(item)));
+					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(CuriosBackpackWrapper::new));
 				}
 			});
 		}
