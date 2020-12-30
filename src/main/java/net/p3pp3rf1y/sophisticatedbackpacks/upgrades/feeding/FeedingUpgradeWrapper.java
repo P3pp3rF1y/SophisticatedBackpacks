@@ -56,7 +56,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
 				stack.getItem().onItemUseFinish(stack, world, player); //call onItemUseFinish here as some items have special logic in there (Eternal steak prevents being eaten)
-				wrapper.getInventoryHandler().saveInventory();
+				wrapper.getInventoryHandler().onContentsChanged(slot);
 				return true;
 			}
 			return false;
