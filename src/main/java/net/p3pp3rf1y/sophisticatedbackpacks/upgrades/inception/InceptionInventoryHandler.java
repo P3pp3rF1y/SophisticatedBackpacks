@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
@@ -6,31 +6,33 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InventoryOrder;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.InsertResponseInventoryWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntConsumer;
 
-public class InceptionInventoryHandler implements IItemHandlerModifiable {
-	private IItemHandlerModifiable invHandlerDelegate;
+public class InceptionInventoryHandler implements IObservableItemHandler {
+	private IItemHandlerModifiable combinedInventories;
 	private final ItemStack backpack;
-	private final BackpackInventoryHandler backpackInventoryHandler;
+	private final IObservableItemHandler wrappedInventoryHandler;
 	private final InventoryOrder inventoryOrder;
 	private final Map<Integer, IBackpackWrapper> subBackpacks = new HashMap<>();
 
-	public InceptionInventoryHandler(ItemStack backpack, BackpackInventoryHandler backpackInventoryHandler, InventoryOrder inventoryOrder) {
+	public InceptionInventoryHandler(ItemStack backpack, IObservableItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder) {
 		this.backpack = backpack;
-		this.backpackInventoryHandler = backpackInventoryHandler;
+		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
-		backpackInventoryHandler.setParentContentsChangeHandler(this::onContentsChanged);
+		wrappedInventoryHandler.addListener(this::onContentsChanged);
 
 		refreshHandlerDelegate();
 	}
 
 	private void onContentsChanged(int slot) {
-		LazyOptional<IBackpackWrapper> backpackWrapper = backpackInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+		LazyOptional<IBackpackWrapper> backpackWrapper = wrappedInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
 		if (subBackpacks.containsKey(slot) != backpackWrapper.isPresent() || backpackWrapper.map(w -> w != subBackpacks.get(slot)).orElse(false)) {
 			refreshHandlerDelegate();
 		}
@@ -41,36 +43,36 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 
 		List<IItemHandlerModifiable> handlers = new ArrayList<>();
 		if (inventoryOrder == InventoryOrder.MAIN_FIRST) {
-			handlers.add(backpackInventoryHandler);
+			handlers.add(wrappedInventoryHandler);
 		}
 
-		for (int slot = 0; slot < backpackInventoryHandler.getSlots(); slot++) {
+		for (int slot = 0; slot < wrappedInventoryHandler.getSlots(); slot++) {
 			int finalSlot = slot;
-			backpackInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			wrappedInventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.ifPresent(wrapper -> {
 						subBackpacks.put(finalSlot, wrapper);
 						handlers.add(wrapper.getInventoryForInputOutput());
 					});
 		}
 		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
-			handlers.add(backpackInventoryHandler);
+			handlers.add(wrappedInventoryHandler);
 		}
-		invHandlerDelegate = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {}));
+		combinedInventories = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {}));
 	}
 
 	@Override
 	public void setStackInSlot(int slot, ItemStack stack) {
-		invHandlerDelegate.setStackInSlot(slot, stack);
+		combinedInventories.setStackInSlot(slot, stack);
 	}
 
 	@Override
 	public int getSlots() {
-		return invHandlerDelegate.getSlots();
+		return combinedInventories.getSlots();
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int slot) {
-		return invHandlerDelegate.getStackInSlot(slot);
+		return combinedInventories.getStackInSlot(slot);
 	}
 
 	@Override
@@ -80,7 +82,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 			return ret;
 		}
 
-		ret = invHandlerDelegate.insertItem(slot, stack, simulate);
+		ret = combinedInventories.insertItem(slot, stack, simulate);
 
 		if (ret == stack) {
 			return ret;
@@ -94,16 +96,26 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
-		return invHandlerDelegate.extractItem(slot, amount, simulate);
+		return combinedInventories.extractItem(slot, amount, simulate);
 	}
 
 	@Override
 	public int getSlotLimit(int slot) {
-		return invHandlerDelegate.getSlotLimit(slot);
+		return combinedInventories.getSlotLimit(slot);
 	}
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return invHandlerDelegate.isItemValid(slot, stack);
+		return combinedInventories.isItemValid(slot, stack);
+	}
+
+	@Override
+	public void addListener(IntConsumer onContentsChanged) {
+		wrappedInventoryHandler.addListener(onContentsChanged);
+	}
+
+	@Override
+	public void clearListeners() {
+		wrappedInventoryHandler.clearListeners();
 	}
 }

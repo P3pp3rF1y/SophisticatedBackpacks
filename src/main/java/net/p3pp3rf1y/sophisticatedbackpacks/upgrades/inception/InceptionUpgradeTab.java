@@ -17,7 +17,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 
 public class InceptionUpgradeTab extends UpgradeSettingsTab<InceptionUpgradeContainer> {
-	public static final UpgradeContainerType<InceptionUpgradeItem.Wrapper, InceptionUpgradeContainer> TYPE = new UpgradeContainerType<>(InceptionUpgradeContainer::new);
+	public static final UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> TYPE = new UpgradeContainerType<>(InceptionUpgradeContainer::new);
 
 	private static final ButtonDefinition.Toggle<InventoryOrder> INVENTORY_ORDER = createToggleButtonDefinition(
 			ImmutableMap.of(

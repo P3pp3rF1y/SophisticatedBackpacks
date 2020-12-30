@@ -2,9 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 
 import java.util.List;
 
@@ -20,22 +20,20 @@ public class InventoryModificationHandler {
 
 	public IItemHandlerModifiable getModifiedInventoryHandler() {
 		if (modifiedInventoryHandler == null) {
-			initializeInceptionInventoryHandler(backpackWrapper.getInventoryHandler());
+			backpackWrapper.getInventoryHandler().clearListeners();
+			initializeWrappedInventory(backpackWrapper.getInventoryHandler());
 		}
 		return modifiedInventoryHandler;
 	}
 
-	private void initializeInceptionInventoryHandler(BackpackInventoryHandler inventoryHandler) {
-		List<InceptionUpgradeItem.Wrapper> inceptionUpgrades = backpackWrapper.getUpgradeHandler().getTypeWrappers(InceptionUpgradeItem.TYPE);
-		if (!inceptionUpgrades.isEmpty() && Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get())) {
-			InceptionUpgradeItem.Wrapper firstUpgrade = inceptionUpgrades.get(0);
-			setModifiedInventoryHandler(new InceptionInventoryHandler(backpack, inventoryHandler, firstUpgrade.getInventoryOrder()));
-		} else {
-			setModifiedInventoryHandler(inventoryHandler);
-		}
-	}
+	private void initializeWrappedInventory(IObservableItemHandler inventoryHandler) {
+		List<IInventoryWrapperUpgrade> inventoryWrapperUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInventoryWrapperUpgrade.class);
 
-	private void setModifiedInventoryHandler(IItemHandlerModifiable inventoryAfterModifierUpgrades) {
-		modifiedInventoryHandler = new InsertResponseInventoryWrapper(backpack, inventoryAfterModifierUpgrades);
+		IObservableItemHandler wrappedHandler = inventoryHandler;
+		for (IInventoryWrapperUpgrade inventoryWrapperUpgrade : inventoryWrapperUpgrades) {
+			wrappedHandler = inventoryWrapperUpgrade.wrapInventory(backpack, wrappedHandler);
+		}
+
+		modifiedInventoryHandler = new InsertResponseInventoryWrapper(backpack, wrappedHandler);
 	}
 }

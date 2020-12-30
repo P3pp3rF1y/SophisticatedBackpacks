@@ -5,17 +5,20 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-public class BackpackInventoryHandler extends ItemStackHandler {
+public class BackpackInventoryHandler extends ItemStackHandler implements IObservableItemHandler {
 	private static final String INVENTORY_TAG = "inventory";
 	private final ItemStack backpack;
 	private final Consumer<ItemStack> backpackSaveHandler;
-	private IntConsumer contentsChangeHandler = slot -> {};
+	private final List<IntConsumer> onContentsChangedListeners = new ArrayList<>();
 
 	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
 		super(getNumberOfSlots(backpack));
@@ -24,15 +27,11 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
 	}
 
-	public void setParentContentsChangeHandler(IntConsumer contentsChangeHandler) {
-		this.contentsChangeHandler = contentsChangeHandler;
-	}
-
 	@Override
 	public void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
 		saveInventory();
-		contentsChangeHandler.accept(slot);
+		onContentsChangedListeners.forEach(l -> l.accept(slot));
 	}
 
 	@Override
@@ -56,5 +55,15 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
+	}
+
+	@Override
+	public void addListener(IntConsumer onContentsChanged) {
+		onContentsChangedListeners.add(onContentsChanged);
+	}
+
+	@Override
+	public void clearListeners() {
+		onContentsChangedListeners.clear();
 	}
 }
