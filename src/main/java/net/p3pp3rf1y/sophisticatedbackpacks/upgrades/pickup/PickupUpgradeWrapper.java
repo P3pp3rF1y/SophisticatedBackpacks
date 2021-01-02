@@ -15,13 +15,13 @@ public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrappe
 	private static final int FULL_COOLDOWN = 60;
 	private final FilterLogic filterLogic;
 
-	public PickupUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public PickupUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, stack -> save(), upgradeItem.getFilterSlotCount());
 	}
 
 	@Override
-	public ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpackWrapper, boolean simulate) {
+	public ItemStack pickup(World world, ItemStack stack, boolean simulate) {
 		if (isInCooldown(world)) {
 			return stack;
 		}

@@ -16,14 +16,14 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 		implements IPickupResponseUpgrade, IInsertResponseUpgrade, IFilteredUpgrade {
 	private final FilterLogic filterLogic;
 
-	public VoidUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public VoidUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 		filterLogic.setAllowByDefault();
 	}
 
 	@Override
-	public ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpack, boolean simulate) {
+	public ItemStack pickup(World world, ItemStack stack, boolean simulate) {
 		if (filterLogic.matchesFilter(stack)) {
 			return ItemStack.EMPTY;
 		}

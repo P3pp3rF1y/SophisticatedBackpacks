@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
@@ -9,12 +8,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 import java.util.List;
 
 public class InventoryModificationHandler {
-	private final ItemStack backpack;
 	private final IBackpackWrapper backpackWrapper;
 	private IItemHandlerModifiable modifiedInventoryHandler;
 
-	public InventoryModificationHandler(ItemStack backpack, IBackpackWrapper backpackWrapper) {
-		this.backpack = backpack;
+	public InventoryModificationHandler(IBackpackWrapper backpackWrapper) {
 		this.backpackWrapper = backpackWrapper;
 	}
 
@@ -31,9 +28,9 @@ public class InventoryModificationHandler {
 
 		IObservableItemHandler wrappedHandler = inventoryHandler;
 		for (IInventoryWrapperUpgrade inventoryWrapperUpgrade : inventoryWrapperUpgrades) {
-			wrappedHandler = inventoryWrapperUpgrade.wrapInventory(backpack, wrappedHandler);
+			wrappedHandler = inventoryWrapperUpgrade.wrapInventory(wrappedHandler);
 		}
 
-		modifiedInventoryHandler = new InsertResponseInventoryWrapper(backpack, wrappedHandler);
+		modifiedInventoryHandler = new InsertResponseInventoryWrapper(backpackWrapper, wrappedHandler);
 	}
 }

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
@@ -16,8 +17,8 @@ public class EverlastingUpgradeItem extends UpgradeItemBase<EverlastingUpgradeIt
 	}
 
 	public static class Wrapper extends UpgradeWrapperBase<Wrapper, EverlastingUpgradeItem> {
-		public Wrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-			super(upgrade, upgradeSaveHandler);
+		public Wrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+			super(backpackWrapper, upgrade, upgradeSaveHandler);
 		}
 
 		@Override

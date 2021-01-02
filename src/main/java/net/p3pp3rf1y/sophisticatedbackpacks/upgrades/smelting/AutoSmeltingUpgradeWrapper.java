@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
@@ -32,8 +33,8 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 	private int fuelCooldown = 0;
 	private int inputCooldown = 0;
 
-	public AutoSmeltingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public AutoSmeltingUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		inputFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.inputFilterSlots.get(),
 				s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), "inputFilter");
 		fuelFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.fuelFilterSlots.get(),
@@ -47,68 +48,70 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 				Config.COMMON.autoSmeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
 
-	private void tryPushingOutput(IBackpackWrapper wrapper) {
+	private void tryPushingOutput() {
 		if (outputCooldown > 0) {
 			outputCooldown--;
 			return;
 		}
 
 		ItemStack output = smeltingLogic.getCookOutput();
-		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, wrapper.getInventoryForUpgradeProcessing(), true).getCount() < output.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(output, wrapper.getInventoryForUpgradeProcessing(), false);
+		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, inventory, true).getCount() < output.getCount()) {
+			ItemStack ret = InventoryHelper.insertIntoInventory(output, inventory, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.COOK_OUTPUT_SLOT, output.getCount() - ret.getCount(), false);
 		} else {
 			outputCooldown = NO_INVENTORY_SPACE_COOLDOWN;
 		}
 
 		ItemStack fuel = smeltingLogic.getFuel();
-		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryForUpgradeProcessing(), true).getCount() < fuel.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, wrapper.getInventoryForUpgradeProcessing(), false);
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
+			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, inventory, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}
-		tryPushingOutput(wrapper);
-		tryPullingFuel(wrapper);
-		tryPullingInput(wrapper);
+		tryPushingOutput();
+		tryPullingFuel();
+		tryPullingInput();
 
 		if (!smeltingLogic.tick(world) && outputCooldown <= 0 && fuelCooldown <= 0 && inputCooldown <= 0) {
 			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
 		}
 	}
 
-	private void tryPullingInput(IBackpackWrapper wrapper) {
+	private void tryPullingInput() {
 		if (inputCooldown > 0) {
 			inputCooldown--;
 			return;
 		}
 
-		if (tryPullingGetUnsucessful(wrapper, smeltingLogic.getCookInput(), smeltingLogic::setCookInput, isValidInput)) {
+		if (tryPullingGetUnsucessful(smeltingLogic.getCookInput(), smeltingLogic::setCookInput, isValidInput)) {
 			inputCooldown = NO_INVENTORY_SPACE_COOLDOWN;
 		}
 	}
 
-	private void tryPullingFuel(IBackpackWrapper wrapper) {
+	private void tryPullingFuel() {
 		if (fuelCooldown > 0) {
 			fuelCooldown--;
 			return;
 		}
 
-		if (tryPullingGetUnsucessful(wrapper, smeltingLogic.getFuel(), smeltingLogic::setFuel, isValidFuel)) {
+		if (tryPullingGetUnsucessful(smeltingLogic.getFuel(), smeltingLogic::setFuel, isValidFuel)) {
 			fuelCooldown = NO_INVENTORY_SPACE_COOLDOWN;
 		}
 	}
 
-	private boolean tryPullingGetUnsucessful(IBackpackWrapper wrapper, ItemStack stack, Consumer<ItemStack> setSlot, Predicate<ItemStack> isItemValid) {
+	private boolean tryPullingGetUnsucessful(ItemStack stack, Consumer<ItemStack> setSlot, Predicate<ItemStack> isItemValid) {
 		ItemStack toExtract;
+		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		if (stack.isEmpty()) {
 			AtomicReference<ItemStack> ret = new AtomicReference<>(ItemStack.EMPTY);
-			InventoryHelper.iterate(wrapper.getInventoryForUpgradeProcessing(), (slot, st) -> {
+			InventoryHelper.iterate(inventory, (slot, st) -> {
 				if (isItemValid.test(st)) {
 					ret.set(st.copy());
 				}
@@ -126,8 +129,8 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 			toExtract.setCount(stack.getMaxStackSize() - stack.getCount());
 		}
 
-		if (InventoryHelper.extractFromInventory(toExtract, wrapper.getInventoryForUpgradeProcessing(), true).getCount() > 0) {
-			ItemStack toSet = InventoryHelper.extractFromInventory(toExtract, wrapper.getInventoryForUpgradeProcessing(), false);
+		if (InventoryHelper.extractFromInventory(toExtract, inventory, true).getCount() > 0) {
+			ItemStack toSet = InventoryHelper.extractFromInventory(toExtract, inventory, false);
 			toSet.grow(stack.getCount());
 			setSlot.accept(toSet);
 		} else {

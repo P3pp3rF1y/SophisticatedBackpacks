@@ -7,5 +7,5 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public interface ITickableUpgrade {
-	void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper);
+	void tick(@Nullable PlayerEntity player, World world, BlockPos pos);
 }

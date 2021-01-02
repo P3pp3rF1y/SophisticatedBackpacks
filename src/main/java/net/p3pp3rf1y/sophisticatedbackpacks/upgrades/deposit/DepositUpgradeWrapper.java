@@ -17,8 +17,8 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 		implements IFilteredUpgrade, IItemHandlerInteractionUpgrade {
 	private final FilterLogic filterLogic;
 
-	public DepositUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public DepositUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 	}
 
@@ -28,7 +28,7 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 	}
 
 	@Override
-	public void onHandlerInteract(IBackpackWrapper wrapper, IItemHandler itemHandler) {
-		InventoryHelper.transfer(wrapper.getInventoryForUpgradeProcessing(), new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()));
+	public void onHandlerInteract(IItemHandler itemHandler) {
+		InventoryHelper.transfer(backpackWrapper.getInventoryForUpgradeProcessing(), new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()));
 	}
 }

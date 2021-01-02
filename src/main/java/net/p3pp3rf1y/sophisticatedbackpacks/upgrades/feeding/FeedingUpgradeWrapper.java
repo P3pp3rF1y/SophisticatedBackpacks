@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
@@ -22,41 +23,42 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 	private static final int FEEDING_RANGE = 3;
 	private final FilterLogic filterLogic;
 
-	public FeedingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public FeedingUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.feedingUpgrade.filterSlots.get(), ItemStack::isFood);
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}
 
 		if (player == null) {
-			world.getEntitiesWithinAABB(EntityType.PLAYER, new AxisAlignedBB(pos).grow(FEEDING_RANGE), p -> true).forEach(p -> feedPlayer(p, world, wrapper));
+			world.getEntitiesWithinAABB(EntityType.PLAYER, new AxisAlignedBB(pos).grow(FEEDING_RANGE), p -> true).forEach(p -> feedPlayer(p, world));
 		} else {
-			feedPlayer(player, world, wrapper);
+			feedPlayer(player, world);
 		}
 
 		setCooldown(world, COOLDOWN);
 	}
 
-	private void feedPlayer(PlayerEntity player, World world, IBackpackWrapper wrapper) {
+	private void feedPlayer(PlayerEntity player, World world) {
 		int hungerLevel = 20 - player.getFoodStats().getFoodLevel();
 		if (hungerLevel == 0) {
 			return;
 		}
-		tryFeedingFoodFromBackpack(world, wrapper, hungerLevel, player);
+		tryFeedingFoodFromBackpack(world, hungerLevel, player);
 	}
 
-	private void tryFeedingFoodFromBackpack(World world, IBackpackWrapper wrapper, int hungerLevel, PlayerEntity player) {
+	private void tryFeedingFoodFromBackpack(World world, int hungerLevel, PlayerEntity player) {
 		boolean isHurt = player.getHealth() < player.getMaxHealth() - 1;
-		InventoryHelper.iterate(wrapper.getInventoryForUpgradeProcessing(), (slot, stack) -> {
+		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
 				stack.getItem().onItemUseFinish(stack, world, player); //call onItemUseFinish here as some items have special logic in there (Eternal steak prevents being eaten)
-				wrapper.getInventoryHandler().onContentsChanged(slot);
+				inventory.setStackInSlot(slot, stack);
 				return true;
 			}
 			return false;

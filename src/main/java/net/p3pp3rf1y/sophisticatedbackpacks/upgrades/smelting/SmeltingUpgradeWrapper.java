@@ -17,14 +17,14 @@ public class SmeltingUpgradeWrapper extends UpgradeWrapperBase<SmeltingUpgradeWr
 
 	private final SmeltingLogic smeltingLogic;
 
-	public SmeltingUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public SmeltingUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, Config.COMMON.smeltingUpgrade.smeltingSpeedMultiplier.get(),
 				Config.COMMON.smeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}

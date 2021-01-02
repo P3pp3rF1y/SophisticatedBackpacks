@@ -6,7 +6,6 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.InsertResponseInventoryWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 
 import java.util.ArrayList;
@@ -17,13 +16,11 @@ import java.util.function.IntConsumer;
 
 public class InceptionInventoryHandler implements IObservableItemHandler {
 	private IItemHandlerModifiable combinedInventories;
-	private final ItemStack backpack;
 	private final IObservableItemHandler wrappedInventoryHandler;
 	private final InventoryOrder inventoryOrder;
 	private final Map<Integer, IBackpackWrapper> subBackpacks = new HashMap<>();
 
-	public InceptionInventoryHandler(ItemStack backpack, IObservableItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder) {
-		this.backpack = backpack;
+	public InceptionInventoryHandler(IObservableItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		wrappedInventoryHandler.addListener(this::onContentsChanged);
@@ -77,21 +74,7 @@ public class InceptionInventoryHandler implements IObservableItemHandler {
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		ItemStack ret = InsertResponseInventoryWrapper.runOnBeforeInsert(slot, stack, simulate, this, backpack);
-		if (ret.isEmpty()) {
-			return ret;
-		}
-
-		ret = combinedInventories.insertItem(slot, stack, simulate);
-
-		if (ret == stack) {
-			return ret;
-		}
-
-		InsertResponseInventoryWrapper.runOnAfterInsert(slot, simulate, this, backpack);
-
-		return ret;
-
+		return combinedInventories.insertItem(slot, stack, simulate);
 	}
 
 	@Override

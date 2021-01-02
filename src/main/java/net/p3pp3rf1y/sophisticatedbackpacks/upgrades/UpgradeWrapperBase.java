@@ -2,18 +2,21 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 
 import java.util.function.Consumer;
 
 public class UpgradeWrapperBase<W extends IUpgradeWrapper, T extends UpgradeItemBase<W>> implements IUpgradeWrapper {
+	protected final IBackpackWrapper backpackWrapper;
 	protected final Consumer<ItemStack> upgradeSaveHandler;
 	protected ItemStack upgrade;
 	protected T upgradeItem;
 
 	private long cooldown = 0;
 
-	public UpgradeWrapperBase(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+	public UpgradeWrapperBase(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		this.backpackWrapper = backpackWrapper;
 		this.upgrade = upgrade;
 		//noinspection unchecked
 		upgradeItem = (T) upgrade.getItem();

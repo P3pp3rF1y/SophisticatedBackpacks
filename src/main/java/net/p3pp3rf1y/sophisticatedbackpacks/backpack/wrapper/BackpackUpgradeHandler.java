@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	private static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final ItemStack backpack;
+	private final IBackpackWrapper backpackWrapper;
 	private final Consumer<ItemStack> backpackSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
@@ -28,9 +29,10 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
 
-	public BackpackUpgradeHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
+	public BackpackUpgradeHandler(ItemStack backpack, IBackpackWrapper backpackWrapper, Consumer<ItemStack> backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(getNumberOfUpgradeSlots(backpack));
 		this.backpack = backpack;
+		this.backpackWrapper = backpackWrapper;
 		this.backpackSaveHandler = backpackSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
 		NBTHelper.getCompound(backpack, UPGRADE_INVENTORY_TAG).ifPresent(this::deserializeNBT);
@@ -44,8 +46,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		if (!justSavingNbtChange) {
 			wrappersInitialized = false;
 			onInvalidateUpgradeCaches.run();
-		} else {
-			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> slotWrappers.get(slot).onNbtChange(w));
 		}
 	}
 
@@ -63,7 +63,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				return;
 			}
 			UpgradeType<?> type = ((IBackpackUpgradeItem<?>) upgrade.getItem()).getType();
-			IUpgradeWrapper wrapper = type.create(upgrade, upgradeStack -> {
+			IUpgradeWrapper wrapper = type.create(backpackWrapper, upgrade, upgradeStack -> {
 				justSavingNbtChange = true;
 				setStackInSlot(slot, upgradeStack);
 				justSavingNbtChange = false;

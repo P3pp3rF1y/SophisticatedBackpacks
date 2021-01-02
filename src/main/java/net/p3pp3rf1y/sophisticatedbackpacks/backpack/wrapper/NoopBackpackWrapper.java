@@ -43,7 +43,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
-		return new BackpackUpgradeHandler(backpack, s -> {}, () -> {});
+		return new BackpackUpgradeHandler(backpack, this, s -> {}, () -> {});
 	}
 
 	@Override

@@ -45,7 +45,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IItemHandlerModifiable getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
-			inventoryModificationHandler = new InventoryModificationHandler(backpack, this);
+			inventoryModificationHandler = new InventoryModificationHandler(this);
 		}
 		return inventoryModificationHandler.getModifiedInventoryHandler();
 	}
@@ -79,7 +79,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(backpack, backpackSaveHandler, () -> {
+			upgradeHandler = new BackpackUpgradeHandler(backpack, this, backpackSaveHandler, () -> {
 				inventoryIOHandler = null;
 				inventoryModificationHandler = null;
 			});

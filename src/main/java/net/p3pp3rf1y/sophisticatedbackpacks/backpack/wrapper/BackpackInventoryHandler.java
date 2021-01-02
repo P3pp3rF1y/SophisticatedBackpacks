@@ -36,7 +36,11 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IObser
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return !(stack.getItem() instanceof BackpackItem) || isBackpackWithoutInceptionUpgrade(stack);
+		return !(stack.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(stack));
+	}
+
+	private boolean hasInceptionUpgrade() {
+		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {

@@ -17,8 +17,8 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 		implements IFilteredUpgrade, IItemHandlerInteractionUpgrade {
 	private final FilterLogic filterLogic;
 
-	public RestockUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public RestockUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 	}
 
@@ -28,7 +28,7 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 	}
 
 	@Override
-	public void onHandlerInteract(IBackpackWrapper wrapper, IItemHandler itemHandler) {
-		InventoryHelper.transfer(itemHandler, new FilteredItemHandler<>(wrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList()));
+	public void onHandlerInteract(IItemHandler itemHandler) {
+		InventoryHelper.transfer(itemHandler, new FilteredItemHandler<>(backpackWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList()));
 	}
 }

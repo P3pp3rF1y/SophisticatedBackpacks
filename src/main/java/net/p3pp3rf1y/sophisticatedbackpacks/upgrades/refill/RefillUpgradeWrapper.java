@@ -22,8 +22,8 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 	private final FilterLogic filterLogic;
 
-	public RefillUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public RefillUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.refillUpgrade.filterSlots.get());
 		filterLogic.setAllowByDefault();
 	}
@@ -34,7 +34,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
 		if (player == null /*not supported in block form*/ || isInCooldown(world)) {
 			return;
 		}
@@ -46,7 +46,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			if (missingCount == 0) {
 				return;
 			}
-			InventoryHelper.moveBetweenInventories(wrapper.getInventoryForUpgradeProcessing(), playerInvHandler, filter, missingCount);
+			InventoryHelper.moveBetweenInventories(backpackWrapper.getInventoryForUpgradeProcessing(), playerInvHandler, filter, missingCount);
 		}));
 		setCooldown(world, COOLDOWN);
 	}

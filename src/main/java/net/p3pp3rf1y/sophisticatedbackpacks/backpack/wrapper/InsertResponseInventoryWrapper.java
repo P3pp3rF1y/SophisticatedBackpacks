@@ -3,17 +3,17 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 
 import java.util.List;
 
 public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
-	private final ItemStack backpack;
+	private final IBackpackWrapper backpackWrapper;
 	private final IItemHandlerModifiable inventory;
 
-	public InsertResponseInventoryWrapper(ItemStack backpack, IItemHandlerModifiable inventory) {
-		this.backpack = backpack;
+	public InsertResponseInventoryWrapper(IBackpackWrapper backpackWrapper, IItemHandlerModifiable inventory) {
+		this.backpackWrapper = backpackWrapper;
 		this.inventory = inventory;
 	}
 
@@ -34,7 +34,7 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		ItemStack ret = runOnBeforeInsert(slot, stack, simulate, this, backpack);
+		ItemStack ret = runOnBeforeInsert(slot, stack, simulate, this, backpackWrapper);
 		if (ret.isEmpty()) {
 			return ret;
 		}
@@ -45,7 +45,7 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 			return ret;
 		}
 
-		runOnAfterInsert(slot, simulate, this, backpack);
+		runOnAfterInsert(slot, simulate, this, backpackWrapper);
 
 		return ret;
 	}
@@ -65,26 +65,21 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 		return inventory.isItemValid(slot, stack);
 	}
 
-	public static void runOnAfterInsert(int slot, boolean simulate, IItemHandler handler, ItemStack backpack) {
+	private void runOnAfterInsert(int slot, boolean simulate, IItemHandler handler, IBackpackWrapper backpackWrapper) {
 		if (!simulate) {
-			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.ifPresent(wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class)
-							.forEach(u -> u.onAfterInsert(handler, slot)));
+			backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class).forEach(u -> u.onAfterInsert(handler, slot));
 		}
 	}
 
-	public static ItemStack runOnBeforeInsert(int slot, ItemStack stack, boolean simulate, IItemHandler handler, ItemStack backpack) {
-		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(wrapper -> {
-					List<IInsertResponseUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class);
-					ItemStack remaining = stack;
-					for (IInsertResponseUpgrade upgrade : wrappers) {
-						remaining = upgrade.onBeforeInsert(handler, slot, remaining, simulate);
-						if (remaining.isEmpty()) {
-							return ItemStack.EMPTY;
-						}
-					}
-					return remaining;
-				}).orElse(stack);
+	private ItemStack runOnBeforeInsert(int slot, ItemStack stack, boolean simulate, IItemHandler handler, IBackpackWrapper backpackWrapper) {
+		List<IInsertResponseUpgrade> wrappers = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class);
+		ItemStack remaining = stack;
+		for (IInsertResponseUpgrade upgrade : wrappers) {
+			remaining = upgrade.onBeforeInsert(handler, slot, remaining, simulate);
+			if (remaining.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		return remaining;
 	}
 }

@@ -181,7 +181,7 @@ public class BackpackItem extends ItemBase {
 		if (wrappers.isEmpty()) {
 			return false;
 		}
-		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(wrapper, itemHandler));
+		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(itemHandler));
 		return true;
 	}
 
@@ -239,7 +239,7 @@ public class BackpackItem extends ItemBase {
 		PlayerEntity player = (PlayerEntity) entityIn;
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition(), wrapper))
+						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition()))
 		);
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}

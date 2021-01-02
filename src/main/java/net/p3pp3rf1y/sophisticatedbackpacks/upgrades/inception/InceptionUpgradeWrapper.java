@@ -11,8 +11,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import java.util.function.Consumer;
 
 public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgradeWrapper, InceptionUpgradeItem> implements IInventoryWrapperUpgrade {
-	public InceptionUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public InceptionUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 	}
 
 	@Override
@@ -27,17 +27,13 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	public void setInventoryOrder(InventoryOrder inventoryOrder) {
 		NBTHelper.setEnumConstant(upgrade, "inventoryOrder", inventoryOrder);
 		save();
-	}
-
-	@Override
-	public void onNbtChange(IBackpackWrapper backpackWrapper) {
 		backpackWrapper.refreshInventoryForUpgradeProcessing();
 	}
 
 	@Override
-	public IObservableItemHandler wrapInventory(ItemStack backpack, IObservableItemHandler inventory) {
+	public IObservableItemHandler wrapInventory(IObservableItemHandler inventory) {
 		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get())) {
-			return new InceptionInventoryHandler(backpack, inventory, getInventoryOrder());
+			return new InceptionInventoryHandler(inventory, getInventoryOrder());
 		} else {
 			return inventory;
 		}

@@ -65,7 +65,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		if (world.isRemote) {
 			return;
 		}
-		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos(), backpackWrapper));
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos()));
 	}
 
 	@Override

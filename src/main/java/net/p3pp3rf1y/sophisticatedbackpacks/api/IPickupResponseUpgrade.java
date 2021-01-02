@@ -4,5 +4,5 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public interface IPickupResponseUpgrade {
-	ItemStack pickup(World world, ItemStack stack, IBackpackWrapper backpack, boolean simulate);
+	ItemStack pickup(World world, ItemStack stack, boolean simulate);
 }

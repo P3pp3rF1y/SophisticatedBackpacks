@@ -14,14 +14,15 @@ import java.util.function.Consumer;
 public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrapper, FilterUpgradeItem> implements IFilteredUpgrade, IIOFilterUpgrade {
 	private final FilterLogic filterLogic;
 
-	public FilterUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public FilterUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 	}
 
 	public void setDirection(Direction direction) {
 		NBTHelper.setEnumConstant(upgrade, "direction", direction);
 		save();
+		backpackWrapper.refreshInventoryForInputOutput();
 	}
 
 	public Direction getDirection() {
@@ -31,11 +32,6 @@ public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrappe
 	@Override
 	public FilterLogic getFilterLogic() {
 		return filterLogic;
-	}
-
-	@Override
-	public void onNbtChange(IBackpackWrapper backpackWrapper) {
-		backpackWrapper.refreshInventoryForInputOutput();
 	}
 
 	@Override

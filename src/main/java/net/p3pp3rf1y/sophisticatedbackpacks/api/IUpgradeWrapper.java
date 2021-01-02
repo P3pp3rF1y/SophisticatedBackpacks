@@ -8,8 +8,4 @@ public interface IUpgradeWrapper {
 	default boolean hideSettingsTab() {
 		return false;
 	}
-
-	default void onNbtChange(IBackpackWrapper backpackWrapper) {
-		//noop
-	}
 }

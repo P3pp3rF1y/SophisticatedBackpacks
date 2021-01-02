@@ -84,7 +84,7 @@ public class InventoryHelper {
 		List<IPickupResponseUpgrade> pickupUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IPickupResponseUpgrade.class);
 
 		for (IPickupResponseUpgrade pickupUpgrade : pickupUpgrades) {
-			ItemStack ret = pickupUpgrade.pickup(world, remainingStack, backpackWrapper, simulate);
+			ItemStack ret = pickupUpgrade.pickup(world, remainingStack, simulate);
 			remainingStack.setCount(ret.getCount());
 			if (remainingStack.isEmpty()) {
 				return true;
