@@ -3,9 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -57,8 +60,13 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
-				stack.getItem().onItemUseFinish(stack, world, player); //call onItemUseFinish here as some items have special logic in there (Eternal steak prevents being eaten)
+				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().onItemUseFinish(stack, world, player));
 				inventory.setStackInSlot(slot, stack);
+				if (containerItem != stack) {
+					//not handling the case where player doesn't have item handler cap as the player should always have it. if that changes in the future well I guess I fix it
+					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
+							.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, containerItem, inventory, playerInventory));
+				}
 				return true;
 			}
 			return false;

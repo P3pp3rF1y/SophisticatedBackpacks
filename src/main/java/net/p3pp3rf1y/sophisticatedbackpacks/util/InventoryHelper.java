@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -191,5 +192,18 @@ public class InventoryHelper {
 			return ItemStack.EMPTY;
 		}
 		return itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), false);
+	}
+
+	public static void insertOrDropItem(PlayerEntity player, ItemStack stack, IItemHandler... inventories) {
+		ItemStack ret = stack;
+		for (IItemHandler inventory : inventories) {
+			ret = insertIntoInventory(ret, inventory, false);
+			if (ret.isEmpty()) {
+				return;
+			}
+		}
+		if (!ret.isEmpty()) {
+			player.dropItem(ret, true);
+		}
 	}
 }
