@@ -80,6 +80,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
 			upgradeHandler = new BackpackUpgradeHandler(backpack, this, backpackSaveHandler, () -> {
+				getInventoryHandler().clearListeners();
 				inventoryIOHandler = null;
 				inventoryModificationHandler = null;
 			});

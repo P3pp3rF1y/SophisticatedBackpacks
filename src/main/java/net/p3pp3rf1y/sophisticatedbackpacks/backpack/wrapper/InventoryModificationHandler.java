@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 
 import java.util.List;
 
@@ -17,16 +16,15 @@ public class InventoryModificationHandler {
 
 	public IItemHandlerModifiable getModifiedInventoryHandler() {
 		if (modifiedInventoryHandler == null) {
-			backpackWrapper.getInventoryHandler().clearListeners();
 			initializeWrappedInventory(backpackWrapper.getInventoryHandler());
 		}
 		return modifiedInventoryHandler;
 	}
 
-	private void initializeWrappedInventory(IObservableItemHandler inventoryHandler) {
+	private void initializeWrappedInventory(IItemHandlerModifiable inventoryHandler) {
 		List<IInventoryWrapperUpgrade> inventoryWrapperUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInventoryWrapperUpgrade.class);
 
-		IObservableItemHandler wrappedHandler = inventoryHandler;
+		IItemHandlerModifiable wrappedHandler = inventoryHandler;
 		for (IInventoryWrapperUpgrade inventoryWrapperUpgrade : inventoryWrapperUpgrades) {
 			wrappedHandler = inventoryWrapperUpgrade.wrapInventory(wrappedHandler);
 		}

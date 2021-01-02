@@ -5,7 +5,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IObservableItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-public class BackpackInventoryHandler extends ItemStackHandler implements IObservableItemHandler {
+public class BackpackInventoryHandler extends ItemStackHandler {
 	private static final String INVENTORY_TAG = "inventory";
 	private final ItemStack backpack;
 	private final Consumer<ItemStack> backpackSaveHandler;
@@ -61,12 +60,10 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IObser
 		InventoryHelper.copyTo(this, otherHandler);
 	}
 
-	@Override
 	public void addListener(IntConsumer onContentsChanged) {
 		onContentsChangedListeners.add(onContentsChanged);
 	}
 
-	@Override
 	public void clearListeners() {
 		onContentsChangedListeners.clear();
 	}

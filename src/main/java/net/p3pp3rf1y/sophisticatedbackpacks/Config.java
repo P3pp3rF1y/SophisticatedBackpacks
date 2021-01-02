@@ -98,11 +98,14 @@ public class Config {
 
 		public static class InceptionUpgradeConfig {
 			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
+			public final ForgeConfigSpec.BooleanValue upgradesInContainedBackpacksAreFunctional;
 
 			public InceptionUpgradeConfig(ForgeConfigSpec.Builder builder) {
 				builder.comment("Inception Upgrade Settings").push("inceptionUpgrade");
 				upgradesUseInventoriesOfBackpacksInBackpack = builder.comment("Allows / Disallows backpack upgrades to work with inventories of Backpacks in the Backpack with Inception Upgrade")
 						.define("upgradesUseInventoriesOfBackpacksInBackpack", true);
+				upgradesInContainedBackpacksAreFunctional = builder.comment("Allows / Disallows upgrades to be functional even when they are in Backpacks in the inventory of Backpack with Inception Upgrade")
+						.define("upgradesInContainedBackpacksAreFunctional", true);
 				builder.pop();
 			}
 		}

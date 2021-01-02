@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -25,9 +26,9 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final Runnable onInvalidateUpgradeCaches;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
-	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
 	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
+	private IUpgradeWrapperAccessor wrapperAccessor = null;
 
 	public BackpackUpgradeHandler(ItemStack backpack, IBackpackWrapper backpackWrapper, Consumer<ItemStack> backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(getNumberOfUpgradeSlots(backpack));
@@ -56,7 +57,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		wrappersInitialized = true;
 		slotWrappers.clear();
 		typeWrappers.clear();
-		interfaceWrappers.clear();
 
 		InventoryHelper.iterate(this, (slot, upgrade) -> {
 			if (upgrade.isEmpty() || !(upgrade.getItem() instanceof IBackpackUpgradeItem<?>)) {
@@ -71,6 +71,16 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			slotWrappers.put(slot, wrapper);
 			addTypeWrapper(type, wrapper);
 		});
+
+		initializeUpgradeAccessor();
+	}
+
+	private void initializeUpgradeAccessor() {
+		IUpgradeWrapperAccessor accessor = new Accessor(this);
+		for (IUpgradeAccessModifier upgrade : getListOfWrappersThatImplement(IUpgradeAccessModifier.class)) {
+			accessor = upgrade.wrapAccessor(accessor);
+		}
+		wrapperAccessor = accessor;
 	}
 
 	private <T extends IUpgradeWrapper> void addTypeWrapper(UpgradeType<?> type, T wrapper) {
@@ -90,11 +100,10 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
 		initializeWrappers();
-		//noinspection unchecked
-		return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, this::getListOfWrappersThatImplement);
+		return wrapperAccessor.getWrappersThatImplement(upgradeClass);
 	}
 
-	private <T> List<?> getListOfWrappersThatImplement(Class<T> uc) {
+	public <T> List<T> getListOfWrappersThatImplement(Class<T> uc) {
 		List<T> ret = new ArrayList<>();
 		for (IUpgradeWrapper wrapper : slotWrappers.values()) {
 			if (uc.isInstance(wrapper)) {
@@ -121,6 +130,27 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public void copyTo(BackpackUpgradeHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
+	}
+
+	private static class Accessor implements IUpgradeWrapperAccessor {
+		private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
+
+		private final BackpackUpgradeHandler upgradeHandler;
+
+		public Accessor(BackpackUpgradeHandler upgradeHandler) {
+			this.upgradeHandler = upgradeHandler;
+		}
+
+		@Override
+		public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
+			//noinspection unchecked
+			return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, upgradeHandler::getListOfWrappersThatImplement);
+		}
+
+		@Override
+		public void clearCache() {
+			interfaceWrappers.clear();
+		}
 	}
 }
 
