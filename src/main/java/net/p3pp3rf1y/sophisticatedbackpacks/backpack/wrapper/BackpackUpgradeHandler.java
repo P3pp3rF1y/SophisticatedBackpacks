@@ -121,7 +121,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return stack.getItem() instanceof IBackpackUpgradeItem;
+		return stack.getItem() instanceof IBackpackUpgradeItem && ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper);
 	}
 
 	private static int getNumberOfUpgradeSlots(ItemStack backpack) {

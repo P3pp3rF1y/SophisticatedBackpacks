@@ -22,6 +22,17 @@ import java.util.function.Supplier;
 public class InventoryHelper {
 	private InventoryHelper() {}
 
+	public static boolean hasItem(IItemHandler inventory, Predicate<ItemStack> matches) {
+		int slots = inventory.getSlots();
+		for (int slot = 0; slot < slots; slot++) {
+			ItemStack slotStack = inventory.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && matches.test(slotStack)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static void copyTo(IItemHandlerModifiable handlerA, IItemHandlerModifiable handlerB) {
 		int slotsA = handlerA.getSlots();
 		int slotsB = handlerB.getSlots();

@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
@@ -437,6 +438,11 @@ public class BackpackContainer extends Container {
 			if (updateWrappersAndCheckForReloadNeeded()) {
 				reloadUpgradeControl();
 			}
+		}
+
+		@Override
+		public boolean canTakeStack(PlayerEntity playerIn) {
+			return super.canTakeStack(playerIn) && ((IBackpackUpgradeItem<?>) getStack().getItem()).canRemoveUpgradeFrom(backpackWrapper);
 		}
 
 		private boolean updateWrappersAndCheckForReloadNeeded() {
