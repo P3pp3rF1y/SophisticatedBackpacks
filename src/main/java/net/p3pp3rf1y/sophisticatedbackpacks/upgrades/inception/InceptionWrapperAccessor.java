@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
+	private final Map<Class<?>, List<?>> mainBackpackInterfaceWrappers = new HashMap<>();
 	private final IBackpackWrapper backpackWrapper;
 	private final SubBackpacksHandler subBackpacksHandler;
 
@@ -23,6 +24,12 @@ public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
 		//noinspection unchecked
 		return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, this::collectListOfWrappersThatImplement);
+	}
+
+	@Override
+	public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
+		//noinspection unchecked
+		return (List<T>) mainBackpackInterfaceWrappers.computeIfAbsent(upgradeClass, backpackWrapper.getUpgradeHandler()::getListOfWrappersThatImplement);
 	}
 
 	private <T> List<T> collectListOfWrappersThatImplement(Class<T> upgradeClass) {

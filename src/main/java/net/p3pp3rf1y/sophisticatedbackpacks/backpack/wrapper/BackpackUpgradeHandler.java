@@ -103,6 +103,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		return wrapperAccessor.getWrappersThatImplement(upgradeClass);
 	}
 
+	public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
+		initializeWrappers();
+		return wrapperAccessor.getWrappersThatImplementFromMainBackpack(upgradeClass);
+	}
+
 	public <T> List<T> getListOfWrappersThatImplement(Class<T> uc) {
 		List<T> ret = new ArrayList<>();
 		for (IUpgradeWrapper wrapper : slotWrappers.values()) {
@@ -143,6 +148,12 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 		@Override
 		public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
+			//noinspection unchecked
+			return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, upgradeHandler::getListOfWrappersThatImplement);
+		}
+
+		@Override
+		public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
 			//noinspection unchecked
 			return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, upgradeHandler::getListOfWrappersThatImplement);
 		}

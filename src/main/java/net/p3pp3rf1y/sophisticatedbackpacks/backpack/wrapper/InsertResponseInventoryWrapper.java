@@ -67,12 +67,12 @@ public class InsertResponseInventoryWrapper implements IItemHandlerModifiable {
 
 	private void runOnAfterInsert(int slot, boolean simulate, IItemHandler handler, IBackpackWrapper backpackWrapper) {
 		if (!simulate) {
-			backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class).forEach(u -> u.onAfterInsert(handler, slot));
+			backpackWrapper.getUpgradeHandler().getWrappersThatImplementFromMainBackpack(IInsertResponseUpgrade.class).forEach(u -> u.onAfterInsert(handler, slot));
 		}
 	}
 
 	private ItemStack runOnBeforeInsert(int slot, ItemStack stack, boolean simulate, IItemHandler handler, IBackpackWrapper backpackWrapper) {
-		List<IInsertResponseUpgrade> wrappers = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInsertResponseUpgrade.class);
+		List<IInsertResponseUpgrade> wrappers = backpackWrapper.getUpgradeHandler().getWrappersThatImplementFromMainBackpack(IInsertResponseUpgrade.class);
 		ItemStack remaining = stack;
 		for (IInsertResponseUpgrade upgrade : wrappers) {
 			remaining = upgrade.onBeforeInsert(handler, slot, remaining, simulate);
