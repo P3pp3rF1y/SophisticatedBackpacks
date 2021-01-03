@@ -223,4 +223,22 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
+
+	@Override
+	protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
+		return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) && hasClickedOutsideOfUpgradeSlots(mouseX, mouseY)
+				&& hasClickedOutsideOfUpgradeSettings(mouseX, mouseY);
+	}
+
+	private boolean hasClickedOutsideOfUpgradeSettings(double mouseX, double mouseY) {
+		return upgradeControl.getTabRectangles().stream().noneMatch(r -> r.contains((int) mouseX, (int) mouseY));
+	}
+
+	private boolean hasClickedOutsideOfUpgradeSlots(double mouseX, double mouseY) {
+		return !getUpgradeSlotsRectangle().contains((int) mouseX, (int) mouseY);
+	}
+
+	public Rectangle2d getUpgradeSlotsRectangle() {
+		return new Rectangle2d(getGuiLeft() - BackpackScreen.UPGRADE_INVENTORY_OFFSET, getGuiTop() + getUpgradeTop(), 32, getUpgradeHeight());
+	}
 }
