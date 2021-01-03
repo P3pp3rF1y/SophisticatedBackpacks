@@ -1,39 +1,26 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
-import java.util.function.Consumer;
-
-public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeItem.Wrapper> {
-	public static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
+public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrapper> {
+	public static final UpgradeType<InceptionUpgradeWrapper> TYPE = new UpgradeType<>(InceptionUpgradeWrapper::new);
 
 	@Override
-	public UpgradeType<Wrapper> getType() {
+	public UpgradeType<InceptionUpgradeWrapper> getType() {
 		return TYPE;
 	}
 
-	public static class Wrapper extends UpgradeWrapperBase<Wrapper, InceptionUpgradeItem> {
-		public Wrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-			super(upgrade, upgradeSaveHandler);
-		}
+	@Override
+	public boolean canAddUpgradeTo(IBackpackWrapper backpackWrapper) {
+		return !backpackWrapper.getUpgradeHandler().hasUpgrade(TYPE);
+	}
 
-		@Override
-		public boolean displaysSettingsTab() {
-			return Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get();
-		}
-
-		public InventoryOrder getInventoryOrder() {
-			return NBTHelper.getEnumConstant(upgrade, "inventoryOrder", InventoryOrder::fromName).orElse(InventoryOrder.MAIN_FIRST);
-		}
-
-		public void setInventoryOrder(InventoryOrder inventoryOrder) {
-			NBTHelper.setEnumConstant(upgrade, "inventoryOrder", inventoryOrder);
-			save();
-		}
+	@Override
+	public boolean canRemoveUpgradeFrom(IBackpackWrapper backpackWrapper) {
+		return !InventoryHelper.hasItem(backpackWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
 	}
 }

@@ -105,10 +105,7 @@ public class InventorySorter {
 				return;
 			}
 			FilterStack filterStack = new FilterStack(stack);
-			if (!ret.containsKey(filterStack)) {
-				ret.put(filterStack, 0);
-			}
-			ret.put(filterStack, ret.get(filterStack) + stack.getCount());
+			ret.put(filterStack, ret.computeIfAbsent(filterStack, fs -> 0) + stack.getCount());
 		});
 		return ret;
 	}

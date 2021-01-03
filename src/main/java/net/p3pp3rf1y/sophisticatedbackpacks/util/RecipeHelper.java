@@ -31,16 +31,16 @@ public class RecipeHelper {
 		return Optional.ofNullable(world.get());
 	}
 
-	private static void tryCompatingRecipes(Item item) {
-		getWorld().ifPresent(w -> {
+	private static CompactingShape getCompactingShape(Item item) {
+		return getWorld().map(w -> {
 			if (tryCompactingRecipe(item, w, 2, 2)) {
-				RecipeHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.TWO_BY_TWO);
-				return;
+				return CompactingShape.TWO_BY_TWO;
 			}
 			if (tryCompactingRecipe(item, w, 3, 3)) {
-				RecipeHelper.ITEM_COMPACTING_SHAPES.put(item, CompactingShape.THREE_BY_THREE);
+				return CompactingShape.THREE_BY_THREE;
 			}
-		});
+			return CompactingShape.NONE;
+		}).orElse(CompactingShape.NONE);
 	}
 
 	private static boolean tryCompactingRecipe(Item item, World w, int width, int height) {
@@ -79,15 +79,7 @@ public class RecipeHelper {
 	}
 
 	public static CompactingShape getItemCompactingShape(Item item) {
-		initCompactingShapes(item);
-		return ITEM_COMPACTING_SHAPES.get(item);
-	}
-
-	private static void initCompactingShapes(Item item) {
-		if (!ITEM_COMPACTING_SHAPES.containsKey(item)) {
-			ITEM_COMPACTING_SHAPES.put(item, CompactingShape.NONE);
-			tryCompatingRecipes(item);
-		}
+		return ITEM_COMPACTING_SHAPES.computeIfAbsent(item, RecipeHelper::getCompactingShape);
 	}
 
 	public enum CompactingShape {

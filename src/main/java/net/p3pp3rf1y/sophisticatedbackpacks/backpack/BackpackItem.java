@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.items;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -32,20 +32,19 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.BackpackBlock;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -75,14 +74,12 @@ public class BackpackItem extends ItemBase {
 
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack stack = new ItemStack(this);
-			stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-					.ifPresent(wrapper -> wrapper.setColors(color.getColorValue(), color.getColorValue()));
+			new BackpackWrapper(stack).setColors(color.getColorValue(), color.getColorValue());
 			items.add(stack);
 		}
 
 		ItemStack stack = new ItemStack(this);
-		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-				.ifPresent(wrapper -> wrapper.setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue()));
+		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 		items.add(stack);
 	}
 
@@ -92,7 +89,7 @@ public class BackpackItem extends ItemBase {
 	}
 
 	private boolean hasEverlastingUpgrade(ItemStack stack) {
-		return stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	@Nullable
@@ -172,20 +169,19 @@ public class BackpackItem extends ItemBase {
 				.map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, context.getFace())
 						.map(itemHandler -> {
 							ItemStack backpack = context.getItem();
-							return backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+							return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 									.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper))
 									.orElse(false);
 						}).orElse(false)
 				).orElse(false);
 	}
 
-	@Nonnull
-	private Boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
+	private boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
 		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;
 		}
-		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(wrapper, itemHandler));
+		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(itemHandler));
 		return true;
 	}
 
@@ -219,10 +215,10 @@ public class BackpackItem extends ItemBase {
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 				initWrapper();
-				if (cap == BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY) {
+				if (cap == CapabilityBackpackWrapper.getCapabilityInstance()) {
 					return LazyOptional.of(() -> wrapper).cast();
 				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-					return LazyOptional.of(() -> wrapper.getFilteredHandler()).cast();
+					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
 				}
 				return LazyOptional.empty();
 			}
@@ -241,9 +237,9 @@ public class BackpackItem extends ItemBase {
 			return;
 		}
 		PlayerEntity player = (PlayerEntity) entityIn;
-		stack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).ifPresent(
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition(), wrapper))
+						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition()))
 		);
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}

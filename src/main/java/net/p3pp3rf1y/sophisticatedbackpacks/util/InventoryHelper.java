@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -7,6 +8,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -19,6 +21,17 @@ import java.util.function.Supplier;
 
 public class InventoryHelper {
 	private InventoryHelper() {}
+
+	public static boolean hasItem(IItemHandler inventory, Predicate<ItemStack> matches) {
+		int slots = inventory.getSlots();
+		for (int slot = 0; slot < slots; slot++) {
+			ItemStack slotStack = inventory.getStackInSlot(slot);
+			if (!slotStack.isEmpty() && matches.test(slotStack)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static void copyTo(IItemHandlerModifiable handlerA, IItemHandlerModifiable handlerB) {
 		int slotsA = handlerA.getSlots();
@@ -83,7 +96,7 @@ public class InventoryHelper {
 		List<IPickupResponseUpgrade> pickupUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IPickupResponseUpgrade.class);
 
 		for (IPickupResponseUpgrade pickupUpgrade : pickupUpgrades) {
-			ItemStack ret = pickupUpgrade.pickup(world, remainingStack, backpackWrapper, simulate);
+			ItemStack ret = pickupUpgrade.pickup(world, remainingStack, simulate);
 			remainingStack.setCount(ret.getCount());
 			if (remainingStack.isEmpty()) {
 				return true;
@@ -190,5 +203,18 @@ public class InventoryHelper {
 			return ItemStack.EMPTY;
 		}
 		return itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), false);
+	}
+
+	public static void insertOrDropItem(PlayerEntity player, ItemStack stack, IItemHandler... inventories) {
+		ItemStack ret = stack;
+		for (IItemHandler inventory : inventories) {
+			ret = insertIntoInventory(ret, inventory, false);
+			if (ret.isEmpty()) {
+				return;
+			}
+		}
+		if (!ret.isEmpty()) {
+			player.dropItem(ret, true);
+		}
 	}
 }

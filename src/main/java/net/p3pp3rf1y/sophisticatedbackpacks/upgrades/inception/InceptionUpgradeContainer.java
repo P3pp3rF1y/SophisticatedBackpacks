@@ -6,10 +6,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpgradeItem.Wrapper, InceptionUpgradeContainer> {
+public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpgradeWrapper, InceptionUpgradeContainer> {
 	private static final String DATA_INVENTORY_ORDER = "inventoryOrder";
 
-	public InceptionUpgradeContainer(PlayerEntity player, int upgradeContainerId, InceptionUpgradeItem.Wrapper upgradeWrapper, UpgradeContainerType<InceptionUpgradeItem.Wrapper, InceptionUpgradeContainer> type) {
+	public InceptionUpgradeContainer(PlayerEntity player, int upgradeContainerId, InceptionUpgradeWrapper upgradeWrapper, UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 	}
 

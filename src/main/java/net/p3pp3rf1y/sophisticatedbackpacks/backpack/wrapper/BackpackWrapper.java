@@ -1,22 +1,22 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
-	@CapabilityInject(IBackpackWrapper.class)
-	public static Capability<IBackpackWrapper> BACKPACK_WRAPPER_CAPABILITY = null;
 
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
@@ -28,6 +28,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private BackpackInventoryHandler handler = null;
 	private BackpackUpgradeHandler upgradeHandler = null;
 	private Consumer<ItemStack> backpackSaveHandler = stack -> {};
+	@Nullable
+	private InventoryIOHandler inventoryIOHandler = null;
+	@Nullable
+	private InventoryModificationHandler inventoryModificationHandler = null;
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -39,8 +43,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInceptionInventoryHandler() {
-		return getUpgradeHandler().getInceptionInventoryHandler(getInventoryHandler());
+	public IItemHandlerModifiable getInventoryForUpgradeProcessing() {
+		if (inventoryModificationHandler == null) {
+			inventoryModificationHandler = new InventoryModificationHandler(this);
+		}
+		return inventoryModificationHandler.getModifiedInventoryHandler();
 	}
 
 	@Override
@@ -52,8 +59,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getFilteredHandler() {
-		return getUpgradeHandler().getFilteredHandler(getInceptionInventoryHandler());
+	public IItemHandlerModifiable getInventoryForInputOutput() {
+		if (inventoryIOHandler == null) {
+			inventoryIOHandler = new InventoryIOHandler(this);
+		}
+		return inventoryIOHandler.getFilteredItemHandler();
 	}
 
 	@Override
@@ -69,7 +79,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(backpack, backpackSaveHandler);
+			upgradeHandler = new BackpackUpgradeHandler(backpack, this, backpackSaveHandler, () -> {
+				getInventoryHandler().clearListeners();
+				inventoryIOHandler = null;
+				inventoryModificationHandler = null;
+			});
 		}
 		return upgradeHandler;
 	}
@@ -139,5 +153,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public ItemStack getBackpack() {
 		return backpack;
+	}
+
+	@Override
+	public void refreshInventoryForInputOutput() {
+		inventoryIOHandler = null;
+	}
+
+	@Override
+	public void refreshInventoryForUpgradeProcessing() {
+		inventoryModificationHandler = null;
+		refreshInventoryForInputOutput();
 	}
 }

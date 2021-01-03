@@ -17,7 +17,7 @@ public class ButtonDefinition {
 	private final TextureBlitData foregroundTexture;
 	private final ITextComponent tooltip;
 
-	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture, TextureBlitData hoveredBackgroundTexture) {
+	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
 		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new StringTextComponent(""));
 	}
 

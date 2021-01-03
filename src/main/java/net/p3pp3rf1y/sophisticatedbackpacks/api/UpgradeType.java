@@ -11,11 +11,11 @@ public class UpgradeType<T extends IUpgradeWrapper> {
 		this.factory = factory;
 	}
 
-	public T create(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		return factory.create(upgrade, upgradeSaveHandler);
+	public T create(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		return factory.create(backpackWrapper, upgrade, upgradeSaveHandler);
 	}
 
 	public interface IFactory<T extends IUpgradeWrapper> {
-		T create(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler);
+		T create(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler);
 	}
 }

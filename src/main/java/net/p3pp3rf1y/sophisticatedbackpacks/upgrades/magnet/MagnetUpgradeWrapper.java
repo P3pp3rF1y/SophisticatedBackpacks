@@ -7,11 +7,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
@@ -23,8 +24,8 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	private static final int FULL_COOLDOWN_TICKS = 40;
 	private final FilterLogic filterLogic;
 
-	public MagnetUpgradeWrapper(ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
-		super(upgrade, upgradeSaveHandler);
+	public MagnetUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 	}
 
@@ -34,7 +35,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos, IBackpackWrapper wrapper) {
+	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}
@@ -50,20 +51,21 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem())) {
 				continue;
 			}
-			if (tryToInsertItem(wrapper, itemEntity)) {
+			if (tryToInsertItem(itemEntity)) {
 				cooldown = COOLDOWN_TICKS;
 			}
 		}
 		setCooldown(world, cooldown);
 	}
 
-	private boolean tryToInsertItem(IBackpackWrapper wrapper, ItemEntity itemEntity) {
+	private boolean tryToInsertItem(ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), true);
+		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, inventory, true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, wrapper.getInceptionInventoryHandler(), false);
+			remaining = InventoryHelper.insertIntoInventory(stack, inventory, false);
 			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;

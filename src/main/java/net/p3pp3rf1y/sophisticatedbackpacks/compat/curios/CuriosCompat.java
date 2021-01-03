@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,9 +16,9 @@ import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.items.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
@@ -37,12 +38,12 @@ public class CuriosCompat implements ICompat {
 		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
 				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true
+				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, false
 		);
 	}
 
-	private <T> T getFromBackStackHandler(PlayerEntity player, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
-		return CuriosApi.getCuriosHelper().getCuriosHandler(player)
+	public static <T> T getFromBackStackHandler(LivingEntity livingEntity, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
+		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity)
 				.map(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
 	}
 
@@ -62,7 +63,7 @@ public class CuriosCompat implements ICompat {
 			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, item.getRegistryName().getPath() + "_curios"), new ICapabilityProvider() {
 				@Override
 				public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(() -> new CuriosBackpackWrapper(item)));
+					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(CuriosBackpackWrapper::new));
 				}
 			});
 		}

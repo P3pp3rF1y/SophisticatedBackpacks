@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
@@ -9,12 +9,11 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NoopBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
@@ -28,7 +27,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = backpack.getCapability(BackpackWrapper.BACKPACK_WRAPPER_CAPABILITY).orElse(NoopBackpackWrapper.INSTANCE);
+		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper.linkToTileEntity(this);
 	}
 
@@ -66,14 +65,13 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		if (world.isRemote) {
 			return;
 		}
-		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos(), backpackWrapper));
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos()));
 	}
 
-	@Nonnull
 	@Override
-	public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().map(IBackpackWrapper::getFilteredHandler).orElse(NoopBackpackWrapper.INSTANCE.getFilteredHandler())).cast();
+			return LazyOptional.of(() -> getBackpackWrapper().map(IBackpackWrapper::getInventoryForInputOutput).orElse(NoopBackpackWrapper.INSTANCE.getInventoryForInputOutput())).cast();
 		}
 		return super.getCapability(cap, side);
 	}

@@ -1,8 +1,9 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.blocks.tile.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
@@ -21,7 +22,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public BackpackInventoryHandler getInceptionInventoryHandler() {
+	public BackpackInventoryHandler getInventoryForUpgradeProcessing() {
 		return new BackpackInventoryHandler(backpack, s -> {});
 	}
 
@@ -31,7 +32,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getFilteredHandler() {
+	public IItemHandlerModifiable getInventoryForInputOutput() {
 		return new BackpackInventoryHandler(backpack, s -> {});
 	}
 
@@ -42,7 +43,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
-		return new BackpackUpgradeHandler(backpack, s -> {});
+		return new BackpackUpgradeHandler(backpack, this, s -> {}, () -> {});
 	}
 
 	@Override
@@ -92,6 +93,16 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void sort() {
+		//noop
+	}
+
+	@Override
+	public void refreshInventoryForUpgradeProcessing() {
+		//noop
+	}
+
+	@Override
+	public void refreshInventoryForInputOutput() {
 		//noop
 	}
 }
