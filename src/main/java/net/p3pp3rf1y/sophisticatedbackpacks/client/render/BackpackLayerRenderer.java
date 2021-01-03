@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -45,35 +46,40 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 			matrixStack.push();
-			if (player.isCrouching()) {
-				matrixStack.translate(0D, 0.2D, 0D);
-				matrixStack.rotate(Vector3f.XP.rotationDegrees(90F / (float) Math.PI));
-			}
-
-			matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
-			float zOffset = backpackRenderInfo.isArmorSlot() || player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()).isEmpty() ? -0.2f : -0.25f;
-			matrixStack.translate(0, -0.75f, zOffset);
-
+			boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()).isEmpty();
 			ItemStack backpack = backpackRenderInfo.getBackpack();
-			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
-				IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
+			renderBackpack(player, matrixStack, buffer, packedLight, backpack, wearsArmor);
+			matrixStack.pop();
+		});
+	}
 
-				int color = wrapper.getClothColor();
-				float red = (color >> 16 & 255) / 255.0F;
-				float green = (color >> 8 & 255) / 255.0F;
-				float blue = (color & 255) / 255.0F;
-				MODEL.cloth.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+	public static void renderBackpack(LivingEntity livingEntity, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, ItemStack backpack, boolean wearsArmor) {
+		if (livingEntity.isCrouching()) {
+			matrixStack.translate(0D, 0.2D, 0D);
+			matrixStack.rotate(Vector3f.XP.rotationDegrees(90F / (float) Math.PI));
+		}
 
-				color = wrapper.getBorderColor();
-				red = (color >> 16 & 255) / 255.0F;
-				green = (color >> 8 & 255) / 255.0F;
-				blue = (color & 255) / 255.0F;
-				MODEL.border.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+		matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
+		float zOffset = wearsArmor ? -0.25f : -0.2f;
+		matrixStack.translate(0, -0.75f, zOffset);
 
-				BACKPACK_CLIPS.getOrDefault(backpack.getItem(), MODEL.leatherClips).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			IVertexBuilder vertexBuilder = ItemRenderer.getBuffer(buffer, RenderType.getEntityCutoutNoCull(BACKPACK_TEXTURE), false, false);
 
-				matrixStack.pop();
-			});
+			int color = wrapper.getClothColor();
+			float red = (color >> 16 & 255) / 255.0F;
+			float green = (color >> 8 & 255) / 255.0F;
+			float blue = (color & 255) / 255.0F;
+			MODEL.cloth.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+
+			color = wrapper.getBorderColor();
+			red = (color >> 16 & 255) / 255.0F;
+			green = (color >> 8 & 255) / 255.0F;
+			blue = (color & 255) / 255.0F;
+			MODEL.border.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+
+			BACKPACK_CLIPS.getOrDefault(backpack.getItem(), MODEL.leatherClips).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+
 		});
 	}
 }

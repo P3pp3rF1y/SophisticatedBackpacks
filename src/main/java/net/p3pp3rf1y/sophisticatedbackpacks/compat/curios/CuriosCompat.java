@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -37,12 +38,12 @@ public class CuriosCompat implements ICompat {
 		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
 				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true
+				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, false
 		);
 	}
 
-	private <T> T getFromBackStackHandler(PlayerEntity player, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
-		return CuriosApi.getCuriosHelper().getCuriosHandler(player)
+	public static <T> T getFromBackStackHandler(LivingEntity livingEntity, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
+		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity)
 				.map(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
 	}
 
