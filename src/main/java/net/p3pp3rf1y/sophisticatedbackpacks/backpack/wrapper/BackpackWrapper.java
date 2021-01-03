@@ -158,11 +158,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void refreshInventoryForInputOutput() {
 		inventoryIOHandler = null;
-		refreshInventoryForUpgradeProcessing();
 	}
 
 	@Override
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
+		refreshInventoryForInputOutput();
 	}
 }
