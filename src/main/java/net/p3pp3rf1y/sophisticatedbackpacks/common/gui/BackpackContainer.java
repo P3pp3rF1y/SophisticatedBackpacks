@@ -179,7 +179,7 @@ public class BackpackContainer extends Container {
 			for (int j = 0; j < 9; ++j) {
 				int slotIndex = j + i * 9 + 9;
 				int xPosition = playerInventoryXOffset + 8 + j * 18;
-				Slot slot = addBackpackSafeSlot(playerInventory, yPosition, slotIndex, xPosition, backpackSlotIndex);
+				Slot slot = addBackpackSafeSlot(playerInventory, yPosition, slotIndex, xPosition, backpackSlotIndex, shouldLockBackpackSlot);
 				addSlotAndUpdateBackpackSlotNumber(backpackSlotIndex, shouldLockBackpackSlot, slotIndex, slot);
 			}
 			yPosition += 18;
@@ -189,14 +189,14 @@ public class BackpackContainer extends Container {
 
 		for (int slotIndex = 0; slotIndex < 9; ++slotIndex) {
 			int xPosition = playerInventoryXOffset + 8 + slotIndex * 18;
-			Slot slot = addBackpackSafeSlot(playerInventory, yPosition, slotIndex, xPosition, backpackSlotIndex);
+			Slot slot = addBackpackSafeSlot(playerInventory, yPosition, slotIndex, xPosition, backpackSlotIndex, shouldLockBackpackSlot);
 			addSlotAndUpdateBackpackSlotNumber(backpackSlotIndex, shouldLockBackpackSlot, slotIndex, slot);
 		}
 	}
 
-	private Slot addBackpackSafeSlot(PlayerInventory playerInventory, int yPosition, int slotIndex, int xPosition, int backpackSlotIndex) {
+	private Slot addBackpackSafeSlot(PlayerInventory playerInventory, int yPosition, int slotIndex, int xPosition, int backpackSlotIndex, boolean shouldLockBackpackSlot) {
 		Slot slot;
-		if (slotIndex == backpackSlotIndex) {
+		if (shouldLockBackpackSlot && slotIndex == backpackSlotIndex) {
 			slot = new Slot(playerInventory, slotIndex, xPosition, yPosition) {
 				@Override
 				public boolean canTakeStack(PlayerEntity playerIn) {
