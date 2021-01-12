@@ -12,9 +12,10 @@ import java.util.Optional;
 public class NoopBackpackWrapper implements IBackpackWrapper {
 	public static final NoopBackpackWrapper INSTANCE = new NoopBackpackWrapper();
 
-	private NoopBackpackWrapper() {}
-
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
+	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(backpack, this, s -> {}, () -> {});
+
+	private NoopBackpackWrapper() {}
 
 	@Override
 	public void linkToTileEntity(BackpackTileEntity te) {
@@ -43,7 +44,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
-		return new BackpackUpgradeHandler(backpack, this, s -> {}, () -> {});
+		return backpackUpgradeHandler;
 	}
 
 	@Override

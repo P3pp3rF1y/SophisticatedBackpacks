@@ -45,8 +45,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
 		backpackSaveHandler.accept(backpack);
 		if (!justSavingNbtChange) {
-			wrappersInitialized = false;
-			onInvalidateUpgradeCaches.run();
+			refreshUpgradeWrappers();
 		}
 	}
 
@@ -124,17 +123,17 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		return slotWrappers;
 	}
 
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack) {
-		return stack.getItem() instanceof IBackpackUpgradeItem && ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper);
-	}
-
 	private static int getNumberOfUpgradeSlots(ItemStack backpack) {
 		return ((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots();
 	}
 
 	public void copyTo(BackpackUpgradeHandler otherHandler) {
 		InventoryHelper.copyTo(this, otherHandler);
+	}
+
+	public void refreshUpgradeWrappers() {
+		wrappersInitialized = false;
+		onInvalidateUpgradeCaches.run();
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {

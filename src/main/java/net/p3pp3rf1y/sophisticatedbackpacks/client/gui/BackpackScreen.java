@@ -18,6 +18,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
 
@@ -44,6 +46,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		playerInventoryTitleY = ySize - 94;
 		playerInventoryTitleX = 8 + getContainer().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
 		slots = getContainer().getNumberOfUpgradeSlots();
+		passEvents = true;
 	}
 
 	@Override
@@ -72,6 +75,15 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			}
 		}, () -> getContainer().getSortBy());
 		addListener(sortByButton);
+	}
+
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (keyCode == 256 && !getContainer().isFirstLevelBackpack()) {
+			PacketHandler.sendToServer(new BackpackOpenMessage());
+			return true;
+		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	private Position getSortButtonsPosition() {

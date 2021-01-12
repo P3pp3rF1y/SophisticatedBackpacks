@@ -15,8 +15,8 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	}
 
 	@Override
-	public boolean canAddUpgradeTo(IBackpackWrapper backpackWrapper) {
-		return !backpackWrapper.getUpgradeHandler().hasUpgrade(TYPE);
+	public boolean canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+		return firstLevelBackpack && !backpackWrapper.getUpgradeHandler().hasUpgrade(TYPE);
 	}
 
 	@Override

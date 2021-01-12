@@ -7,10 +7,11 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
@@ -30,17 +33,29 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
 import java.util.Map;
 
+import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
 	public static final KeyBinding BACKPACK_OPEN_KEYBIND = new KeyBinding("keybind.sophisticatedbackpacks.backpack.open",
-			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), "keybind.sophisticatedbackpacks.category");
+			BackpackKeyConflictContext.INSTANCE, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), "keybind.sophisticatedbackpacks.category");
 
 	public static void handleKeyInputEvent(TickEvent.ClientTickEvent event) {
 		if (BACKPACK_OPEN_KEYBIND.isPressed()) {
-			PacketHandler.sendToServer(BackpackOpenMessage.getInstance());
+			if (!GUI.isActive()) {
+				PacketHandler.sendToServer(new BackpackOpenMessage());
+			} else {
+				BackpackScreen backpackScreen = (BackpackScreen) Minecraft.getInstance().currentScreen;
+
+				if (backpackScreen != null) {
+					Slot slot = backpackScreen.getSlotUnderMouse();
+					if (slot != null && slot.getStack().getItem() instanceof BackpackItem) {
+						PacketHandler.sendToServer(new BackpackOpenMessage(slot.slotNumber));
+					}
+				}
+			}
 		}
 	}
 
@@ -84,4 +99,19 @@ public class ClientProxy extends CommonProxy {
 		//noinspection ConstantConditions - by the time player is joining the world is not null
 		RecipeHelper.setWorld(Minecraft.getInstance().world);
 	}
+
+	private static class BackpackKeyConflictContext implements IKeyConflictContext {
+		public static final BackpackKeyConflictContext INSTANCE = new BackpackKeyConflictContext();
+
+		@Override
+		public boolean isActive() {
+			return !GUI.isActive() || Minecraft.getInstance().currentScreen instanceof BackpackScreen;
+		}
+
+		@Override
+		public boolean conflicts(IKeyConflictContext other) {
+			return this == other;
+		}
+	}
+
 }

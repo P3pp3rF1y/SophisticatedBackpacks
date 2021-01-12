@@ -38,6 +38,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
@@ -198,7 +199,7 @@ public class BackpackItem extends ItemBase {
 		if (!world.isRemote && player instanceof ServerPlayerEntity) {
 			String handlerName = hand == Hand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == Hand.MAIN_HAND ? player.inventory.currentItem : 0;
-			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, handlerName, slot), stack.getDisplayName()),
+			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Item(handlerName, slot)), stack.getDisplayName()),
 					buf -> {
 						buf.writeString(handlerName);
 						buf.writeInt(slot);

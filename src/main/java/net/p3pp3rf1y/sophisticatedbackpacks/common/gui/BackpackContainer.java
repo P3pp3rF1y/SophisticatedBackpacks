@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -20,17 +19,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,9 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_BLOCK_CONTAINER_TYPE;
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_ITEM_CONTAINER_TYPE;
-
 public class BackpackContainer extends Container {
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
@@ -53,6 +46,8 @@ public class BackpackContainer extends Container {
 	private final IBackpackWrapper backpackWrapper;
 	private final PlayerEntity player;
 	private int backpackSlotNumber = -1;
+
+	private final BackpackContext backpackContext;
 
 	private final Map<Integer, UpgradeContainerBase<?, ?>> upgradeContainers = new LinkedHashMap<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
@@ -65,31 +60,21 @@ public class BackpackContainer extends Container {
 	public final NonNullList<ItemStack> upgradeItemStacks = NonNullList.create();
 	public final List<Slot> upgradeSlots = Lists.newArrayList();
 
-	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
-		super(BACKPACK_ITEM_CONTAINER_TYPE.get(), windowId);
-		this.player = player;
+	private final IBackpackWrapper parentBackpackWrapper;
 
-		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
-		if (!h.isPresent()) {
-			backpackWrapper = NoopBackpackWrapper.INSTANCE;
-			backpackBackgroundProperties = BackpackBackgroundProperties.REGULAR;
-			return;
-		}
-		PlayerInventoryHandler handler = h.get();
-		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
+	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
+		super(backpackContext.getContainerType(), windowId);
+		this.player = player;
+		this.backpackContext = backpackContext;
+		parentBackpackWrapper = backpackContext.getParentBackpackWrapper(player).orElse(NoopBackpackWrapper.INSTANCE);
+		backpackWrapper = backpackContext.getBackpackWrapper(player);
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
-		initSlotsAndContainers(player, backpackSlot, handler.isVisibleInGui());
+		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
 	}
 
-	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
-		super(BACKPACK_BLOCK_CONTAINER_TYPE.get(), windowId);
-		this.player = player;
-		Optional<BackpackTileEntity> backpackTile = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class);
-		backpackWrapper = backpackTile.map(te -> te.getBackpackWrapper().orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
-
-		initSlotsAndContainers(player, -1, false);
+	public IBackpackWrapper getParentBackpackWrapper() {
+		return parentBackpackWrapper;
 	}
 
 	private void initSlotsAndContainers(PlayerEntity player, int backpackSlotIndex, boolean shouldLockBackpackSlot) {
@@ -217,7 +202,8 @@ public class BackpackContainer extends Container {
 	}
 
 	public void closeBackpackScreenIfSomethingMessedWithBackpackStack(ItemStack supposedToBeBackpackStack) {
-		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w != backpackWrapper).orElse(true)) {
+		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(w -> w != (isFirstLevelBackpack() ? backpackWrapper : parentBackpackWrapper)).orElse(true)) {
 			player.closeScreen();
 		}
 	}
@@ -245,11 +231,19 @@ public class BackpackContainer extends Container {
 	}
 
 	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, packetBuffer.readString(), packetBuffer.readInt());
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Item.fromBuffer(packetBuffer));
 	}
 
 	public static BackpackContainer fromBufferBlock(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BlockPos.fromLong(packetBuffer.readLong()));
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Block.fromBuffer(packetBuffer));
+	}
+
+	public static BackpackContainer fromBufferItemSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.ItemSubBackpack.fromBuffer(packetBuffer));
+	}
+
+	public static BackpackContainer fromBufferBlockSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.BlockSubBackpack.fromBuffer(packetBuffer));
 	}
 
 	@Override
@@ -427,7 +421,16 @@ public class BackpackContainer extends Container {
 		backpackWrapper.sort();
 	}
 
+	public boolean isFirstLevelBackpack() {
+		return parentBackpackWrapper == NoopBackpackWrapper.INSTANCE;
+	}
+
+	public BackpackContext getBackpackContext() {
+		return backpackContext;
+	}
+
 	public class BackpackUpgradeSlot extends SlotItemHandler {
+
 		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
 			super(upgradeHandler, slotIndex, -18, yPosition);
 		}
@@ -437,7 +440,18 @@ public class BackpackContainer extends Container {
 			super.onSlotChanged();
 			if (updateWrappersAndCheckForReloadNeeded()) {
 				reloadUpgradeControl();
+				if (!isFirstLevelBackpack()) {
+					parentBackpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
+				}
 			}
+		}
+
+		@Override
+		public boolean isItemValid(@Nonnull ItemStack stack) {
+			if (stack.isEmpty()) {
+				return false;
+			}
+			return stack.getItem() instanceof IBackpackUpgradeItem && ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, isFirstLevelBackpack());
 		}
 
 		@Override
@@ -912,4 +926,5 @@ public class BackpackContainer extends Container {
 
 		return flag;
 	}
+
 }

@@ -22,7 +22,7 @@ public class ModBlockColors {
 				return -1;
 			}
 			return WorldHelper.getTile(blockDisplayReader, pos, BackpackTileEntity.class)
-					.map(te -> te.getBackpackWrapper().map(w -> tintIndex == 0 ? w.getClothColor() : w.getBorderColor()).orElse(getDefaultColor(tintIndex)))
+					.map(te -> tintIndex == 0 ? te.getBackpackWrapper().getClothColor() : te.getBackpackWrapper().getBorderColor())
 					.orElse(getDefaultColor(tintIndex));
 		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get());
 	}

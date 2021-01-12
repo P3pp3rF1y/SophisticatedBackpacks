@@ -137,6 +137,10 @@ public class ModItems {
 
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
 			() -> IForgeContainerType.create(BackpackContainer::fromBufferItem));
+	public static final RegistryObject<ContainerType<BackpackContainer>> BLOCK_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("block_subbackpack",
+			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlockSubBackpack));
+	public static final RegistryObject<ContainerType<BackpackContainer>> ITEM_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("item_subbackpack",
+			() -> IForgeContainerType.create(BackpackContainer::fromBufferItemSubBackpack));
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_BLOCK_CONTAINER_TYPE = CONTAINERS.register("backpack_block",
 			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlock));
 
@@ -197,6 +201,8 @@ public class ModItems {
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
 			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::new);
+			ScreenManager.registerFactory(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::new);
+			ScreenManager.registerFactory(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::new);
 
 			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);

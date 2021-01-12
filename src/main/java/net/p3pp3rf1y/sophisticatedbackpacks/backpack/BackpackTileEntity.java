@@ -15,7 +15,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
@@ -55,8 +54,8 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		return ret;
 	}
 
-	public Optional<IBackpackWrapper> getBackpackWrapper() {
-		return Optional.ofNullable(backpackWrapper);
+	public IBackpackWrapper getBackpackWrapper() {
+		return backpackWrapper;
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().map(IBackpackWrapper::getInventoryForInputOutput).orElse(NoopBackpackWrapper.INSTANCE.getInventoryForInputOutput())).cast();
+			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		}
 		return super.getCapability(cap, side);
 	}
