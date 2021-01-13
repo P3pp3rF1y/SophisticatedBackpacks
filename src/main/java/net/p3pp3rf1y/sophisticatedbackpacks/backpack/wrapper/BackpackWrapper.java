@@ -5,7 +5,6 @@ import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -25,9 +24,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
 	private static final String SORT_BY_TAG = "sortBy";
 	private final ItemStack backpack;
-	private BackpackInventoryHandler handler = null;
-	private BackpackUpgradeHandler upgradeHandler = null;
+
 	private Consumer<ItemStack> backpackSaveHandler = stack -> {};
+
+	@Nullable
+	private BackpackInventoryHandler handler = null;
+	@Nullable
+	private BackpackUpgradeHandler upgradeHandler = null;
 	@Nullable
 	private InventoryIOHandler inventoryIOHandler = null;
 	@Nullable
@@ -38,8 +41,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void linkToTileEntity(BackpackTileEntity te) {
-		backpackSaveHandler = stack -> te.markDirty();
+	public void setBackpackSaveHandler(Consumer<ItemStack> saveHandler) {
+		backpackSaveHandler = saveHandler;
+		refreshAllHandlers();
 	}
 
 	@Override
@@ -164,5 +168,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
 		refreshInventoryForInputOutput();
+	}
+
+	private void refreshAllHandlers() {
+		handler = null;
+		upgradeHandler = null;
+		refreshInventoryForUpgradeProcessing();
 	}
 }

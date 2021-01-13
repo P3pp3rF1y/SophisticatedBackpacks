@@ -27,7 +27,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackWrapper.linkToTileEntity(this);
+		backpackWrapper.setBackpackSaveHandler(stack -> markDirty());
 	}
 
 	@Override

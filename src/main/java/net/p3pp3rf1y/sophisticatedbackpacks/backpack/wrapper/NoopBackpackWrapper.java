@@ -3,11 +3,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class NoopBackpackWrapper implements IBackpackWrapper {
 	public static final NoopBackpackWrapper INSTANCE = new NoopBackpackWrapper();
@@ -18,7 +18,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	private NoopBackpackWrapper() {}
 
 	@Override
-	public void linkToTileEntity(BackpackTileEntity te) {
+	public void setBackpackSaveHandler(Consumer<ItemStack> saveHandler) {
 		//noop
 	}
 

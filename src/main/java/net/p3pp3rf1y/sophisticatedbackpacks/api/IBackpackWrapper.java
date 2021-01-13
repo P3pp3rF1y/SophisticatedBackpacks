@@ -2,16 +2,16 @@ package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface IBackpackWrapper {
 
-	void linkToTileEntity(BackpackTileEntity te);
+	void setBackpackSaveHandler(Consumer<ItemStack> saveHandler);
 
 	IItemHandlerModifiable getInventoryForUpgradeProcessing();
 
