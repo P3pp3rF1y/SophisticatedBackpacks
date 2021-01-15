@@ -21,6 +21,7 @@ public class TranslationHelper {
 	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
 	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + "buttons.";
+	private static final String KEYBIND_PREFIX = "keybind.sophisticatedbackpacks.";
 
 	public static String translUpgrade(String upgradeName) {
 		return GUI_UPGRADE_PREFIX + upgradeName;
@@ -63,5 +64,9 @@ public class TranslationHelper {
 		}
 
 		return ret;
+	}
+
+	public static String translKeybind(String keybindName) {
+		return KEYBIND_PREFIX + keybindName;
 	}
 }

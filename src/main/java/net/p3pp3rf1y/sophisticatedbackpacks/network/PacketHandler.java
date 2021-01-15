@@ -24,6 +24,7 @@ public class PacketHandler {
 
 		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::encode, BackpackOpenMessage::decode, BackpackOpenMessage::onMessage);
 		registerMessage(ServerBackpackDataMessage.class, ServerBackpackDataMessage::encode, ServerBackpackDataMessage::decode, ServerBackpackDataMessage::onMessage);
+		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
