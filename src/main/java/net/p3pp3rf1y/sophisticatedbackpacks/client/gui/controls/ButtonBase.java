@@ -1,7 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.util.SoundEvents;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 
@@ -26,6 +30,9 @@ public abstract class ButtonBase extends Widget {
 			return false;
 		}
 		onClick.accept(button);
+		if (Boolean.TRUE.equals(Config.CLIENT.playButtonSound.get())) {
+			Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+		}
 		return true;
 	}
 
