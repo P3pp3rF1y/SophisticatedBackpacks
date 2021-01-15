@@ -4,6 +4,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IUpgradeWrapperAccessor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,18 @@ public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 	public InceptionWrapperAccessor(IBackpackWrapper backpackWrapper, SubBackpacksHandler subBackpacksHandler) {
 		this.backpackWrapper = backpackWrapper;
 		this.subBackpacksHandler = subBackpacksHandler;
-		subBackpacksHandler.addRefreshListener(this::clearCache);
+		addRefreshCallbacks(subBackpacksHandler.getSubBackpacks());
+		subBackpacksHandler.addBeforeRefreshListener(this::removeCallBacks);
+		subBackpacksHandler.addRefreshListener(this::clearCacheAndAddCallBacks);
+	}
+
+	private void clearCacheAndAddCallBacks(Collection<IBackpackWrapper> subbackpacks) {
+		clearCache();
+		addRefreshCallbacks(subbackpacks);
+	}
+
+	private void addRefreshCallbacks(Collection<IBackpackWrapper> subbackpacks) {
+		subbackpacks.forEach(sb -> sb.getUpgradeHandler().setRefreshCallBack(this::clearCache));
 	}
 
 	@Override
@@ -32,14 +44,22 @@ public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 		return (List<T>) mainBackpackInterfaceWrappers.computeIfAbsent(upgradeClass, backpackWrapper.getUpgradeHandler()::getListOfWrappersThatImplement);
 	}
 
+	@Override
+	public void onBeforeDeconstruct() {
+		removeCallBacks(subBackpacksHandler.getSubBackpacks());
+	}
+
 	private <T> List<T> collectListOfWrappersThatImplement(Class<T> upgradeClass) {
 		List<T> ret = new ArrayList<>(backpackWrapper.getUpgradeHandler().getListOfWrappersThatImplement(upgradeClass));
 		subBackpacksHandler.getSubBackpacks().forEach(sbp -> ret.addAll(sbp.getUpgradeHandler().getWrappersThatImplement(upgradeClass)));
 		return ret;
 	}
 
-	@Override
-	public void clearCache() {
+	private void removeCallBacks(Collection<IBackpackWrapper> subBackpacksHandler) {
+		subBackpacksHandler.forEach(sb -> sb.getUpgradeHandler().removeRefreshCallback());
+	}
+
+	private void clearCache() {
 		interfaceWrappers.clear();
 	}
 }

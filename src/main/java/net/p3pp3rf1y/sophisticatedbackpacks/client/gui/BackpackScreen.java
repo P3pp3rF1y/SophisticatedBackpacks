@@ -22,6 +22,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
@@ -38,6 +40,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private final int slots;
 	private Button sortButton;
 	private ToggleButton<SortBy> sortByButton;
+	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -58,6 +61,20 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			initUpgradeControl();
 		});
 		addSortButtons();
+		addUpgradeSwitches();
+	}
+
+	private void addUpgradeSwitches() {
+		upgradeSwitches.clear();
+		int swithTop = guiTop + getUpgradeTop() + 11;
+		for (int slot = 0; slot < slots; slot++) {
+			int finalSlot = slot;
+			ToggleButton<Boolean> upgradeSwitch = new ToggleButton<>(new Position(guiLeft - 20, swithTop), ButtonDefinitions.UPGRADE_SWITCH,
+					button -> getContainer().setUpgradeEnabled(finalSlot, !getContainer().getUpgradeEnabled(finalSlot)), () -> getContainer().getUpgradeEnabled(finalSlot));
+			addListener(upgradeSwitch);
+			upgradeSwitches.add(upgradeSwitch);
+			swithTop += 22;
+		}
 	}
 
 	private void addSortButtons() {
@@ -75,6 +92,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			}
 		}, () -> getContainer().getSortBy());
 		addListener(sortByButton);
+
 	}
 
 	@Override
@@ -118,6 +136,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
+		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
 
@@ -180,13 +199,11 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void drawUpgradeBackground(MatrixStack matrixStack) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		minecraft.getTextureManager().bindTexture(GUI_CONTROLS);
-		int i = (width - xSize) / 2;
-		int j = (height - ySize) / 2;
 
 		int firstHalfHeight = getUpgradeHeightWithoutBottom();
 
-		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
-		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
+		blit(matrixStack, guiLeft - UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
+		blit(matrixStack, guiLeft - UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
 	}
 
 	public int getUpgradeTop() {
@@ -251,6 +268,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	public Rectangle2d getUpgradeSlotsRectangle() {
-		return new Rectangle2d(getGuiLeft() - BackpackScreen.UPGRADE_INVENTORY_OFFSET, getGuiTop() + getUpgradeTop(), 32, getUpgradeHeight());
+		return new Rectangle2d(guiLeft - BackpackScreen.UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop(), 32, getUpgradeHeight());
 	}
 }

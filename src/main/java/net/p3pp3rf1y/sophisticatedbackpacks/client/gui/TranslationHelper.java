@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -26,6 +28,10 @@ public class TranslationHelper {
 
 	public static String translUpgradeTooltip(String upgradeName) {
 		return translUpgrade(upgradeName) + ".tooltip";
+	}
+
+	public static ITextComponent translColoredButton(String buttonName, TextFormatting color) {
+		return new TranslationTextComponent(translButton(buttonName)).mergeStyle(color);
 	}
 
 	public static String translButton(String buttonName) {

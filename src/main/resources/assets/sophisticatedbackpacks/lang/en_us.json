@@ -106,5 +106,7 @@
     "gui.sophisticatedbackpacks.buttons.sort_by_name": "By Name",
     "gui.sophisticatedbackpacks.buttons.sort_by_count": "By Count",
     "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",
-    "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack"
+    "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack",
+    "gui.sophisticatedbackpacks.buttons.upgrade_switch_enabled": "ON",
+    "gui.sophisticatedbackpacks.buttons.upgrade_switch_disabled": "OFF"
 }

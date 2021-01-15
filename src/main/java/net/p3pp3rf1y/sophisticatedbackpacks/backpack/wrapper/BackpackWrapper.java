@@ -43,7 +43,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setBackpackSaveHandler(Consumer<ItemStack> saveHandler) {
 		backpackSaveHandler = saveHandler;
-		refreshAllHandlers();
+		refreshInventoryForUpgradeProcessing();
 	}
 
 	@Override
@@ -168,11 +168,5 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
 		refreshInventoryForInputOutput();
-	}
-
-	private void refreshAllHandlers() {
-		handler = null;
-		upgradeHandler = null;
-		refreshInventoryForUpgradeProcessing();
 	}
 }

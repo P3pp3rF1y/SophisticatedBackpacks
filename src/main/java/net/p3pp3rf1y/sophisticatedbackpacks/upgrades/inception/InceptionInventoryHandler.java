@@ -17,7 +17,7 @@ public class InceptionInventoryHandler implements IItemHandlerModifiable {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
-		subBackpacksHandler.addRefreshListener(this::refreshHandlerDelegate);
+		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlerDelegate());
 
 		refreshHandlerDelegate();
 	}

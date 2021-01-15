@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,10 +25,13 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final IBackpackWrapper backpackWrapper;
 	private final Consumer<ItemStack> backpackSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
+	@Nullable
+	private Runnable refreshCallBack = null;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
 	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
+	@Nullable
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 
 	public BackpackUpgradeHandler(ItemStack backpack, IBackpackWrapper backpackWrapper, Consumer<ItemStack> backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
@@ -49,6 +53,14 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		}
 	}
 
+	public void setRefreshCallBack(Runnable refreshCallBack) {
+		this.refreshCallBack = refreshCallBack;
+	}
+
+	public void removeRefreshCallback() {
+		refreshCallBack = null;
+	}
+
 	private void initializeWrappers() {
 		if (wrappersInitialized) {
 			return;
@@ -68,18 +80,10 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				justSavingNbtChange = false;
 			});
 			slotWrappers.put(slot, wrapper);
-			addTypeWrapper(type, wrapper);
+			if (wrapper.isEnabled()) {
+				addTypeWrapper(type, wrapper);
+			}
 		});
-
-		initializeUpgradeAccessor();
-	}
-
-	private void initializeUpgradeAccessor() {
-		IUpgradeWrapperAccessor accessor = new Accessor(this);
-		for (IUpgradeAccessModifier upgrade : getListOfWrappersThatImplement(IUpgradeAccessModifier.class)) {
-			accessor = upgrade.wrapAccessor(accessor);
-		}
-		wrapperAccessor = accessor;
 	}
 
 	private <T extends IUpgradeWrapper> void addTypeWrapper(UpgradeType<?> type, T wrapper) {
@@ -99,18 +103,29 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
 		initializeWrappers();
-		return wrapperAccessor.getWrappersThatImplement(upgradeClass);
+		return getWrapperAccessor().getWrappersThatImplement(upgradeClass);
+	}
+
+	private IUpgradeWrapperAccessor getWrapperAccessor() {
+		if (wrapperAccessor == null) {
+			IUpgradeWrapperAccessor accessor = new Accessor(this);
+			for (IUpgradeAccessModifier upgrade : getListOfWrappersThatImplement(IUpgradeAccessModifier.class)) {
+				accessor = upgrade.wrapAccessor(accessor);
+			}
+			wrapperAccessor = accessor;
+		}
+		return wrapperAccessor;
 	}
 
 	public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
 		initializeWrappers();
-		return wrapperAccessor.getWrappersThatImplementFromMainBackpack(upgradeClass);
+		return getWrapperAccessor().getWrappersThatImplementFromMainBackpack(upgradeClass);
 	}
 
 	public <T> List<T> getListOfWrappersThatImplement(Class<T> uc) {
 		List<T> ret = new ArrayList<>();
 		for (IUpgradeWrapper wrapper : slotWrappers.values()) {
-			if (uc.isInstance(wrapper)) {
+			if (wrapper.isEnabled() && uc.isInstance(wrapper)) {
 				//noinspection unchecked
 				ret.add((T) wrapper);
 			}
@@ -133,6 +148,13 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	public void refreshUpgradeWrappers() {
 		wrappersInitialized = false;
+		if (wrapperAccessor != null) {
+			wrapperAccessor.onBeforeDeconstruct();
+			wrapperAccessor = null;
+		}
+		if (refreshCallBack != null) {
+			refreshCallBack.run();
+		}
 		onInvalidateUpgradeCaches.run();
 	}
 
@@ -155,11 +177,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
 			//noinspection unchecked
 			return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, upgradeHandler::getListOfWrappersThatImplement);
-		}
-
-		@Override
-		public void clearCache() {
-			interfaceWrappers.clear();
 		}
 	}
 }

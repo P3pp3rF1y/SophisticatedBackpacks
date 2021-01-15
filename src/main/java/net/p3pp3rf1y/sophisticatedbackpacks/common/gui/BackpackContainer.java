@@ -41,6 +41,8 @@ public class BackpackContainer extends Container {
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
 	private static final String SORT_BY_TAG = "sortBy";
+	private static final String UPGRADE_ENABLED_TAG = "upgradeEnabled";
+	private static final String UPGRADE_SLOT_TAG = "upgradeSlot";
 	private static final String ACTION_TAG = "action";
 
 	private final IBackpackWrapper backpackWrapper;
@@ -368,6 +370,8 @@ public class BackpackContainer extends Container {
 			setSortBy(SortBy.fromName(data.getString(SORT_BY_TAG)));
 		} else if (data.contains(ACTION_TAG) && data.getString(ACTION_TAG).equals("sort")) {
 			sort();
+		} else if (data.contains(UPGRADE_ENABLED_TAG)) {
+			setUpgradeEnabled(data.getInt(UPGRADE_SLOT_TAG), data.getBoolean(UPGRADE_ENABLED_TAG));
 		}
 	}
 
@@ -429,10 +433,32 @@ public class BackpackContainer extends Container {
 		return backpackContext;
 	}
 
+	public boolean getUpgradeEnabled(int upgradeSlot) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return false;
+		}
+		return slotWrappers.get(upgradeSlot).isEnabled();
+	}
+
+	public void setUpgradeEnabled(int upgradeSlot, boolean enabled) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return;
+		}
+		if (player.world.isRemote) {
+			CompoundNBT data = new CompoundNBT();
+			data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
+			data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
+			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		}
+		slotWrappers.get(upgradeSlot).setEnabled(enabled);
+	}
+
 	public class BackpackUpgradeSlot extends SlotItemHandler {
 
 		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
-			super(upgradeHandler, slotIndex, -18, yPosition);
+			super(upgradeHandler, slotIndex, -15, yPosition);
 		}
 
 		@Override
@@ -467,8 +493,10 @@ public class BackpackContainer extends Container {
 					if (container != null) {
 						return true;
 					}
-				} else if (container == null || container.getUpgradeWrapper() != slotWrapper.getValue()) {
-					if (container == null || container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
+				} else if (container == null || container.getUpgradeWrapper().isEnabled() != slotWrapper.getValue().isEnabled()) {
+					return true;
+				} else if (container.getUpgradeWrapper() != slotWrapper.getValue()) {
+					if (container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
 						return true;
 					} else {
 						container.setUpgradeWrapper(slotWrapper.getValue());
