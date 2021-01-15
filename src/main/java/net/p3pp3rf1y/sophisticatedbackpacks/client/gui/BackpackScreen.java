@@ -36,6 +36,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	private static final int SLOTS_Y_OFFSET = 17;
+	static final int DISABLED_SLOT_X_POS = -1000;
 	private UpgradeSettingsControl upgradeControl;
 	private final int slots;
 	private Button sortButton;
@@ -149,7 +150,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void renderUpgradeSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
 		for (int slotId = 0; slotId < container.upgradeSlots.size(); ++slotId) {
 			Slot slot = container.upgradeSlots.get(slotId);
-			if (slot.isEnabled()) {
+			if (slot.isEnabled() && slot.xPos != DISABLED_SLOT_X_POS) {
 				moveItems(matrixStack, slot);
 			}
 
