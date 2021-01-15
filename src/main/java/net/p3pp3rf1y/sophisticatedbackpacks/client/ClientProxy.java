@@ -8,10 +8,12 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -29,6 +31,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
@@ -105,6 +108,7 @@ public class ClientProxy extends CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(this::loadComplete);
 		modBus.addListener(this::clientSetup);
+		modBus.addListener(this::stitchTextures);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
@@ -138,12 +142,19 @@ public class ClientProxy extends CommonProxy {
 		render.addLayer(new BackpackLayerRenderer(render));
 	}
 
+	public void stitchTextures(TextureStitchEvent.Pre evt) {
+		if (evt.getMap().getTextureLocation() == PlayerContainer.LOCATION_BLOCKS_TEXTURE) {
+			evt.addSprite(BackpackContainer.EMPTY_UPGRADE_SLOT_BACKGROUND);
+		}
+	}
+
 	private static void onPlayerJoinServer(ClientPlayerNetworkEvent.LoggedInEvent evt) {
 		//noinspection ConstantConditions - by the time player is joining the world is not null
 		RecipeHelper.setWorld(Minecraft.getInstance().world);
 	}
 
 	private static class BackpackKeyConflictContext implements IKeyConflictContext {
+
 		public static final BackpackKeyConflictContext INSTANCE = new BackpackKeyConflictContext();
 
 		@Override
@@ -155,6 +166,6 @@ public class ClientProxy extends CommonProxy {
 		public boolean conflicts(IKeyConflictContext other) {
 			return this == other;
 		}
-	}
 
+	}
 }
