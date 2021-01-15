@@ -4,6 +4,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.data.CustomRecipeBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.RecipeProvider;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
@@ -19,11 +20,11 @@ import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper.getModRegistryName;
 
-public class Recipes extends net.minecraft.data.RecipeProvider {
+public class SBPRecipeProvider extends RecipeProvider {
 
 	private static final String HAS_UPGRADE_BASE_CRITERION = "has_upgrade_base";
 
-	public Recipes(DataGenerator generatorIn) {
+	public SBPRecipeProvider(DataGenerator generatorIn) {
 		super(generatorIn);
 	}
 

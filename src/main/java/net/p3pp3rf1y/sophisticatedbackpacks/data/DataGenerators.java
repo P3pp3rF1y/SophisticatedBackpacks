@@ -8,7 +8,7 @@ public class DataGenerators {
 
 	public static void gatherData(GatherDataEvent evt) {
 		DataGenerator generator = evt.getGenerator();
-		generator.addProvider(new BlockLoot(generator));
-		generator.addProvider(new Recipes(generator));
+		generator.addProvider(new SBPBlockLootProvider(generator));
+		generator.addProvider(new SBPRecipeProvider(generator));
 	}
 }
