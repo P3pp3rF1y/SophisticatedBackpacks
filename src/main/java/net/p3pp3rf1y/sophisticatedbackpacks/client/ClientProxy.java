@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
@@ -134,12 +136,20 @@ public class ClientProxy extends CommonProxy {
 		RenderingRegistry.registerEntityRenderingHandler(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), renderManager -> new ItemRenderer(renderManager, Minecraft.getInstance().getItemRenderer()));
 	}
 
+	@SuppressWarnings("java:S3740") //explanation below
 	private void registerBackpackLayer() {
-		Map<String, PlayerRenderer> skinMap = Minecraft.getInstance().getRenderManager().getSkinMap();
+		EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
+		Map<String, PlayerRenderer> skinMap = renderManager.getSkinMap();
 		PlayerRenderer render = skinMap.get("default");
-		render.addLayer(new BackpackLayerRenderer(render));
+		render.addLayer(new BackpackLayerRenderer<>(render));
 		render = skinMap.get("slim");
-		render.addLayer(new BackpackLayerRenderer(render));
+		render.addLayer(new BackpackLayerRenderer<>(render));
+		renderManager.renderers.forEach((e, r) -> {
+			if (r instanceof LivingRenderer<?, ?>) {
+				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				((LivingRenderer<?, ?>) r).addLayer(new BackpackLayerRenderer((LivingRenderer<?, ?>) r));
+			}
+		});
 	}
 
 	public void stitchTextures(TextureStitchEvent.Pre evt) {
