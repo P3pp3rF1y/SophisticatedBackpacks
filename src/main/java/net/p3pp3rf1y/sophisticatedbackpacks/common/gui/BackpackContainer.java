@@ -1,18 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.ints.IntComparators;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -20,17 +22,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,18 +41,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_BLOCK_CONTAINER_TYPE;
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_ITEM_CONTAINER_TYPE;
-
 public class BackpackContainer extends Container {
+	public static final ResourceLocation EMPTY_UPGRADE_SLOT_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "item/empty_upgrade_slot");
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
 	private static final String SORT_BY_TAG = "sortBy";
+	private static final String UPGRADE_ENABLED_TAG = "upgradeEnabled";
+	private static final String UPGRADE_SLOT_TAG = "upgradeSlot";
 	private static final String ACTION_TAG = "action";
 
 	private final IBackpackWrapper backpackWrapper;
 	private final PlayerEntity player;
 	private int backpackSlotNumber = -1;
+
+	private final BackpackContext backpackContext;
 
 	private final Map<Integer, UpgradeContainerBase<?, ?>> upgradeContainers = new LinkedHashMap<>();
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
@@ -65,31 +67,21 @@ public class BackpackContainer extends Container {
 	public final NonNullList<ItemStack> upgradeItemStacks = NonNullList.create();
 	public final List<Slot> upgradeSlots = Lists.newArrayList();
 
-	public BackpackContainer(int windowId, PlayerEntity player, String handlerName, int backpackSlot) {
-		super(BACKPACK_ITEM_CONTAINER_TYPE.get(), windowId);
-		this.player = player;
+	private final IBackpackWrapper parentBackpackWrapper;
 
-		Optional<PlayerInventoryHandler> h = PlayerInventoryProvider.getPlayerInventoryHandler(handlerName);
-		if (!h.isPresent()) {
-			backpackWrapper = NoopBackpackWrapper.INSTANCE;
-			backpackBackgroundProperties = BackpackBackgroundProperties.REGULAR;
-			return;
-		}
-		PlayerInventoryHandler handler = h.get();
-		backpackWrapper = handler.getStackInSlot(player, backpackSlot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
+	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
+		super(backpackContext.getContainerType(), windowId);
+		this.player = player;
+		this.backpackContext = backpackContext;
+		parentBackpackWrapper = backpackContext.getParentBackpackWrapper(player).orElse(NoopBackpackWrapper.INSTANCE);
+		backpackWrapper = backpackContext.getBackpackWrapper(player);
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
-		initSlotsAndContainers(player, backpackSlot, handler.isVisibleInGui());
+		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
 	}
 
-	public BackpackContainer(int windowId, PlayerEntity player, BlockPos pos) {
-		super(BACKPACK_BLOCK_CONTAINER_TYPE.get(), windowId);
-		this.player = player;
-		Optional<BackpackTileEntity> backpackTile = WorldHelper.getTile(player.world, pos, BackpackTileEntity.class);
-		backpackWrapper = backpackTile.map(te -> te.getBackpackWrapper().orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
-
-		initSlotsAndContainers(player, -1, false);
+	public IBackpackWrapper getParentBackpackWrapper() {
+		return parentBackpackWrapper;
 	}
 
 	private void initSlotsAndContainers(PlayerEntity player, int backpackSlotIndex, boolean shouldLockBackpackSlot) {
@@ -217,7 +209,8 @@ public class BackpackContainer extends Container {
 	}
 
 	public void closeBackpackScreenIfSomethingMessedWithBackpackStack(ItemStack supposedToBeBackpackStack) {
-		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w != backpackWrapper).orElse(true)) {
+		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(w -> w != (isFirstLevelBackpack() ? backpackWrapper : parentBackpackWrapper)).orElse(true)) {
 			player.closeScreen();
 		}
 	}
@@ -245,11 +238,19 @@ public class BackpackContainer extends Container {
 	}
 
 	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, packetBuffer.readString(), packetBuffer.readInt());
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Item.fromBuffer(packetBuffer));
 	}
 
 	public static BackpackContainer fromBufferBlock(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BlockPos.fromLong(packetBuffer.readLong()));
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Block.fromBuffer(packetBuffer));
+	}
+
+	public static BackpackContainer fromBufferItemSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.ItemSubBackpack.fromBuffer(packetBuffer));
+	}
+
+	public static BackpackContainer fromBufferBlockSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.BlockSubBackpack.fromBuffer(packetBuffer));
 	}
 
 	@Override
@@ -374,6 +375,8 @@ public class BackpackContainer extends Container {
 			setSortBy(SortBy.fromName(data.getString(SORT_BY_TAG)));
 		} else if (data.contains(ACTION_TAG) && data.getString(ACTION_TAG).equals("sort")) {
 			sort();
+		} else if (data.contains(UPGRADE_ENABLED_TAG)) {
+			setUpgradeEnabled(data.getInt(UPGRADE_SLOT_TAG), data.getBoolean(UPGRADE_ENABLED_TAG));
 		}
 	}
 
@@ -427,9 +430,48 @@ public class BackpackContainer extends Container {
 		backpackWrapper.sort();
 	}
 
+	public boolean isFirstLevelBackpack() {
+		return parentBackpackWrapper == NoopBackpackWrapper.INSTANCE;
+	}
+
+	public BackpackContext getBackpackContext() {
+		return backpackContext;
+	}
+
+	public boolean canDisableUpgrade(int upgradeSlot) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return false;
+		}
+		return slotWrappers.get(upgradeSlot).canBeDisabled();
+	}
+
+	public boolean getUpgradeEnabled(int upgradeSlot) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return false;
+		}
+		return slotWrappers.get(upgradeSlot).isEnabled();
+	}
+
+	public void setUpgradeEnabled(int upgradeSlot, boolean enabled) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return;
+		}
+		if (player.world.isRemote) {
+			CompoundNBT data = new CompoundNBT();
+			data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
+			data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
+			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		}
+		slotWrappers.get(upgradeSlot).setEnabled(enabled);
+	}
+
 	public class BackpackUpgradeSlot extends SlotItemHandler {
+
 		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
-			super(upgradeHandler, slotIndex, -18, yPosition);
+			super(upgradeHandler, slotIndex, -15, yPosition);
 		}
 
 		@Override
@@ -437,7 +479,18 @@ public class BackpackContainer extends Container {
 			super.onSlotChanged();
 			if (updateWrappersAndCheckForReloadNeeded()) {
 				reloadUpgradeControl();
+				if (!isFirstLevelBackpack()) {
+					parentBackpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
+				}
 			}
+		}
+
+		@Override
+		public boolean isItemValid(@Nonnull ItemStack stack) {
+			if (stack.isEmpty()) {
+				return false;
+			}
+			return stack.getItem() instanceof IBackpackUpgradeItem && ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, isFirstLevelBackpack());
 		}
 
 		@Override
@@ -453,8 +506,10 @@ public class BackpackContainer extends Container {
 					if (container != null) {
 						return true;
 					}
-				} else if (container == null || container.getUpgradeWrapper() != slotWrapper.getValue()) {
-					if (container == null || container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
+				} else if (container == null || container.getUpgradeWrapper().isEnabled() != slotWrapper.getValue().isEnabled()) {
+					return true;
+				} else if (container.getUpgradeWrapper() != slotWrapper.getValue()) {
+					if (container.getUpgradeWrapper().getUpgradeStack().getItem() != slotWrapper.getValue().getUpgradeStack().getItem()) {
 						return true;
 					} else {
 						container.setUpgradeWrapper(slotWrapper.getValue());
@@ -492,6 +547,12 @@ public class BackpackContainer extends Container {
 			if (upgradeChangeListener != null) {
 				upgradeChangeListener.accept(BackpackContainer.this);
 			}
+		}
+
+		@Nullable
+		@Override
+		public Pair<ResourceLocation, ResourceLocation> getBackground() {
+			return new Pair<>(PlayerContainer.LOCATION_BLOCKS_TEXTURE, EMPTY_UPGRADE_SLOT_BACKGROUND);
 		}
 	}
 
@@ -912,4 +973,5 @@ public class BackpackContainer extends Container {
 
 		return flag;
 	}
+
 }

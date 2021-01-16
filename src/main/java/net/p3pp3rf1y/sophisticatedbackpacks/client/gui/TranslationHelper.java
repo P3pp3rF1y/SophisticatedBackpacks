@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -19,6 +21,7 @@ public class TranslationHelper {
 	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
 	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + "buttons.";
+	private static final String KEYBIND_PREFIX = "keybind.sophisticatedbackpacks.";
 
 	public static String translUpgrade(String upgradeName) {
 		return GUI_UPGRADE_PREFIX + upgradeName;
@@ -26,6 +29,10 @@ public class TranslationHelper {
 
 	public static String translUpgradeTooltip(String upgradeName) {
 		return translUpgrade(upgradeName) + ".tooltip";
+	}
+
+	public static ITextComponent translColoredButton(String buttonName, TextFormatting color) {
+		return new TranslationTextComponent(translButton(buttonName)).mergeStyle(color);
 	}
 
 	public static String translButton(String buttonName) {
@@ -57,5 +64,9 @@ public class TranslationHelper {
 		}
 
 		return ret;
+	}
+
+	public static String translKeybind(String keybindName) {
+		return KEYBIND_PREFIX + keybindName;
 	}
 }

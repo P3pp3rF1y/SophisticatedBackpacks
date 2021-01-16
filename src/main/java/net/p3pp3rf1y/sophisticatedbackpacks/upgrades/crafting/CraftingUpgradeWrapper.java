@@ -28,4 +28,9 @@ public class CraftingUpgradeWrapper extends UpgradeWrapperBase<CraftingUpgradeWr
 	public ItemStackHandler getInventory() {
 		return inventory;
 	}
+
+	@Override
+	public boolean canBeDisabled() {
+		return false;
+	}
 }

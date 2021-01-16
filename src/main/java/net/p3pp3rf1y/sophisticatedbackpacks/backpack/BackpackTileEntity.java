@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -15,7 +17,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
@@ -28,12 +29,16 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackWrapper.linkToTileEntity(this);
+		backpackWrapper.setBackpackSaveHandler(stack -> markDirty());
 	}
 
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
+		setBackpackFromNbt(nbt);
+	}
+
+	private void setBackpackFromNbt(CompoundNBT nbt) {
 		setBackpack(ItemStack.read(nbt.getCompound("backpackData")));
 	}
 
@@ -55,8 +60,19 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		return ret;
 	}
 
-	public Optional<IBackpackWrapper> getBackpackWrapper() {
-		return Optional.ofNullable(backpackWrapper);
+	@Nullable
+	@Override
+	public SUpdateTileEntityPacket getUpdatePacket() {
+		return new SUpdateTileEntityPacket(pos, 1, getUpdateTag());
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+		setBackpackFromNbt(pkt.getNbtCompound());
+	}
+
+	public IBackpackWrapper getBackpackWrapper() {
+		return backpackWrapper;
 	}
 
 	@Override
@@ -71,7 +87,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().map(IBackpackWrapper::getInventoryForInputOutput).orElse(NoopBackpackWrapper.INSTANCE.getInventoryForInputOutput())).cast();
+			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		}
 		return super.getCapability(cap, side);
 	}

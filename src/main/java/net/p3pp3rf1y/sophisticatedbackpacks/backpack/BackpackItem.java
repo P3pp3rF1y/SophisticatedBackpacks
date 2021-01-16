@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -38,6 +39,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
@@ -134,34 +136,40 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 
+		Direction direction = player.getHorizontalFacing().getOpposite();
+
 		BlockItemUseContext blockItemUseContext = new BlockItemUseContext(context);
+		ActionResultType result = tryPlace(player, direction, blockItemUseContext);
+		return result == ActionResultType.PASS ? super.onItemUse(context) : result;
+	}
+
+	public ActionResultType tryPlace(@Nullable PlayerEntity player, Direction direction, BlockItemUseContext blockItemUseContext) {
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
 		}
 		World world = blockItemUseContext.getWorld();
 		BlockPos pos = blockItemUseContext.getPos();
 
-		FluidState fluidstate = context.getWorld().getFluidState(pos);
-		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite())
+		FluidState fluidstate = blockItemUseContext.getWorld().getFluidState(pos);
+		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, direction)
 				.with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
 		if (!canPlace(blockItemUseContext, placementState)) {
 			return ActionResultType.FAIL;
 		}
 
-		if (world.setBlockState(pos, placementState, 27)) {
+		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
-			placementState.updateNeighbours(world, pos, 3);
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			if (!player.abilities.isCreativeMode) {
+			if (player == null || !player.abilities.isCreativeMode) {
 				backpack.shrink(1);
 			}
 
 			return ActionResultType.SUCCESS;
 		}
-		return super.onItemUse(context);
+		return ActionResultType.PASS;
 	}
 
 	private boolean tryInventoryInteraction(ItemUseContext context) {
@@ -198,7 +206,7 @@ public class BackpackItem extends ItemBase {
 		if (!world.isRemote && player instanceof ServerPlayerEntity) {
 			String handlerName = hand == Hand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == Hand.MAIN_HAND ? player.inventory.currentItem : 0;
-			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, handlerName, slot), stack.getDisplayName()),
+			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Item(handlerName, slot)), stack.getDisplayName()),
 					buf -> {
 						buf.writeString(handlerName);
 						buf.writeInt(slot);
@@ -261,5 +269,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
 		return slotChanged;
+	}
+
+	@Override
+	public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
+		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
 	}
 }

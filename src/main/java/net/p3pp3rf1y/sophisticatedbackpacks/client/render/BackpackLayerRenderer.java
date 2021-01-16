@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
@@ -22,13 +22,14 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
+public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<T>> extends LayerRenderer<T, M> {
 	private static final ResourceLocation BACKPACK_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
 	private static final BackpackModel MODEL = new BackpackModel();
 	private static final Map<Item, ModelRenderer> BACKPACK_CLIPS = ImmutableMap.of(
@@ -38,19 +39,27 @@ public class BackpackLayerRenderer extends LayerRenderer<AbstractClientPlayerEnt
 			ModItems.DIAMOND_BACKPACK.get(), MODEL.diamondClips
 	);
 
-	public BackpackLayerRenderer(IEntityRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> entityRendererIn) {
+	public BackpackLayerRenderer(IEntityRenderer<T, M> entityRendererIn) {
 		super(entityRendererIn);
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-		PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
-			matrixStack.push();
-			boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()).isEmpty();
-			ItemStack backpack = backpackRenderInfo.getBackpack();
-			renderBackpack(player, matrixStack, buffer, packedLight, backpack, wearsArmor);
-			matrixStack.pop();
-		});
+	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+		if (entity instanceof AbstractClientPlayerEntity) {
+			AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) entity;
+			PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
+				matrixStack.push();
+				boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()).isEmpty();
+				ItemStack backpack = backpackRenderInfo.getBackpack();
+				renderBackpack(player, matrixStack, buffer, packedLight, backpack, wearsArmor);
+				matrixStack.pop();
+			});
+		} else {
+			ItemStack chestStack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+			if (chestStack.getItem() instanceof BackpackItem) {
+				renderBackpack(entity, matrixStack, buffer, packedLight, chestStack, false);
+			}
+		}
 	}
 
 	public static void renderBackpack(LivingEntity livingEntity, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, ItemStack backpack, boolean wearsArmor) {

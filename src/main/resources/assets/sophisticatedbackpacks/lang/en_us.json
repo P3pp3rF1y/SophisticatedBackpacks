@@ -48,7 +48,14 @@
     "item.sophisticatedbackpacks.crafting_upgrade": "Crafting Upgrade",
     "item.sophisticatedbackpacks.crafting_upgrade.tooltip": "Crafting table in an upgrade tab",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
-    "keybind.sophisticatedbackpacks.backpack.open": "Open Backpack",
+    "keybind.sophisticatedbackpacks.open_backpack": "Open Backpack",
+    "keybind.sophisticatedbackpacks.toggle_upgrade_1": "Switch Upgrade in the 1st Slot On/Off",
+    "keybind.sophisticatedbackpacks.toggle_upgrade_2": "Switch Upgrade in the 2nd Slot On/Off",
+    "keybind.sophisticatedbackpacks.toggle_upgrade_3": "Switch Upgrade in the 3rd Slot On/Off",
+    "keybind.sophisticatedbackpacks.toggle_upgrade_4": "Switch Upgrade in the 4th Slot On/Off",
+    "keybind.sophisticatedbackpacks.toggle_upgrade_5": "Switch Upgrade in the 5th Slot On/Off",
+    "gui.sophisticatedbackpacks.status.upgrade_switched_off": "%s Switched Off",
+    "gui.sophisticatedbackpacks.status.upgrade_switched_on": "%s Switched On",
     "gui.sophisticatedbackpacks.upgrades.pickup": "Pickup",
     "gui.sophisticatedbackpacks.upgrades.advanced_pickup": "Adv. Pickup",
     "gui.sophisticatedbackpacks.upgrades.filter": "Filter",
@@ -106,5 +113,7 @@
     "gui.sophisticatedbackpacks.buttons.sort_by_name": "By Name",
     "gui.sophisticatedbackpacks.buttons.sort_by_count": "By Count",
     "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",
-    "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack"
+    "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack",
+    "gui.sophisticatedbackpacks.buttons.upgrade_switch_enabled": "ON",
+    "gui.sophisticatedbackpacks.buttons.upgrade_switch_disabled": "OFF"
 }

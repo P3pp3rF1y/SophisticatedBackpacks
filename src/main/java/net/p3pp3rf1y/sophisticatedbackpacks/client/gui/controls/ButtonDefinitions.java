@@ -1,11 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.PrimaryMatch;
@@ -13,7 +15,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.PrimaryMatch;
 import java.util.Map;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.*;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translButton;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeButton;
 
 public class ButtonDefinitions {
@@ -61,12 +62,20 @@ public class ButtonDefinitions {
 
 	public static final ButtonDefinition.Toggle<SortBy> SORT_BY = createSmallToggleButtonDefinition(
 			ImmutableMap.of(
-					SortBy.NAME, GuiHelper.getButtonStateData(new UV(77, 18), translButton("sort_by_name"), Dimension.SQUARE_12),
-					SortBy.COUNT, GuiHelper.getButtonStateData(new UV(89, 18), translButton("sort_by_count"), Dimension.SQUARE_12),
-					SortBy.TAGS, GuiHelper.getButtonStateData(new UV(65, 18), translButton("sort_by_tags"), Dimension.SQUARE_12)
+					SortBy.NAME, GuiHelper.getButtonStateData(new UV(77, 18), TranslationHelper.translButton("sort_by_name"), Dimension.SQUARE_12),
+					SortBy.COUNT, GuiHelper.getButtonStateData(new UV(89, 18), TranslationHelper.translButton("sort_by_count"), Dimension.SQUARE_12),
+					SortBy.TAGS, GuiHelper.getButtonStateData(new UV(65, 18), TranslationHelper.translButton("sort_by_tags"), Dimension.SQUARE_12)
 			));
 
 	private static final TextureBlitData SORT_BUTTON_FOREGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(53, 18), Dimension.SQUARE_12);
 	public static final ButtonDefinition SORT = new ButtonDefinition(Dimension.SQUARE_12, SMALL_BUTTON_BACKGROUND, SMALL_BUTTON_HOVERED_BACKGROUND, SORT_BUTTON_FOREGROUND,
-			new TranslationTextComponent(translButton("sort_action")));
+			new TranslationTextComponent(TranslationHelper.translButton("sort_action")));
+
+	private static final TextureBlitData UPGRADE_SWITCH_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(65, 0), Dimension.RECTANGLE_6_12);
+	private static final TextureBlitData UPGRADE_SWITCH_HOVERED_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(71, 0), Dimension.RECTANGLE_6_12);
+	public static final ButtonDefinition.Toggle<Boolean> UPGRADE_SWITCH = new ButtonDefinition.Toggle<>(Dimension.RECTANGLE_6_12, UPGRADE_SWITCH_BACKGROUND, ImmutableMap.of(
+			true, GuiHelper.getButtonStateData(new UV(81, 0), Dimension.RECTANGLE_4_10, new Position(1, 1), TranslationHelper.translColoredButton("upgrade_switch_enabled", TextFormatting.GREEN)),
+			false, GuiHelper.getButtonStateData(new UV(77, 0), Dimension.RECTANGLE_4_10, new Position(1, 1), TranslationHelper.translColoredButton("upgrade_switch_disabled", TextFormatting.RED))
+	), UPGRADE_SWITCH_HOVERED_BACKGROUND);
+
 }

@@ -18,8 +18,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
@@ -32,10 +36,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	private static final int SLOTS_Y_OFFSET = 17;
+	static final int DISABLED_SLOT_X_POS = -1000;
 	private UpgradeSettingsControl upgradeControl;
 	private final int slots;
 	private Button sortButton;
 	private ToggleButton<SortBy> sortByButton;
+	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -44,17 +50,35 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		playerInventoryTitleY = ySize - 94;
 		playerInventoryTitleX = 8 + getContainer().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
 		slots = getContainer().getNumberOfUpgradeSlots();
+		passEvents = true;
 	}
 
 	@Override
 	protected void init() {
 		super.init();
 		initUpgradeControl();
+		addUpgradeSwitches();
 		getContainer().setUpgradeChangeListener(c -> {
 			children.remove(upgradeControl);
 			initUpgradeControl();
+			addUpgradeSwitches();
 		});
 		addSortButtons();
+	}
+
+	private void addUpgradeSwitches() {
+		upgradeSwitches.clear();
+		int switchTop = guiTop + getUpgradeTop() + 10;
+		for (int slot = 0; slot < slots; slot++) {
+			if (container.canDisableUpgrade(slot)) {
+				int finalSlot = slot;
+				ToggleButton<Boolean> upgradeSwitch = new ToggleButton<>(new Position(guiLeft - 22, switchTop), ButtonDefinitions.UPGRADE_SWITCH,
+						button -> getContainer().setUpgradeEnabled(finalSlot, !getContainer().getUpgradeEnabled(finalSlot)), () -> getContainer().getUpgradeEnabled(finalSlot));
+				addListener(upgradeSwitch);
+				upgradeSwitches.add(upgradeSwitch);
+			}
+			switchTop += 22;
+		}
 	}
 
 	private void addSortButtons() {
@@ -72,6 +96,16 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			}
 		}, () -> getContainer().getSortBy());
 		addListener(sortByButton);
+
+	}
+
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (keyCode == 256 && !getContainer().isFirstLevelBackpack()) {
+			PacketHandler.sendToServer(new BackpackOpenMessage());
+			return true;
+		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	private Position getSortButtonsPosition() {
@@ -106,6 +140,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
+		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
 
@@ -118,7 +153,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void renderUpgradeSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
 		for (int slotId = 0; slotId < container.upgradeSlots.size(); ++slotId) {
 			Slot slot = container.upgradeSlots.get(slotId);
-			if (slot.isEnabled()) {
+			if (slot.isEnabled() && slot.xPos != DISABLED_SLOT_X_POS) {
 				moveItems(matrixStack, slot);
 			}
 
@@ -168,13 +203,11 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void drawUpgradeBackground(MatrixStack matrixStack) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		minecraft.getTextureManager().bindTexture(GUI_CONTROLS);
-		int i = (width - xSize) / 2;
-		int j = (height - ySize) / 2;
 
 		int firstHalfHeight = getUpgradeHeightWithoutBottom();
 
-		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
-		blit(matrixStack, i - UPGRADE_INVENTORY_OFFSET, j + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
+		blit(matrixStack, guiLeft - UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop(), 0, 0, 29, firstHalfHeight, 256, 256);
+		blit(matrixStack, guiLeft - UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop() + firstHalfHeight, 0, (float) TOTAL_UPGRADE_GUI_HEIGHT - UPGRADE_BOTTOM_HEIGHT, 29, UPGRADE_BOTTOM_HEIGHT, 256, 256);
 	}
 
 	public int getUpgradeTop() {
@@ -239,6 +272,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	public Rectangle2d getUpgradeSlotsRectangle() {
-		return new Rectangle2d(getGuiLeft() - BackpackScreen.UPGRADE_INVENTORY_OFFSET, getGuiTop() + getUpgradeTop(), 32, getUpgradeHeight());
+		return new Rectangle2d(guiLeft - BackpackScreen.UPGRADE_INVENTORY_OFFSET, guiTop + getUpgradeTop(), 32, getUpgradeHeight());
 	}
 }

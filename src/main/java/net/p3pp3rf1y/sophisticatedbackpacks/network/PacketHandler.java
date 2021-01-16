@@ -22,8 +22,9 @@ public class PacketHandler {
 		networkWrapper = NetworkRegistry.newSimpleChannel(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "channel"),
 				() -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
 
-		registerMessage(BackpackOpenMessage.class, (m, b) -> {}, packetBuffer -> BackpackOpenMessage.getInstance(), (msg, sup) -> BackpackOpenMessage.onMessage(sup));
+		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::encode, BackpackOpenMessage::decode, BackpackOpenMessage::onMessage);
 		registerMessage(ServerBackpackDataMessage.class, ServerBackpackDataMessage::encode, ServerBackpackDataMessage::decode, ServerBackpackDataMessage::onMessage);
+		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

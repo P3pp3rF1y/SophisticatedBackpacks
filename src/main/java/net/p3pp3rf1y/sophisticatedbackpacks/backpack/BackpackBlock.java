@@ -34,6 +34,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -84,7 +85,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 	}
 
 	private boolean hasEverlastingUpgrade(IBlockReader world, BlockPos pos) {
-		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false)).orElse(false);
+		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	@Override
@@ -126,20 +127,18 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 			return ActionResultType.SUCCESS;
 		}
 
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, pos),
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Block(pos)),
 				getBackpackDisplayName(world, pos)), buf -> buf.writeLong(pos.toLong()));
 		return ActionResultType.SUCCESS;
 	}
 
 	private ITextComponent getBackpackDisplayName(World world, BlockPos pos) {
 		ITextComponent defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getDisplayName();
-		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(w -> w.getBackpack().getDisplayName())
-				.orElse(defaultDisplayName)).orElse(defaultDisplayName);
+		return WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getDisplayName()).orElse(defaultDisplayName);
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand) {
-		player.setHeldItem(hand, WorldHelper.getTile(world, pos, BackpackTileEntity.class)
-				.map(te -> te.getBackpackWrapper().map(IBackpackWrapper::getBackpack).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY));
+		player.setHeldItem(hand, WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY));
 		world.removeBlock(pos, false);
 
 		SoundType soundType = state.getSoundType();
@@ -185,7 +184,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		super.onEntityCollision(state, world, pos, entity);
 		if (entity instanceof ItemEntity) {
 			ItemEntity itemEntity = (ItemEntity) entity;
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).flatMap(BackpackTileEntity::getBackpackWrapper).ifPresent(w -> tryToPickup(world, itemEntity, w));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> tryToPickup(world, itemEntity, te.getBackpackWrapper()));
 		}
 	}
 
@@ -199,7 +198,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	public ItemStack getItem(IBlockReader worldIn, BlockPos pos, BlockState state) {
-		return WorldHelper.getTile(worldIn, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().map(IBackpackWrapper::getBackpack).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY);
+		return WorldHelper.getTile(worldIn, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
 	}
 
 	private void tryToPickup(World world, ItemEntity itemEntity, IBackpackWrapper w) {

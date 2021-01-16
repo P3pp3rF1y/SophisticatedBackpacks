@@ -10,7 +10,6 @@ import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.loot.functions.ILootFunction;
 import net.minecraft.tileentity.TileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 
@@ -23,7 +22,7 @@ public class CopyBackpackDataFunction extends LootFunction {
 	protected ItemStack doApply(ItemStack stack, LootContext context) {
 		TileEntity te = context.get(LootParameters.BLOCK_ENTITY);
 		if (te instanceof BackpackTileEntity) {
-			return ((BackpackTileEntity) te).getBackpackWrapper().map(IBackpackWrapper::getBackpack).orElse(stack);
+			return ((BackpackTileEntity) te).getBackpackWrapper().getBackpack();
 		}
 
 		return stack;
