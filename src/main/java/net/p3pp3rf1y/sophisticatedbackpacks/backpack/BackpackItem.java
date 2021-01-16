@@ -136,34 +136,40 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 
+		Direction direction = player.getHorizontalFacing().getOpposite();
+
 		BlockItemUseContext blockItemUseContext = new BlockItemUseContext(context);
+		ActionResultType result = tryPlace(player, direction, blockItemUseContext);
+		return result == ActionResultType.PASS ? super.onItemUse(context) : result;
+	}
+
+	public ActionResultType tryPlace(@Nullable PlayerEntity player, Direction direction, BlockItemUseContext blockItemUseContext) {
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
 		}
 		World world = blockItemUseContext.getWorld();
 		BlockPos pos = blockItemUseContext.getPos();
 
-		FluidState fluidstate = context.getWorld().getFluidState(pos);
-		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, player.getHorizontalFacing().getOpposite())
+		FluidState fluidstate = blockItemUseContext.getWorld().getFluidState(pos);
+		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, direction)
 				.with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
 		if (!canPlace(blockItemUseContext, placementState)) {
 			return ActionResultType.FAIL;
 		}
 
-		if (world.setBlockState(pos, placementState, 27)) {
+		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
-			placementState.updateNeighbours(world, pos, 3);
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			if (!player.abilities.isCreativeMode) {
+			if (player == null || !player.abilities.isCreativeMode) {
 				backpack.shrink(1);
 			}
 
 			return ActionResultType.SUCCESS;
 		}
-		return super.onItemUse(context);
+		return ActionResultType.PASS;
 	}
 
 	private boolean tryInventoryInteraction(ItemUseContext context) {

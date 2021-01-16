@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -33,6 +35,10 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
+		setBackpackFromNbt(nbt);
+	}
+
+	private void setBackpackFromNbt(CompoundNBT nbt) {
 		setBackpack(ItemStack.read(nbt.getCompound("backpackData")));
 	}
 
@@ -52,6 +58,17 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		CompoundNBT ret = super.getUpdateTag();
 		writeBackpack(ret);
 		return ret;
+	}
+
+	@Nullable
+	@Override
+	public SUpdateTileEntityPacket getUpdatePacket() {
+		return new SUpdateTileEntityPacket(pos, 1, getUpdateTag());
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+		setBackpackFromNbt(pkt.getNbtCompound());
 	}
 
 	public IBackpackWrapper getBackpackWrapper() {

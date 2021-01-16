@@ -1,11 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.dispenser.OptionalDispenseBehavior;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.DirectionalPlaceContext;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeContainerType;
@@ -234,5 +241,29 @@ public class ModItems {
 		evt.getRegistry().register(UpgradeNextTierRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "upgrade_next_tier"));
 		evt.getRegistry().register(BackpackSingleDyeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_single_dye"));
 		evt.getRegistry().register(BackpackTwoDyesRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_two_dyes"));
+	}
+
+	public static void registerDispenseBehavior() {
+		DispenserBlock.registerDispenseBehavior(BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerDispenseBehavior(IRON_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerDispenseBehavior(GOLD_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerDispenseBehavior(DIAMOND_BACKPACK.get(), new BackpackDispenseBehavior());
+	}
+
+	private static class BackpackDispenseBehavior extends OptionalDispenseBehavior {
+		@Override
+		protected ItemStack dispenseStack(IBlockSource source, ItemStack stack) {
+			setSuccessful(false);
+			Item item = stack.getItem();
+			if (item instanceof BackpackItem) {
+				Direction dispenserDirection = source.getBlockState().get(DispenserBlock.FACING);
+				BlockPos blockpos = source.getBlockPos().offset(dispenserDirection);
+				Direction against = source.getWorld().isAirBlock(blockpos.down()) ? dispenserDirection.getOpposite() : Direction.UP;
+
+				setSuccessful(((BackpackItem) item).tryPlace(null, dispenserDirection.getOpposite(), new DirectionalPlaceContext(source.getWorld(), blockpos, dispenserDirection, stack, against)).isSuccessOrConsume());
+			}
+
+			return stack;
+		}
 	}
 }
