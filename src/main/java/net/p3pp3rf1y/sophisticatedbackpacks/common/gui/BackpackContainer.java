@@ -438,6 +438,14 @@ public class BackpackContainer extends Container {
 		return backpackContext;
 	}
 
+	public boolean canDisableUpgrade(int upgradeSlot) {
+		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
+		if (!slotWrappers.containsKey(upgradeSlot)) {
+			return false;
+		}
+		return slotWrappers.get(upgradeSlot).canBeDisabled();
+	}
+
 	public boolean getUpgradeEnabled(int upgradeSlot) {
 		Map<Integer, IUpgradeWrapper> slotWrappers = backpackWrapper.getUpgradeHandler().getSlotWrappers();
 		if (!slotWrappers.containsKey(upgradeSlot)) {

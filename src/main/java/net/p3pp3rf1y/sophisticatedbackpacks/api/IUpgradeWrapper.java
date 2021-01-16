@@ -7,6 +7,10 @@ public interface IUpgradeWrapper {
 
 	void setEnabled(boolean enabled);
 
+	default boolean canBeDisabled() {
+		return true;
+	}
+
 	ItemStack getUpgradeStack();
 
 	default boolean hideSettingsTab() {
