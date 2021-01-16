@@ -22,8 +22,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
@@ -41,7 +41,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private final int slots;
 	private Button sortButton;
 	private ToggleButton<SortBy> sortByButton;
-	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
+	private final Map<Integer, ToggleButton<Boolean>> upgradeSwitches = new HashMap<>();
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -67,13 +67,13 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	private void addUpgradeSwitches() {
 		upgradeSwitches.clear();
-		int swithTop = guiTop + getUpgradeTop() + 11;
+		int swithTop = guiTop + getUpgradeTop() + 10;
 		for (int slot = 0; slot < slots; slot++) {
 			int finalSlot = slot;
-			ToggleButton<Boolean> upgradeSwitch = new ToggleButton<>(new Position(guiLeft - 20, swithTop), ButtonDefinitions.UPGRADE_SWITCH,
+			ToggleButton<Boolean> upgradeSwitch = new ToggleButton<>(new Position(guiLeft - 22, swithTop), ButtonDefinitions.UPGRADE_SWITCH,
 					button -> getContainer().setUpgradeEnabled(finalSlot, !getContainer().getUpgradeEnabled(finalSlot)), () -> getContainer().getUpgradeEnabled(finalSlot));
 			addListener(upgradeSwitch);
-			upgradeSwitches.add(upgradeSwitch);
+			upgradeSwitches.put(slot, upgradeSwitch);
 			swithTop += 22;
 		}
 	}
@@ -137,8 +137,16 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
-		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
+		renderUpgradeSwitches(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
+	}
+
+	private void renderUpgradeSwitches(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		for (int slot = 0; slot < container.getNumberOfUpgradeSlots(); slot++) {
+			if (!container.upgradeSlots.get(slot).getStack().isEmpty()) {
+				upgradeSwitches.get(slot).render(matrixStack, mouseX, mouseY, partialTicks);
+			}
+		}
 	}
 
 	@Override

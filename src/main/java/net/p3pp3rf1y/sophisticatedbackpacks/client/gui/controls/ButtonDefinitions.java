@@ -71,11 +71,11 @@ public class ButtonDefinitions {
 	public static final ButtonDefinition SORT = new ButtonDefinition(Dimension.SQUARE_12, SMALL_BUTTON_BACKGROUND, SMALL_BUTTON_HOVERED_BACKGROUND, SORT_BUTTON_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translButton("sort_action")));
 
-	private static final TextureBlitData UPGRADE_SWITCH_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(65, 0), Dimension.RECTANGLE_4_10);
-	private static final TextureBlitData UPGRADE_SWITCH_HOVERED_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(69, 0), Dimension.RECTANGLE_4_10);
-	public static final ButtonDefinition.Toggle<Boolean> UPGRADE_SWITCH = new ButtonDefinition.Toggle<>(Dimension.RECTANGLE_4_10, UPGRADE_SWITCH_BACKGROUND, ImmutableMap.of(
-			true, GuiHelper.getButtonStateData(new UV(77, 0), Dimension.RECTANGLE_4_10, TranslationHelper.translColoredButton("upgrade_switch_enabled", TextFormatting.GREEN)),
-			false, GuiHelper.getButtonStateData(new UV(73, 0), Dimension.RECTANGLE_4_10, TranslationHelper.translColoredButton("upgrade_switch_disabled", TextFormatting.RED))
+	private static final TextureBlitData UPGRADE_SWITCH_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(65, 0), Dimension.RECTANGLE_6_12);
+	private static final TextureBlitData UPGRADE_SWITCH_HOVERED_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(71, 0), Dimension.RECTANGLE_6_12);
+	public static final ButtonDefinition.Toggle<Boolean> UPGRADE_SWITCH = new ButtonDefinition.Toggle<>(Dimension.RECTANGLE_6_12, UPGRADE_SWITCH_BACKGROUND, ImmutableMap.of(
+			true, GuiHelper.getButtonStateData(new UV(81, 0), Dimension.RECTANGLE_4_10, new Position(1, 1), TranslationHelper.translColoredButton("upgrade_switch_enabled", TextFormatting.GREEN)),
+			false, GuiHelper.getButtonStateData(new UV(77, 0), Dimension.RECTANGLE_4_10, new Position(1, 1), TranslationHelper.translColoredButton("upgrade_switch_disabled", TextFormatting.RED))
 	), UPGRADE_SWITCH_HOVERED_BACKGROUND);
 
 }

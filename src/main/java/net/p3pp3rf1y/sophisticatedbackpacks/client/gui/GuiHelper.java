@@ -195,8 +195,8 @@ public class GuiHelper {
 		builder.pos(matrix, (float) x2, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
 	}
 
-	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, ITextComponent... tooltip) {
-		return getButtonStateData(uv, dimension, new Position(0, 0), Arrays.asList(tooltip));
+	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, Position offset, ITextComponent... tooltip) {
+		return getButtonStateData(uv, dimension, offset, Arrays.asList(tooltip));
 	}
 
 	public static ToggleButton.StateData getButtonStateData(UV uv, String tooltip, Dimension dimension) {
