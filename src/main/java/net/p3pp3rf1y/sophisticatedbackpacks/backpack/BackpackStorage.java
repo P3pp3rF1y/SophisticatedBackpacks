@@ -88,13 +88,17 @@ public class BackpackStorage extends WorldSavedData {
 				backpackContents.remove(existingBackpackUuid);
 			}
 			originalUuidBackpacks.put(originalUuid, backpackUuid);
+			markDirty();
 		}
 
 		return getOrCreateBackpackContents(backpackUuid);
 	}
 
 	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid) {
-		return backpackContents.computeIfAbsent(backpackUuid, uuid -> new CompoundNBT());
+		return backpackContents.computeIfAbsent(backpackUuid, uuid -> {
+			markDirty();
+			return new CompoundNBT();
+		});
 	}
 
 	public void removeOriginalBackpack(@Nullable UUID originalUuid) {
