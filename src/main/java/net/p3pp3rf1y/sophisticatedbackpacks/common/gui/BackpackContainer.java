@@ -16,13 +16,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
@@ -140,7 +140,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private int addBackpackInventorySlots() {
-		BackpackInventoryHandler inventoryHandler = backpackWrapper.getInventoryHandler();
+		IItemHandlerModifiable inventoryHandler = backpackWrapper.getInventoryHandler();
 		int slotIndex = 0;
 		int yPosition = 18;
 
@@ -209,10 +209,14 @@ public class BackpackContainer extends Container {
 	}
 
 	public void closeBackpackScreenIfSomethingMessedWithBackpackStack(ItemStack supposedToBeBackpackStack) {
-		if (!player.world.isRemote && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		if (!isClientSide() && supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(w -> w != (isFirstLevelBackpack() ? backpackWrapper : parentBackpackWrapper)).orElse(true)) {
 			player.closeScreen();
 		}
+	}
+
+	private boolean isClientSide() {
+		return player.world.isRemote;
 	}
 
 	private void addSlotAndUpdateBackpackSlotNumber(int backpackSlotIndex, boolean lockBackpackSlot, int slotIndex, Slot slot) {
@@ -224,8 +228,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public int getNumberOfRows() {
-		BackpackInventoryHandler invHandler = backpackWrapper.getInventoryHandler();
-		return (int) Math.ceil((double) invHandler.getSlots() / getSlotsOnLine());
+		return (int) Math.ceil((double) getNumberOfSlots() / getSlotsOnLine());
 	}
 
 	private int getSlotsOnLine() {
@@ -389,7 +392,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public void setOpenTabId(int tabId) {
-		if (player.world.isRemote) {
+		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putInt(OPEN_TAB_ID_TAG, tabId);
 			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
@@ -411,7 +414,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public void setSortBy(SortBy sortBy) {
-		if (player.world.isRemote) {
+		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putString(SORT_BY_TAG, sortBy.getString());
 			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
@@ -420,7 +423,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public void sort() {
-		if (player.world.isRemote) {
+		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putString(ACTION_TAG, "sort");
 			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
@@ -459,7 +462,7 @@ public class BackpackContainer extends Container {
 		if (!slotWrappers.containsKey(upgradeSlot)) {
 			return;
 		}
-		if (player.world.isRemote) {
+		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
 			data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
@@ -559,7 +562,7 @@ public class BackpackContainer extends Container {
 	private class BackpackInventorySlot extends SlotItemHandler {
 		private final int slotIndex;
 
-		public BackpackInventorySlot(BackpackInventoryHandler inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
+		public BackpackInventorySlot(IItemHandlerModifiable inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
 			super(inventoryHandler, slotIndex, 8 + lineIndex * 18, yPosition);
 			this.slotIndex = slotIndex;
 		}

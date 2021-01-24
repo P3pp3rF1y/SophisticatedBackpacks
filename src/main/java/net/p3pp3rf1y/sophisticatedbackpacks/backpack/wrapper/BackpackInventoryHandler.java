@@ -1,29 +1,31 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
-	private static final String INVENTORY_TAG = "inventory";
-	private final ItemStack backpack;
-	private final Consumer<ItemStack> backpackSaveHandler;
+	public static final String INVENTORY_TAG = "inventory";
+	private final IBackpackWrapper backpackWrapper;
+	private final CompoundNBT contentsNbt;
+	private final Runnable backpackSaveHandler;
 	private final List<IntConsumer> onContentsChangedListeners = new ArrayList<>();
 
-	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
-		super(getNumberOfSlots(backpack));
-		this.backpack = backpack;
+	public BackpackInventoryHandler(int numberOfInventorySlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler) {
+		super(numberOfInventorySlots);
+		this.backpackWrapper = backpackWrapper;
+		this.contentsNbt = contentsNbt;
 		this.backpackSaveHandler = backpackSaveHandler;
-		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
+		deserializeNBT(contentsNbt.getCompound(INVENTORY_TAG));
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	private boolean hasInceptionUpgrade() {
-		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
+		return backpackWrapper.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
@@ -48,12 +50,8 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	public void saveInventory() {
-		backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
-		backpackSaveHandler.accept(backpack);
-	}
-
-	private static int getNumberOfSlots(ItemStack backpack) {
-		return ((BackpackItem) backpack.getItem()).getNumberOfSlots();
+		contentsNbt.put(INVENTORY_TAG, serializeNBT());
+		backpackSaveHandler.run();
 	}
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {

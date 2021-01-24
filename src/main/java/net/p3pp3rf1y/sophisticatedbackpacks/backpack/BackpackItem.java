@@ -262,6 +262,12 @@ public class BackpackItem extends ItemBase {
 
 	@Nullable
 	@Override
+	public CompoundNBT getShareTag(ItemStack stack) {
+		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(IBackpackWrapper::getClientTag).orElse(super.getShareTag(stack));
+	}
+
+	@Nullable
+	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
 	}

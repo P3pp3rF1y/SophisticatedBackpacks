@@ -29,7 +29,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackWrapper.setBackpackSaveHandler(stack -> markDirty());
+		backpackWrapper.setBackpackSaveHandler(this::markDirty);
 	}
 
 	@Override
@@ -50,7 +50,9 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	private void writeBackpack(CompoundNBT ret) {
-		ret.put("backpackData", backpackWrapper.getBackpack().write(new CompoundNBT()));
+		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
+		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
+		ret.put("backpackData", backpackCopy.write(new CompoundNBT()));
 	}
 
 	@Override

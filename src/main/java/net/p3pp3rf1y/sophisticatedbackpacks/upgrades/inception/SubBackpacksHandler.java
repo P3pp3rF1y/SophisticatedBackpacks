@@ -58,16 +58,12 @@ public class SubBackpacksHandler {
 	}
 
 	private void refreshSubBackpacks() {
-		subBackpacks.values().forEach(sb -> sb.setBackpackSaveHandler(stack -> {}));
 		subBackpacks.clear();
 
 		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {
 			int finalSlot = slot;
 			inventoryHandler.getStackInSlot(slot).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.ifPresent(wrapper -> {
-						wrapper.setBackpackSaveHandler(stack -> inventoryHandler.onContentsChanged(finalSlot));
-						subBackpacks.put(finalSlot, wrapper);
-					});
+					.ifPresent(wrapper -> subBackpacks.put(finalSlot, wrapper));
 		}
 	}
 

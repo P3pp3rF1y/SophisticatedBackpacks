@@ -1,15 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -17,14 +15,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class BackpackUpgradeHandler extends ItemStackHandler {
-	private static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
-	private final ItemStack backpack;
+	public static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final IBackpackWrapper backpackWrapper;
-	private final Consumer<ItemStack> backpackSaveHandler;
+	private final Runnable backpackSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
+	private final CompoundNBT contentsNbt;
 	@Nullable
 	private Runnable refreshCallBack = null;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
@@ -34,20 +31,20 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	@Nullable
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 
-	public BackpackUpgradeHandler(ItemStack backpack, IBackpackWrapper backpackWrapper, Consumer<ItemStack> backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
-		super(getNumberOfUpgradeSlots(backpack));
-		this.backpack = backpack;
+	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
+		super(numberOfUpgradeSlots);
+		this.contentsNbt = contentsNbt;
 		this.backpackWrapper = backpackWrapper;
 		this.backpackSaveHandler = backpackSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
-		NBTHelper.getCompound(backpack, UPGRADE_INVENTORY_TAG).ifPresent(this::deserializeNBT);
+		deserializeNBT(contentsNbt.getCompound(UPGRADE_INVENTORY_TAG));
 	}
 
 	@Override
 	protected void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		backpack.setTagInfo(UPGRADE_INVENTORY_TAG, serializeNBT());
-		backpackSaveHandler.accept(backpack);
+		contentsNbt.put(UPGRADE_INVENTORY_TAG, serializeNBT());
+		backpackSaveHandler.run();
 		if (!justSavingNbtChange) {
 			refreshUpgradeWrappers();
 		}
@@ -136,10 +133,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	public Map<Integer, IUpgradeWrapper> getSlotWrappers() {
 		initializeWrappers();
 		return slotWrappers;
-	}
-
-	private static int getNumberOfUpgradeSlots(ItemStack backpack) {
-		return ((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots();
 	}
 
 	public void copyTo(BackpackUpgradeHandler otherHandler) {
