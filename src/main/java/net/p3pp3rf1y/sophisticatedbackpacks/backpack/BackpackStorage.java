@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -13,6 +15,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +25,7 @@ public class BackpackStorage extends WorldSavedData {
 	private static final String SAVED_DATA_NAME = SophisticatedBackpacks.MOD_ID;
 
 	private final Map<UUID, CompoundNBT> backpackContents = new HashMap<>();
+	private final Multimap<UUID, UUID> originalUuidBackpacks = HashMultimap.create();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 
 	public BackpackStorage() {
@@ -48,6 +52,12 @@ public class BackpackStorage extends WorldSavedData {
 			CompoundNBT contents = uuidContentsPair.getCompound("contents");
 			backpackContents.put(uuid, contents);
 		}
+		for (INBT n : nbt.getList("originalUuidBackpacks", Constants.NBT.TAG_COMPOUND)) {
+			CompoundNBT originalUuidBackpackPair = (CompoundNBT) n;
+			UUID originalUuid = NBTUtil.readUniqueId(Objects.requireNonNull(originalUuidBackpackPair.get("originalUuid")));
+			UUID uuid = NBTUtil.readUniqueId(Objects.requireNonNull(originalUuidBackpackPair.get("uuid")));
+			originalUuidBackpacks.put(originalUuid, uuid);
+		}
 	}
 
 	@Override
@@ -61,10 +71,37 @@ public class BackpackStorage extends WorldSavedData {
 			backpackContentsNbt.add(uuidContentsPair);
 		}
 		ret.put("backpackContents", backpackContentsNbt);
+
+		for (Map.Entry<UUID, UUID> entry : originalUuidBackpacks.entries()) {
+			CompoundNBT originalUuidBackpackPair = new CompoundNBT();
+			originalUuidBackpackPair.put("originalUuid", NBTUtil.func_240626_a_(entry.getKey()));
+			originalUuidBackpackPair.put("uuid", NBTUtil.func_240626_a_(entry.getValue()));
+			backpackContentsNbt.add(originalUuidBackpackPair);
+		}
+		ret.put("originalUuidBackpacks", backpackContentsNbt);
 		return ret;
+	}
+
+	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid, @Nullable UUID originalUuid) {
+		if (originalUuid != null && !originalUuidBackpacks.containsValue(backpackUuid)) {
+			for (UUID existingBackpackUuid : originalUuidBackpacks.removeAll(originalUuid)) {
+				backpackContents.remove(existingBackpackUuid);
+			}
+			originalUuidBackpacks.put(originalUuid, backpackUuid);
+		}
+
+		return getOrCreateBackpackContents(backpackUuid);
 	}
 
 	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid) {
 		return backpackContents.computeIfAbsent(backpackUuid, uuid -> new CompoundNBT());
+	}
+
+	public void removeOriginalBackpack(@Nullable UUID originalUuid) {
+		if (originalUuid == null) {
+			return;
+		}
+
+		backpackContents.remove(originalUuid);
 	}
 }

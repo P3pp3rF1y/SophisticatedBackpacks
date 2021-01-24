@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("java:S4144") //this is noop wrapper and thus identical implementation isn't an issue especially when it means just returning same field
 public class NoopBackpackWrapper implements IBackpackWrapper {
@@ -111,6 +112,16 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void refreshInventoryForInputOutput() {
+		//noop
+	}
+
+	@Override
+	public void setOriginalUuid(UUID orCreateContentsUuid) {
+		//noop
+	}
+
+	@Override
+	public void removeOriginalBackpack() {
 		//noop
 	}
 }

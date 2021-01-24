@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHand
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IBackpackWrapper {
 
@@ -48,4 +49,8 @@ public interface IBackpackWrapper {
 	void refreshInventoryForUpgradeProcessing();
 
 	void refreshInventoryForInputOutput();
+
+	void setOriginalUuid(UUID orCreateContentsUuid);
+
+	void removeOriginalBackpack();
 }

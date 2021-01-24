@@ -281,4 +281,9 @@ public class BackpackItem extends ItemBase {
 	public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
 		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
 	}
+
+	@Override
+	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(IBackpackWrapper::removeOriginalBackpack);
+	}
 }

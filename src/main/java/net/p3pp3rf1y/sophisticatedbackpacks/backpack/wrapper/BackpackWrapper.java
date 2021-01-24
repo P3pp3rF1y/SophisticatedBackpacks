@@ -29,6 +29,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String CONTENTS_UUID_TAG = "contentsUuid";
 	private static final String INVENTORY_SLOTS_TAG = "inventorySlots";
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
+	private static final String ORIGINAL_UUID_TAG = "originalUuid";
 
 	private final ItemStack backpack;
 
@@ -75,7 +76,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nonnull
 	private CompoundNBT getBackpackContentsNbt() {
-		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
+		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid(), getOriginalUuid());
+	}
+
+	@Nullable
+	private UUID getOriginalUuid() {
+		return NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).orElse(null);
 	}
 
 	private void markBackpackContentsDirty() {
@@ -92,6 +98,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
+		otherBackpackWrapper.setOriginalUuid(getOrCreateContentsUuid());
+
 		if (backpack.hasDisplayName()) {
 			otherBackpackWrapper.getBackpack().setDisplayName(backpack.getDisplayName());
 		}
@@ -219,6 +227,18 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void refreshInventoryForInputOutput() {
 		inventoryIOHandler = null;
+	}
+
+	@Override
+	public void setOriginalUuid(UUID originalUuid) {
+		NBTHelper.setUniqueId(backpack, ORIGINAL_UUID_TAG, originalUuid);
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void removeOriginalBackpack() {
+		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid());
+		NBTHelper.removeTag(backpack, ORIGINAL_UUID_TAG);
 	}
 
 	@Override
