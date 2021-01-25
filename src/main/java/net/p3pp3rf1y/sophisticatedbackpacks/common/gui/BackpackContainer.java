@@ -15,6 +15,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
@@ -184,6 +186,16 @@ public class BackpackContainer extends Container {
 			Slot slot = addBackpackSafeSlot(playerInventory, yPosition, slotIndex, xPosition, backpackSlotIndex, shouldLockBackpackSlot);
 			addSlotAndUpdateBackpackSlotNumber(backpackSlotIndex, shouldLockBackpackSlot, slotIndex, slot);
 		}
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void setAll(List<ItemStack> items) {
+		backpackWrapper.setPersistent(false);
+		super.setAll(items);
+		backpackWrapper.setPersistent(true);
+		backpackWrapper.getInventoryHandler().saveInventory();
+		backpackWrapper.getUpgradeHandler().saveInventory();
 	}
 
 	private Slot addBackpackSafeSlot(PlayerInventory playerInventory, int yPosition, int slotIndex, int xPosition, int backpackSlotIndex, boolean shouldLockBackpackSlot) {

@@ -30,6 +30,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private boolean wrappersInitialized = false;
 	@Nullable
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
+	private boolean persistent = true;
 
 	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(numberOfUpgradeSlots);
@@ -43,11 +44,21 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	@Override
 	protected void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		contentsNbt.put(UPGRADE_INVENTORY_TAG, serializeNBT());
-		backpackSaveHandler.run();
+		if (persistent) {
+			saveInventory();
+			backpackSaveHandler.run();
+		}
 		if (!justSavingNbtChange) {
 			refreshUpgradeWrappers();
 		}
+	}
+
+	public void saveInventory() {
+		contentsNbt.put(UPGRADE_INVENTORY_TAG, serializeNBT());
+	}
+
+	public void setPersistent(boolean persistent) {
+		this.persistent = persistent;
 	}
 
 	public void setRefreshCallBack(Runnable refreshCallBack) {

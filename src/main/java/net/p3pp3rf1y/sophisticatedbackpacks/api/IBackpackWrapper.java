@@ -53,4 +53,6 @@ public interface IBackpackWrapper {
 	void setOriginalUuid(UUID orCreateContentsUuid);
 
 	void removeOriginalBackpack();
+
+	void setPersistent(boolean persistent);
 }

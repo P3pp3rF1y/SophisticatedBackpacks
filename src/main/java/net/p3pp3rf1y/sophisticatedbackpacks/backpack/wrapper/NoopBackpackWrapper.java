@@ -124,4 +124,9 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public void removeOriginalBackpack() {
 		//noop
 	}
+
+	@Override
+	public void setPersistent(boolean persistent) {
+		//noop
+	}
 }

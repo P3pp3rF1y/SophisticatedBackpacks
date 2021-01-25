@@ -28,7 +28,7 @@ public class BackpackStorage extends WorldSavedData {
 	private final Multimap<UUID, UUID> originalUuidBackpacks = HashMultimap.create();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 
-	public BackpackStorage() {
+	private BackpackStorage() {
 		super(SAVED_DATA_NAME);
 	}
 
@@ -72,13 +72,14 @@ public class BackpackStorage extends WorldSavedData {
 		}
 		ret.put("backpackContents", backpackContentsNbt);
 
+		ListNBT origUuidBackpacksNbt = new ListNBT();
 		for (Map.Entry<UUID, UUID> entry : originalUuidBackpacks.entries()) {
 			CompoundNBT originalUuidBackpackPair = new CompoundNBT();
 			originalUuidBackpackPair.put("originalUuid", NBTUtil.func_240626_a_(entry.getKey()));
 			originalUuidBackpackPair.put("uuid", NBTUtil.func_240626_a_(entry.getValue()));
-			backpackContentsNbt.add(originalUuidBackpackPair);
+			origUuidBackpacksNbt.add(originalUuidBackpackPair);
 		}
-		ret.put("originalUuidBackpacks", backpackContentsNbt);
+		ret.put("originalUuidBackpacks", origUuidBackpacksNbt);
 		return ret;
 	}
 

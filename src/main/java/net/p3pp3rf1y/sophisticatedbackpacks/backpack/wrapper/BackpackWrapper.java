@@ -32,7 +32,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String ORIGINAL_UUID_TAG = "originalUuid";
 
 	private final ItemStack backpack;
-
 	private Runnable backpackSaveHandler = () -> {};
 
 	@Nullable
@@ -239,6 +238,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void removeOriginalBackpack() {
 		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid());
 		NBTHelper.removeTag(backpack, ORIGINAL_UUID_TAG);
+	}
+
+	@Override
+	public void setPersistent(boolean persistent) {
+		getInventoryHandler().setPersistent(persistent);
+		getUpgradeHandler().setPersistent(persistent);
 	}
 
 	@Override
