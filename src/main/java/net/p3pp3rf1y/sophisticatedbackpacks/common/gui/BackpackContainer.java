@@ -31,7 +31,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundPropert
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -501,7 +500,7 @@ public class BackpackContainer extends Container {
 		}
 
 		@Override
-		public boolean isItemValid(@Nonnull ItemStack stack) {
+		public boolean isItemValid(ItemStack stack) {
 			if (stack.isEmpty()) {
 				return false;
 			}

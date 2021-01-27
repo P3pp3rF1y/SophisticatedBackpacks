@@ -111,6 +111,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public ItemStack cloneBackpack() {
+		return backpack;
+	}
+
+	@Override
 	public void refreshInventoryForInputOutput() {
 		//noop
 	}
@@ -122,6 +127,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void removeOriginalBackpack() {
+		//noop
+	}
+
+	@Override
+	public void removeLinkToOriginalBackpack() {
 		//noop
 	}
 

@@ -106,7 +106,11 @@ public class BackpackStorage extends WorldSavedData {
 		if (originalUuid == null) {
 			return;
 		}
-
+		removeLinkToOriginalBackpack(originalUuid);
 		backpackContents.remove(originalUuid);
+	}
+
+	public void removeLinkToOriginalBackpack(UUID originalUuid) {
+		originalUuidBackpacks.removeAll(originalUuid);
 	}
 }

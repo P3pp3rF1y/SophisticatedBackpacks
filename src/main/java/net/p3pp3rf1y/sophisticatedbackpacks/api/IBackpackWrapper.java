@@ -48,11 +48,15 @@ public interface IBackpackWrapper {
 
 	void refreshInventoryForUpgradeProcessing();
 
+	ItemStack cloneBackpack();
+
 	void refreshInventoryForInputOutput();
 
 	void setOriginalUuid(UUID orCreateContentsUuid);
 
 	void removeOriginalBackpack();
+
+	void removeLinkToOriginalBackpack();
 
 	void setPersistent(boolean persistent);
 }

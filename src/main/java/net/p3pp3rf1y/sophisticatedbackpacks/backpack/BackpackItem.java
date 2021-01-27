@@ -159,17 +159,25 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			if (player == null || !player.abilities.isCreativeMode) {
+			if (player == null || !player.isCreative()) {
 				backpack.shrink(1);
 			}
 
 			return ActionResultType.SUCCESS;
 		}
 		return ActionResultType.PASS;
+	}
+
+	private ItemStack getBackpackCopy(@Nullable PlayerEntity player, ItemStack backpack) {
+		if (player == null || !player.isCreative()) {
+			return backpack.copy();
+		}
+		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
 	}
 
 	private boolean tryInventoryInteraction(ItemUseContext context) {

@@ -5,14 +5,15 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.Map;
@@ -73,7 +74,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG).orElse(((BackpackItem) backpack.getItem()).getNumberOfSlots());
 	}
 
-	@Nonnull
 	private CompoundNBT getBackpackContentsNbt() {
 		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid(), getOriginalUuid());
 	}
@@ -224,6 +224,35 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public ItemStack cloneBackpack() {
+		ItemStack clonedBackpack = cloneBackpack(this);
+		clonedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(this::cloneSubbackpacks);
+		return clonedBackpack;
+	}
+
+	private void cloneSubbackpacks(IBackpackWrapper wrapperCloned) {
+		BackpackInventoryHandler inventoryHandler = wrapperCloned.getInventoryHandler();
+		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
+			if (!(stack.getItem() instanceof BackpackItem)) {
+				return;
+			}
+			inventoryHandler.setStackInSlot(slot,
+					stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
+		});
+	}
+
+	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
+		ItemStack backpackCopy = new ItemStack(originalWrapper.getBackpack().getItem());
+		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(wrapperCopy -> {
+							originalWrapper.copyDataTo(wrapperCopy);
+							wrapperCopy.removeLinkToOriginalBackpack();
+							return wrapperCopy.getBackpack();
+						}
+				).orElse(ItemStack.EMPTY);
+	}
+
+	@Override
 	public void refreshInventoryForInputOutput() {
 		inventoryIOHandler = null;
 	}
@@ -237,7 +266,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void removeOriginalBackpack() {
 		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid());
+		removeLinkToOriginalBackpack();
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void removeLinkToOriginalBackpack() {
+		NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).ifPresent(originalUuid -> BackpackStorage.get().removeLinkToOriginalBackpack(originalUuid));
 		NBTHelper.removeTag(backpack, ORIGINAL_UUID_TAG);
+		backpackSaveHandler.run();
 	}
 
 	@Override
