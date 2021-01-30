@@ -6,8 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ItemButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Label;
@@ -19,7 +17,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> extends CompositeWidget<Widget> {
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;

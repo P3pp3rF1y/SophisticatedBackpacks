@@ -6,10 +6,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class BackpackModel extends AgeableModel<LivingEntity> {
 	final ModelRenderer cloth;
 	final ModelRenderer border;

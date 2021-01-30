@@ -15,8 +15,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
@@ -188,7 +186,6 @@ public class BackpackContainer extends Container {
 	}
 
 	@Override
-	@OnlyIn(Dist.CLIENT)
 	public void setAll(List<ItemStack> items) {
 		backpackWrapper.setPersistent(false);
 		super.setAll(items);

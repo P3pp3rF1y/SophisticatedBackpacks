@@ -12,8 +12,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -46,7 +44,6 @@ import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translKeybind;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
 	private static final int KEY_Z = 90;

@@ -3,8 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
@@ -14,7 +12,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.*;
 
-@OnlyIn(Dist.CLIENT)
 public class FilterLogicControl extends CompositeWidget<Widget> {
 	protected final FilterLogicContainer container;
 	private final Button[] showButtons;

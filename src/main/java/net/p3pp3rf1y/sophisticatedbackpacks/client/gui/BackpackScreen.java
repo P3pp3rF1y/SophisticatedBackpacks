@@ -10,8 +10,6 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
@@ -27,7 +25,6 @@ import java.util.Set;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
-@OnlyIn(Dist.CLIENT)
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int UPGRADE_TOP_HEIGHT = 7;
 	private static final int UPGRADE_SLOT_HEIGHT = 18;

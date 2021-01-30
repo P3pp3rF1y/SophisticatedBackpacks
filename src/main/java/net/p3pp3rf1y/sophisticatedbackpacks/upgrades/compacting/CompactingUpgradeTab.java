@@ -2,8 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
@@ -16,7 +14,6 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.ALLOW_LIST;
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.PRIMARY_MATCH;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<CompactingUpgradeWrapper>> {
 	protected FilterLogicControl filterLogicControl;
 

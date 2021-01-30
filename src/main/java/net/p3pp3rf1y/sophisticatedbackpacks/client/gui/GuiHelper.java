@@ -17,8 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -30,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@OnlyIn(Dist.CLIENT)
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
 	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(47, 0), Dimension.SQUARE_18);

@@ -1,8 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
@@ -12,7 +10,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgrade;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
-@OnlyIn(Dist.CLIENT)
 public class AutoSmeltingUpgradeTab extends UpgradeSettingsTab<AutoSmeltingUpgradeContainer> {
 	private final FilterLogicControl inputFilterLogicControl;
 	private final FilterLogicControl fuelFilterLogicControl;

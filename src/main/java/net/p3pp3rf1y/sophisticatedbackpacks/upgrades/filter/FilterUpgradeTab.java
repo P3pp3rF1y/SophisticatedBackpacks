@@ -3,8 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
@@ -19,7 +17,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeContainer> {
 	private static final ButtonDefinition.Toggle<Direction> DIRECTION = createToggleButtonDefinition(
 			ImmutableMap.of(
