@@ -2,6 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -25,7 +27,12 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -55,6 +62,7 @@ import java.util.function.Supplier;
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
+	public static final String BACKPACK_TOOLTIP = "item.sophisticatedbackpacks.backpack.tooltip.";
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -83,6 +91,18 @@ public class BackpackItem extends ItemBase {
 		ItemStack stack = new ItemStack(this);
 		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 		items.add(stack);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (!Screen.hasShiftDown()) {
+			tooltip.add(new TranslationTextComponent(
+					BACKPACK_TOOLTIP + "press_for_contents",
+					new TranslationTextComponent(BACKPACK_TOOLTIP + "shift").mergeStyle(TextFormatting.AQUA)
+			).mergeStyle(TextFormatting.GRAY));
+		}
 	}
 
 	@Override

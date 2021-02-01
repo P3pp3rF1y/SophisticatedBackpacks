@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +32,16 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		this.contentsNbt = contentsNbt;
 		this.backpackSaveHandler = backpackSaveHandler;
 		deserializeNBT(contentsNbt.getCompound(INVENTORY_TAG));
+		initStackNbts();
+	}
+
+	private void initStackNbts() {
+		for (int slot = 0; slot < stacks.size(); slot++) {
+			ItemStack slotStack = stacks.get(slot);
+			if (!slotStack.isEmpty()) {
+				stackNbts.put(slot, getSlotsStackNbt(slot, slotStack));
+			}
+		}
 	}
 
 	@Override
@@ -50,15 +61,21 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 				return true;
 			}
 		} else {
-			CompoundNBT itemTag = new CompoundNBT();
-			itemTag.putInt("Slot", slot);
-			slotStack.write(itemTag);
+			CompoundNBT itemTag = getSlotsStackNbt(slot, slotStack);
 			if (!stackNbts.containsKey(slot) || !stackNbts.get(slot).equals(itemTag)) {
 				stackNbts.put(slot, itemTag);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@Nonnull
+	private CompoundNBT getSlotsStackNbt(int slot, ItemStack slotStack) {
+		CompoundNBT itemTag = new CompoundNBT();
+		itemTag.putInt("Slot", slot);
+		slotStack.write(itemTag);
+		return itemTag;
 	}
 
 	public void setPersistent(boolean persistent) {

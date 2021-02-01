@@ -26,6 +26,8 @@ public interface IBackpackWrapper {
 
 	CompoundNBT getClientTag();
 
+	UUID getOrCreateContentsUuid();
+
 	int getClothColor();
 
 	int getBorderColor();
@@ -44,11 +46,13 @@ public interface IBackpackWrapper {
 
 	ItemStack getBackpack();
 
+	ItemStack cloneBackpack();
+
 	void sort();
 
-	void refreshInventoryForUpgradeProcessing();
+	void onContentsNbtUpdated();
 
-	ItemStack cloneBackpack();
+	void refreshInventoryForUpgradeProcessing();
 
 	void refreshInventoryForInputOutput();
 

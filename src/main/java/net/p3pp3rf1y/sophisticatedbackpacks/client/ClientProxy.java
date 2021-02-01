@@ -30,6 +30,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -111,6 +112,7 @@ public class ClientProxy extends CommonProxy {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
+		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {

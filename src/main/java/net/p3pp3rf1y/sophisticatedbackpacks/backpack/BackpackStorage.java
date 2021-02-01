@@ -12,6 +12,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
@@ -33,14 +34,15 @@ public class BackpackStorage extends WorldSavedData {
 	}
 
 	public static BackpackStorage get() {
-		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-		if (server != null) {
-			ServerWorld overworld = server.getWorld(World.OVERWORLD);
-			//noinspection ConstantConditions - by this time overworld is loaded
-			DimensionSavedDataManager storage = overworld.getSavedData();
-			return storage.getOrCreate(BackpackStorage::new, SAVED_DATA_NAME);
+		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+			if (server != null) {
+				ServerWorld overworld = server.getWorld(World.OVERWORLD);
+				//noinspection ConstantConditions - by this time overworld is loaded
+				DimensionSavedDataManager storage = overworld.getSavedData();
+				return storage.getOrCreate(BackpackStorage::new, SAVED_DATA_NAME);
+			}
 		}
-
 		return clientStorageCopy;
 	}
 
@@ -112,5 +114,9 @@ public class BackpackStorage extends WorldSavedData {
 
 	public void removeLinkToOriginalBackpack(UUID originalUuid) {
 		originalUuidBackpacks.removeAll(originalUuid);
+	}
+
+	public void setBackpackContents(UUID backpackUuid, CompoundNBT contents) {
+		backpackContents.put(backpackUuid, contents);
 	}
 }

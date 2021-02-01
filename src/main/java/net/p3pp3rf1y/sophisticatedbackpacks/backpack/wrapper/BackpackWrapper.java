@@ -131,7 +131,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return tag;
 	}
 
-	private UUID getOrCreateContentsUuid() {
+	@Override
+	public UUID getOrCreateContentsUuid() {
 		Optional<UUID> contentsUuid = NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
@@ -287,5 +288,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
 		refreshInventoryForInputOutput();
+	}
+
+	@Override
+	public void onContentsNbtUpdated() {
+		handler = null;
+		upgradeHandler = null;
+		refreshInventoryForUpgradeProcessing();
 	}
 }

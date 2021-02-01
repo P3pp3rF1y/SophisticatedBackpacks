@@ -1,0 +1,211 @@
+package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
+
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+public class BackpackTooltipRenderer {
+	private BackpackTooltipRenderer() {}
+
+	private static final int REFRESH_INTERVAL = 20;
+	private static boolean shouldRefreshContents = true;
+	private static long lastRequestTime = 0;
+	private static ContentsTooltipPart contentsTooltipPart;
+	private static UUID backpackUuid;
+
+	public static void renderBackpackTooltip(RenderTooltipEvent.Pre event) {
+		ItemStack backpack = event.getStack();
+		Minecraft minecraft = Minecraft.getInstance();
+		ClientPlayerEntity player = minecraft.player;
+		if (!(backpack.getItem() instanceof BackpackItem) || !Screen.hasShiftDown() || player == null) {
+			return;
+		}
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			requestContents(player, wrapper);
+			refreshContents(wrapper, minecraft);
+
+			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+			GuiHelper.setTooltipToRender(lines.stream().map(ITextComponent::func_241878_f).collect(Collectors.toList()), event.getFontRenderer());
+			GuiHelper.renderToolTip(minecraft, event.getMatrixStack(), event.getX(), event.getY(), contentsTooltipPart);
+			event.setCanceled(true);
+		});
+
+	}
+
+	private static void requestContents(ClientPlayerEntity player, net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper wrapper) {
+		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
+			lastRequestTime = player.world.getGameTime();
+			PacketHandler.sendToServer(new RequestBackpackContentsMessage(wrapper.getOrCreateContentsUuid()));
+		}
+	}
+
+	private static void refreshContents(IBackpackWrapper wrapper, Minecraft minecraft) {
+		if (shouldRefreshContents || backpackUuid != wrapper.getOrCreateContentsUuid()) {
+			backpackUuid = wrapper.getOrCreateContentsUuid();
+			shouldRefreshContents = false;
+			wrapper.onContentsNbtUpdated();
+			List<ItemStack> sortedContents = InventorySorter.getCompactedStacksSortedByCount(wrapper.getInventoryHandler());
+			contentsTooltipPart = new ContentsTooltipPart(minecraft, new TreeMap<>(wrapper.getUpgradeHandler().getSlotWrappers()), sortedContents);
+		}
+		if (contentsTooltipPart == null) {
+			contentsTooltipPart = new ContentsTooltipPart(minecraft, new HashMap<>(), new ArrayList<>());
+		}
+	}
+
+	//TODO this probably needs to move somewhere else, but there's no easy way to understand what STACK requested refresh of contents and tooltip is the only one at the moment
+	public static void refreshContents() {
+		shouldRefreshContents = true;
+	}
+
+	private static class ContentsTooltipPart implements GuiHelper.ITooltipRenderPart {
+		private static final TextureBlitData UPGRADE_ON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(81, 0), Dimension.RECTANGLE_4_10);
+		private static final TextureBlitData UPGRADE_OFF = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(77, 0), Dimension.RECTANGLE_4_10);
+		private static final int MAX_STACKS_ON_LINE = 9;
+		private static final int DEFAULT_STACK_WIDTH = 18;
+		private final Minecraft minecraft;
+		private final Map<Integer, IUpgradeWrapper> upgrades;
+		private final List<ItemStack> backpackContents;
+		private int height;
+		private int width;
+
+		public ContentsTooltipPart(Minecraft minecraft, Map<Integer, IUpgradeWrapper> upgrades, List<ItemStack> backpackContents) {
+			this.minecraft = minecraft;
+			this.upgrades = upgrades;
+			this.backpackContents = backpackContents;
+			calculateHeight();
+			calculateWidth();
+		}
+
+		private void calculateWidth() {
+			int upgradesWidth = calculateUpgradesWidth();
+			int contentsWidth = calculateContentsWidth();
+			int stacksWidth = Math.max(upgradesWidth, contentsWidth);
+			width = stacksWidth > 0 ? stacksWidth : getEmptyTooltipWidth();
+		}
+
+		private int calculateUpgradesWidth() {
+			int upgradesWidth = 0;
+			for (IUpgradeWrapper upgradeWrapper : upgrades.values()) {
+				upgradesWidth += (upgradeWrapper.canBeDisabled() ? 4 : 0) + DEFAULT_STACK_WIDTH;
+			}
+			return upgradesWidth;
+		}
+
+		private int calculateContentsWidth() {
+			FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+			int contentsWidth = 0;
+			for (int i = 0; i < backpackContents.size() && i < MAX_STACKS_ON_LINE; i++) {
+				int countWidth = getStackCountWidth(fontRenderer, backpackContents.get(i));
+				contentsWidth += Math.max(countWidth, DEFAULT_STACK_WIDTH);
+			}
+
+			return contentsWidth;
+		}
+
+		private int getStackCountWidth(FontRenderer fontRenderer, ItemStack stack) {
+			return fontRenderer.getStringWidth(Integer.toString(stack.getCount()));
+		}
+
+		private void calculateHeight() {
+			int upgradesHeight = upgrades.isEmpty() ? 0 : 32;
+			int inventoryHeight = backpackContents.isEmpty() ? 0 : 12 + (1 + backpackContents.size() / MAX_STACKS_ON_LINE) * 20;
+			int totalHeight = upgradesHeight + inventoryHeight;
+			height = totalHeight > 0 ? totalHeight : 12;
+		}
+
+		@Override
+		public int getWidth() {
+			return width;
+		}
+
+		private int getEmptyTooltipWidth() {
+			return Minecraft.getInstance().fontRenderer.func_243245_a(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + "empty").func_241878_f());
+		}
+
+		@Override
+		public int getHeight() {
+			return height;
+		}
+
+		@Override
+		public void render(MatrixStack matrixStack, int leftX, int topY, FontRenderer font) {
+			if (!upgrades.isEmpty()) {
+				topY = renderTooltipLine(leftX, topY, matrixStack, font, "upgrades");
+				topY = renderUpgrades(matrixStack, leftX, topY);
+			}
+			if (!backpackContents.isEmpty()) {
+				topY = renderTooltipLine(leftX, topY, matrixStack, font, "inventory");
+				renderContents(matrixStack, leftX, topY);
+			}
+			if (upgrades.isEmpty() && backpackContents.isEmpty()) {
+				renderTooltipLine(leftX, topY, matrixStack, font, "empty");
+			}
+		}
+
+		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
+			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW).func_241878_f()),
+					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer);
+			renderTypeBuffer.finish();
+			return topY;
+		}
+
+		private int renderUpgrades(MatrixStack matrixStack, int leftX, int topY) {
+			int x = leftX;
+			for (IUpgradeWrapper upgradeWrapper : upgrades.values()) {
+				if (upgradeWrapper.canBeDisabled()) {
+					GuiHelper.blit(minecraft, matrixStack, x, topY + 3, upgradeWrapper.isEnabled() ? UPGRADE_ON : UPGRADE_OFF);
+					x += 4;
+				}
+				GuiHelper.renderItemInGUI(matrixStack, minecraft, upgradeWrapper.getUpgradeStack(), x, topY, true);
+				x += DEFAULT_STACK_WIDTH;
+			}
+			topY += 20;
+			return topY;
+		}
+
+		private void renderContents(MatrixStack matrixStack, int leftX, int topY) {
+			int x = leftX;
+			for (int i = 0; i < backpackContents.size(); i++) {
+				int y = topY + i / MAX_STACKS_ON_LINE * 20;
+				if (i % MAX_STACKS_ON_LINE == 0) {
+					x = leftX;
+				}
+				int stackWidth = Math.max(getStackCountWidth(minecraft.fontRenderer, backpackContents.get(i)), DEFAULT_STACK_WIDTH);
+				int xOffset = stackWidth - DEFAULT_STACK_WIDTH;
+				GuiHelper.renderItemInGUI(matrixStack, minecraft, backpackContents.get(i), x + xOffset, y, true);
+				x += stackWidth;
+			}
+		}
+	}
+}

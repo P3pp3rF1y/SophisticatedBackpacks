@@ -56,6 +56,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public UUID getOrCreateContentsUuid() {
+		return UUID.randomUUID();
+	}
+
+	@Override
 	public int getClothColor() {
 		return -1;
 	}
@@ -102,6 +107,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void sort() {
+		//noop
+	}
+
+	@Override
+	public void onContentsNbtUpdated() {
 		//noop
 	}
 

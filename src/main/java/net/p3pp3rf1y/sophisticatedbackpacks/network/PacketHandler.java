@@ -1,7 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -25,6 +27,8 @@ public class PacketHandler {
 		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::encode, BackpackOpenMessage::decode, BackpackOpenMessage::onMessage);
 		registerMessage(ServerBackpackDataMessage.class, ServerBackpackDataMessage::encode, ServerBackpackDataMessage::decode, ServerBackpackDataMessage::onMessage);
 		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
+		registerMessage(RequestBackpackContentsMessage.class, RequestBackpackContentsMessage::encode, RequestBackpackContentsMessage::decode, RequestBackpackContentsMessage::onMessage);
+		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::encode, BackpackContentsMessage::decode, BackpackContentsMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -34,5 +38,9 @@ public class PacketHandler {
 
 	public static <M> void sendToServer(M message) {
 		networkWrapper.sendToServer(message);
+	}
+
+	public static <M> void sendToClient(ServerPlayerEntity player, M message) {
+		networkWrapper.sendTo(message, player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
 	}
 }
