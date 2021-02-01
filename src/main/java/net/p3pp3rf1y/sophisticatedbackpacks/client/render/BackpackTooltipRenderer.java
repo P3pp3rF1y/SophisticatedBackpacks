@@ -13,6 +13,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
@@ -42,6 +43,12 @@ public class BackpackTooltipRenderer {
 	private static long lastRequestTime = 0;
 	private static ContentsTooltipPart contentsTooltipPart;
 	private static UUID backpackUuid;
+
+	@SuppressWarnings("unused") //parameter needs to be there so that addListener logic would know which event this method listens to
+	public static void onWorldLoad(WorldEvent.Load event) {
+		shouldRefreshContents = true;
+		lastRequestTime = 0;
+	}
 
 	public static void renderBackpackTooltip(RenderTooltipEvent.Pre event) {
 		ItemStack backpack = event.getStack();

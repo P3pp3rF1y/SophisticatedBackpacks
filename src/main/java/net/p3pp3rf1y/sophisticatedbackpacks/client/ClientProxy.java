@@ -113,6 +113,7 @@ public class ClientProxy extends CommonProxy {
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
 		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
+		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
