@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
@@ -36,6 +37,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	public void read(BlockState state, CompoundNBT nbt) {
 		super.read(state, nbt);
 		setBackpackFromNbt(nbt);
+		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	private void setBackpackFromNbt(CompoundNBT nbt) {
@@ -71,6 +73,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
 		setBackpackFromNbt(pkt.getNbtCompound());
+		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	public IBackpackWrapper getBackpackWrapper() {
