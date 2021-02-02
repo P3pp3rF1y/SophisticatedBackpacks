@@ -12,8 +12,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -32,6 +30,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -46,7 +45,6 @@ import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translKeybind;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
 	private static final int KEY_Z = 90;
@@ -114,6 +112,8 @@ public class ClientProxy extends CommonProxy {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
+		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
+		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {

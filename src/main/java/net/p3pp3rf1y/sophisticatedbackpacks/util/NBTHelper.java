@@ -3,9 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.UUIDCodec;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -70,6 +73,11 @@ public class NBTHelper {
 		return getTagValue(stack, key, CompoundNBT::getLong);
 	}
 
+	public static Optional<UUID> getUniqueId(ItemStack stack, String key) {
+		//noinspection ConstantConditions - contains check is run before this get so it won't be null
+		return getTagValue(stack, key, (compound, k) -> NBTUtil.readUniqueId(compound.get(k)));
+	}
+
 	public static void setCompoundNBT(ItemStack stack, String parentKey, String key, CompoundNBT tag) {
 		if (parentKey.isEmpty()) {
 			stack.getOrCreateTag().put(key, tag);
@@ -118,5 +126,16 @@ public class NBTHelper {
 
 	public static void setInteger(ItemStack stack, String key, int value) {
 		stack.getOrCreateTag().putInt(key, value);
+	}
+
+	public static void setUniqueId(ItemStack stack, String key, UUID uuid) {
+		stack.getOrCreateTag().putIntArray(key, UUIDCodec.encodeUUID(uuid));
+	}
+
+	public static void removeTag(ItemStack stack, String key) {
+		if (stack.getTag() == null) {
+			return;
+		}
+		stack.getTag().remove(key);
 	}
 }

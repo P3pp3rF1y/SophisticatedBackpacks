@@ -20,7 +20,6 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +91,6 @@ public class ShapeBasedRecipeBuilder {
 		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + getGroup() + "/" + id.getPath()), serializer));
 	}
 
-	@Nonnull
 	private String getGroup() {
 		return itemResult.getGroup() == null ? "" : itemResult.getGroup().getPath();
 	}

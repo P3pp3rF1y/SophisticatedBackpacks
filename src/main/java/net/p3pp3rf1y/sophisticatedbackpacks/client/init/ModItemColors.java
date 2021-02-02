@@ -2,14 +2,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
 
-@OnlyIn(Dist.CLIENT)
 public class ModItemColors {
 	private ModItemColors() {}
 

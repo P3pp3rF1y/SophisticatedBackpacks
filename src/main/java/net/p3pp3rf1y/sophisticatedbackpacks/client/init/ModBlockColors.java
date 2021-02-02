@@ -2,15 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
 
-@OnlyIn(Dist.CLIENT)
 public class ModBlockColors {
 	private ModBlockColors() {}
 

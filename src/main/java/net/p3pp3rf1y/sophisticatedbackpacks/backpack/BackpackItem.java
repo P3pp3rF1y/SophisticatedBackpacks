@@ -2,6 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -25,7 +27,12 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -55,6 +62,7 @@ import java.util.function.Supplier;
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
+	public static final String BACKPACK_TOOLTIP = "item.sophisticatedbackpacks.backpack.tooltip.";
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -83,6 +91,18 @@ public class BackpackItem extends ItemBase {
 		ItemStack stack = new ItemStack(this);
 		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
 		items.add(stack);
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (!Screen.hasShiftDown()) {
+			tooltip.add(new TranslationTextComponent(
+					BACKPACK_TOOLTIP + "press_for_contents",
+					new TranslationTextComponent(BACKPACK_TOOLTIP + "shift").mergeStyle(TextFormatting.AQUA)
+			).mergeStyle(TextFormatting.GRAY));
+		}
 	}
 
 	@Override
@@ -159,17 +179,25 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(backpack.copy()));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-			if (player == null || !player.abilities.isCreativeMode) {
+			if (player == null || !player.isCreative()) {
 				backpack.shrink(1);
 			}
 
 			return ActionResultType.SUCCESS;
 		}
 		return ActionResultType.PASS;
+	}
+
+	private ItemStack getBackpackCopy(@Nullable PlayerEntity player, ItemStack backpack) {
+		if (player == null || !player.isCreative()) {
+			return backpack.copy();
+		}
+		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
 	}
 
 	private boolean tryInventoryInteraction(ItemUseContext context) {
@@ -262,6 +290,12 @@ public class BackpackItem extends ItemBase {
 
 	@Nullable
 	@Override
+	public CompoundNBT getShareTag(ItemStack stack) {
+		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(IBackpackWrapper::getClientTag).orElse(super.getShareTag(stack));
+	}
+
+	@Nullable
+	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
 	}
@@ -274,5 +308,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
 		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
+	}
+
+	@Override
+	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(IBackpackWrapper::removeOriginalBackpack);
 	}
 }

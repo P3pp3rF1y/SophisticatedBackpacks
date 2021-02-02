@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -26,5 +27,13 @@ public class WorldHelper {
 		}
 
 		return Optional.empty();
+	}
+
+	public static void notifyBlockUpdate(TileEntity tile) {
+		World world = tile.getWorld();
+		if (world == null) {
+			return;
+		}
+		world.notifyBlockUpdate(tile.getPos(), tile.getBlockState(), tile.getBlockState(), 3);
 	}
 }

@@ -3,15 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
 public abstract class CompositeWidget<T extends Widget> extends Widget implements INestedGuiEventHandler {
 	protected final List<T> children = new ArrayList<>();
 

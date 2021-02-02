@@ -1,6 +1,11 @@
 {
     "itemGroup.sophisticatedbackpacks": "Sophisticated Backpacks",
     "item.sophisticatedbackpacks.backpack": "Backpack",
+    "item.sophisticatedbackpacks.backpack.tooltip.press_for_contents": "Press <%s> to View Contents",
+    "item.sophisticatedbackpacks.backpack.tooltip.shift": "Left Shift",
+    "item.sophisticatedbackpacks.backpack.tooltip.upgrades": "Upgrades",
+    "item.sophisticatedbackpacks.backpack.tooltip.inventory": "Inventory",
+    "item.sophisticatedbackpacks.backpack.tooltip.empty": "No Upgrades or Inventory Contents",
     "item.sophisticatedbackpacks.iron_backpack": "Iron Backpack",
     "item.sophisticatedbackpacks.gold_backpack": "Gold Backpack",
     "item.sophisticatedbackpacks.diamond_backpack": "Diamond Backpack",

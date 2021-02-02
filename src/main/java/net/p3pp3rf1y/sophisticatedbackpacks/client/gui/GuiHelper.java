@@ -17,8 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -30,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@OnlyIn(Dist.CLIENT)
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
 	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(47, 0), Dimension.SQUARE_18);
@@ -93,6 +90,10 @@ public class GuiHelper {
 	}
 
 	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY) {
+		renderToolTip(minecraft, matrixStack, mouseX, mouseY, ITooltipRenderPart.EMPTY);
+	}
+
+	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY, ITooltipRenderPart additionalRender) {
 		if (tooltipToRender.isEmpty()) {
 			return;
 		}
@@ -101,7 +102,8 @@ public class GuiHelper {
 		int windowWidth = minecraft.getMainWindow().getScaledWidth();
 		int windowHeight = minecraft.getMainWindow().getScaledHeight();
 
-		int maxLineWidth = getMaxLineWidth(tooltipToRender, font);
+		int tooltipWidth = getMaxLineWidth(tooltipToRender, font);
+		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
 		int leftX = mouseX + 12;
 		int topY = mouseY - 12;
@@ -109,9 +111,10 @@ public class GuiHelper {
 		if (tooltipToRender.size() > 1) {
 			tooltipHeight += 2 + (tooltipToRender.size() - 1) * 10;
 		}
+		tooltipHeight += additionalRender.getHeight();
 
-		if (leftX + maxLineWidth > windowWidth) {
-			leftX -= 28 + maxLineWidth;
+		if (leftX + tooltipWidth > windowWidth) {
+			leftX -= 28 + tooltipWidth;
 		}
 
 		if (topY + tooltipHeight + 6 > windowHeight) {
@@ -123,15 +126,15 @@ public class GuiHelper {
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
 		Matrix4f matrix4f = matrixStack.getLast().getMatrix();
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + maxLineWidth + 3, topY - 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + maxLineWidth + 3, topY + tooltipHeight + 4, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + maxLineWidth + 3, topY + tooltipHeight + 3, 400, -267386864, -267386864);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, 400, -267386864, -267386864);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, 400, -267386864, -267386864);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, -267386864, -267386864);
 		fillGradient(matrix4f, bufferbuilder, leftX - 4, topY - 3, leftX - 3, topY + tooltipHeight + 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX + maxLineWidth + 3, topY - 3, leftX + maxLineWidth + 4, topY + tooltipHeight + 3, 400, -267386864, -267386864);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 3, topY - 3, leftX + tooltipWidth + 4, topY + tooltipHeight + 3, 400, -267386864, -267386864);
 		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3 + 1, leftX - 3 + 1, topY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferbuilder, leftX + maxLineWidth + 2, topY - 3 + 1, leftX + maxLineWidth + 3, topY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + maxLineWidth + 3, topY - 3 + 1, 400, 1347420415, 1347420415);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + maxLineWidth + 3, topY + tooltipHeight + 3, 400, 1344798847, 1344798847);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 2, topY - 3 + 1, leftX + tooltipWidth + 3, topY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY - 3 + 1, 400, 1347420415, 1347420415);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, 1344798847, 1344798847);
 		RenderSystem.enableDepthTest();
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
@@ -145,9 +148,10 @@ public class GuiHelper {
 		IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 		matrixStack.translate(0.0D, 0.0D, 400.0D);
 
-		writeTooltipLines(tooltipToRender, font, (float) leftX, topY, matrix4f, renderTypeBuffer);
+		topY = writeTooltipLines(tooltipToRender, font, (float) leftX, topY, matrix4f, renderTypeBuffer);
 
 		renderTypeBuffer.finish();
+		additionalRender.render(matrixStack, leftX, topY, font);
 		matrixStack.pop();
 
 		tooltipToRender = Collections.emptyList();
@@ -165,7 +169,7 @@ public class GuiHelper {
 		return maxLineWidth;
 	}
 
-	private static void writeTooltipLines(List<? extends IReorderingProcessor> tooltips, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer) {
+	public static int writeTooltipLines(List<? extends IReorderingProcessor> tooltips, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer) {
 		for (int i = 0; i < tooltips.size(); ++i) {
 			IReorderingProcessor reorderingProcessor = tooltips.get(i);
 			if (reorderingProcessor != null) {
@@ -178,6 +182,7 @@ public class GuiHelper {
 
 			topY += 10;
 		}
+		return topY;
 	}
 
 	private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int z, int colorA, int colorB) {
@@ -218,5 +223,30 @@ public class GuiHelper {
 		if (extraRowSlots > 0) {
 			renderSlotsBackground(minecraft, matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
 		}
+	}
+
+	public interface ITooltipRenderPart {
+		ITooltipRenderPart EMPTY = new ITooltipRenderPart() {
+			@Override
+			public int getWidth() {
+				return 0;
+			}
+
+			@Override
+			public int getHeight() {
+				return 0;
+			}
+
+			@Override
+			public void render(MatrixStack matrixStack, int leftX, int topY, FontRenderer font) {
+				//noop
+			}
+		};
+
+		int getWidth();
+
+		int getHeight();
+
+		void render(MatrixStack matrixStack, int leftX, int topY, FontRenderer font);
 	}
 }

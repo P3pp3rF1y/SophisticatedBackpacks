@@ -98,7 +98,7 @@ public class InventorySorter {
 		}
 	}
 
-	public static Map<FilterStack, Integer> getCompactedStacks(IItemHandler handler) {
+	private static Map<FilterStack, Integer> getCompactedStacks(IItemHandler handler) {
 		Map<FilterStack, Integer> ret = new HashMap<>();
 		InventoryHelper.iterate(handler, (slot, stack) -> {
 			if (stack.isEmpty()) {
@@ -106,6 +106,20 @@ public class InventorySorter {
 			}
 			FilterStack filterStack = new FilterStack(stack);
 			ret.put(filterStack, ret.computeIfAbsent(filterStack, fs -> 0) + stack.getCount());
+		});
+		return ret;
+	}
+
+	public static List<ItemStack> getCompactedStacksSortedByCount(IItemHandler handler) {
+		Map<FilterStack, Integer> compactedStacks = getCompactedStacks(handler);
+		List<Map.Entry<FilterStack, Integer>> sortedList = new ArrayList<>(compactedStacks.entrySet());
+		sortedList.sort(BY_COUNT);
+
+		List<ItemStack> ret = new ArrayList<>();
+		sortedList.forEach(e -> {
+			ItemStack stackCopy = e.getKey().stack.copy();
+			stackCopy.setCount(e.getValue());
+			ret.add(stackCopy);
 		});
 		return ret;
 	}

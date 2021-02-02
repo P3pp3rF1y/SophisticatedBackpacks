@@ -196,11 +196,6 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		return super.canEntityDestroy(state, world, pos, entity);
 	}
 
-	@Override
-	public ItemStack getItem(IBlockReader worldIn, BlockPos pos, BlockState state) {
-		return WorldHelper.getTile(worldIn, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
-	}
-
 	private void tryToPickup(World world, ItemEntity itemEntity, IBackpackWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();
 		InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);

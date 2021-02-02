@@ -1,17 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.UUID;
 
 public interface IBackpackWrapper {
 
-	void setBackpackSaveHandler(Consumer<ItemStack> saveHandler);
+	void setBackpackSaveHandler(Runnable saveHandler);
 
 	IItemHandlerModifiable getInventoryForUpgradeProcessing();
 
@@ -22,6 +23,10 @@ public interface IBackpackWrapper {
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
 
 	BackpackUpgradeHandler getUpgradeHandler();
+
+	CompoundNBT getClientTag();
+
+	UUID getOrCreateContentsUuid();
 
 	int getClothColor();
 
@@ -41,9 +46,21 @@ public interface IBackpackWrapper {
 
 	ItemStack getBackpack();
 
+	ItemStack cloneBackpack();
+
 	void sort();
+
+	void onContentsNbtUpdated();
 
 	void refreshInventoryForUpgradeProcessing();
 
 	void refreshInventoryForInputOutput();
+
+	void setOriginalUuid(UUID orCreateContentsUuid);
+
+	void removeOriginalBackpack();
+
+	void removeLinkToOriginalBackpack();
+
+	void setPersistent(boolean persistent);
 }

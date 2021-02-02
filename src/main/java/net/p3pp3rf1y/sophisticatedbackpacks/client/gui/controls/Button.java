@@ -3,8 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.IReorderingProcessor;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
@@ -14,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-@OnlyIn(Dist.CLIENT)
 public class Button extends ButtonBase {
 	private final TextureBlitData backgroundTexture;
 	@Nullable

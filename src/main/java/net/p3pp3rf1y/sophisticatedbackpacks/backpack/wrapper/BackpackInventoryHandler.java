@@ -1,36 +1,85 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
 import java.util.function.IntConsumer;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
-	private static final String INVENTORY_TAG = "inventory";
-	private final ItemStack backpack;
-	private final Consumer<ItemStack> backpackSaveHandler;
+	public static final String INVENTORY_TAG = "inventory";
+	private final IBackpackWrapper backpackWrapper;
+	private final CompoundNBT contentsNbt;
+	private final Runnable backpackSaveHandler;
 	private final List<IntConsumer> onContentsChangedListeners = new ArrayList<>();
+	private boolean persistent = true;
+	private final Map<Integer, CompoundNBT> stackNbts = new LinkedHashMap<>();
 
-	public BackpackInventoryHandler(ItemStack backpack, Consumer<ItemStack> backpackSaveHandler) {
-		super(getNumberOfSlots(backpack));
-		this.backpack = backpack;
+	public BackpackInventoryHandler(int numberOfInventorySlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler) {
+		super(numberOfInventorySlots);
+		this.backpackWrapper = backpackWrapper;
+		this.contentsNbt = contentsNbt;
 		this.backpackSaveHandler = backpackSaveHandler;
-		NBTHelper.getCompound(backpack, INVENTORY_TAG).ifPresent(this::deserializeNBT);
+		deserializeNBT(contentsNbt.getCompound(INVENTORY_TAG));
+		initStackNbts();
+	}
+
+	private void initStackNbts() {
+		for (int slot = 0; slot < stacks.size(); slot++) {
+			ItemStack slotStack = stacks.get(slot);
+			if (!slotStack.isEmpty()) {
+				stackNbts.put(slot, getSlotsStackNbt(slot, slotStack));
+			}
+		}
 	}
 
 	@Override
 	public void onContentsChanged(int slot) {
 		super.onContentsChanged(slot);
-		saveInventory();
-		onContentsChangedListeners.forEach(l -> l.accept(slot));
+		if (persistent && updateSlotNbt(slot)) {
+			saveInventory();
+			onContentsChangedListeners.forEach(l -> l.accept(slot));
+		}
+	}
+
+	private boolean updateSlotNbt(int slot) {
+		ItemStack slotStack = getStackInSlot(slot);
+		if (slotStack.isEmpty()) {
+			if (stackNbts.containsKey(slot)) {
+				stackNbts.remove(slot);
+				return true;
+			}
+		} else {
+			CompoundNBT itemTag = getSlotsStackNbt(slot, slotStack);
+			if (!stackNbts.containsKey(slot) || !stackNbts.get(slot).equals(itemTag)) {
+				stackNbts.put(slot, itemTag);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Nonnull
+	private CompoundNBT getSlotsStackNbt(int slot, ItemStack slotStack) {
+		CompoundNBT itemTag = new CompoundNBT();
+		itemTag.putInt("Slot", slot);
+		slotStack.write(itemTag);
+		return itemTag;
+	}
+
+	public void setPersistent(boolean persistent) {
+		this.persistent = persistent;
 	}
 
 	@Override
@@ -39,7 +88,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	private boolean hasInceptionUpgrade() {
-		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
+		return backpackWrapper.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
@@ -48,12 +97,8 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	}
 
 	public void saveInventory() {
-		backpack.setTagInfo(INVENTORY_TAG, serializeNBT());
-		backpackSaveHandler.accept(backpack);
-	}
-
-	private static int getNumberOfSlots(ItemStack backpack) {
-		return ((BackpackItem) backpack.getItem()).getNumberOfSlots();
+		contentsNbt.put(INVENTORY_TAG, serializeNBT());
+		backpackSaveHandler.run();
 	}
 
 	public void copyStacksTo(BackpackInventoryHandler otherHandler) {
@@ -66,5 +111,15 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	public void clearListeners() {
 		onContentsChangedListeners.clear();
+	}
+
+	@Override
+	public CompoundNBT serializeNBT() {
+		ListNBT nbtTagList = new ListNBT();
+		nbtTagList.addAll(stackNbts.values());
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.put("Items", nbtTagList);
+		nbt.putInt("Size", getSlots());
+		return nbt;
 	}
 }
