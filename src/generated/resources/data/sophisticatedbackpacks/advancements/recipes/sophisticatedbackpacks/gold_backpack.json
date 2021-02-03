@@ -6,6 +6,16 @@
         ]
     },
     "criteria": {
+        "has_iron_backpack": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "sophisticatedbackpacks:iron_backpack"
+                    }
+                ]
+            }
+        },
         "has_the_recipe": {
             "trigger": "minecraft:recipe_unlocked",
             "conditions": {
@@ -15,6 +25,7 @@
     },
     "requirements": [
         [
+            "has_iron_backpack",
             "has_the_recipe"
         ]
     ]
