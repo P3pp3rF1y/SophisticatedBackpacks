@@ -312,6 +312,12 @@ public class BackpackItem extends ItemBase {
 
 	@Override
 	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(IBackpackWrapper::removeOriginalBackpack);
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> {
+			if (this == ModItems.BACKPACK.get()) {
+				w.removeContentsUuid();
+			} else {
+				w.removeOriginalBackpack();
+			}
+		});
 	}
 }

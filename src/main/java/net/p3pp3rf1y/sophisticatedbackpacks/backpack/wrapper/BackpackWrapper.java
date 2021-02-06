@@ -132,6 +132,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public void removeContentsUuid() {
+		Optional<UUID> contentsUuid = NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+		if (contentsUuid.isPresent()) {
+			BackpackStorage.get().removeOriginalBackpack(contentsUuid.get());
+			NBTHelper.removeTag(backpack, CONTENTS_UUID_TAG);
+		}
+	}
+
+	@Override
 	public UUID getOrCreateContentsUuid() {
 		Optional<UUID> contentsUuid = NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
 		if (contentsUuid.isPresent()) {
