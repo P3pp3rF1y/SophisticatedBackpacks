@@ -6,6 +6,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 
@@ -13,7 +15,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
 
 public class PickupUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<PickupUpgradeWrapper>> {
-	protected FilterLogicControl filterLogicControl;
+	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected PickupUpgradeTab(FilteredUpgradeContainer<PickupUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);

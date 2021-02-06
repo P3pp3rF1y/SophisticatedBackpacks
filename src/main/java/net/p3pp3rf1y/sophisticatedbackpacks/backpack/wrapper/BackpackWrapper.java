@@ -12,6 +12,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import javax.annotation.Nullable;
@@ -207,7 +208,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		InventorySorter.sortHandler(getInventoryHandler(), getComparator());
 	}
 
-	private Comparator<Map.Entry<InventorySorter.FilterStack, Integer>> getComparator() {
+	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {
 		switch (getSortBy()) {
 			case COUNT:
 				return InventorySorter.BY_COUNT;

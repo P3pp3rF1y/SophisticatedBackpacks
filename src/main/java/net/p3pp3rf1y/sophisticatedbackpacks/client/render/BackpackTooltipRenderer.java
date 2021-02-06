@@ -24,7 +24,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,7 +81,7 @@ public class BackpackTooltipRenderer {
 			backpackUuid = wrapper.getOrCreateContentsUuid();
 			shouldRefreshContents = false;
 			wrapper.onContentsNbtUpdated();
-			List<ItemStack> sortedContents = InventorySorter.getCompactedStacksSortedByCount(wrapper.getInventoryHandler());
+			List<ItemStack> sortedContents = InventoryHelper.getCompactedStacksSortedByCount(wrapper.getInventoryHandler());
 			contentsTooltipPart = new ContentsTooltipPart(minecraft, new TreeMap<>(wrapper.getUpgradeHandler().getSlotWrappers()), sortedContents);
 		}
 		if (contentsTooltipPart == null) {

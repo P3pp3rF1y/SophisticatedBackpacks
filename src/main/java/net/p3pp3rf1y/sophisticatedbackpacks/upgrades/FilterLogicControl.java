@@ -12,8 +12,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.*;
 
-public class FilterLogicControl extends CompositeWidget<Widget> {
-	protected final FilterLogicContainer container;
+public class FilterLogicControl<L extends FilterLogic, C extends FilterLogicContainer<L>> extends CompositeWidget<Widget> {
+	protected final C container;
 	private final Button[] showButtons;
 	private final int height;
 	private final int width;
@@ -22,7 +22,11 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 	private final int slotsInExtraRow;
 	private final int fullSlotRows;
 
-	public FilterLogicControl(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow, Button... showButtons) {
+	public FilterLogicControl(Position position, C filterLogicContainer, int slotsPerRow, Button... showButtons) {
+		this(position, filterLogicContainer, slotsPerRow, showButtons.length > 0, showButtons);
+	}
+
+	protected FilterLogicControl(Position position, C filterLogicContainer, int slotsPerRow, boolean buttonsVisible, Button... showButtons) {
 		super(position);
 		container = filterLogicContainer;
 		this.slotsPerRow = slotsPerRow;
@@ -45,7 +49,7 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		}
 
 		width = Math.max(slotsPerRow * 18, getMaxButtonWidth());
-		slotsTopYOffset = showButtons.length > 0 ? 21 : 0;
+		slotsTopYOffset = buttonsVisible ? 21 : 0;
 		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
 		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
 		height = (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset;
@@ -86,14 +90,14 @@ public class FilterLogicControl extends CompositeWidget<Widget> {
 		return height;
 	}
 
-	public static class Basic extends FilterLogicControl {
-		public Basic(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+	public static class Basic extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {
+		public Basic(Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
 			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST);
 		}
 	}
 
-	public static class Advanced extends FilterLogicControl {
-		public Advanced(Position position, FilterLogicContainer filterLogicContainer, int slotsPerRow) {
+	public static class Advanced extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {
+		public Advanced(Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
 			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}

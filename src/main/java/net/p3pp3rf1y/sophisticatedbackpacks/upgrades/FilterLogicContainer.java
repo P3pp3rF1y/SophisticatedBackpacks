@@ -13,16 +13,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class FilterLogicContainer {
+public class FilterLogicContainer<T extends FilterLogic> {
 	private static final String DATA_IS_ALLOW_LIST = "isAllowList";
 	private static final String DATA_MATCH_DURABILITY = "matchDurability";
 	private static final String DATA_MATCH_NBT = "matchNbt";
 	private static final String DATA_PRIMARY_MATCH = "primaryMatch";
-	private final IServerUpdater serverUpdater;
-	private final Supplier<FilterLogic> filterLogic;
-	private final List<Slot> filterSlots = new ArrayList<>();
+	protected final IServerUpdater serverUpdater;
+	protected final Supplier<T> filterLogic;
+	private final List<FilterLogicSlot> filterSlots = new ArrayList<>();
 
-	public FilterLogicContainer(Supplier<FilterLogic> filterLogic, IServerUpdater serverUpdater, Consumer<Slot> addSlot) {
+	public FilterLogicContainer(Supplier<T> filterLogic, IServerUpdater serverUpdater, Consumer<Slot> addSlot) {
 		this.filterLogic = filterLogic;
 		this.serverUpdater = serverUpdater;
 		ItemStackHandler filterHandler = filterLogic.get().getFilterHandler();
@@ -90,13 +90,24 @@ public class FilterLogicContainer {
 		return false;
 	}
 
-	public List<Slot> getFilterSlots() {
+	public List<FilterLogicSlot> getFilterSlots() {
 		return filterSlots;
 	}
 
 	public static class FilterLogicSlot extends FilterSlotItemHandler {
+		private boolean enabled = true;
+
 		public FilterLogicSlot(Supplier<IItemHandler> filterHandler, Integer slot) {
 			super(filterHandler, slot, -100, -100);
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return enabled;
 		}
 	}
 }

@@ -12,6 +12,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
@@ -25,7 +27,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
-	protected FilterLogicControl filterLogicControl;
+	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen,
 			ITextComponent tabLabel, ITextComponent closedTooltip) {

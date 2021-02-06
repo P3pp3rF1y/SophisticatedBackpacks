@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class FilterLogic {
-	private final ItemStack upgrade;
+	protected final ItemStack upgrade;
 	private final Consumer<ItemStack> saveHandler;
 	private final int filterSlotCount;
 	private final Predicate<ItemStack> isItemValid;
@@ -84,7 +84,7 @@ public class FilterLogic {
 		return filterHandler;
 	}
 
-	private void save() {
+	protected void save() {
 		saveHandler.accept(upgrade);
 	}
 

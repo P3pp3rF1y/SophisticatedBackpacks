@@ -6,6 +6,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
 
@@ -15,7 +17,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.B
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.PRIMARY_MATCH;
 
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContainer<CompactingUpgradeWrapper>> {
-	protected FilterLogicControl filterLogicControl;
+	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected CompactingUpgradeTab(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position,
 			BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
@@ -40,7 +42,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<FilteredUp
 		public Advanced(FilteredUpgradeContainer<CompactingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("advanced_compacting")),
 					new TranslationTextComponent(translUpgradeTooltip("advanced_compacting")));
-			filterLogicControl = addHideableChild(new FilterLogicControl(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl<>(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedCompactingUpgrade.slotsInRow.get(), ALLOW_LIST, PRIMARY_MATCH));
 		}
 	}

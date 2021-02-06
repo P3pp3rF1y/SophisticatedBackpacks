@@ -119,6 +119,7 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.direction_output": "Output",
     "gui.sophisticatedbackpacks.upgrades.buttons.inventory_order_main_first": "Upgrades work with inventory\nof main backpack first",
     "gui.sophisticatedbackpacks.upgrades.buttons.inventory_order_incepted_first": "Upgrades work with inventories\nof backpacks in backpack first",
+    "gui.sophisticatedbackpacks.upgrades.buttons.deposit_filter_type_inventory": "Match Inventory Contents",
     "gui.sophisticatedbackpacks.buttons.sort_by_name": "By Name",
     "gui.sophisticatedbackpacks.buttons.sort_by_count": "By Count",
     "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",
