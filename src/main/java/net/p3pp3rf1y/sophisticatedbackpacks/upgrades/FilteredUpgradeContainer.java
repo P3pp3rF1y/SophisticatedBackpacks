@@ -7,7 +7,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
 public class FilteredUpgradeContainer<W extends IUpgradeWrapper & IFilteredUpgrade> extends UpgradeContainerBase<W, FilteredUpgradeContainer<W>> {
-	protected final FilterLogicContainer<FilterLogic> filterLogicContainer;
+	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
 	public FilteredUpgradeContainer(PlayerEntity player, int containerId, W wrapper, UpgradeContainerType<W, FilteredUpgradeContainer<W>> type) {
 		super(player, containerId, wrapper, type);

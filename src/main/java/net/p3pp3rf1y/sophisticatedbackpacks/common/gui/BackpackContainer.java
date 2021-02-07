@@ -147,7 +147,7 @@ public class BackpackContainer extends Container {
 		while (slotIndex < inventoryHandler.getSlots()) {
 			int lineIndex = slotIndex % getSlotsOnLine();
 			int finalSlotIndex = slotIndex;
-			backpackInventorySlots.add(addSlot(new BackpackInventorySlot(inventoryHandler, finalSlotIndex, lineIndex, yPosition)));
+			backpackInventorySlots.add(addSlot(new BackpackInventorySlot(player.world.isRemote, backpackWrapper, inventoryHandler, finalSlotIndex, lineIndex, yPosition)));
 
 			slotIndex++;
 			if (slotIndex % getSlotsOnLine() == 0) {
@@ -569,23 +569,6 @@ public class BackpackContainer extends Container {
 		@Override
 		public Pair<ResourceLocation, ResourceLocation> getBackground() {
 			return new Pair<>(PlayerContainer.LOCATION_BLOCKS_TEXTURE, EMPTY_UPGRADE_SLOT_BACKGROUND);
-		}
-	}
-
-	private class BackpackInventorySlot extends SlotItemHandler {
-		private final int slotIndex;
-
-		public BackpackInventorySlot(IItemHandlerModifiable inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
-			super(inventoryHandler, slotIndex, 8 + lineIndex * 18, yPosition);
-			this.slotIndex = slotIndex;
-		}
-
-		@Override
-		public void onSlotChanged() {
-			super.onSlotChanged();
-			// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
-			// however it does notify the slot of change
-			backpackWrapper.getInventoryHandler().onContentsChanged(slotIndex);
 		}
 	}
 

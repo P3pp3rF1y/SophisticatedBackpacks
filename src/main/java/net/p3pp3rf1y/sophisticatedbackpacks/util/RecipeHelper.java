@@ -33,23 +33,27 @@ public class RecipeHelper {
 
 	private static CompactingShape getCompactingShape(Item item) {
 		return getWorld().map(w -> {
-			if (tryCompactingRecipe(item, w, 2, 2)) {
+			ItemStack compactingResult = getCraftingResult(item, w, 2, 2);
+			if (!compactingResult.isEmpty()) {
+				if (uncompactMatchesItem(compactingResult, w, item, 4)) {
+					return CompactingShape.TWO_BY_TWO_UNCRAFTABLE;
+				}
 				return CompactingShape.TWO_BY_TWO;
 			}
-			if (tryCompactingRecipe(item, w, 3, 3)) {
+			compactingResult = getCraftingResult(item, w, 3, 3);
+			if (!compactingResult.isEmpty()) {
+				if (uncompactMatchesItem(compactingResult, w, item, 9)) {
+					return CompactingShape.THREE_BY_THREE_UNCRAFTABLE;
+				}
 				return CompactingShape.THREE_BY_THREE;
 			}
 			return CompactingShape.NONE;
 		}).orElse(CompactingShape.NONE);
 	}
 
-	private static boolean tryCompactingRecipe(Item item, World w, int width, int height) {
-		ItemStack result = getCraftingResult(item, w, width, height);
-		if (!result.isEmpty()) {
-			result = getCraftingResult(result.getItem(), w, 1, 1);
-			return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == width * height;
-		}
-		return false;
+	private static boolean uncompactMatchesItem(ItemStack result, World w, Item item, int count) {
+		result = getCraftingResult(result.getItem(), w, 1, 1);
+		return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == count;
 	}
 
 	public static ItemStack getCraftingResult(Item item, int width, int height) {
@@ -85,6 +89,8 @@ public class RecipeHelper {
 	public enum CompactingShape {
 		NONE,
 		THREE_BY_THREE,
-		TWO_BY_TWO
+		TWO_BY_TWO,
+		THREE_BY_THREE_UNCRAFTABLE,
+		TWO_BY_TWO_UNCRAFTABLE
 	}
 }
