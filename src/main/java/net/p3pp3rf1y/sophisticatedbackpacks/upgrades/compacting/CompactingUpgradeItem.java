@@ -7,11 +7,11 @@ import java.util.function.IntSupplier;
 
 public class CompactingUpgradeItem extends UpgradeItemBase<CompactingUpgradeWrapper> {
 	private static final UpgradeType<CompactingUpgradeWrapper> TYPE = new UpgradeType<>(CompactingUpgradeWrapper::new);
-	private final boolean shouldCompactNineByNine;
+	private final boolean shouldCompactThreeByThree;
 	private final IntSupplier filterSlotCount;
 
-	public CompactingUpgradeItem(boolean shouldCompactNineByNine, IntSupplier filterSlotCount) {
-		this.shouldCompactNineByNine = shouldCompactNineByNine;
+	public CompactingUpgradeItem(boolean shouldCompactThreeByThree, IntSupplier filterSlotCount) {
+		this.shouldCompactThreeByThree = shouldCompactThreeByThree;
 		this.filterSlotCount = filterSlotCount;
 	}
 
@@ -20,8 +20,8 @@ public class CompactingUpgradeItem extends UpgradeItemBase<CompactingUpgradeWrap
 		return TYPE;
 	}
 
-	public boolean shouldCompactNineByNine() {
-		return shouldCompactNineByNine;
+	public boolean shouldCompactThreeByThree() {
+		return shouldCompactThreeByThree;
 	}
 
 	public int getFilterSlotCount() {

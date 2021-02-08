@@ -12,7 +12,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -216,5 +221,43 @@ public class InventoryHelper {
 		if (!ret.isEmpty()) {
 			player.dropItem(ret, true);
 		}
+	}
+
+	static Map<ItemStackKey, Integer> getCompactedStacks(IItemHandler handler) {
+		Map<ItemStackKey, Integer> ret = new HashMap<>();
+		iterate(handler, (slot, stack) -> {
+			if (stack.isEmpty()) {
+				return;
+			}
+			ItemStackKey itemStackKey = new ItemStackKey(stack);
+			ret.put(itemStackKey, ret.computeIfAbsent(itemStackKey, fs -> 0) + stack.getCount());
+		});
+		return ret;
+	}
+
+	public static List<ItemStack> getCompactedStacksSortedByCount(IItemHandler handler) {
+		Map<ItemStackKey, Integer> compactedStacks = getCompactedStacks(handler);
+		List<Map.Entry<ItemStackKey, Integer>> sortedList = new ArrayList<>(compactedStacks.entrySet());
+		sortedList.sort(InventorySorter.BY_COUNT);
+
+		List<ItemStack> ret = new ArrayList<>();
+		sortedList.forEach(e -> {
+			ItemStack stackCopy = e.getKey().getStack().copy();
+			stackCopy.setCount(e.getValue());
+			ret.add(stackCopy);
+		});
+		return ret;
+	}
+
+	public static Set<ItemStackKey> getUniqueStacks(IItemHandler handler) {
+		Set<ItemStackKey> uniqueStacks = new HashSet<>();
+		iterate(handler, (slot, stack) -> {
+			if (stack.isEmpty()) {
+				return;
+			}
+			ItemStackKey itemStackKey = new ItemStackKey(stack);
+			uniqueStacks.add(itemStackKey);
+		});
+		return uniqueStacks;
 	}
 }

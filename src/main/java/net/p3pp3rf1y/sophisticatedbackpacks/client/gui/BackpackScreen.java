@@ -26,6 +26,8 @@ import java.util.Set;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
 
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
+	private static final int DISABLED_SLOT_COLOR = -1072689136;
+
 	private static final int UPGRADE_TOP_HEIGHT = 7;
 	private static final int UPGRADE_SLOT_HEIGHT = 18;
 	private static final int UPGRADE_SPACE_BETWEEN_SLOTS = 4;
@@ -150,22 +152,28 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void renderUpgradeSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
 		for (int slotId = 0; slotId < container.upgradeSlots.size(); ++slotId) {
 			Slot slot = container.upgradeSlots.get(slotId);
-			if (slot.isEnabled() && slot.xPos != DISABLED_SLOT_X_POS) {
+			if (slot.xPos != DISABLED_SLOT_X_POS) {
 				moveItems(matrixStack, slot);
+				if (!slot.isEnabled()) {
+					renderSlotOverlay(matrixStack, slot, DISABLED_SLOT_COLOR);
+				}
 			}
 
 			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
 				hoveredSlot = slot;
-				RenderSystem.disableDepthTest();
-				int xPos = slot.xPos;
-				int yPos = slot.yPos;
-				RenderSystem.colorMask(true, true, true, false);
-				int slotColor = getSlotColor(slotId);
-				fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
-				RenderSystem.colorMask(true, true, true, true);
-				RenderSystem.enableDepthTest();
+				renderSlotOverlay(matrixStack, slot, getSlotColor(slotId));
 			}
 		}
+	}
+
+	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
+		RenderSystem.disableDepthTest();
+		int xPos = slot.xPos;
+		int yPos = slot.yPos;
+		RenderSystem.colorMask(true, true, true, false);
+		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
+		RenderSystem.colorMask(true, true, true, true);
+		RenderSystem.enableDepthTest();
 	}
 
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y) {

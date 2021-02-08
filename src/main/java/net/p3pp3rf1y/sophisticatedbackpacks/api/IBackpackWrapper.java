@@ -28,7 +28,7 @@ public interface IBackpackWrapper {
 
 	void removeContentsUuid();
 
-	UUID getOrCreateContentsUuid();
+	Optional<UUID> getContentsUuid();
 
 	int getClothColor();
 
