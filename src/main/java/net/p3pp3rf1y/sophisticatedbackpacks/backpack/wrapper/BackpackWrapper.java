@@ -142,8 +142,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public UUID getOrCreateContentsUuid() {
-		Optional<UUID> contentsUuid = NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+	public Optional<UUID> getContentsUuid() {
+		return NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+	}
+
+	private UUID getOrCreateContentsUuid() {
+		Optional<UUID> contentsUuid = getContentsUuid();
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
 		}

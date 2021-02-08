@@ -26,6 +26,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +44,8 @@ public class BackpackTooltipRenderer {
 	private static boolean shouldRefreshContents = true;
 	private static long lastRequestTime = 0;
 	private static ContentsTooltipPart contentsTooltipPart;
-	private static UUID backpackUuid;
+	@Nullable
+	private static UUID backpackUuid = null;
 
 	@SuppressWarnings("unused") //parameter needs to be there so that addListener logic would know which event this method listens to
 	public static void onWorldLoad(WorldEvent.Load event) {
@@ -58,6 +61,12 @@ public class BackpackTooltipRenderer {
 			return;
 		}
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			UUID newUuid = wrapper.getContentsUuid().orElse(null);
+			if (backpackUuid == null && newUuid != null || backpackUuid != null && !backpackUuid.equals(newUuid)) {
+				lastRequestTime = 0;
+				backpackUuid = newUuid;
+				shouldRefreshContents = true;
+			}
 			requestContents(player, wrapper);
 			refreshContents(wrapper, minecraft);
 
@@ -72,21 +81,29 @@ public class BackpackTooltipRenderer {
 	private static void requestContents(ClientPlayerEntity player, net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
 			lastRequestTime = player.world.getGameTime();
-			PacketHandler.sendToServer(new RequestBackpackContentsMessage(wrapper.getOrCreateContentsUuid()));
+			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackContentsMessage(uuid)));
 		}
 	}
 
 	private static void refreshContents(IBackpackWrapper wrapper, Minecraft minecraft) {
-		if (shouldRefreshContents || backpackUuid != wrapper.getOrCreateContentsUuid()) {
-			backpackUuid = wrapper.getOrCreateContentsUuid();
+		if (shouldRefreshContents) {
 			shouldRefreshContents = false;
-			wrapper.onContentsNbtUpdated();
-			List<ItemStack> sortedContents = InventoryHelper.getCompactedStacksSortedByCount(wrapper.getInventoryHandler());
-			contentsTooltipPart = new ContentsTooltipPart(minecraft, new TreeMap<>(wrapper.getUpgradeHandler().getSlotWrappers()), sortedContents);
+			if (backpackUuid != null) {
+				wrapper.onContentsNbtUpdated();
+				List<ItemStack> sortedContents = InventoryHelper.getCompactedStacksSortedByCount(wrapper.getInventoryHandler());
+				contentsTooltipPart = new ContentsTooltipPart(minecraft, new TreeMap<>(wrapper.getUpgradeHandler().getSlotWrappers()), sortedContents);
+			} else {
+				contentsTooltipPart = getEmptyInventoryTooltip(minecraft);
+			}
 		}
 		if (contentsTooltipPart == null) {
-			contentsTooltipPart = new ContentsTooltipPart(minecraft, new HashMap<>(), new ArrayList<>());
+			contentsTooltipPart = getEmptyInventoryTooltip(minecraft);
 		}
+	}
+
+	@Nonnull
+	private static ContentsTooltipPart getEmptyInventoryTooltip(Minecraft minecraft) {
+		return new ContentsTooltipPart(minecraft, new HashMap<>(), new ArrayList<>());
 	}
 
 	//TODO this probably needs to move somewhere else, but there's no easy way to understand what STACK requested refresh of contents and tooltip is the only one at the moment

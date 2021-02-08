@@ -61,8 +61,8 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public UUID getOrCreateContentsUuid() {
-		return UUID.randomUUID();
+	public Optional<UUID> getContentsUuid() {
+		return Optional.empty();
 	}
 
 	@Override
