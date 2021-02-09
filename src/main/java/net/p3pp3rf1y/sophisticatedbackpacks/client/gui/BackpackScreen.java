@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
@@ -38,8 +39,10 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	static final int DISABLED_SLOT_X_POS = -1000;
 	private UpgradeSettingsControl upgradeControl;
 	private final int slots;
-	private Button sortButton;
-	private ToggleButton<SortBy> sortByButton;
+	@Nullable
+	private Button sortButton = null;
+	@Nullable
+	private ToggleButton<SortBy> sortByButton = null;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
@@ -81,7 +84,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void addSortButtons() {
-		Position pos = getSortButtonsPosition();
+		SortButtonsPosition sortButtonsPosition = Config.CLIENT.sortButtonsPosition.get();
+		if (sortButtonsPosition == SortButtonsPosition.HIDDEN) {
+			return;
+		}
+
+		Position pos = getSortButtonsPosition(sortButtonsPosition);
 
 		sortButton = new Button(new Position(pos.getX(), pos.getY()), ButtonDefinitions.SORT, button -> {
 			if (button == 0) {
@@ -107,8 +115,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private Position getSortButtonsPosition() {
-		switch (Config.CLIENT.sortButtonsPosition.get()) {
+	private Position getSortButtonsPosition(SortButtonsPosition sortButtonsPosition) {
+		switch (sortButtonsPosition) {
 			case ABOVE_UPGRADES:
 				return new Position(guiLeft - UPGRADE_INVENTORY_OFFSET - 2, guiTop + getUpgradeTop() - 14);
 			case BELOW_UPGRADES:
@@ -121,9 +129,9 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		}
 	}
 
-	public Rectangle2d getSortButtonsRectangle() {
-		return new Rectangle2d(sortButton.getX(), sortButton.getY(), sortByButton.getX() + sortByButton.getWidth() - sortButton.getX(),
-				sortByButton.getY() + sortByButton.getHeight() - sortButton.getY());
+	public Optional<Rectangle2d> getSortButtonsRectangle() {
+		return sortButton == null || sortByButton == null ? Optional.empty() : Optional.of(new Rectangle2d(sortButton.getX(), sortButton.getY(),
+				sortByButton.getX() + sortByButton.getWidth() - sortButton.getX(), sortByButton.getY() + sortByButton.getHeight() - sortButton.getY()));
 	}
 
 	private void initUpgradeControl() {
@@ -137,8 +145,10 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		upgradeControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
-		sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
+		if (sortButton != null && sortByButton != null) {
+			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
+			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
+		}
 		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}

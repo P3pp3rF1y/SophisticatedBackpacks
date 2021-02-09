@@ -53,7 +53,7 @@ public class SBPlugin implements IModPlugin {
 				List<Rectangle2d> ret = new ArrayList<>();
 				ret.add(gui.getUpgradeSlotsRectangle());
 				ret.addAll(gui.getUpgradeControl().getTabRectangles());
-				ret.add(gui.getSortButtonsRectangle());
+				gui.getSortButtonsRectangle().ifPresent(ret::add);
 				return ret;
 			}
 		});
