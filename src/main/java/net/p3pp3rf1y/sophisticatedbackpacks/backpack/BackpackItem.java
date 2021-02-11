@@ -42,7 +42,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -50,6 +49,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
@@ -152,7 +152,7 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.PASS;
 		}
 
-		if (tryInventoryInteraction(context)) {
+		if (InventoryInteractionHelper.tryInventoryInteraction(context)) {
 			return ActionResultType.SUCCESS;
 		}
 
@@ -198,27 +198,6 @@ public class BackpackItem extends ItemBase {
 		}
 		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
-	}
-
-	private boolean tryInventoryInteraction(ItemUseContext context) {
-		return WorldHelper.getTile(context.getWorld(), context.getPos())
-				.map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, context.getFace())
-						.map(itemHandler -> {
-							ItemStack backpack = context.getItem();
-							return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-									.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper))
-									.orElse(false);
-						}).orElse(false)
-				).orElse(false);
-	}
-
-	private boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
-		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
-		if (wrappers.isEmpty()) {
-			return false;
-		}
-		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(itemHandler));
-		return true;
 	}
 
 	protected boolean canPlace(BlockItemUseContext context, BlockState state) {

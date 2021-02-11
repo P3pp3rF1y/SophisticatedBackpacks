@@ -12,6 +12,10 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -25,6 +29,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -35,9 +40,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.Map;
 
@@ -47,6 +54,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BAC
 
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
+	private static final int KEY_C = 67;
 	private static final int KEY_Z = 90;
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
@@ -55,6 +63,8 @@ public class ClientProxy extends CommonProxy {
 
 	public static final KeyBinding BACKPACK_OPEN_KEYBIND = new KeyBinding(translKeybind("open_backpack"),
 			BackpackKeyConflictContext.INSTANCE, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final KeyBinding INVENTORY_INTERACTION_KEYBIND = new KeyBinding(translKeybind("inventory_interaction"),
+			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyBinding BACKPACK_TOGGLE_UPGRADE_1 = new KeyBinding(translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -78,6 +88,8 @@ public class ClientProxy extends CommonProxy {
 	public static void handleKeyInputEvent(TickEvent.ClientTickEvent event) {
 		if (BACKPACK_OPEN_KEYBIND.isPressed()) {
 			sendBackpackOpenMessage();
+		} else if (INVENTORY_INTERACTION_KEYBIND.isPressed()) {
+			sendInteractWithInventoryMessage();
 		} else {
 			for (Map.Entry<Integer, KeyBinding> slotKeybind : UPGRADE_SLOT_TOGGLE_KEYBINDS.entrySet()) {
 				if (slotKeybind.getValue().isPressed()) {
@@ -85,6 +97,23 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+
+	}
+
+	private static void sendInteractWithInventoryMessage() {
+		Minecraft mc = Minecraft.getInstance();
+		RayTraceResult rayTrace = mc.objectMouseOver;
+		if (rayTrace == null || rayTrace.getType() != RayTraceResult.Type.BLOCK) {
+			return;
+		}
+		BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) rayTrace;
+		BlockPos pos = blockraytraceresult.getPos();
+
+		if (!WorldHelper.getTile(mc.world, pos, TileEntity.class).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false)) {
+			return;
+		}
+
+		PacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getFace()));
 	}
 
 	private static void sendBackpackOpenMessage() {
@@ -127,6 +156,7 @@ public class ClientProxy extends CommonProxy {
 	private void clientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
 			ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND);
+			ClientRegistry.registerKeyBinding(INVENTORY_INTERACTION_KEYBIND);
 			UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> ClientRegistry.registerKeyBinding(keybind));
 		});
 		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK.get(), RenderType.getCutout());

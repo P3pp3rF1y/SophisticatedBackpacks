@@ -26,7 +26,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,7 +100,6 @@ public class BackpackTooltipRenderer {
 		}
 	}
 
-	@Nonnull
 	private static ContentsTooltipPart getEmptyInventoryTooltip(Minecraft minecraft) {
 		return new ContentsTooltipPart(minecraft, new HashMap<>(), new ArrayList<>());
 	}
