@@ -95,7 +95,7 @@
     "gui.sophisticatedbackpacks.upgrades.restock.tooltip": "取货设置",
     "gui.sophisticatedbackpacks.upgrades.advanced_restock.tooltip": "高级取货设置",
     "gui.sophisticatedbackpacks.upgrades.deposit.tooltip": "卸货设置",
-    "gui.sophisticatedbackpacks.upgrades.advanced_deposit.tooltip": "高级取货设置",
+    "gui.sophisticatedbackpacks.upgrades.advanced_deposit.tooltip": "高级卸货设置",
     "gui.sophisticatedbackpacks.upgrades.smelting.tooltip": "熔炼",
     "gui.sophisticatedbackpacks.upgrades.auto_smelting.tooltip": "自动熔炼",
     "gui.sophisticatedbackpacks.upgrades.crafting.tooltip": "合成",
