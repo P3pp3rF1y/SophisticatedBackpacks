@@ -28,6 +28,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -97,6 +98,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (flagIn == ITooltipFlag.TooltipFlags.ADVANCED) {
+			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(new StringTextComponent("UUID: " + uuid).mergeStyle(TextFormatting.DARK_GRAY))));
+		}
 		if (!Screen.hasShiftDown()) {
 			tooltip.add(new TranslationTextComponent(
 					BACKPACK_TOOLTIP + "press_for_contents",
