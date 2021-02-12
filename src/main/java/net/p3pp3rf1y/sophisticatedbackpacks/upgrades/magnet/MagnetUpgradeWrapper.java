@@ -4,6 +4,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -20,6 +21,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem> implements IFilteredUpgrade, ITickableUpgrade {
+	private static final String PREVENT_REMOTE_MOVEMENT = "PreventRemoteMovement";
+	private static final String ALLOW_MACHINE_MOVEMENT = "AllowMachineRemoteMovement";
+
 	private static final int COOLDOWN_TICKS = 10;
 	private static final int FULL_COOLDOWN_TICKS = 40;
 	private final FilterLogic filterLogic;
@@ -48,7 +52,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 		int cooldown = FULL_COOLDOWN_TICKS;
 		for (ItemEntity itemEntity : itemEntities) {
-			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem())) {
+			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, player)) {
 				continue;
 			}
 			if (tryToInsertItem(itemEntity)) {
@@ -56,6 +60,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			}
 		}
 		setCooldown(world, cooldown);
+	}
+
+	private boolean canNotPickup(ItemEntity itemEntity, @Nullable PlayerEntity player) {
+		CompoundNBT data = itemEntity.getPersistentData();
+		return player != null ? data.contains(PREVENT_REMOTE_MOVEMENT) : data.contains(PREVENT_REMOTE_MOVEMENT) && !data.contains(ALLOW_MACHINE_MOVEMENT);
+
 	}
 
 	private boolean tryToInsertItem(ItemEntity itemEntity) {
