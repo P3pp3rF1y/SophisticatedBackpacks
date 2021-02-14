@@ -51,9 +51,9 @@ public class SBPlugin implements IModPlugin {
 			@Override
 			public List<Rectangle2d> getGuiExtraAreas(BackpackScreen gui) {
 				List<Rectangle2d> ret = new ArrayList<>();
-				ret.add(gui.getUpgradeSlotsRectangle());
-				ret.addAll(gui.getUpgradeControl().getTabRectangles());
-				ret.add(gui.getSortButtonsRectangle());
+				gui.getUpgradeSlotsRectangle().ifPresent(ret::add);
+				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
+				gui.getSortButtonsRectangle().ifPresent(ret::add);
 				return ret;
 			}
 		});

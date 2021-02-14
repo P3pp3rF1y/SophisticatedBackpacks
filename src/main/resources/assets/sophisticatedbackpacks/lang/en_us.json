@@ -58,6 +58,7 @@
     "item.sophisticatedbackpacks.crafting_upgrade.tooltip": "Crafting table in an upgrade tab",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.open_backpack": "Open Backpack",
+    "keybind.sophisticatedbackpacks.inventory_interaction": "Run Inventory Interaction Upgrades",
     "keybind.sophisticatedbackpacks.toggle_upgrade_1": "Switch Upgrade in the 1st Slot On/Off",
     "keybind.sophisticatedbackpacks.toggle_upgrade_2": "Switch Upgrade in the 2nd Slot On/Off",
     "keybind.sophisticatedbackpacks.toggle_upgrade_3": "Switch Upgrade in the 3rd Slot On/Off",

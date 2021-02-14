@@ -29,6 +29,7 @@ public class PacketHandler {
 		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
 		registerMessage(RequestBackpackContentsMessage.class, RequestBackpackContentsMessage::encode, RequestBackpackContentsMessage::decode, RequestBackpackContentsMessage::onMessage);
 		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::encode, BackpackContentsMessage::decode, BackpackContentsMessage::onMessage);
+		registerMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::encode, InventoryInteractionMessage::decode, InventoryInteractionMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

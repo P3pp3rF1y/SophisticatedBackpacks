@@ -10,7 +10,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,6 +52,8 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		}
 	}
 
+	@SuppressWarnings("java:S3824")
+	//compute use here would be difficult as then there's no way of telling that value was newly created vs different than the one that needs to be set
 	private boolean updateSlotNbt(int slot) {
 		ItemStack slotStack = getStackInSlot(slot);
 		if (slotStack.isEmpty()) {
@@ -70,7 +71,6 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		return false;
 	}
 
-	@Nonnull
 	private CompoundNBT getSlotsStackNbt(int slot, ItemStack slotStack) {
 		CompoundNBT itemTag = new CompoundNBT();
 		itemTag.putInt("Slot", slot);
