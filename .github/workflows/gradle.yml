@@ -14,7 +14,11 @@ jobs:
       with:
         java-version: 1.11
     - name: Build with Gradle
-      run: ./gradlew build
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: ./gradlew build
     - name: Publish to Github Packages
       env:
         GPR_USER: ${{ secrets.GPR_USER }}
