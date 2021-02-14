@@ -127,8 +127,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public CompoundNBT getClientTag() {
 		CompoundNBT tag = backpack.getOrCreateTag();
-		tag.putInt(INVENTORY_SLOTS_TAG, getInventoryHandler().getSlots());
-		tag.putInt(UPGRADE_SLOTS_TAG, getUpgradeHandler().getSlots());
+		if (getContentsUuid().isPresent()) {
+			tag.putInt(INVENTORY_SLOTS_TAG, getInventoryHandler().getSlots());
+			tag.putInt(UPGRADE_SLOTS_TAG, getUpgradeHandler().getSlots());
+		}
 		return tag;
 	}
 
