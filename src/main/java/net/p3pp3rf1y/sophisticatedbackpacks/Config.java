@@ -1,13 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
+import net.minecraft.entity.EntityType;
+import net.minecraft.loot.LootTables;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Config {
 	private Config() {}
@@ -64,6 +71,7 @@ public class Config {
 		public final SmeltingUpgradeConfig smeltingUpgrade;
 		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
 		public final InceptionUpgradeConfig inceptionUpgrade;
+		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -94,8 +102,87 @@ public class Config {
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
+			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			builder.pop();
+		}
+
+		public static class EntityBackpackAdditionsConfig {
+			private static final String ENTITY_LOOT_MATCHER = "([a-zA-Z1-9]+:[a-zA-Z1-9]+)\\|(null|[a-zA-Z1-9]+:[a-zA-Z1-9]+)";
+			public final ForgeConfigSpec.DoubleValue chance;
+			public final ForgeConfigSpec.BooleanValue addLoot;
+			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
+			public final ForgeConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
+			@Nullable
+			private Map<EntityType<?>, ResourceLocation> entityLootTables = null;
+
+			public EntityBackpackAdditionsConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Settings for Spawning Entities with Backpack").push("entityBackpackAdditions");
+				chance = builder.comment("Chance of an entity spawning with Backpack").defineInRange("chance", 0.01, 0, 1);
+				addLoot = builder.comment("Turns on/off addition of loot into backpacks").define("addLoot", true);
+				buffWithPotionEffects = builder.comment("Turns on/off buffing the entity that wears backpack with potion effects. These are scaled based on how much loot is added.")
+						.define("buffWithPotionEffects", true);
+				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName")
+						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
+				builder.pop();
+			}
+
+			public Optional<ResourceLocation> getLootTableName(EntityType<?> entityType) {
+				if (entityLootTables == null) {
+					initEntityLootTables();
+				}
+				return Optional.ofNullable(entityLootTables.get(entityType));
+			}
+
+			public boolean canWearBackpack(EntityType<?> entityType) {
+				if (entityLootTables == null) {
+					initEntityLootTables();
+				}
+				return entityLootTables.containsKey(entityType);
+			}
+
+			private void initEntityLootTables() {
+				entityLootTables = new HashMap<>();
+				for (String mapping : entityLootTableList.get()) {
+					String[] entityLoot = mapping.split("\\|");
+					if (entityLoot.length < 2) {
+						continue;
+					}
+					String entityRegistryName = entityLoot[0];
+					String lootTableName = entityLoot[1];
+
+					EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityRegistryName));
+					if (entityType != null) {
+						entityLootTables.put(entityType, lootTableName.equals("null") ? null : new ResourceLocation(lootTableName));
+					}
+				}
+			}
+
+			private List<String> getDefaultEntityLootTableList() {
+				return getDefaultEntityLootMapping().entrySet().stream().map(e -> e.getKey().getRegistryName() + "|" + e.getValue()).collect(Collectors.toList());
+			}
+
+			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
+				Map<EntityType<?>, ResourceLocation> mapping = new HashMap<>();
+				mapping.put(EntityType.CREEPER, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.DROWNED, LootTables.CHESTS_SHIPWRECK_TREASURE);
+				mapping.put(EntityType.ENDERMAN, LootTables.CHESTS_END_CITY_TREASURE);
+				mapping.put(EntityType.EVOKER, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.HUSK, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.PIGLIN, LootTables.BASTION_BRIDGE);
+				mapping.put(EntityType.field_242287_aj, LootTables.BASTION_TREASURE);
+				mapping.put(EntityType.PILLAGER, LootTables.CHESTS_PILLAGER_OUTPOST);
+				mapping.put(EntityType.SKELETON, LootTables.CHESTS_SIMPLE_DUNGEON);
+				mapping.put(EntityType.STRAY, LootTables.CHESTS_IGLOO_CHEST);
+				mapping.put(EntityType.VEX, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.VINDICATOR, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.WITCH, LootTables.CHESTS_BURIED_TREASURE);
+				mapping.put(EntityType.WITHER_SKELETON, LootTables.CHESTS_NETHER_BRIDGE);
+				mapping.put(EntityType.ZOMBIE, LootTables.CHESTS_SIMPLE_DUNGEON);
+				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.CHESTS_VILLAGE_VILLAGE_ARMORER);
+				mapping.put(EntityType.ZOMBIFIED_PIGLIN, LootTables.BASTION_OTHER);
+				return mapping;
+			}
 		}
 
 		public static class InceptionUpgradeConfig {
