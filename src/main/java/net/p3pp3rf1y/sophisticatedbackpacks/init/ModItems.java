@@ -81,6 +81,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeCon
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeWrapper;
@@ -174,8 +175,8 @@ public class ModItems {
 	private static final UpgradeContainerType<FeedingUpgradeWrapper, FilteredUpgradeContainer<FeedingUpgradeWrapper>> FEEDING_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
 	private static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> ADVANCED_COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
-	private static final UpgradeContainerType<VoidUpgradeWrapper, FilteredUpgradeContainer<VoidUpgradeWrapper>> VOID_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
-	private static final UpgradeContainerType<VoidUpgradeWrapper, FilteredUpgradeContainer<VoidUpgradeWrapper>> ADVANCED_VOID_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+	private static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> VOID_TYPE = new UpgradeContainerType<>(VoidUpgradeContainer::new);
+	private static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> ADVANCED_VOID_TYPE = new UpgradeContainerType<>(VoidUpgradeContainer::new);
 	private static final UpgradeContainerType<RestockUpgradeWrapper, RestockUpgradeContainer> RESTOCK_TYPE = new UpgradeContainerType<>(RestockUpgradeContainer::new);
 	private static final UpgradeContainerType<RestockUpgradeWrapper, RestockUpgradeContainer> ADVANCED_RESTOCK_TYPE = new UpgradeContainerType<>(RestockUpgradeContainer::new);
 	private static final UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> DEPOSIT_TYPE = new UpgradeContainerType<>(DepositUpgradeContainer::new);

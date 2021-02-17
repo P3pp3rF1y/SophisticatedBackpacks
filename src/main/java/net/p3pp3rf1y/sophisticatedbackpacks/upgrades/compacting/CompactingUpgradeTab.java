@@ -28,12 +28,6 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 					true, GuiHelper.getButtonStateData(new UV(112, 64), translUpgradeButton("compact_anything"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
-	public static final ButtonDefinition.Toggle<Boolean> WORK_IN_GUI = ButtonDefinitions.createToggleButtonDefinition(
-			ImmutableMap.of(
-					true, GuiHelper.getButtonStateData(new UV(32, 80), translUpgradeButton("compacting_works_in_gui"), Dimension.SQUARE_16, new Position(1, 1)),
-					false, GuiHelper.getButtonStateData(new UV(48, 80), translUpgradeButton("compacting_only_automatic"), Dimension.SQUARE_16, new Position(1, 1))
-			));
-
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected CompactingUpgradeTab(CompactingUpgradeContainer container, Position position,
@@ -41,7 +35,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 		super(container, position, screen, tabLabel, closedTooltip);
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), COMPACT_UNCRAFTABLE, button -> getContainer().setCompactNonUncraftable(!getContainer().shouldCompactNonUncraftable()),
 				getContainer()::shouldCompactNonUncraftable));
-		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), WORK_IN_GUI, button -> getContainer().setShouldWorkdInGUI(!getContainer().shouldWorkInGUI()),
+		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), ButtonDefinitions.WORK_IN_GUI, button -> getContainer().setShouldWorkdInGUI(!getContainer().shouldWorkInGUI()),
 				getContainer()::shouldWorkInGUI));
 	}
 
