@@ -278,7 +278,7 @@ public class BackpackContainer extends Container {
 			ItemStack slotStack = upgradeContainer.map(c -> c.getSlotStackToTransfer(slot)).orElse(slot.getStack());
 			itemstack = slotStack.copy();
 
-			if (!mergeSlotStack(index, slotStack)) {
+			if (!mergeSlotStack(slot, index, slotStack)) {
 				return ItemStack.EMPTY;
 			}
 
@@ -299,11 +299,14 @@ public class BackpackContainer extends Container {
 		return itemstack;
 	}
 
-	private boolean mergeSlotStack(int index, ItemStack slotStack) {
+	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack) {
 		if (isBackpackInventoryOrUpgradeSlot(index)) {
 			return mergeStackToPlayersInventory(slotStack);
 		} else if (isUpgradeSettingsSlot(index)) {
-			return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack);
+			if (getSlotUpgradeContainer(slot).map(c -> c.mergeIntoBackpackFirst(slot)).orElse(true)) {
+				return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack);
+			}
+			return mergeStackToPlayersInventory(slotStack) || mergeStackToBackpack(slotStack);
 		} else {
 			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
 		}

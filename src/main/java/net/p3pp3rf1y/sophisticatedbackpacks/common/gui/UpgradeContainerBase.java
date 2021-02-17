@@ -100,4 +100,8 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
 		slot.onTake(player, slotStack);
 	}
+
+	public boolean mergeIntoBackpackFirst(@SuppressWarnings("unused") Slot slot) {
+		return true;
+	}
 }

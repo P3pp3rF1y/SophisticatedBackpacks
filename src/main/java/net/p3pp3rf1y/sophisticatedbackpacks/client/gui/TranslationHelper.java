@@ -50,6 +50,10 @@ public class TranslationHelper {
 		return ret;
 	}
 
+	public static List<StringTextComponent> getTranslatedLines(String translateKey) {
+		return getTranslatedLines(translateKey, null);
+	}
+
 	public static List<StringTextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters) {
 		String text = I18n.format(translateKey, parameters);
 
