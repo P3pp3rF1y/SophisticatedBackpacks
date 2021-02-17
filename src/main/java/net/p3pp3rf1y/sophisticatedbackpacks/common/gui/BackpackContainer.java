@@ -314,19 +314,19 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean mergeStackToBackpack(ItemStack slotStack) {
-		return mergeItemStack(slotStack, 0, getBackpackSlotsCount(), false);
+		return mergeItemStack(slotStack, 0, getNumberOfSlots(), false);
 	}
 
 	private boolean mergeStackToPlayersInventory(ItemStack slotStack) {
-		return mergeItemStack(slotStack, getBackpackSlotsCount(), inventorySlots.size(), true);
+		return mergeItemStack(slotStack, getNumberOfSlots(), inventorySlots.size(), true);
 	}
 
 	private boolean isUpgradeSettingsSlot(int index) {
-		return index >= getBackpackSlotsCount() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
+		return index >= getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
 	private boolean isBackpackInventoryOrUpgradeSlot(int index) {
-		return index < getBackpackSlotsCount() || (index >= inventorySlots.size() && (index - inventorySlots.size() < getNumberOfUpgradeSlots()));
+		return index < getNumberOfSlots() || (index >= inventorySlots.size() && (index - inventorySlots.size() < getNumberOfUpgradeSlots()));
 	}
 
 	private Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
@@ -338,10 +338,6 @@ public class BackpackContainer extends Container {
 			}
 		}
 		return Optional.empty();
-	}
-
-	private int getBackpackSlotsCount() {
-		return getNumberOfRows() * getSlotsOnLine();
 	}
 
 	@Override
