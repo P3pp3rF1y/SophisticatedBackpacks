@@ -72,6 +72,7 @@ public class Config {
 		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
+		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -104,11 +105,13 @@ public class Config {
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
+			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
+
 			builder.pop();
 		}
 
 		public static class EntityBackpackAdditionsConfig {
-			private static final String ENTITY_LOOT_MATCHER = "([a-zA-Z1-9]+:[a-zA-Z1-9]+)\\|(null|[a-zA-Z1-9]+:[a-zA-Z1-9]+)";
+			private static final String ENTITY_LOOT_MATCHER = "([a-zA-Z1-9]+:[a-zA-Z1-9]+)\\|(null|[a-zA-Z1-9]+:[a-zA-Z1-9/]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
