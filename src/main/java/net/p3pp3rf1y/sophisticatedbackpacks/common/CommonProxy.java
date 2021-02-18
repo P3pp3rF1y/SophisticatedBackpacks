@@ -1,12 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -25,6 +30,22 @@ public class CommonProxy {
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
 		MinecraftForge.EVENT_BUS.addListener(this::onItemPickup);
+		MinecraftForge.EVENT_BUS.addListener(this::onLivingSpecialSpawn);
+		MinecraftForge.EVENT_BUS.addListener(this::onLivingDrops);
+	}
+
+	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
+		Entity entity = event.getEntity();
+		if (entity instanceof MonsterEntity) {
+			MonsterEntity monster = (MonsterEntity) entity;
+			if (monster.getItemStackFromSlot(EquipmentSlotType.CHEST).isEmpty()) {
+				EntityBackpackAdditionHandler.addBackpack(monster);
+			}
+		}
+	}
+
+	private void onLivingDrops(LivingDropsEvent event) {
+		EntityBackpackAdditionHandler.handleBackpackDrop(event);
 	}
 
 	private void onItemPickup(EntityItemPickupEvent event) {

@@ -1,9 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import com.google.common.collect.Lists;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -13,10 +15,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -259,5 +264,53 @@ public class InventoryHelper {
 			uniqueStacks.add(itemStackKey);
 		});
 		return uniqueStacks;
+	}
+
+	public static List<Integer> getEmptySlotsRandomized(IItemHandler inventory, Random rand) {
+		List<Integer> list = Lists.newArrayList();
+
+		for (int i = 0; i < inventory.getSlots(); ++i) {
+			if (inventory.getStackInSlot(i).isEmpty()) {
+				list.add(i);
+			}
+		}
+
+		Collections.shuffle(list, rand);
+		return list;
+	}
+
+	public static void shuffleItems(List<ItemStack> stacks, int emptySlotsCount, Random rand) {
+		List<ItemStack> list = Lists.newArrayList();
+		Iterator<ItemStack> iterator = stacks.iterator();
+
+		while (iterator.hasNext()) {
+			ItemStack itemstack = iterator.next();
+			if (itemstack.isEmpty()) {
+				iterator.remove();
+			} else if (itemstack.getCount() > 1) {
+				list.add(itemstack);
+				iterator.remove();
+			}
+		}
+
+		while (emptySlotsCount - stacks.size() - list.size() > 0 && !list.isEmpty()) {
+			ItemStack itemstack2 = list.remove(MathHelper.nextInt(rand, 0, list.size() - 1));
+			int i = MathHelper.nextInt(rand, 1, itemstack2.getCount() / 2);
+			ItemStack itemstack1 = itemstack2.split(i);
+			if (itemstack2.getCount() > 1 && rand.nextBoolean()) {
+				list.add(itemstack2);
+			} else {
+				stacks.add(itemstack2);
+			}
+
+			if (itemstack1.getCount() > 1 && rand.nextBoolean()) {
+				list.add(itemstack1);
+			} else {
+				stacks.add(itemstack1);
+			}
+		}
+
+		stacks.addAll(list);
+		Collections.shuffle(stacks, rand);
 	}
 }

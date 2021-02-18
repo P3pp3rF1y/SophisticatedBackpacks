@@ -10,5 +10,6 @@ public class DataGenerators {
 		DataGenerator generator = evt.getGenerator();
 		generator.addProvider(new SBPBlockLootProvider(generator));
 		generator.addProvider(new SBPRecipeProvider(generator));
+		generator.addProvider(new SBPLootInjectProvider(generator));
 	}
 }

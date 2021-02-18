@@ -33,4 +33,13 @@ public class CraftingUpgradeWrapper extends UpgradeWrapperBase<CraftingUpgradeWr
 	public boolean canBeDisabled() {
 		return false;
 	}
+
+	public boolean shouldShiftClickIntoBackpack() {
+		return NBTHelper.getBoolean(upgrade, "shiftClickIntoBackpack").orElse(true);
+	}
+
+	public void setShiftClickIntoBackpack(boolean shiftClickIntoBackpack) {
+		NBTHelper.setBoolean(upgrade, "shiftClickIntoBackpack", shiftClickIntoBackpack);
+		save();
+	}
 }

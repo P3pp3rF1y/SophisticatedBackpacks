@@ -18,11 +18,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.List;
 import java.util.Optional;
 
 public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgradeWrapper, CraftingUpgradeContainer> implements ICraftingContainer {
+	private static final String DATA_SHIFT_CLICK_INTO_BACKPACK = "shiftClickIntoBackpack";
 	private final CraftResultInventory craftResult = new CraftResultInventory();
 	private final CraftingItemHandler craftMatrix;
 	private final CraftingResultSlot craftingResultSlot;
@@ -41,7 +43,9 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 			});
 		}
 		craftMatrix = new CraftingItemHandler(upgradeWrapper::getInventory, this::onCraftMatrixChanged);
-		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100);
+		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
+
+		};
 		slots.add(craftingResultSlot);
 	}
 
@@ -77,7 +81,9 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 
 	@Override
 	public void handleMessage(CompoundNBT data) {
-		//noop
+		if (data.contains(DATA_SHIFT_CLICK_INTO_BACKPACK)) {
+			setShiftClickIntoBackpack(data.getBoolean(DATA_SHIFT_CLICK_INTO_BACKPACK));
+		}
 	}
 
 	@Override
@@ -101,5 +107,19 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	@Override
 	public List<Slot> getRecipeSlots() {
 		return slots.subList(0, 9);
+	}
+
+	public boolean shouldShiftClickIntoBackpack() {
+		return upgradeWrapper.shouldShiftClickIntoBackpack();
+	}
+
+	public void setShiftClickIntoBackpack(boolean shiftClickIntoBackpack) {
+		upgradeWrapper.setShiftClickIntoBackpack(shiftClickIntoBackpack);
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHIFT_CLICK_INTO_BACKPACK, shiftClickIntoBackpack));
+	}
+
+	@Override
+	public boolean mergeIntoBackpackFirst(Slot slot) {
+		return !(slot instanceof CraftingResultSlot) || shouldShiftClickIntoBackpack();
 	}
 }
