@@ -105,7 +105,7 @@ public class EntityBackpackAdditionHandler {
 		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.buffWithPotionEffects.get())) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(effect -> {
-						int amplifier = Math.min(minDifficulty, monster.world.rand.nextInt(difficulty + 1));
+						int amplifier = Math.max(minDifficulty, monster.world.rand.nextInt(difficulty + 1));
 						monster.addPotionEffect(new EffectInstance(effect, 30 * 60 * 20, amplifier));
 					});
 		}
