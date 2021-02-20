@@ -56,10 +56,10 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 
 		CompactingShape shape = RecipeHelper.getItemCompactingShape(item);
 
-		if (shape == CompactingShape.TWO_BY_TWO_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.TWO_BY_TWO)) {
-			tryCompacting(inventoryHandler, item, 2, 2);
-		} else if (upgradeItem.shouldCompactThreeByThree() && (shape == CompactingShape.THREE_BY_THREE_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.THREE_BY_THREE))) {
+		if (upgradeItem.shouldCompactThreeByThree() && (shape == CompactingShape.THREE_BY_THREE_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.THREE_BY_THREE))) {
 			tryCompacting(inventoryHandler, item, 3, 3);
+		} else if (shape == CompactingShape.TWO_BY_TWO_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.TWO_BY_TWO)) {
+			tryCompacting(inventoryHandler, item, 2, 2);
 		}
 	}
 
