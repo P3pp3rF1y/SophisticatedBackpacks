@@ -33,7 +33,7 @@ public class PacketHandler {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static <M> void registerMessage(Class<M> messageType, BiConsumer<M, PacketBuffer> encoder, Function<PacketBuffer, M> decoder, BiConsumer<M, Supplier<NetworkEvent.Context>> messageConsumer) {
+	public static <M> void registerMessage(Class<M> messageType, BiConsumer<M, PacketBuffer> encoder, Function<PacketBuffer, M> decoder, BiConsumer<M, Supplier<NetworkEvent.Context>> messageConsumer) {
 		networkWrapper.registerMessage(idx++, messageType, encoder, decoder, messageConsumer);
 	}
 
