@@ -40,7 +40,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 			ModItems.BACKPACK.get(), MODEL.leatherClips,
 			ModItems.IRON_BACKPACK.get(), MODEL.ironClips,
 			ModItems.GOLD_BACKPACK.get(), MODEL.goldClips,
-			ModItems.DIAMOND_BACKPACK.get(), MODEL.diamondClips
+			ModItems.DIAMOND_BACKPACK.get(), MODEL.diamondClips,
+			ModItems.NETHERITE_BACKPACK.get(), MODEL.netheriteClips
 	);
 
 	private static final Map<EntityType<?>, Vector3d> entityTranslations;

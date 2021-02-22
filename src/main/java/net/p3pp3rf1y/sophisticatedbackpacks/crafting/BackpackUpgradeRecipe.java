@@ -9,7 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.Optional;
 
-public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRecipe {
+public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecipe<ShapedRecipe> {
 	public static final Serializer SERIALIZER = new Serializer();
 	private final ShapedRecipe compose;
 
@@ -50,9 +50,9 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IShapeBasedRe
 		return SERIALIZER;
 	}
 
-	public static class Serializer extends ShapedSerializer<BackpackUpgradeRecipe> {
+	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BackpackUpgradeRecipe> {
 		public Serializer() {
-			super(BackpackUpgradeRecipe::new);
+			super(BackpackUpgradeRecipe::new, IRecipeSerializer.CRAFTING_SHAPED);
 		}
 	}
 }

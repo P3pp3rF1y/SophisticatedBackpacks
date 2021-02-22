@@ -40,6 +40,7 @@ public class SBPlugin implements IModPlugin {
 		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
 		registration.registerSubtypeInterpreter(ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
 		registration.registerSubtypeInterpreter(ModItems.DIAMOND_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(ModItems.NETHERITE_BACKPACK.get(), backpackNbtInterpreter);
 	}
 
 	@Override

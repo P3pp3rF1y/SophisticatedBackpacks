@@ -14,6 +14,7 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 	final ModelRenderer ironClips;
 	final ModelRenderer goldClips;
 	final ModelRenderer diamondClips;
+	final ModelRenderer netheriteClips;
 
 	public BackpackModel() {
 		textureWidth = 64;
@@ -52,6 +53,7 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 		ironClips = getClipsRenderer(6);
 		goldClips = getClipsRenderer(12);
 		diamondClips = getClipsRenderer(18);
+		netheriteClips = getClipsRenderer(24);
 	}
 
 	private ModelRenderer getClipsRenderer(int xTextureOffset) {

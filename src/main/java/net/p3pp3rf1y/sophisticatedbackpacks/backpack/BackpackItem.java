@@ -69,7 +69,11 @@ public class BackpackItem extends ItemBase {
 	private final Supplier<BackpackBlock> blockSupplier;
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
-		super(new Properties().maxStackSize(1));
+		this(numberOfSlots, numberOfUpgradeSlots, blockSupplier, new Properties());
+	}
+
+	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, Properties properties) {
+		super(properties.maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;

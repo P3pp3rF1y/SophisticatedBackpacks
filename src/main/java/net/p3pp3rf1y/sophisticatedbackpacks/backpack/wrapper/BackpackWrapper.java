@@ -282,7 +282,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void removeOriginalBackpack() {
-		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid());
+		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid(), getContentsUuid().orElse(null));
 		removeLinkToOriginalBackpack();
 		backpackSaveHandler.run();
 	}

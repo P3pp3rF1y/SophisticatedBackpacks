@@ -52,6 +52,7 @@ public class Config {
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
 		public final BackpackConfig diamondBackpack;
+		public final BackpackConfig netheriteBackpack;
 		public final FilteredUpgradeConfig compactingUpgrade;
 		public final FilteredUpgradeConfig advancedCompactingUpgrade;
 		public final FilteredUpgradeConfig depositUpgrade;
@@ -83,6 +84,7 @@ public class Config {
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
 			goldBackpack = new BackpackConfig(builder, "Gold", 81, 3);
 			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);
+			netheriteBackpack = new BackpackConfig(builder, "Netherite", 120, 7);
 
 			compactingUpgrade = new FilteredUpgradeConfig(builder, "Compacting Upgrade", "compactingUpgrade", 9, 3);
 			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
