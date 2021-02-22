@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -167,7 +168,7 @@ public class InventoryHelper {
 		return false;
 	}
 
-	public static void transfer(IItemHandler handlerA, IItemHandler handlerB) {
+	public static void transfer(IItemHandler handlerA, IItemHandler handlerB, Consumer<Supplier<ItemStack>> onInserted) {
 		int slotsA = handlerA.getSlots();
 		for (int slot = 0; slot < slotsA; slot++) {
 			ItemStack slotStack = handlerA.getStackInSlot(slot);
@@ -179,6 +180,11 @@ public class InventoryHelper {
 			int countToExtract = slotStack.getCount() - resultStack.getCount();
 			if (countToExtract > 0 && handlerA.extractItem(slot, countToExtract, true).getCount() == countToExtract) {
 				InventoryHelper.insertIntoInventory(handlerA.extractItem(slot, countToExtract, false), handlerB, false);
+				onInserted.accept(() -> {
+					ItemStack copiedStack = slotStack.copy();
+					copiedStack.setCount(countToExtract);
+					return copiedStack;
+				});
 			}
 		}
 	}
