@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class BackpackTooltipRenderer {
 	private BackpackTooltipRenderer() {}
@@ -70,8 +69,7 @@ public class BackpackTooltipRenderer {
 			refreshContents(wrapper, minecraft);
 
 			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-			GuiHelper.setTooltipToRender(lines.stream().map(ITextComponent::func_241878_f).collect(Collectors.toList()), event.getFontRenderer());
-			GuiHelper.renderToolTip(minecraft, event.getMatrixStack(), event.getX(), event.getY(), contentsTooltipPart);
+			GuiHelper.renderToolTip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
 			event.setCanceled(true);
 		});
 
@@ -196,7 +194,7 @@ public class BackpackTooltipRenderer {
 
 		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
 			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW).func_241878_f()),
+			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW)),
 					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer);
 			renderTypeBuffer.finish();
 			return topY;

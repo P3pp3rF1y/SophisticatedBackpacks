@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.ITextProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
@@ -18,14 +18,14 @@ public class Button extends ButtonBase {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private final List<IReorderingProcessor> tooltip;
+	private final List<ITextProperties> tooltip;
 
 	public Button(Position position, ButtonDefinition buttonDefinition, Consumer<Integer> onClick) {
 		super(position, buttonDefinition.getDimension(), onClick);
 		backgroundTexture = buttonDefinition.getBackgroundTexture();
 		foregroundTexture = buttonDefinition.getForegroundTexture();
 		hoveredBackgroundTexture = buttonDefinition.getHoveredBackgroundTexture();
-		tooltip = Collections.singletonList(buttonDefinition.getTooltip().func_241878_f());
+		tooltip = Collections.singletonList(buttonDefinition.getTooltip());
 	}
 
 	@Override

@@ -12,11 +12,15 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.LanguageMap;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -76,40 +80,37 @@ public class GuiHelper {
 		AbstractGui.blit(matrixStack, x + texData.getXOffset(), y + texData.getYOffset(), texData.getU(), texData.getV(), texData.getWidth(), texData.getHeight(), texData.getTextureWidth(), texData.getTextureHeight());
 	}
 
-	private static List<? extends IReorderingProcessor> tooltipToRender = Collections.emptyList();
-	@Nullable
-	private static FontRenderer tooltipRenderFont = null;
+	private static List<? extends ITextProperties> tooltipToRender = Collections.emptyList();
 
-	public static void setTooltipToRender(List<IReorderingProcessor> tooltip) {
-		setTooltipToRender(tooltip, null);
-	}
-
-	public static void setTooltipToRender(List<IReorderingProcessor> tooltip, @Nullable FontRenderer font) {
+	public static void setTooltipToRender(List<? extends ITextProperties> tooltip) {
 		tooltipToRender = tooltip;
-		tooltipRenderFont = font;
 	}
 
 	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY) {
-		renderToolTip(minecraft, matrixStack, mouseX, mouseY, ITooltipRenderPart.EMPTY);
-	}
-
-	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY, ITooltipRenderPart additionalRender) {
 		if (tooltipToRender.isEmpty()) {
 			return;
 		}
 
+		renderToolTip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY);
+		tooltipToRender = Collections.emptyList();
+	}
+
+	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, List<? extends ITextProperties> textLines, int mouseX, int mouseY,
+			ITooltipRenderPart additionalRender, @Nullable FontRenderer tooltipRenderFont, ItemStack stack) {
+
 		FontRenderer font = tooltipRenderFont == null ? minecraft.fontRenderer : tooltipRenderFont;
+
 		int windowWidth = minecraft.getMainWindow().getScaledWidth();
 		int windowHeight = minecraft.getMainWindow().getScaledHeight();
 
-		int tooltipWidth = getMaxLineWidth(tooltipToRender, font);
+		int tooltipWidth = getMaxLineWidth(textLines, font);
 		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
 		int leftX = mouseX + 12;
 		int topY = mouseY - 12;
 		int tooltipHeight = 8;
-		if (tooltipToRender.size() > 1) {
-			tooltipHeight += 2 + (tooltipToRender.size() - 1) * 10;
+		if (textLines.size() > 1) {
+			tooltipHeight += 2 + (textLines.size() - 1) * 10;
 		}
 		tooltipHeight += additionalRender.getHeight();
 
@@ -126,15 +127,25 @@ public class GuiHelper {
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
 		Matrix4f matrix4f = matrixStack.getLast().getMatrix();
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 4, topY - 3, leftX - 3, topY + tooltipHeight + 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 3, topY - 3, leftX + tooltipWidth + 4, topY + tooltipHeight + 3, 400, -267386864, -267386864);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3 + 1, leftX - 3 + 1, topY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 2, topY - 3 + 1, leftX + tooltipWidth + 3, topY + tooltipHeight + 3 - 1, 400, 1347420415, 1344798847);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY - 3 + 1, 400, 1347420415, 1347420415);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, 1344798847, 1344798847);
+
+		int backgroundColor = GuiUtils.DEFAULT_BACKGROUND_COLOR;
+		int borderColorStart = GuiUtils.DEFAULT_BORDER_COLOR_START;
+		int borderColorEnd = GuiUtils.DEFAULT_BORDER_COLOR_END;
+		RenderTooltipEvent.Color colorEvent = new RenderTooltipEvent.Color(stack, textLines, matrixStack, leftX, topY, font, backgroundColor, borderColorStart, borderColorEnd);
+		MinecraftForge.EVENT_BUS.post(colorEvent);
+		backgroundColor = colorEvent.getBackground();
+		borderColorStart = colorEvent.getBorderStart();
+		borderColorEnd = colorEvent.getBorderEnd();
+
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, 400, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, 400, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 4, topY - 3, leftX - 3, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 3, topY - 3, leftX + tooltipWidth + 4, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3 + 1, leftX - 3 + 1, topY + tooltipHeight + 3 - 1, 400, borderColorStart, borderColorEnd);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 2, topY - 3 + 1, leftX + tooltipWidth + 3, topY + tooltipHeight + 3 - 1, 400, borderColorStart, borderColorEnd);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY - 3 + 1, 400, borderColorStart, borderColorStart);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, borderColorEnd, borderColorEnd);
 		RenderSystem.enableDepthTest();
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
@@ -145,23 +156,25 @@ public class GuiHelper {
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
 		RenderSystem.enableTexture();
+
+		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
+
 		IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 		matrixStack.translate(0.0D, 0.0D, 400.0D);
 
-		topY = writeTooltipLines(tooltipToRender, font, (float) leftX, topY, matrix4f, renderTypeBuffer);
+		topY = writeTooltipLines(textLines, font, (float) leftX, topY, matrix4f, renderTypeBuffer);
 
 		renderTypeBuffer.finish();
 		additionalRender.render(matrixStack, leftX, topY, font);
 		matrixStack.pop();
 
-		tooltipToRender = Collections.emptyList();
-		tooltipRenderFont = null;
+		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
 	}
 
-	private static int getMaxLineWidth(List<? extends IReorderingProcessor> tooltips, FontRenderer font) {
+	private static int getMaxLineWidth(List<? extends ITextProperties> tooltips, FontRenderer font) {
 		int maxLineWidth = 0;
-		for (IReorderingProcessor ireorderingprocessor : tooltips) {
-			int lineWidth = font.func_243245_a(ireorderingprocessor);
+		for (ITextProperties line : tooltips) {
+			int lineWidth = font.getStringPropertyWidth(line);
 			if (lineWidth > maxLineWidth) {
 				maxLineWidth = lineWidth;
 			}
@@ -169,11 +182,11 @@ public class GuiHelper {
 		return maxLineWidth;
 	}
 
-	public static int writeTooltipLines(List<? extends IReorderingProcessor> tooltips, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer) {
-		for (int i = 0; i < tooltips.size(); ++i) {
-			IReorderingProcessor reorderingProcessor = tooltips.get(i);
-			if (reorderingProcessor != null) {
-				font.func_238416_a_(reorderingProcessor, leftX, (float) topY, -1, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
+	public static int writeTooltipLines(List<? extends ITextProperties> textLines, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer) {
+		for (int i = 0; i < textLines.size(); ++i) {
+			ITextProperties line = textLines.get(i);
+			if (line != null) {
+				font.func_238416_a_(LanguageMap.getInstance().func_241870_a(line), leftX, (float) topY, -1, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
 			}
 
 			if (i == 0) {
