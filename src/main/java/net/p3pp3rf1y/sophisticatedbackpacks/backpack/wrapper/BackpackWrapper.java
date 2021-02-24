@@ -98,24 +98,33 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
-		otherBackpackWrapper.setOriginalUuid(getOrCreateContentsUuid());
+		getContentsUuid().ifPresent(originalUuid -> {
+			otherBackpackWrapper.setOriginalUuid(originalUuid);
+			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
+			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
+		});
 
 		if (backpack.hasDisplayName()) {
 			otherBackpackWrapper.getBackpack().setDisplayName(backpack.getDisplayName());
 		}
-		getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
-		getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
-		otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+
+		if (getClothColor() != DEFAULT_CLOTH_COLOR || getBorderColor() != DEFAULT_BORDER_COLOR) {
+			otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+		}
 	}
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
-				getInventoryHandler().clearListeners();
-				inventoryIOHandler = null;
-				inventoryModificationHandler = null;
-			});
+			if (getContentsUuid().isPresent()) {
+				upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
+					getInventoryHandler().clearListeners();
+					inventoryIOHandler = null;
+					inventoryModificationHandler = null;
+				});
+			} else {
+				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
+			}
 		}
 		return upgradeHandler;
 	}
@@ -144,10 +153,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
 		}
+		clearDummyUpgradeHandler();
 		UUID newUuid = UUID.randomUUID();
 		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
+	}
+
+	private void clearDummyUpgradeHandler() {
+		if (upgradeHandler == NoopBackpackWrapper.INSTANCE.getUpgradeHandler()) {
+			upgradeHandler = null;
+		}
 	}
 
 	private void migrateBackpackContents(UUID newUuid) {
