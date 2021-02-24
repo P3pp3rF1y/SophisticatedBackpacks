@@ -56,11 +56,6 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void removeContentsUuid() {
-		//noop
-	}
-
-	@Override
 	public Optional<UUID> getContentsUuid() {
 		return Optional.empty();
 	}
