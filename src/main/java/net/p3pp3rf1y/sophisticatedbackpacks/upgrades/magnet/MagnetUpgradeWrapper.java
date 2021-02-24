@@ -17,7 +17,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem> implements IFilteredUpgrade, ITickableUpgrade {
@@ -27,6 +29,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	private static final int COOLDOWN_TICKS = 10;
 	private static final int FULL_COOLDOWN_TICKS = 40;
 	private final FilterLogic filterLogic;
+
+	private static final Set<IMagnetPreventionChecker> magnetCheckers = new HashSet<>();
+
+	public static void addMagnetPreventionChecker(IMagnetPreventionChecker checker) {
+		magnetCheckers.add(checker);
+	}
 
 	public MagnetUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
@@ -62,10 +70,22 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		setCooldown(world, cooldown);
 	}
 
+	private boolean isBlockedBySomething(ItemEntity itemEntity) {
+		for (IMagnetPreventionChecker checker : magnetCheckers) {
+			if (checker.isBlocked(itemEntity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean canNotPickup(ItemEntity itemEntity, @Nullable PlayerEntity player) {
+		if (isBlockedBySomething(itemEntity)) {
+			return true;
+		}
+
 		CompoundNBT data = itemEntity.getPersistentData();
 		return player != null ? data.contains(PREVENT_REMOTE_MOVEMENT) : data.contains(PREVENT_REMOTE_MOVEMENT) && !data.contains(ALLOW_MACHINE_MOVEMENT);
-
 	}
 
 	private boolean tryToInsertItem(ItemEntity itemEntity) {

@@ -5,13 +5,16 @@ import net.minecraft.data.CustomRecipeBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.data.RecipeProvider;
+import net.minecraft.data.SmithingRecipeBuilder;
 import net.minecraft.item.Items;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
@@ -324,5 +327,10 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('T', Items.CRAFTING_TABLE)
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
+
+		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.fromItems(ModItems.DIAMOND_BACKPACK.get()),
+				Ingredient.fromItems(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
+				.addCriterion("has_diamond_backpack", hasItem(ModItems.DIAMOND_BACKPACK.get()))
+				.build(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
 	}
 }

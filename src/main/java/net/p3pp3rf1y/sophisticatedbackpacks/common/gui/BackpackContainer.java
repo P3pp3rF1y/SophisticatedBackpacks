@@ -60,7 +60,6 @@ public class BackpackContainer extends Container {
 	private Consumer<BackpackContainer> upgradeChangeListener = null;
 
 	private final List<Slot> backpackInventorySlots = new ArrayList<>();
-	private final List<Slot> playerSlots = new ArrayList<>();
 
 	private final BackpackBackgroundProperties backpackBackgroundProperties;
 
@@ -235,8 +234,6 @@ public class BackpackContainer extends Container {
 	private void addSlotAndUpdateBackpackSlotNumber(int backpackSlotIndex, boolean lockBackpackSlot, int slotIndex, Slot slot) {
 		if (lockBackpackSlot && slotIndex == backpackSlotIndex) {
 			backpackSlotNumber = slot.slotNumber;
-		} else {
-			playerSlots.add(slot);
 		}
 	}
 
@@ -397,10 +394,6 @@ public class BackpackContainer extends Container {
 
 	public List<Slot> getBackpackInventorySlots() {
 		return backpackInventorySlots;
-	}
-
-	public Collection<Slot> getPlayerInventorySlots() {
-		return playerSlots;
 	}
 
 	public void setOpenTabId(int tabId) {

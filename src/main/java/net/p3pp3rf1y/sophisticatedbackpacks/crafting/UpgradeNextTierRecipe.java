@@ -8,7 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 
 import java.util.Optional;
 
-public class UpgradeNextTierRecipe extends ShapedRecipe implements IShapeBasedRecipe {
+public class UpgradeNextTierRecipe extends ShapedRecipe implements IWrapperRecipe<ShapedRecipe> {
 	public static final Serializer SERIALIZER = new Serializer();
 	private final ShapedRecipe compose;
 
@@ -44,9 +44,9 @@ public class UpgradeNextTierRecipe extends ShapedRecipe implements IShapeBasedRe
 		return SERIALIZER;
 	}
 
-	public static class Serializer extends ShapedSerializer<UpgradeNextTierRecipe> {
+	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, UpgradeNextTierRecipe> {
 		public Serializer() {
-			super(UpgradeNextTierRecipe::new);
+			super(UpgradeNextTierRecipe::new, IRecipeSerializer.CRAFTING_SHAPED);
 		}
 	}
 }

@@ -87,9 +87,6 @@ public class BackpackStorage extends WorldSavedData {
 
 	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid, @Nullable UUID originalUuid) {
 		if (originalUuid != null && !originalUuidBackpacks.containsValue(backpackUuid)) {
-			for (UUID existingBackpackUuid : originalUuidBackpacks.removeAll(originalUuid)) {
-				backpackContents.remove(existingBackpackUuid);
-			}
 			originalUuidBackpacks.put(originalUuid, backpackUuid);
 			markDirty();
 		}
@@ -104,11 +101,19 @@ public class BackpackStorage extends WorldSavedData {
 		});
 	}
 
-	public void removeOriginalBackpack(@Nullable UUID originalUuid) {
+	public void removeOriginalBackpack(UUID originalUuid) {
+		removeOriginalBackpack(originalUuid, null);
+	}
+
+	public void removeOriginalBackpack(@Nullable UUID originalUuid, @Nullable UUID exceptFor) {
 		if (originalUuid == null) {
 			return;
 		}
-		removeLinkToOriginalBackpack(originalUuid);
+		for (UUID existingBackpackUuid : originalUuidBackpacks.removeAll(originalUuid)) {
+			if (!existingBackpackUuid.equals(exceptFor)) {
+				backpackContents.remove(existingBackpackUuid);
+			}
+		}
 		backpackContents.remove(originalUuid);
 	}
 

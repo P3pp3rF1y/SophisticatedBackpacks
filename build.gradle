@@ -25,6 +25,7 @@ repositories {
     maven { url "http://dvs1.progwml6.com/files/maven" }
     maven { url "https://maven.theillusivec4.top/" }
     maven { url "https://maven.tterrag.com/" }
+    maven { url = "https://modmaven.dev/" }
 }
 
 group = 'sophisticatedbackpacks'
@@ -85,6 +86,10 @@ dependencies {
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
     compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}:api")
     runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}")
+    compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
+    runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
 }
 
 test {

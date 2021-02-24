@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
@@ -36,23 +36,23 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 
 	public static class StateData {
 		private final TextureBlitData texture;
-		private final List<IReorderingProcessor> tooltip;
+		private final List<? extends ITextProperties> tooltip;
 
 		public StateData(TextureBlitData texture, List<? extends ITextComponent> tooltip) {
 			this.texture = texture;
-			this.tooltip = tooltip.stream().map(ITextComponent::func_241878_f).collect(Collectors.toList());
+			this.tooltip = tooltip;
 		}
 
 		public StateData(TextureBlitData texture, ITextComponent... tooltip) {
 			this.texture = texture;
-			this.tooltip = Arrays.stream(tooltip).map(ITextComponent::func_241878_f).collect(Collectors.toList());
+			this.tooltip = Arrays.stream(tooltip).collect(Collectors.toList());
 		}
 
 		public TextureBlitData getTexture() {
 			return texture;
 		}
 
-		public List<IReorderingProcessor> getTooltip() {
+		public List<? extends ITextProperties> getTooltip() {
 			return tooltip;
 		}
 	}

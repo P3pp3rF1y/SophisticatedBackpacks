@@ -26,8 +26,6 @@ public interface IBackpackWrapper {
 
 	CompoundNBT getClientTag();
 
-	void removeContentsUuid();
-
 	Optional<UUID> getContentsUuid();
 
 	int getClothColor();

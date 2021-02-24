@@ -69,7 +69,11 @@ public class BackpackItem extends ItemBase {
 	private final Supplier<BackpackBlock> blockSupplier;
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
-		super(new Properties().maxStackSize(1));
+		this(numberOfSlots, numberOfUpgradeSlots, blockSupplier, new Properties());
+	}
+
+	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, Properties properties) {
+		super(properties.maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
@@ -297,9 +301,7 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> {
-			if (this == ModItems.BACKPACK.get()) {
-				w.removeContentsUuid();
-			} else {
+			if (this != ModItems.BACKPACK.get()) {
 				w.removeOriginalBackpack();
 			}
 		});
