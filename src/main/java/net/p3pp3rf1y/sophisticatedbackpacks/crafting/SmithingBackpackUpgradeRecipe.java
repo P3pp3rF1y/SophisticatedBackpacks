@@ -26,11 +26,12 @@ public class SmithingBackpackUpgradeRecipe extends SmithingRecipe implements IWr
 	public ItemStack getCraftingResult(IInventory inv) {
 		ItemStack upgradedBackpack = getCraftingResult().copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-			getBackpack(inv).ifPresent(backpack ->
-					backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-							.ifPresent(wrapper -> upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-									.ifPresent(wrapper::copyDataTo)));
-
+			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
+			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+					.ifPresent(wrapper -> {
+						BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
+						wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
+					});
 		}
 		return upgradedBackpack;
 	}

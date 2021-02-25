@@ -278,12 +278,6 @@ public class BackpackItem extends ItemBase {
 
 	@Nullable
 	@Override
-	public CompoundNBT getShareTag(ItemStack stack) {
-		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(IBackpackWrapper::getClientTag).orElse(super.getShareTag(stack));
-	}
-
-	@Nullable
-	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
 	}
@@ -296,14 +290,5 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
 		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
-	}
-
-	@Override
-	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> {
-			if (this != ModItems.BACKPACK.get()) {
-				w.removeOriginalBackpack();
-			}
-		});
 	}
 }

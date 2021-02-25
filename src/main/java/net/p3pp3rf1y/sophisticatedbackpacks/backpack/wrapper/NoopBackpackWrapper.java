@@ -51,11 +51,6 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public CompoundNBT getClientTag() {
-		return backpack.getOrCreateTag();
-	}
-
-	@Override
 	public Optional<UUID> getContentsUuid() {
 		return Optional.empty();
 	}
@@ -131,22 +126,12 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setOriginalUuid(UUID orCreateContentsUuid) {
-		//noop
-	}
-
-	@Override
-	public void removeOriginalBackpack() {
-		//noop
-	}
-
-	@Override
-	public void removeLinkToOriginalBackpack() {
-		//noop
-	}
-
-	@Override
 	public void setPersistent(boolean persistent) {
+		//noop
+	}
+
+	@Override
+	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
 		//noop
 	}
 }
