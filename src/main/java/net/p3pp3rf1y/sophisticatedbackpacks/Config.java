@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -113,7 +114,7 @@ public class Config {
 		}
 
 		public static class EntityBackpackAdditionsConfig {
-			private static final String ENTITY_LOOT_MATCHER = "([a-zA-Z1-9]+:[a-zA-Z1-9]+)\\|(null|[a-zA-Z1-9]+:[a-zA-Z1-9/]+)";
+			private static final String ENTITY_LOOT_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
@@ -168,7 +169,7 @@ public class Config {
 			}
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
-				Map<EntityType<?>, ResourceLocation> mapping = new HashMap<>();
+				Map<EntityType<?>, ResourceLocation> mapping = new LinkedHashMap<>();
 				mapping.put(EntityType.CREEPER, LootTables.CHESTS_DESERT_PYRAMID);
 				mapping.put(EntityType.DROWNED, LootTables.CHESTS_SHIPWRECK_TREASURE);
 				mapping.put(EntityType.ENDERMAN, LootTables.CHESTS_END_CITY_TREASURE);
