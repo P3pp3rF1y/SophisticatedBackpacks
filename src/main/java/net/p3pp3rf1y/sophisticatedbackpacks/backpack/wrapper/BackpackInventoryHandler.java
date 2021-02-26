@@ -34,6 +34,11 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		initStackNbts();
 	}
 
+	@Override
+	public void setSize(int size) {
+		super.setSize(stacks.size());
+	}
+
 	private void initStackNbts() {
 		for (int slot = 0; slot < stacks.size(); slot++) {
 			ItemStack slotStack = stacks.get(slot);

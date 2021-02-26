@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
@@ -23,8 +22,6 @@ public interface IBackpackWrapper {
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
 
 	BackpackUpgradeHandler getUpgradeHandler();
-
-	CompoundNBT getClientTag();
 
 	Optional<UUID> getContentsUuid();
 
@@ -56,11 +53,7 @@ public interface IBackpackWrapper {
 
 	void refreshInventoryForInputOutput();
 
-	void setOriginalUuid(UUID orCreateContentsUuid);
-
-	void removeOriginalBackpack();
-
-	void removeLinkToOriginalBackpack();
-
 	void setPersistent(boolean persistent);
+
+	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
 }

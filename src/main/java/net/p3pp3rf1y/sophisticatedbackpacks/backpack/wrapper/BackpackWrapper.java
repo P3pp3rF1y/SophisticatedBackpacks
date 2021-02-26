@@ -31,7 +31,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String CONTENTS_UUID_TAG = "contentsUuid";
 	private static final String INVENTORY_SLOTS_TAG = "inventorySlots";
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
-	private static final String ORIGINAL_UUID_TAG = "originalUuid";
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
@@ -72,16 +71,23 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private int getNumberOfInventorySlots() {
-		return NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG).orElse(((BackpackItem) backpack.getItem()).getNumberOfSlots());
+		Optional<Integer> inventorySlots = NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG);
+
+		if (inventorySlots.isPresent()) {
+			return inventorySlots.get();
+		}
+
+		int itemInventorySlots = ((BackpackItem) backpack.getItem()).getNumberOfSlots();
+		setNumberOfInventorySlots(itemInventorySlots);
+		return itemInventorySlots;
+	}
+
+	private void setNumberOfInventorySlots(int itemInventorySlots) {
+		NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, itemInventorySlots);
 	}
 
 	private CompoundNBT getBackpackContentsNbt() {
-		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid(), getOriginalUuid());
-	}
-
-	@Nullable
-	private UUID getOriginalUuid() {
-		return NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).orElse(null);
+		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
 	}
 
 	private void markBackpackContentsDirty() {
@@ -98,40 +104,46 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
-		otherBackpackWrapper.setOriginalUuid(getOrCreateContentsUuid());
+		getContentsUuid().ifPresent(originalUuid -> {
+			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
+			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
+		});
 
 		if (backpack.hasDisplayName()) {
 			otherBackpackWrapper.getBackpack().setDisplayName(backpack.getDisplayName());
 		}
-		getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
-		getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
-		otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+
+		if (getClothColor() != DEFAULT_CLOTH_COLOR || getBorderColor() != DEFAULT_BORDER_COLOR) {
+			otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+		}
 	}
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
-				getInventoryHandler().clearListeners();
-				inventoryIOHandler = null;
-				inventoryModificationHandler = null;
-			});
+			if (getContentsUuid().isPresent()) {
+				upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
+					getInventoryHandler().clearListeners();
+					inventoryIOHandler = null;
+					inventoryModificationHandler = null;
+				});
+			} else {
+				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
+			}
 		}
 		return upgradeHandler;
 	}
 
 	private int getNumberOfUpgradeSlots() {
-		return NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG).orElse(((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots());
-	}
+		Optional<Integer> upgradeSlots = NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG);
 
-	@Override
-	public CompoundNBT getClientTag() {
-		CompoundNBT tag = backpack.getOrCreateTag();
-		if (getContentsUuid().isPresent()) {
-			tag.putInt(INVENTORY_SLOTS_TAG, getInventoryHandler().getSlots());
-			tag.putInt(UPGRADE_SLOTS_TAG, getUpgradeHandler().getSlots());
+		if (upgradeSlots.isPresent()) {
+			return upgradeSlots.get();
 		}
-		return tag;
+
+		int itemUpgradeSlots = ((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots();
+		setNumberOfUpgradeSlots(itemUpgradeSlots);
+		return itemUpgradeSlots;
 	}
 
 	@Override
@@ -144,10 +156,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
 		}
+		clearDummyUpgradeHandler();
 		UUID newUuid = UUID.randomUUID();
 		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
+	}
+
+	private void clearDummyUpgradeHandler() {
+		if (upgradeHandler == NoopBackpackWrapper.INSTANCE.getUpgradeHandler()) {
+			upgradeHandler = null;
+		}
 	}
 
 	private void migrateBackpackContents(UUID newUuid) {
@@ -254,7 +273,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
-							wrapperCopy.removeLinkToOriginalBackpack();
 							return wrapperCopy.getBackpack();
 						}
 				).orElse(ItemStack.EMPTY);
@@ -266,29 +284,19 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setOriginalUuid(UUID originalUuid) {
-		NBTHelper.setUniqueId(backpack, ORIGINAL_UUID_TAG, originalUuid);
-		backpackSaveHandler.run();
-	}
-
-	@Override
-	public void removeOriginalBackpack() {
-		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid(), getContentsUuid().orElse(null));
-		removeLinkToOriginalBackpack();
-		backpackSaveHandler.run();
-	}
-
-	@Override
-	public void removeLinkToOriginalBackpack() {
-		NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).ifPresent(originalUuid -> BackpackStorage.get().removeLinkToOriginalBackpack(originalUuid));
-		NBTHelper.removeTag(backpack, ORIGINAL_UUID_TAG);
-		backpackSaveHandler.run();
-	}
-
-	@Override
 	public void setPersistent(boolean persistent) {
 		getInventoryHandler().setPersistent(persistent);
 		getUpgradeHandler().setPersistent(persistent);
+	}
+
+	@Override
+	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
+		setNumberOfInventorySlots(numberOfInventorySlots);
+		setNumberOfUpgradeSlots(numberOfUpgradeSlots);
+	}
+
+	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
+		NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
 	}
 
 	@Override

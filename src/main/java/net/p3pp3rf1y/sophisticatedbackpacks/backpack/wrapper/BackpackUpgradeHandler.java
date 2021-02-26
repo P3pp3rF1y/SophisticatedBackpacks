@@ -53,6 +53,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		}
 	}
 
+	@Override
+	public void setSize(int size) {
+		super.setSize(stacks.size());
+	}
+
 	public void saveInventory() {
 		contentsNbt.put(UPGRADE_INVENTORY_TAG, serializeNBT());
 	}
