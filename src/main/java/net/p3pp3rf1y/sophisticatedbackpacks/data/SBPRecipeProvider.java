@@ -10,8 +10,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.Tags;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
@@ -43,8 +42,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion("has_leather", hasItem(Tags.Items.LEATHER))
 				.build(consumer);
 
-		CustomRecipeBuilder.customRecipe(BackpackSingleDyeRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_single_dye"));
-		CustomRecipeBuilder.customRecipe(BackpackTwoDyesRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_two_dyes"));
+		CustomRecipeBuilder.customRecipe(BackpackDyeRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_dye"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")

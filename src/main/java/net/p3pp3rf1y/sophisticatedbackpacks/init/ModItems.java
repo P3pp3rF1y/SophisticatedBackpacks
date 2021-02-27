@@ -30,8 +30,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackSingleDyeRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackTwoDyesRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ItemEnabledCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
@@ -247,8 +246,7 @@ public class ModItems {
 		evt.getRegistry().register(BackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_upgrade"));
 		evt.getRegistry().register(SmithingBackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "smithing_backpack_upgrade"));
 		evt.getRegistry().register(UpgradeNextTierRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "upgrade_next_tier"));
-		evt.getRegistry().register(BackpackSingleDyeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_single_dye"));
-		evt.getRegistry().register(BackpackTwoDyesRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_two_dyes"));
+		evt.getRegistry().register(BackpackDyeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_two_dyes"));
 	}
 
 	public static void registerDispenseBehavior() {

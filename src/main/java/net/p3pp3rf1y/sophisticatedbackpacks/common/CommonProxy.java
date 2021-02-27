@@ -1,21 +1,33 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.CauldronBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -32,6 +44,44 @@ public class CommonProxy {
 		MinecraftForge.EVENT_BUS.addListener(this::onItemPickup);
 		MinecraftForge.EVENT_BUS.addListener(this::onLivingSpecialSpawn);
 		MinecraftForge.EVENT_BUS.addListener(this::onLivingDrops);
+		MinecraftForge.EVENT_BUS.addListener(this::onCauldronInteract);
+	}
+
+	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {
+		PlayerEntity player = event.getPlayer();
+		Hand hand = event.getHand();
+		ItemStack backpack = player.getHeldItem(hand);
+		if (!(backpack.getItem() instanceof BackpackItem)) {
+			return;
+		}
+
+		BlockPos pos = event.getPos();
+		World world = event.getWorld();
+		BlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		if (block != Blocks.CAULDRON) {
+			return;
+		}
+		int level = state.get(CauldronBlock.LEVEL);
+
+		LazyOptional<IBackpackWrapper> backpackWrapperCapability = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+		if (level == 0 || backpackWrapperCapability.map(this::hasDefaultColor).orElse(true)) {
+			return;
+		}
+
+		if (!world.isRemote) {
+			backpackWrapperCapability.ifPresent(w -> {
+				w.setColors(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR);
+				((CauldronBlock) block).setWaterLevel(world, pos, state, level - 1);
+			});
+		}
+
+		event.setCanceled(true);
+		event.setCancellationResult(ActionResultType.SUCCESS);
+	}
+
+	private boolean hasDefaultColor(IBackpackWrapper wrapper) {
+		return wrapper.getBorderColor() == BackpackWrapper.DEFAULT_BORDER_COLOR && wrapper.getClothColor() == BackpackWrapper.DEFAULT_CLOTH_COLOR;
 	}
 
 	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
