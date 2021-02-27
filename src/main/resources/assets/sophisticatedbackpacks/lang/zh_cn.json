@@ -1,7 +1,7 @@
 {
     "itemGroup.sophisticatedbackpacks": "精致背包",
     "item.sophisticatedbackpacks.backpack": "背包",
-     "block.sophisticatedbackpacks.backpack": "背包",
+    "block.sophisticatedbackpacks.backpack": "背包",
     "item.sophisticatedbackpacks.backpack.tooltip.press_for_contents": "按 <%s> 查看物品栏",
     "item.sophisticatedbackpacks.backpack.tooltip.shift": "左 Shift",
     "item.sophisticatedbackpacks.backpack.tooltip.upgrades": "升级",
@@ -60,7 +60,7 @@
     "item.sophisticatedbackpacks.crafting_upgrade.tooltip": "升级卡插槽内的工作台",
     "keybind.sophisticatedbackpacks.category": "精致背包",
     "keybind.sophisticatedbackpacks.open_backpack": "打开背包",
-    "keybind.sophisticatedbackpacks.inventory_interaction": "运行物品栏交互升级（机翻待定）",
+    "keybind.sophisticatedbackpacks.inventory_interaction": "运行物品交互升级",
     "keybind.sophisticatedbackpacks.toggle_upgrade_1": "打开/关闭第一个插槽中的升级卡",
     "keybind.sophisticatedbackpacks.toggle_upgrade_2": "打开/关闭第二个插槽中的升级卡",
     "keybind.sophisticatedbackpacks.toggle_upgrade_3": "打开/关闭第三个插槽中的升级卡",
