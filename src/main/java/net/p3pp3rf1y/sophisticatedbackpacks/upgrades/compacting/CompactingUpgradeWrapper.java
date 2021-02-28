@@ -32,7 +32,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
 
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(),
-				stack -> RecipeHelper.getItemCompactingShape(stack.getItem()) != CompactingShape.NONE);
+				stack -> !RecipeHelper.getItemCompactingShapes(stack.getItem()).isEmpty());
 	}
 
 	@Override
@@ -54,11 +54,11 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 
 		Item item = slotStack.getItem();
 
-		CompactingShape shape = RecipeHelper.getItemCompactingShape(item);
+		Set<CompactingShape> shapes = RecipeHelper.getItemCompactingShapes(item);
 
-		if (upgradeItem.shouldCompactThreeByThree() && (shape == CompactingShape.THREE_BY_THREE_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.THREE_BY_THREE))) {
+		if (upgradeItem.shouldCompactThreeByThree() && (shapes.contains(CompactingShape.THREE_BY_THREE_UNCRAFTABLE) || (shouldCompactNonUncraftable() && shapes.contains(CompactingShape.THREE_BY_THREE)))) {
 			tryCompacting(inventoryHandler, item, 3, 3);
-		} else if (shape == CompactingShape.TWO_BY_TWO_UNCRAFTABLE || (shouldCompactNonUncraftable() && shape == CompactingShape.TWO_BY_TWO)) {
+		} else if (shapes.contains(CompactingShape.TWO_BY_TWO_UNCRAFTABLE) || (shouldCompactNonUncraftable() && shapes.contains(CompactingShape.TWO_BY_TWO))) {
 			tryCompacting(inventoryHandler, item, 2, 2);
 		}
 	}
