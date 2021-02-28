@@ -18,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting.ICraftingUIPart;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -45,6 +46,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private ToggleButton<SortBy> sortByButton = null;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
+	private static ICraftingUIPart craftingUIPart = ICraftingUIPart.NOOP;
+
+	public static void setCraftingUIPart(ICraftingUIPart part) {
+		craftingUIPart = part;
+	}
+
 	public BackpackScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
 		ySize = 114 + getContainer().getNumberOfRows() * 18;
@@ -55,13 +62,19 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		passEvents = true;
 	}
 
+	public ICraftingUIPart getCraftingUIAddition() {
+		return craftingUIPart;
+	}
+
 	@Override
 	protected void init() {
 		super.init();
+		craftingUIPart.setBackpackScreen(this);
 		initUpgradeSettingsControl();
 		addUpgradeSwitches();
 		getContainer().setUpgradeChangeListener(c -> {
 			children.remove(upgradeSettingsControl);
+			craftingUIPart.onCraftingSlotsHidden();
 			initUpgradeSettingsControl();
 			addUpgradeSwitches();
 		});

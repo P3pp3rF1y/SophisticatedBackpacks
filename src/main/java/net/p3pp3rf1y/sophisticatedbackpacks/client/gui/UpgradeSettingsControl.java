@@ -10,6 +10,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?>> {
 	private static final int VERTICAL_SPACE = 1;
@@ -19,16 +20,15 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 	public UpgradeSettingsControl(Position position, BackpackScreen screen) {
 		super(position);
 		int i = 0;
-		for (UpgradeContainerBase<?, ?> container : screen.getContainer().getUpgradeContainers()) {
-			UpgradeSettingsTab<UpgradeContainerBase<?, ?>> tab = addChild(UpgradeSettingsTabManager.getTab(container, new Position(x, getTopY(i)), screen));
-			int tabId = i;
+		for (Map.Entry<Integer, UpgradeContainerBase<?, ?>> entry : screen.getContainer().getUpgradeContainers().entrySet()) {
+			UpgradeSettingsTab<UpgradeContainerBase<?, ?>> tab = addChild(UpgradeSettingsTabManager.getTab(entry.getValue(), new Position(x, getTopY(i)), screen));
 			tab.setHandlers(t -> {
 						if (differentTabIsOpen(t)) {
 							openTab.close();
 						}
 						t.setZOffset(200);
 						openTab = t;
-						screen.getContainer().setOpenTabId(tabId);
+						screen.getContainer().setOpenTabId(entry.getKey());
 					},
 					t -> {
 						if (openTab != null) {

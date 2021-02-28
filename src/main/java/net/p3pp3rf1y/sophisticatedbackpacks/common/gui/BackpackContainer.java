@@ -34,7 +34,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -371,8 +370,8 @@ public class BackpackContainer extends Container {
 		return getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	public Collection<UpgradeContainerBase<?, ?>> getUpgradeContainers() {
-		return upgradeContainers.values();
+	public Map<Integer, UpgradeContainerBase<?, ?>> getUpgradeContainers() {
+		return upgradeContainers;
 	}
 
 	public void handleMessage(CompoundNBT data) {
@@ -474,6 +473,10 @@ public class BackpackContainer extends Container {
 			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
 		}
 		slotWrappers.get(upgradeSlot).setEnabled(enabled);
+	}
+
+	public Optional<UpgradeContainerBase<?, ?>> getOpenContainer() {
+		return backpackWrapper.getOpenTabId().flatMap(id -> upgradeContainers.containsKey(id) ? Optional.of(upgradeContainers.get(id)) : Optional.empty());
 	}
 
 	public class BackpackUpgradeSlot extends SlotItemHandler {
