@@ -24,17 +24,17 @@ public class PlayerInventoryProvider {
 
 	static {
 		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.mainInventory.size(),
-				(player, slot) -> player.inventory.mainInventory.get(slot), (player, slot, stack) -> player.inventory.mainInventory.set(slot, stack), true, false);
+				(player, slot) -> player.inventory.mainInventory.get(slot), (player, slot, stack) -> player.inventory.mainInventory.set(slot, stack), true, false, false);
 		PlayerInventoryProvider.addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offHandInventory.size(),
-				(player, slot) -> player.inventory.offHandInventory.get(slot), (player, slot, stack) -> player.inventory.offHandInventory.set(slot, stack), false, false);
+				(player, slot) -> player.inventory.offHandInventory.get(slot), (player, slot, stack) -> player.inventory.offHandInventory.set(slot, stack), false, false, false);
 		PlayerInventoryProvider.addPlayerInventoryHandler(ARMOR_INVENTORY, player -> 1,
-				(player, slot) -> player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armorInventory.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true);
+				(player, slot) -> player.inventory.armorInventory.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armorInventory.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true, false);
 	}
 
-	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered) {
+	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
-		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui));
+		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui, ownRenderer));
 		playerInventoryHandlers.putAll(temp);
 
 		if (rendered) {
@@ -51,7 +51,7 @@ public class PlayerInventoryProvider {
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
 				if (slotStack.getItem() instanceof BackpackItem) {
-					return Optional.of(new BackpackRenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+					return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new BackpackRenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
 				}
 			}
 		}
