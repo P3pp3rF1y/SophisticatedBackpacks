@@ -31,7 +31,9 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IItemHandler itemHandler, PlayerEntity player) {
-		filterLogic.setInventory(itemHandler);
+		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
+			filterLogic.setInventory(itemHandler);
+		}
 		AtomicInteger stacksAdded = new AtomicInteger(0);
 
 		InventoryHelper.transfer(backpackWrapper.getInventoryForUpgradeProcessing(),

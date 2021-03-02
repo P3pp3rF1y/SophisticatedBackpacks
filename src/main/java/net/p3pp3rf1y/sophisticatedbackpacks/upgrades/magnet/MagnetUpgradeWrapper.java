@@ -11,8 +11,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
@@ -22,13 +22,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem> implements IFilteredUpgrade, ITickableUpgrade {
+public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem>
+		implements IContentsFilteredUpgrade, ITickableUpgrade {
 	private static final String PREVENT_REMOTE_MOVEMENT = "PreventRemoteMovement";
 	private static final String ALLOW_MACHINE_MOVEMENT = "AllowMachineRemoteMovement";
 
+	private static final int BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS = 10;
 	private static final int COOLDOWN_TICKS = 10;
 	private static final int FULL_COOLDOWN_TICKS = 40;
-	private final FilterLogic filterLogic;
+	private final ContentsFilterLogic filterLogic;
+
+	private long backpackContentsRefreshCooldown = 0;
 
 	private static final Set<IMagnetPreventionChecker> magnetCheckers = new HashSet<>();
 
@@ -38,11 +42,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	public MagnetUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 	}
 
 	@Override
-	public FilterLogic getFilterLogic() {
+	public ContentsFilterLogic getFilterLogic() {
 		return filterLogic;
 	}
 
@@ -59,6 +63,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		}
 
 		int cooldown = FULL_COOLDOWN_TICKS;
+
+		if (backpackContentsRefreshCooldown < world.getGameTime()) {
+			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
+			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
+		}
+
 		for (ItemEntity itemEntity : itemEntities) {
 			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, player)) {
 				continue;

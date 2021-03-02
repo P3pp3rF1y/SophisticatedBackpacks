@@ -1,8 +1,7 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -11,22 +10,22 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class RestockFilterLogic extends FilterLogic {
+public class ContentsFilterLogic extends FilterLogic {
 	private Set<ItemStackKey> backpackFilterStacks = new HashSet<>();
 
-	public RestockFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
+	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
 		super(upgrade, saveHandler, filterSlotCount);
 	}
 
-	public RestockFilterType getRestockFilterType() {
+	public ContentsFilterType getFilterType() {
 		if (shouldFilterByBackpack()) {
-			return RestockFilterType.BACKPACK;
+			return ContentsFilterType.BACKPACK;
 		}
-		return isAllowList() ? RestockFilterType.ALLOW : RestockFilterType.BLOCK;
+		return isAllowList() ? ContentsFilterType.ALLOW : ContentsFilterType.BLOCK;
 	}
 
-	public void setDepositFilterType(RestockFilterType restockFilterType) {
-		switch (restockFilterType) {
+	public void setDepositFilterType(ContentsFilterType contentsFilterType) {
+		switch (contentsFilterType) {
 			case ALLOW:
 				setFilterByBackpack(false);
 				setAllowList(true);
