@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class RandHelper {
@@ -22,4 +23,29 @@ public class RandHelper {
 		}
 		return ret;
 	}
+
+	public static <T> Optional<T> getRandomWeightedElement(Random random, List<WeightedElement<T>> weightedElements) {
+		int totalWeight = 0;
+		for (WeightedElement<T> weightedElement : weightedElements) {
+			int weight = weightedElement.getWeight();
+			if (weight < 0) {
+				throw new IllegalArgumentException("Negative weight element passed in");
+			}
+			totalWeight += weight;
+		}
+		if (totalWeight == 0) {
+			throw new IllegalArgumentException("Map passed in is either empty or the only element has 0 weight");
+		}
+
+		int rndValue = random.nextInt(totalWeight + 1);
+
+		for (WeightedElement<T> weightedElement : weightedElements) {
+			rndValue -= weightedElement.getWeight();
+			if (rndValue <= 0) {
+				return Optional.of(weightedElement.getElement());
+			}
+		}
+		return Optional.empty();
+	}
+
 }

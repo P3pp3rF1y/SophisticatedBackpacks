@@ -1,18 +1,18 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.IStringSerializable;
 
 import java.util.Map;
 
-public enum RestockFilterType implements IStringSerializable {
+public enum ContentsFilterType implements IStringSerializable {
 	ALLOW("allow"),
 	BLOCK("block"),
 	BACKPACK("backpack");
 
 	private final String name;
 
-	RestockFilterType(String name) {
+	ContentsFilterType(String name) {
 		this.name = name;
 	}
 
@@ -21,23 +21,23 @@ public enum RestockFilterType implements IStringSerializable {
 		return name;
 	}
 
-	public RestockFilterType next() {
+	public ContentsFilterType next() {
 		return VALUES[(ordinal() + 1) % VALUES.length];
 	}
 
-	private static final Map<String, RestockFilterType> NAME_VALUES;
-	private static final RestockFilterType[] VALUES;
+	private static final Map<String, ContentsFilterType> NAME_VALUES;
+	private static final ContentsFilterType[] VALUES;
 
 	static {
-		ImmutableMap.Builder<String, RestockFilterType> builder = new ImmutableMap.Builder<>();
-		for (RestockFilterType value : values()) {
+		ImmutableMap.Builder<String, ContentsFilterType> builder = new ImmutableMap.Builder<>();
+		for (ContentsFilterType value : values()) {
 			builder.put(value.getString(), value);
 		}
 		NAME_VALUES = builder.build();
 		VALUES = values();
 	}
 
-	public static RestockFilterType fromName(String name) {
+	public static ContentsFilterType fromName(String name) {
 		return NAME_VALUES.getOrDefault(name, BLOCK);
 	}
 }

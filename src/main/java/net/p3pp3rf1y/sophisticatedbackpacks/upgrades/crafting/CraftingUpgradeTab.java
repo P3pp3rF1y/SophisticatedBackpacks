@@ -22,6 +22,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContainer> {
 	private static final TextureBlitData CRAFTING_SLOT = new TextureBlitData(GuiHelper.GUI_CONTROLS, new UV(71, 216), new Dimension(26, 26));
 	private static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.GUI_CONTROLS, new UV(97, 216), new Dimension(15, 8));
+
+	private final ICraftingUIPart craftingUIAddition;
+
 	public static final ButtonDefinition.Toggle<Boolean> SHIFT_CLICK_TARGET = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
 					true, GuiHelper.getButtonStateData(new UV(64, 80), Dimension.SQUARE_16, new Position(1, 1),
@@ -35,24 +38,31 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 				new TranslationTextComponent(translUpgradeTooltip("crafting")));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), SHIFT_CLICK_TARGET, button -> getContainer().setShiftClickIntoBackpack(!getContainer().shouldShiftClickIntoBackpack()),
 				getContainer()::shouldShiftClickIntoBackpack));
-		openTabDimension = new Dimension(63, 142);
+		craftingUIAddition = screen.getCraftingUIAddition();
+		openTabDimension = new Dimension(63 + craftingUIAddition.getWidth(), 142);
 	}
 
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, minecraft, mouseX, mouseY);
 		if (getContainer().isOpen()) {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 3, y + 44, 3, 3);
-			GuiHelper.blit(minecraft, matrixStack, x + 3 + 19, y + 101, ARROW);
-			GuiHelper.blit(minecraft, matrixStack, x + 3 + 14, y + 111, CRAFTING_SLOT);
+			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth(), y + 44, 3, 3);
+			GuiHelper.blit(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth() + 19, y + 101, ARROW);
+			GuiHelper.blit(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth() + 14, y + 111, CRAFTING_SLOT);
 		}
+	}
+
+	@Override
+	protected void onTabClose() {
+		super.onTabClose();
+		craftingUIAddition.onCraftingSlotsHidden();
 	}
 
 	@Override
 	protected void moveSlotsToTab() {
 		int slotNumber = 0;
 		for (Slot slot : getContainer().getSlots()) {
-			slot.xPos = x + 3 - screen.getGuiLeft() + 1 + (slotNumber % 3) * 18;
+			slot.xPos = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 1 + (slotNumber % 3) * 18;
 			slot.yPos = y + 44 - screen.getGuiTop() + 1 + (slotNumber / 3) * 18;
 			slotNumber++;
 			if (slotNumber >= 9) {
@@ -61,7 +71,9 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 		}
 
 		Slot craftingSlot = getContainer().getSlots().get(9);
-		craftingSlot.xPos = x + 3 - screen.getGuiLeft() + 19;
+		craftingSlot.xPos = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 19;
 		craftingSlot.yPos = y + 44 - screen.getGuiTop() + 72;
+
+		craftingUIAddition.onCraftingSlotsDisplayed(getContainer().getSlots());
 	}
 }

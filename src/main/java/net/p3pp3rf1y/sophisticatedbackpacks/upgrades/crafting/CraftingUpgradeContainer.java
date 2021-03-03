@@ -109,6 +109,11 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		return slots.subList(0, 9);
 	}
 
+	@Override
+	public IInventory getCraftMatrix() {
+		return craftMatrix;
+	}
+
 	public boolean shouldShiftClickIntoBackpack() {
 		return upgradeWrapper.shouldShiftClickIntoBackpack();
 	}

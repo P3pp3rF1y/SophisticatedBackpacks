@@ -1,15 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 import java.util.Collection;
@@ -18,24 +20,35 @@ import java.util.Set;
 
 public class DyeRecipesMaker {
 	private DyeRecipesMaker() {}
+
 	public static Collection<ICraftingRecipe> getRecipes() {
 		Set<ICraftingRecipe> recipes = new HashSet<>();
 		addSingleColorRecipes(recipes);
-		addTwoColorsRecipe(recipes);
+		addMultipleColorsRecipe(recipes);
 
 		return recipes;
 	}
 
-	private static void addTwoColorsRecipe(Set<ICraftingRecipe> recipes) {
+	private static void addMultipleColorsRecipe(Set<ICraftingRecipe> recipes) {
 		NonNullList<Ingredient> ingredients = NonNullList.create();
 		ingredients.add(Ingredient.fromTag(DyeColor.YELLOW.getTag()));
 		ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
+		ingredients.add(Ingredient.EMPTY);
+		ingredients.add(Ingredient.fromTag(DyeColor.LIME.getTag()));
 		ingredients.add(Ingredient.fromTag(DyeColor.BLUE.getTag()));
+		ingredients.add(Ingredient.fromTag(DyeColor.BLACK.getTag()));
 
 		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
-		backpackOutput.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue()));
+		int clothColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, ImmutableList.of(
+				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
+		));
+		int trimColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, ImmutableList.of(
+				DyeColor.BLUE, DyeColor.BLACK
+		));
 
-		ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "two_colors");
+		backpackOutput.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.setColors(clothColor, trimColor));
+
+		ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "multiple_colors");
 		recipes.add(new ShapedRecipe(id, "", 3, 1, ingredients, backpackOutput));
 	}
 
@@ -47,7 +60,7 @@ public class DyeRecipesMaker {
 			NonNullList<Ingredient> ingredients = NonNullList.create();
 			ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
 			ingredients.add(Ingredient.fromTag(color.getTag()));
-			recipes.add(new ShapelessRecipe(id, "", backpackOutput, ingredients));
+			recipes.add(new ShapedRecipe(id, "", 1, 2, ingredients, backpackOutput));
 		}
 	}
 }

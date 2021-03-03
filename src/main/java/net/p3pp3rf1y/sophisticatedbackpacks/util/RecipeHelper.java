@@ -13,12 +13,15 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class RecipeHelper {
-	private static final Map<Item, CompactingShape> ITEM_COMPACTING_SHAPES = new HashMap<>();
+	private static final Map<Item, Set<CompactingShape>> ITEM_COMPACTING_SHAPES = new HashMap<>();
 	private static WeakReference<World> world;
 
 	private RecipeHelper() {}
@@ -31,24 +34,27 @@ public class RecipeHelper {
 		return Optional.ofNullable(world.get());
 	}
 
-	private static CompactingShape getCompactingShape(Item item) {
+	private static Set<CompactingShape> getCompactingShapes(Item item) {
 		return getWorld().map(w -> {
+			Set<CompactingShape> compactingShapes = new HashSet<>();
 			ItemStack compactingResult = getCraftingResult(item, w, 2, 2);
 			if (!compactingResult.isEmpty()) {
 				if (uncompactMatchesItem(compactingResult, w, item, 4)) {
-					return CompactingShape.TWO_BY_TWO_UNCRAFTABLE;
+					compactingShapes.add(CompactingShape.TWO_BY_TWO_UNCRAFTABLE);
+				} else {
+					compactingShapes.add(CompactingShape.TWO_BY_TWO);
 				}
-				return CompactingShape.TWO_BY_TWO;
 			}
 			compactingResult = getCraftingResult(item, w, 3, 3);
 			if (!compactingResult.isEmpty()) {
 				if (uncompactMatchesItem(compactingResult, w, item, 9)) {
-					return CompactingShape.THREE_BY_THREE_UNCRAFTABLE;
+					compactingShapes.add(CompactingShape.THREE_BY_THREE_UNCRAFTABLE);
+				} else {
+					compactingShapes.add(CompactingShape.THREE_BY_THREE);
 				}
-				return CompactingShape.THREE_BY_THREE;
 			}
-			return CompactingShape.NONE;
-		}).orElse(CompactingShape.NONE);
+			return compactingShapes;
+		}).orElse(Collections.emptySet());
 	}
 
 	private static boolean uncompactMatchesItem(ItemStack result, World w, Item item, int count) {
@@ -82,8 +88,8 @@ public class RecipeHelper {
 		return getWorld().flatMap(w -> w.getRecipeManager().getRecipe(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.from(ItemStack.EMPTY, stack))), w));
 	}
 
-	public static CompactingShape getItemCompactingShape(Item item) {
-		return ITEM_COMPACTING_SHAPES.computeIfAbsent(item, RecipeHelper::getCompactingShape);
+	public static Set<CompactingShape> getItemCompactingShapes(Item item) {
+		return ITEM_COMPACTING_SHAPES.computeIfAbsent(item, RecipeHelper::getCompactingShapes);
 	}
 
 	public enum CompactingShape {

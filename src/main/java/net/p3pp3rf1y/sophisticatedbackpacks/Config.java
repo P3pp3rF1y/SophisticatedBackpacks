@@ -118,6 +118,8 @@ public class Config {
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
+			public final ForgeConfigSpec.BooleanValue buffHealth;
+			public final ForgeConfigSpec.BooleanValue equipWithArmor;
 			public final ForgeConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
 			@Nullable
 			private Map<EntityType<?>, ResourceLocation> entityLootTables = null;
@@ -128,7 +130,11 @@ public class Config {
 				addLoot = builder.comment("Turns on/off addition of loot into backpacks").define("addLoot", true);
 				buffWithPotionEffects = builder.comment("Turns on/off buffing the entity that wears backpack with potion effects. These are scaled based on how much loot is added.")
 						.define("buffWithPotionEffects", true);
-				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName")
+				buffHealth = builder.comment("Turns on/off buffing the entity that wears backpack with additional health. Health is scaled based on backpack tier the mob wears.")
+						.define("buffHealth", true);
+				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
+						.define("equipWithArmor", true);
+				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
 						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
 				builder.pop();
 			}
