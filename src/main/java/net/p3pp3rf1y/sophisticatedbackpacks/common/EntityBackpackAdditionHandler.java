@@ -8,6 +8,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -222,7 +223,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
-		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!event.getSource().damageType.equals("player") || event.getSource().getTrueSource() instanceof FakePlayer)) {
+		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
 			event.getDrops().removeIf(drop -> drop.getItem().getItem() instanceof BackpackItem);
 		}
 	}
