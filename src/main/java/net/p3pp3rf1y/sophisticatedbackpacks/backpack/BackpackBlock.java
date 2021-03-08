@@ -138,7 +138,9 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand) {
-		player.setHeldItem(hand, WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY));
+		ItemStack backpack = WorldHelper.getTile(world, pos, BackpackTileEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
+		player.setHeldItem(hand, backpack);
+		player.getCooldownTracker().setCooldown(backpack.getItem(), 5);
 		world.removeBlock(pos, false);
 
 		SoundType soundType = state.getSoundType();
