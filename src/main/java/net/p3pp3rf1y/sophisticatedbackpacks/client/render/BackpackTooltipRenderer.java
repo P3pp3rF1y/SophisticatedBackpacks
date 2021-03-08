@@ -69,7 +69,7 @@ public class BackpackTooltipRenderer {
 			refreshContents(wrapper, minecraft);
 
 			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-			GuiHelper.renderToolTip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
+			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
 			event.setCanceled(true);
 		});
 

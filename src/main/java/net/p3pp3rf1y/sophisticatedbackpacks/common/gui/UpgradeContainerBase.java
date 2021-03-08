@@ -101,7 +101,13 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		slot.onTake(player, slotStack);
 	}
 
-	public boolean mergeIntoBackpackFirst(@SuppressWarnings("unused") Slot slot) {
+	@SuppressWarnings({"unused", "java:S1172"}) //parameter is used in overrides
+	public boolean mergeIntoBackpackFirst(Slot slot) {
+		return true;
+	}
+
+	@SuppressWarnings({"unused", "java:S1172"}) //parameter is used in overrides
+	public boolean allowsPickupAll(Slot slot) {
 		return true;
 	}
 }

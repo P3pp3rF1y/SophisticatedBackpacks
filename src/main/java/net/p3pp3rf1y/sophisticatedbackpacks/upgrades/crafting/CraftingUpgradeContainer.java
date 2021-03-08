@@ -127,4 +127,9 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	public boolean mergeIntoBackpackFirst(Slot slot) {
 		return !(slot instanceof CraftingResultSlot) || shouldShiftClickIntoBackpack();
 	}
+
+	@Override
+	public boolean allowsPickupAll(Slot slot) {
+		return slot != craftingResultSlot;
+	}
 }

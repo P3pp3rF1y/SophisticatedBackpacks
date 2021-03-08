@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
+	public static final TextureBlitData CRAFTING_RESULT_SLOT = new TextureBlitData(GUI_CONTROLS, new UV(71, 216), new Dimension(26, 26));
 	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(47, 0), Dimension.SQUARE_18);
 	public static final TextureBlitData DEFAULT_BUTTON_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(29, 0), Dimension.SQUARE_18);
 	public static final TextureBlitData SMALL_BUTTON_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 18), Dimension.SQUARE_12);
@@ -86,16 +87,16 @@ public class GuiHelper {
 		tooltipToRender = tooltip;
 	}
 
-	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY) {
+	public static void renderTooltip(Minecraft minecraft, MatrixStack matrixStack, int mouseX, int mouseY) {
 		if (tooltipToRender.isEmpty()) {
 			return;
 		}
 
-		renderToolTip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY);
+		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY);
 		tooltipToRender = Collections.emptyList();
 	}
 
-	public static void renderToolTip(Minecraft minecraft, MatrixStack matrixStack, List<? extends ITextProperties> textLines, int mouseX, int mouseY,
+	public static void renderTooltip(Minecraft minecraft, MatrixStack matrixStack, List<? extends ITextProperties> textLines, int mouseX, int mouseY,
 			ITooltipRenderPart additionalRender, @Nullable FontRenderer tooltipRenderFont, ItemStack stack) {
 
 		FontRenderer font = tooltipRenderFont == null ? minecraft.fontRenderer : tooltipRenderFont;

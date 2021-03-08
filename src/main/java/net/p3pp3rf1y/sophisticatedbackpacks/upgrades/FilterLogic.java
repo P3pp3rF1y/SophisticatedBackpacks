@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -75,7 +76,11 @@ public class FilterLogic {
 
 				@Override
 				public boolean isItemValid(int slot, ItemStack stack) {
-					return stack.isEmpty() || isItemValid.test(stack);
+					return stack.isEmpty() || (doesNotContain(stack) && isItemValid.test(stack));
+				}
+
+				private boolean doesNotContain(ItemStack stack) {
+					return !InventoryHelper.hasItem(this, s -> ItemHandlerHelper.canItemStacksStack(s, stack));
 				}
 			};
 			NBTHelper.getCompound(upgrade, parentTagKey, "filters").ifPresent(filterHandler::deserializeNBT);

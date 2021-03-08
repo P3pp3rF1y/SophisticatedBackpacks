@@ -297,19 +297,31 @@ public class BackpackContainer extends Container {
 
 	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack) {
 		if (isBackpackInventoryOrUpgradeSlot(index)) {
-			return mergeStackToPlayersInventory(slotStack);
+			return mergeStackToOpenUpgradeTab(slotStack) || mergeStackToPlayersInventory(slotStack);
 		} else if (isUpgradeSettingsSlot(index)) {
 			if (getSlotUpgradeContainer(slot).map(c -> c.mergeIntoBackpackFirst(slot)).orElse(true)) {
 				return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack);
 			}
 			return mergeStackToPlayersInventory(slotStack) || mergeStackToBackpack(slotStack);
 		} else {
-			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
+			return mergeStackToOpenUpgradeTab(slotStack) || mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
 		}
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
 		return mergeItemStack(slotStack, inventorySlots.size(), inventorySlots.size() + getNumberOfUpgradeSlots(), false);
+	}
+
+	private boolean mergeStackToOpenUpgradeTab(ItemStack slotStack) {
+		return getOpenContainer().map(c -> {
+			List<Slot> slots = c.getSlots();
+			if (slots.isEmpty()) {
+				return false;
+			}
+			int firstSlotIndex = slots.get(0).slotNumber;
+			int lastSlotIndex = slots.get(slots.size() - 1).slotNumber;
+			return mergeItemStack(slotStack, firstSlotIndex, lastSlotIndex + 1, false);
+		}).orElse(false);
 	}
 
 	private boolean mergeStackToBackpack(ItemStack slotStack) {
@@ -328,7 +340,7 @@ public class BackpackContainer extends Container {
 		return index < getNumberOfSlots() || (index >= inventorySlots.size() && (index - inventorySlots.size() < getNumberOfUpgradeSlots()));
 	}
 
-	private Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
+	public Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
 		if (slot.slotNumber >= getFirstUpgradeSettingsSlot()) {
 			for (UpgradeContainerBase<?, ?> upgradeContainer : upgradeContainers.values()) {
 				if (upgradeContainer.containsSlot(slot)) {
@@ -946,7 +958,13 @@ public class BackpackContainer extends Container {
 				Slot slot1 = getSlot(i);
 				ItemStack itemstack1 = slot1.getStack();
 				if (itemstack1.isEmpty() && slot1.isItemValid(stack)) {
-					if (stack.getCount() > slot1.getSlotStackLimit()) {
+					//filter slot logic
+					if (slot1 instanceof FilterSlotItemHandler) {
+						ItemStack fakeStack = stack.copy();
+						fakeStack.setCount(1);
+						slot1.putStack(fakeStack);
+						//end filter slot logic
+					} else if (stack.getCount() > slot1.getSlotStackLimit()) {
 						slot1.putStack(stack.split(slot1.getSlotStackLimit()));
 					} else {
 						slot1.putStack(stack.split(stack.getCount()));

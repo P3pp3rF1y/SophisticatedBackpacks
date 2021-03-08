@@ -2,11 +2,13 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
@@ -16,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -90,6 +93,10 @@ public class RecipeHelper {
 
 	public static Set<CompactingShape> getItemCompactingShapes(Item item) {
 		return ITEM_COMPACTING_SHAPES.computeIfAbsent(item, RecipeHelper::getCompactingShapes);
+	}
+
+	public static List<StonecuttingRecipe> getStonecuttingRecipes(IInventory inventory) {
+		return getWorld().map(w -> w.getRecipeManager().getRecipes(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
 	}
 
 	public enum CompactingShape {
