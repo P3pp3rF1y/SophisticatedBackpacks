@@ -1,0 +1,31 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "stonecutter_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        " S ",
+        "IBI",
+        " R "
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "S": {
+            "item": "minecraft:stonecutter"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:stonecutter_upgrade"
+    }
+}

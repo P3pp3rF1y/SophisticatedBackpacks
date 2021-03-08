@@ -8,6 +8,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -141,10 +142,11 @@ public class EntityBackpackAdditionHandler {
 		}
 		ModifiableAttributeInstance maxHealth = monster.getAttribute(Attributes.MAX_HEALTH);
 		if (maxHealth != null) {
-			double healthAddition = maxHealth.getBaseValue() * 0.5D * minDifficulty;
+			double healthAddition = maxHealth.getBaseValue() * minDifficulty;
 			if (healthAddition > 0.1D) {
 				maxHealth.applyPersistentModifier(new AttributeModifier("Backpack bearer health bonus", healthAddition, AttributeModifier.Operation.ADDITION));
 			}
+			monster.setHealth(monster.getMaxHealth());
 		}
 	}
 
@@ -163,8 +165,14 @@ public class EntityBackpackAdditionHandler {
 		return secondaryColor == null ? -1 : secondaryColor;
 	}
 
-	private static final List<Effect> APPLICABLE_EFFECTS = ImmutableList.of(Effects.RESISTANCE, Effects.FIRE_RESISTANCE, Effects.ABSORPTION, Effects.HEALTH_BOOST,
-			Effects.REGENERATION, Effects.SPEED, Effects.STRENGTH);
+	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = ImmutableList.of(
+			new ApplicableEffect(Effects.RESISTANCE, 3),
+			new ApplicableEffect(Effects.FIRE_RESISTANCE),
+			new ApplicableEffect(Effects.ABSORPTION),
+			new ApplicableEffect(Effects.HEALTH_BOOST),
+			new ApplicableEffect(Effects.REGENERATION),
+			new ApplicableEffect(Effects.SPEED),
+			new ApplicableEffect(Effects.STRENGTH));
 
 	private static void setLoot(MonsterEntity monster, IBackpackWrapper backpackWrapper, int difficulty) {
 		MinecraftServer server = monster.world.getServer();
@@ -180,9 +188,9 @@ public class EntityBackpackAdditionHandler {
 	private static void applyPotions(MonsterEntity monster, int difficulty, int minDifficulty) {
 		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.buffWithPotionEffects.get())) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
-					.forEach(effect -> {
-						int amplifier = Math.max(minDifficulty, monster.world.rand.nextInt(difficulty + 1));
-						monster.addPotionEffect(new EffectInstance(effect, 30 * 60 * 20, amplifier));
+					.forEach(applicableEffect -> {
+						int amplifier = Math.min(Math.max(minDifficulty, monster.world.rand.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
+						monster.addPotionEffect(new EffectInstance(applicableEffect.getEffect(), 30 * 60 * 20, amplifier));
 					});
 		}
 	}
@@ -222,7 +230,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
-		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!event.getSource().damageType.equals("player") || event.getSource().getTrueSource() instanceof FakePlayer)) {
+		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
 			event.getDrops().removeIf(drop -> drop.getItem().getItem() instanceof BackpackItem);
 		}
 	}
@@ -262,6 +270,29 @@ public class EntityBackpackAdditionHandler {
 
 		public int getMinDifficulty() {
 			return minDifficulty;
+		}
+	}
+
+	private static class ApplicableEffect {
+		private final Effect effect;
+
+		private final int maxAmplifier;
+
+		private ApplicableEffect(Effect effect) {
+			this(effect, Integer.MAX_VALUE);
+		}
+
+		private ApplicableEffect(Effect effect, int maxAmplifier) {
+			this.effect = effect;
+			this.maxAmplifier = maxAmplifier;
+		}
+
+		public Effect getEffect() {
+			return effect;
+		}
+
+		public int getMaxAmplifier() {
+			return maxAmplifier;
 		}
 	}
 }

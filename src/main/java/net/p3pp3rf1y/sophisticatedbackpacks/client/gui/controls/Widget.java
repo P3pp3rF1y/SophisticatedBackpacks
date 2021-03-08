@@ -62,4 +62,8 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 	public int getY() {
 		return y;
 	}
+
+	protected int getCenteredX(int elementWidth) {
+		return (getWidth() - elementWidth) / 2;
+	}
 }

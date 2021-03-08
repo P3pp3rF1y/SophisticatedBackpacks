@@ -83,4 +83,12 @@ public class ButtonDefinitions {
 					true, getButtonStateData(new UV(32, 80), translUpgradeButton("works_in_gui"), Dimension.SQUARE_16, new Position(1, 1)),
 					false, getButtonStateData(new UV(48, 80), translUpgradeButton("only_automatic"), Dimension.SQUARE_16, new Position(1, 1))
 			));
+
+	public static final ButtonDefinition.Toggle<Boolean> SHIFT_CLICK_TARGET = createToggleButtonDefinition(
+			ImmutableMap.of(
+					true, getButtonStateData(new UV(64, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("shift_click_into_backpack"), null)),
+					false, getButtonStateData(new UV(80, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("shift_click_into_inventory")))
+			));
 }

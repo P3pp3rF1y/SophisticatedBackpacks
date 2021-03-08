@@ -115,6 +115,11 @@ public class NBTHelper {
 		return tag;
 	}
 
+	public static CompoundNBT putInt(CompoundNBT tag, String key, int value) {
+		tag.putInt(key, value);
+		return tag;
+	}
+
 	public static <T extends Enum<T> & IStringSerializable> CompoundNBT putEnumConstant(CompoundNBT tag, String key, T enumConstant) {
 		tag.putString(key, enumConstant.getString());
 		return tag;
@@ -137,5 +142,9 @@ public class NBTHelper {
 			return;
 		}
 		stack.getTag().remove(key);
+	}
+
+	public static Optional<String> getString(ItemStack stack, String key) {
+		return getTagValue(stack, key, CompoundNBT::getString);
 	}
 }

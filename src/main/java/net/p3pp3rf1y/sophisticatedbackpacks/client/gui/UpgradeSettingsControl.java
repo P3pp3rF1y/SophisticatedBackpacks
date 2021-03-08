@@ -68,6 +68,10 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		//noop
 	}
 
+	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		children.forEach(tab -> tab.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
+	}
+
 	private int getTopY(int index) {
 		return y + index * (UpgradeSettingsTab.DEFAULT_HEIGHT + VERTICAL_SPACE);
 	}

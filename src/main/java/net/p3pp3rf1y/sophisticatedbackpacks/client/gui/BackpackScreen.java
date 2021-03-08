@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.entity.player.PlayerInventory;
@@ -158,6 +159,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		upgradeSettingsControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		upgradeSettingsControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
 		if (sortButton != null && sortByButton != null) {
 			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -207,7 +209,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	@Override
 	protected void renderHoveredTooltip(MatrixStack matrixStack, int x, int y) {
 		super.renderHoveredTooltip(matrixStack, x, y);
-		GuiHelper.renderToolTip(minecraft, matrixStack, x, y);
+		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
 	}
 
 	private void drawInventoryBackground(MatrixStack matrixStack) {
@@ -287,6 +289,24 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		}
 
 		return super.mouseReleased(mouseX, mouseY, button);
+	}
+
+	@Override
+	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
+		if (type == ClickType.PICKUP_ALL && !container.getSlotUpgradeContainer(slot).map(c -> c.allowsPickupAll(slot)).orElse(true)) {
+			type = ClickType.PICKUP;
+		}
+		super.handleMouseClick(slot, slotId, mouseButton, type);
+	}
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+		for (IGuiEventListener child : children) {
+			if (child.isMouseOver(mouseX, mouseY) && child.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+				return true;
+			}
+		}
+		return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
 	}
 
 	@Override
