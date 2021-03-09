@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
@@ -47,7 +48,8 @@ public class CommonProxy {
 		MinecraftForge.EVENT_BUS.addListener(this::onLivingSpecialSpawn);
 		MinecraftForge.EVENT_BUS.addListener(this::onLivingDrops);
 		MinecraftForge.EVENT_BUS.addListener(this::onCauldronInteract);
-		MinecraftForge.EVENT_BUS.addListener(this::onEntityMobGriefingEvent);
+		MinecraftForge.EVENT_BUS.addListener(this::onEntityMobGriefing);
+		MinecraftForge.EVENT_BUS.addListener(this::onEntityLeaveWorld);
 	}
 
 	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {
@@ -101,10 +103,17 @@ public class CommonProxy {
 		EntityBackpackAdditionHandler.handleBackpackDrop(event);
 	}
 
-	private void onEntityMobGriefingEvent(EntityMobGriefingEvent event) {
+	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
 		if (event.getEntity() instanceof CreeperEntity) {
 			EntityBackpackAdditionHandler.removeBeneficialEffects((CreeperEntity) event.getEntity());
 		}
+	}
+
+	private void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
+		if (!(event.getEntity() instanceof MonsterEntity)) {
+			return;
+		}
+		EntityBackpackAdditionHandler.removeBackpackUuid((MonsterEntity) event.getEntity());
 	}
 
 	private void onItemPickup(EntityItemPickupEvent event) {

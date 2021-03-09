@@ -73,6 +73,10 @@ public class BackpackStorage extends WorldSavedData {
 		});
 	}
 
+	public void removeBackpackContents(UUID backpackUuid) {
+		backpackContents.remove(backpackUuid);
+	}
+
 	public void setBackpackContents(UUID backpackUuid, CompoundNBT contents) {
 		backpackContents.put(backpackUuid, contents);
 	}

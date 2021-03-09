@@ -25,6 +25,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WeightedElement;
@@ -203,6 +204,15 @@ public class EntityBackpackAdditionHandler {
 		if (creeper.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			creeper.getActivePotionEffects().removeIf(e -> e.getPotion().isBeneficial());
 		}
+	}
+
+	public static void removeBackpackUuid(MonsterEntity entity) {
+		if (entity.getShouldBeDead() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			return;
+		}
+
+		entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
 	}
 
 	private static class BackpackAddition {
