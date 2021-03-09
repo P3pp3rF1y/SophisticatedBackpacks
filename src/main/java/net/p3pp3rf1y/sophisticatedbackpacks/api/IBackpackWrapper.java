@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
@@ -56,4 +58,8 @@ public interface IBackpackWrapper {
 	void setPersistent(boolean persistent);
 
 	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
+
+	void setLoot(ResourceLocation lootTableName, float lootPercentage);
+
+	void fillWithLoot(PlayerEntity playerEntity);
 }

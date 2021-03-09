@@ -147,4 +147,8 @@ public class NBTHelper {
 	public static Optional<String> getString(ItemStack stack, String key) {
 		return getTagValue(stack, key, CompoundNBT::getString);
 	}
+
+	public static Optional<Float> getFloat(ItemStack stack, String key) {
+		return getTagValue(stack, key, CompoundNBT::getFloat);
+	}
 }

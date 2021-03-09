@@ -73,6 +73,7 @@ public class BackpackContainer extends Container {
 		this.backpackContext = backpackContext;
 		parentBackpackWrapper = backpackContext.getParentBackpackWrapper(player).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper = backpackContext.getBackpackWrapper(player);
+		backpackWrapper.fillWithLoot(player);
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
