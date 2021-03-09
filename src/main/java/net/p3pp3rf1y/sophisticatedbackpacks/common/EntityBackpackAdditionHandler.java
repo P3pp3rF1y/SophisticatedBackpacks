@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -232,6 +233,12 @@ public class EntityBackpackAdditionHandler {
 	static void handleBackpackDrop(LivingDropsEvent event) {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
 			event.getDrops().removeIf(drop -> drop.getItem().getItem() instanceof BackpackItem);
+		}
+	}
+
+	public static void removeBeneficialEffects(CreeperEntity creeper) {
+		if (creeper.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			creeper.getActivePotionEffects().removeIf(e -> e.getPotion().isBeneficial());
 		}
 	}
 
