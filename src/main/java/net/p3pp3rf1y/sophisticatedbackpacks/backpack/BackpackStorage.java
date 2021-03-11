@@ -24,6 +24,7 @@ public class BackpackStorage extends WorldSavedData {
 
 	private final Map<UUID, CompoundNBT> backpackContents = new HashMap<>();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
+	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
 
 	private BackpackStorage() {
 		super(SAVED_DATA_NAME);
@@ -44,6 +45,18 @@ public class BackpackStorage extends WorldSavedData {
 
 	@Override
 	public void read(CompoundNBT nbt) {
+		readBackpackContents(nbt);
+		readAccessLogs(nbt);
+	}
+
+	private void readAccessLogs(CompoundNBT nbt) {
+		for (INBT n : nbt.getList("accessLogRecords", Constants.NBT.TAG_COMPOUND)) {
+			AccessLogRecord alr = AccessLogRecord.deserializeFromNBT((CompoundNBT) n);
+			accessLogRecords.put(alr.getBackpackUuid(), alr);
+		}
+	}
+
+	private void readBackpackContents(CompoundNBT nbt) {
 		for (INBT n : nbt.getList("backpackContents", Constants.NBT.TAG_COMPOUND)) {
 			CompoundNBT uuidContentsPair = (CompoundNBT) n;
 			UUID uuid = NBTUtil.readUniqueId(Objects.requireNonNull(uuidContentsPair.get("uuid")));
@@ -55,6 +68,12 @@ public class BackpackStorage extends WorldSavedData {
 	@Override
 	public CompoundNBT write(CompoundNBT compound) {
 		CompoundNBT ret = new CompoundNBT();
+		writeBackpackContents(ret);
+		writeAccessLogs(ret);
+		return ret;
+	}
+
+	private void writeBackpackContents(CompoundNBT ret) {
 		ListNBT backpackContentsNbt = new ListNBT();
 		for (Map.Entry<UUID, CompoundNBT> entry : backpackContents.entrySet()) {
 			CompoundNBT uuidContentsPair = new CompoundNBT();
@@ -63,7 +82,14 @@ public class BackpackStorage extends WorldSavedData {
 			backpackContentsNbt.add(uuidContentsPair);
 		}
 		ret.put("backpackContents", backpackContentsNbt);
-		return ret;
+	}
+
+	private void writeAccessLogs(CompoundNBT ret) {
+		ListNBT accessLogsNbt = new ListNBT();
+		for (AccessLogRecord alr : accessLogRecords.values()) {
+			accessLogsNbt.add(alr.serializeToNBT());
+		}
+		ret.put("accessLogRecords", accessLogsNbt);
 	}
 
 	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid) {
@@ -73,11 +99,20 @@ public class BackpackStorage extends WorldSavedData {
 		});
 	}
 
+	public void putAccessLog(AccessLogRecord alr) {
+		accessLogRecords.put(alr.getBackpackUuid(), alr);
+		markDirty();
+	}
+
 	public void removeBackpackContents(UUID backpackUuid) {
 		backpackContents.remove(backpackUuid);
 	}
 
 	public void setBackpackContents(UUID backpackUuid, CompoundNBT contents) {
 		backpackContents.put(backpackUuid, contents);
+	}
+
+	public Map<UUID, AccessLogRecord> getAccessLogs() {
+		return accessLogRecords;
 	}
 }

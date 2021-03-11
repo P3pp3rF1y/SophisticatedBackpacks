@@ -168,7 +168,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 		clearDummyUpgradeHandler();
 		UUID newUuid = UUID.randomUUID();
-		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, newUuid);
+		setContentsUuid(newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
 	}
@@ -318,6 +318,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return;
 		}
 		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
+	}
+
+	@Override
+	public void setContentsUuid(UUID backpackUuid) {
+		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, backpackUuid);
 	}
 
 	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {

@@ -146,4 +146,9 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public void fillWithLoot(PlayerEntity playerEntity) {
 		//noop
 	}
+
+	@Override
+	public void setContentsUuid(UUID backpackUuid) {
+		//noop
+	}
 }

@@ -62,4 +62,6 @@ public interface IBackpackWrapper {
 	void setLoot(ResourceLocation lootTableName, float lootPercentage);
 
 	void fillWithLoot(PlayerEntity playerEntity);
+
+	void setContentsUuid(UUID backpackUuid);
 }

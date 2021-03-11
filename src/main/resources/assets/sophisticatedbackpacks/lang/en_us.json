@@ -143,5 +143,10 @@
     "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",
     "gui.sophisticatedbackpacks.buttons.sort_action": "Sort Backpack",
     "gui.sophisticatedbackpacks.buttons.upgrade_switch_enabled": "ON",
-    "gui.sophisticatedbackpacks.buttons.upgrade_switch_disabled": "OFF"
+    "gui.sophisticatedbackpacks.buttons.upgrade_switch_disabled": "OFF",
+    "commands.sophisticatedbackpacks.list.header": "Backpack Name, Colors, Last Open By, Last Open On",
+    "commands.sophisticatedbackpacks.list.cloth_color": "Cloth",
+    "commands.sophisticatedbackpacks.list.trim_color": "Trim",
+    "commands.sophisticatedbackpacks.give.success": "Gave backpack to %s",
+    "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "Click to give backpack UUID: %s"
 }
