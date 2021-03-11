@@ -1,9 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -13,10 +18,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +39,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String CONTENTS_UUID_TAG = "contentsUuid";
 	private static final String INVENTORY_SLOTS_TAG = "inventorySlots";
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
+	private static final String LOOT_TABLE_NAME_TAG = "lootTableName";
+	private static final String LOOT_PERCENTAGE_TAG = "lootPercentage";
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
@@ -158,7 +168,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 		clearDummyUpgradeHandler();
 		UUID newUuid = UUID.randomUUID();
-		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, newUuid);
+		setContentsUuid(newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
 	}
@@ -293,6 +303,45 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
 		setNumberOfInventorySlots(numberOfInventorySlots);
 		setNumberOfUpgradeSlots(numberOfUpgradeSlots);
+	}
+
+	@Override
+	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+		backpack.setTagInfo(LOOT_TABLE_NAME_TAG, StringNBT.valueOf(lootTableName.toString()));
+		backpack.setTagInfo(LOOT_PERCENTAGE_TAG, FloatNBT.valueOf(lootPercentage));
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void fillWithLoot(PlayerEntity playerEntity) {
+		if (playerEntity.world.isRemote) {
+			return;
+		}
+		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
+	}
+
+	@Override
+	public void setContentsUuid(UUID backpackUuid) {
+		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, backpackUuid);
+	}
+
+	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {
+		MinecraftServer server = playerEntity.world.getServer();
+		if (server == null || !(playerEntity.world instanceof ServerWorld)) {
+			return;
+		}
+
+		ResourceLocation lootTableName = new ResourceLocation(lootName);
+		float lootPercentage = NBTHelper.getFloat(backpack, LOOT_PERCENTAGE_TAG).orElse(0f);
+
+		backpack.removeChildTag(LOOT_TABLE_NAME_TAG);
+		backpack.removeChildTag(LOOT_PERCENTAGE_TAG);
+
+		ServerWorld world = (ServerWorld) playerEntity.world;
+
+		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
+		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
+		LootHelper.fillWithLoot(world.rand, loot, getInventoryHandler());
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {

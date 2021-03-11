@@ -15,6 +15,10 @@ public class RandHelper {
 	}
 
 	public static <T> List<T> getNRandomElements(List<T> input, int numberOfElements) {
+		if (input.size() == numberOfElements) {
+			return input;
+		}
+
 		ArrayList<T> randomizedList = new ArrayList<>(input);
 		List<T> ret = new ArrayList<>();
 		Collections.shuffle(randomizedList);

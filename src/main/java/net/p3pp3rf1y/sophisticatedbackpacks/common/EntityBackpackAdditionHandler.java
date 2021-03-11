@@ -2,11 +2,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -14,32 +14,22 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootTable;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WeightedElement;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -181,7 +171,7 @@ public class EntityBackpackAdditionHandler {
 		}
 
 		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.addLoot.get())) {
-			addLoot(monster, backpackWrapper, difficulty, server);
+			addLoot(monster, backpackWrapper, difficulty);
 		}
 	}
 
@@ -195,44 +185,34 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static void addLoot(MonsterEntity monster, IBackpackWrapper backpackWrapper, int difficulty, MinecraftServer server) {
+	private static void addLoot(MonsterEntity monster, IBackpackWrapper backpackWrapper, int difficulty) {
 		if (difficulty != 0) {
-			List<ItemStack> loot = getLoot(monster, server);
-
-			if (difficulty < MAX_DIFFICULTY) {
-				loot = RandHelper.getNRandomElements(loot, (int) (loot.size() / (float) MAX_DIFFICULTY * difficulty));
-			}
-			BackpackInventoryHandler backpackInventory = backpackWrapper.getInventoryHandler();
-			List<Integer> slots = InventoryHelper.getEmptySlotsRandomized(backpackInventory, monster.world.rand);
-			InventoryHelper.shuffleItems(loot, slots.size(), monster.world.rand);
-
-			for (ItemStack lootStack : loot) {
-				if (slots.isEmpty()) {
-					SophisticatedBackpacks.LOGGER.warn("Tried to over-fill backpack");
-					return;
-				}
-
-				if (!lootStack.isEmpty()) {
-					backpackInventory.setStackInSlot(slots.remove(slots.size() - 1), lootStack);
-				}
-			}
+			Config.COMMON.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
+				float lootPercentage = (float) difficulty / MAX_DIFFICULTY;
+				backpackWrapper.setLoot(lootTableName, lootPercentage);
+			});
 		}
-	}
-
-	private static List<ItemStack> getLoot(Entity entity, MinecraftServer server) {
-		return Config.COMMON.entityBackpackAdditions.getLootTableName(entity.getType()).map(lootTableName -> {
-			LootTable lootTable = server.getLootTableManager().getLootTableFromLocation(lootTableName);
-			LootContext.Builder lootBuilder = (new LootContext.Builder((ServerWorld) entity.world)).withParameter(LootParameters.field_237457_g_, Vector3d.copyCentered(entity.getPosition())).withSeed(entity.world.rand.nextLong());
-			List<ItemStack> lootStacks = new ArrayList<>();
-			lootTable.recursiveGenerate(lootBuilder.build(LootParameterSets.CHEST), lootStacks::add);
-			return lootStacks;
-		}).orElse(Collections.emptyList());
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
 			event.getDrops().removeIf(drop -> drop.getItem().getItem() instanceof BackpackItem);
 		}
+	}
+
+	public static void removeBeneficialEffects(CreeperEntity creeper) {
+		if (creeper.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			creeper.getActivePotionEffects().removeIf(e -> e.getPotion().isBeneficial());
+		}
+	}
+
+	public static void removeBackpackUuid(MonsterEntity entity) {
+		if (entity.getShouldBeDead() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			return;
+		}
+
+		entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
 	}
 
 	private static class BackpackAddition {
