@@ -1,20 +1,23 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ISlotChangeResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 
-class BackpackInventorySlot extends SlotItemHandler {
+public class BackpackInventorySlot extends SlotItemHandler {
 	private final boolean isClientSide;
 	private final IBackpackWrapper backpackWrapper;
+	private final BackpackInventoryHandler inventoryHandler;
 	private final int slotIndex;
 
-	public BackpackInventorySlot(boolean isClientSide, IBackpackWrapper backpackWrapper, IItemHandlerModifiable inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
+	public BackpackInventorySlot(boolean isClientSide, IBackpackWrapper backpackWrapper, BackpackInventoryHandler inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
 		super(inventoryHandler, slotIndex, 8 + lineIndex * 18, yPosition);
 		this.isClientSide = isClientSide;
 		this.backpackWrapper = backpackWrapper;
+		this.inventoryHandler = inventoryHandler;
 		this.slotIndex = slotIndex;
 	}
 
@@ -31,5 +34,10 @@ class BackpackInventorySlot extends SlotItemHandler {
 		if (!isClientSide) {
 			backpackWrapper.getUpgradeHandler().getWrappersThatImplementFromMainBackpack(ISlotChangeResponseUpgrade.class).forEach(u -> u.onSlotChange(handler, slot));
 		}
+	}
+
+	@Override
+	public int getItemStackLimit(ItemStack stack) {
+		return inventoryHandler.getStackLimit(slotIndex, stack);
 	}
 }

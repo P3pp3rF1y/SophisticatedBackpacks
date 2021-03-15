@@ -6,7 +6,6 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,7 +105,6 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		}
 	}
 
-	@Nonnull
 	private static Map<Integer, ItemStack> removeItemsFromInventory(
 			PlayerEntity player,
 			BackpackContainer container,

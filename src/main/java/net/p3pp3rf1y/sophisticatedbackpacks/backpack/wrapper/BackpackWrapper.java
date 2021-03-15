@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
@@ -75,7 +76,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(getNumberOfInventorySlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
+			handler = new BackpackInventoryHandler(getNumberOfInventorySlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
 		}
 		return handler;
 	}
@@ -133,6 +134,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (upgradeHandler == null) {
 			if (getContentsUuid().isPresent()) {
 				upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
+					if (handler != null) {
+						handler.clearListeners();
+						handler.setSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
+					}
 					getInventoryHandler().clearListeners();
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;

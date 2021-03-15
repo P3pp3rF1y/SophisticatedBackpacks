@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
@@ -24,6 +25,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
@@ -69,6 +71,12 @@ public class BackpackTooltipRenderer {
 			refreshContents(wrapper, minecraft);
 
 			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+			int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
+			if (multiplier > 1) {
+				lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
+						new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
+				).mergeStyle(TextFormatting.GREEN));
+			}
 			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
 			event.setCanceled(true);
 		});
@@ -112,6 +120,7 @@ public class BackpackTooltipRenderer {
 		private static final TextureBlitData UPGRADE_OFF = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(77, 0), Dimension.RECTANGLE_4_10);
 		private static final int MAX_STACKS_ON_LINE = 9;
 		private static final int DEFAULT_STACK_WIDTH = 18;
+		private static final int COUNT_PADDING = 2;
 		private final Minecraft minecraft;
 		private final Map<Integer, IUpgradeWrapper> upgrades;
 		private final List<ItemStack> backpackContents;
@@ -153,7 +162,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int getStackCountWidth(FontRenderer fontRenderer, ItemStack stack) {
-			return fontRenderer.getStringWidth(Integer.toString(stack.getCount()));
+			return fontRenderer.getStringWidth(CountAbbreviator.abbreviate(stack.getCount())) + COUNT_PADDING;
 		}
 
 		private void calculateHeight() {
@@ -221,9 +230,10 @@ public class BackpackTooltipRenderer {
 				if (i % MAX_STACKS_ON_LINE == 0) {
 					x = leftX;
 				}
-				int stackWidth = Math.max(getStackCountWidth(minecraft.fontRenderer, backpackContents.get(i)), DEFAULT_STACK_WIDTH);
+				ItemStack stack = backpackContents.get(i);
+				int stackWidth = Math.max(getStackCountWidth(minecraft.fontRenderer, stack), DEFAULT_STACK_WIDTH);
 				int xOffset = stackWidth - DEFAULT_STACK_WIDTH;
-				GuiHelper.renderItemInGUI(matrixStack, minecraft, backpackContents.get(i), x + xOffset, y, true);
+				GuiHelper.renderItemInGUI(matrixStack, minecraft, stack, x + xOffset, y, true, CountAbbreviator.abbreviate(stack.getCount()));
 				x += stackWidth;
 			}
 		}

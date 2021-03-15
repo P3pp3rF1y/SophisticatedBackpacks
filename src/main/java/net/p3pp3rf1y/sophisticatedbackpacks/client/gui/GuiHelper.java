@@ -61,12 +61,17 @@ public class GuiHelper {
 	}
 
 	public static void renderItemInGUI(MatrixStack matrixStack, Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, boolean renderOverlay) {
+		renderItemInGUI(matrixStack, minecraft, stack, xPosition, yPosition, renderOverlay, null);
+	}
+
+	public static void renderItemInGUI(MatrixStack matrixStack, Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, boolean renderOverlay,
+			@Nullable String countText) {
 		ItemRenderer itemRenderer = minecraft.getItemRenderer();
 		float originalZLevel = itemRenderer.zLevel;
 		itemRenderer.zLevel += getZOffset(matrixStack);
 		itemRenderer.renderItemAndEffectIntoGUI(stack, xPosition, yPosition);
 		if (renderOverlay) {
-			itemRenderer.renderItemOverlayIntoGUI(minecraft.fontRenderer, stack, xPosition, yPosition, null);
+			itemRenderer.renderItemOverlayIntoGUI(minecraft.fontRenderer, stack, xPosition, yPosition, countText);
 		}
 		itemRenderer.zLevel = originalZLevel;
 	}

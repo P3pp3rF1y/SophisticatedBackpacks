@@ -337,6 +337,42 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_1.get())
+				.patternLine("III")
+				.patternLine("IBI")
+				.patternLine("III")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('I', Tags.Items.STORAGE_BLOCKS_IRON)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_2.get())
+				.patternLine("GGG")
+				.patternLine("GSG")
+				.patternLine("GGG")
+				.key('S', ModItems.STACK_UPGRADE_TIER_1.get())
+				.key('G', Tags.Items.STORAGE_BLOCKS_GOLD)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_1.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_3.get())
+				.patternLine("DDD")
+				.patternLine("DSD")
+				.patternLine("DDD")
+				.key('S', ModItems.STACK_UPGRADE_TIER_2.get())
+				.key('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_2.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_4.get())
+				.patternLine("NNN")
+				.patternLine("NSN")
+				.patternLine("NNN")
+				.key('S', ModItems.STACK_UPGRADE_TIER_3.get())
+				.key('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_3.get()))
+				.build(consumer);
+
 		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.fromItems(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.fromItems(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.addCriterion("has_diamond_backpack", hasItem(ModItems.DIAMOND_BACKPACK.get()))
