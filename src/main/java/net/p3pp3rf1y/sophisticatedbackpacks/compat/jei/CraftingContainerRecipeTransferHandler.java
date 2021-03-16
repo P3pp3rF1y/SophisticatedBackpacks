@@ -16,7 +16,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,7 +122,6 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		return inputCount;
 	}
 
-	@Nonnull
 	private Map<Integer, Slot> getCraftingSlots(BackpackContainer container) {
 		Map<Integer, Slot> craftingSlots = new HashMap<>();
 		List<Slot> recipeSlots = container.getCraftingContainer().map(ICraftingContainer::getRecipeSlots).orElse(Collections.emptyList());
@@ -133,7 +131,6 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		return craftingSlots;
 	}
 
-	@Nonnull
 	private Map<Integer, Slot> getInventorySlots(BackpackContainer container) {
 		Map<Integer, Slot> inventorySlots = new HashMap<>();
 		for (Slot slot : container.inventorySlots) {
@@ -271,7 +268,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		public abstract static class DelegateIterator<T, R> implements Iterator<R> {
 			protected final Iterator<T> delegate;
 
-			public DelegateIterator(Iterator<T> delegate) {
+			protected DelegateIterator(Iterator<T> delegate) {
 				this.delegate = delegate;
 			}
 

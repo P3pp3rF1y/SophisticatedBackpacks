@@ -30,6 +30,10 @@ public class PacketHandler {
 		registerMessage(RequestBackpackContentsMessage.class, RequestBackpackContentsMessage::encode, RequestBackpackContentsMessage::decode, RequestBackpackContentsMessage::onMessage);
 		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::encode, BackpackContentsMessage::decode, BackpackContentsMessage::onMessage);
 		registerMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::encode, InventoryInteractionMessage::decode, InventoryInteractionMessage::onMessage);
+		registerMessage(TransferFullSlotMessage.class, TransferFullSlotMessage::encode, TransferFullSlotMessage::decode, TransferFullSlotMessage::onMessage);
+		registerMessage(SyncContainerStacksMessage.class, SyncContainerStacksMessage::encode, SyncContainerStacksMessage::decode, SyncContainerStacksMessage::onMessage);
+		registerMessage(SyncSlotStackMessage.class, SyncSlotStackMessage::encode, SyncSlotStackMessage::decode, SyncSlotStackMessage::onMessage);
+		registerMessage(WindowClickMessage.class, WindowClickMessage::encode, WindowClickMessage::decode, WindowClickMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

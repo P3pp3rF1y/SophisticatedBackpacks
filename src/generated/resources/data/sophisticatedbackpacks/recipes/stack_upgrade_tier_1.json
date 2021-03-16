@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "stack_upgrade_tier_1",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "III",
+        "IBI",
+        "III"
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "I": {
+            "tag": "forge:storage_blocks/iron"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:stack_upgrade_tier_1"
+    }
+}

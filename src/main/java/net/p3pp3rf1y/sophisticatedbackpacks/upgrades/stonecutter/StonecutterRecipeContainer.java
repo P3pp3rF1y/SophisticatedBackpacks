@@ -21,7 +21,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting.CraftingItemHandle
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -50,7 +49,6 @@ public class StonecutterRecipeContainer {
 				onCraftMatrixChanged(inputInventory);
 			}
 
-			@Nonnull
 			@Override
 			public ItemStack decrStackSize(int amount) {
 				ItemStack ret = super.decrStackSize(amount);

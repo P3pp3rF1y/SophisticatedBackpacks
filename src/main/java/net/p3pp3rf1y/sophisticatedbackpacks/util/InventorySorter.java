@@ -81,7 +81,13 @@ public class InventorySorter {
 			}
 			if (current != null && count > 0) {
 				ItemStack copy = current.getStack().copy();
-				int countToPlace = Math.min(count, copy.getMaxStackSize());
+				int slotLimit = handler.getSlotLimit(slot);
+				int countToPlace;
+				if (slotLimit > 64) {
+					countToPlace = Math.min(count, slotLimit / 64 * copy.getMaxStackSize());
+				} else {
+					countToPlace = Math.min(count, copy.getMaxStackSize());
+				}
 				copy.setCount(countToPlace);
 				if (!ItemStack.areItemStacksEqual(handler.getStackInSlot(slot), copy)) {
 					handler.setStackInSlot(slot, copy);
