@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
@@ -350,7 +351,11 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean isUpgradeSlot(int index) {
-		return index >= inventorySlots.size() && (index - inventorySlots.size() < getNumberOfUpgradeSlots());
+		return index >= getFirstUpgradeSlot() && (index - getFirstUpgradeSlot() < getNumberOfUpgradeSlots());
+	}
+
+	private int getFirstUpgradeSlot() {
+		return inventorySlots.size();
 	}
 
 	public Optional<UpgradeContainerBase<?, ?>> getSlotUpgradeContainer(Slot slot) {
@@ -1046,5 +1051,24 @@ public class BackpackContainer extends Container {
 			return;
 		}
 		super.addListener(listener);
+	}
+
+	@Override
+	public void onContainerClosed(PlayerEntity player) {
+		for (Slot slot : upgradeSlots) {
+			if (isInventorySlotInUpgradeTab(player, slot) && slot.getStack().getItem() instanceof BackpackItem &&
+					!backpackWrapper.getInventoryHandler().isItemValid(0, slot.getStack())) {
+				ItemStack slotStack = slot.getStack();
+				slot.putStack(ItemStack.EMPTY);
+				if (!player.addItemStackToInventory(slotStack)) {
+					player.dropItem(slotStack, false);
+				}
+			}
+		}
+		super.onContainerClosed(player);
+	}
+
+	private boolean isInventorySlotInUpgradeTab(PlayerEntity player, Slot slot) {
+		return slot.canTakeStack(player) && !(slot instanceof CraftingResultSlot);
 	}
 }
