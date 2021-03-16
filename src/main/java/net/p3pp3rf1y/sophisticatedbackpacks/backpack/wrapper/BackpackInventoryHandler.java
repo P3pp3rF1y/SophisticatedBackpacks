@@ -20,6 +20,7 @@ import java.util.function.IntConsumer;
 
 public class BackpackInventoryHandler extends ItemStackHandler {
 	public static final String INVENTORY_TAG = "inventory";
+	private static final String REAL_COUNT_TAG = "realCount";
 	private final IBackpackWrapper backpackWrapper;
 	private final CompoundNBT contentsNbt;
 	private final Runnable backpackSaveHandler;
@@ -86,7 +87,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	private CompoundNBT getSlotsStackNbt(int slot, ItemStack slotStack) {
 		CompoundNBT itemTag = new CompoundNBT();
 		itemTag.putInt("Slot", slot);
-		itemTag.putInt("realCount", slotStack.getCount());
+		itemTag.putInt(REAL_COUNT_TAG, slotStack.getCount());
 		slotStack.write(itemTag);
 		return itemTag;
 	}
@@ -101,7 +102,9 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 			if (slot >= 0 && slot < stacks.size()) {
 				ItemStack slotStack = ItemStack.read(itemTags);
-				slotStack.setCount(itemTags.getInt("realCount"));
+				if (itemTags.contains(REAL_COUNT_TAG)) {
+					slotStack.setCount(itemTags.getInt(REAL_COUNT_TAG));
+				}
 				stacks.set(slot, slotStack);
 			}
 		}
