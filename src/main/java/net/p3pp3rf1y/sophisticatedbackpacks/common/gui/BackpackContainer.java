@@ -958,7 +958,7 @@ public class BackpackContainer extends Container {
 			i = endIndex - 1;
 		}
 
-		int toTransfer = transferMaxStackSizeFromSource ? sourceStack.getMaxStackSize() : sourceStack.getCount();
+		int toTransfer = transferMaxStackSizeFromSource ? Math.min(sourceStack.getMaxStackSize(), sourceStack.getCount()) : sourceStack.getCount();
 		if (sourceStack.isStackable() || getSlot(startIndex).getSlotStackLimit() > 64) {
 			while (toTransfer > 0) {
 				if (reverseDirection) {
