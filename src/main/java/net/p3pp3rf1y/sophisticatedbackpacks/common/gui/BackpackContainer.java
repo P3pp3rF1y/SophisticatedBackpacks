@@ -347,7 +347,11 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean isBackpackInventoryOrUpgradeSlot(int index) {
-		return index < getNumberOfSlots() || isUpgradeSlot(index);
+		return isBackpackInventorySlot(index) || isUpgradeSlot(index);
+	}
+
+	private boolean isBackpackInventorySlot(int index) {
+		return index < getNumberOfSlots();
 	}
 
 	private boolean isUpgradeSlot(int index) {
@@ -750,11 +754,14 @@ public class BackpackContainer extends Container {
 					return ItemStack.EMPTY;
 				}
 
-				int countBeforeTransfer = slot5.getStack().getCount();
-				for (ItemStack itemstack8 = transferStackInSlot(player, slotId);
-					 !itemstack8.isEmpty() && ItemStack.areItemsEqual(slot5.getStack(), itemstack8) && countBeforeTransfer - itemstack8.getMaxStackSize() > slot5.getStack().getCount();
-					 itemstack8 = transferStackInSlot(player, slotId)) {
-					ret = itemstack8.copy();
+				if (isBackpackInventorySlot(slotId)) {
+					ret = transferStackInSlot(player, slotId).copy();
+				} else {
+					for (ItemStack itemstack8 = transferStackInSlot(player, slotId);
+						 !itemstack8.isEmpty() && ItemStack.areItemsEqual(slot5.getStack(), itemstack8);
+						 itemstack8 = transferStackInSlot(player, slotId)) {
+						ret = itemstack8.copy();
+					}
 				}
 			} else {
 				if (slotId < 0) {
