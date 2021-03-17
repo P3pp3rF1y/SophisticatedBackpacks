@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
@@ -18,7 +19,10 @@ import net.minecraft.util.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,9 @@ import java.util.List;
 @SuppressWarnings("unused")
 @JeiPlugin
 public class SBPlugin implements IModPlugin {
+
+	private static final int LEFT_MOUSE_BUTTON = 0;
+
 	@Override
 	public ResourceLocation getPluginUid() {
 		return new ResourceLocation(SophisticatedBackpacks.MOD_ID, "default");
@@ -53,6 +60,39 @@ public class SBPlugin implements IModPlugin {
 				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
 				gui.getSortButtonsRectangle().ifPresent(ret::add);
 				return ret;
+			}
+		});
+
+		registration.addGhostIngredientHandler(BackpackScreen.class, new IGhostIngredientHandler<BackpackScreen>() {
+			@Override
+			public <I> List<Target<I>> getTargets(BackpackScreen screen, I i, boolean b) {
+				List<Target<I>> targets = new ArrayList<>();
+				if (!(i instanceof ItemStack)) {
+					return targets;
+				}
+				ItemStack ghostStack = (ItemStack) i;
+				BackpackContainer container = screen.getContainer();
+				container.getOpenContainer().ifPresent(c -> c.getSlots().forEach(s -> {
+					if (s instanceof FilterSlotItemHandler && s.isItemValid(ghostStack)) {
+						targets.add(new Target<I>() {
+							@Override
+							public Rectangle2d getArea() {
+								return new Rectangle2d(screen.getGuiLeft() + s.xPos, screen.getGuiTop() + s.yPos, 17, 17);
+							}
+
+							@Override
+							public void accept(I i) {
+								PacketHandler.sendToServer(new SetGhostSlotMessage(ghostStack, s.slotNumber));
+							}
+						});
+					}
+				}));
+				return targets;
+			}
+
+			@Override
+			public void onComplete() {
+				//noop
 			}
 		});
 	}
