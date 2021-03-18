@@ -42,6 +42,8 @@ public abstract class BackpackContext {
 
 	public abstract void toBuffer(PacketBuffer packetBuffer);
 
+	public abstract boolean canInteractWith(PlayerEntity player);
+
 	public static class Item extends BackpackContext {
 		protected final String handlerName;
 		protected final int backpackSlotIndex;
@@ -96,6 +98,11 @@ public abstract class BackpackContext {
 		public void toBuffer(PacketBuffer packetBuffer) {
 			packetBuffer.writeString(handlerName);
 			packetBuffer.writeInt(backpackSlotIndex);
+		}
+
+		@Override
+		public boolean canInteractWith(PlayerEntity player) {
+			return true;
 		}
 	}
 
@@ -188,6 +195,12 @@ public abstract class BackpackContext {
 		@Override
 		public void toBuffer(PacketBuffer packetBuffer) {
 			packetBuffer.writeLong(pos.toLong());
+		}
+
+		@Override
+		public boolean canInteractWith(PlayerEntity player) {
+			return player.world.getTileEntity(pos) instanceof BackpackTileEntity
+					&& (player.getDistanceSq((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D);
 		}
 	}
 

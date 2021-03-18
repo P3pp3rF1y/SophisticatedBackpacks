@@ -19,6 +19,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.items.SlotItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
@@ -255,8 +256,8 @@ public class BackpackContainer extends Container {
 	}
 
 	@Override
-	public boolean canInteractWith(PlayerEntity playerIn) {
-		return true;
+	public boolean canInteractWith(PlayerEntity player) {
+		return backpackContext.canInteractWith(player);
 	}
 
 	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
@@ -307,14 +308,20 @@ public class BackpackContainer extends Container {
 
 	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack, boolean transferMaxStackSizeFromSource) {
 		if (isBackpackInventoryOrUpgradeSlot(index)) {
-			return mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource) || mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource);
+			if (Config.COMMON.shiftClickIntoOpenTabFirst.get()) {
+				return mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource) || mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource);
+			}
+			return mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource) || mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource);
 		} else if (isUpgradeSettingsSlot(index)) {
 			if (getSlotUpgradeContainer(slot).map(c -> c.mergeIntoBackpackFirst(slot)).orElse(true)) {
 				return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack, true);
 			}
 			return mergeStackToPlayersInventory(slotStack, true) || mergeStackToBackpack(slotStack);
 		} else {
-			return mergeStackToOpenUpgradeTab(slotStack, true) || mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
+			if (Config.COMMON.shiftClickIntoOpenTabFirst.get()) {
+				return mergeStackToOpenUpgradeTab(slotStack, true) || mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
+			}
+			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack) || mergeStackToOpenUpgradeTab(slotStack, true);
 		}
 	}
 
@@ -615,13 +622,19 @@ public class BackpackContainer extends Container {
 		}
 	}
 
-	public Optional<ICraftingContainer> getCraftingContainer() {
+	@SuppressWarnings("unchecked") // both conditions of T are checked before casting it in the result
+	public <T extends UpgradeContainerBase<?, ?> & ICraftingContainer> Optional<T> getOpenOrFirstCraftingContainer() {
+		T firstContainer = null;
 		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
 			if (container instanceof ICraftingContainer) {
-				return Optional.of((ICraftingContainer) container);
+				if (container.isOpen()) {
+					return Optional.of((T) container);
+				} else if (firstContainer == null) {
+					firstContainer = (T) container;
+				}
 			}
 		}
-		return Optional.empty();
+		return Optional.ofNullable(firstContainer);
 	}
 
 	@Override

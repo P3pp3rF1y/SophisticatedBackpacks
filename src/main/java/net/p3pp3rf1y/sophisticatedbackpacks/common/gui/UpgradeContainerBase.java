@@ -110,4 +110,8 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	public boolean allowsPickupAll(Slot slot) {
 		return true;
 	}
+
+	public int getUpgradeContainerId() {
+		return upgradeContainerId;
+	}
 }
