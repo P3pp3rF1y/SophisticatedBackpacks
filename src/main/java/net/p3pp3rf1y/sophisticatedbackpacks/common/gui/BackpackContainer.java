@@ -615,13 +615,19 @@ public class BackpackContainer extends Container {
 		}
 	}
 
-	public Optional<ICraftingContainer> getCraftingContainer() {
+	@SuppressWarnings("unchecked") // both conditions of T are checked before casting it in the result
+	public <T extends UpgradeContainerBase<?, ?> & ICraftingContainer> Optional<T> getOpenOrFirstCraftingContainer() {
+		T firstContainer = null;
 		for (UpgradeContainerBase<?, ?> container : upgradeContainers.values()) {
 			if (container instanceof ICraftingContainer) {
-				return Optional.of((ICraftingContainer) container);
+				if (container.isOpen()) {
+					return Optional.of((T) container);
+				} else if (firstContainer == null) {
+					firstContainer = (T) container;
+				}
 			}
 		}
-		return Optional.empty();
+		return Optional.ofNullable(firstContainer);
 	}
 
 	@Override

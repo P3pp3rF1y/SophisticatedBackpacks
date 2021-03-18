@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 import javax.annotation.Nullable;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -44,12 +46,14 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 
 	@Override
 	public IRecipeTransferError transferRecipe(BackpackContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
-		if (!container.getCraftingContainer().isPresent()) {
+		Optional<? extends UpgradeContainerBase<?, ?>> potentialCraftingContainer = container.getOpenOrFirstCraftingContainer();
+		if (!potentialCraftingContainer.isPresent()) {
 			return handlerHelper.createInternalError();
 		}
 
 		Map<Integer, Slot> inventorySlots = getInventorySlots(container);
-		Map<Integer, Slot> craftingSlots = getCraftingSlots(container);
+		UpgradeContainerBase<?, ?> openOrFirstCraftingContainer = potentialCraftingContainer.get();
+		Map<Integer, Slot> craftingSlots = getCraftingSlots((ICraftingContainer) openOrFirstCraftingContainer);
 		IGuiItemStackGroup itemStackGroup = recipeLayout.getItemStacks();
 		int inputCount = getInputCount(itemStackGroup);
 
@@ -92,6 +96,14 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		Collections.sort(inventorySlotIndexes);
 
 		if (doTransfer) {
+			if (!openOrFirstCraftingContainer.isOpen()) {
+				container.getOpenContainer().ifPresent(c -> {
+					c.setIsOpen(false);
+					container.setOpenTabId(-1);
+				});
+				openOrFirstCraftingContainer.setIsOpen(true);
+				container.setOpenTabId(openOrFirstCraftingContainer.getUpgradeContainerId());
+			}
 			TransferRecipeMessage message = new TransferRecipeMessage(matchingItemsResult.matchingItems, craftingSlotIndexes, inventorySlotIndexes, maxTransfer);
 			PacketHandler.sendToServer(message);
 		}
@@ -122,9 +134,9 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		return inputCount;
 	}
 
-	private Map<Integer, Slot> getCraftingSlots(BackpackContainer container) {
+	private Map<Integer, Slot> getCraftingSlots(ICraftingContainer openOrFirstCraftingContainer) {
 		Map<Integer, Slot> craftingSlots = new HashMap<>();
-		List<Slot> recipeSlots = container.getCraftingContainer().map(ICraftingContainer::getRecipeSlots).orElse(Collections.emptyList());
+		List<Slot> recipeSlots = openOrFirstCraftingContainer.getRecipeSlots();
 		for (Slot slot : recipeSlots) {
 			craftingSlots.put(slot.slotNumber, slot);
 		}
