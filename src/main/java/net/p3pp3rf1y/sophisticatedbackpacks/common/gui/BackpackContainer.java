@@ -255,8 +255,8 @@ public class BackpackContainer extends Container {
 	}
 
 	@Override
-	public boolean canInteractWith(PlayerEntity playerIn) {
-		return true;
+	public boolean canInteractWith(PlayerEntity player) {
+		return backpackContext.canInteractWith(player);
 	}
 
 	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
