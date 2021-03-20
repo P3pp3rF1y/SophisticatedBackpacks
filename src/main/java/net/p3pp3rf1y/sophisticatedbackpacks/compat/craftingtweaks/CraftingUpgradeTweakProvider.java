@@ -324,7 +324,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 
 	@Override
 	public boolean requiresServerSide() {
-		return false;
+		return true;
 	}
 
 	private Optional<ICraftingContainer> getOpenCraftingContainer(BackpackContainer container) {
