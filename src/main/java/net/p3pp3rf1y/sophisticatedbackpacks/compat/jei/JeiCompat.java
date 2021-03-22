@@ -7,5 +7,6 @@ public class JeiCompat implements ICompat {
 	@Override
 	public void setup() {
 		PacketHandler.registerMessage(TransferRecipeMessage.class, TransferRecipeMessage::encode, TransferRecipeMessage::decode, TransferRecipeMessage::onMessage);
+		PacketHandler.registerMessage(SetGhostSlotMessage.class, SetGhostSlotMessage::encode, SetGhostSlotMessage::decode, SetGhostSlotMessage::onMessage);
 	}
 }

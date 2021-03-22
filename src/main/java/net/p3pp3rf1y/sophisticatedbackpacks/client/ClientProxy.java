@@ -43,6 +43,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
@@ -143,6 +144,7 @@ public class ClientProxy extends CommonProxy {
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
 		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
+		eventBus.addListener(BackpackSoundHandler::tick);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {

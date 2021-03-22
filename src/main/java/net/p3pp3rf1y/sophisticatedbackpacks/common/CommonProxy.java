@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
@@ -50,6 +51,7 @@ public class CommonProxy {
 		MinecraftForge.EVENT_BUS.addListener(this::onCauldronInteract);
 		MinecraftForge.EVENT_BUS.addListener(this::onEntityMobGriefing);
 		MinecraftForge.EVENT_BUS.addListener(this::onEntityLeaveWorld);
+		MinecraftForge.EVENT_BUS.addListener(ServerBackpackSoundHandler::tick);
 	}
 
 	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {
