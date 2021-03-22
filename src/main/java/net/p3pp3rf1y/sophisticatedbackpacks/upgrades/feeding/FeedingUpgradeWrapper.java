@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
@@ -32,15 +33,15 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
-		if (isInCooldown(world)) {
+	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
+		if (isInCooldown(world) || (entity != null && !(entity instanceof PlayerEntity))) {
 			return;
 		}
 
-		if (player == null) {
+		if (entity == null) {
 			world.getEntitiesWithinAABB(EntityType.PLAYER, new AxisAlignedBB(pos).grow(FEEDING_RANGE), p -> true).forEach(p -> feedPlayer(p, world));
 		} else {
-			feedPlayer(player, world);
+			feedPlayer((PlayerEntity) entity, world);
 		}
 
 		setCooldown(world, COOLDOWN);

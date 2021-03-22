@@ -94,12 +94,12 @@ public class ServerBackpackSoundHandler {
 
 	public static void startPlayingDisc(ServerWorld serverWorld, BlockPos position, UUID backpackUuid, int discItemId, Runnable onStopHandler) {
 		Vector3d pos = Vector3d.copyCentered(position);
-		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), pos, 64, new PlayDiscMessage(backpackUuid, discItemId, position));
+		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), pos, 128, new PlayDiscMessage(backpackUuid, discItemId, position));
 		putKeepAliveInfo(serverWorld, backpackUuid, onStopHandler, pos);
 	}
 
 	public static void startPlayingDisc(ServerWorld serverWorld, Vector3d position, UUID backpackUuid, int entityId, int discItemId, Runnable onStopHandler) {
-		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), position, 64, new PlayDiscMessage(backpackUuid, discItemId, entityId));
+		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), position, 128, new PlayDiscMessage(backpackUuid, discItemId, entityId));
 		putKeepAliveInfo(serverWorld, backpackUuid, onStopHandler, position);
 	}
 

@@ -45,13 +45,15 @@ public class CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
-		MinecraftForge.EVENT_BUS.addListener(this::onItemPickup);
-		MinecraftForge.EVENT_BUS.addListener(this::onLivingSpecialSpawn);
-		MinecraftForge.EVENT_BUS.addListener(this::onLivingDrops);
-		MinecraftForge.EVENT_BUS.addListener(this::onCauldronInteract);
-		MinecraftForge.EVENT_BUS.addListener(this::onEntityMobGriefing);
-		MinecraftForge.EVENT_BUS.addListener(this::onEntityLeaveWorld);
-		MinecraftForge.EVENT_BUS.addListener(ServerBackpackSoundHandler::tick);
+		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addListener(this::onItemPickup);
+		eventBus.addListener(this::onLivingSpecialSpawn);
+		eventBus.addListener(this::onLivingDrops);
+		eventBus.addListener(this::onCauldronInteract);
+		eventBus.addListener(this::onEntityMobGriefing);
+		eventBus.addListener(this::onEntityLeaveWorld);
+		eventBus.addListener(ServerBackpackSoundHandler::tick);
+		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 	}
 
 	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {

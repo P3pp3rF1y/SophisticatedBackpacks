@@ -65,6 +65,6 @@ public class BackpackSoundHandler {
 		if (!(entity instanceof LivingEntity)) {
 			return;
 		}
-		playBackpackSound(backpackUuid, new EntityTickableSound(soundEvent, SoundCategory.RECORDS, entity));
+		playBackpackSound(backpackUuid, new EntityTickableSound(soundEvent, SoundCategory.RECORDS, 2, 1, entity));
 	}
 }

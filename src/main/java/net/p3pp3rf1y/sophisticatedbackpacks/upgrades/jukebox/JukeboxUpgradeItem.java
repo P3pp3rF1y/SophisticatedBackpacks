@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.MusicDiscItem;
@@ -24,7 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapper> {
-	private static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
+	public static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
 
 	@Override
 	public UpgradeType<Wrapper> getType() {
@@ -104,10 +103,10 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		}
 
 		@Override
-		public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
+		public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
 			if (isPlaying && lastKeepAliveSendTime < world.getGameTime() - KEEP_ALIVE_SEND_INTERVAL) {
 				backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
-						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, player != null ? player.getPositionVec() : Vector3d.copyCentered(pos), () -> setIsPlaying(false))
+						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, entity != null ? entity.getPositionVec() : Vector3d.copyCentered(pos), () -> setIsPlaying(false))
 				);
 				lastKeepAliveSendTime = world.getGameTime();
 			}

@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -51,7 +51,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
+	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}
@@ -70,7 +70,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		}
 
 		for (ItemEntity itemEntity : itemEntities) {
-			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, player)) {
+			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, entity)) {
 				continue;
 			}
 			if (tryToInsertItem(itemEntity)) {
@@ -89,7 +89,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		return false;
 	}
 
-	private boolean canNotPickup(ItemEntity itemEntity, @Nullable PlayerEntity player) {
+	private boolean canNotPickup(ItemEntity itemEntity, @Nullable LivingEntity player) {
 		if (isBlockedBySomething(itemEntity)) {
 			return true;
 		}

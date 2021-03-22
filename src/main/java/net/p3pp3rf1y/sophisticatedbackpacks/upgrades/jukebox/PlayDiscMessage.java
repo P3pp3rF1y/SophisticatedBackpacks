@@ -68,5 +68,4 @@ public class PlayDiscMessage {
 			BackpackSoundHandler.playBackpackSound(soundEvent, backpackUuid, msg.entityId);
 		}
 	}
-
 }

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -107,7 +107,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
+	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
 		if (slotsToCompact.isEmpty()) {
 			return;
 		}
