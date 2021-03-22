@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -34,11 +34,11 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
-		if (player == null /*not supported in block form*/ || isInCooldown(world)) {
+	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
+		if (entity == null /*not supported in block form*/ || isInCooldown(world)) {
 			return;
 		}
-		player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
+		entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).ifPresent(playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
 			if (filter.isEmpty()) {
 				return;
 			}

@@ -20,7 +20,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 public class ButtonDefinitions {
 	private ButtonDefinitions() {}
 
-	private static Map<Boolean, ToggleButton.StateData> getBooleanStateData(ToggleButton.StateData onStateData, ToggleButton.StateData offStateData) {
+	public static Map<Boolean, ToggleButton.StateData> getBooleanStateData(ToggleButton.StateData onStateData, ToggleButton.StateData offStateData) {
 		return ImmutableMap.of(
 				true, onStateData,
 				false, offStateData

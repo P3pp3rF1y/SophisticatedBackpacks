@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
@@ -44,12 +45,15 @@ public class CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
-		MinecraftForge.EVENT_BUS.addListener(this::onItemPickup);
-		MinecraftForge.EVENT_BUS.addListener(this::onLivingSpecialSpawn);
-		MinecraftForge.EVENT_BUS.addListener(this::onLivingDrops);
-		MinecraftForge.EVENT_BUS.addListener(this::onCauldronInteract);
-		MinecraftForge.EVENT_BUS.addListener(this::onEntityMobGriefing);
-		MinecraftForge.EVENT_BUS.addListener(this::onEntityLeaveWorld);
+		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addListener(this::onItemPickup);
+		eventBus.addListener(this::onLivingSpecialSpawn);
+		eventBus.addListener(this::onLivingDrops);
+		eventBus.addListener(this::onCauldronInteract);
+		eventBus.addListener(this::onEntityMobGriefing);
+		eventBus.addListener(this::onEntityLeaveWorld);
+		eventBus.addListener(ServerBackpackSoundHandler::tick);
+		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 	}
 
 	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {

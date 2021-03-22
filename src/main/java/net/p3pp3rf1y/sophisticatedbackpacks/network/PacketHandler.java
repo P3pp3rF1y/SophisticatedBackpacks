@@ -2,12 +2,19 @@ package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.PlayDiscMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.SoundStopNotificationMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.StopDiscPlaybackMessage;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -34,6 +41,9 @@ public class PacketHandler {
 		registerMessage(SyncContainerStacksMessage.class, SyncContainerStacksMessage::encode, SyncContainerStacksMessage::decode, SyncContainerStacksMessage::onMessage);
 		registerMessage(SyncSlotStackMessage.class, SyncSlotStackMessage::encode, SyncSlotStackMessage::decode, SyncSlotStackMessage::onMessage);
 		registerMessage(WindowClickMessage.class, WindowClickMessage::encode, WindowClickMessage::decode, WindowClickMessage::onMessage);
+		registerMessage(PlayDiscMessage.class, PlayDiscMessage::encode, PlayDiscMessage::decode, PlayDiscMessage::onMessage);
+		registerMessage(StopDiscPlaybackMessage.class, StopDiscPlaybackMessage::encode, StopDiscPlaybackMessage::decode, StopDiscPlaybackMessage::onMessage);
+		registerMessage(SoundStopNotificationMessage.class, SoundStopNotificationMessage::encode, SoundStopNotificationMessage::decode, SoundStopNotificationMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -47,5 +57,13 @@ public class PacketHandler {
 
 	public static <M> void sendToClient(ServerPlayerEntity player, M message) {
 		networkWrapper.sendTo(message, player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+	}
+
+	public static <M> void sendToAllNear(ServerWorld world, RegistryKey<World> dimension, Vector3d position, int range, M message) {
+		world.getPlayers().forEach(player -> {
+			if (player.world.getDimensionKey() == dimension && player.getDistanceSq(position) <= range * range) {
+				sendToClient(player, message);
+			}
+		});
 	}
 }

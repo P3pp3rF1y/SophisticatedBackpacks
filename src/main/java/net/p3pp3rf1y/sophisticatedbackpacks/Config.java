@@ -118,13 +118,15 @@ public class Config {
 		}
 
 		public static class EntityBackpackAdditionsConfig {
-			private static final String ENTITY_LOOT_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
+			private static final String REGISTRY_NAME_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
 			public final ForgeConfigSpec.BooleanValue buffHealth;
 			public final ForgeConfigSpec.BooleanValue equipWithArmor;
+			public final ForgeConfigSpec.BooleanValue playJukebox;
 			public final ForgeConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
+			public final ForgeConfigSpec.ConfigValue<List<? extends String>> discBlockList;
 			@Nullable
 			private Map<EntityType<?>, ResourceLocation> entityLootTables = null;
 
@@ -139,7 +141,10 @@ public class Config {
 				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
 						.define("equipWithArmor", true);
 				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
-						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
+						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
+						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade a plays a music disc.").define("playJukebox", true);
 				builder.pop();
 			}
 
@@ -172,6 +177,13 @@ public class Config {
 						entityLootTables.put(entityType, lootTableName.equals("null") ? null : new ResourceLocation(lootTableName));
 					}
 				}
+			}
+
+			private List<String> getDefaultDiscBlockList() {
+				List<String> ret = new ArrayList<>();
+				ret.add("botania:record_gaia_1");
+				ret.add("botania:record_gaia_2");
+				return ret;
 			}
 
 			private List<String> getDefaultEntityLootTableList() {

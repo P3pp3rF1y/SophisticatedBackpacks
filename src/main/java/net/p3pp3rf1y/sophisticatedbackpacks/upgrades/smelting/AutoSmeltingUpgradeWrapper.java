@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -71,7 +71,7 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 	}
 
 	@Override
-	public void tick(@Nullable PlayerEntity player, World world, BlockPos pos) {
+	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}

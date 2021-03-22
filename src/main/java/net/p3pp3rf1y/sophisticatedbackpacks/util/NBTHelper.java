@@ -78,6 +78,10 @@ public class NBTHelper {
 		return getTagValue(stack, key, (compound, k) -> NBTUtil.readUniqueId(compound.get(k)));
 	}
 
+	public static void setCompoundNBT(ItemStack stack, String key, CompoundNBT tag) {
+		setCompoundNBT(stack, "", key, tag);
+	}
+
 	public static void setCompoundNBT(ItemStack stack, String parentKey, String key, CompoundNBT tag) {
 		if (parentKey.isEmpty()) {
 			stack.getOrCreateTag().put(key, tag);
@@ -117,6 +121,11 @@ public class NBTHelper {
 
 	public static CompoundNBT putInt(CompoundNBT tag, String key, int value) {
 		tag.putInt(key, value);
+		return tag;
+	}
+
+	public static CompoundNBT putString(CompoundNBT tag, String key, String value) {
+		tag.putString(key, value);
 		return tag;
 	}
 

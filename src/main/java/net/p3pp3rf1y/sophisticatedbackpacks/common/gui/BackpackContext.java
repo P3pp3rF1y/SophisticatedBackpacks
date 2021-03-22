@@ -44,6 +44,10 @@ public abstract class BackpackContext {
 
 	public abstract boolean canInteractWith(PlayerEntity player);
 
+	public BlockPos getBackpackPosition(PlayerEntity playerEntity) {
+		return playerEntity.getPosition();
+	}
+
 	public static class Item extends BackpackContext {
 		protected final String handlerName;
 		protected final int backpackSlotIndex;
@@ -156,6 +160,11 @@ public abstract class BackpackContext {
 		public Block(ContainerType<BackpackContainer> containerType, BlockPos pos) {
 			super(containerType);
 			this.pos = pos;
+		}
+
+		@Override
+		public BlockPos getBackpackPosition(PlayerEntity playerEntity) {
+			return pos;
 		}
 
 		@Override
