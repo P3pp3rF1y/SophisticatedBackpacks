@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -54,6 +55,33 @@ public class InventoryHelper {
 				handlerB.setStackInSlot(slot, slotStack);
 			}
 		}
+	}
+
+	public static List<ItemStack> insertIntoInventory(List<ItemStack> stacks, IItemHandler inventory, boolean simulate) {
+		if (stacks.isEmpty()) {
+			return stacks;
+		}
+		IItemHandler targetInventory = inventory;
+		if (simulate) {
+			targetInventory = cloneInventory(inventory);
+		}
+
+		List<ItemStack> remaining = new ArrayList<>();
+		for (ItemStack stack : stacks) {
+			ItemStack result = insertIntoInventory(stack, targetInventory, false);
+			if (!result.isEmpty()) {
+				remaining.add(result);
+			}
+		}
+		return remaining;
+	}
+
+	public static IItemHandler cloneInventory(IItemHandler inventory) {
+		IItemHandler cloned = new ItemStackHandler(inventory.getSlots());
+		for (int slot = 0; slot < inventory.getSlots(); slot++) {
+			cloned.insertItem(slot, inventory.getStackInSlot(slot).copy(), false);
+		}
+		return cloned;
 	}
 
 	public static ItemStack insertIntoInventory(ItemStack stack, IItemHandler inventory, boolean simulate) {

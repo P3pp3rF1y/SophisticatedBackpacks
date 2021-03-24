@@ -15,6 +15,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,7 @@ public class RecipeHelper {
 	private static Set<CompactingShape> getCompactingShapes(Item item) {
 		return getWorld().map(w -> {
 			Set<CompactingShape> compactingShapes = new HashSet<>();
-			ItemStack compactingResult = getCraftingResult(item, w, 2, 2);
+			ItemStack compactingResult = getCraftingResultAndRemainingItems(item, w, 2, 2, new ArrayList<>());
 			if (!compactingResult.isEmpty()) {
 				if (uncompactMatchesItem(compactingResult, w, item, 4)) {
 					compactingShapes.add(CompactingShape.TWO_BY_TWO_UNCRAFTABLE);
@@ -48,7 +49,7 @@ public class RecipeHelper {
 					compactingShapes.add(CompactingShape.TWO_BY_TWO);
 				}
 			}
-			compactingResult = getCraftingResult(item, w, 3, 3);
+			compactingResult = getCraftingResultAndRemainingItems(item, w, 3, 3, new ArrayList<>());
 			if (!compactingResult.isEmpty()) {
 				if (uncompactMatchesItem(compactingResult, w, item, 9)) {
 					compactingShapes.add(CompactingShape.THREE_BY_THREE_UNCRAFTABLE);
@@ -61,17 +62,24 @@ public class RecipeHelper {
 	}
 
 	private static boolean uncompactMatchesItem(ItemStack result, World w, Item item, int count) {
-		result = getCraftingResult(result.getItem(), w, 1, 1);
+		result = getCraftingResultAndRemainingItems(result.getItem(), w, 1, 1, new ArrayList<>());
 		return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == count;
 	}
 
-	public static ItemStack getCraftingResult(Item item, int width, int height) {
-		return getWorld().map(w -> getCraftingResult(item, w, width, height)).orElse(ItemStack.EMPTY);
+	public static ItemStack getCraftingResultAndRemainingItems(Item item, int width, int height, List<ItemStack> remainingItems) {
+		return getWorld().map(w -> getCraftingResultAndRemainingItems(item, w, width, height, remainingItems)).orElse(ItemStack.EMPTY);
 	}
 
-	private static ItemStack getCraftingResult(Item item, World w, int width, int height) {
+	private static ItemStack getCraftingResultAndRemainingItems(Item item, World w, int width, int height, List<ItemStack> remainingItems) {
 		CraftingInventory craftingInventory = getFilledCraftingInventory(item, width, height);
-		return w.getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, w).map(r -> r.getCraftingResult(craftingInventory)).orElse(ItemStack.EMPTY);
+		return w.getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
+			r.getRemainingItems(craftingInventory).forEach(stack -> {
+				if (!stack.isEmpty()) {
+					remainingItems.add(stack);
+				}
+			});
+			return r.getCraftingResult(craftingInventory);
+		}).orElse(ItemStack.EMPTY);
 	}
 
 	private static CraftingInventory getFilledCraftingInventory(Item item, int width, int height) {
