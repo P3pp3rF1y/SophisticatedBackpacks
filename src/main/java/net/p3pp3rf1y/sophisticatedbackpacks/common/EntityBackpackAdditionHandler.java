@@ -134,18 +134,24 @@ public class EntityBackpackAdditionHandler {
 					w.setColors(getPrimaryColor(egg), getSecondaryColor(egg));
 					setLoot(monster, w, difficulty);
 					if (playMusicDisc) {
-						monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
 						w.getInventoryHandler(); //just to assign uuid and real upgrade handler
-						w.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.JUKEBOX_UPGRADE.get()));
-						Iterator<JukeboxUpgradeItem.Wrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
-						if (it.hasNext()) {
-							JukeboxUpgradeItem.Wrapper wrapper = it.next();
-							List<MusicDiscItem> musicDiscs = getMusicDiscs();
-							wrapper.setDisc(new ItemStack(musicDiscs.get(monster.world.rand.nextInt(musicDiscs.size()))));
+						if (w.getUpgradeHandler().getSlots() > 0) {
+							monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
+							addJukeboxUpgradeAndRandomDisc(monster, w);
 						}
 					}
 				}));
 		monster.setItemStackToSlot(EquipmentSlotType.CHEST, backpack);
+	}
+
+	private static void addJukeboxUpgradeAndRandomDisc(MonsterEntity monster, IBackpackWrapper w) {
+		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.JUKEBOX_UPGRADE.get()));
+		Iterator<JukeboxUpgradeItem.Wrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
+		if (it.hasNext()) {
+			JukeboxUpgradeItem.Wrapper wrapper = it.next();
+			List<MusicDiscItem> musicDiscs = getMusicDiscs();
+			wrapper.setDisc(new ItemStack(musicDiscs.get(monster.world.rand.nextInt(musicDiscs.size()))));
+		}
 	}
 
 	private static List<MusicDiscItem> musicDiscs = null;
