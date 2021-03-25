@@ -144,7 +144,7 @@ public class Config {
 						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
 						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
-				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade a plays a music disc.").define("playJukebox", true);
+				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
 				builder.pop();
 			}
 
