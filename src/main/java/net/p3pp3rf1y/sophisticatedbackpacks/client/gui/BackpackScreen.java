@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Rectangle2d;
@@ -45,7 +46,6 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONT
 
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int DISABLED_SLOT_COLOR = -1072689136;
-
 	private static final int UPGRADE_TOP_HEIGHT = 7;
 	private static final int UPGRADE_SLOT_HEIGHT = 18;
 	private static final int UPGRADE_SPACE_BETWEEN_SLOTS = 4;
@@ -54,6 +54,17 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	private static final int SLOTS_Y_OFFSET = 17;
 	static final int DISABLED_SLOT_X_POS = -1000;
+
+	private static ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> screenFactory = BackpackScreen::new;
+
+	public static void setScreenFactory(ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> factory) {
+		screenFactory = factory;
+	}
+
+	public static BackpackScreen constructScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent title) {
+		return screenFactory.create(screenContainer, inv, title);
+	}
+
 	private UpgradeSettingsControl upgradeSettingsControl;
 	private final int numberOfUpgradeSlots;
 	@Nullable

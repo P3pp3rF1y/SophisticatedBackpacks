@@ -237,10 +237,10 @@ public class ModItems {
 		UpgradeContainerRegistry.register(JUKEBOX_UPGRADE.getId(), JUKEBOX_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::new);
-			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::new);
-			ScreenManager.registerFactory(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::new);
-			ScreenManager.registerFactory(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::new);
+			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.registerFactory(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.registerFactory(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
 
 			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);

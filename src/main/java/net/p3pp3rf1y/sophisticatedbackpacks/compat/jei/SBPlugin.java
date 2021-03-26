@@ -30,9 +30,6 @@ import java.util.List;
 @SuppressWarnings("unused")
 @JeiPlugin
 public class SBPlugin implements IModPlugin {
-
-	private static final int LEFT_MOUSE_BUTTON = 0;
-
 	@Override
 	public ResourceLocation getPluginUid() {
 		return new ResourceLocation(SophisticatedBackpacks.MOD_ID, "default");
