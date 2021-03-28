@@ -118,7 +118,8 @@ public class Config {
 		}
 
 		public static class EntityBackpackAdditionsConfig {
-			private static final String REGISTRY_NAME_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
+			private static final String REGISTRY_NAME_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)";
+			private static final String ENTITY_LOOT_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
@@ -141,7 +142,7 @@ public class Config {
 				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
 						.define("equipWithArmor", true);
 				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
-						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
 				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
 						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
