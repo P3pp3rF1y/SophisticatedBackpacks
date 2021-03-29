@@ -28,11 +28,13 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -52,6 +54,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -199,6 +202,10 @@ public class BackpackItem extends ItemBase {
 			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
 
+			if (!world.isRemote) {
+				stopBackpackSounds(backpack, world, pos);
+			}
+
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 			if (player == null || !player.isCreative()) {
@@ -208,6 +215,12 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 		return ActionResultType.PASS;
+	}
+
+	private static void stopBackpackSounds(ItemStack backpack, World world, BlockPos pos) {
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
+				ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) world, Vector3d.copyCentered(pos), uuid))
+		);
 	}
 
 	private ItemStack getBackpackCopy(@Nullable PlayerEntity player, ItemStack backpack) {
