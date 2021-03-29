@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SSetSlotPacket;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,8 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	private final CraftResultInventory craftResult = new CraftResultInventory();
 	private final CraftingItemHandler craftMatrix;
 	private final CraftingResultSlot craftingResultSlot;
+	@Nullable
+	private ICraftingRecipe lastRecipe = null;
 
 	public CraftingUpgradeContainer(PlayerEntity player, int upgradeContainerId, CraftingUpgradeWrapper upgradeWrapper, UpgradeContainerType<CraftingUpgradeWrapper, CraftingUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
@@ -44,7 +47,39 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		}
 		craftMatrix = new CraftingItemHandler(upgradeWrapper::getInventory, this::onCraftMatrixChanged);
 		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
+			@Override
+			public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
+				onCrafting(stack);
+				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
+				NonNullList<ItemStack> nonnulllist;
+				if (lastRecipe != null && lastRecipe.matches(craftMatrix, player.world)) {
+					nonnulllist = lastRecipe.getRemainingItems(craftMatrix);
+				} else {
+					nonnulllist = craftMatrix.stackList;
+				}
+				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
+				for (int i = 0; i < nonnulllist.size(); ++i) {
+					ItemStack itemstack = craftMatrix.getStackInSlot(i);
+					ItemStack itemstack1 = nonnulllist.get(i);
+					if (!itemstack.isEmpty()) {
+						craftMatrix.decrStackSize(i, 1);
+						itemstack = craftMatrix.getStackInSlot(i);
+					}
 
+					if (!itemstack1.isEmpty()) {
+						if (itemstack.isEmpty()) {
+							craftMatrix.setInventorySlotContents(i, itemstack1);
+						} else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1)) {
+							itemstack1.grow(itemstack.getCount());
+							craftMatrix.setInventorySlotContents(i, itemstack1);
+						} else if (!player.inventory.addItemStackToInventory(itemstack1)) {
+							player.dropItem(itemstack1, false);
+						}
+					}
+				}
+
+				return stack;
+			}
 		};
 		slots.add(craftingResultSlot);
 	}
@@ -59,22 +94,29 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		updateCraftingResult(player.world, player, craftMatrix, craftResult, craftingResultSlot);
 	}
 
-	private static void updateCraftingResult(World world, PlayerEntity player, CraftingInventory inventory, CraftResultInventory inventoryResult, CraftingResultSlot craftingResultSlot) {
+	private void updateCraftingResult(World world, PlayerEntity player, CraftingInventory inventory, CraftResultInventory inventoryResult, CraftingResultSlot craftingResultSlot) {
 		if (!world.isRemote) {
 			ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) player;
 			ItemStack itemstack = ItemStack.EMPTY;
-			//noinspection ConstantConditions - we're on server and for sure in the world so getServer can't return null here
-			Optional<ICraftingRecipe> optional = world.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, inventory, world);
-			if (optional.isPresent()) {
-				ICraftingRecipe icraftingrecipe = optional.get();
-				if (inventoryResult.canUseRecipe(world, serverplayerentity, icraftingrecipe)) {
-					itemstack = icraftingrecipe.getCraftingResult(inventory);
+			if (lastRecipe != null && lastRecipe.matches(inventory, world)) {
+				itemstack = lastRecipe.getCraftingResult(inventory);
+			} else {
+				//noinspection ConstantConditions - we're on server and for sure in the world so getServer can't return null here
+				Optional<ICraftingRecipe> optional = world.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, inventory, world);
+				if (optional.isPresent()) {
+					ICraftingRecipe craftingRecipe = optional.get();
+					if (inventoryResult.canUseRecipe(world, serverplayerentity, craftingRecipe)) {
+						lastRecipe = craftingRecipe;
+						itemstack = lastRecipe.getCraftingResult(inventory);
+					} else {
+						lastRecipe = null;
+					}
 				}
 			}
 
 			craftingResultSlot.putStack(itemstack);
 			if (serverplayerentity.openContainer instanceof BackpackContainer) {
-				serverplayerentity.connection.sendPacket(new SSetSlotPacket(serverplayerentity.openContainer.windowId, craftingResultSlot.slotNumber, itemstack));
+				((BackpackContainer) serverplayerentity.openContainer).setSlotStackToUpdate(craftingResultSlot.slotNumber, itemstack);
 			}
 		}
 	}

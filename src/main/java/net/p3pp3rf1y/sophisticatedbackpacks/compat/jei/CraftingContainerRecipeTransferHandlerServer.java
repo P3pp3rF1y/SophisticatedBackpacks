@@ -49,6 +49,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 
 		putIntoInventory(player, inventorySlots, container, clearedCraftingItems);
 
+		container.sendSlotUpdates();
 		container.detectAndSendChanges();
 	}
 
