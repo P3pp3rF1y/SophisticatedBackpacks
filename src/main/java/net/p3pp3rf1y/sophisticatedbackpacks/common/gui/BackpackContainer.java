@@ -15,6 +15,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -38,6 +39,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +72,8 @@ public class BackpackContainer extends Container {
 	public final List<Slot> upgradeSlots = Lists.newArrayList();
 
 	private final IBackpackWrapper parentBackpackWrapper;
+
+	private final Map<Integer, ItemStack> slotStacksToUpdate = new HashMap<>();
 
 	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(backpackContext.getContainerType(), windowId);
@@ -946,7 +950,17 @@ public class BackpackContainer extends Container {
 			detectAndSendChanges();
 		}
 
+		sendSlotUpdates();
+
 		return ret;
+	}
+
+	public void sendSlotUpdates() {
+		if (!player.world.isRemote) {
+			ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+			slotStacksToUpdate.forEach((slot, stack) -> serverPlayer.connection.sendPacket(new SSetSlotPacket(serverPlayer.openContainer.windowId, slot, stack)));
+			slotStacksToUpdate.clear();
+		}
 	}
 
 	public static boolean canMergeItemToSlot(@Nullable Slot slot, ItemStack stack) {
@@ -1090,5 +1104,9 @@ public class BackpackContainer extends Container {
 
 	private boolean isInventorySlotInUpgradeTab(PlayerEntity player, Slot slot) {
 		return slot.canTakeStack(player) && !(slot instanceof CraftingResultSlot);
+	}
+
+	public void setSlotStackToUpdate(int slot, ItemStack stack) {
+		slotStacksToUpdate.put(slot, stack);
 	}
 }

@@ -21,8 +21,8 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -317,9 +317,9 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
+	@Nullable
 	public IInventory getCraftMatrix(PlayerEntity entityPlayer, BackpackContainer container, int id) {
-		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix)
-				.orElse(InventoryHelper.NOOP_INVENTORY);
+		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix).orElse(null);
 	}
 
 	@Override
@@ -344,7 +344,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 
 	@Override
 	public int getCraftingGridSize(PlayerEntity entityPlayer, BackpackContainer container, int id) {
-		return 9;
+		return getOpenCraftingContainer(container).isPresent() ? 9 : 0;
 	}
 
 	@OnlyIn(Dist.CLIENT)
