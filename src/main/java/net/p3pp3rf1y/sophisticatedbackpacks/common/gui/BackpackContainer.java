@@ -394,7 +394,7 @@ public class BackpackContainer extends Container {
 
 			getSlot(slotId).putStack(cursorStack);
 			return ItemStack.EMPTY;
-		} else if (isUpgradeSlot(slotId) && getSlot(slotId) instanceof BackpackUpgradeSlot) {
+		} else if (isUpgradeSlot(slotId) && getSlot(slotId) instanceof BackpackUpgradeSlot && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
 			BackpackUpgradeSlot upgradeSlot = (BackpackUpgradeSlot) getSlot(slotId);
 			ItemStack cursorStack = player.inventory.getItemStack();
 			ItemStack slotStack = upgradeSlot.getStack();
