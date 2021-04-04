@@ -145,6 +145,7 @@ public class ClientProxy extends CommonProxy {
 		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 		eventBus.addListener(BackpackSoundHandler::tick);
+		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
