@@ -19,6 +19,7 @@ public class SBPCommand {
 						.requires(cs -> cs.hasPermissionLevel(OP_LEVEL))
 						.then(ListCommand.register())
 						.then(GiveCommand.register())
+						.then(RemoveNonPlayerCommand.register())
 		);
 		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermissionLevel(OP_LEVEL)).redirect(mainNode));
 	}
