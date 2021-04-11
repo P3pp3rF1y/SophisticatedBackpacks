@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BackpackStorage extends WorldSavedData {
 	private static final String SAVED_DATA_NAME = SophisticatedBackpacks.MOD_ID;
@@ -114,5 +115,20 @@ public class BackpackStorage extends WorldSavedData {
 
 	public Map<UUID, AccessLogRecord> getAccessLogs() {
 		return accessLogRecords;
+	}
+
+	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
+		AtomicInteger numberRemoved = new AtomicInteger(0);
+		backpackContents.entrySet().removeIf(entry -> {
+			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !entry.getValue().contains("inventory"))) {
+				numberRemoved.incrementAndGet();
+				return true;
+			}
+			return false;
+		});
+		if (numberRemoved.get() > 0) {
+			markDirty();
+		}
+		return numberRemoved.get();
 	}
 }

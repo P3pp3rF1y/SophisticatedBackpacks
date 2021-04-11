@@ -246,7 +246,13 @@ public class EntityBackpackAdditionHandler {
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
-			event.getDrops().removeIf(drop -> drop.getItem().getItem() instanceof BackpackItem);
+			event.getDrops().removeIf(drop -> {
+				if (drop.getItem().getItem() instanceof BackpackItem) {
+					removeContentsUuid(drop.getItem());
+					return true;
+				}
+				return false;
+			});
 		}
 	}
 
@@ -257,11 +263,16 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBackpackUuid(MonsterEntity entity) {
-		if (entity.getShouldBeDead() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (!entity.getShouldBeDead() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 
-		entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		ItemStack stack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		removeContentsUuid(stack);
+	}
+
+	private static void removeContentsUuid(ItemStack stack) {
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
 	}
 
