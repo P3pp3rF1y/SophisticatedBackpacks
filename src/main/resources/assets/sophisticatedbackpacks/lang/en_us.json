@@ -71,6 +71,8 @@
     "item.sophisticatedbackpacks.stack_upgrade_tier_3.tooltip": "Multiplies the number of stacks that can fit in a slot by 8",
     "item.sophisticatedbackpacks.stack_upgrade_tier_4": "Stack Upgrade Tier 4",
     "item.sophisticatedbackpacks.stack_upgrade_tier_4.tooltip": "Multiplies the number of stacks that can fit in a slot by 16",
+    "item.sophisticatedbackpacks.tool_swapper_upgrade": "Tool Swapper Upgrade",
+    "item.sophisticatedbackpacks.tool_swapper_upgrade.tooltip": "Automatically swaps item in player's hand for the one effective on the block/entity.",
     "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.open_backpack": "Open Backpack",
     "keybind.sophisticatedbackpacks.inventory_interaction": "Run Inventory Interaction Upgrades",

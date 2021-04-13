@@ -23,12 +23,15 @@ import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -53,6 +56,8 @@ public class CommonProxy {
 		eventBus.addListener(this::onEntityMobGriefing);
 		eventBus.addListener(this::onEntityLeaveWorld);
 		eventBus.addListener(ServerBackpackSoundHandler::tick);
+		eventBus.addListener(this::onBlockClick);
+		eventBus.addListener(this::onAttackEntity);
 		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 	}
 
@@ -91,6 +96,33 @@ public class CommonProxy {
 
 	private boolean hasDefaultColor(IBackpackWrapper wrapper) {
 		return wrapper.getBorderColor() == BackpackWrapper.DEFAULT_BORDER_COLOR && wrapper.getClothColor() == BackpackWrapper.DEFAULT_CLOTH_COLOR;
+	}
+
+	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
+		PlayerEntity player = event.getPlayer();
+		BlockPos pos = event.getPos();
+		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(wrapper -> {
+					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
+						if (upgrade.onBlockClick(player, pos)) {
+							return true;
+						}
+					}
+					return false;
+				}).orElse(false));
+	}
+
+	private void onAttackEntity(AttackEntityEvent event) {
+		PlayerEntity player = event.getPlayer();
+		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+				.map(wrapper -> {
+					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
+						if (upgrade.onAttackEntity(player)) {
+							return true;
+						}
+					}
+					return false;
+				}).orElse(false));
 	}
 
 	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {

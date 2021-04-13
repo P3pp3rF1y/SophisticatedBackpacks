@@ -384,6 +384,20 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.TOOL_SWAPPER_UPGRADE.get())
+				.patternLine("RWR")
+				.patternLine("PBA")
+				.patternLine("ISI")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('S', Items.WOODEN_SHOVEL)
+				.key('P', Items.WOODEN_PICKAXE)
+				.key('A', Items.WOODEN_AXE)
+				.key('W', Items.WOODEN_SWORD)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
 		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.fromItems(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.fromItems(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.addCriterion("has_diamond_backpack", hasItem(ModItems.DIAMOND_BACKPACK.get()))
