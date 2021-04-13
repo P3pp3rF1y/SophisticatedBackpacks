@@ -895,9 +895,9 @@ public class BackpackContainer extends Container {
 		} else if (clickType == ClickType.THROW && playerinventory.getItemStack().isEmpty() && slotId >= 0) {
 			Slot slot3 = getSlot(slotId);
 			if (slot3.getHasStack() && slot3.canTakeStack(player)) {
-				ItemStack itemstack6 = slot3.decrStackSize(dragType == 0 ? 1 : slot3.getStack().getCount());
-				slot3.onTake(player, itemstack6);
-				player.dropItem(itemstack6, true);
+				ItemStack stackToThrow = slot3.decrStackSize(dragType == 0 ? 1 : Math.min(slot3.getStack().getCount(), slot3.getStack().getMaxStackSize()));
+				slot3.onTake(player, stackToThrow);
+				player.dropItem(stackToThrow, true);
 			}
 		} else if (clickType == ClickType.PICKUP_ALL && slotId >= 0) {
 			Slot slot2 = getSlot(slotId);
