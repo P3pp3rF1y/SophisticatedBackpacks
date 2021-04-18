@@ -91,6 +91,8 @@ public class BackpackContainer extends Container {
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getDisplayName().getString(),
 					backpackWrapper.getClothColor(), backpackWrapper.getBorderColor());
 		});
+
+		backpackWrapper.getUpgradeHandler().runTemporaryBugFixToRemoveInvalidItems(player);
 	}
 
 	public IBackpackWrapper getParentBackpackWrapper() {

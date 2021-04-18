@@ -1,6 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Direction;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -9,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +44,22 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		this.backpackSaveHandler = backpackSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
 		deserializeNBT(contentsNbt.getCompound(UPGRADE_INVENTORY_TAG));
+	}
+
+	//TODO: remove this in the future - is only meant to remove items that got there through bug in BackpackContainer
+	public void runTemporaryBugFixToRemoveInvalidItems(PlayerEntity player) {
+		InventoryHelper.iterate(this, (slot, stack) -> {
+			if (!stack.isEmpty() && !(stack.getItem() instanceof IBackpackUpgradeItem)) {
+				player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
+						.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, stack, backpackWrapper.getInventoryHandler(), playerInventory));
+				setStackInSlot(slot, ItemStack.EMPTY);
+			}
+		});
+	}
+
+	@Override
+	public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+		return stack.isEmpty() || stack.getItem() instanceof IBackpackUpgradeItem;
 	}
 
 	@Override
