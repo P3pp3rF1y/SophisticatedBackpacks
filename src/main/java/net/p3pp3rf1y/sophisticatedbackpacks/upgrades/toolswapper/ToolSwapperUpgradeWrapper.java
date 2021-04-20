@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,7 +41,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	@Override
 	public boolean onBlockClick(PlayerEntity player, BlockPos pos) {
-		if (player.isCreative() || player.isSpectator()) {
+		if (player.isCreative() || player.isSpectator() || !shouldSwapTools()) {
 			return false;
 		}
 
@@ -85,6 +86,10 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	@Override
 	public boolean onAttackEntity(PlayerEntity player) {
+		if (!shouldSwapWeapon()) {
+			return false;
+		}
+
 		ItemStack mainHandItem = player.getHeldItemMainhand();
 		if (mainHandItem.getItem() instanceof BackpackItem || !isTool(mainHandItem)) {
 			return false;
@@ -187,5 +192,23 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	public ToolSwapperFilterLogic getFilterLogic() {
 		return filterLogic;
+	}
+
+	public boolean shouldSwapWeapon() {
+		return NBTHelper.getBoolean(upgrade, "shouldSwapWeapon").orElse(true);
+	}
+
+	public void setSwapWeapon(boolean shouldSwapWeapon) {
+		NBTHelper.setBoolean(upgrade, "shouldSwapWeapon", shouldSwapWeapon);
+		save();
+	}
+
+	public boolean shouldSwapTools() {
+		return NBTHelper.getBoolean(upgrade, "shouldSwapTools").orElse(true);
+	}
+
+	public void setSwapTools(boolean shouldSwapTools) {
+		NBTHelper.setBoolean(upgrade, "shouldSwapTools", shouldSwapTools);
+		save();
 	}
 }
