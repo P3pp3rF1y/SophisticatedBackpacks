@@ -18,6 +18,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Config {
+
+	private static final String SETTINGS = " Settings";
+
 	private Config() {}
 
 	public static final Client CLIENT;
@@ -76,6 +79,7 @@ public class Config {
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
+		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -107,6 +111,7 @@ public class Config {
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
+			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
@@ -214,6 +219,16 @@ public class Config {
 			}
 		}
 
+		public static class ToolSwapperUpgradeConfig {
+			public final ForgeConfigSpec.IntValue slotsInRow;
+
+			protected ToolSwapperUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tool Swapper Upgrade" + SETTINGS).push("toolSwapperUpgrade");
+				slotsInRow = builder.comment("Number of tool filter slots displayed in a row").defineInRange("slotsInRow", 4, 1, 6);
+				builder.pop();
+			}
+		}
+
 		public static class InceptionUpgradeConfig {
 			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
 			public final ForgeConfigSpec.BooleanValue upgradesInContainedBackpacksAreFunctional;
@@ -256,7 +271,7 @@ public class Config {
 			public final ForgeConfigSpec.DoubleValue fuelEfficiencyMultiplier;
 
 			protected SmeltingUpgradeConfigBase(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
-				builder.comment(upgradeName + " Settings").push(path);
+				builder.comment(upgradeName + SETTINGS).push(path);
 				smeltingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
 						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
 				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
@@ -286,7 +301,7 @@ public class Config {
 			public final ForgeConfigSpec.IntValue slotsInRow;
 
 			protected FilteredUpgradeConfigBase(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
-				builder.comment(name + " Settings").push(path);
+				builder.comment(name + SETTINGS).push(path);
 				filterSlots = builder.comment("Number of " + name + "'s filter slots").defineInRange("filterSlots", defaultFilterSlots, 1, 20);
 				slotsInRow = builder.comment("Number of filter slots displayed in a row").defineInRange("slotsInRow", defaultSlotsInRow, 1, 6);
 			}

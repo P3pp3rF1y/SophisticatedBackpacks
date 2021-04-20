@@ -37,6 +37,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
 
 import javax.annotation.Nullable;
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -305,7 +306,16 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Override
 	protected void renderHoveredTooltip(MatrixStack matrixStack, int x, int y) {
-		super.renderHoveredTooltip(matrixStack, x, y);
+		if (minecraft.player.inventory.getItemStack().isEmpty() && hoveredSlot != null) {
+			if (hoveredSlot.getHasStack()) {
+				renderTooltip(matrixStack, hoveredSlot.getStack(), x, y);
+			} else if (hoveredSlot instanceof INameableEmptySlot) {
+				INameableEmptySlot emptySlot = (INameableEmptySlot) hoveredSlot;
+				if (emptySlot.hasEmptyTooltip()) {
+					renderWrappedToolTip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
+				}
+			}
+		}
 		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
 	}
 

@@ -20,17 +20,22 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade {
+	private final ToolSwapperFilterLogic filterLogic;
+
 	protected ToolSwapperUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
+		filterLogic = new ToolSwapperFilterLogic(upgrade, upgradeSaveHandler);
 	}
 
 	@Override
@@ -47,7 +52,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		BlockState state = player.world.getBlockState(pos);
 		Block block = state.getBlock();
 
-		if (anyToolTypeEffectiveOnBlock(state, block, mainHandItem)) {
+		if (getToolTypeEffectiveOnBlock(state, block, mainHandItem).isPresent()) {
 			return true;
 		}
 
@@ -58,24 +63,24 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		AtomicBoolean swappedInEffectiveTool = new AtomicBoolean(false);
 		AtomicBoolean noSpaceForItem = new AtomicBoolean(false);
 		IItemHandlerModifiable backpackInventory = backpackWrapper.getInventoryHandler();
-		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
-			if (anyToolTypeEffectiveOnBlock(state, block, stack)
-					&& (stack.getCount() == 1 || InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, true).isEmpty())) {
-				player.setHeldItem(Hand.MAIN_HAND, backpackInventory.extractItem(slot, 1, false));
-				InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, false);
-				swappedInEffectiveTool.set(true);
-			}
-		}, () -> swappedInEffectiveTool.get() || noSpaceForItem.get());
+		InventoryHelper.iterate(backpackInventory, (slot, stack) ->
+				getToolTypeEffectiveOnBlock(state, block, stack).ifPresent(toolType -> {
+					if (filterLogic.matchesToolFilter(stack, toolType) && (stack.getCount() == 1 || InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, true).isEmpty())) {
+						player.setHeldItem(Hand.MAIN_HAND, backpackInventory.extractItem(slot, 1, false));
+						InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, false);
+						swappedInEffectiveTool.set(true);
+					}
+				}), () -> swappedInEffectiveTool.get() || noSpaceForItem.get());
 		return swappedInEffectiveTool.get();
 	}
 
-	private boolean anyToolTypeEffectiveOnBlock(BlockState state, Block block, ItemStack mainHandItem) {
-		for (ToolType type : mainHandItem.getToolTypes()) {
+	private Optional<ToolType> getToolTypeEffectiveOnBlock(BlockState state, Block block, ItemStack stack) {
+		for (ToolType type : stack.getToolTypes()) {
 			if (block.isToolEffective(state, type)) {
-				return true;
+				return Optional.of(type);
 			}
 		}
-		return false;
+		return Optional.empty();
 	}
 
 	@Override
@@ -86,6 +91,17 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 		if (isSword(mainHandItem, player)) {
 			return true;
+		}
+
+		if (filterLogic.isAllowList()) {
+			BackpackInventoryHandler backpackInventory = backpackWrapper.getInventoryHandler();
+			AtomicBoolean result = new AtomicBoolean(false);
+			InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
+				if (filterLogic.matchesWeaponFilter(stack)) {
+					result.set(swapWeapon(player, mainHandItem, backpackInventory, stack));
+				}
+			});
+			return result.get();
 		}
 
 		return tryToSwapInWeapon(player, mainHandItem);
@@ -112,7 +128,11 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, mainHandItem);
 
 		IItemHandlerModifiable backpackInventory = backpackWrapper.getInventoryHandler();
-		InventoryHelper.iterate(backpackInventory, (slot, stack) -> updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, stack));
+		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
+			if (filterLogic.matchesWeaponFilter(stack)) {
+				updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, stack);
+			}
+		});
 
 		if (!bestSword.get().isEmpty()) {
 			return swapWeapon(player, mainHandItem, backpackInventory, bestSword.get());
@@ -123,10 +143,6 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private void updateBestWeapons(AtomicReference<ItemStack> bestAxe, AtomicDouble bestAxeDamage, AtomicReference<ItemStack> bestSword, AtomicDouble bestSwordDamage, ItemStack stack) {
-		if (stack.isEmpty() || stack.getMaxStackSize() > 1) {
-			return;
-		}
-
 		ModifiableAttributeInstance attribute = new ModifiableAttributeInstance(Attributes.ATTACK_DAMAGE, a -> {});
 		Multimap<Attribute, AttributeModifier> attributeModifiers = stack.getAttributeModifiers(EquipmentSlotType.MAINHAND);
 		if (!attributeModifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
@@ -164,4 +180,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 	}
 
+	@Override
+	public boolean hideSettingsTab() {
+		return !upgradeItem.hasSettingsTab();
+	}
+
+	public ToolSwapperFilterLogic getFilterLogic() {
+		return filterLogic;
+	}
 }

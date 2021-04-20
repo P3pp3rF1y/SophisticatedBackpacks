@@ -314,7 +314,7 @@ public class BackpackContainer extends Container {
 
 	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack, boolean transferMaxStackSizeFromSource) {
 		if (isBackpackInventoryOrUpgradeSlot(index)) {
-			if (Config.COMMON.shiftClickIntoOpenTabFirst.get()) {
+			if (Boolean.TRUE.equals(Config.COMMON.shiftClickIntoOpenTabFirst.get())) {
 				return mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource) || mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource);
 			}
 			return mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource) || mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource);
@@ -324,7 +324,7 @@ public class BackpackContainer extends Container {
 			}
 			return mergeStackToPlayersInventory(slotStack, true) || mergeStackToBackpack(slotStack);
 		} else {
-			if (Config.COMMON.shiftClickIntoOpenTabFirst.get()) {
+			if (Boolean.TRUE.equals(Config.COMMON.shiftClickIntoOpenTabFirst.get())) {
 				return mergeStackToOpenUpgradeTab(slotStack, true) || mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
 			}
 			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack) || mergeStackToOpenUpgradeTab(slotStack, true);
@@ -388,7 +388,7 @@ public class BackpackContainer extends Container {
 
 	@Override
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
-		if (isUpgradeSettingsSlot(slotId) && getSlot(slotId) instanceof FilterSlotItemHandler && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
+		if (isUpgradeSettingsSlot(slotId) && getSlot(slotId) instanceof IFilterSlot && getSlot(slotId).isItemValid(player.inventory.getItemStack())) {
 			ItemStack cursorStack = player.inventory.getItemStack().copy();
 			if (cursorStack.getCount() > 1) {
 				cursorStack.setCount(1);
@@ -1053,7 +1053,7 @@ public class BackpackContainer extends Container {
 				ItemStack itemstack1 = destStack.getStack();
 				if (itemstack1.isEmpty() && destStack.isItemValid(sourceStack)) {
 					//filter slot logic
-					if (destStack instanceof FilterSlotItemHandler) {
+					if (destStack instanceof IFilterSlot) {
 						ItemStack fakeStack = sourceStack.copy();
 						fakeStack.setCount(1);
 						destStack.putStack(fakeStack);
