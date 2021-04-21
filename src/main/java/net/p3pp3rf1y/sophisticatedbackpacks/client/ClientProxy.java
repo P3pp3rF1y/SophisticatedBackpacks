@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -16,6 +17,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -40,6 +42,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
@@ -67,6 +70,8 @@ public class ClientProxy extends CommonProxy {
 			BackpackKeyConflictContext.INSTANCE, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyBinding INVENTORY_INTERACTION_KEYBIND = new KeyBinding(translKeybind("inventory_interaction"),
 			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final KeyBinding TOOL_SWAP_KEYBIND = new KeyBinding(translKeybind("tool_swap"),
+			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyBinding BACKPACK_TOGGLE_UPGRADE_1 = new KeyBinding(translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -92,6 +97,8 @@ public class ClientProxy extends CommonProxy {
 			sendBackpackOpenMessage();
 		} else if (INVENTORY_INTERACTION_KEYBIND.isPressed()) {
 			sendInteractWithInventoryMessage();
+		} else if (TOOL_SWAP_KEYBIND.isPressed()) {
+			sendToolSwapMessage();
 		} else {
 			for (Map.Entry<Integer, KeyBinding> slotKeybind : UPGRADE_SLOT_TOGGLE_KEYBINDS.entrySet()) {
 				if (slotKeybind.getValue().isPressed()) {
@@ -99,7 +106,24 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+	}
 
+	private static void sendToolSwapMessage() {
+		Minecraft mc = Minecraft.getInstance();
+		ClientPlayerEntity player = mc.player;
+		if (player == null || mc.objectMouseOver == null) {
+			return;
+		}
+		if (player.getHeldItemMainhand().getItem() instanceof BackpackItem) {
+			player.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"), true);
+			return;
+		}
+		RayTraceResult rayTrace = mc.objectMouseOver;
+		if (rayTrace.getType() == RayTraceResult.Type.BLOCK) {
+			BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) rayTrace;
+			BlockPos pos = blockraytraceresult.getPos();
+			PacketHandler.sendToServer(new BlockToolSwapMessage(pos));
+		}
 	}
 
 	private static void sendInteractWithInventoryMessage() {
@@ -161,6 +185,7 @@ public class ClientProxy extends CommonProxy {
 		event.enqueueWork(() -> {
 			ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND);
 			ClientRegistry.registerKeyBinding(INVENTORY_INTERACTION_KEYBIND);
+			ClientRegistry.registerKeyBinding(TOOL_SWAP_KEYBIND);
 			UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> ClientRegistry.registerKeyBinding(keybind));
 		});
 		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK.get(), RenderType.getCutout());
