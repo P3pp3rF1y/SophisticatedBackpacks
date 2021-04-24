@@ -859,10 +859,15 @@ public class BackpackContainer extends Container {
 			if (!cursorStack.isEmpty() || !slotStack.isEmpty()) {
 				if (cursorStack.isEmpty()) {
 					if (slot.canTakeStack(player)) {
-						playerinventory.setInventorySlotContents(dragType, slotStack);
-						onSwapCraft(slot, slotStack.getCount());
-						slot.putStack(ItemStack.EMPTY);
-						slot.onTake(player, slotStack);
+						if (slotStack.getCount() <= slotStack.getMaxStackSize()) {
+							playerinventory.setInventorySlotContents(dragType, slotStack);
+							onSwapCraft(slot, slotStack.getCount());
+							slot.putStack(ItemStack.EMPTY);
+							slot.onTake(player, slotStack);
+						} else {
+							playerinventory.setInventorySlotContents(dragType, slotStack.split(slotStack.getMaxStackSize()));
+							slot.onSlotChanged();
+						}
 					}
 				} else if (slotStack.isEmpty()) {
 					if (slot.isItemValid(cursorStack)) {
@@ -874,7 +879,7 @@ public class BackpackContainer extends Container {
 							playerinventory.setInventorySlotContents(dragType, ItemStack.EMPTY);
 						}
 					}
-				} else if (slot.canTakeStack(player) && slot.isItemValid(cursorStack)) {
+				} else if (slotStack.getCount() <= slotStack.getMaxStackSize() && slot.canTakeStack(player) && slot.isItemValid(cursorStack)) {
 					int l1 = slot.getItemStackLimit(cursorStack);
 					if (cursorStack.getCount() > l1) {
 						slot.putStack(cursorStack.split(l1));
