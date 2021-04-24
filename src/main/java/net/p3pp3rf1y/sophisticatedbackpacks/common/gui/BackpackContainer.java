@@ -537,6 +537,7 @@ public class BackpackContainer extends Container {
 	}
 
 	public class BackpackUpgradeSlot extends SlotItemHandler {
+		private boolean wasEmpty = false;
 
 		public BackpackUpgradeSlot(BackpackUpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
 			super(upgradeHandler, slotIndex, -15, yPosition);
@@ -545,12 +546,13 @@ public class BackpackContainer extends Container {
 		@Override
 		public void onSlotChanged() {
 			super.onSlotChanged();
-			if (updateWrappersAndCheckForReloadNeeded()) {
+			if ((wasEmpty != getStack().isEmpty()) || updateWrappersAndCheckForReloadNeeded()) {
 				reloadUpgradeControl();
 				if (!isFirstLevelBackpack()) {
 					parentBackpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
 				}
 			}
+			wasEmpty = getStack().isEmpty();
 		}
 
 		@Override
