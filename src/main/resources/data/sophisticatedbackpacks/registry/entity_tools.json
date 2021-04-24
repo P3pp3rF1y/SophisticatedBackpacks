@@ -4,6 +4,16 @@
             "minecraft:cow": [
                 "minecraft:bucket"
             ]
+        },
+        {
+            "entities": [
+                {
+                    "type": "animal"
+                }
+            ],
+            "tools": [
+                "minecraft:lead"
+            ]
         }
     ]
 }
