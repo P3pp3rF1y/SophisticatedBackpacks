@@ -2,22 +2,16 @@
     "block_tools": [
         {
             "blocks": [
-                "minecraft:enchanting_table"
             ],
             "tools": [
-                {
-                    "type": "tag",
-                    "tag": "forge:dyes"
-                },
-                "minecraft:stick"
+            ]
+        },
+        {
+            "minecraft": [
             ]
         },
         {
             "minecraft:grass_block": [
-                {
-                    "type": "tool",
-                    "tool": "axe"
-                }
             ]
         }
     ]

@@ -11,6 +11,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class RegistryLoader extends JsonReloadListener {
 
 	static {
 		registerParser(new ToolRegistry.BlockToolsLoader());
+		registerParser(new ToolRegistry.EntityToolsLoader());
 	}
 
 	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();

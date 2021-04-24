@@ -31,7 +31,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.registry.ToolRegistry;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -264,7 +264,10 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean itemWorksOnEntity(ItemStack stack, Entity entity) {
-		return isShearableEntity(entity, stack) && isShearsItem(stack);
+		if (isShearableEntity(entity, stack) && isShearsItem(stack)) {
+			return true;
+		}
+		return ToolRegistry.isToolForEntity(stack, entity);
 	}
 
 	@Override

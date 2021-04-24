@@ -1,19 +1,8 @@
 {
-    "tools": [
+    "entity_tools": [
         {
-            "blockcarpentry": [
-                "blockcarpentry:texture_wrench",
-                "blockcarpentry:chisel",
-                "blockcarpentry:paintbrush",
-                "blockcarpentry:hammer"
-            ]
-        },
-        {
-            "resourcefulbees": [
-                "resourcefulbees:smoker",
-                "resourcefulbees:craper",
-                "resourcefulbees:honey_dipper",
-                "minecraft:shears"
+            "minecraft:cow": [
+                "minecraft:bucket"
             ]
         }
     ]

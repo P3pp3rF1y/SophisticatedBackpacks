@@ -7,7 +7,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ToolType;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.registry.ToolRegistry;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import org.apache.commons.lang3.StringUtils;

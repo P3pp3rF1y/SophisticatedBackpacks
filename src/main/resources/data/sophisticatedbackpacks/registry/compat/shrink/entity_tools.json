@@ -1,0 +1,15 @@
+{
+    "mod": "shrink",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "living"
+                }
+            ],
+            "tools": [
+                "shrink:shrinking_device"
+            ]
+        }
+    ]
+}
