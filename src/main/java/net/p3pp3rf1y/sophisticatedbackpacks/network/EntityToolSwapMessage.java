@@ -1,55 +1,64 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class BlockToolSwapMessage {
-	private final BlockPos pos;
+public class EntityToolSwapMessage {
+	private final int entityId;
 
-	public BlockToolSwapMessage(BlockPos pos) {
-		this.pos = pos;
+	public EntityToolSwapMessage(int entityId) {
+		this.entityId = entityId;
 	}
 
-	public static void encode(BlockToolSwapMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeLong(msg.pos.toLong());
+	public static void encode(EntityToolSwapMessage msg, PacketBuffer packetBuffer) {
+		packetBuffer.writeInt(msg.entityId);
 	}
 
-	public static BlockToolSwapMessage decode(PacketBuffer packetBuffer) {
-		return new BlockToolSwapMessage(BlockPos.fromLong(packetBuffer.readLong()));
+	public static EntityToolSwapMessage decode(PacketBuffer packetBuffer) {
+		return new EntityToolSwapMessage(packetBuffer.readInt());
 	}
 
-	static void onMessage(BlockToolSwapMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
+	static void onMessage(EntityToolSwapMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
 		NetworkEvent.Context context = contextSupplier.get();
 		context.enqueueWork(() -> handleMessage(msg, context.getSender()));
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(BlockToolSwapMessage msg, @Nullable ServerPlayerEntity sender) {
+	private static void handleMessage(EntityToolSwapMessage msg, @Nullable ServerPlayerEntity sender) {
 		if (sender == null) {
 			return;
 		}
+
+		World world = sender.world;
+		Entity entity = world.getEntityByID(msg.entityId);
+
+		if (entity == null) {
+			return;
+		}
+
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
 		PlayerInventoryProvider.runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(backpackWrapper -> {
-							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
+							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
 									.forEach(upgrade -> {
-										if (!upgrade.canProcessBlockInteract() || result.get()) {
+										if (!upgrade.canProcessEntityInteract() || result.get()) {
 											return;
 										}
 										anyUpgradeCanInteract.set(true);
 
-										result.set(upgrade.onBlockInteract(sender.world, msg.pos, sender.world.getBlockState(msg.pos), sender));
+										result.set(upgrade.onEntityInteract(world, entity, sender));
 									});
 							return result.get();
 						}
@@ -61,7 +70,7 @@ public class BlockToolSwapMessage {
 			return;
 		}
 		if (!result.get()) {
-			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
+			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
 		}
 	}
 }

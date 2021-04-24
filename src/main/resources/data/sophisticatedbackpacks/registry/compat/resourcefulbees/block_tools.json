@@ -1,0 +1,20 @@
+{
+    "mod": "resourcefulbees",
+    "block_tools": [
+        {
+            "blocks": [
+                "resourcefulbees",
+                "minecraft:beehive",
+                "minecraft:bee_nest"
+            ],
+            "tools": [
+                "resourcefulbees:smoker"
+            ]
+        },
+        {
+            "resourcefulbees": [
+                "resourcefulbees:scraper"
+            ]
+        }
+    ]
+}

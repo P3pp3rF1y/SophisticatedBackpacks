@@ -10,6 +10,15 @@ import net.minecraft.world.World;
  */
 public interface IBlockToolSwapUpgrade {
 	/**
+	 * Just a simple flag whether the upgrade can actually process interactions. Used for different levels of the same upgrade where one level can and the other can't interact.
+	 *
+	 * @return true if the onBlockInteract should be run otherwise false
+	 */
+	default boolean canProcessBlockInteract() {
+		return true;
+	}
+
+	/**
 	 * Called when player presses tool swap keybind over a block
 	 *
 	 * @param world      World

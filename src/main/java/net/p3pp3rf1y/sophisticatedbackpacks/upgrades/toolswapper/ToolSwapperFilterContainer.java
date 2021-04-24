@@ -7,6 +7,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ToolType;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.ToolRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,7 @@ public class ToolSwapperFilterContainer extends FilterLogicContainerBase<ToolSwa
 	static {
 		ImmutableMap.Builder<ToolType, ResourceLocation> builder = new ImmutableMap.Builder<>();
 		String template = "item/empty_%s_slot";
-		for (ToolType toolType : ToolSwapperFilterLogic.TOOL_TYPES.values()) {
+		for (ToolType toolType : ToolRegistry.getToolTypes().values()) {
 			if (AVAILABLE_TOOL_BACKGROUNDS.contains(toolType.getName())) {
 				builder.put(toolType, new ResourceLocation(SophisticatedBackpacks.MOD_ID, String.format(template, toolType.getName())));
 			}

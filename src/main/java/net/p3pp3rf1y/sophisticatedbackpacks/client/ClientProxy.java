@@ -16,6 +16,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -43,6 +44,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
@@ -120,9 +122,12 @@ public class ClientProxy extends CommonProxy {
 		}
 		RayTraceResult rayTrace = mc.objectMouseOver;
 		if (rayTrace.getType() == RayTraceResult.Type.BLOCK) {
-			BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) rayTrace;
-			BlockPos pos = blockraytraceresult.getPos();
+			BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) rayTrace;
+			BlockPos pos = blockRayTraceResult.getPos();
 			PacketHandler.sendToServer(new BlockToolSwapMessage(pos));
+		} else if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
+			EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult) rayTrace;
+			PacketHandler.sendToServer(new EntityToolSwapMessage(entityRayTraceResult.getEntity().getEntityId()));
 		}
 	}
 

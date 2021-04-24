@@ -1,0 +1,16 @@
+{
+    "mod": "transport",
+    "block_tools": [
+        {
+            "blocks": [
+                "transport",
+                {
+                    "type": "rail"
+                }
+            ],
+            "tools": [
+                "transport:rail_breaker"
+            ]
+        }
+    ]
+}

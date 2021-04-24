@@ -1,0 +1,15 @@
+{
+    "mod": "pedestals",
+    "block_tools": [
+        {
+            "pedestals": [
+                "pedestals:devtool",
+                "pedestals:linkingtool",
+                "pedestals:linkingtoolbackwards",
+                "pedestals:tagtool",
+                "pedestals:toolswapper",
+                "pedestals:upgradetool"
+            ]
+        }
+    ]
+}
