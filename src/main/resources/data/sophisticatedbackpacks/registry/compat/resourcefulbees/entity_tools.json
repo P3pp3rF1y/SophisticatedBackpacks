@@ -8,7 +8,10 @@
                 }
             ],
             "tools": [
-                "resourcefulbees:bee_jar",
+                {
+                    "type": "emptynbt",
+                    "item": "resourcefulbees:bee_jar"
+                },
                 "resourcefulbees:honey_dipper"
             ]
         }

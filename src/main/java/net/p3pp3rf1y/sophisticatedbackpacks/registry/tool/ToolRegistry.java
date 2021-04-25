@@ -81,6 +81,17 @@ public class ToolRegistry {
 				return TOOL_TYPES.containsKey(toolName) ? Optional.of(new ToolTypeMatcher(TOOL_TYPES.get(toolName))) : Optional.empty();
 			}
 		});
+		itemMatcherFactories.add(new ItemMatcherFactory("emptynbt") {
+			@Override
+			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
+				ResourceLocation itemName = new ResourceLocation(JSONUtils.getString(jsonObject, "item"));
+				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
+					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
+				}
+				Item item = ForgeRegistries.ITEMS.getValue(itemName);
+				return Optional.of(st -> st.getItem() == item && (st.getTag() == null || st.getTag().isEmpty()));
+			}
+		});
 
 		blockMatcherFactories.add(new IMatcherFactory<BlockContext>() {
 			@Override
