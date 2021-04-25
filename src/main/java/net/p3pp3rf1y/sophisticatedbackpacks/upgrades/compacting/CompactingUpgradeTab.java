@@ -18,8 +18,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.*;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.ALLOW_LIST;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl.Button.PRIMARY_MATCH;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.ALLOW_LIST;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.PRIMARY_MATCH;
 
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<CompactingUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> COMPACT_UNCRAFTABLE = ButtonDefinitions.createToggleButtonDefinition(

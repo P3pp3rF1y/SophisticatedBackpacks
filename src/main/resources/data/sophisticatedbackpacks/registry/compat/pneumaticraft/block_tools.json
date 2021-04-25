@@ -1,0 +1,12 @@
+{
+    "mod": "pneumaticraft",
+    "block_tools": [
+        {
+            "pneumaticraft": [
+                "pneumaticcraft:camo_applicator",
+                "pneumaticcraft:manometer",
+                "pneumaticcraft:pneumatic_wrench"
+            ]
+        }
+    ]
+}

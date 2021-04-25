@@ -81,7 +81,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 		}
 
 		matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
-		float zOffset = wearsArmor ? -0.25f : -0.2f;
+		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.75f;
 
 		if (livingEntity.isChild()) {
@@ -114,6 +114,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 			green = (color >> 8 & 255) / 255.0F;
 			blue = (color & 255) / 255.0F;
 			MODEL.border.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+
+			MODEL.fabric.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 
 			BACKPACK_CLIPS.getOrDefault(backpack.getItem(), MODEL.leatherClips).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 

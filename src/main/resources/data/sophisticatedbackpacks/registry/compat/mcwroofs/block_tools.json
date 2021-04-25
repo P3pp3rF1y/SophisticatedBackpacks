@@ -1,0 +1,10 @@
+{
+    "mod": "mcwroofs",
+    "block_tools": [
+        {
+            "mcwroofs": [
+                "mcwroofs:roofing_hammer"
+            ]
+        }
+    ]
+}

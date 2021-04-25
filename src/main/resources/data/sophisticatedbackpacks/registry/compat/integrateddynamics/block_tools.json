@@ -1,0 +1,17 @@
+{
+    "mod": "integrateddynamics",
+    "block_tools": [
+        {
+            "blocks": [
+                "integrateddynamics",
+                "integratednbt",
+                "integratedcrafting",
+                "integratedterminals",
+                "integratedtunnels"
+            ],
+            "tools": [
+                "integrateddynamics:wrench"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "mod": "mekanism",
+    "block_tools": [
+        {
+            "blocks": [
+                "mekanism",
+                "mekanismgenerators"
+            ],
+            "tools": [
+                {
+                    "type": "tag",
+                    "tag": "mekanism:configurators"
+                },
+                "mekanism:network_reader"
+            ]
+        },
+        {
+            "blocks": [
+                "minecraft:spawner",
+                {
+                    "type": "item_handler"
+                }
+            ],
+            "tools": [
+                "mekanism:cardboard_box"
+            ]
+        }
+    ]
+}

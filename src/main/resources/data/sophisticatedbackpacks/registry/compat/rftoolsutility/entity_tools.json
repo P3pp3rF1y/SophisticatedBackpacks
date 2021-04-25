@@ -1,0 +1,15 @@
+{
+    "mod": "rftoolsutility",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "living"
+                }
+            ],
+            "tools": [
+                "rftoolsutility:syringe"
+            ]
+        }
+    ]
+}

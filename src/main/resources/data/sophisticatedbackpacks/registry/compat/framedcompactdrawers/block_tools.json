@@ -1,0 +1,11 @@
+{
+    "mod": "framedcompactdrawers",
+    "block_tools": [
+        {
+            "framedcompactdrawers": [
+                "storagedrawers:drawer_key",
+                "storagedrawers:quantify_key"
+            ]
+        }
+    ]
+}

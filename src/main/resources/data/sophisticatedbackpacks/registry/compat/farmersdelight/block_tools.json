@@ -1,0 +1,29 @@
+{
+    "mod": "farmersdelight",
+    "block_tools": [
+        {
+            "farmersdelight:cutting_board": [
+                {
+                    "type": "tag",
+                    "tag": "forge:tools/knives"
+                },
+                {
+                    "type": "tool",
+                    "tool": "axe"
+                },
+                {
+                    "type": "tool",
+                    "tool": "pickaxe"
+                },
+                {
+                    "type": "tool",
+                    "tool": "shovel"
+                },
+                {
+                    "type": "tag",
+                    "tag": "forge:shears"
+                }
+            ]
+        }
+    ]
+}

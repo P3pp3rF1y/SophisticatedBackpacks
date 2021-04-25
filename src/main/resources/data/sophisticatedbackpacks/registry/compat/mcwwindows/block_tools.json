@@ -1,0 +1,10 @@
+{
+    "mod": "mcwwindows",
+    "block_tools": [
+        {
+            "mcwwindows": [
+                "mcwwindows:hammer"
+            ]
+        }
+    ]
+}

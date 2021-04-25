@@ -1,0 +1,15 @@
+{
+    "mod": "refinedstorage",
+    "block_tools": [
+        {
+            "blocks": [
+                "refinedstorage",
+                "extrastorage",
+                "rsrequestify"
+            ],
+            "tools": [
+                "refinedstorage:wrench"
+            ]
+        }
+    ]
+}

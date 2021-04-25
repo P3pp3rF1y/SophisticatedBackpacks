@@ -20,7 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IFilterSlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
@@ -70,7 +70,7 @@ public class SBPlugin implements IModPlugin {
 				ItemStack ghostStack = (ItemStack) i;
 				BackpackContainer container = screen.getContainer();
 				container.getOpenContainer().ifPresent(c -> c.getSlots().forEach(s -> {
-					if (s instanceof FilterSlotItemHandler && s.isItemValid(ghostStack)) {
+					if (s instanceof IFilterSlot && s.isItemValid(ghostStack)) {
 						targets.add(new Target<I>() {
 							@Override
 							public Rectangle2d getArea() {

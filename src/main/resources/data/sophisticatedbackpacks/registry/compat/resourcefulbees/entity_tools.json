@@ -1,0 +1,16 @@
+{
+    "mod": "resourcefulbees",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "bee"
+                }
+            ],
+            "tools": [
+                "resourcefulbees:bee_jar",
+                "resourcefulbees:honey_dipper"
+            ]
+        }
+    ]
+}
