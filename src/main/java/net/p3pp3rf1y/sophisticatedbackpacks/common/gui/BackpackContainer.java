@@ -75,6 +75,8 @@ public class BackpackContainer extends Container {
 
 	private final Map<Integer, ItemStack> slotStacksToUpdate = new HashMap<>();
 
+	private boolean isUpdatingFromPacket = false;
+
 	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(backpackContext.getContainerType(), windowId);
 		this.player = player;
@@ -204,7 +206,9 @@ public class BackpackContainer extends Container {
 	@Override
 	public void setAll(List<ItemStack> items) {
 		backpackWrapper.setPersistent(false);
+		isUpdatingFromPacket = true;
 		super.setAll(items);
+		isUpdatingFromPacket = false;
 		backpackWrapper.setPersistent(true);
 		backpackWrapper.getInventoryHandler().saveInventory();
 		backpackWrapper.getUpgradeHandler().saveInventory();
@@ -546,7 +550,7 @@ public class BackpackContainer extends Container {
 		@Override
 		public void onSlotChanged() {
 			super.onSlotChanged();
-			if ((wasEmpty != getStack().isEmpty()) || updateWrappersAndCheckForReloadNeeded()) {
+			if ((!isUpdatingFromPacket && wasEmpty != getStack().isEmpty()) || updateWrappersAndCheckForReloadNeeded()) {
 				reloadUpgradeControl();
 				if (!isFirstLevelBackpack()) {
 					parentBackpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
