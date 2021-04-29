@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
@@ -26,11 +25,5 @@ public class StonecutterUpgradeTab extends UpgradeSettingsTab<StonecutterUpgrade
 	@Override
 	protected void moveSlotsToTab() {
 		recipeControl.moveSlotsToView();
-	}
-
-	@Override
-	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
-		recipeControl.afterScreenRender(matrixStack, mouseX, mouseY);
 	}
 }

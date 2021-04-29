@@ -68,6 +68,7 @@ public class UpgradeSettingsControl extends CompositeWidget<UpgradeSettingsTab<?
 		//noop
 	}
 
+	@Override
 	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		children.forEach(tab -> tab.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
 	}
