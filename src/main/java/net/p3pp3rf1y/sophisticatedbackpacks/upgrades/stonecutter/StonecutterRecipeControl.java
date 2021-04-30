@@ -114,7 +114,9 @@ public class StonecutterRecipeControl extends Widget {
 		//noop - everything is rendered in background or after screen render is done
 	}
 
-	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY) {
+	@Override
+	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
 

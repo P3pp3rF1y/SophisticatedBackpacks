@@ -171,9 +171,4 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 			setOpen(true);
 		}
 	}
-
-	@SuppressWarnings("unused") //parameters used in overrides
-	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		//noop
-	}
 }
