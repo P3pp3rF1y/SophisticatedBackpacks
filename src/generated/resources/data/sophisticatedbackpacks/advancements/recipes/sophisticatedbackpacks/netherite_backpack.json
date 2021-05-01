@@ -1,0 +1,32 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:netherite_backpack"
+        ]
+    },
+    "criteria": {
+        "has_diamond_backpack": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "sophisticatedbackpacks:diamond_backpack"
+                    }
+                ]
+            }
+        },
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:netherite_backpack"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_diamond_backpack",
+            "has_the_recipe"
+        ]
+    ]
+}

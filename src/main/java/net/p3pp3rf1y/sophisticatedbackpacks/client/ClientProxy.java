@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -12,6 +13,12 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -25,6 +32,7 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -35,9 +43,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperFilterContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.Map;
 
@@ -47,6 +61,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BAC
 
 public class ClientProxy extends CommonProxy {
 	private static final int KEY_B = 66;
+	private static final int KEY_C = 67;
 	private static final int KEY_Z = 90;
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
@@ -55,6 +70,10 @@ public class ClientProxy extends CommonProxy {
 
 	public static final KeyBinding BACKPACK_OPEN_KEYBIND = new KeyBinding(translKeybind("open_backpack"),
 			BackpackKeyConflictContext.INSTANCE, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_B), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final KeyBinding INVENTORY_INTERACTION_KEYBIND = new KeyBinding(translKeybind("inventory_interaction"),
+			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final KeyBinding TOOL_SWAP_KEYBIND = new KeyBinding(translKeybind("tool_swap"),
+			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyBinding BACKPACK_TOGGLE_UPGRADE_1 = new KeyBinding(translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -78,6 +97,10 @@ public class ClientProxy extends CommonProxy {
 	public static void handleKeyInputEvent(TickEvent.ClientTickEvent event) {
 		if (BACKPACK_OPEN_KEYBIND.isPressed()) {
 			sendBackpackOpenMessage();
+		} else if (INVENTORY_INTERACTION_KEYBIND.isPressed()) {
+			sendInteractWithInventoryMessage();
+		} else if (TOOL_SWAP_KEYBIND.isPressed()) {
+			sendToolSwapMessage();
 		} else {
 			for (Map.Entry<Integer, KeyBinding> slotKeybind : UPGRADE_SLOT_TOGGLE_KEYBINDS.entrySet()) {
 				if (slotKeybind.getValue().isPressed()) {
@@ -85,6 +108,43 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+	}
+
+	private static void sendToolSwapMessage() {
+		Minecraft mc = Minecraft.getInstance();
+		ClientPlayerEntity player = mc.player;
+		if (player == null || mc.objectMouseOver == null) {
+			return;
+		}
+		if (player.getHeldItemMainhand().getItem() instanceof BackpackItem) {
+			player.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"), true);
+			return;
+		}
+		RayTraceResult rayTrace = mc.objectMouseOver;
+		if (rayTrace.getType() == RayTraceResult.Type.BLOCK) {
+			BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) rayTrace;
+			BlockPos pos = blockRayTraceResult.getPos();
+			PacketHandler.sendToServer(new BlockToolSwapMessage(pos));
+		} else if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
+			EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult) rayTrace;
+			PacketHandler.sendToServer(new EntityToolSwapMessage(entityRayTraceResult.getEntity().getEntityId()));
+		}
+	}
+
+	private static void sendInteractWithInventoryMessage() {
+		Minecraft mc = Minecraft.getInstance();
+		RayTraceResult rayTrace = mc.objectMouseOver;
+		if (rayTrace == null || rayTrace.getType() != RayTraceResult.Type.BLOCK) {
+			return;
+		}
+		BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) rayTrace;
+		BlockPos pos = blockraytraceresult.getPos();
+
+		if (!WorldHelper.getTile(mc.world, pos, TileEntity.class).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false)) {
+			return;
+		}
+
+		PacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getFace()));
 	}
 
 	private static void sendBackpackOpenMessage() {
@@ -114,6 +174,8 @@ public class ClientProxy extends CommonProxy {
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
 		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
+		eventBus.addListener(BackpackSoundHandler::tick);
+		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
 	}
 
 	private void loadComplete(FMLLoadCompleteEvent event) {
@@ -127,12 +189,15 @@ public class ClientProxy extends CommonProxy {
 	private void clientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
 			ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND);
+			ClientRegistry.registerKeyBinding(INVENTORY_INTERACTION_KEYBIND);
+			ClientRegistry.registerKeyBinding(TOOL_SWAP_KEYBIND);
 			UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> ClientRegistry.registerKeyBinding(keybind));
 		});
 		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(ModBlocks.IRON_BACKPACK.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(ModBlocks.GOLD_BACKPACK.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(ModBlocks.DIAMOND_BACKPACK.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(ModBlocks.NETHERITE_BACKPACK.get(), RenderType.getCutout());
 		RenderingRegistry.registerEntityRenderingHandler(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), renderManager -> new ItemRenderer(renderManager, Minecraft.getInstance().getItemRenderer()));
 	}
 
@@ -155,6 +220,8 @@ public class ClientProxy extends CommonProxy {
 	public void stitchTextures(TextureStitchEvent.Pre evt) {
 		if (evt.getMap().getTextureLocation() == PlayerContainer.LOCATION_BLOCKS_TEXTURE) {
 			evt.addSprite(BackpackContainer.EMPTY_UPGRADE_SLOT_BACKGROUND);
+			evt.addSprite(ToolSwapperFilterContainer.EMPTY_WEAPON_SLOT_BACKGROUND);
+			ToolSwapperFilterContainer.EMPTY_TOOL_SLOT_BACKGROUNDS.values().forEach(evt::addSprite);
 		}
 	}
 

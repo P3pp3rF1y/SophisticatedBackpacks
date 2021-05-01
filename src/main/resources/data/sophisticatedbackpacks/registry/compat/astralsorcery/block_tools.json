@@ -1,0 +1,10 @@
+{
+    "mod": "astralsorcery",
+    "block_tools": [
+        {
+            "astralsorcery": [
+                "astralsorcery:linking_tool"
+            ]
+        }
+    ]
+}

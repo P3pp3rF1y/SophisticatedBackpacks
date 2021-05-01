@@ -1,0 +1,32 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:stonecutter_upgrade"
+        ]
+    },
+    "criteria": {
+        "has_upgrade_base": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "sophisticatedbackpacks:upgrade_base"
+                    }
+                ]
+            }
+        },
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:stonecutter_upgrade"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_upgrade_base",
+            "has_the_recipe"
+        ]
+    ]
+}

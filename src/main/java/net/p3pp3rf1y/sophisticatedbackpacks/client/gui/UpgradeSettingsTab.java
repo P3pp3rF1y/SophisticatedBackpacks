@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ItemButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Label;
@@ -26,7 +26,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	private static final int BOTTOM_BORDER_HEIGHT = 7;
 
 	protected final BackpackScreen screen;
-	private final List<IReorderingProcessor> closedTooltip;
+	private final List<ITextProperties> closedTooltip;
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
 	private final C upgradeContainer;
@@ -40,7 +40,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	protected UpgradeSettingsTab(C upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(position);
 		this.upgradeContainer = upgradeContainer;
-		this.closedTooltip = ImmutableList.of(closedTooltip.func_241878_f());
+		this.closedTooltip = ImmutableList.of(closedTooltip);
 		addChild(new ItemButton(new Position(x + 1, y + 4), this::onTabIconClicked, getContainer().getUpgradeStack()) {
 			@Override
 			protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {

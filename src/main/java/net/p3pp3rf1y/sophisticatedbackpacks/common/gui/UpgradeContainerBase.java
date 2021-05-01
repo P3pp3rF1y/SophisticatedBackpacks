@@ -100,4 +100,18 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
 		slot.onTake(player, slotStack);
 	}
+
+	@SuppressWarnings({"unused", "java:S1172"}) //parameter is used in overrides
+	public boolean mergeIntoBackpackFirst(Slot slot) {
+		return true;
+	}
+
+	@SuppressWarnings({"unused", "java:S1172"}) //parameter is used in overrides
+	public boolean allowsPickupAll(Slot slot) {
+		return true;
+	}
+
+	public int getUpgradeContainerId() {
+		return upgradeContainerId;
+	}
 }

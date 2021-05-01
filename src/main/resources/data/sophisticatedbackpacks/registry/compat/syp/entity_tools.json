@@ -1,0 +1,16 @@
+{
+    "mod": "syp",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "tameable"
+                }
+            ],
+            "tools": [
+                "syp:golden_pet_bandage",
+                "syp:pet_bandage"
+            ]
+        }
+    ]
+}

@@ -38,6 +38,7 @@ public class SBPBlockLootProvider implements IDataProvider {
 		tables.put(ModBlocks.IRON_BACKPACK.getId(), getBackpack(ModItems.IRON_BACKPACK.get()));
 		tables.put(ModBlocks.GOLD_BACKPACK.getId(), getBackpack(ModItems.GOLD_BACKPACK.get()));
 		tables.put(ModBlocks.DIAMOND_BACKPACK.getId(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));
+		tables.put(ModBlocks.NETHERITE_BACKPACK.getId(), getBackpack(ModItems.NETHERITE_BACKPACK.get()));
 
 		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
 			Path path = getPath(generator.getOutputFolder(), e.getKey());

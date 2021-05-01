@@ -1,0 +1,15 @@
+{
+    "mod": "apotheosis",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "animal"
+                }
+            ],
+            "tools": [
+                "apotheosis:farmers_leash"
+            ]
+        }
+    ]
+}

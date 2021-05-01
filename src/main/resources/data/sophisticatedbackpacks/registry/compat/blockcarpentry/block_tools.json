@@ -1,0 +1,13 @@
+{
+    "mod": "blockcarpentry",
+    "block_tools": [
+        {
+            "blockcarpentry": [
+                "blockcarpentry:texture_wrench",
+                "blockcarpentry:chisel",
+                "blockcarpentry:paintbrush",
+                "blockcarpentry:hammer"
+            ]
+        }
+    ]
+}

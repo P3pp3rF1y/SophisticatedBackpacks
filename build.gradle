@@ -3,7 +3,7 @@ buildscript {
         jcenter()
         maven {
             name = "forge"
-            url = "https://files.minecraftforge.net/maven"
+            url = "https://maven.minecraftforge.net"
         }
         mavenCentral()
     }
@@ -24,6 +24,10 @@ repositories {
     mavenCentral()
     maven { url "http://dvs1.progwml6.com/files/maven" }
     maven { url "https://maven.theillusivec4.top/" }
+    maven { url "https://maven.tterrag.com/" }
+    maven { url = "https://modmaven.dev/" }
+    maven { url "https://minecraft.curseforge.com/api/maven/"}
+    maven { url "http://maven.blamejared.com/" }
 }
 
 group = 'sophisticatedbackpacks'
@@ -39,6 +43,7 @@ minecraft {
         client {
             properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
             properties 'forge.logging.console.level': 'debug'
+            properties 'mixin.env.disableRefMap': 'true'
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -49,6 +54,7 @@ minecraft {
         server {
             properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
             properties 'forge.logging.console.level': 'debug'
+            properties 'mixin.env.disableRefMap': 'true'
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -60,6 +66,7 @@ minecraft {
             properties 'forge.logging.markers': 'REGISTRIES,REGISTRYDUMP'
             properties 'forge.logging.console.level': 'debug'
             properties 'fml.earlyprogresswindow': 'false'
+            properties 'mixin.env.disableRefMap': 'true'
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -80,8 +87,17 @@ dependencies {
 
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_mc_version}-${curios_version}:api")
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_mc_version}-${curios_version}")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}:api")
+    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}")
+    compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
+    runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
+    compile fg.deobf("vazkii.autoreglib:AutoRegLib:${autoreglib_version}")
+    compile fg.deobf("vazkii.quark:Quark:${quark_version}")
+    compile fg.deobf("crafting-tweaks:CraftingTweaks_${crafting_tweaks_mc_version}:${crafting_tweaks_version}")
 }
 
 test {
@@ -104,7 +120,7 @@ jar {
                     "Specification-Vendor"    : "p3pp3rf1y",
                     "Specification-Version"   : "1",
                     "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${version}",
+                    "Implementation-Version"  : "${archiveVersion}",
                     "Implementation-Vendor"   : "p3pp3rf1y",
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
@@ -142,7 +158,7 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            artifactId='sophisticatedbackpacks'
+            artifactId = 'sophisticatedbackpacks'
             from(components.java)
         }
     }

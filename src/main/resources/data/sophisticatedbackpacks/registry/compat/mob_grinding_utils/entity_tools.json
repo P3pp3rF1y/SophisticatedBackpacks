@@ -1,0 +1,15 @@
+{
+    "mod": "mob_grinding_utils",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "living"
+                }
+            ],
+            "tools": [
+                "mob_grinding_utils:mob_swab"
+            ]
+        }
+    ]
+}

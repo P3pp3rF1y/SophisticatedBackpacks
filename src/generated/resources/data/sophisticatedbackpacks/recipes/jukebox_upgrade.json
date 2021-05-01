@@ -1,0 +1,31 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "jukebox_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        " J ",
+        "IBI",
+        " R "
+    ],
+    "key": {
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "J": {
+            "item": "minecraft:jukebox"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:jukebox_upgrade"
+    }
+}

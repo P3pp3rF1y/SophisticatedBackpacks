@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolFilterSlot;
 
 public class InventorySorterCompat implements ICompat {
 	private static final String SLOTBLACKLIST = "slotblacklist";
@@ -25,6 +26,7 @@ public class InventorySorterCompat implements ICompat {
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, FilterSlotItemHandler.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, FilterLogicContainer.FilterLogicSlot.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, SlotSuppliedHandler.class::getName);
+			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, ToolFilterSlot.class::getName);
 		});
 	}
 

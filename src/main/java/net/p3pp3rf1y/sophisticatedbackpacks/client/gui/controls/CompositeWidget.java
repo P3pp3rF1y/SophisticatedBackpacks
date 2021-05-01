@@ -12,6 +12,9 @@ import java.util.List;
 public abstract class CompositeWidget<T extends Widget> extends Widget implements INestedGuiEventHandler {
 	protected final List<T> children = new ArrayList<>();
 
+	private boolean dragging = false;
+
+	@Nullable
 	private IGuiEventListener listener;
 
 	protected CompositeWidget(Position position) {
@@ -40,7 +43,7 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 				return true;
 			}
 		}
-		return false;
+		return dragging;
 	}
 
 	@Override
@@ -59,7 +62,7 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	@Override
 	public void setDragging(boolean dragging) {
-		//noop
+		this.dragging = dragging;
 	}
 
 	@Nullable
@@ -71,5 +74,11 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	@Override
 	public void setListener(@Nullable IGuiEventListener listener) {
 		this.listener = listener;
+	}
+
+	@Override
+	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
+		children.forEach(c -> c.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
 	}
 }

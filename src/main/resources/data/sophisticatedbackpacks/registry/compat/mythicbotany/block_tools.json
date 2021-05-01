@@ -1,0 +1,19 @@
+{
+    "mod": "mythicbotany",
+    "block_tools": [
+        {
+            "mythicbotany": [
+                "botania:twig_wand"
+            ]
+        },
+        {
+            "blocks": [
+                "botania",
+                "mythicbotany"
+            ],
+            "tools": [
+                "mythicbotany:dreamwood_twig_wand"
+            ]
+        }
+    ]
+}

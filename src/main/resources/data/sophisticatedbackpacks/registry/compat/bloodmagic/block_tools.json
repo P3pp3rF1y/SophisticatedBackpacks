@@ -1,0 +1,27 @@
+{
+    "mod": "bloodmagic",
+    "block_tools": [
+        {
+            "bloodmagic:altar": [
+                "bloodmagic:daggerofsacrifice",
+                "bloodmagic:sacrificialdagger"
+            ]
+        },
+        {
+            "bloodmagic:masterritualstone": [
+                "bloodmagic:ritualdiviner",
+                "bloodmagic:ritualdivinerdusk",
+                "bloodmagic:ritualtinkerer"
+            ]
+        },
+        {
+            "bloodmagic:ritualstone": [
+                "bloodmagic:airscribetool",
+                "bloodmagic:duskscribetool",
+                "bloodmagic:earthscribetool",
+                "bloodmagic:firescribetool",
+                "bloodmagic:waterscribetool"
+            ]
+        }
+    ]
+}

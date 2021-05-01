@@ -1,0 +1,10 @@
+{
+    "mod": "powah",
+    "block_tools": [
+        {
+            "powah": [
+                "powah:wrench"
+            ]
+        }
+    ]
+}

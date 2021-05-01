@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "stack_upgrade_tier_4",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "NNN",
+        "NSN",
+        "NNN"
+    ],
+    "key": {
+        "S": {
+            "item": "sophisticatedbackpacks:stack_upgrade_tier_3"
+        },
+        "N": {
+            "tag": "forge:storage_blocks/netherite"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:stack_upgrade_tier_4"
+    }
+}

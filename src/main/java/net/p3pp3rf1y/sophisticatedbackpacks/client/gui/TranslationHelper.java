@@ -50,8 +50,12 @@ public class TranslationHelper {
 		return ret;
 	}
 
+	public static List<StringTextComponent> getTranslatedLines(String translateKey) {
+		return getTranslatedLines(translateKey, null);
+	}
+
 	public static List<StringTextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters) {
-		String text = I18n.format(translateKey, parameters);
+		String text = translate(translateKey, parameters);
 
 		String[] lines = text.split("\n");
 
@@ -61,6 +65,10 @@ public class TranslationHelper {
 		}
 
 		return ret;
+	}
+
+	public static String translate(String translateKey, Object... parameters) {
+		return I18n.format(translateKey, parameters);
 	}
 
 	public static String translKeybind(String keybindName) {

@@ -7,6 +7,8 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.UUIDCodec;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -78,6 +80,10 @@ public class NBTHelper {
 		return getTagValue(stack, key, (compound, k) -> NBTUtil.readUniqueId(compound.get(k)));
 	}
 
+	public static void setCompoundNBT(ItemStack stack, String key, CompoundNBT tag) {
+		setCompoundNBT(stack, "", key, tag);
+	}
+
 	public static void setCompoundNBT(ItemStack stack, String parentKey, String key, CompoundNBT tag) {
 		if (parentKey.isEmpty()) {
 			stack.getOrCreateTag().put(key, tag);
@@ -115,6 +121,16 @@ public class NBTHelper {
 		return tag;
 	}
 
+	public static CompoundNBT putInt(CompoundNBT tag, String key, int value) {
+		tag.putInt(key, value);
+		return tag;
+	}
+
+	public static CompoundNBT putString(CompoundNBT tag, String key, String value) {
+		tag.putString(key, value);
+		return tag;
+	}
+
 	public static <T extends Enum<T> & IStringSerializable> CompoundNBT putEnumConstant(CompoundNBT tag, String key, T enumConstant) {
 		tag.putString(key, enumConstant.getString());
 		return tag;
@@ -137,5 +153,37 @@ public class NBTHelper {
 			return;
 		}
 		stack.getTag().remove(key);
+	}
+
+	public static Optional<String> getString(ItemStack stack, String key) {
+		return getTagValue(stack, key, CompoundNBT::getString);
+	}
+
+	public static Optional<Float> getFloat(ItemStack stack, String key) {
+		return getTagValue(stack, key, CompoundNBT::getFloat);
+	}
+
+	public static <K, V> Optional<Map<K, V>> getMap(ItemStack stack, String key, Function<String, K> getKey, BiFunction<String, INBT, V> getValue) {
+		Optional<CompoundNBT> parentTag = getCompound(stack, key);
+
+		if (!parentTag.isPresent()) {
+			return Optional.empty();
+		}
+		CompoundNBT tag = parentTag.get();
+		Map<K, V> map = new HashMap<>();
+
+		for (String tagName : tag.keySet()) {
+			map.put(getKey.apply(tagName), getValue.apply(tagName, tag.get(tagName)));
+		}
+
+		return Optional.of(map);
+	}
+
+	public static <K, V> void setMap(ItemStack stack, String key, Map<K, V> map, Function<K, String> getStringKey, Function<V, INBT> getNbtValue) {
+		CompoundNBT mapNbt = new CompoundNBT();
+		for (Map.Entry<K, V> entry : map.entrySet()) {
+			mapNbt.put(getStringKey.apply(entry.getKey()), getNbtValue.apply(entry.getValue()));
+		}
+		stack.getOrCreateTag().put(key, mapNbt);
 	}
 }

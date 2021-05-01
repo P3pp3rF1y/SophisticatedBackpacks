@@ -1,0 +1,10 @@
+{
+    "mod": "botania",
+    "block_tools": [
+        {
+            "botania": [
+                "botania:twig_wand"
+            ]
+        }
+    ]
+}

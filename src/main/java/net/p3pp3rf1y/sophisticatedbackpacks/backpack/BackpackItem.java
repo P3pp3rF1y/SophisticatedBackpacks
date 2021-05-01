@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,10 +28,13 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -42,14 +46,16 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
@@ -68,7 +74,11 @@ public class BackpackItem extends ItemBase {
 	private final Supplier<BackpackBlock> blockSupplier;
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier) {
-		super(new Properties().maxStackSize(1));
+		this(numberOfSlots, numberOfUpgradeSlots, blockSupplier, new Properties());
+	}
+
+	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, Properties properties) {
+		super(properties.maxStackSize(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
@@ -88,8 +98,15 @@ public class BackpackItem extends ItemBase {
 			items.add(stack);
 		}
 
+		int clothColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, ImmutableList.of(
+				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
+		));
+		int trimColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, ImmutableList.of(
+				DyeColor.BLUE, DyeColor.BLACK
+		));
+
 		ItemStack stack = new ItemStack(this);
-		new BackpackWrapper(stack).setColors(DyeColor.YELLOW.getColorValue(), DyeColor.BLUE.getColorValue());
+		new BackpackWrapper(stack).setColors(clothColor, trimColor);
 		items.add(stack);
 	}
 
@@ -97,6 +114,10 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		super.addInformation(stack, worldIn, tooltip, flagIn);
+		if (flagIn == ITooltipFlag.TooltipFlags.ADVANCED) {
+			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(new StringTextComponent("UUID: " + uuid).mergeStyle(TextFormatting.DARK_GRAY))));
+		}
 		if (!Screen.hasShiftDown()) {
 			tooltip.add(new TranslationTextComponent(
 					BACKPACK_TOOLTIP + "press_for_contents",
@@ -152,7 +173,7 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.PASS;
 		}
 
-		if (tryInventoryInteraction(context)) {
+		if (InventoryInteractionHelper.tryInventoryInteraction(context)) {
 			return ActionResultType.SUCCESS;
 		}
 
@@ -181,6 +202,10 @@ public class BackpackItem extends ItemBase {
 			ItemStack backpack = blockItemUseContext.getItem();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
 
+			if (!world.isRemote) {
+				stopBackpackSounds(backpack, world, pos);
+			}
+
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 			if (player == null || !player.isCreative()) {
@@ -192,33 +217,18 @@ public class BackpackItem extends ItemBase {
 		return ActionResultType.PASS;
 	}
 
+	private static void stopBackpackSounds(ItemStack backpack, World world, BlockPos pos) {
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
+				ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) world, Vector3d.copyCentered(pos), uuid))
+		);
+	}
+
 	private ItemStack getBackpackCopy(@Nullable PlayerEntity player, ItemStack backpack) {
 		if (player == null || !player.isCreative()) {
 			return backpack.copy();
 		}
 		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
-	}
-
-	private boolean tryInventoryInteraction(ItemUseContext context) {
-		return WorldHelper.getTile(context.getWorld(), context.getPos())
-				.map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, context.getFace())
-						.map(itemHandler -> {
-							ItemStack backpack = context.getItem();
-							return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-									.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper))
-									.orElse(false);
-						}).orElse(false)
-				).orElse(false);
-	}
-
-	private boolean tryRunningInteractionWrappers(net.minecraftforge.items.IItemHandler itemHandler, IBackpackWrapper wrapper) {
-		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
-		if (wrappers.isEmpty()) {
-			return false;
-		}
-		wrappers.forEach(upgrade -> upgrade.onHandlerInteract(itemHandler));
-		return true;
 	}
 
 	protected boolean canPlace(BlockItemUseContext context, BlockState state) {
@@ -290,12 +300,6 @@ public class BackpackItem extends ItemBase {
 
 	@Nullable
 	@Override
-	public CompoundNBT getShareTag(ItemStack stack) {
-		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(IBackpackWrapper::getClientTag).orElse(super.getShareTag(stack));
-	}
-
-	@Nullable
-	@Override
 	public EquipmentSlotType getEquipmentSlot(ItemStack stack) {
 		return EquipmentSlotType.CHEST;
 	}
@@ -308,10 +312,5 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
 		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
-	}
-
-	@Override
-	public void onCreated(ItemStack stack, World worldIn, PlayerEntity playerIn) {
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(IBackpackWrapper::removeOriginalBackpack);
 	}
 }

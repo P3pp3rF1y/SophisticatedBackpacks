@@ -1,7 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
@@ -24,9 +25,7 @@ public interface IBackpackWrapper {
 
 	BackpackUpgradeHandler getUpgradeHandler();
 
-	CompoundNBT getClientTag();
-
-	UUID getOrCreateContentsUuid();
+	Optional<UUID> getContentsUuid();
 
 	int getClothColor();
 
@@ -56,11 +55,13 @@ public interface IBackpackWrapper {
 
 	void refreshInventoryForInputOutput();
 
-	void setOriginalUuid(UUID orCreateContentsUuid);
-
-	void removeOriginalBackpack();
-
-	void removeLinkToOriginalBackpack();
-
 	void setPersistent(boolean persistent);
+
+	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
+
+	void setLoot(ResourceLocation lootTableName, float lootPercentage);
+
+	void fillWithLoot(PlayerEntity playerEntity);
+
+	void setContentsUuid(UUID backpackUuid);
 }

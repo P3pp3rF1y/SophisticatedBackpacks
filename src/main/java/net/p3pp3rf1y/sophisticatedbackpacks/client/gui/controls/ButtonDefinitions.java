@@ -20,7 +20,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.
 public class ButtonDefinitions {
 	private ButtonDefinitions() {}
 
-	private static Map<Boolean, ToggleButton.StateData> getBooleanStateData(ToggleButton.StateData onStateData, ToggleButton.StateData offStateData) {
+	public static Map<Boolean, ToggleButton.StateData> getBooleanStateData(ToggleButton.StateData onStateData, ToggleButton.StateData offStateData) {
 		return ImmutableMap.of(
 				true, onStateData,
 				false, offStateData
@@ -78,4 +78,17 @@ public class ButtonDefinitions {
 			false, GuiHelper.getButtonStateData(new UV(77, 0), Dimension.RECTANGLE_4_10, new Position(1, 1), TranslationHelper.translColoredButton("upgrade_switch_disabled", TextFormatting.RED))
 	), UPGRADE_SWITCH_HOVERED_BACKGROUND);
 
+	public static final ButtonDefinition.Toggle<Boolean> WORK_IN_GUI = createToggleButtonDefinition(
+			ImmutableMap.of(
+					true, getButtonStateData(new UV(32, 80), translUpgradeButton("works_in_gui"), Dimension.SQUARE_16, new Position(1, 1)),
+					false, getButtonStateData(new UV(48, 80), translUpgradeButton("only_automatic"), Dimension.SQUARE_16, new Position(1, 1))
+			));
+
+	public static final ButtonDefinition.Toggle<Boolean> SHIFT_CLICK_TARGET = createToggleButtonDefinition(
+			ImmutableMap.of(
+					true, getButtonStateData(new UV(64, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("shift_click_into_backpack"), null)),
+					false, getButtonStateData(new UV(80, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("shift_click_into_inventory")))
+			));
 }

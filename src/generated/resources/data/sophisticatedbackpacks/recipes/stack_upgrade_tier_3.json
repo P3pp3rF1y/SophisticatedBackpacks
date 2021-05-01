@@ -1,0 +1,25 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "conditions": [
+        {
+            "itemRegistryName": "stack_upgrade_tier_3",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "DDD",
+        "DSD",
+        "DDD"
+    ],
+    "key": {
+        "S": {
+            "item": "sophisticatedbackpacks:stack_upgrade_tier_2"
+        },
+        "D": {
+            "tag": "forge:storage_blocks/diamond"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:stack_upgrade_tier_3"
+    }
+}

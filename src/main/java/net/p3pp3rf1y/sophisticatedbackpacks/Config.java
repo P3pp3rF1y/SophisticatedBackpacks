@@ -1,15 +1,26 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
+import net.minecraft.entity.EntityType;
+import net.minecraft.loot.LootTables;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Config {
+
+	private static final String SETTINGS = " Settings";
+
 	private Config() {}
 
 	public static final Client CLIENT;
@@ -45,6 +56,7 @@ public class Config {
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
 		public final BackpackConfig diamondBackpack;
+		public final BackpackConfig netheriteBackpack;
 		public final FilteredUpgradeConfig compactingUpgrade;
 		public final FilteredUpgradeConfig advancedCompactingUpgrade;
 		public final FilteredUpgradeConfig depositUpgrade;
@@ -64,6 +76,10 @@ public class Config {
 		public final SmeltingUpgradeConfig smeltingUpgrade;
 		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
 		public final InceptionUpgradeConfig inceptionUpgrade;
+		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
+		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
+		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
+		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -74,6 +90,7 @@ public class Config {
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
 			goldBackpack = new BackpackConfig(builder, "Gold", 81, 3);
 			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);
+			netheriteBackpack = new BackpackConfig(builder, "Netherite", 120, 7);
 
 			compactingUpgrade = new FilteredUpgradeConfig(builder, "Compacting Upgrade", "compactingUpgrade", 9, 3);
 			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
@@ -94,8 +111,122 @@ public class Config {
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
+			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
+
+			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
+
+			shiftClickIntoOpenTabFirst = builder.comment("Shift clicking will first move the stack into open tab and only then to player's inventory or to backpack (based on where shift clicking from backpack or from player's inventory).",
+					"Setting this to false will move stacks to backpack/inventory first.").define("shiftClickIntoOpenTabFirst", true);
 
 			builder.pop();
+		}
+
+		public static class EntityBackpackAdditionsConfig {
+			private static final String REGISTRY_NAME_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)";
+			private static final String ENTITY_LOOT_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
+			public final ForgeConfigSpec.DoubleValue chance;
+			public final ForgeConfigSpec.BooleanValue addLoot;
+			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
+			public final ForgeConfigSpec.BooleanValue buffHealth;
+			public final ForgeConfigSpec.BooleanValue equipWithArmor;
+			public final ForgeConfigSpec.BooleanValue playJukebox;
+			public final ForgeConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
+			public final ForgeConfigSpec.ConfigValue<List<? extends String>> discBlockList;
+			@Nullable
+			private Map<EntityType<?>, ResourceLocation> entityLootTables = null;
+
+			public EntityBackpackAdditionsConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Settings for Spawning Entities with Backpack").push("entityBackpackAdditions");
+				chance = builder.comment("Chance of an entity spawning with Backpack").defineInRange("chance", 0.01, 0, 1);
+				addLoot = builder.comment("Turns on/off addition of loot into backpacks").define("addLoot", true);
+				buffWithPotionEffects = builder.comment("Turns on/off buffing the entity that wears backpack with potion effects. These are scaled based on how much loot is added.")
+						.define("buffWithPotionEffects", true);
+				buffHealth = builder.comment("Turns on/off buffing the entity that wears backpack with additional health. Health is scaled based on backpack tier the mob wears.")
+						.define("buffHealth", true);
+				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
+						.define("equipWithArmor", true);
+				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
+						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
+				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
+						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
+				builder.pop();
+			}
+
+			public Optional<ResourceLocation> getLootTableName(EntityType<?> entityType) {
+				if (entityLootTables == null) {
+					initEntityLootTables();
+				}
+				return Optional.ofNullable(entityLootTables.get(entityType));
+			}
+
+			public boolean canWearBackpack(EntityType<?> entityType) {
+				if (entityLootTables == null) {
+					initEntityLootTables();
+				}
+				return entityLootTables.containsKey(entityType);
+			}
+
+			private void initEntityLootTables() {
+				entityLootTables = new HashMap<>();
+				for (String mapping : entityLootTableList.get()) {
+					String[] entityLoot = mapping.split("\\|");
+					if (entityLoot.length < 2) {
+						continue;
+					}
+					String entityRegistryName = entityLoot[0];
+					String lootTableName = entityLoot[1];
+
+					EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(entityRegistryName));
+					if (entityType != null) {
+						entityLootTables.put(entityType, lootTableName.equals("null") ? null : new ResourceLocation(lootTableName));
+					}
+				}
+			}
+
+			private List<String> getDefaultDiscBlockList() {
+				List<String> ret = new ArrayList<>();
+				ret.add("botania:record_gaia_1");
+				ret.add("botania:record_gaia_2");
+				return ret;
+			}
+
+			private List<String> getDefaultEntityLootTableList() {
+				return getDefaultEntityLootMapping().entrySet().stream().map(e -> e.getKey().getRegistryName() + "|" + e.getValue()).collect(Collectors.toList());
+			}
+
+			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
+				Map<EntityType<?>, ResourceLocation> mapping = new LinkedHashMap<>();
+				mapping.put(EntityType.CREEPER, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.DROWNED, LootTables.CHESTS_SHIPWRECK_TREASURE);
+				mapping.put(EntityType.ENDERMAN, LootTables.CHESTS_END_CITY_TREASURE);
+				mapping.put(EntityType.EVOKER, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.HUSK, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.PIGLIN, LootTables.BASTION_BRIDGE);
+				mapping.put(EntityType.field_242287_aj, LootTables.BASTION_TREASURE);
+				mapping.put(EntityType.PILLAGER, LootTables.CHESTS_PILLAGER_OUTPOST);
+				mapping.put(EntityType.SKELETON, LootTables.CHESTS_SIMPLE_DUNGEON);
+				mapping.put(EntityType.STRAY, LootTables.CHESTS_IGLOO_CHEST);
+				mapping.put(EntityType.VEX, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.VINDICATOR, LootTables.CHESTS_WOODLAND_MANSION);
+				mapping.put(EntityType.WITCH, LootTables.CHESTS_BURIED_TREASURE);
+				mapping.put(EntityType.WITHER_SKELETON, LootTables.CHESTS_NETHER_BRIDGE);
+				mapping.put(EntityType.ZOMBIE, LootTables.CHESTS_SIMPLE_DUNGEON);
+				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.CHESTS_VILLAGE_VILLAGE_ARMORER);
+				mapping.put(EntityType.ZOMBIFIED_PIGLIN, LootTables.BASTION_OTHER);
+				return mapping;
+			}
+		}
+
+		public static class ToolSwapperUpgradeConfig {
+			public final ForgeConfigSpec.IntValue slotsInRow;
+
+			protected ToolSwapperUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tool Swapper Upgrade" + SETTINGS).push("toolSwapperUpgrade");
+				slotsInRow = builder.comment("Number of tool filter slots displayed in a row").defineInRange("slotsInRow", 4, 1, 6);
+				builder.pop();
+			}
 		}
 
 		public static class InceptionUpgradeConfig {
@@ -140,7 +271,7 @@ public class Config {
 			public final ForgeConfigSpec.DoubleValue fuelEfficiencyMultiplier;
 
 			protected SmeltingUpgradeConfigBase(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
-				builder.comment(upgradeName + " Settings").push(path);
+				builder.comment(upgradeName + SETTINGS).push(path);
 				smeltingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
 						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
 				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
@@ -170,7 +301,7 @@ public class Config {
 			public final ForgeConfigSpec.IntValue slotsInRow;
 
 			protected FilteredUpgradeConfigBase(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
-				builder.comment(name + " Settings").push(path);
+				builder.comment(name + SETTINGS).push(path);
 				filterSlots = builder.comment("Number of " + name + "'s filter slots").defineInRange("filterSlots", defaultFilterSlots, 1, 20);
 				slotsInRow = builder.comment("Number of filter slots displayed in a row").defineInRange("slotsInRow", defaultSlotsInRow, 1, 6);
 			}

@@ -1,21 +1,31 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +40,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String CONTENTS_UUID_TAG = "contentsUuid";
 	private static final String INVENTORY_SLOTS_TAG = "inventorySlots";
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
-	private static final String ORIGINAL_UUID_TAG = "originalUuid";
+	private static final String LOOT_TABLE_NAME_TAG = "lootTableName";
+	private static final String LOOT_PERCENTAGE_TAG = "lootPercentage";
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
@@ -65,22 +76,29 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(getNumberOfInventorySlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
+			handler = new BackpackInventoryHandler(getNumberOfInventorySlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
 		}
 		return handler;
 	}
 
 	private int getNumberOfInventorySlots() {
-		return NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG).orElse(((BackpackItem) backpack.getItem()).getNumberOfSlots());
+		Optional<Integer> inventorySlots = NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG);
+
+		if (inventorySlots.isPresent()) {
+			return inventorySlots.get();
+		}
+
+		int itemInventorySlots = ((BackpackItem) backpack.getItem()).getNumberOfSlots();
+		setNumberOfInventorySlots(itemInventorySlots);
+		return itemInventorySlots;
+	}
+
+	private void setNumberOfInventorySlots(int itemInventorySlots) {
+		NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, itemInventorySlots);
 	}
 
 	private CompoundNBT getBackpackContentsNbt() {
-		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid(), getOriginalUuid());
-	}
-
-	@Nullable
-	private UUID getOriginalUuid() {
-		return NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).orElse(null);
+		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
 	}
 
 	private void markBackpackContentsDirty() {
@@ -97,50 +115,73 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
-		otherBackpackWrapper.setOriginalUuid(getOrCreateContentsUuid());
+		getContentsUuid().ifPresent(originalUuid -> {
+			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
+			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
+		});
 
 		if (backpack.hasDisplayName()) {
 			otherBackpackWrapper.getBackpack().setDisplayName(backpack.getDisplayName());
 		}
-		getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
-		getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
-		otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+
+		if (getClothColor() != DEFAULT_CLOTH_COLOR || getBorderColor() != DEFAULT_BORDER_COLOR) {
+			otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
+		}
 	}
 
 	@Override
 	public BackpackUpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
-			upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
-				getInventoryHandler().clearListeners();
-				inventoryIOHandler = null;
-				inventoryModificationHandler = null;
-			});
+			if (getContentsUuid().isPresent()) {
+				upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
+					if (handler != null) {
+						handler.clearListeners();
+						handler.setSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
+					}
+					getInventoryHandler().clearListeners();
+					inventoryIOHandler = null;
+					inventoryModificationHandler = null;
+				});
+			} else {
+				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
+			}
 		}
 		return upgradeHandler;
 	}
 
 	private int getNumberOfUpgradeSlots() {
-		return NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG).orElse(((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots());
+		Optional<Integer> upgradeSlots = NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG);
+
+		if (upgradeSlots.isPresent()) {
+			return upgradeSlots.get();
+		}
+
+		int itemUpgradeSlots = ((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots();
+		setNumberOfUpgradeSlots(itemUpgradeSlots);
+		return itemUpgradeSlots;
 	}
 
 	@Override
-	public CompoundNBT getClientTag() {
-		CompoundNBT tag = backpack.getOrCreateTag();
-		tag.putInt(INVENTORY_SLOTS_TAG, getInventoryHandler().getSlots());
-		tag.putInt(UPGRADE_SLOTS_TAG, getUpgradeHandler().getSlots());
-		return tag;
+	public Optional<UUID> getContentsUuid() {
+		return NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
 	}
 
-	@Override
-	public UUID getOrCreateContentsUuid() {
-		Optional<UUID> contentsUuid = NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+	private UUID getOrCreateContentsUuid() {
+		Optional<UUID> contentsUuid = getContentsUuid();
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
 		}
+		clearDummyUpgradeHandler();
 		UUID newUuid = UUID.randomUUID();
-		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, newUuid);
+		setContentsUuid(newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
+	}
+
+	private void clearDummyUpgradeHandler() {
+		if (upgradeHandler == NoopBackpackWrapper.INSTANCE.getUpgradeHandler()) {
+			upgradeHandler = null;
+		}
 	}
 
 	private void migrateBackpackContents(UUID newUuid) {
@@ -207,7 +248,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		InventorySorter.sortHandler(getInventoryHandler(), getComparator());
 	}
 
-	private Comparator<Map.Entry<InventorySorter.FilterStack, Integer>> getComparator() {
+	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {
 		switch (getSortBy()) {
 			case COUNT:
 				return InventorySorter.BY_COUNT;
@@ -247,7 +288,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
-							wrapperCopy.removeLinkToOriginalBackpack();
 							return wrapperCopy.getBackpack();
 						}
 				).orElse(ItemStack.EMPTY);
@@ -259,29 +299,58 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setOriginalUuid(UUID originalUuid) {
-		NBTHelper.setUniqueId(backpack, ORIGINAL_UUID_TAG, originalUuid);
-		backpackSaveHandler.run();
-	}
-
-	@Override
-	public void removeOriginalBackpack() {
-		BackpackStorage.get().removeOriginalBackpack(getOriginalUuid());
-		removeLinkToOriginalBackpack();
-		backpackSaveHandler.run();
-	}
-
-	@Override
-	public void removeLinkToOriginalBackpack() {
-		NBTHelper.getUniqueId(backpack, ORIGINAL_UUID_TAG).ifPresent(originalUuid -> BackpackStorage.get().removeLinkToOriginalBackpack(originalUuid));
-		NBTHelper.removeTag(backpack, ORIGINAL_UUID_TAG);
-		backpackSaveHandler.run();
-	}
-
-	@Override
 	public void setPersistent(boolean persistent) {
 		getInventoryHandler().setPersistent(persistent);
 		getUpgradeHandler().setPersistent(persistent);
+	}
+
+	@Override
+	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
+		setNumberOfInventorySlots(numberOfInventorySlots);
+		setNumberOfUpgradeSlots(numberOfUpgradeSlots);
+	}
+
+	@Override
+	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+		backpack.setTagInfo(LOOT_TABLE_NAME_TAG, StringNBT.valueOf(lootTableName.toString()));
+		backpack.setTagInfo(LOOT_PERCENTAGE_TAG, FloatNBT.valueOf(lootPercentage));
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void fillWithLoot(PlayerEntity playerEntity) {
+		if (playerEntity.world.isRemote) {
+			return;
+		}
+		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
+	}
+
+	@Override
+	public void setContentsUuid(UUID backpackUuid) {
+		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, backpackUuid);
+	}
+
+	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {
+		MinecraftServer server = playerEntity.world.getServer();
+		if (server == null || !(playerEntity.world instanceof ServerWorld)) {
+			return;
+		}
+
+		ResourceLocation lootTableName = new ResourceLocation(lootName);
+		float lootPercentage = NBTHelper.getFloat(backpack, LOOT_PERCENTAGE_TAG).orElse(0f);
+
+		backpack.removeChildTag(LOOT_TABLE_NAME_TAG);
+		backpack.removeChildTag(LOOT_PERCENTAGE_TAG);
+
+		ServerWorld world = (ServerWorld) playerEntity.world;
+
+		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
+		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
+		LootHelper.fillWithLoot(world.rand, loot, getInventoryHandler());
+	}
+
+	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
+		NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
 	}
 
 	@Override

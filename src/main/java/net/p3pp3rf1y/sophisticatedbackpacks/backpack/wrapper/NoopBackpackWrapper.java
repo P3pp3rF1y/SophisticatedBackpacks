@@ -1,7 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
@@ -16,7 +18,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
 	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundNBT(), () -> {}, () -> {});
-	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundNBT(), () -> {});
+	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundNBT(), () -> {}, 64);
 
 	private NoopBackpackWrapper() {}
 
@@ -51,13 +53,8 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public CompoundNBT getClientTag() {
-		return backpack.getOrCreateTag();
-	}
-
-	@Override
-	public UUID getOrCreateContentsUuid() {
-		return UUID.randomUUID();
+	public Optional<UUID> getContentsUuid() {
+		return Optional.empty();
 	}
 
 	@Override
@@ -131,22 +128,27 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setOriginalUuid(UUID orCreateContentsUuid) {
-		//noop
-	}
-
-	@Override
-	public void removeOriginalBackpack() {
-		//noop
-	}
-
-	@Override
-	public void removeLinkToOriginalBackpack() {
-		//noop
-	}
-
-	@Override
 	public void setPersistent(boolean persistent) {
+		//noop
+	}
+
+	@Override
+	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
+		//noop
+	}
+
+	@Override
+	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+		//noop
+	}
+
+	@Override
+	public void fillWithLoot(PlayerEntity playerEntity) {
+		//noop
+	}
+
+	@Override
+	public void setContentsUuid(UUID backpackUuid) {
 		//noop
 	}
 }

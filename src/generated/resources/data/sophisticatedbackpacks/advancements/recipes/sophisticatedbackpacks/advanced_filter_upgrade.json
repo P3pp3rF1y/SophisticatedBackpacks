@@ -6,6 +6,16 @@
         ]
     },
     "criteria": {
+        "has_filter_upgrade": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "sophisticatedbackpacks:filter_upgrade"
+                    }
+                ]
+            }
+        },
         "has_the_recipe": {
             "trigger": "minecraft:recipe_unlocked",
             "conditions": {
@@ -15,6 +25,7 @@
     },
     "requirements": [
         [
+            "has_filter_upgrade",
             "has_the_recipe"
         ]
     ]
