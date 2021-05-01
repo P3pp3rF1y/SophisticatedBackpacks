@@ -336,7 +336,7 @@ public class BackpackContainer extends Container {
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
-		return mergeItemStack(slotStack, inventorySlots.size(), inventorySlots.size() + getNumberOfUpgradeSlots(), false);
+		return !upgradeSlots.isEmpty() && mergeItemStack(slotStack, inventorySlots.size(), inventorySlots.size() + getNumberOfUpgradeSlots(), false);
 	}
 
 	private boolean mergeStackToOpenUpgradeTab(ItemStack slotStack, boolean transferMaxStackSizeFromSource) {
