@@ -1022,9 +1022,9 @@ public class BackpackContainer extends Container {
 					int j = destStack.getCount() + toTransfer;
 					int maxSize = calculateMaxCountForStack(slot.getSlotStackLimit(), sourceStack);
 					if (j <= maxSize) {
-						sourceStack.setCount(0);
+						sourceStack.shrink(toTransfer);
 						destStack.setCount(j);
-						toTransfer -= j;
+						toTransfer = 0;
 						slot.onSlotChanged();
 						flag = true;
 					} else if (destStack.getCount() < maxSize) {
