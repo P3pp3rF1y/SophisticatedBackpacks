@@ -43,6 +43,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -88,7 +89,7 @@ public class BackpackItem extends ItemBase {
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
 		super.fillItemGroup(group, items);
 
-		if (!isInGroup(group) || this != ModItems.BACKPACK.get()) {
+		if (!isInGroup(group) || this != ModItems.BACKPACK.get() || !Config.COMMON.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 

@@ -1,11 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Item;
 import net.minecraft.loot.LootTables;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -18,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Config {
-
 	private static final String SETTINGS = " Settings";
 
 	private Config() {}
@@ -80,6 +82,11 @@ public class Config {
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+
+		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
+		public void onConfigReload(ModConfig.Reloading event) {
+			enabledItems.enabledMap.clear();
+		}
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -327,7 +334,14 @@ public class Config {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
 			}
 
+			public boolean isItemEnabled(Item item) {
+				return RegistryHelper.getRegistryName(item).map(rn -> isItemEnabled(rn.getPath())).orElse(false);
+			}
+
 			public boolean isItemEnabled(String itemRegistryName) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
 				if (enabledMap.isEmpty()) {
 					loadEnabledMap();
 				}
