@@ -1,0 +1,10 @@
+{
+    "mod": "thermal",
+    "block_tools": [
+        {
+            "thermal": [
+                "thermal:wrench"
+            ]
+        }
+    ]
+}

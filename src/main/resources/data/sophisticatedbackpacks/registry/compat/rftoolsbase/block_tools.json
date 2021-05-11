@@ -1,0 +1,20 @@
+{
+    "mod": "rftoolsbase",
+    "block_tools": [
+        {
+            "blocks": [
+                "rftoolsbase",
+                "rftoolsbuilder",
+                "rftoolscontrol",
+                "rftoolspower",
+                "rftoolsstorage",
+                "rftoolsutility",
+                "xnet"
+            ],
+            "tools": [
+                "rftoolsbase:smartwrench",
+                "rftoolsbase:smartwrench_select"
+            ]
+        }
+    ]
+}

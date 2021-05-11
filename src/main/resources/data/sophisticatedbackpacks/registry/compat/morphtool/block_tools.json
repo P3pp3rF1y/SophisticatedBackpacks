@@ -1,0 +1,15 @@
+{
+    "mod": "morphtool",
+    "block_tools": [
+        {
+            "blocks": [
+                {
+                    "type": "all"
+                }
+            ],
+            "tools": [
+                "morphtool:tool"
+            ]
+        }
+    ]
+}

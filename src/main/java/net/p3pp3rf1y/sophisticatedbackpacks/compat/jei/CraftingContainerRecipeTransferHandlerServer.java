@@ -218,7 +218,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 						ItemStack.areItemStackTagsEqual(inventoryStack, stack)) {
 
 					final int remain = stack.getCount() - added;
-					final int maxStackSize = Math.min(slot.getItemStackLimit(inventoryStack), inventoryStack.getMaxStackSize());
+					final int maxStackSize = slot.getItemStackLimit(inventoryStack);
 					final int space = maxStackSize - inventoryStack.getCount();
 					if (space > 0) {
 
@@ -229,7 +229,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 						}
 
 						// Not enough space
-						inventoryStack.setCount(inventoryStack.getMaxStackSize());
+						inventoryStack.setCount(maxStackSize);
 
 						added += space;
 					}

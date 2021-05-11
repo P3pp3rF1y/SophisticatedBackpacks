@@ -76,6 +76,10 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 							player.dropItem(itemstack1, false);
 						}
 					}
+					if (thePlayer.openContainer instanceof BackpackContainer) {
+						Slot slot = slots.get(i);
+						((BackpackContainer) thePlayer.openContainer).setSlotStackToUpdate(slot.slotNumber, slot.getStack());
+					}
 				}
 
 				return stack;

@@ -75,4 +75,10 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	public void setListener(@Nullable IGuiEventListener listener) {
 		this.listener = listener;
 	}
+
+	@Override
+	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
+		children.forEach(c -> c.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
+	}
 }

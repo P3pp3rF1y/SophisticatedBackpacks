@@ -89,7 +89,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeTab;
@@ -168,7 +171,9 @@ public class ModItems {
 	public static final RegistryObject<JukeboxUpgradeItem> JUKEBOX_UPGRADE = ITEMS.register("jukebox_upgrade",
 			JukeboxUpgradeItem::new);
 	public static final RegistryObject<ToolSwapperUpgradeItem> TOOL_SWAPPER_UPGRADE = ITEMS.register("tool_swapper_upgrade",
-			ToolSwapperUpgradeItem::new);
+			() -> new ToolSwapperUpgradeItem(false, false));
+	public static final RegistryObject<ToolSwapperUpgradeItem> ADVANCED_TOOL_SWAPPER_UPGRADE = ITEMS.register("advanced_tool_swapper_upgrade",
+			() -> new ToolSwapperUpgradeItem(true, true));
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
@@ -214,6 +219,7 @@ public class ModItems {
 	private static final UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> INCEPTION_TYPE = new UpgradeContainerType<>(InceptionUpgradeContainer::new);
 	private static final UpgradeContainerType<StonecutterUpgradeWrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(StonecutterUpgradeContainer::new);
 	private static final UpgradeContainerType<JukeboxUpgradeItem.Wrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
+	private static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(ToolSwapperUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -238,6 +244,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(INCEPTION_UPGRADE.getId(), INCEPTION_TYPE);
 		UpgradeContainerRegistry.register(STONECUTTER_UPGRADE.getId(), STONECUTTER_TYPE);
 		UpgradeContainerRegistry.register(JUKEBOX_UPGRADE.getId(), JUKEBOX_TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_TOOL_SWAPPER_UPGRADE.getId(), TOOL_SWAPPER_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
@@ -267,6 +274,7 @@ public class ModItems {
 			UpgradeSettingsTabManager.register(INCEPTION_TYPE, InceptionUpgradeTab::new);
 			UpgradeSettingsTabManager.register(STONECUTTER_TYPE, StonecutterUpgradeTab::new);
 			UpgradeSettingsTabManager.register(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
+			UpgradeSettingsTabManager.register(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
 		});
 	}
 

@@ -1,0 +1,16 @@
+{
+    "mod": "chiselsandbits",
+    "block_tools": [
+        {
+            "chiselsandbits": [
+                "chiselsandbits:chisel_diamond",
+                "chiselsandbits:chisel_gold",
+                "chiselsandbits:chisel_iron",
+                "chiselsandbits:chisel_netherite",
+                "chiselsandbits:chisel_printer",
+                "chiselsandbits:chisel_stone",
+                "chiselsandbits:wrench_wood"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "mod": "storagedrawers",
+    "block_tools": [
+        {
+            "storagedrawers": [
+                "storagedrawers:drawer_key",
+                "storagedrawers:quantify_key"
+            ]
+        }
+    ]
+}

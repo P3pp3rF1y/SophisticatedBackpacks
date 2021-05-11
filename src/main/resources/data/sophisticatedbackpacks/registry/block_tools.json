@@ -1,0 +1,18 @@
+{
+    "block_tools": [
+        {
+            "blocks": [
+            ],
+            "tools": [
+            ]
+        },
+        {
+            "minecraft": [
+            ]
+        },
+        {
+            "minecraft:grass_block": [
+            ]
+        }
+    ]
+}

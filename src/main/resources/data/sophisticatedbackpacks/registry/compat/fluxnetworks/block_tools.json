@@ -1,0 +1,11 @@
+{
+    "mod": "fluxnetworks",
+    "block_tools": [
+        {
+            "fluxnetworks": [
+                "fluxnetworks:admin_configurator",
+                "fluxnetworks:flux_configurator"
+            ]
+        }
+    ]
+}

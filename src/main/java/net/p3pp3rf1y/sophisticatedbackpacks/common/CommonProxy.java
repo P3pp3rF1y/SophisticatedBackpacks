@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -36,6 +37,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -44,6 +46,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 import java.util.Random;
 
 public class CommonProxy {
+	private final RegistryLoader registryLoader = new RegistryLoader();
+
 	public void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
@@ -59,6 +63,11 @@ public class CommonProxy {
 		eventBus.addListener(this::onBlockClick);
 		eventBus.addListener(this::onAttackEntity);
 		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
+		eventBus.addListener(this::onAddReloadListener);
+	}
+
+	private void onAddReloadListener(AddReloadListenerEvent event) {
+		event.addListener(registryLoader);
 	}
 
 	private void onCauldronInteract(PlayerInteractEvent.RightClickBlock event) {

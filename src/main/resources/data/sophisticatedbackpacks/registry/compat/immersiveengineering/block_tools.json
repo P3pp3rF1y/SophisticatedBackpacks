@@ -1,0 +1,12 @@
+{
+    "mod": "immersiveengineering",
+    "block_tools": [
+        {
+            "immersiveengineering": [
+                "immersiveengineering:hammer",
+                "immersiveengineering:screwdriver",
+                "immersiveengineering:wirecutter"
+            ]
+        }
+    ]
+}

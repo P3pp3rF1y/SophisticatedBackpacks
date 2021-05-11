@@ -111,7 +111,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 					craftMatrix.setInventorySlotContents(slotIndex, ItemStack.EMPTY);
 				}
 			}
-			container.detectAndSendChanges();
+			container.sendSlotUpdates();
 		}
 	}
 
@@ -137,7 +137,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 				}
 			}
 
-			container.detectAndSendChanges();
+			container.sendSlotUpdates();
 		}
 	}
 
@@ -180,7 +180,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			}
 		}
 
-		container.detectAndSendChanges();
+		container.sendSlotUpdates();
 	}
 
 	@Override
@@ -222,7 +222,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		balanceGrid(this, id, entityPlayer, container);
 	}
 
-	private <T extends Container> void balanceGrid(TweakProvider<T> provider, int id, PlayerEntity entityPlayer, T container) {
+	private <T extends BackpackContainer> void balanceGrid(TweakProvider<T> provider, int id, PlayerEntity entityPlayer, T container) {
 		ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
 		Multiset<String> itemCount = HashMultiset.create();
 		int start = provider.getCraftingGridStart(entityPlayer, container, id);
@@ -260,7 +260,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			}
 		}
 
-		container.detectAndSendChanges();
+		container.sendSlotUpdates();
 	}
 
 	@Override
@@ -305,6 +305,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		if (itemStack.getCount() > 0 && firstEmptySlot != -1) {
 			ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getInventoryStackLimit()));
 			craftMatrix.setInventorySlotContents(firstEmptySlot, transferStack);
+			container.sendSlotUpdates();
 			return true;
 		}
 
