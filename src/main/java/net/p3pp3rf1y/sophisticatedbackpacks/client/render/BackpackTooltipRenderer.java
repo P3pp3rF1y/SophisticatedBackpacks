@@ -71,11 +71,13 @@ public class BackpackTooltipRenderer {
 			refreshContents(wrapper, minecraft);
 
 			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-			int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
-			if (multiplier > 1) {
-				lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
-						new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
-				).mergeStyle(TextFormatting.GREEN));
+			if (backpackUuid != null) {
+				int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
+				if (multiplier > 1) {
+					lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
+							new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
+					).mergeStyle(TextFormatting.GREEN));
+				}
 			}
 			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
 			event.setCanceled(true);
