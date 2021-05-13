@@ -1,17 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
-
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_BLOCK_CONTAINER_TYPE;
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BLOCK_SUBBACKPACK_CONTAINER_TYPE;
 
 public class JukeboxUpgradeContainer extends UpgradeContainerBase<JukeboxUpgradeItem.Wrapper, JukeboxUpgradeContainer> {
 
@@ -35,10 +31,14 @@ public class JukeboxUpgradeContainer extends UpgradeContainerBase<JukeboxUpgrade
 		if (data.contains(ACTION_DATA)) {
 			String actionName = data.getString(ACTION_DATA);
 			if (actionName.equals("play")) {
-				if (isBlockBackpack(player.openContainer.getType())) {
-					upgradeWrapper.play(player.world, getBlockBackpackPosition());
-				} else {
-					upgradeWrapper.play(player);
+				if (player.openContainer instanceof BackpackContainer) {
+					BackpackContext context = ((BackpackContainer) player.openContainer).getBackpackContext();
+
+					if (isBlockBackpack(context)) {
+						upgradeWrapper.play(player.world, context.getBackpackPosition(player));
+					} else {
+						upgradeWrapper.play(player);
+					}
 				}
 			} else if (actionName.equals("stop")) {
 				upgradeWrapper.stop(player);
@@ -46,12 +46,9 @@ public class JukeboxUpgradeContainer extends UpgradeContainerBase<JukeboxUpgrade
 		}
 	}
 
-	private boolean isBlockBackpack(ContainerType<?> type) {
-		return type == BLOCK_SUBBACKPACK_CONTAINER_TYPE.get() || type == BACKPACK_BLOCK_CONTAINER_TYPE.get();
-	}
-
-	private BlockPos getBlockBackpackPosition() {
-		return player.openContainer instanceof BackpackContainer ? ((BackpackContainer) player.openContainer).getBackpackContext().getBackpackPosition(player) : BlockPos.ZERO;
+	private boolean isBlockBackpack(BackpackContext context) {
+		BackpackContext.ContextType type = context.getType();
+		return type == BackpackContext.ContextType.BLOCK_BACKPACK || type == BackpackContext.ContextType.BLOCK_SUB_BACKPACK;
 	}
 
 	public void play() {

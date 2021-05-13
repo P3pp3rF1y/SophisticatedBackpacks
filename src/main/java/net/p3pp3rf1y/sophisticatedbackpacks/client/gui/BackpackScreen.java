@@ -57,7 +57,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	static final int DISABLED_SLOT_X_POS = -1000;
 
 	private static ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> screenFactory = BackpackScreen::new;
-
 	public static void setScreenFactory(ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> factory) {
 		screenFactory = factory;
 	}
@@ -72,6 +71,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private Button sortButton = null;
 	@Nullable
 	private ToggleButton<SortBy> sortByButton = null;
+	private Button settingsButton;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
 	private static ICraftingUIPart craftingUIPart = ICraftingUIPart.NOOP;
@@ -84,6 +84,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super(screenContainer, inv, titleIn);
 		ySize = 114 + getContainer().getNumberOfRows() * 18;
 		xSize = getContainer().getBackpackBackgroundProperties().getSlotsOnLine() * 18 + 14;
+		titleX = 22;
 		playerInventoryTitleY = ySize - 94;
 		playerInventoryTitleX = 8 + getContainer().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
 		numberOfUpgradeSlots = getContainer().getNumberOfUpgradeSlots();
@@ -107,6 +108,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			addUpgradeSwitches();
 		});
 		addSortButtons();
+		settingsButton = new Button(new Position(guiLeft + 7, guiTop + 4), ButtonDefinitions.SETTINGS, button -> getContainer().openSettings());
+		addListener(settingsButton);
 	}
 
 	private void addUpgradeSwitches() {
@@ -191,6 +194,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		}
+		settingsButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}

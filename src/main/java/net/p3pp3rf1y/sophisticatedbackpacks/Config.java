@@ -80,7 +80,6 @@ public class Config {
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
-		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
@@ -122,9 +121,6 @@ public class Config {
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
-
-			shiftClickIntoOpenTabFirst = builder.comment("Shift clicking will first move the stack into open tab and only then to player's inventory or to backpack (based on where shift clicking from backpack or from player's inventory).",
-					"Setting this to false will move stacks to backpack/inventory first.").define("shiftClickIntoOpenTabFirst", true);
 
 			builder.pop();
 		}

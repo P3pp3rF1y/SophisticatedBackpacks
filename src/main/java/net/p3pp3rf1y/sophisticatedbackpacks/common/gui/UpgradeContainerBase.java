@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -62,7 +62,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		}
 		CompoundNBT data = supplyData.get();
 		data.putInt("containerId", upgradeContainerId);
-		PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 	}
 
 	public void onInit() {

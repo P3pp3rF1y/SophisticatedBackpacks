@@ -127,8 +127,9 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 			return ActionResultType.SUCCESS;
 		}
 
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Block(pos)),
-				getBackpackDisplayName(world, pos)), buf -> buf.writeLong(pos.toLong()));
+		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
+				getBackpackDisplayName(world, pos)), backpackContext::toBuffer);
 		return ActionResultType.SUCCESS;
 	}
 

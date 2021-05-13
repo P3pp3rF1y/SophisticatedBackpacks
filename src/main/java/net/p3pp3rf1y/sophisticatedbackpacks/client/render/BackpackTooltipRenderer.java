@@ -85,7 +85,7 @@ public class BackpackTooltipRenderer {
 
 	}
 
-	private static void requestContents(ClientPlayerEntity player, net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper wrapper) {
+	private static void requestContents(ClientPlayerEntity player, IBackpackWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
 			lastRequestTime = player.world.getGameTime();
 			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackContentsMessage(uuid)));

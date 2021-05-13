@@ -2,13 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
@@ -45,12 +44,15 @@ public class BackpackOpenMessage {
 		}
 
 		if (player.openContainer instanceof BackpackContainer) {
-			BackpackContainer backpackContainer = (BackpackContainer) player.openContainer;
+			BackpackContext backpackContext = ((BackpackContainer) player.openContainer).getBackpackContext();
 			if (msg.subBackpackSlotIndex == -1) {
-				openParentBackpack(player, backpackContainer);
+				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else {
-				openSubBackpack(player, msg, backpackContainer);
+				openBackpack(player, backpackContext.getSubBackpackContext(msg.subBackpackSlotIndex));
 			}
+		} else if (player.openContainer instanceof SettingsContainer) {
+			BackpackContext backpackContext = ((SettingsContainer) player.openContainer).getBackpackContext();
+			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);
 		}
@@ -65,17 +67,8 @@ public class BackpackOpenMessage {
 		});
 	}
 
-	private static void openSubBackpack(ServerPlayerEntity player, BackpackOpenMessage msg, BackpackContainer backpackContainer) {
-		BackpackContext backpackContext = backpackContainer.getBackpackContext().getSubBackpackContext(msg.subBackpackSlotIndex);
-		ItemStack subBackpack = backpackContainer.inventorySlots.get(msg.subBackpackSlotIndex).getStack();
-		NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), new StringTextComponent("... > " + subBackpack.getDisplayName().getString())),
-				backpackContext::toBuffer);
-	}
-
-	private static void openParentBackpack(ServerPlayerEntity player, BackpackContainer backpackContainer) {
-		BackpackContext backpackContext = backpackContainer.getBackpackContext().getParentBackpackContext();
-		ItemStack parentBackpack = backpackContainer.getParentBackpackWrapper().getBackpack();
-		NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), parentBackpack.getDisplayName()),
+	private static void openBackpack(ServerPlayerEntity player, BackpackContext backpackContext) {
+		NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
 				backpackContext::toBuffer);
 	}
 }

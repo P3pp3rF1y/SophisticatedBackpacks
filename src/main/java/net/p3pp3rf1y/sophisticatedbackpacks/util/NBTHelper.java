@@ -40,6 +40,14 @@ public class NBTHelper {
 			tag = (CompoundNBT) parentTag;
 		}
 
+		return getTagValue(tag, key, getValue);
+	}
+
+	public static Optional<Boolean> getBoolean(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getBoolean);
+	}
+
+	private static <T> Optional<T> getTagValue(CompoundNBT tag, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();
 		}

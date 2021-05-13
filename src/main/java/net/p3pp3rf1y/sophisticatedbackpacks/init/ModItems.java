@@ -26,8 +26,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
@@ -177,14 +179,11 @@ public class ModItems {
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
 
-	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferItem));
-	public static final RegistryObject<ContainerType<BackpackContainer>> BLOCK_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("block_subbackpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlockSubBackpack));
-	public static final RegistryObject<ContainerType<BackpackContainer>> ITEM_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("item_subbackpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferItemSubBackpack));
-	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_BLOCK_CONTAINER_TYPE = CONTAINERS.register("backpack_block",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlock));
+	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
+			() -> IForgeContainerType.create(BackpackContainer::fromBuffer));
+
+	public static final RegistryObject<ContainerType<SettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
+			() -> IForgeContainerType.create(SettingsContainer::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.create(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
@@ -247,10 +246,8 @@ public class ModItems {
 		UpgradeContainerRegistry.register(ADVANCED_TOOL_SWAPPER_UPGRADE.getId(), TOOL_SWAPPER_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.registerFactory(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.registerFactory(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
 
 			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);

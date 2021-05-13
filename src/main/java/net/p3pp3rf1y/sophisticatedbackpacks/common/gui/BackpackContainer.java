@@ -11,6 +11,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -18,9 +19,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.SlotItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
@@ -28,12 +30,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -46,7 +50,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BackpackContainer extends Container {
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
+
+public class BackpackContainer extends Container implements ISyncedContainer {
 	public static final ResourceLocation EMPTY_UPGRADE_SLOT_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "item/empty_upgrade_slot");
 	private static final int NUMBER_OF_PLAYER_SLOTS = 36;
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
@@ -78,11 +84,12 @@ public class BackpackContainer extends Container {
 	private boolean isUpdatingFromPacket = false;
 
 	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
-		super(backpackContext.getContainerType(), windowId);
+		super(BACKPACK_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
 		this.backpackContext = backpackContext;
 		parentBackpackWrapper = backpackContext.getParentBackpackWrapper(player).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper = backpackContext.getBackpackWrapper(player);
+		removeOpenTabIfKeepOff();
 		backpackWrapper.fillWithLoot(player);
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
@@ -270,20 +277,8 @@ public class BackpackContainer extends Container {
 		return backpackContext.canInteractWith(player);
 	}
 
-	public static BackpackContainer fromBufferItem(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Item.fromBuffer(packetBuffer));
-	}
-
-	public static BackpackContainer fromBufferBlock(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.Block.fromBuffer(packetBuffer));
-	}
-
-	public static BackpackContainer fromBufferItemSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.ItemSubBackpack.fromBuffer(packetBuffer));
-	}
-
-	public static BackpackContainer fromBufferBlockSubBackpack(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.BlockSubBackpack.fromBuffer(packetBuffer));
+	public static BackpackContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
 	}
 
 	@Override
@@ -318,7 +313,7 @@ public class BackpackContainer extends Container {
 
 	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack, boolean transferMaxStackSizeFromSource) {
 		if (isBackpackInventoryOrUpgradeSlot(index)) {
-			if (Boolean.TRUE.equals(Config.COMMON.shiftClickIntoOpenTabFirst.get())) {
+			if (shouldShiftClickIntoOpenTabFirst()) {
 				return mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource) || mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource);
 			}
 			return mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource) || mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource);
@@ -328,11 +323,15 @@ public class BackpackContainer extends Container {
 			}
 			return mergeStackToPlayersInventory(slotStack, true) || mergeStackToBackpack(slotStack);
 		} else {
-			if (Boolean.TRUE.equals(Config.COMMON.shiftClickIntoOpenTabFirst.get())) {
+			if (shouldShiftClickIntoOpenTabFirst()) {
 				return mergeStackToOpenUpgradeTab(slotStack, true) || mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack);
 			}
 			return mergeStackToUpgradeSlots(slotStack) || mergeStackToBackpack(slotStack) || mergeStackToOpenUpgradeTab(slotStack, true);
 		}
+	}
+
+	private boolean shouldShiftClickIntoOpenTabFirst() {
+		return BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getBackpack(), BackpackSettingsManager.SHIFT_CLICK_INTO_OPEN_TAB_FIRST);
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
@@ -435,6 +434,7 @@ public class BackpackContainer extends Container {
 		return upgradeContainers;
 	}
 
+	@Override
 	public void handleMessage(CompoundNBT data) {
 		if (data.contains("containerId")) {
 			int containerId = data.getInt("containerId");
@@ -445,8 +445,13 @@ public class BackpackContainer extends Container {
 			setOpenTabId(data.getInt(OPEN_TAB_ID_TAG));
 		} else if (data.contains(SORT_BY_TAG)) {
 			setSortBy(SortBy.fromName(data.getString(SORT_BY_TAG)));
-		} else if (data.contains(ACTION_TAG) && data.getString(ACTION_TAG).equals("sort")) {
-			sort();
+		} else if (data.contains(ACTION_TAG)) {
+			String actionName = data.getString(ACTION_TAG);
+			if (actionName.equals("sort")) {
+				sort();
+			} else if (actionName.equals("openSettings")) {
+				openSettings();
+			}
 		} else if (data.contains(UPGRADE_ENABLED_TAG)) {
 			setUpgradeEnabled(data.getInt(UPGRADE_SLOT_TAG), data.getBoolean(UPGRADE_ENABLED_TAG));
 		}
@@ -460,7 +465,7 @@ public class BackpackContainer extends Container {
 		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putInt(OPEN_TAB_ID_TAG, tabId);
-			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 		}
 
 		if (tabId == -1) {
@@ -482,7 +487,7 @@ public class BackpackContainer extends Container {
 		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putString(SORT_BY_TAG, sortBy.getString());
-			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 		}
 		backpackWrapper.setSortBy(sortBy);
 	}
@@ -491,11 +496,22 @@ public class BackpackContainer extends Container {
 		if (isClientSide()) {
 			CompoundNBT data = new CompoundNBT();
 			data.putString(ACTION_TAG, "sort");
-			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 			return;
 		}
 
 		backpackWrapper.sort();
+	}
+
+	public void openSettings() {
+		if (isClientSide()) {
+			CompoundNBT data = new CompoundNBT();
+			data.putString(ACTION_TAG, "openSettings");
+			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			return;
+		}
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SettingsContainer(w, pl, backpackContext),
+				new TranslationTextComponent(TranslationHelper.translGui("settings.title"))), backpackContext::toBuffer);
 	}
 
 	public boolean isFirstLevelBackpack() {
@@ -531,7 +547,7 @@ public class BackpackContainer extends Container {
 			CompoundNBT data = new CompoundNBT();
 			data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
 			data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
-			PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 		}
 		slotWrappers.get(upgradeSlot).setEnabled(enabled);
 	}
@@ -1113,6 +1129,15 @@ public class BackpackContainer extends Container {
 			}
 		}
 		super.onContainerClosed(player);
+		if (!player.world.isRemote) {
+			removeOpenTabIfKeepOff();
+		}
+	}
+
+	private void removeOpenTabIfKeepOff() {
+		if (Boolean.FALSE.equals(BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getBackpack(), BackpackSettingsManager.KEEP_TAB_OPEN))) {
+			backpackWrapper.removeOpenTabId();
+		}
 	}
 
 	private boolean isInventorySlotInUpgradeTab(PlayerEntity player, Slot slot) {

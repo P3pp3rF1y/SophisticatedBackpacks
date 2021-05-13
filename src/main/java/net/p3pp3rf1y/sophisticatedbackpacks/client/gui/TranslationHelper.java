@@ -74,4 +74,8 @@ public class TranslationHelper {
 	public static String translKeybind(String keybindName) {
 		return KEYBIND_PREFIX + keybindName;
 	}
+
+	public static String translGui(String guiTranslateKey) {
+		return GUI_PREFIX + guiTranslateKey;
+	}
 }
