@@ -35,7 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHa
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 
@@ -447,10 +447,17 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			setSortBy(SortBy.fromName(data.getString(SORT_BY_TAG)));
 		} else if (data.contains(ACTION_TAG)) {
 			String actionName = data.getString(ACTION_TAG);
-			if (actionName.equals("sort")) {
-				sort();
-			} else if (actionName.equals("openSettings")) {
-				openSettings();
+			switch (actionName) {
+				case "sort":
+					sort();
+					break;
+				case "openSettings":
+					openSettings();
+					break;
+				case "openSlotSettings":
+					openSlotSettings();
+					break;
+				default:
 			}
 		} else if (data.contains(UPGRADE_ENABLED_TAG)) {
 			setUpgradeEnabled(data.getInt(UPGRADE_SLOT_TAG), data.getBoolean(UPGRADE_ENABLED_TAG));
@@ -463,9 +470,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	public void setOpenTabId(int tabId) {
 		if (isClientSide()) {
-			CompoundNBT data = new CompoundNBT();
-			data.putInt(OPEN_TAB_ID_TAG, tabId);
-			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			sendToServer(data -> data.putInt(OPEN_TAB_ID_TAG, tabId));
 		}
 
 		if (tabId == -1) {
@@ -483,20 +488,22 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return backpackWrapper.getSortBy();
 	}
 
+	private void sendToServer(Consumer<CompoundNBT> addData) {
+		CompoundNBT data = new CompoundNBT();
+		addData.accept(data);
+		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+	}
+
 	public void setSortBy(SortBy sortBy) {
 		if (isClientSide()) {
-			CompoundNBT data = new CompoundNBT();
-			data.putString(SORT_BY_TAG, sortBy.getString());
-			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			sendToServer(data -> data.putString(SORT_BY_TAG, sortBy.getString()));
 		}
 		backpackWrapper.setSortBy(sortBy);
 	}
 
 	public void sort() {
 		if (isClientSide()) {
-			CompoundNBT data = new CompoundNBT();
-			data.putString(ACTION_TAG, "sort");
-			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			sendToServer(data -> data.putString(ACTION_TAG, "sort"));
 			return;
 		}
 
@@ -505,9 +512,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	public void openSettings() {
 		if (isClientSide()) {
-			CompoundNBT data = new CompoundNBT();
-			data.putString(ACTION_TAG, "openSettings");
-			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
 		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SettingsContainer(w, pl, backpackContext),
@@ -544,16 +549,25 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			return;
 		}
 		if (isClientSide()) {
-			CompoundNBT data = new CompoundNBT();
-			data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
-			data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
-			PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+			sendToServer(data -> {
+				data.putBoolean(UPGRADE_ENABLED_TAG, enabled);
+				data.putInt(UPGRADE_SLOT_TAG, upgradeSlot);
+			});
 		}
 		slotWrappers.get(upgradeSlot).setEnabled(enabled);
 	}
 
 	public Optional<UpgradeContainerBase<?, ?>> getOpenContainer() {
 		return backpackWrapper.getOpenTabId().flatMap(id -> upgradeContainers.containsKey(id) ? Optional.of(upgradeContainers.get(id)) : Optional.empty());
+	}
+
+	public void openSlotSettings() {
+		if (isClientSide()) {
+			sendToServer(data -> data.putString(ACTION_TAG, "openSlotSettings"));
+			return;
+		}
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SlotSettingsContainer(w, pl, backpackContext),
+				new TranslationTextComponent(TranslationHelper.translGui("slot_settings.title"))), backpackContext::toBuffer);
 	}
 
 	public class BackpackUpgradeSlot extends SlotItemHandler {

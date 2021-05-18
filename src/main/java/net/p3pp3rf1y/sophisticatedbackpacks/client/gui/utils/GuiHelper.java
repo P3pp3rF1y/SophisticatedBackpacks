@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;

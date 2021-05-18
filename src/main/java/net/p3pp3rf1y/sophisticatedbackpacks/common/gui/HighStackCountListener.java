@@ -26,10 +26,8 @@ public class HighStackCountListener implements IContainerListener {
 
 	@Override
 	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-		if (!(containerToSend.getSlot(slotInd) instanceof CraftingResultSlot)) {
-			if (!player.isChangingQuantityOnly) {
-				PacketHandler.sendToClient(player, new SyncSlotStackMessage(containerToSend.windowId, slotInd, stack));
-			}
+		if (!(containerToSend.getSlot(slotInd) instanceof CraftingResultSlot) && !player.isChangingQuantityOnly) {
+			PacketHandler.sendToClient(player, new SyncSlotStackMessage(containerToSend.windowId, slotInd, stack));
 		}
 	}
 

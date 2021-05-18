@@ -7,7 +7,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
@@ -50,8 +50,8 @@ public class BackpackOpenMessage {
 			} else {
 				openBackpack(player, backpackContext.getSubBackpackContext(msg.subBackpackSlotIndex));
 			}
-		} else if (player.openContainer instanceof SettingsContainer) {
-			BackpackContext backpackContext = ((SettingsContainer) player.openContainer).getBackpackContext();
+		} else if (player.openContainer instanceof IContextAwareContainer) {
+			BackpackContext backpackContext = ((IContextAwareContainer) player.openContainer).getBackpackContext();
 			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);

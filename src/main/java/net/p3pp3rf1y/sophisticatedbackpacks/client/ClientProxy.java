@@ -56,7 +56,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 import java.util.Map;
 
 import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translKeybind;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translKeybind;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
 public class ClientProxy extends CommonProxy {

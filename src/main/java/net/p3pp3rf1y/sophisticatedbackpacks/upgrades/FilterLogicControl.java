@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
 

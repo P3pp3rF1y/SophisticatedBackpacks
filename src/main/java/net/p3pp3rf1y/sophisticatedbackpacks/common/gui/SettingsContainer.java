@@ -11,7 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessa
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
-public class SettingsContainer extends Container implements ISyncedContainer {
+public class SettingsContainer extends Container implements ISyncedContainer, IContextAwareContainer {
 	private final PlayerEntity player;
 	private final BackpackContext backpackContext;
 
@@ -30,6 +30,7 @@ public class SettingsContainer extends Container implements ISyncedContainer {
 		return new SettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
 	}
 
+	@Override
 	public BackpackContext getBackpackContext() {
 		return backpackContext;
 	}

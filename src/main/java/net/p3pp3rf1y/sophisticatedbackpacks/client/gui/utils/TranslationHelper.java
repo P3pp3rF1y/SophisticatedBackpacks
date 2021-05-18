@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.ITextComponent;

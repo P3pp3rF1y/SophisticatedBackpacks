@@ -25,6 +25,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackInventorySlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
@@ -43,7 +45,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.GUI_CONTROLS;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.GUI_CONTROLS;
 
 public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int DISABLED_SLOT_COLOR = -1072689136;
@@ -53,10 +55,10 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int UPGRADE_BOTTOM_HEIGHT = 7;
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
-	private static final int SLOTS_Y_OFFSET = 17;
 	static final int DISABLED_SLOT_X_POS = -1000;
 
 	private static ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> screenFactory = BackpackScreen::new;
+
 	public static void setScreenFactory(ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> factory) {
 		screenFactory = factory;
 	}
@@ -65,7 +67,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		return screenFactory.create(screenContainer, inv, title);
 	}
 
-	private UpgradeSettingsControl upgradeSettingsControl;
+	private SettingsTabControl settingsTabControl;
 	private final int numberOfUpgradeSlots;
 	@Nullable
 	private Button sortButton = null;
@@ -102,7 +104,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		initUpgradeSettingsControl();
 		addUpgradeSwitches();
 		getContainer().setUpgradeChangeListener(c -> {
-			children.remove(upgradeSettingsControl);
+			children.remove(settingsTabControl);
 			craftingUIPart.onCraftingSlotsHidden();
 			initUpgradeSettingsControl();
 			addUpgradeSwitches();
@@ -166,7 +168,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			case BELOW_UPGRADES:
 				return new Position(guiLeft - UPGRADE_INVENTORY_OFFSET - 2, guiTop + getUpgradeTop() + getUpgradeHeightWithoutBottom() + UPGRADE_BOTTOM_HEIGHT + 2);
 			case BELOW_UPGRADE_TABS:
-				return upgradeSettingsControl == null ? new Position(0, 0) : new Position(upgradeSettingsControl.getX() + 2, upgradeSettingsControl.getY() + Math.max(0, upgradeSettingsControl.getHeight() + 2));
+				return settingsTabControl == null ? new Position(0, 0) : new Position(settingsTabControl.getX() + 2, settingsTabControl.getY() + Math.max(0, settingsTabControl.getHeight() + 2));
 			case TITLE_LINE_RIGHT:
 			default:
 				return new Position(guiLeft + xSize - 34, guiTop + 4);
@@ -179,17 +181,17 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void initUpgradeSettingsControl() {
-		upgradeSettingsControl = new UpgradeSettingsControl(new Position(guiLeft + xSize, guiTop + 4), this);
-		addListener(upgradeSettingsControl);
+		settingsTabControl = new UpgradeSettingsTabControl(new Position(guiLeft + xSize, guiTop + 4), this);
+		addListener(settingsTabControl);
 	}
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
-		upgradeSettingsControl.render(matrixStack, mouseX, mouseY, partialTicks);
+		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		upgradeSettingsControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
+		settingsTabControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
 		if (sortButton != null && sortByButton != null) {
 			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -336,21 +338,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void drawInventoryBackground(MatrixStack matrixStack) {
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		minecraft.getTextureManager().bindTexture(getContainer().getBackpackBackgroundProperties().getTextureName());
-		int x = (width - xSize) / 2;
-		int y = (height - ySize) / 2;
-		int inventorySlots = getContainer().getBackpackInventorySlots().size();
-		int slotsOnLine = getContainer().getBackpackBackgroundProperties().getSlotsOnLine();
-		int slotRows = inventorySlots / slotsOnLine;
-		int remainingSlots = inventorySlots % slotsOnLine;
-		int slotsHeight = 18 * (slotRows + (remainingSlots > 0 ? 1 : 0));
-		int halfSlotHeight = slotsHeight / 2;
-		blit(matrixStack, x, y, 0, 0, xSize, SLOTS_Y_OFFSET + halfSlotHeight, 256, 256);
-		int playerInventoryHeight = 97;
-		blit(matrixStack, x, y + SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
-
-		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 7, y + SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
+		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
 	}
 
 	private void drawUpgradeBackground(MatrixStack matrixStack) {
@@ -379,11 +368,11 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		return UPGRADE_BOTTOM_HEIGHT + numberOfUpgradeSlots * UPGRADE_SLOT_HEIGHT + (numberOfUpgradeSlots - 1) * UPGRADE_SPACE_BETWEEN_SLOTS;
 	}
 
-	public UpgradeSettingsControl getUpgradeSettingsControl() {
-		if (upgradeSettingsControl == null) {
-			upgradeSettingsControl = new UpgradeSettingsControl(new Position(guiLeft + xSize, guiTop + 4), this);
+	public SettingsTabControl getUpgradeSettingsControl() {
+		if (settingsTabControl == null) {
+			settingsTabControl = new UpgradeSettingsTabControl(new Position(guiLeft + xSize, guiTop + 4), this);
 		}
-		return upgradeSettingsControl;
+		return settingsTabControl;
 	}
 
 	@Nullable
@@ -467,7 +456,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private boolean hasClickedOutsideOfUpgradeSettings(double mouseX, double mouseY) {
-		return upgradeSettingsControl.getTabRectangles().stream().noneMatch(r -> r.contains((int) mouseX, (int) mouseY));
+		return settingsTabControl.getTabRectangles().stream().noneMatch(r -> r.contains((int) mouseX, (int) mouseY));
 	}
 
 	private boolean hasClickedOutsideOfUpgradeSlots(double mouseX, double mouseY) {
