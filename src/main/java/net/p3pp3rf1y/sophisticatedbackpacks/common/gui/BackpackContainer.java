@@ -15,6 +15,7 @@ import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
@@ -31,13 +32,17 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISlotColorCategory;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -102,6 +107,23 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		});
 
 		backpackWrapper.getUpgradeHandler().runTemporaryBugFixToRemoveInvalidItems(player);
+		sendBackpackSettingsToClient();
+	}
+
+	private void sendBackpackSettingsToClient() {
+		if (player.world.isRemote) {
+			return;
+		}
+
+		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
+			CompoundNBT backpackContents = BackpackStorage.get().getOrCreateBackpackContents(uuid);
+			CompoundNBT settingsContents = new CompoundNBT();
+			INBT settingsNbt = backpackContents.get(BackpackSettingsHandler.SETTINGS_TAG);
+			if (settingsNbt != null) {
+				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
+				PacketHandler.sendToClient((ServerPlayerEntity) player, new BackpackContentsMessage(uuid, settingsContents));
+			}
+		});
 	}
 
 	public IBackpackWrapper getParentBackpackWrapper() {
@@ -515,7 +537,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SettingsContainer(w, pl, backpackContext),
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackSettingsContainer(w, pl, backpackContext),
 				new TranslationTextComponent(TranslationHelper.translGui("settings.title"))), backpackContext::toBuffer);
 	}
 
@@ -568,6 +590,12 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		}
 		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SlotSettingsContainer(w, pl, backpackContext),
 				new TranslationTextComponent(TranslationHelper.translGui("slot_settings.title"))), backpackContext::toBuffer);
+	}
+
+	public List<Integer> getSlotOverlayColors(int slot) {
+		List<Integer> ret = new ArrayList<>();
+		backpackWrapper.getSettingsHandler().getCategoriesThatImplement(ISlotColorCategory.class).forEach(c -> c.getSlotColor(slot).ifPresent(ret::add));
+		return ret;
 	}
 
 	public class BackpackUpgradeSlot extends SlotItemHandler {

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -16,14 +16,30 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsContainer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SLOT_SETTINGS_CONTAINER_TYPE;
 
 public class SlotSettingsContainer extends Container implements IContextAwareContainer, ISyncedContainer {
+	private static final Map<String, ISettingsContainerFactory<?, ?>> SETTINGS_CONTAINER_FACTORIES;
+
+	static {
+		ImmutableMap.Builder<String, ISettingsContainerFactory<?, ?>> builder = new ImmutableMap.Builder<>();
+		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsContainer::new);
+		SETTINGS_CONTAINER_FACTORIES = builder.build();
+	}
+
 	private final PlayerEntity player;
 	private final BackpackContext backpackContext;
 	private final IBackpackWrapper backpackWrapper;
@@ -31,9 +47,11 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 
 	private final List<Slot> backpackInventorySlots = new ArrayList<>();
 
-	public NonNullList<ItemStack> ghostItemStacks = NonNullList.create();
+	public final NonNullList<ItemStack> ghostItemStacks = NonNullList.create();
 
-	public final List<Slot> ghostSlots = Lists.newArrayList();
+	private final Map<String, SettingsContainerBase<?>> settingsContainers = new HashMap<>();
+
+	public final List<Slot> ghostSlots = new ArrayList<>();
 
 	protected SlotSettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(SLOT_SETTINGS_CONTAINER_TYPE.get(), windowId);
@@ -44,6 +62,12 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		addBackpackInventorySlots();
+		addSettingsContainers();
+	}
+
+	private void addSettingsContainers() {
+		BackpackSettingsHandler settingsHandler = backpackWrapper.getSettingsHandler();
+		settingsHandler.getSettingsCategories().forEach((name, category) -> settingsContainers.put(name, instantiateContainer(this, name, category)));
 	}
 
 	private void addBackpackInventorySlots() {
@@ -129,13 +153,16 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 
 	@Override
 	public void handleMessage(CompoundNBT data) {
-
+		if (data.contains("categoryName")) {
+			String categoryName = data.getString("categoryName");
+			if (settingsContainers.containsKey(categoryName)) {
+				settingsContainers.get(categoryName).handleMessage(data);
+			}
+		}
 	}
 
 	@Override
 	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player) {
-		//TODO add delegation to the open settings
-
 		return ItemStack.EMPTY;
 	}
 
@@ -145,6 +172,14 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 
 	public static SlotSettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
 		return new SlotSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
+	}
+
+	public void forEachSettingsContainer(BiConsumer<String, ? super SettingsContainerBase<?>> consumer) {
+		settingsContainers.forEach(consumer);
+	}
+
+	public PlayerEntity getPlayer() {
+		return player;
 	}
 
 	private static class ViewOnlyBackpackInventorySlot extends SlotItemHandler {
@@ -160,5 +195,24 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 
 	public int getNumberOfRows() {
 		return (int) Math.ceil((double) getNumberOfSlots() / getSlotsOnLine());
+	}
+
+	private static <C extends ISettingsCategory, T extends SettingsContainerBase<C>> void addFactory(
+			ImmutableMap.Builder<String, ISettingsContainerFactory<?, ?>> builder, String categoryName, ISettingsContainerFactory<C, T> factory) {
+		builder.put(categoryName, factory);
+	}
+
+	public interface ISettingsContainerFactory<C extends ISettingsCategory, T extends SettingsContainerBase<C>> {
+		T create(SlotSettingsContainer slotSettingsContainer, String categoryName, C category);
+	}
+
+	private static <C extends ISettingsCategory> SettingsContainerBase<C> instantiateContainer(SlotSettingsContainer slotSettingsContainer, String name, C category) {
+		//noinspection unchecked
+		return (SettingsContainerBase<C>) getSettingsContainerFactory(name).create(slotSettingsContainer, name, category);
+	}
+
+	private static <C extends ISettingsCategory, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
+		//noinspection unchecked
+		return (ISettingsContainerFactory<C, T>) SETTINGS_CONTAINER_FACTORIES.get(name);
 	}
 }

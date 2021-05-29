@@ -11,10 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TranslationHelper {
+
+	private static final String TOOLTIP_SUFFIX = ".tooltip";
+
 	private TranslationHelper() {}
 
 	private static final String GUI_PREFIX = "gui.sophisticatedbackpacks.";
 	private static final String GUI_UPGRADE_PREFIX = GUI_PREFIX + "upgrades.";
+	private static final String GUI_SETTINGS_PREFIX = GUI_PREFIX + "settings.";
 	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
 	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + "buttons.";
@@ -24,8 +28,16 @@ public class TranslationHelper {
 		return GUI_UPGRADE_PREFIX + upgradeName;
 	}
 
+	public static String translSettings(String categoryName) {
+		return GUI_SETTINGS_PREFIX + categoryName;
+	}
+
 	public static String translUpgradeTooltip(String upgradeName) {
-		return translUpgrade(upgradeName) + ".tooltip";
+		return translUpgrade(upgradeName) + TOOLTIP_SUFFIX;
+	}
+
+	public static String translSettingsTooltip(String categoryName) {
+		return translSettings(categoryName) + TOOLTIP_SUFFIX;
 	}
 
 	public static ITextComponent translColoredButton(String buttonName, TextFormatting color) {
@@ -41,7 +53,7 @@ public class TranslationHelper {
 	}
 
 	public static String translUpgradeItemTooltip(String upgradeName) {
-		return ITEM_UPGRADE_PREFIX + upgradeName + ".tooltip";
+		return ITEM_UPGRADE_PREFIX + upgradeName + TOOLTIP_SUFFIX;
 	}
 
 	public static List<StringTextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters, TextFormatting... textFormattings) {

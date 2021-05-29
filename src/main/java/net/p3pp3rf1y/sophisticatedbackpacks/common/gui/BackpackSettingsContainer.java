@@ -11,11 +11,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessa
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
-public class SettingsContainer extends Container implements ISyncedContainer, IContextAwareContainer {
+public class BackpackSettingsContainer extends Container implements ISyncedContainer, IContextAwareContainer {
 	private final PlayerEntity player;
 	private final BackpackContext backpackContext;
 
-	protected SettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
+	protected BackpackSettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(SETTINGS_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
 		this.backpackContext = backpackContext;
@@ -26,8 +26,8 @@ public class SettingsContainer extends Container implements ISyncedContainer, IC
 		return true;
 	}
 
-	public static SettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new SettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
+	public static BackpackSettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new BackpackSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
 	}
 
 	@Override

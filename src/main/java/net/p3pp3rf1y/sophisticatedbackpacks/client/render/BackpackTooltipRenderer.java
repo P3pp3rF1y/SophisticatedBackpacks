@@ -24,7 +24,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
@@ -88,7 +88,7 @@ public class BackpackTooltipRenderer {
 	private static void requestContents(ClientPlayerEntity player, IBackpackWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
 			lastRequestTime = player.world.getGameTime();
-			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackContentsMessage(uuid)));
+			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
 		}
 	}
 

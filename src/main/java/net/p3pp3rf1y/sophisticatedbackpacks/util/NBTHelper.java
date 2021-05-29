@@ -21,6 +21,10 @@ public class NBTHelper {
 		return getTagValue(stack, key, CompoundNBT::getInt);
 	}
 
+	public static Optional<Integer> getInt(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getInt);
+	}
+
 	private static <T> Optional<T> getTagValue(ItemStack stack, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		return getTagValue(stack, "", key, getValue);
 	}

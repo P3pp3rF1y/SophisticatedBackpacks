@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -15,9 +16,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
+
+import javax.annotation.Nullable;
 
 public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
-	private SlotSettingsTabControl settingsTabControl;
+	private BackpackSettingsTabControl settingsTabControl;
 
 	public SlotSettingsScreen(SlotSettingsContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -31,7 +35,7 @@ public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
 	protected void init() {
 		super.init();
 
-		settingsTabControl = new SlotSettingsTabControl(new Position(guiLeft + xSize, guiTop + 4));
+		settingsTabControl = new BackpackSettingsTabControl(this, new Position(guiLeft + xSize, guiTop + 4));
 		children.add(settingsTabControl);
 	}
 
@@ -45,6 +49,7 @@ public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
+		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		settingsTabControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
@@ -56,6 +61,8 @@ public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
 		for (int slotId = 0; slotId < container.ghostSlots.size(); ++slotId) {
 			Slot slot = container.ghostSlots.get(slotId);
 			moveItems(matrixStack, slot);
+
+			settingsTabControl.renderSlotOverlays(matrixStack, slot, this::renderSlotOverlay);
 
 			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
 				hoveredSlot = slot;
@@ -92,6 +99,46 @@ public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
 		setBlitOffset(0);
 	}
 
+	@SuppressWarnings("java:S2589") // slot can actually be null despite being marked non null
+	@Override
+	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
+		//noinspection ConstantConditions
+		if (slot != null) {
+			settingsTabControl.handleSlotClick(slot, mouseButton);
+		}
+	}
+
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+		Slot slot = getSelectedSlot(mouseX, mouseY);
+		if (slot != null) {
+			settingsTabControl.handleSlotClick(slot, button);
+		}
+		return true;
+	}
+
+	@Nullable
+	@Override
+	protected Slot getSelectedSlot(double mouseX, double mouseY) {
+		for (int i = 0; i < container.ghostSlots.size(); ++i) {
+			Slot slot = container.ghostSlots.get(i);
+			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+				return slot;
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
+		return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) && hasClickedOutsideOfSettings(mouseX, mouseY);
+	}
+
+	private boolean hasClickedOutsideOfSettings(double mouseX, double mouseY) {
+		return settingsTabControl.getTabRectangles().stream().noneMatch(r -> r.contains((int) mouseX, (int) mouseY));
+	}
+
 	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
 		RenderSystem.disableDepthTest();
 		int xPos = slot.xPos;
@@ -121,7 +168,7 @@ public class SlotSettingsScreen extends ContainerScreen<SlotSettingsContainer> {
 		return new SlotSettingsScreen(slotSettingsContainer, playerInventory, title);
 	}
 
-	public SlotSettingsTabControl getSettingsTabControl() {
+	public BackpackSettingsTabControl getSettingsTabControl() {
 		return settingsTabControl;
 	}
 }

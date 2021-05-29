@@ -67,7 +67,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		return screenFactory.create(screenContainer, inv, title);
 	}
 
-	private SettingsTabControl settingsTabControl;
+	private UpgradeSettingsTabControl settingsTabControl;
 	private final int numberOfUpgradeSlots;
 	@Nullable
 	private Button sortButton = null;
@@ -340,6 +340,16 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private void drawInventoryBackground(MatrixStack matrixStack) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
 		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
+
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);
+		for (int slot = 0; slot < container.getNumberOfSlots(); slot++) {
+			List<Integer> colors = container.getSlotOverlayColors(slot);
+			if (!colors.isEmpty()) {
+				renderSlotOverlay(matrixStack, container.getSlot(slot), colors.get(0) | (80 << 24)); //TODO needs to support more colors later
+			}
+		}
+		RenderSystem.popMatrix();
 	}
 
 	private void drawUpgradeBackground(MatrixStack matrixStack) {
@@ -368,7 +378,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		return UPGRADE_BOTTOM_HEIGHT + numberOfUpgradeSlots * UPGRADE_SLOT_HEIGHT + (numberOfUpgradeSlots - 1) * UPGRADE_SPACE_BETWEEN_SLOTS;
 	}
 
-	public SettingsTabControl getUpgradeSettingsControl() {
+	public UpgradeSettingsTabControl getUpgradeSettingsControl() {
 		if (settingsTabControl == null) {
 			settingsTabControl = new UpgradeSettingsTabControl(new Position(guiLeft + xSize, guiTop + 4), this);
 		}

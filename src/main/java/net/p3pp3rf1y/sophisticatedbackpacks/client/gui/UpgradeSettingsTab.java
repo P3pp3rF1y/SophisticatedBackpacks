@@ -5,7 +5,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ItemButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 
-public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> extends SettingsTab {
+public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> extends SettingsTabBase<BackpackScreen> {
 
 	private final C upgradeContainer;
 

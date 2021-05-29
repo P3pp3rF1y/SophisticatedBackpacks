@@ -12,12 +12,17 @@ import java.util.function.IntConsumer;
 public abstract class ButtonBase extends Widget {
 	protected final int width;
 	protected final int height;
-	protected final IntConsumer onClick;
+
+	protected IntConsumer onClick;
 
 	protected ButtonBase(Position position, Dimension dimension, IntConsumer onClick) {
 		super(position);
 		width = dimension.getWidth();
 		height = dimension.getHeight();
+		this.onClick = onClick;
+	}
+
+	protected void setOnClick(IntConsumer onClick) {
 		this.onClick = onClick;
 	}
 

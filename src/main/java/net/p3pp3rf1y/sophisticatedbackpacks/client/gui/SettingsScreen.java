@@ -14,7 +14,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
@@ -28,10 +28,10 @@ import java.util.function.BooleanSupplier;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager.KEEP_TAB_OPEN;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager.SHIFT_CLICK_INTO_OPEN_TAB_FIRST;
 
-public class SettingsScreen extends ContainerScreen<SettingsContainer> {
+public class SettingsScreen extends ContainerScreen<BackpackSettingsContainer> {
 	private boolean showPlayerSettings = true;
 
-	public SettingsScreen(SettingsContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+	public SettingsScreen(BackpackSettingsContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
 	}
 
@@ -79,7 +79,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	public static SettingsScreen constructScreen(SettingsContainer screenContainer, PlayerInventory playerInventory, ITextComponent title) {
+	public static SettingsScreen constructScreen(BackpackSettingsContainer screenContainer, PlayerInventory playerInventory, ITextComponent title) {
 		return new SettingsScreen(screenContainer, playerInventory, title);
 	}
 

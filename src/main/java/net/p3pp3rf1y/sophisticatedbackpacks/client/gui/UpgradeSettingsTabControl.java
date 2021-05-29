@@ -5,7 +5,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 
 import java.util.Map;
 
-public class UpgradeSettingsTabControl extends SettingsTabControl {
+public class UpgradeSettingsTabControl extends SettingsTabControl<BackpackScreen, UpgradeSettingsTab<?>> {
 	public UpgradeSettingsTabControl(Position position, BackpackScreen screen) {
 		super(position);
 		addChild(new SlotSettingsTab(new Position(x, getTopY()), screen));

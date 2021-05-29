@@ -1,6 +1,7 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import net.minecraft.util.text.TranslationTextComponent;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Tab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ImageButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;

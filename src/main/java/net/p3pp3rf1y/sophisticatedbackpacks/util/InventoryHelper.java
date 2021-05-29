@@ -264,9 +264,13 @@ public class InventoryHelper {
 	}
 
 	static Map<ItemStackKey, Integer> getCompactedStacks(IItemHandler handler) {
+		return getCompactedStacks(handler, new HashSet<>());
+	}
+
+	static Map<ItemStackKey, Integer> getCompactedStacks(IItemHandler handler, Set<Integer> ignoreSlots) {
 		Map<ItemStackKey, Integer> ret = new HashMap<>();
 		iterate(handler, (slot, stack) -> {
-			if (stack.isEmpty()) {
+			if (stack.isEmpty() || ignoreSlots.contains(slot)) {
 				return;
 			}
 			ItemStackKey itemStackKey = new ItemStackKey(stack);

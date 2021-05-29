@@ -13,9 +13,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
-import java.util.function.Predicate;
 
 public abstract class Tab extends CompositeWidget<Widget> {
 	private static final int TEXTURE_WIDTH = 256;
@@ -27,26 +27,30 @@ public abstract class Tab extends CompositeWidget<Widget> {
 	private int height = DEFAULT_HEIGHT;
 	private final List<ITextProperties> tooltip;
 
-	private Predicate<Tab> shouldShowTooltip = t -> true;
-	private Predicate<Tab> shouldRender = t -> true;
+	private BooleanSupplier shouldShowTooltip = () -> true;
+	private BooleanSupplier shouldRender = () -> true;
 
-	protected Tab(Position position, ITextComponent tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+	protected Tab(Position position, List<ITextProperties> tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
 		super(position);
-		this.tooltip = ImmutableList.of(tooltip);
+		this.tooltip = tooltip;
 		addChild(getTabButton.apply(this::onTabIconClicked));
 	}
 
-	public void setHandlers(Predicate<Tab> shouldShowTooltip, Predicate<Tab> shouldRender) {
+	protected Tab(Position position, ITextComponent tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+		this(position, ImmutableList.of(tooltip), getTabButton);
+	}
+
+	public void setHandlers(BooleanSupplier shouldShowTooltip, BooleanSupplier shouldRender) {
 		this.shouldShowTooltip = shouldShowTooltip;
 		this.shouldRender = shouldRender;
 	}
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		if (!shouldRender.test(this)) {
+		if (!shouldRender.getAsBoolean()) {
 			return;
 		}
-		if (isTooltipVisible(mouseX, mouseY)) {
+		if (isClosedTooltipVisible(mouseX, mouseY)) {
 			GuiHelper.setTooltipToRender(tooltip);
 		}
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -84,8 +88,8 @@ public abstract class Tab extends CompositeWidget<Widget> {
 		blit(matrixStack, x - 3, y, TEXTURE_WIDTH / 2, TEXTURE_HEIGHT - height, 3, height);
 	}
 
-	protected boolean isTooltipVisible(int mouseX, int mouseY) {
-		return shouldShowTooltip.test(this) && isMouseOver(mouseX, mouseY);
+	protected boolean isClosedTooltipVisible(int mouseX, int mouseY) {
+		return shouldShowTooltip.getAsBoolean() && isMouseOver(mouseX, mouseY);
 	}
 
 	public int getTopY() {

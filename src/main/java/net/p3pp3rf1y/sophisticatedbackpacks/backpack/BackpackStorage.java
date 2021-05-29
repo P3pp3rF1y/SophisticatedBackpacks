@@ -110,7 +110,15 @@ public class BackpackStorage extends WorldSavedData {
 	}
 
 	public void setBackpackContents(UUID backpackUuid, CompoundNBT contents) {
-		backpackContents.put(backpackUuid, contents);
+		if (!backpackContents.containsKey(backpackUuid)) {
+			backpackContents.put(backpackUuid, contents);
+		} else {
+			CompoundNBT currentContents = backpackContents.get(backpackUuid);
+			for (String key : contents.keySet()) {
+				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
+				currentContents.put(key, contents.get(key));
+			}
+		}
 	}
 
 	public Map<UUID, AccessLogRecord> getAccessLogs() {
