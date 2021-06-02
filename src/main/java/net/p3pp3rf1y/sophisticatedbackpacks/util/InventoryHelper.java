@@ -218,21 +218,6 @@ public class InventoryHelper {
 		}
 	}
 
-	public static void moveBetweenInventories(IItemHandler extractFromHandler, IItemHandler insertIntoHandler, ItemStack filter, int count) {
-		ItemStack toMove = filter.copy();
-		toMove.setCount(count);
-		ItemStack extracted = extractFromInventory(toMove, extractFromHandler, true);
-		if (extracted.isEmpty()) {
-			return;
-		}
-		ItemStack remaining = insertIntoInventory(extracted, insertIntoHandler, true);
-		if (remaining.getCount() == extracted.getCount()) {
-			return;
-		}
-		toMove.setCount(extracted.getCount() - remaining.getCount());
-		insertIntoInventory(extractFromInventory(toMove, extractFromHandler, false), insertIntoHandler, false);
-	}
-
 	public static boolean isEmpty(IItemHandler itemHandler) {
 		int slots = itemHandler.getSlots();
 		for (int slot = 0; slot < slots; slot++) {
