@@ -22,10 +22,10 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.DE
 
 public class ColorToggleButton extends ButtonBase {
 	private static final DyeColor[] DYE_VALUES = DyeColor.values();
-	private static final List<? extends ITextProperties> TOOLTIP = ImmutableList.of(
-			new TranslationTextComponent(TranslationHelper.translButton("toggle_color")),
-			new TranslationTextComponent(TranslationHelper.translButton("toggle_color_detail")).mergeStyle(TextFormatting.GRAY)
-	);
+	private static final List<ITextProperties> TOOLTIP = new ImmutableList.Builder<ITextProperties>()
+			.add(new TranslationTextComponent(TranslationHelper.translButton("toggle_color")))
+			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translButton("toggle_color_detail"), TextFormatting.GRAY))
+			.build();
 
 	private final Supplier<DyeColor> getColor;
 	private final Consumer<DyeColor> setColor;

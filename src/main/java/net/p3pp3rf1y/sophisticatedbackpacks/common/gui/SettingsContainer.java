@@ -15,27 +15,33 @@ import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackBackgroundProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsContainer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SLOT_SETTINGS_CONTAINER_TYPE;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
-public class SlotSettingsContainer extends Container implements IContextAwareContainer, ISyncedContainer {
+public class SettingsContainer extends Container implements IContextAwareContainer, ISyncedContainer {
 	private static final Map<String, ISettingsContainerFactory<?, ?>> SETTINGS_CONTAINER_FACTORIES;
 
 	static {
 		ImmutableMap.Builder<String, ISettingsContainerFactory<?, ?>> builder = new ImmutableMap.Builder<>();
+		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsContainer::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsContainer::new);
 		SETTINGS_CONTAINER_FACTORIES = builder.build();
 	}
@@ -44,17 +50,14 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 	private final BackpackContext backpackContext;
 	private final IBackpackWrapper backpackWrapper;
 	private final BackpackBackgroundProperties backpackBackgroundProperties;
-
 	private final List<Slot> backpackInventorySlots = new ArrayList<>();
-
 	public final NonNullList<ItemStack> ghostItemStacks = NonNullList.create();
-
-	private final Map<String, SettingsContainerBase<?>> settingsContainers = new HashMap<>();
-
+	private final Map<String, SettingsContainerBase<?>> settingsContainers = new LinkedHashMap<>();
 	public final List<Slot> ghostSlots = new ArrayList<>();
+	private CompoundNBT lastSettingsNbt = null;
 
-	protected SlotSettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
-		super(SLOT_SETTINGS_CONTAINER_TYPE.get(), windowId);
+	protected SettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
+		super(SETTINGS_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
 		this.backpackContext = backpackContext;
 
@@ -113,6 +116,37 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 				}
 			}
 		}
+
+		if (lastSettingsNbt == null || !lastSettingsNbt.equals(backpackWrapper.getSettingsHandler().getNbt())) {
+			lastSettingsNbt = backpackWrapper.getSettingsHandler().getNbt().copy();
+			sendBackpackSettingsToClient();
+		}
+	}
+
+	public void detectSettingsChangeAndReload() {
+		if (player.world.isRemote) {
+			backpackWrapper.getContentsUuid().ifPresent(uuid -> {
+				BackpackStorage storage = BackpackStorage.get();
+				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
+					backpackWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid));
+				}
+			});
+		}
+	}
+
+	private void sendBackpackSettingsToClient() {
+		if (player.world.isRemote) {
+			return;
+		}
+
+		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
+			CompoundNBT settingsContents = new CompoundNBT();
+			CompoundNBT settingsNbt = backpackWrapper.getSettingsHandler().getNbt();
+			if (!settingsNbt.isEmpty()) {
+				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
+				PacketHandler.sendToClient((ServerPlayerEntity) player, new BackpackContentsMessage(uuid, settingsContents));
+			}
+		});
 	}
 
 	@Override
@@ -170,8 +204,8 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 		return backpackBackgroundProperties;
 	}
 
-	public static SlotSettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
-		return new SlotSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
+	public static SettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+		return new SettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
 	}
 
 	public void forEachSettingsContainer(BiConsumer<String, ? super SettingsContainerBase<?>> consumer) {
@@ -203,12 +237,12 @@ public class SlotSettingsContainer extends Container implements IContextAwareCon
 	}
 
 	public interface ISettingsContainerFactory<C extends ISettingsCategory, T extends SettingsContainerBase<C>> {
-		T create(SlotSettingsContainer slotSettingsContainer, String categoryName, C category);
+		T create(SettingsContainer settingsContainer, String categoryName, C category);
 	}
 
-	private static <C extends ISettingsCategory> SettingsContainerBase<C> instantiateContainer(SlotSettingsContainer slotSettingsContainer, String name, C category) {
+	private static <C extends ISettingsCategory> SettingsContainerBase<C> instantiateContainer(SettingsContainer settingsContainer, String name, C category) {
 		//noinspection unchecked
-		return (SettingsContainerBase<C>) getSettingsContainerFactory(name).create(slotSettingsContainer, name, category);
+		return (SettingsContainerBase<C>) getSettingsContainerFactory(name).create(settingsContainer, name, category);
 	}
 
 	private static <C extends ISettingsCategory, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {

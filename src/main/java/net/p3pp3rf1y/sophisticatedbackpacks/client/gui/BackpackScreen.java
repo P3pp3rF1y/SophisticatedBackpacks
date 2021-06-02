@@ -73,7 +73,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private Button sortButton = null;
 	@Nullable
 	private ToggleButton<SortBy> sortByButton = null;
-	private Button settingsButton;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
 	private static ICraftingUIPart craftingUIPart = ICraftingUIPart.NOOP;
@@ -86,7 +85,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super(screenContainer, inv, titleIn);
 		ySize = 114 + getContainer().getNumberOfRows() * 18;
 		xSize = getContainer().getBackpackBackgroundProperties().getSlotsOnLine() * 18 + 14;
-		titleX = 22;
 		playerInventoryTitleY = ySize - 94;
 		playerInventoryTitleX = 8 + getContainer().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
 		numberOfUpgradeSlots = getContainer().getNumberOfUpgradeSlots();
@@ -110,8 +108,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			addUpgradeSwitches();
 		});
 		addSortButtons();
-		settingsButton = new Button(new Position(guiLeft + 7, guiTop + 4), ButtonDefinitions.SETTINGS, button -> getContainer().openSettings());
-		addListener(settingsButton);
 	}
 
 	private void addUpgradeSwitches() {
@@ -187,6 +183,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		container.detectSettingsChangeAndReload();
 		renderBackground(matrixStack);
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
@@ -196,7 +193,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		}
-		settingsButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}

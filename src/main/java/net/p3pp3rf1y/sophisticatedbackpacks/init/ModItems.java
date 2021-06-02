@@ -27,11 +27,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SlotSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
@@ -184,11 +182,8 @@ public class ModItems {
 	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
 			() -> IForgeContainerType.create(BackpackContainer::fromBuffer));
 
-	public static final RegistryObject<ContainerType<BackpackSettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
-			() -> IForgeContainerType.create(BackpackSettingsContainer::fromBuffer));
-
-	public static final RegistryObject<ContainerType<SlotSettingsContainer>> SLOT_SETTINGS_CONTAINER_TYPE = CONTAINERS.register("slot_settings",
-			() -> IForgeContainerType.create(SlotSettingsContainer::fromBuffer));
+	public static final RegistryObject<ContainerType<SettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
+			() -> IForgeContainerType.create(SettingsContainer::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.create(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
@@ -253,7 +248,6 @@ public class ModItems {
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
 			ScreenManager.registerFactory(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
-			ScreenManager.registerFactory(SLOT_SETTINGS_CONTAINER_TYPE.get(), SlotSettingsScreen::constructScreen);
 
 			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);

@@ -5,7 +5,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SlotSettingsScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ColorToggleButton;
@@ -34,7 +34,7 @@ public class NoSortSettingsTab extends SettingsTab<NoSortSettingsContainer> {
 	public static final ButtonDefinition UNSELECT_ALL_SLOTS = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, UNSELECT_ALL_SLOTS_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translButton("unselect_all_slots")));
 
-	public NoSortSettingsTab(NoSortSettingsContainer container, Position position, SlotSettingsScreen screen) {
+	public NoSortSettingsTab(NoSortSettingsContainer container, Position position, SettingsScreen screen) {
 		super(container, position, screen, new TranslationTextComponent(translSettings(NoSortSettingsCategory.NAME)),
 				new ImmutableList.Builder<ITextProperties>()
 						.add(new TranslationTextComponent(translSettingsTooltip(NoSortSettingsCategory.NAME)))

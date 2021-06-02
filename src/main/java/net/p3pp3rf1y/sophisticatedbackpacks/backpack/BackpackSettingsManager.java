@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import org.apache.logging.log4j.util.TriConsumer;
 
@@ -28,8 +28,8 @@ public class BackpackSettingsManager {
 		settings.put(KEEP_TAB_OPEN.getName(), KEEP_TAB_OPEN);
 	}
 
-	public static BackpackSetting<?> getBackpackSetting(String settingName) {
-		return settings.get(settingName);
+	public static Optional<BackpackSetting<?>> getBackpackSetting(String settingName) {
+		return Optional.ofNullable(settings.get(settingName));
 	}
 
 	public static <T> T getPlayerSettingOrDefault(PlayerEntity player, BackpackSetting<T> setting) {
@@ -55,27 +55,17 @@ public class BackpackSettingsManager {
 		}
 	}
 
-	public static <T> Optional<T> getItemSetting(ItemStack backpack, BackpackSetting<T> setting) {
-		return getItemSettings(backpack).flatMap(setting::getValue);
-	}
-
-	private static Optional<CompoundNBT> getItemSettings(ItemStack backpack) {
-		return NBTHelper.getCompound(backpack, "settings");
-	}
-
-	public static <T> void setItemSetting(PlayerEntity player, ItemStack backpack, BackpackSetting<T> setting, T value) {
+	public static <T> void setBackpackSetting(PlayerEntity player, BackpackSettingsCategory category, BackpackSetting<T> setting, T value) {
 		T playerSettingValue = getPlayerSetting(player, setting).orElse(setting.getDefaultValue());
-		CompoundNBT settingsNbt = getItemSettings(backpack).orElse(new CompoundNBT());
 		if (playerSettingValue != value) {
-			setting.setValue(settingsNbt, value);
+			category.setSettingValue(setting, value);
 		} else {
-			setting.removeFrom(settingsNbt);
+			category.removeSetting(setting);
 		}
-		NBTHelper.setCompoundNBT(backpack, "settings", settingsNbt);
 	}
 
-	public static <T> T getBackpackSettingValue(PlayerEntity player, ItemStack backpack, BackpackSetting<T> setting) {
-		return getItemSetting(backpack, setting).map(Optional::of).orElse(getPlayerSetting(player, setting)).orElse(setting.getDefaultValue());
+	public static <T> T getBackpackSettingValue(PlayerEntity player, BackpackSettingsCategory category, BackpackSetting<T> setting) {
+		return category.getSettingValue(setting).orElse(getPlayerSetting(player, setting).orElse(setting.getDefaultValue()));
 	}
 
 	public static class BackpackSetting<T> {

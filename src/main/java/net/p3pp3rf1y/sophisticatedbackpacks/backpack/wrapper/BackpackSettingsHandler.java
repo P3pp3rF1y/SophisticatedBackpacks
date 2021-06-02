@@ -2,10 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -16,7 +18,7 @@ public class BackpackSettingsHandler {
 	private final CompoundNBT backpackContentsNbt;
 	private final Runnable markBackpackContentsDirty;
 	private final Map<Class<?>, List<?>> interfaceCategories = new HashMap<>();
-	private final Map<String, ISettingsCategory> settingsCategories = new HashMap<>();
+	private final Map<String, ISettingsCategory> settingsCategories = new LinkedHashMap<>();
 	private final Map<Class<? extends ISettingsCategory>, ISettingsCategory> typeCategories = new HashMap<>();
 
 	public BackpackSettingsHandler(CompoundNBT backpackContentsNbt, Runnable markBackpackContentsDirty) {
@@ -26,6 +28,7 @@ public class BackpackSettingsHandler {
 	}
 
 	private void addSettingsCategories(CompoundNBT settingsNbt) {
+		addSettingsCategory(settingsNbt, BackpackSettingsCategory.NAME, markBackpackContentsDirty, BackpackSettingsCategory::new);
 		addSettingsCategory(settingsNbt, NoSortSettingsCategory.NAME, markBackpackContentsDirty, NoSortSettingsCategory::new);
 	}
 
@@ -69,5 +72,14 @@ public class BackpackSettingsHandler {
 			//noinspection ConstantConditions - checking for whether tag exists just one line up
 			settingsHandler.backpackContentsNbt.put(SETTINGS_TAG, backpackContentsNbt.get(SETTINGS_TAG));
 		}
+	}
+
+	public CompoundNBT getNbt() {
+		return backpackContentsNbt.getCompound(SETTINGS_TAG);
+	}
+
+	public void reloadFrom(CompoundNBT backpackContentsNbt) {
+		CompoundNBT settingsNbt = backpackContentsNbt.getCompound(SETTINGS_TAG);
+		settingsCategories.forEach((categoryName, category) -> category.reloadFrom(settingsNbt.getCompound(categoryName)));
 	}
 }

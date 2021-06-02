@@ -3,9 +3,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.inventory.container.Slot;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsTabControl;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SlotSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsTab;
 
@@ -13,21 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BackpackSettingsTabControl extends SettingsTabControl<SlotSettingsScreen, SettingsTab<?>> {
+public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
 	private static final Map<String, ISettingsTabFactory<?, ?>> SETTINGS_TAB_FACTORIES;
 	private final List<SettingsTab<?>> settingsTabs = new ArrayList<>();
 
 	static {
 		ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder = new ImmutableMap.Builder<>();
+		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsTab::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsTab::new);
 		SETTINGS_TAB_FACTORIES = builder.build();
 	}
 
-	public BackpackSettingsTabControl(SlotSettingsScreen screen, Position position) {
+	public BackpackSettingsTabControl(SettingsScreen screen, Position position) {
 		super(position);
 		addChild(new BackToBackpackTab(new Position(x, getTopY())));
 		screen.getContainer().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
-				addChild(instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen)))));
+				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));
 	}
 
 	private static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> void addFactory(
@@ -50,10 +53,10 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SlotSettingsS
 	}
 
 	public interface ISettingsTabFactory<C extends SettingsContainerBase<?>, T extends SettingsTab<C>> {
-		T create(C container, Position position, SlotSettingsScreen screen);
+		T create(C container, Position position, SettingsScreen screen);
 	}
 
-	private static <C extends SettingsContainerBase<?>> SettingsTab<C> instantiateContainer(String categoryName, C container, Position position, SlotSettingsScreen screen) {
+	private static <C extends SettingsContainerBase<?>> SettingsTab<C> instantiateContainer(String categoryName, C container, Position position, SettingsScreen screen) {
 		//noinspection unchecked
 		return (SettingsTab<C>) getSettingsTabFactory(categoryName).create(container, position, screen);
 	}

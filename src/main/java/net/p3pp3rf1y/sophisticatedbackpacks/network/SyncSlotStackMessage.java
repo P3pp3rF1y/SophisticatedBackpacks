@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 
 import java.util.function.Supplier;
 
@@ -39,7 +39,7 @@ public class SyncSlotStackMessage {
 
 	private static void handleMessage(SyncSlotStackMessage msg) {
 		ClientPlayerEntity player = Minecraft.getInstance().player;
-		if (player == null || !(player.openContainer instanceof BackpackContainer || player.openContainer instanceof SlotSettingsContainer) || player.openContainer.windowId != msg.windowId) {
+		if (player == null || !(player.openContainer instanceof BackpackContainer || player.openContainer instanceof SettingsContainer) || player.openContainer.windowId != msg.windowId) {
 			return;
 		}
 		player.openContainer.putStackInSlot(msg.slotNumber, msg.stack);

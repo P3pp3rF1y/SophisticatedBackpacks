@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort;
 
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
 
 public class NoSortSettingsContainer extends SettingsContainerBase<NoSortSettingsCategory> {
@@ -14,7 +14,7 @@ public class NoSortSettingsContainer extends SettingsContainerBase<NoSortSetting
 	private static final String SELECT_SLOT_TAG = "selectSlot";
 	private static final String COLOR_TAG = "color";
 
-	public NoSortSettingsContainer(SlotSettingsContainer settingsContainer, String categoryName, NoSortSettingsCategory category) {
+	public NoSortSettingsContainer(SettingsContainer settingsContainer, String categoryName, NoSortSettingsCategory category) {
 		super(settingsContainer, categoryName, category);
 	}
 
@@ -43,31 +43,46 @@ public class NoSortSettingsContainer extends SettingsContainerBase<NoSortSetting
 		if (!isSlotSelected(slotNumber)) {
 			return;
 		}
-		getCategory().unselectSlot(slotNumber);
-		sendIntToServer(UNSELECT_SLOT_TAG, slotNumber);
+		if (isServer()) {
+			getCategory().unselectSlot(slotNumber);
+		} else {
+			sendIntToServer(UNSELECT_SLOT_TAG, slotNumber);
+		}
 	}
 
 	public void selectSlot(int slotNumber) {
 		if (isSlotSelected(slotNumber)) {
 			return;
 		}
-		getCategory().selectSlot(slotNumber);
-		sendIntToServer(SELECT_SLOT_TAG, slotNumber);
+		if (isServer()) {
+			getCategory().selectSlot(slotNumber);
+		} else {
+			sendIntToServer(SELECT_SLOT_TAG, slotNumber);
+		}
 	}
 
 	public void unselectAllSlots() {
-		getCategory().unselectAllSlots();
-		sendStringToServer(ACTION_TAG, UNSELECT_ALL_ACTION);
+		if (isServer()) {
+			getCategory().unselectAllSlots();
+		} else {
+			sendStringToServer(ACTION_TAG, UNSELECT_ALL_ACTION);
+		}
 	}
 
 	public void selectAllSlots() {
-		getCategory().selectSlots(0, getSettingsContainer().getNumberOfSlots());
-		sendStringToServer(ACTION_TAG, SELECT_ALL_ACTION);
+		if (isServer()) {
+			getCategory().selectSlots(0, getSettingsContainer().getNumberOfSlots());
+		} else {
+			sendStringToServer(ACTION_TAG, SELECT_ALL_ACTION);
+		}
 	}
 
 	public void setColor(DyeColor color) {
-		getCategory().setColor(color);
-		sendIntToServer(COLOR_TAG, color.getId());
+		if (isServer()) {
+			getCategory().setColor(color);
+		} else {
+			sendIntToServer(COLOR_TAG, color.getId());
+		}
 	}
 
 	public boolean isSlotSelected(int slotNumber) {

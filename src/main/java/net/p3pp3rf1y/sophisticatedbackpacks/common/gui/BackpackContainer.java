@@ -15,7 +15,6 @@ import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.NonNullList;
@@ -43,6 +42,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISlotColorCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -88,6 +88,8 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	private boolean isUpdatingFromPacket = false;
 
+	private CompoundNBT lastSettingsNbt = null;
+
 	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(BACKPACK_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
@@ -107,7 +109,6 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		});
 
 		backpackWrapper.getUpgradeHandler().runTemporaryBugFixToRemoveInvalidItems(player);
-		sendBackpackSettingsToClient();
 	}
 
 	private void sendBackpackSettingsToClient() {
@@ -116,10 +117,9 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		}
 
 		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
-			CompoundNBT backpackContents = BackpackStorage.get().getOrCreateBackpackContents(uuid);
 			CompoundNBT settingsContents = new CompoundNBT();
-			INBT settingsNbt = backpackContents.get(BackpackSettingsHandler.SETTINGS_TAG);
-			if (settingsNbt != null) {
+			CompoundNBT settingsNbt = backpackWrapper.getSettingsHandler().getNbt();
+			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
 				PacketHandler.sendToClient((ServerPlayerEntity) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
@@ -353,7 +353,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	}
 
 	private boolean shouldShiftClickIntoOpenTabFirst() {
-		return BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getBackpack(), BackpackSettingsManager.SHIFT_CLICK_INTO_OPEN_TAB_FIRST);
+		return BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getSettingsHandler().getTypeCategory(BackpackSettingsCategory.class), BackpackSettingsManager.SHIFT_CLICK_INTO_OPEN_TAB_FIRST);
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
@@ -476,9 +476,6 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 				case "openSettings":
 					openSettings();
 					break;
-				case "openSlotSettings":
-					openSlotSettings();
-					break;
 				default:
 			}
 		} else if (data.contains(UPGRADE_ENABLED_TAG)) {
@@ -532,15 +529,6 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		backpackWrapper.sort();
 	}
 
-	public void openSettings() {
-		if (isClientSide()) {
-			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
-			return;
-		}
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackSettingsContainer(w, pl, backpackContext),
-				new TranslationTextComponent(TranslationHelper.translGui("settings.title"))), backpackContext::toBuffer);
-	}
-
 	public boolean isFirstLevelBackpack() {
 		return parentBackpackWrapper == NoopBackpackWrapper.INSTANCE;
 	}
@@ -583,13 +571,13 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return backpackWrapper.getOpenTabId().flatMap(id -> upgradeContainers.containsKey(id) ? Optional.of(upgradeContainers.get(id)) : Optional.empty());
 	}
 
-	public void openSlotSettings() {
+	public void openSettings() {
 		if (isClientSide()) {
-			sendToServer(data -> data.putString(ACTION_TAG, "openSlotSettings"));
+			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SlotSettingsContainer(w, pl, backpackContext),
-				new TranslationTextComponent(TranslationHelper.translGui("slot_settings.title"))), backpackContext::toBuffer);
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new SettingsContainer(w, pl, backpackContext),
+				new TranslationTextComponent(TranslationHelper.translGui("settings.title"))), backpackContext::toBuffer);
 	}
 
 	public List<Integer> getSlotOverlayColors(int slot) {
@@ -735,6 +723,21 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 					}
 				}
 			}
+		}
+		if (lastSettingsNbt == null || !lastSettingsNbt.equals(backpackWrapper.getSettingsHandler().getNbt())) {
+			lastSettingsNbt = backpackWrapper.getSettingsHandler().getNbt().copy();
+			sendBackpackSettingsToClient();
+		}
+	}
+
+	public void detectSettingsChangeAndReload() {
+		if (player.world.isRemote) {
+			backpackWrapper.getContentsUuid().ifPresent(uuid -> {
+				BackpackStorage storage = BackpackStorage.get();
+				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
+					backpackWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid));
+				}
+			});
 		}
 	}
 
@@ -1177,7 +1180,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	}
 
 	private void removeOpenTabIfKeepOff() {
-		if (Boolean.FALSE.equals(BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getBackpack(), BackpackSettingsManager.KEEP_TAB_OPEN))) {
+		if (Boolean.FALSE.equals(BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getSettingsHandler().getTypeCategory(BackpackSettingsCategory.class), BackpackSettingsManager.KEEP_TAB_OPEN))) {
 			backpackWrapper.removeOpenTabId();
 		}
 	}

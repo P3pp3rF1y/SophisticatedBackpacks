@@ -20,7 +20,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SlotSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IFilterSlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -62,9 +61,9 @@ public class SBPPlugin implements IModPlugin {
 			}
 		});
 
-		registration.addGuiContainerHandler(SlotSettingsScreen.class, new IGuiContainerHandler<SlotSettingsScreen>() {
+		registration.addGuiContainerHandler(SettingsScreen.class, new IGuiContainerHandler<SettingsScreen>() {
 			@Override
-			public List<Rectangle2d> getGuiExtraAreas(SlotSettingsScreen gui) {
+			public List<Rectangle2d> getGuiExtraAreas(SettingsScreen gui) {
 				return new ArrayList<>(gui.getSettingsTabControl().getTabRectangles());
 			}
 		});
@@ -101,8 +100,6 @@ public class SBPPlugin implements IModPlugin {
 				//noop
 			}
 		});
-
-		registration.addGuiScreenHandler(SettingsScreen.class, scr -> null);
 	}
 
 	@Override

@@ -15,7 +15,7 @@ public class NoSortSettingsCategory implements ISettingsCategory, ISlotColorCate
 	public static final String NAME = "no_sort";
 	private static final String COLOR_TAG = "color";
 	private static final String SELECTED_SLOTS_TAG = "selectedSlots";
-	private final CompoundNBT categoryNbt;
+	private CompoundNBT categoryNbt;
 	private final Consumer<CompoundNBT> saveNbt;
 	private final Set<Integer> selectedSlots = new HashSet<>();
 	private DyeColor color = DyeColor.LIME;
@@ -93,5 +93,13 @@ public class NoSortSettingsCategory implements ISettingsCategory, ISlotColorCate
 
 	public Set<Integer> getNoSortSlots() {
 		return selectedSlots;
+	}
+
+	@Override
+	public void reloadFrom(CompoundNBT categoryNbt) {
+		this.categoryNbt = categoryNbt;
+		selectedSlots.clear();
+		color = DyeColor.LIME;
+		deserialize();
 	}
 }

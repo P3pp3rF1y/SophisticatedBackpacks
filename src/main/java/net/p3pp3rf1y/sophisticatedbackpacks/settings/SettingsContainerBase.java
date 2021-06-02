@@ -1,18 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 
 import java.util.function.Supplier;
 
 public abstract class SettingsContainerBase<C extends ISettingsCategory> {
-	private final SlotSettingsContainer settingsContainer;
+	private final SettingsContainer settingsContainer;
 	private final String categoryName;
 	private final C category;
 
-	protected SettingsContainerBase(SlotSettingsContainer settingsContainer, String categoryName, C category) {
+	protected SettingsContainerBase(SettingsContainer settingsContainer, String categoryName, C category) {
 		this.settingsContainer = settingsContainer;
 		this.categoryName = categoryName;
 		this.category = category;
@@ -22,7 +22,7 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 		return category;
 	}
 
-	protected SlotSettingsContainer getSettingsContainer() {
+	protected SettingsContainer getSettingsContainer() {
 		return settingsContainer;
 	}
 
@@ -43,12 +43,16 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 	}
 
 	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
-		if (!settingsContainer.getPlayer().world.isRemote) {
+		if (isServer()) {
 			return;
 		}
 		CompoundNBT data = supplyData.get();
 		data.putString("categoryName", categoryName);
 		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
+	}
+
+	protected boolean isServer() {
+		return !settingsContainer.getPlayer().world.isRemote;
 	}
 
 	public abstract void handleMessage(CompoundNBT data);
