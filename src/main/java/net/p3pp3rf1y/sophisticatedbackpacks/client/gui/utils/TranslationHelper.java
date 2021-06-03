@@ -32,6 +32,10 @@ public class TranslationHelper {
 		return GUI_SETTINGS_PREFIX + categoryName;
 	}
 
+	public static String translSettingsButton(String buttonName) {
+		return translSettings("buttons." + buttonName);
+	}
+
 	public static String translUpgradeTooltip(String upgradeName) {
 		return translUpgrade(upgradeName) + TOOLTIP_SUFFIX;
 	}

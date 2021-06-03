@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
+package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -8,6 +8,7 @@ import net.minecraft.item.DyeColor;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -23,8 +24,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.DE
 public class ColorToggleButton extends ButtonBase {
 	private static final DyeColor[] DYE_VALUES = DyeColor.values();
 	private static final List<ITextProperties> TOOLTIP = new ImmutableList.Builder<ITextProperties>()
-			.add(new TranslationTextComponent(TranslationHelper.translButton("toggle_color")))
-			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translButton("toggle_color_detail"), TextFormatting.GRAY))
+			.add(new TranslationTextComponent(TranslationHelper.translSettingsButton("toggle_color")))
+			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translSettingsButton("toggle_color_detail"), null, TextFormatting.GRAY))
 			.build();
 
 	private final Supplier<DyeColor> getColor;

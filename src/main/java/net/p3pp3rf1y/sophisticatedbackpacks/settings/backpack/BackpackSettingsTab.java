@@ -31,35 +31,35 @@ public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> 
 			ImmutableMap.of(
 					true, getButtonStateData(new UV(112, 64), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
-									new TranslationTextComponent(translButton("shift_click_open_tab.on")),
-									new TranslationTextComponent(translButton("shift_click_open_tab.on.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on")),
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on.tooltip")).mergeStyle(TextFormatting.GRAY))
 					),
 					false, getButtonStateData(new UV(96, 128), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
-									new TranslationTextComponent(translButton("shift_click_open_tab.off")),
-									new TranslationTextComponent(translButton("shift_click_open_tab.off.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off")),
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off.tooltip")).mergeStyle(TextFormatting.GRAY))
 					)
 			));
 	private static final ButtonDefinition.Toggle<Boolean> KEEP_TAB_OPEN = createToggleButtonDefinition(
 			ImmutableMap.of(
 					true, getButtonStateData(new UV(112, 112), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
-									new TranslationTextComponent(translButton("keep_tab_open.on")),
-									new TranslationTextComponent(translButton("keep_tab_open.on.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.on")),
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.on.tooltip")).mergeStyle(TextFormatting.GRAY))
 					),
 					false, getButtonStateData(new UV(112, 128), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
-									new TranslationTextComponent(translButton("keep_tab_open.off")),
-									new TranslationTextComponent(translButton("keep_tab_open.off.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.off")),
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.off.tooltip")).mergeStyle(TextFormatting.GRAY))
 					)
 			));
 	private static final List<ITextComponent> PLAYER_CONTEXT_TOOLTIP = ImmutableList.of(
-			new TranslationTextComponent(translButton("context_player.tooltip")),
-			new TranslationTextComponent(translButton("context_player.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
+			new TranslationTextComponent(translSettingsButton("context_player.tooltip")),
+			new TranslationTextComponent(translSettingsButton("context_player.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
 	);
 	private static final List<ITextComponent> BACKPACK_CONTEXT_TOOLTIP = ImmutableList.of(
-			new TranslationTextComponent(translButton("context_backpack.tooltip")),
-			new TranslationTextComponent(translButton("context_backpack.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
+			new TranslationTextComponent(translSettingsButton("context_backpack.tooltip")),
+			new TranslationTextComponent(translSettingsButton("context_backpack.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
 	);
 
 	public BackpackSettingsTab(BackpackSettingsContainer container, Position position, SettingsScreen screen) {
@@ -67,7 +67,7 @@ public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> 
 				ImmutableList.of(new TranslationTextComponent(translSettingsTooltip(BackpackSettingsCategory.NAME))), Collections.emptyList(),
 				onTabIconClicked -> new ImageButton(new Position(position.getX() + 1, position.getY() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
 		addHideableChild(new ContextButton(new Position(x + 3, y + 24), button -> container.toggleContext(),
-				() -> new TranslationTextComponent(container.getContext() == Context.PLAYER ? translButton("context_player") : translButton("context_backpack")),
+				() -> new TranslationTextComponent(container.getContext() == Context.PLAYER ? translSettingsButton("context_player") : translSettingsButton("context_backpack")),
 				() -> container.getContext() == Context.PLAYER ? PLAYER_CONTEXT_TOOLTIP : BACKPACK_CONTEXT_TOOLTIP));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 46), SHIFT_CLICK_INTO_OPEN_TAB, button -> container.toggleShiftClickIntoOpenTab(), container::shouldShiftClickIntoOpenTab));
 		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 46), KEEP_TAB_OPEN, button -> container.toggleKeepTabOpen(), container::shouldKeepTabOpen));
