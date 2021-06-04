@@ -265,7 +265,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 
 	@Override
 	public boolean canTransferFrom(PlayerEntity entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
-		return sourceSlot.canTakeStack(entityPlayer) && sourceSlot.slotNumber < container.inventorySlots.size();
+		return sourceSlot.canTakeStack(entityPlayer) && sourceSlot.slotNumber < container.realInventorySlots.size();
 	}
 
 	@Override

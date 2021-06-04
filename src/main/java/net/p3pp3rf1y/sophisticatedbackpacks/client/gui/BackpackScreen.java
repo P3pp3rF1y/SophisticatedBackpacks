@@ -201,6 +201,19 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
 		renderUpgradeSlots(matrixStack, mouseX, mouseY);
+		renderRealInventorySlots(matrixStack, mouseX, mouseY);
+	}
+
+	private void renderRealInventorySlots(MatrixStack matrixStack, int mouseX, int mouseY) {
+		for (int slotId = 0; slotId < container.realInventorySlots.size(); ++slotId) {
+			Slot slot = container.realInventorySlots.get(slotId);
+			moveItems(matrixStack, slot);
+
+			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+				hoveredSlot = slot;
+				renderSlotOverlay(matrixStack, slot, getSlotColor(slotId));
+			}
+		}
 	}
 
 	private void renderUpgradeSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
@@ -335,14 +348,14 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	private void drawInventoryBackground(MatrixStack matrixStack) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getNumberOfSlots(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
 
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);
-		for (int slot = 0; slot < container.getNumberOfSlots(); slot++) {
-			List<Integer> colors = container.getSlotOverlayColors(slot);
+		for (int slotNumber = 0; slotNumber < container.getNumberOfSlots(); slotNumber++) {
+			List<Integer> colors = container.getSlotOverlayColors(slotNumber);
 			if (!colors.isEmpty()) {
-				renderSlotOverlay(matrixStack, container.getSlot(slot), colors.get(0) | (80 << 24)); //TODO needs to support more colors later
+				renderSlotOverlay(matrixStack, container.getSlot(slotNumber), colors.get(0) | (80 << 24)); //TODO needs to support more colors later
 			}
 		}
 		RenderSystem.popMatrix();
@@ -391,6 +404,13 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			}
 		}
 
+		for (int i = 0; i < container.realInventorySlots.size(); ++i) {
+			Slot slot = container.realInventorySlots.get(i);
+			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+				return slot;
+			}
+		}
+
 		return super.getSelectedSlot(mouseX, mouseY);
 	}
 
@@ -406,6 +426,15 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 				}
 			}
 		}
+
+		if (doubleClick && slot != null && button == 0 && container.canMergeSlot(ItemStack.EMPTY, slot) && hasShiftDown() && !shiftClickedSlot.isEmpty()) {
+			for (Slot slot2 : container.realInventorySlots) {
+				if (slot2 != null && slot2.canTakeStack(minecraft.player) && slot2.getHasStack() && slot2.isSameInventory(slot) && Container.canAddItemToSlot(slot2, shiftClickedSlot, true)) {
+					handleMouseClick(slot2, slot2.slotNumber, button, ClickType.QUICK_MOVE);
+				}
+			}
+		}
+
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
 

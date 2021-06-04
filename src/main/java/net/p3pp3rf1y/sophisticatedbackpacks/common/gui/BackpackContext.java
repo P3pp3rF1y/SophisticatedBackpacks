@@ -46,10 +46,6 @@ public abstract class BackpackContext {
 		return playerEntity.getPosition();
 	}
 
-	public boolean isParentBackpack() {
-		return true;
-	}
-
 	public ITextComponent getDisplayName(PlayerEntity player) {
 		return getBackpackWrapper(player).getBackpack().getDisplayName();
 	}
@@ -208,11 +204,6 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public boolean isParentBackpack() {
-			return false;
-		}
-
-		@Override
 		public ContextType getType() {
 			return ContextType.ITEM_SUB_BACKPACK;
 		}
@@ -323,11 +314,6 @@ public abstract class BackpackContext {
 		@Override
 		public BackpackContext getParentBackpackContext() {
 			return new BackpackContext.Block(pos);
-		}
-
-		@Override
-		public boolean isParentBackpack() {
-			return false;
 		}
 
 		@Override

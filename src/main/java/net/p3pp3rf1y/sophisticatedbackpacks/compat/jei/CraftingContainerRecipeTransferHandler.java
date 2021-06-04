@@ -145,7 +145,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 
 	private Map<Integer, Slot> getInventorySlots(BackpackContainer container) {
 		Map<Integer, Slot> inventorySlots = new HashMap<>();
-		for (Slot slot : container.inventorySlots) {
+		for (Slot slot : container.realInventorySlots) {
 			inventorySlots.put(slot.slotNumber, slot);
 		}
 		return inventorySlots;
