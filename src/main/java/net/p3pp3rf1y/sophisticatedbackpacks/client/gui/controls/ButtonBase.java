@@ -4,20 +4,25 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.util.SoundEvents;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public abstract class ButtonBase extends Widget {
 	protected final int width;
 	protected final int height;
-	protected final Consumer<Integer> onClick;
 
-	protected ButtonBase(Position position, Dimension dimension, Consumer<Integer> onClick) {
+	protected IntConsumer onClick;
+
+	protected ButtonBase(Position position, Dimension dimension, IntConsumer onClick) {
 		super(position);
 		width = dimension.getWidth();
 		height = dimension.getHeight();
+		this.onClick = onClick;
+	}
+
+	protected void setOnClick(IntConsumer onClick) {
 		this.onClick = onClick;
 	}
 

@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -17,6 +17,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.LanguageMap;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,6 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,12 +99,17 @@ public class GuiHelper {
 			return;
 		}
 
-		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY);
+		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 150);
 		tooltipToRender = Collections.emptyList();
 	}
 
 	public static void renderTooltip(Minecraft minecraft, MatrixStack matrixStack, List<? extends ITextProperties> textLines, int mouseX, int mouseY,
 			ITooltipRenderPart additionalRender, @Nullable FontRenderer tooltipRenderFont, ItemStack stack) {
+		renderTooltip(minecraft, matrixStack, textLines, mouseX, mouseY, additionalRender, tooltipRenderFont, stack, 0);
+	}
+
+	public static void renderTooltip(Minecraft minecraft, MatrixStack matrixStack, List<? extends ITextProperties> textLines, int mouseX, int mouseY,
+			ITooltipRenderPart additionalRender, @Nullable FontRenderer tooltipRenderFont, ItemStack stack, int maxTextWidth) {
 
 		FontRenderer font = tooltipRenderFont == null ? minecraft.fontRenderer : tooltipRenderFont;
 
@@ -112,17 +119,40 @@ public class GuiHelper {
 		int tooltipWidth = getMaxLineWidth(textLines, font);
 		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
+		boolean needsWrap = false;
+
+		if (maxTextWidth > 0 && tooltipWidth > maxTextWidth) {
+			tooltipWidth = maxTextWidth;
+			needsWrap = true;
+		}
+
+		if (needsWrap) {
+			int wrappedTooltipWidth = 0;
+			List<ITextProperties> wrappedTextLines = new ArrayList<>();
+			for (ITextProperties textLine : textLines) {
+				List<ITextProperties> wrappedLine = font.getCharacterManager().func_238362_b_(textLine, tooltipWidth, Style.EMPTY);
+
+				for (ITextProperties line : wrappedLine) {
+					int lineWidth = font.getStringPropertyWidth(line);
+					if (lineWidth > wrappedTooltipWidth) { wrappedTooltipWidth = lineWidth; }
+					wrappedTextLines.add(line);
+				}
+			}
+			tooltipWidth = wrappedTooltipWidth;
+			textLines = wrappedTextLines;
+		}
+
 		int leftX = mouseX + 12;
+		if (leftX + tooltipWidth > windowWidth) {
+			leftX -= 28 + tooltipWidth;
+		}
+
 		int topY = mouseY - 12;
 		int tooltipHeight = 8;
 		if (textLines.size() > 1) {
 			tooltipHeight += 2 + (textLines.size() - 1) * 10;
 		}
 		tooltipHeight += additionalRender.getHeight();
-
-		if (leftX + tooltipWidth > windowWidth) {
-			leftX -= 28 + tooltipWidth;
-		}
 
 		if (topY + tooltipHeight + 6 > windowHeight) {
 			topY = windowHeight - tooltipHeight - 6;

@@ -11,7 +11,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
@@ -145,7 +145,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 
 	private Map<Integer, Slot> getInventorySlots(BackpackContainer container) {
 		Map<Integer, Slot> inventorySlots = new HashMap<>();
-		for (Slot slot : container.inventorySlots) {
+		for (Slot slot : container.realInventorySlots) {
 			inventorySlots.put(slot.slotNumber, slot);
 		}
 		return inventorySlots;

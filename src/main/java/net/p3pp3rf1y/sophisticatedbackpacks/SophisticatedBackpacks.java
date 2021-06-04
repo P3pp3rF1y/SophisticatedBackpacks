@@ -42,6 +42,7 @@ public class SophisticatedBackpacks {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(Config.COMMON::onConfigReload);
 		ModLoot.init();
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;

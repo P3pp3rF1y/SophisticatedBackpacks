@@ -12,8 +12,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.getTranslatedLines;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeItemTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.getTranslatedLines;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeItemTooltip;
 
 public abstract class UpgradeItemBase<T extends IUpgradeWrapper> extends ItemBase implements IBackpackUpgradeItem<T> {
 	protected UpgradeItemBase() {

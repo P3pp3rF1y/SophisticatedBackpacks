@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SConfirmTransactionPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
-import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
@@ -69,26 +68,13 @@ public class WindowClickMessage {
 			} else {
 				player.connection.sendPacket(new SConfirmTransactionPacket(msg.windowId, msg.actionNumber, false));
 				player.openContainer.setCanCraft(player, false);
-				NonNullList<ItemStack> stacks = NonNullList.create();
-
-				for (int j = 0; j < player.openContainer.inventorySlots.size(); ++j) {
-					ItemStack itemstack = player.openContainer.inventorySlots.get(j).getStack();
-					stacks.add(itemstack.isEmpty() ? ItemStack.EMPTY : itemstack);
-				}
-
-				PacketHandler.sendToClient(player, new SyncContainerStacksMessage(player.openContainer.windowId, stacks));
+				PacketHandler.sendToClient(player, new SyncContainerStacksMessage(player.openContainer.windowId, player.openContainer.getInventory()));
 				player.connection.sendPacket(new SSetSlotPacket(-1, -1, player.inventory.getItemStack()));
 			}
 		}
 	}
 
 	private static void syncSlotsForSpectator(ServerPlayerEntity player) {
-		NonNullList<ItemStack> stacks = NonNullList.create();
-
-		for (int i = 0; i < player.openContainer.inventorySlots.size(); ++i) {
-			stacks.add(player.openContainer.inventorySlots.get(i).getStack());
-		}
-
-		PacketHandler.sendToClient(player, new SyncContainerStacksMessage(player.openContainer.windowId, stacks));
+		PacketHandler.sendToClient(player, new SyncContainerStacksMessage(player.openContainer.windowId, player.openContainer.getInventory()));
 	}
 }

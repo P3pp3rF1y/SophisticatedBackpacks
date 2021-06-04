@@ -280,6 +280,6 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	}
 
 	private static int getTotalSlotsSize(BackpackContainer container) {
-		return container.upgradeSlots.size() + container.inventorySlots.size();
+		return container.upgradeSlots.size() + container.realInventorySlots.size();
 	}
 }

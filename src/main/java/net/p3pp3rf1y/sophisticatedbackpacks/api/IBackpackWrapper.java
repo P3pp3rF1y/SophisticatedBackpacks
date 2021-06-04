@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
@@ -22,6 +23,8 @@ public interface IBackpackWrapper {
 	IItemHandlerModifiable getInventoryForInputOutput();
 
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
+
+	BackpackSettingsHandler getSettingsHandler();
 
 	BackpackUpgradeHandler getUpgradeHandler();
 

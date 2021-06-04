@@ -21,6 +21,10 @@ public class NBTHelper {
 		return getTagValue(stack, key, CompoundNBT::getInt);
 	}
 
+	public static Optional<Integer> getInt(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getInt);
+	}
+
 	private static <T> Optional<T> getTagValue(ItemStack stack, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		return getTagValue(stack, "", key, getValue);
 	}
@@ -40,6 +44,14 @@ public class NBTHelper {
 			tag = (CompoundNBT) parentTag;
 		}
 
+		return getTagValue(tag, key, getValue);
+	}
+
+	public static Optional<Boolean> getBoolean(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getBoolean);
+	}
+
+	private static <T> Optional<T> getTagValue(CompoundNBT tag, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();
 		}

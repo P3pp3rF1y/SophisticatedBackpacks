@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
@@ -54,6 +55,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private InventoryIOHandler inventoryIOHandler = null;
 	@Nullable
 	private InventoryModificationHandler inventoryModificationHandler = null;
+	@Nullable
+	private BackpackSettingsHandler settingsHandler = null;
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -118,6 +121,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		getContentsUuid().ifPresent(originalUuid -> {
 			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
 			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
+			getSettingsHandler().copyTo(otherBackpackWrapper.getSettingsHandler());
 		});
 
 		if (backpack.hasDisplayName()) {
@@ -127,6 +131,18 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (getClothColor() != DEFAULT_CLOTH_COLOR || getBorderColor() != DEFAULT_BORDER_COLOR) {
 			otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
 		}
+	}
+
+	@Override
+	public BackpackSettingsHandler getSettingsHandler() {
+		if (settingsHandler == null) {
+			if (getContentsUuid().isPresent()) {
+				settingsHandler = new BackpackSettingsHandler(getBackpackContentsNbt(), this::markBackpackContentsDirty);
+			} else {
+				settingsHandler = NoopBackpackWrapper.INSTANCE.getSettingsHandler();
+			}
+		}
+		return settingsHandler;
 	}
 
 	@Override
@@ -171,16 +187,19 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (contentsUuid.isPresent()) {
 			return contentsUuid.get();
 		}
-		clearDummyUpgradeHandler();
+		clearDummyHandlers();
 		UUID newUuid = UUID.randomUUID();
 		setContentsUuid(newUuid);
 		migrateBackpackContents(newUuid);
 		return newUuid;
 	}
 
-	private void clearDummyUpgradeHandler() {
+	private void clearDummyHandlers() {
 		if (upgradeHandler == NoopBackpackWrapper.INSTANCE.getUpgradeHandler()) {
 			upgradeHandler = null;
+		}
+		if (settingsHandler == NoopBackpackWrapper.INSTANCE.getSettingsHandler()) {
+			settingsHandler = null;
 		}
 	}
 
@@ -245,7 +264,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void sort() {
-		InventorySorter.sortHandler(getInventoryHandler(), getComparator());
+		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
 	}
 
 	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {

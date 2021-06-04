@@ -19,6 +19,7 @@ import net.minecraft.util.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IFilterSlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -29,7 +30,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 @JeiPlugin
-public class SBPlugin implements IModPlugin {
+public class SBPPlugin implements IModPlugin {
 	@Override
 	public ResourceLocation getPluginUid() {
 		return new ResourceLocation(SophisticatedBackpacks.MOD_ID, "default");
@@ -57,6 +58,13 @@ public class SBPlugin implements IModPlugin {
 				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
 				gui.getSortButtonsRectangle().ifPresent(ret::add);
 				return ret;
+			}
+		});
+
+		registration.addGuiContainerHandler(SettingsScreen.class, new IGuiContainerHandler<SettingsScreen>() {
+			@Override
+			public List<Rectangle2d> getGuiExtraAreas(SettingsScreen gui) {
+				return new ArrayList<>(gui.getSettingsTabControl().getTabRectangles());
 			}
 		});
 

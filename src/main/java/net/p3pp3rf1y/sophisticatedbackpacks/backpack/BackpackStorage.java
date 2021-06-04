@@ -13,10 +13,13 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -110,7 +113,20 @@ public class BackpackStorage extends WorldSavedData {
 	}
 
 	public void setBackpackContents(UUID backpackUuid, CompoundNBT contents) {
-		backpackContents.put(backpackUuid, contents);
+		if (!backpackContents.containsKey(backpackUuid)) {
+			backpackContents.put(backpackUuid, contents);
+			updatedBackpackSettingsFlags.add(backpackUuid);
+		} else {
+			CompoundNBT currentContents = backpackContents.get(backpackUuid);
+			for (String key : contents.keySet()) {
+				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
+				currentContents.put(key, contents.get(key));
+
+				if (key.equals(BackpackSettingsHandler.SETTINGS_TAG)) {
+					updatedBackpackSettingsFlags.add(backpackUuid);
+				}
+			}
+		}
 	}
 
 	public Map<UUID, AccessLogRecord> getAccessLogs() {
@@ -130,5 +146,11 @@ public class BackpackStorage extends WorldSavedData {
 			markDirty();
 		}
 		return numberRemoved.get();
+	}
+
+	private final Set<UUID> updatedBackpackSettingsFlags = new HashSet<>();
+
+	public boolean removeUpdatedBackpackSettingsFlag(UUID backpackUuid) {
+		return updatedBackpackSettingsFlags.remove(backpackUuid);
 	}
 }

@@ -3,14 +3,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextProperties;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public class Button extends ButtonBase {
 	private final TextureBlitData backgroundTexture;
@@ -20,7 +20,7 @@ public class Button extends ButtonBase {
 	private final TextureBlitData foregroundTexture;
 	private final List<ITextProperties> tooltip;
 
-	public Button(Position position, ButtonDefinition buttonDefinition, Consumer<Integer> onClick) {
+	public Button(Position position, ButtonDefinition buttonDefinition, IntConsumer onClick) {
 		super(position, buttonDefinition.getDimension(), onClick);
 		backgroundTexture = buttonDefinition.getBackgroundTexture();
 		foregroundTexture = buttonDefinition.getForegroundTexture();

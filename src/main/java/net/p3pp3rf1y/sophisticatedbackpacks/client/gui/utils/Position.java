@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
+package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
 public class Position {
 	private final int x;

@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,7 +30,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeItem;
@@ -58,37 +58,34 @@ public class EntityBackpackAdditionHandler {
 			new WeightedElement<>(3, Items.DIAMOND_HELMET),
 			new WeightedElement<>(9, Items.GOLDEN_HELMET),
 			new WeightedElement<>(27, Items.IRON_HELMET),
-			new WeightedElement<>(81, Items.LEATHER_HELMET),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_HELMET)
 	);
 	private static final List<WeightedElement<Item>> LEGGINGS_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, Items.NETHERITE_LEGGINGS),
 			new WeightedElement<>(3, Items.DIAMOND_LEGGINGS),
 			new WeightedElement<>(9, Items.GOLDEN_LEGGINGS),
 			new WeightedElement<>(27, Items.IRON_LEGGINGS),
-			new WeightedElement<>(81, Items.LEATHER_LEGGINGS),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_LEGGINGS)
 	);
 	private static final List<WeightedElement<Item>> BOOTS_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, Items.NETHERITE_BOOTS),
 			new WeightedElement<>(3, Items.DIAMOND_BOOTS),
 			new WeightedElement<>(9, Items.GOLDEN_BOOTS),
 			new WeightedElement<>(27, Items.IRON_BOOTS),
-			new WeightedElement<>(81, Items.LEATHER_BOOTS),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_BOOTS)
 	);
 
 	private static final List<WeightedElement<BackpackAddition>> BACKPACK_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
-					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 3))),
+					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1))),
 			new WeightedElement<>(5, new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3,
-					HELMET_CHANCES.subList(0, 3), LEGGINGS_CHANCES.subList(0, 3), BOOTS_CHANCES.subList(0, 3))),
+					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 2))),
 			new WeightedElement<>(25, new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2,
-					HELMET_CHANCES.subList(1, 4), LEGGINGS_CHANCES.subList(1, 4), BOOTS_CHANCES.subList(1, 4))),
+					HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3), BOOTS_CHANCES.subList(1, 3))),
 			new WeightedElement<>(125, new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1,
-					HELMET_CHANCES.subList(2, 5), LEGGINGS_CHANCES.subList(2, 5), BOOTS_CHANCES.subList(2, 5))),
+					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4), BOOTS_CHANCES.subList(2, 4))),
 			new WeightedElement<>(625, new BackpackAddition(ModItems.BACKPACK.get(), 0,
-					HELMET_CHANCES.subList(3, 6), LEGGINGS_CHANCES.subList(3, 6), BOOTS_CHANCES.subList(3, 6)))
+					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5)))
 	);
 
 	static void addBackpack(MonsterEntity monster) {
@@ -142,6 +139,7 @@ public class EntityBackpackAdditionHandler {
 					}
 				}));
 		monster.setItemStackToSlot(EquipmentSlotType.CHEST, backpack);
+		monster.setDropChance(EquipmentSlotType.CHEST, 0);
 	}
 
 	private static void addJukeboxUpgradeAndRandomDisc(MonsterEntity monster, IBackpackWrapper w) {
@@ -245,14 +243,16 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
-		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
-			event.getDrops().removeIf(drop -> {
-				if (drop.getItem().getItem() instanceof BackpackItem) {
-					removeContentsUuid(drop.getItem());
-					return true;
-				}
-				return false;
-			});
+		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			LivingEntity mob = event.getEntityLiving();
+			ItemStack backpack = mob.getItemStackFromSlot(EquipmentSlotType.CHEST);
+			if (event.getSource().getTrueSource() instanceof PlayerEntity && !(event.getSource().getTrueSource() instanceof FakePlayer) &&
+					Math.max(mob.world.rand.nextFloat() - (float) event.getLootingLevel() * 0.01F, 0.0F) < 0.085F) {
+				ItemEntity backpackEntity = new ItemEntity(mob.world, mob.getPosX(), mob.getPosY(), mob.getPosZ(), backpack);
+				event.getDrops().add(backpackEntity);
+			} else {
+				removeContentsUuid(backpack);
+			}
 		}
 	}
 

@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 public class Label extends Widget {
 	public static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
