@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Rectangle2d;
@@ -57,14 +56,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	static final int DISABLED_SLOT_X_POS = -1000;
 
-	private static ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> screenFactory = BackpackScreen::new;
-
-	public static void setScreenFactory(ScreenManager.IScreenFactory<BackpackContainer, BackpackScreen> factory) {
-		screenFactory = factory;
-	}
-
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent title) {
-		return screenFactory.create(screenContainer, inv, title);
+		return new BackpackScreen(screenContainer, inv, title);
 	}
 
 	private UpgradeSettingsTabControl settingsTabControl;
