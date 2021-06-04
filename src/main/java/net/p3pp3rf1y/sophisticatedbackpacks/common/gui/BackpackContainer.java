@@ -1192,14 +1192,8 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 				Slot destStack = getSlot(i);
 				ItemStack itemstack1 = destStack.getStack();
-				if (itemstack1.isEmpty() && destStack.isItemValid(sourceStack)) {
-					//filter slot logic
-					if (destStack instanceof IFilterSlot) {
-						ItemStack fakeStack = sourceStack.copy();
-						fakeStack.setCount(1);
-						destStack.putStack(fakeStack);
-						//end filter slot logic
-					} else if (toTransfer > destStack.getSlotStackLimit()) {
+				if (itemstack1.isEmpty() && destStack.isItemValid(sourceStack) && !(destStack instanceof IFilterSlot)) {
+					if (toTransfer > destStack.getSlotStackLimit()) {
 						destStack.putStack(sourceStack.split(destStack.getSlotStackLimit()));
 					} else {
 						destStack.putStack(sourceStack.split(toTransfer));
