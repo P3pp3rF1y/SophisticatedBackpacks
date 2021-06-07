@@ -20,7 +20,9 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -37,6 +39,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
@@ -51,6 +54,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperFilterContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.Map;
@@ -169,6 +173,7 @@ public class ClientProxy extends CommonProxy {
 		modBus.addListener(this::loadComplete);
 		modBus.addListener(this::clientSetup);
 		modBus.addListener(this::stitchTextures);
+		modBus.addListener(this::onModelRegistry);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
@@ -184,6 +189,10 @@ public class ClientProxy extends CommonProxy {
 			ModBlockColors.init();
 			registerBackpackLayer();
 		});
+	}
+
+	private void onModelRegistry(ModelRegistryEvent event) {
+		ModelLoaderRegistry.registerLoader(RegistryHelper.getRL("backpack"), BackpackDynamicModel.Loader.INSTANCE);
 	}
 
 	private void clientSetup(FMLClientSetupEvent event) {

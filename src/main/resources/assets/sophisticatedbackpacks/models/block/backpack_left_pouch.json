@@ -1,0 +1,118 @@
+{
+    "credit": "Made with Blockbench",
+    "texture_size": [32, 32],
+    "textures": {
+        "particle": "sophisticatedbackpacks:block/backpack_cloth",
+        "cloth": "sophisticatedbackpacks:block/backpack_cloth",
+        "border": "sophisticatedbackpacks:block/backpack_border",
+        "clips": "sophisticatedbackpacks:block/leather_clips"
+    },
+    "elements": [
+        {
+            "name": "top",
+            "from": [13, 2, 5.5],
+            "to": [15, 6, 10.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [14, 0, 5.5]},
+            "faces": {
+                "north": {"uv": [9, 7.5, 8, 9.5], "texture": "#cloth", "tintindex": 0},
+                "east": {"uv": [11.5, 5, 9, 7], "texture": "#cloth", "tintindex": 0},
+                "south": {"uv": [9, 9.5, 8, 11.5], "texture": "#cloth", "tintindex": 0},
+                "up": {"uv": [9, 5, 8, 7.5], "texture": "#cloth", "tintindex": 0}
+            }
+        },
+        {
+            "name": "trim",
+            "from": [13, 1, 5.5],
+            "to": [15, 2, 10.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [14, -1, 5.5]},
+            "faces": {
+                "north": {"uv": [5, 6, 4, 6.5], "texture": "#border", "tintindex": 1},
+                "east": {"uv": [0.5, 2.5, 3, 3], "texture": "#border", "tintindex": 1},
+                "south": {"uv": [4, 6, 5, 6.5], "texture": "#border", "tintindex": 1}
+            }
+        },
+        {
+            "name": "bottom",
+            "from": [13, 0, 5.5],
+            "to": [15, 1, 10.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [14, -2, 5.5]},
+            "faces": {
+                "north": {"uv": [10, 7.5, 9, 8], "texture": "#cloth", "tintindex": 0},
+                "east": {"uv": [11.5, 7, 9, 7.5], "texture": "#cloth", "tintindex": 0},
+                "south": {"uv": [11, 7.5, 10, 8], "texture": "#cloth", "tintindex": 0},
+                "down": {"uv": [10, 8, 9, 10.5], "texture": "#cloth", "cullface": "down", "tintindex": 0}
+            }
+        },
+        {
+            "name": "clip",
+            "from": [15, 3, 7.5],
+            "to": [15.25, 5, 8.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [16, 3, 7.5]},
+            "faces": {
+                "north": {"uv": [0, 8, 0.5, 9], "texture": "#clips"},
+                "east": {"uv": [0, 8, 0.5, 9], "texture": "#clips"},
+                "south": {"uv": [0, 8, 0.5, 9], "texture": "#clips"},
+                "up": {"uv": [0, 8, 0.5, 8.5], "texture": "#clips"},
+                "down": {"uv": [0, 8.5, 0.5, 9], "texture": "#clips"}
+            }
+        },
+        {
+            "name": "opening",
+            "from": [13, 4, 5.5],
+            "to": [15, 5, 10.5],
+            "faces": {
+                "north": {"uv": [7, 1.5, 6, 2], "texture": "#clips"},
+                "east": {"uv": [6, 0, 8.5, 0.5], "texture": "#clips"},
+                "south": {"uv": [6, 1.5, 7, 2], "texture": "#clips"}
+            }
+        },
+        {
+            "name": "pouch",
+            "from": [13, 7, 5.5],
+            "to": [14, 11, 10.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [13, 5, 5.5]},
+            "faces": {
+                "north": {"uv": [14, 6.5, 13.5, 8.5], "texture": "#cloth", "tintindex": 0},
+                "east": {"uv": [16, 6.5, 13.5, 8.5], "texture": "#cloth", "tintindex": 0},
+                "south": {"uv": [16, 6.5, 15.5, 8.5], "texture": "#cloth", "tintindex": 0},
+                "up": {"uv": [16, 6.5, 13.5, 7], "rotation": 270, "texture": "#cloth", "tintindex": 0},
+                "down": {"uv": [16, 8, 13.5, 8.5], "rotation": 90, "texture": "#cloth", "tintindex": 0}
+            }
+        },
+        {
+            "name": "clip",
+            "from": [14, 8, 7.5],
+            "to": [14.25, 10, 8.5],
+            "rotation": {"angle": 0, "axis": "y", "origin": [15, 8, 7.5]},
+            "faces": {
+                "north": {"uv": [0, 7, 0.5, 8], "texture": "#clips"},
+                "east": {"uv": [0, 7, 0.5, 8], "texture": "#clips"},
+                "south": {"uv": [0, 7, 0.5, 8], "texture": "#clips"},
+                "up": {"uv": [0, 7, 0.5, 7.5], "texture": "#clips"},
+                "down": {"uv": [0, 7.5, 0.5, 8], "texture": "#clips"}
+            }
+        },
+        {
+            "name": "opening",
+            "from": [12, 9, 5.5],
+            "to": [14, 10, 10.5],
+            "faces": {
+                "north": {"uv": [7, 1.5, 6, 2], "texture": "#clips"},
+                "east": {"uv": [6, 0, 8.5, 0.5], "texture": "#clips"},
+                "south": {"uv": [6, 1.5, 7, 2], "texture": "#clips"}
+            }
+        }
+    ],
+    "groups": [
+        {
+            "name": "left-bottom-pouch",
+            "origin": [16, 3, 7.5],
+            "children": [0, 1, 2, 3, 4]
+        },
+        {
+            "name": "left-top-pouch",
+            "origin": [15, 8, 7.5],
+            "children": [5, 6, 7]
+        }
+    ]
+}
