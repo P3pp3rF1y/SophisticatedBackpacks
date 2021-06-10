@@ -10,10 +10,6 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 
 public class CuriosBackpackWrapper implements ICurio {
-	@Override
-	public boolean canEquip(String identifier, LivingEntity livingEntity) {
-		return identifier.equals(SlotTypePreset.BACK.getIdentifier());
-	}
 
 	@Override
 	public boolean canRender(String identifier, int index, LivingEntity livingEntity) {
