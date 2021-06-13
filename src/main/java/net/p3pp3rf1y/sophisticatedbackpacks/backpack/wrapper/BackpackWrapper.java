@@ -57,9 +57,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private InventoryModificationHandler inventoryModificationHandler = null;
 	@Nullable
 	private BackpackSettingsHandler settingsHandler = null;
+	private final BackpackRenderInfo renderInfo;
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
+		renderInfo = new BackpackRenderInfo(backpack);
 	}
 
 	@Override
@@ -347,6 +349,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setContentsUuid(UUID backpackUuid) {
 		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, backpackUuid);
+	}
+
+	@Override
+	public BackpackRenderInfo getRenderInfo() {
+		return renderInfo;
 	}
 
 	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {

@@ -15,10 +15,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
@@ -95,5 +98,20 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		}
 		return super.getCapability(cap, side);
+	}
+
+	public void refreshRenderState() {
+		BlockState state = getBlockState();
+		state = state.with(LEFT_TANK, false);
+		state = state.with(RIGHT_TANK, false);
+		for (TankPosition pos : backpackWrapper.getRenderInfo().getTankRenderInfos().keySet()) {
+			if (pos == TankPosition.LEFT) {
+				state = state.with(LEFT_TANK, true);
+			} else if (pos == TankPosition.RIGHT) {
+				state = state.with(RIGHT_TANK, true);
+			}
+		}
+		world.setBlockState(pos, state);
+		WorldHelper.notifyBlockUpdate(this);
 	}
 }

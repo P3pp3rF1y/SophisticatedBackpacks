@@ -45,13 +45,13 @@ public class PlayerInventoryProvider {
 		}
 	}
 
-	public static Optional<BackpackRenderInfo> getBackpackFromRendered(PlayerEntity player) {
+	public static Optional<RenderInfo> getBackpackFromRendered(PlayerEntity player) {
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
 				if (slotStack.getItem() instanceof BackpackItem) {
-					return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new BackpackRenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+					return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
 				}
 			}
 		}
@@ -78,11 +78,11 @@ public class PlayerInventoryProvider {
 		boolean accept(ItemStack backpack, String inventoryHandlerName, int slot);
 	}
 
-	public static class BackpackRenderInfo {
+	public static class RenderInfo {
 		private final ItemStack backpack;
 		private final boolean isArmorSlot;
 
-		public BackpackRenderInfo(ItemStack backpack, boolean isArmorSlot) {
+		public RenderInfo(ItemStack backpack, boolean isArmorSlot) {
 			this.backpack = backpack;
 			this.isArmorSlot = isArmorSlot;
 		}

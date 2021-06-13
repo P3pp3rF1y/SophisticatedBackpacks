@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -10,6 +11,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncRenderInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
@@ -49,6 +52,8 @@ public abstract class BackpackContext {
 	public ITextComponent getDisplayName(PlayerEntity player) {
 		return getBackpackWrapper(player).getBackpack().getDisplayName();
 	}
+
+	public abstract void onUpgradeChanged(PlayerEntity player);
 
 	public static BackpackContext fromBuffer(PacketBuffer buffer) {
 		ContextType type = ContextType.fromBuffer(buffer);
@@ -126,6 +131,13 @@ public abstract class BackpackContext {
 			return PlayerInventoryProvider.getPlayerInventoryHandler(handlerName)
 					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE))
 					.orElse(NoopBackpackWrapper.INSTANCE);
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			if (!player.world.isRemote && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+				PacketHandler.sendToClient((ServerPlayerEntity) player, new SyncRenderInfoMessage(backpackSlotIndex, getBackpackWrapper(player).getRenderInfo().getNbt()));
+			}
 		}
 
 		@Override
@@ -212,6 +224,11 @@ public abstract class BackpackContext {
 		public ITextComponent getDisplayName(PlayerEntity player) {
 			return new StringTextComponent("... > " + super.getDisplayName(player).getString());
 		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			//noop
+		}
 	}
 
 	public static class Block extends BackpackContext {
@@ -224,6 +241,13 @@ public abstract class BackpackContext {
 		@Override
 		public BlockPos getBackpackPosition(PlayerEntity playerEntity) {
 			return pos;
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			if (!player.world.isRemote) {
+				WorldHelper.getTile(player.world, pos, BackpackTileEntity.class).ifPresent(BackpackTileEntity::refreshRenderState);
+			}
 		}
 
 		@Override
@@ -324,6 +348,11 @@ public abstract class BackpackContext {
 		@Override
 		public ITextComponent getDisplayName(PlayerEntity player) {
 			return new StringTextComponent("... > " + super.getDisplayName(player).getString());
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			//noop
 		}
 	}
 }

@@ -33,6 +33,9 @@ import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
@@ -45,6 +48,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
 
 public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel> {
 	private final Map<ModelPart, IUnbakedModel> modelParts;
@@ -124,6 +130,10 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
 		private final Map<ModelPart, IBakedModel> models;
 
+		private boolean tankLeft;
+		private boolean tankRight;
+		private boolean battery;
+
 		public BakedModel(Map<ModelPart, IBakedModel> models) {
 			this.models = models;
 		}
@@ -131,14 +141,35 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		@Nonnull
 		@Override
 		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
-			List<BakedQuad> ret = new ArrayList<>();
-
-			ret.addAll(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData));
-			ret.addAll(models.get(ModelPart.LEFT_POUCH).getQuads(state, side, rand, extraData));
-			ret.addAll(models.get(ModelPart.RIGHT_POUCH).getQuads(state, side, rand, extraData));
+			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData));
+			if (state == null) {
+				addLeftSide(state, side, rand, extraData, ret, tankLeft);
+				addRightSide(state, side, rand, extraData, ret, tankRight);
+			} else {
+				addLeftSide(state, side, rand, extraData, ret, state.get(LEFT_TANK));
+				addRightSide(state, side, rand, extraData, ret, state.get(RIGHT_TANK));
+			}
 			ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData));
 
 			return ret;
+		}
+
+		private void addRightSide(
+				@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean tankRight) {
+			if (tankRight) {
+				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand, extraData));
+			} else {
+				ret.addAll(models.get(ModelPart.RIGHT_POUCH).getQuads(state, side, rand, extraData));
+			}
+		}
+
+		private void addLeftSide(
+				@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean tankLeft) {
+			if (tankLeft) {
+				ret.addAll(models.get(ModelPart.LEFT_TANK).getQuads(state, side, rand, extraData));
+			} else {
+				ret.addAll(models.get(ModelPart.LEFT_POUCH).getQuads(state, side, rand, extraData));
+			}
 		}
 
 		@Override
@@ -194,6 +225,19 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		@Nullable
 		@Override
 		public IBakedModel getOverrideModel(IBakedModel model, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity livingEntity) {
+			backpackModel.tankRight = false;
+			backpackModel.tankLeft = false;
+			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = backpackWrapper.getRenderInfo().getTankRenderInfos();
+				tankRenderInfos.forEach((pos, info) -> {
+					if (pos == TankPosition.LEFT) {
+						backpackModel.tankLeft = true;
+					} else {
+						backpackModel.tankRight = true;
+					}
+				});
+			});
+
 			return backpackModel;
 		}
 	}

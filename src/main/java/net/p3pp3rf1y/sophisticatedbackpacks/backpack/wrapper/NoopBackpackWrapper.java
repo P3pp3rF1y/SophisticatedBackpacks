@@ -20,6 +20,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(new CompoundNBT(), () -> {});
 	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundNBT(), () -> {}, () -> {});
 	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundNBT(), () -> {}, 64);
+	private final BackpackRenderInfo backpackRenderInfo = new BackpackRenderInfo(backpack);
 
 	private NoopBackpackWrapper() {}
 
@@ -156,5 +157,10 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setContentsUuid(UUID backpackUuid) {
 		//noop
+	}
+
+	@Override
+	public BackpackRenderInfo getRenderInfo() {
+		return backpackRenderInfo;
 	}
 }

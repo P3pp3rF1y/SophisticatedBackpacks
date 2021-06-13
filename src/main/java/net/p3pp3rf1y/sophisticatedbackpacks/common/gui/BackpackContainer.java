@@ -627,6 +627,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 				if (!isFirstLevelBackpack()) {
 					parentBackpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
 				}
+				backpackContext.onUpgradeChanged(player);
 			}
 			wasEmpty = getStack().isEmpty();
 		}

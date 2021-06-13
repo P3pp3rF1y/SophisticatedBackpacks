@@ -8,6 +8,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	public static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
@@ -186,6 +188,33 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			refreshCallBack.run();
 		}
 		onInvalidateUpgradeCaches.run();
+
+		refreshRenderInfo();
+	}
+
+	private void refreshRenderInfo() {
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		renderInfo.reset();
+
+		AtomicBoolean singleTankRight = new AtomicBoolean(false);
+		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
+		int minRightSlot = getSlots() / 2;
+		getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IRenderedTankUpgrade) {
+				tankRenderWrappers.add((IRenderedTankUpgrade) wrapper);
+				if (slot >= minRightSlot) {
+					singleTankRight.set(true);
+				}
+			}
+		});
+
+		TankPosition currentTankPos = tankRenderWrappers.size() == 1 && singleTankRight.get() ? TankPosition.RIGHT : TankPosition.LEFT;
+		for (IRenderedTankUpgrade tankRenderWrapper : tankRenderWrappers) {
+			TankPosition finalCurrentTankPos = currentTankPos;
+			tankRenderWrapper.setTankRenderInfoUpdateCallback(tankRenderInfo -> renderInfo.setTankRenderInfo(finalCurrentTankPos, tankRenderInfo));
+			tankRenderWrapper.forceUpdateTankRenderInfo();
+			currentTankPos = TankPosition.RIGHT;
+		}
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {

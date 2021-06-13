@@ -13,6 +13,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -49,12 +50,15 @@ import javax.annotation.Nullable;
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackBlock extends Block implements IWaterLoggable {
+	public static final BooleanProperty LEFT_TANK = BooleanProperty.create("left_tank");
+	public static final BooleanProperty RIGHT_TANK = BooleanProperty.create("right_tank");
+
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final int BEDROCK_RESISTANCE = 3600000;
 
 	public BackpackBlock() {
 		super(Properties.create(Material.WOOL).notSolid().hardnessAndResistance(0.8F).sound(SoundType.CLOTH));
-		setDefaultState(stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false));
+		setDefaultState(stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false).with(LEFT_TANK, false).with(RIGHT_TANK, false));
 	}
 
 	@Override
@@ -73,7 +77,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED);
+		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK);
 	}
 
 	@Override
@@ -214,4 +218,5 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 			itemEntity.setItem(remainingStack);
 		}
 	}
+
 }
