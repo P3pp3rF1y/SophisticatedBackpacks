@@ -53,7 +53,7 @@ public abstract class BackpackContext {
 		return getBackpackWrapper(player).getBackpack().getDisplayName();
 	}
 
-	public abstract void onUpgradeChanged(PlayerEntity player);
+	public abstract void onUpgradeChanged(PlayerEntity player, int backpackSlotNumber);
 
 	public static BackpackContext fromBuffer(PacketBuffer buffer) {
 		ContextType type = ContextType.fromBuffer(buffer);
@@ -134,9 +134,9 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public void onUpgradeChanged(PlayerEntity player) {
+		public void onUpgradeChanged(PlayerEntity player, int backpackSlotNumber) {
 			if (!player.world.isRemote && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
-				PacketHandler.sendToClient((ServerPlayerEntity) player, new SyncRenderInfoMessage(backpackSlotIndex, getBackpackWrapper(player).getRenderInfo().getNbt()));
+				PacketHandler.sendToClient((ServerPlayerEntity) player, new SyncRenderInfoMessage(backpackSlotNumber, getBackpackWrapper(player).getRenderInfo().getNbt()));
 			}
 		}
 
@@ -226,7 +226,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public void onUpgradeChanged(PlayerEntity player) {
+		public void onUpgradeChanged(PlayerEntity player, int backpackSlotNumber) {
 			//noop
 		}
 	}
@@ -244,7 +244,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public void onUpgradeChanged(PlayerEntity player) {
+		public void onUpgradeChanged(PlayerEntity player, int backpackSlotNumber) {
 			if (!player.world.isRemote) {
 				WorldHelper.getTile(player.world, pos, BackpackTileEntity.class).ifPresent(BackpackTileEntity::refreshRenderState);
 			}
@@ -351,7 +351,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public void onUpgradeChanged(PlayerEntity player) {
+		public void onUpgradeChanged(PlayerEntity player, int backpackSlotNumber) {
 			//noop
 		}
 	}
