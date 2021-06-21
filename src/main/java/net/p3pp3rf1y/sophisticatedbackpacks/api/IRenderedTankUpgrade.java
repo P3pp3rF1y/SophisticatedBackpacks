@@ -3,8 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.api;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public interface IRenderedTankUpgrade {
@@ -50,8 +52,16 @@ public interface IRenderedTankUpgrade {
 			fluidRegistryName = fluid.getRegistryName();
 		}
 
+		public Optional<Fluid> getFluid() {
+			return Optional.ofNullable(ForgeRegistries.FLUIDS.getValue(fluidRegistryName));
+		}
+
 		public void setFillRatio(float fillRatio) {
 			this.fillRatio = fillRatio;
+		}
+
+		public float getFillRatio() {
+			return fillRatio;
 		}
 	}
 }
