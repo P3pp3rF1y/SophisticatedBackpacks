@@ -174,7 +174,6 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			if (tankRight) {
 				if (rightTankRenderInfo != null) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
-
 				}
 				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand, extraData));
 			} else {

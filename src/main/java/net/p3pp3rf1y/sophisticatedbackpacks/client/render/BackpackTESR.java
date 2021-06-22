@@ -27,7 +27,7 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 		BackpackRenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
 		matrixStack.push();
 		matrixStack.translate(0.5, 0, 0.5);
-		matrixStack.rotate(Vector3f.YP.rotationDegrees(facing.getHorizontalAngle()));
+		matrixStack.rotate(Vector3f.YN.rotationDegrees(facing.getHorizontalAngle()));
 		matrixStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
