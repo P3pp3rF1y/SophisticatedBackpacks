@@ -94,19 +94,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		Direction facing = state.get(FACING);
-
-		switch (facing) {
-			case NORTH:
-				return BackpackShapes.NORTH_SHAPE;
-			case SOUTH:
-				return BackpackShapes.SOUTH_SHAPE;
-			case WEST:
-				return BackpackShapes.WEST_SHAPE;
-			case EAST:
-			default:
-				return BackpackShapes.EAST_SHAPE;
-		}
+		return BackpackShapes.getShape(state.get(FACING), state.get(LEFT_TANK), state.get(RIGHT_TANK), false);
 	}
 
 	@Override
