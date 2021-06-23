@@ -21,9 +21,9 @@ public class InceptionUpgradeTab extends UpgradeSettingsTab<InceptionUpgradeCont
 
 	private static final ButtonDefinition.Toggle<InventoryOrder> INVENTORY_ORDER = createToggleButtonDefinition(
 			ImmutableMap.of(
-					InventoryOrder.MAIN_FIRST, GuiHelper.getButtonStateData(new UV(80, 64), Dimension.SQUARE_16, new Position(1, 1),
+					InventoryOrder.MAIN_FIRST, GuiHelper.getButtonStateData(new UV(48, 32), Dimension.SQUARE_16, new Position(1, 1),
 							TranslationHelper.getTranslatedLines(translUpgradeButton("inventory_order_main_first"), null)),
-					InventoryOrder.INCEPTED_FIRST, GuiHelper.getButtonStateData(new UV(96, 64), Dimension.SQUARE_16, new Position(1, 1),
+					InventoryOrder.INCEPTED_FIRST, GuiHelper.getButtonStateData(new UV(64, 32), Dimension.SQUARE_16, new Position(1, 1),
 							TranslationHelper.getTranslatedLines(translUpgradeButton("inventory_order_incepted_first"), null))
 			));
 

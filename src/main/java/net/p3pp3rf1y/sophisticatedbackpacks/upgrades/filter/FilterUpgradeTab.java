@@ -22,9 +22,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationH
 public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeContainer> {
 	private static final ButtonDefinition.Toggle<Direction> DIRECTION = createToggleButtonDefinition(
 			ImmutableMap.of(
-					Direction.BOTH, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("direction_both"), Dimension.SQUARE_16, new Position(1, 1)),
-					Direction.INPUT, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("direction_input"), Dimension.SQUARE_16, new Position(1, 1)),
-					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("direction_output"), Dimension.SQUARE_16, new Position(1, 1))
+					Direction.BOTH, GuiHelper.getButtonStateData(new UV(0, 32), translUpgradeButton("direction_both"), Dimension.SQUARE_16, new Position(1, 1)),
+					Direction.INPUT, GuiHelper.getButtonStateData(new UV(16, 32), translUpgradeButton("direction_input"), Dimension.SQUARE_16, new Position(1, 1)),
+					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(32, 32), translUpgradeButton("direction_output"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;

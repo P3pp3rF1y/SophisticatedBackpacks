@@ -10,7 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 
 public class BackpackSettingsTab extends Tab {
-	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(112, 0), Dimension.SQUARE_16);
+	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(16, 96), Dimension.SQUARE_16);
 	private final BackpackScreen screen;
 
 	public BackpackSettingsTab(Position position, BackpackScreen screen) {

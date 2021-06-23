@@ -21,14 +21,14 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBa
 public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
-					false, GuiHelper.getButtonStateData(new UV(80, 96), translUpgradeButton("do_not_swap_weapon"), Dimension.SQUARE_16, new Position(1, 1)),
-					true, GuiHelper.getButtonStateData(new UV(64, 96), translUpgradeButton("swap_weapon"), Dimension.SQUARE_16, new Position(1, 1))
+					false, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("do_not_swap_weapon"), Dimension.SQUARE_16, new Position(1, 1)),
+					true, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("swap_weapon"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
 	public static final ButtonDefinition.Toggle<Boolean> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
-					false, GuiHelper.getButtonStateData(new UV(112, 96), translUpgradeButton("do_not_swap_tools"), Dimension.SQUARE_16, new Position(1, 1)),
-					true, GuiHelper.getButtonStateData(new UV(96, 96), translUpgradeButton("swap_tools"), Dimension.SQUARE_16, new Position(1, 1))
+					false, GuiHelper.getButtonStateData(new UV(80, 64), translUpgradeButton("do_not_swap_tools"), Dimension.SQUARE_16, new Position(1, 1)),
+					true, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("swap_tools"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
 	protected ToolSwapperFilterControl filterLogicControl;

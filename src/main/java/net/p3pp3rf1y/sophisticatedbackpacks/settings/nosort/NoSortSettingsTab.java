@@ -26,11 +26,11 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationH
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translSettingsTooltip;
 
 public class NoSortSettingsTab extends SettingsTab<NoSortSettingsContainer> {
-	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(64, 112), Dimension.SQUARE_16);
-	private static final TextureBlitData SELECT_ALL_SLOTS_FOREGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, new UV(48, 112), Dimension.SQUARE_16);
+	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(32, 80), Dimension.SQUARE_16);
+	private static final TextureBlitData SELECT_ALL_SLOTS_FOREGROUND = new TextureBlitData(GuiHelper.ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(16, 80), Dimension.SQUARE_16);
 	public static final ButtonDefinition SELECT_ALL_SLOTS = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, SELECT_ALL_SLOTS_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translSettingsButton("select_all_slots")));
-	private static final TextureBlitData UNSELECT_ALL_SLOTS_FOREGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, new UV(80, 112), Dimension.SQUARE_16);
+	private static final TextureBlitData UNSELECT_ALL_SLOTS_FOREGROUND = new TextureBlitData(GuiHelper.ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(48, 80), Dimension.SQUARE_16);
 	public static final ButtonDefinition UNSELECT_ALL_SLOTS = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, UNSELECT_ALL_SLOTS_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translSettingsButton("unselect_all_slots")));
 

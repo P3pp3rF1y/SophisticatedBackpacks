@@ -26,15 +26,15 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.ge
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
 
 public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> {
-	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(96, 80), Dimension.SQUARE_16);
+	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(64, 48), Dimension.SQUARE_16);
 	private static final ButtonDefinition.Toggle<Boolean> SHIFT_CLICK_INTO_OPEN_TAB = createToggleButtonDefinition(
 			ImmutableMap.of(
-					true, getButtonStateData(new UV(112, 64), Dimension.SQUARE_16, new Position(1, 1),
+					true, getButtonStateData(new UV(80, 32), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on")),
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on.tooltip")).mergeStyle(TextFormatting.GRAY))
 					),
-					false, getButtonStateData(new UV(96, 128), Dimension.SQUARE_16, new Position(1, 1),
+					false, getButtonStateData(new UV(64, 96), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off")),
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off.tooltip")).mergeStyle(TextFormatting.GRAY))
@@ -42,12 +42,12 @@ public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> 
 			));
 	private static final ButtonDefinition.Toggle<Boolean> KEEP_TAB_OPEN = createToggleButtonDefinition(
 			ImmutableMap.of(
-					true, getButtonStateData(new UV(112, 112), Dimension.SQUARE_16, new Position(1, 1),
+					true, getButtonStateData(new UV(80, 80), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.on")),
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.on.tooltip")).mergeStyle(TextFormatting.GRAY))
 					),
-					false, getButtonStateData(new UV(112, 128), Dimension.SQUARE_16, new Position(1, 1),
+					false, getButtonStateData(new UV(80, 96), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.off")),
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.off.tooltip")).mergeStyle(TextFormatting.GRAY))

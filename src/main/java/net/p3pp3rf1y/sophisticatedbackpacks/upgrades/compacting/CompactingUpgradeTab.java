@@ -24,8 +24,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBa
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<CompactingUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> COMPACT_UNCRAFTABLE = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
-					false, GuiHelper.getButtonStateData(new UV(112, 80), translUpgradeButton("compact_only_uncraftable"), Dimension.SQUARE_16, new Position(1, 1)),
-					true, GuiHelper.getButtonStateData(new UV(112, 64), translUpgradeButton("compact_anything"), Dimension.SQUARE_16, new Position(1, 1))
+					false, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("compact_only_uncraftable"), Dimension.SQUARE_16, new Position(1, 1)),
+					true, GuiHelper.getButtonStateData(new UV(80, 32), translUpgradeButton("compact_anything"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;

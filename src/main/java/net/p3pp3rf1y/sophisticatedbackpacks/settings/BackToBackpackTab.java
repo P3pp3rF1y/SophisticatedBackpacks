@@ -13,7 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
 public class BackToBackpackTab extends Tab {
-	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(96, 112), Dimension.SQUARE_16);
+	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(64, 80), Dimension.SQUARE_16);
 
 	protected BackToBackpackTab(Position position) {
 		super(position, new TranslationTextComponent(TranslationHelper.translGui("back_to_backpack.tooltip")),
