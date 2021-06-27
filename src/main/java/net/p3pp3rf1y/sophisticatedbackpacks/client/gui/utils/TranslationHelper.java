@@ -17,6 +17,7 @@ public class TranslationHelper {
 	private TranslationHelper() {}
 
 	private static final String GUI_PREFIX = "gui.sophisticatedbackpacks.";
+
 	private static final String GUI_UPGRADE_PREFIX = GUI_PREFIX + "upgrades.";
 	private static final String GUI_SETTINGS_PREFIX = GUI_PREFIX + "settings.";
 	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
@@ -50,6 +51,10 @@ public class TranslationHelper {
 
 	public static String translButton(String buttonName) {
 		return BUTTONS_PREFIX + buttonName;
+	}
+
+	public static ITextComponent translError(String key, Object... params) {
+		return new TranslationTextComponent(GUI_PREFIX + "error." + key, params);
 	}
 
 	public static String translUpgradeButton(String buttonName) {

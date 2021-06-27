@@ -159,12 +159,6 @@ public class GuiHelper {
 			topY = windowHeight - tooltipHeight - 6;
 		}
 
-		matrixStack.push();
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuffer();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		Matrix4f matrix4f = matrixStack.getLast().getMatrix();
-
 		int backgroundColor = GuiUtils.DEFAULT_BACKGROUND_COLOR;
 		int borderColorStart = GuiUtils.DEFAULT_BORDER_COLOR_START;
 		int borderColorEnd = GuiUtils.DEFAULT_BORDER_COLOR_END;
@@ -173,6 +167,29 @@ public class GuiHelper {
 		backgroundColor = colorEvent.getBackground();
 		borderColorStart = colorEvent.getBorderStart();
 		borderColorEnd = colorEvent.getBorderEnd();
+
+		matrixStack.push();
+		Matrix4f matrix4f = matrixStack.getLast().getMatrix();
+		renderTooltipBackground(matrix4f, tooltipWidth, leftX, topY, tooltipHeight, backgroundColor, borderColorStart, borderColorEnd);
+
+		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
+
+		IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+		matrixStack.translate(0.0D, 0.0D, 400.0D);
+
+		topY = writeTooltipLines(textLines, font, (float) leftX, topY, matrix4f, renderTypeBuffer, -1);
+
+		renderTypeBuffer.finish();
+		additionalRender.render(matrixStack, leftX, topY, font);
+		matrixStack.pop();
+
+		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
+	}
+
+	public static void renderTooltipBackground(Matrix4f matrix4f, int tooltipWidth, int leftX, int topY, int tooltipHeight, int backgroundColor, int borderColorStart, int borderColorEnd) {
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder bufferbuilder = tessellator.getBuffer();
+		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
 
 		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, 400, backgroundColor, backgroundColor);
 		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, 400, backgroundColor, backgroundColor);
@@ -193,19 +210,6 @@ public class GuiHelper {
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
 		RenderSystem.enableTexture();
-
-		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
-
-		IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-		matrixStack.translate(0.0D, 0.0D, 400.0D);
-
-		topY = writeTooltipLines(textLines, font, (float) leftX, topY, matrix4f, renderTypeBuffer);
-
-		renderTypeBuffer.finish();
-		additionalRender.render(matrixStack, leftX, topY, font);
-		matrixStack.pop();
-
-		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
 	}
 
 	private static int getMaxLineWidth(List<? extends ITextProperties> tooltips, FontRenderer font) {
@@ -219,11 +223,11 @@ public class GuiHelper {
 		return maxLineWidth;
 	}
 
-	public static int writeTooltipLines(List<? extends ITextProperties> textLines, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer) {
+	public static int writeTooltipLines(List<? extends ITextProperties> textLines, FontRenderer font, float leftX, int topY, Matrix4f matrix4f, IRenderTypeBuffer.Impl renderTypeBuffer, int color) {
 		for (int i = 0; i < textLines.size(); ++i) {
 			ITextProperties line = textLines.get(i);
 			if (line != null) {
-				font.func_238416_a_(LanguageMap.getInstance().func_241870_a(line), leftX, (float) topY, -1, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
+				font.func_238416_a_(LanguageMap.getInstance().func_241870_a(line), leftX, (float) topY, color, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
 			}
 
 			if (i == 0) {

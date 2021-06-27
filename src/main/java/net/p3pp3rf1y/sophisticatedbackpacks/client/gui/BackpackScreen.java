@@ -3,7 +3,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -14,10 +16,14 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -38,6 +44,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
 
 import javax.annotation.Nullable;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -129,6 +136,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		sortButton = new Button(new Position(pos.getX(), pos.getY()), ButtonDefinitions.SORT, button -> {
 			if (button == 0) {
 				getContainer().sort();
+				Minecraft.getInstance().player.sendStatusMessage(new StringTextComponent("Sorted"), true);
 			}
 		});
 		addListener(sortButton);
@@ -187,6 +195,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		}
 		upgradeSwitches.forEach(us -> us.render(matrixStack, mouseX, mouseY, partialTicks));
+		renderErrorOverlay(matrixStack);
 		renderHoveredTooltip(matrixStack, mouseX, mouseY);
 	}
 
@@ -535,5 +544,60 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 				}
 			}
 		}
+	}
+
+	public static final int ERROR_BACKGROUND_COLOR = 0xF0100010;
+	public static final int ERROR_BORDER_COLOR = DyeColor.RED.getColorValue() | 0xFF000000;
+
+	private void renderErrorOverlay(MatrixStack matrixStack) {
+		container.getErrorUpgradeSlotChangeResult().ifPresent(upgradeSlotChangeResult -> upgradeSlotChangeResult.getErrorMessage().ifPresent(overlayErrorMessage -> {
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);
+			upgradeSlotChangeResult.getErrorUpgradeSlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, container.getSlot(container.getFirstUpgradeSlot() + slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
+			upgradeSlotChangeResult.getErrorInventorySlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, container.getSlot(slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
+			RenderSystem.popMatrix();
+
+			renderErrorMessage(matrixStack, overlayErrorMessage);
+		}));
+	}
+
+	private void renderErrorMessage(MatrixStack matrixStack, ITextComponent overlayErrorMessage) {
+		RenderSystem.pushMatrix();
+		RenderSystem.disableDepthTest();
+		RenderSystem.translatef((float) width / 2, guiTop + playerInventoryTitleY + 4, 300F);
+		FontRenderer fontrenderer = Minecraft.getInstance().fontRenderer;
+
+		int tooltipWidth = font.getStringPropertyWidth(overlayErrorMessage);
+
+		List<ITextProperties> wrappedTextLines = new ArrayList<>();
+		int maxLineWidth = 260;
+		if (tooltipWidth > maxLineWidth) {
+			int wrappedTooltipWidth = 0;
+			List<ITextProperties> wrappedLine = font.getCharacterManager().func_238362_b_(overlayErrorMessage, maxLineWidth, Style.EMPTY);
+
+			for (ITextProperties line : wrappedLine) {
+				int lineWidth = font.getStringPropertyWidth(line);
+				if (lineWidth > wrappedTooltipWidth) { wrappedTooltipWidth = lineWidth; }
+				wrappedTextLines.add(line);
+			}
+			tooltipWidth = wrappedTooltipWidth;
+		} else {
+			wrappedTextLines.add(overlayErrorMessage);
+		}
+
+		int tooltipHeight = 8;
+		if (wrappedTextLines.size() > 1) {
+			tooltipHeight += 2 + (wrappedTextLines.size() - 1) * 10;
+		}
+
+		Matrix4f matrix4f = matrixStack.getLast().getMatrix();
+		float leftX = (float) -tooltipWidth / 2;
+
+		GuiHelper.renderTooltipBackground(matrix4f, tooltipWidth, (int) leftX, 0, tooltipHeight, ERROR_BACKGROUND_COLOR, ERROR_BORDER_COLOR, ERROR_BORDER_COLOR);
+		IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+		matrixStack.translate(0.0D, 0.0D, 400.0D);
+		GuiHelper.writeTooltipLines(wrappedTextLines, fontrenderer, leftX, 0, matrix4f, renderTypeBuffer, DyeColor.RED.getColorValue());
+		renderTypeBuffer.finish();
+		RenderSystem.popMatrix();
 	}
 }

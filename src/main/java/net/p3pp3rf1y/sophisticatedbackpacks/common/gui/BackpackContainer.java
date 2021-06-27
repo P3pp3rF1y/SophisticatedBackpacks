@@ -28,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
@@ -93,6 +94,19 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	private boolean isUpdatingFromPacket = false;
 
 	private CompoundNBT lastSettingsNbt = null;
+
+	private long errorResultExpirationTime = 0;
+
+	public Optional<UpgradeSlotChangeResult> getErrorUpgradeSlotChangeResult() {
+		if (errorUpgradeSlotChangeResult != null && player.world.getGameTime() >= errorResultExpirationTime) {
+			errorResultExpirationTime = 0;
+			errorUpgradeSlotChangeResult = null;
+		}
+		return Optional.ofNullable(errorUpgradeSlotChangeResult);
+	}
+
+	@Nullable
+	private UpgradeSlotChangeResult errorUpgradeSlotChangeResult;
 
 	public BackpackContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
 		super(BACKPACK_CONTAINER_TYPE.get(), windowId);
@@ -426,7 +440,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return index >= getFirstUpgradeSlot() && (index - getFirstUpgradeSlot() < getNumberOfUpgradeSlots());
 	}
 
-	private int getFirstUpgradeSlot() {
+	public int getFirstUpgradeSlot() {
 		return getInventorySlotsSize();
 	}
 
@@ -455,11 +469,15 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			BackpackUpgradeSlot upgradeSlot = (BackpackUpgradeSlot) getSlot(slotId);
 			ItemStack cursorStack = player.inventory.getItemStack();
 			ItemStack slotStack = upgradeSlot.getStack();
-			if (!slotStack.isEmpty() && !cursorStack.isEmpty() && upgradeSlot.canSwapStack(player, cursorStack)) {
-				player.inventory.setItemStack(slotStack);
-				upgradeSlot.putStack(cursorStack);
-				upgradeSlot.onSlotChanged();
-				return slotStack.copy();
+			if (!slotStack.isEmpty() && !cursorStack.isEmpty()) {
+				if (upgradeSlot.canSwapStack(player, cursorStack)) {
+					player.inventory.setItemStack(slotStack);
+					upgradeSlot.putStack(cursorStack);
+					upgradeSlot.onSlotChanged();
+					return slotStack.copy();
+				} else {
+					return ItemStack.EMPTY;
+				}
 			}
 		}
 
@@ -634,19 +652,42 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 		@Override
 		public boolean isItemValid(ItemStack stack) {
-			if (stack.isEmpty()) {
+			if (stack.isEmpty() || !(stack.getItem() instanceof IBackpackUpgradeItem)) {
 				return false;
 			}
-			return stack.getItem() instanceof IBackpackUpgradeItem && ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, isFirstLevelBackpack());
+			UpgradeSlotChangeResult result = ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, isFirstLevelBackpack());
+			updateSlotChangeError(result);
+
+			return result.isSuccessful();
+		}
+
+		private void updateSlotChangeError(UpgradeSlotChangeResult result) {
+			if (player.world.isRemote && !result.isSuccessful()) {
+				errorUpgradeSlotChangeResult = result;
+				errorResultExpirationTime = player.world.getGameTime() + 60;
+			}
 		}
 
 		@Override
-		public boolean canTakeStack(PlayerEntity playerIn) {
-			return super.canTakeStack(playerIn) && ((IBackpackUpgradeItem<?>) getStack().getItem()).canRemoveUpgradeFrom(backpackWrapper);
+		public boolean canTakeStack(PlayerEntity player) {
+			boolean ret = super.canTakeStack(player);
+			if (!ret) {
+				return false;
+			}
+
+			UpgradeSlotChangeResult result = ((IBackpackUpgradeItem<?>) getStack().getItem()).canRemoveUpgradeFrom(backpackWrapper);
+			updateSlotChangeError(result);
+			return result.isSuccessful();
 		}
 
 		public boolean canSwapStack(PlayerEntity player, ItemStack stackToPut) {
-			return super.canTakeStack(player) && ((IBackpackUpgradeItem<?>) getStack().getItem()).canSwapUpgradeFor(stackToPut, backpackWrapper);
+			boolean ret = super.canTakeStack(player);
+			if (!ret) {
+				return false;
+			}
+			UpgradeSlotChangeResult result = ((IBackpackUpgradeItem<?>) getStack().getItem()).canSwapUpgradeFor(stackToPut, backpackWrapper);
+			updateSlotChangeError(result);
+			return result.isSuccessful();
 		}
 
 		private boolean updateWrappersAndCheckForReloadNeeded() {

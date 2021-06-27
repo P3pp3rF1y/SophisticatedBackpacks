@@ -1,10 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translError;
 
 public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrapper> {
 	public static final UpgradeType<InceptionUpgradeWrapper> TYPE = new UpgradeType<>(InceptionUpgradeWrapper::new);
@@ -15,12 +22,31 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	}
 
 	@Override
-	public boolean canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
-		return firstLevelBackpack && !backpackWrapper.getUpgradeHandler().hasUpgrade(TYPE);
+	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+		if (!firstLevelBackpack) {
+			return new UpgradeSlotChangeResult.Fail(translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet());
+		}
+
+		Set<Integer> errorUpgradeSlots = new HashSet<>();
+		backpackWrapper.getUpgradeHandler().getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof InceptionUpgradeWrapper) {
+				errorUpgradeSlots.add(slot);
+			}
+		});
+
+		if (!errorUpgradeSlots.isEmpty()) {
+			return new UpgradeSlotChangeResult.Fail(translError("add.inception_exists"), errorUpgradeSlots, Collections.emptySet());
+		}
+
+		return new UpgradeSlotChangeResult.Success();
 	}
 
 	@Override
-	public boolean canRemoveUpgradeFrom(IBackpackWrapper backpackWrapper) {
-		return !InventoryHelper.hasItem(backpackWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
+	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IBackpackWrapper backpackWrapper) {
+		Set<Integer> slots = InventoryHelper.getItemSlots(backpackWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
+		if (!slots.isEmpty()) {
+			return new UpgradeSlotChangeResult.Fail(translError("remove.inception_sub_backpack"), Collections.emptySet(), slots);
+		}
+		return new UpgradeSlotChangeResult.Success();
 	}
 }
