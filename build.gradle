@@ -118,7 +118,7 @@ jar {
                     "Specification-Vendor"    : "p3pp3rf1y",
                     "Specification-Version"   : "1",
                     "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${archiveVersion}",
+                    "Implementation-Version"  : "${project.version}",
                     "Implementation-Vendor"   : "p3pp3rf1y",
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
