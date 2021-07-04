@@ -46,7 +46,7 @@ public class PacketHandler {
 		registerMessage(SoundStopNotificationMessage.class, SoundStopNotificationMessage::encode, SoundStopNotificationMessage::decode, SoundStopNotificationMessage::onMessage);
 		registerMessage(BlockToolSwapMessage.class, BlockToolSwapMessage::encode, BlockToolSwapMessage::decode, BlockToolSwapMessage::onMessage);
 		registerMessage(EntityToolSwapMessage.class, EntityToolSwapMessage::encode, EntityToolSwapMessage::decode, EntityToolSwapMessage::onMessage);
-		registerMessage(SyncRenderInfoMessage.class, SyncRenderInfoMessage::encode, SyncRenderInfoMessage::decode, SyncRenderInfoMessage::onMessage);
+		registerMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::encode, SyncClientInfoMessage::decode, SyncClientInfoMessage::onMessage);
 	}
 
 	@SuppressWarnings("SameParameterValue")

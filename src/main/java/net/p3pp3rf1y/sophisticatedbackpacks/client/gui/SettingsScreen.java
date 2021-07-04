@@ -42,7 +42,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), getContainer().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft, container.getNumberOfRows());
 	}
 
 	@Override

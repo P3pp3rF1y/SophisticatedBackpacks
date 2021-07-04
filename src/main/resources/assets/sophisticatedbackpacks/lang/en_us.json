@@ -209,6 +209,7 @@
     "gui.sophisticatedbackpacks.error.remove.inception_sub_backpack": "There's one or more backpacks in the backpack",
     "gui.sophisticatedbackpacks.error.add.tool_swapper_exists": "There's already Tool Swapper Upgrade in another upgrade slot",
     "gui.sophisticatedbackpacks.error.remove.stack_low_multiplier": "There's at least one slot that requires multiplier higher than %s",
+    "gui.sophisticatedbackpacks.error.add.needs_occupied_inventory_slots": "There's an item in at least one of the last %s slots needed for %s",
     "commands.sophisticatedbackpacks.list.header": "Backpack Name, Colors, Last Open By, Last Open On",
     "commands.sophisticatedbackpacks.list.cloth_color": "Cloth",
     "commands.sophisticatedbackpacks.list.trim_color": "Trim",

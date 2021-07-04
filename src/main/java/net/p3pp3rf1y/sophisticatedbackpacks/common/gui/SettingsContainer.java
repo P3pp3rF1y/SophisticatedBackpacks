@@ -62,7 +62,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		this.backpackContext = backpackContext;
 
 		backpackWrapper = backpackContext.getBackpackWrapper(player);
-		backpackBackgroundProperties = getNumberOfSlots() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
+		backpackBackgroundProperties = getNumberOfSlots() + backpackWrapper.getColumnsTaken() * backpackWrapper.getNumberOfSlotRows() <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
 		addBackpackInventorySlots();
 		addSettingsContainers();
@@ -163,8 +163,8 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		return ghostSlots.get(slotId);
 	}
 
-	private int getSlotsOnLine() {
-		return backpackBackgroundProperties.getSlotsOnLine();
+	public int getSlotsOnLine() {
+		return backpackBackgroundProperties.getSlotsOnLine() - backpackWrapper.getColumnsTaken();
 	}
 
 	public int getNumberOfSlots() {
@@ -228,7 +228,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	public int getNumberOfRows() {
-		return (int) Math.ceil((double) getNumberOfSlots() / getSlotsOnLine());
+		return backpackWrapper.getNumberOfSlotRows();
 	}
 
 	private static <C extends ISettingsCategory, T extends SettingsContainerBase<C>> void addFactory(

@@ -163,4 +163,14 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public BackpackRenderInfo getRenderInfo() {
 		return backpackRenderInfo;
 	}
+
+	@Override
+	public void setColumnsTaken(int columnsTaken) {
+		//noop
+	}
+
+	@Override
+	public int getColumnsTaken() {
+		return 0;
+	}
 }

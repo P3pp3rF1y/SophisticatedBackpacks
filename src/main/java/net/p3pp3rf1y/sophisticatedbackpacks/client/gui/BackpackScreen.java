@@ -350,7 +350,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	private void drawInventoryBackground(MatrixStack matrixStack) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getNumberOfSlots(), backpackBackgroundProperties.getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft);
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getNumberOfSlots(), getContainer().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft, container.getNumberOfRows());
 
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);

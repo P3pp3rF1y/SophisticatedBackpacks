@@ -70,4 +70,12 @@ public interface IBackpackWrapper {
 	void setContentsUuid(UUID backpackUuid);
 
 	BackpackRenderInfo getRenderInfo();
+
+	void setColumnsTaken(int columnsTaken);
+
+	int getColumnsTaken();
+
+	default int getNumberOfSlotRows() {
+		return 0;
+	}
 }

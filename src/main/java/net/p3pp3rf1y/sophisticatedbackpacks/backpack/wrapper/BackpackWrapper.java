@@ -43,6 +43,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
 	private static final String LOOT_TABLE_NAME_TAG = "lootTableName";
 	private static final String LOOT_PERCENTAGE_TAG = "lootPercentage";
+	private static final String COLUMNS_TAKEN_TAG = "columnsTaken";
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
@@ -81,7 +82,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
-			handler = new BackpackInventoryHandler(getNumberOfInventorySlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
+			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
+					this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
 		}
 		return handler;
 	}
@@ -96,6 +98,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 		int itemInventorySlots = ((BackpackItem) backpack.getItem()).getNumberOfSlots();
 		setNumberOfInventorySlots(itemInventorySlots);
 		return itemInventorySlots;
+	}
+
+	@Override
+	public int getNumberOfSlotRows() {
+		int itemInventorySlots = getNumberOfInventorySlots();
+		return (int) Math.ceil(itemInventorySlots <= 81 ? (double) itemInventorySlots / 9 : (double) itemInventorySlots / 12);
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
@@ -354,6 +362,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackRenderInfo getRenderInfo() {
 		return renderInfo;
+	}
+
+	@Override
+	public void setColumnsTaken(int columnsTaken) {
+		NBTHelper.setInteger(backpack, COLUMNS_TAKEN_TAG, columnsTaken);
+	}
+
+	@Override
+	public int getColumnsTaken() {
+		return NBTHelper.getInt(backpack, COLUMNS_TAKEN_TAG).orElse(0);
 	}
 
 	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {

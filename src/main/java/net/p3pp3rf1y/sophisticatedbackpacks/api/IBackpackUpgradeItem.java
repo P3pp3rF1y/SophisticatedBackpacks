@@ -16,4 +16,8 @@ public interface IBackpackUpgradeItem<T extends IUpgradeWrapper> {
 	default UpgradeSlotChangeResult canSwapUpgradeFor(ItemStack upgradeStackToPut, IBackpackWrapper backpackWrapper) {
 		return canRemoveUpgradeFrom(backpackWrapper);
 	}
+
+	default int getInventoryColumnsTaken() {
+		return 0;
+	}
 }
