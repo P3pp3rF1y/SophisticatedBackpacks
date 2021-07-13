@@ -133,14 +133,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
 			getSettingsHandler().copyTo(otherBackpackWrapper.getSettingsHandler());
 		});
-
-		if (backpack.hasDisplayName()) {
-			otherBackpackWrapper.getBackpack().setDisplayName(backpack.getDisplayName());
-		}
-
-		if (getClothColor() != DEFAULT_CLOTH_COLOR || getBorderColor() != DEFAULT_BORDER_COLOR) {
-			otherBackpackWrapper.setColors(getClothColor(), getBorderColor());
-		}
 	}
 
 	@Override
@@ -313,7 +305,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
-		ItemStack backpackCopy = new ItemStack(originalWrapper.getBackpack().getItem());
+		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
+		backpackCopy.removeChildTag(CONTENTS_UUID_TAG);
 		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
