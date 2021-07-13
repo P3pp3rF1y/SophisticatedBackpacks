@@ -180,6 +180,8 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.do_not_swap_weapon": "Do Not Swap Weapon",
     "gui.sophisticatedbackpacks.upgrades.buttons.swap_tools": "Swap Tools",
     "gui.sophisticatedbackpacks.upgrades.buttons.do_not_swap_tools": "Do Not Swap Tools",
+    "gui.sophisticatedbackpacks.upgrades.slots.tank_output.tooltip": "Output",
+    "gui.sophisticatedbackpacks.upgrades.slots.tank_input.tooltip": "Input",
     "gui.sophisticatedbackpacks.buttons.sort_by_name": "By Name",
     "gui.sophisticatedbackpacks.buttons.sort_by_count": "By Count",
     "gui.sophisticatedbackpacks.buttons.sort_by_tags": "By Tags",

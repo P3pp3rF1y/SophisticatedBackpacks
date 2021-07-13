@@ -30,6 +30,10 @@ public class TranslationHelper {
 		return new TranslationTextComponent(translUpgradeKey(upgradeName));
 	}
 
+	public static ITextComponent translUpgradeSlotTooltip(String tooltipName) {
+		return new TranslationTextComponent(GUI_UPGRADE_PREFIX + "slots." + tooltipName + TOOLTIP_SUFFIX);
+	}
+
 	public static String translUpgradeKey(String upgradeName) {
 		return GUI_UPGRADE_PREFIX + upgradeName;
 	}
