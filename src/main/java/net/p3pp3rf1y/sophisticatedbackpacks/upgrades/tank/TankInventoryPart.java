@@ -68,28 +68,28 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		int screenY = screen.getGuiTop() + pos.getY() + 1;
 		if (mouseX >= screenX && mouseX < screenX + 16 && mouseY >= screenY && mouseY < screenY + height - 2) {
 			List<ITextProperties> tooltip = new ArrayList<>();
-			tooltip.add(contents.getDisplayName());
+			if (!contents.isEmpty()) {
+				tooltip.add(contents.getDisplayName());
+			}
 			tooltip.add(new TranslationTextComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity)));
 			GuiHelper.setTooltipToRender(tooltip);
 		}
-
-		//TODO add empty tooltip that just shows capacity
 	}
 
 	private void renderFluid(MatrixStack matrixStack, int mouseX, int mouseY) {
 		FluidStack contents = container.getContents();
 
+		int capacity = container.getTankCapacity();
 		if (contents.isEmpty()) {
-			renderTooltip(mouseX, mouseY, FluidStack.EMPTY, 0);
+			renderTooltip(mouseX, mouseY, FluidStack.EMPTY, capacity);
 			return;
 		}
 
 		Fluid fluid = contents.getFluid();
-		int capacity = container.getTankCapacity();
 		int fill = contents.getAmount();
 		int displayLevel = (int) ((height - 2) * ((float) fill / capacity));
 
-		ResourceLocation texture = fluid.getAttributes().getStillTexture(new FluidStack(fluid, 5000));
+		ResourceLocation texture = fluid.getAttributes().getStillTexture(contents);
 		TextureAtlasSprite still = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(texture);
 		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.getX() + 10, pos.getY() + 1 + height - 2 - displayLevel, displayLevel);
 		renderTooltip(mouseX, mouseY, contents, capacity);
