@@ -9,9 +9,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 public class BackpackGuiHelper {
-	private BackpackGuiHelper() {}
 
-	private static final int SLOTS_Y_OFFSET = 17;
+	private BackpackGuiHelper() {}
 
 	public static void renderBackpackBackground(Position position, MatrixStack matrixStack, int inventorySlots, int slotsOnLine, ResourceLocation textureName, int xSize, Minecraft minecraft, int numberOfSlotRows) {
 		int x = position.getX();
@@ -22,10 +21,10 @@ public class BackpackGuiHelper {
 		int remainingSlots = inventorySlots % slotsOnLine;
 		int slotsHeight = 18 * numberOfSlotRows;
 		int halfSlotHeight = slotsHeight / 2;
-		AbstractGui.blit(matrixStack, x, y, 0, 0, xSize, SLOTS_Y_OFFSET + halfSlotHeight, 256, 256);
+		AbstractGui.blit(matrixStack, x, y, 0, 0, xSize, BackpackScreen.SLOTS_Y_OFFSET + halfSlotHeight, 256, 256);
 		int playerInventoryHeight = 97;
-		AbstractGui.blit(matrixStack, x, y + SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
+		AbstractGui.blit(matrixStack, x, y + BackpackScreen.SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
 
-		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 7, y + SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
+		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + BackpackScreen.SLOTS_X_OFFSET, y + BackpackScreen.SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
 	}
 }

@@ -27,7 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
@@ -91,7 +91,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankInventoryPart;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeTab;
@@ -221,6 +225,7 @@ public class ModItems {
 	private static final UpgradeContainerType<StonecutterUpgradeWrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(StonecutterUpgradeContainer::new);
 	private static final UpgradeContainerType<JukeboxUpgradeItem.Wrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
 	private static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(ToolSwapperUpgradeContainer::new);
+	private static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -246,34 +251,37 @@ public class ModItems {
 		UpgradeContainerRegistry.register(STONECUTTER_UPGRADE.getId(), STONECUTTER_TYPE);
 		UpgradeContainerRegistry.register(JUKEBOX_UPGRADE.getId(), JUKEBOX_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_TOOL_SWAPPER_UPGRADE.getId(), TOOL_SWAPPER_TYPE);
+		UpgradeContainerRegistry.register(TANK_UPGRADE.getId(), TANK_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.registerFactory(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
 			ScreenManager.registerFactory(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
 
-			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(MAGNET_BASIC_TYPE, MagnetUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(MAGNET_ADVANCED_TYPE, MagnetUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(FEEDING_TYPE, FeedingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(COMPACTING_TYPE, CompactingUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_COMPACTING_TYPE, CompactingUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(VOID_TYPE, VoidUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_VOID_TYPE, VoidUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(RESTOCK_TYPE, RestockUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_RESTOCK_TYPE, RestockUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(REFILL_TYPE, RefillUpgradeTab::new);
-			UpgradeSettingsTabManager.register(SMELTING_TYPE, SmeltingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(AUTO_SMELTING_TYPE, AutoSmeltingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(CRAFTING_TYPE, CraftingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(INCEPTION_TYPE, InceptionUpgradeTab::new);
-			UpgradeSettingsTabManager.register(STONECUTTER_TYPE, StonecutterUpgradeTab::new);
-			UpgradeSettingsTabManager.register(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
-			UpgradeSettingsTabManager.register(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
+			UpgradeGuiManager.registerTab(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(MAGNET_BASIC_TYPE, MagnetUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(MAGNET_ADVANCED_TYPE, MagnetUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(FEEDING_TYPE, FeedingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(COMPACTING_TYPE, CompactingUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_COMPACTING_TYPE, CompactingUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(VOID_TYPE, VoidUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_VOID_TYPE, VoidUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(RESTOCK_TYPE, RestockUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_RESTOCK_TYPE, RestockUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(REFILL_TYPE, RefillUpgradeTab::new);
+			UpgradeGuiManager.registerTab(SMELTING_TYPE, SmeltingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(AUTO_SMELTING_TYPE, AutoSmeltingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(CRAFTING_TYPE, CraftingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(INCEPTION_TYPE, InceptionUpgradeTab::new);
+			UpgradeGuiManager.registerTab(STONECUTTER_TYPE, StonecutterUpgradeTab::new);
+			UpgradeGuiManager.registerTab(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
+			UpgradeGuiManager.registerTab(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
+			UpgradeGuiManager.registerTab(TANK_TYPE, TankUpgradeTab::new);
+			UpgradeGuiManager.registerInventoryPart(TANK_TYPE, TankInventoryPart::new);
 		});
 	}
 

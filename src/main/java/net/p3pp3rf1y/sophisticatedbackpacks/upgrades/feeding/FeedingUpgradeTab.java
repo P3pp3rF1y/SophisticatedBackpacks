@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -15,8 +14,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContain
 	private final FilterLogicControl.Basic filterLogicControl;
 
 	public FeedingUpgradeTab(FilteredUpgradeContainer<FeedingUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, screen,
-				new TranslationTextComponent(translUpgrade("feeding")), new TranslationTextComponent(translUpgradeTooltip("feeding")));
+		super(upgradeContainer, position, screen, translUpgrade("feeding"), translUpgradeTooltip("feeding"));
 		filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(), Config.COMMON.feedingUpgrade.slotsInRow.get()));
 	}
 

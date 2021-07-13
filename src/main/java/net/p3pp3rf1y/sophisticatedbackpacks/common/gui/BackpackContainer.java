@@ -127,8 +127,6 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getDisplayName().getString(),
 					backpackWrapper.getClothColor(), backpackWrapper.getBorderColor());
 		});
-
-		backpackWrapper.getUpgradeHandler().runTemporaryBugFixToRemoveInvalidItems(player);
 	}
 
 	private void sendBackpackSettingsToClient() {
@@ -148,6 +146,10 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	public IBackpackWrapper getParentBackpackWrapper() {
 		return parentBackpackWrapper;
+	}
+
+	public int getColumnsTaken() {
+		return backpackWrapper.getColumnsTaken();
 	}
 
 	private void initSlotsAndContainers(PlayerEntity player, int backpackSlotIndex, boolean shouldLockBackpackSlot) {

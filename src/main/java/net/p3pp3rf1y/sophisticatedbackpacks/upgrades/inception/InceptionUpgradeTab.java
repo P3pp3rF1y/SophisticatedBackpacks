@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
@@ -28,8 +27,7 @@ public class InceptionUpgradeTab extends UpgradeSettingsTab<InceptionUpgradeCont
 			));
 
 	public InceptionUpgradeTab(InceptionUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("inception")),
-				new TranslationTextComponent(translUpgradeTooltip("inception")));
+		super(upgradeContainer, position, screen, translUpgrade("inception"), translUpgradeTooltip("inception"));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), INVENTORY_ORDER, button -> getContainer().setInventoryOrder(getContainer().getInventoryOrder().next()),
 				() -> getContainer().getInventoryOrder()));
 	}

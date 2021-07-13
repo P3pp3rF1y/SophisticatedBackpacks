@@ -1,10 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -46,17 +43,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		this.backpackSaveHandler = backpackSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
 		deserializeNBT(contentsNbt.getCompound(UPGRADE_INVENTORY_TAG));
-	}
-
-	//TODO: remove this in the future - is only meant to remove items that got there through bug in BackpackContainer
-	public void runTemporaryBugFixToRemoveInvalidItems(PlayerEntity player) {
-		InventoryHelper.iterate(this, (slot, stack) -> {
-			if (!stack.isEmpty() && !(stack.getItem() instanceof IBackpackUpgradeItem)) {
-				player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
-						.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, stack, backpackWrapper.getInventoryHandler(), playerInventory));
-				setStackInSlot(slot, ItemStack.EMPTY);
-			}
-		});
 	}
 
 	@Override
@@ -120,6 +106,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				addTypeWrapper(type, wrapper);
 			}
 		});
+
+		initRenderInfoCallbacks(false);
 	}
 
 	private <T extends IUpgradeWrapper> void addTypeWrapper(UpgradeType<?> type, T wrapper) {
@@ -189,12 +177,14 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		}
 		onInvalidateUpgradeCaches.run();
 
-		refreshRenderInfo();
+		initRenderInfoCallbacks(true);
 	}
 
-	private void refreshRenderInfo() {
+	private void initRenderInfoCallbacks(boolean forceUpdateRenderInfo) {
 		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
-		renderInfo.reset();
+		if (forceUpdateRenderInfo) {
+			renderInfo.reset();
+		}
 
 		AtomicBoolean singleTankRight = new AtomicBoolean(false);
 		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
@@ -212,7 +202,9 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		for (IRenderedTankUpgrade tankRenderWrapper : tankRenderWrappers) {
 			TankPosition finalCurrentTankPos = currentTankPos;
 			tankRenderWrapper.setTankRenderInfoUpdateCallback(tankRenderInfo -> renderInfo.setTankRenderInfo(finalCurrentTankPos, tankRenderInfo));
-			tankRenderWrapper.forceUpdateTankRenderInfo();
+			if (forceUpdateRenderInfo) {
+				tankRenderWrapper.forceUpdateTankRenderInfo();
+			}
 			currentTankPos = TankPosition.RIGHT;
 		}
 	}

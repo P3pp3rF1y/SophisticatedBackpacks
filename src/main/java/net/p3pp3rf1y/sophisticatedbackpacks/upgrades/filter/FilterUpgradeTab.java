@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -44,8 +43,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("filter")),
-					new TranslationTextComponent(translUpgradeTooltip("filter")));
+			super(upgradeContainer, position, screen, translUpgrade("filter"), translUpgradeTooltip("filter"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.filterUpgrade.slotsInRow.get()));
 		}
@@ -53,9 +51,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("advanced_filter")),
-					new TranslationTextComponent(translUpgradeTooltip("advanced_filter")));
-
+			super(upgradeContainer, position, screen, translUpgrade("advanced_filter"), translUpgradeTooltip("advanced_filter"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedFilterUpgrade.slotsInRow.get()));
 		}

@@ -28,8 +28,7 @@ public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContaine
 			new TranslationTextComponent(TranslationHelper.translUpgradeButton("stop")));
 
 	public JukeboxUpgradeTab(JukeboxUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("jukebox")),
-				new TranslationTextComponent(translUpgradeTooltip("jukebox")));
+		super(upgradeContainer, position, screen, translUpgrade("jukebox"), translUpgradeTooltip("jukebox"));
 
 		addHideableChild(new Button(new Position(x + 3, y + 44), STOP, button -> {
 			if (button == 0) {

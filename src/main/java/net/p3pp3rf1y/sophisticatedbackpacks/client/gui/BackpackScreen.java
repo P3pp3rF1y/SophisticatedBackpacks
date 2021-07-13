@@ -35,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackInventorySlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.TransferFullSlotMessage;
@@ -62,6 +63,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
 	static final int DISABLED_SLOT_X_POS = -1000;
+	static final int SLOTS_Y_OFFSET = 17;
+	static final int SLOTS_X_OFFSET = 7;
 
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent title) {
 		return new BackpackScreen(screenContainer, inv, title);
@@ -74,6 +77,8 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	@Nullable
 	private ToggleButton<SortBy> sortByButton = null;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
+
+	private final List<UpgradeInventoryPartBase<?>> inventoryParts = new ArrayList<>();
 
 	private static ICraftingUIPart craftingUIPart = ICraftingUIPart.NOOP;
 
@@ -100,14 +105,30 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		super.init();
 		craftingUIPart.setBackpackScreen(this);
 		initUpgradeSettingsControl();
+		initUpgradeInventoryParts();
 		addUpgradeSwitches();
 		getContainer().setUpgradeChangeListener(c -> {
 			children.remove(settingsTabControl);
 			craftingUIPart.onCraftingSlotsHidden();
 			initUpgradeSettingsControl();
+			initUpgradeInventoryParts();
 			addUpgradeSwitches();
 		});
 		addSortButtons();
+	}
+
+	private void initUpgradeInventoryParts() {
+		inventoryParts.clear();
+		if (getContainer().getColumnsTaken() == 0) {
+			return;
+		}
+
+		Position pos = new Position(SLOTS_X_OFFSET + container.getSlotsOnLine() * 18, SLOTS_Y_OFFSET);
+		int height = container.getNumberOfRows() * 18;
+		for (UpgradeContainerBase<?, ?> container : getContainer().getUpgradeContainers().values()) {
+			UpgradeGuiManager.getInventoryPart(container, pos, height, this).ifPresent(inventoryParts::add);
+			pos = new Position(pos.getX() + 36, pos.getY());
+		}
 	}
 
 	private void addUpgradeSwitches() {
@@ -202,8 +223,13 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	@Override
 	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
+		renderUpgradeInventoryParts(matrixStack, mouseX, mouseY);
 		renderUpgradeSlots(matrixStack, mouseX, mouseY);
 		renderRealInventorySlots(matrixStack, mouseX, mouseY);
+	}
+
+	private void renderUpgradeInventoryParts(MatrixStack matrixStack, int mouseX, int mouseY) {
+		inventoryParts.forEach(ip -> ip.render(matrixStack, mouseX, mouseY));
 	}
 
 	private void renderRealInventorySlots(MatrixStack matrixStack, int mouseX, int mouseY) {

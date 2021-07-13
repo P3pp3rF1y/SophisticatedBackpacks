@@ -20,12 +20,17 @@ public class TranslationHelper {
 
 	private static final String GUI_UPGRADE_PREFIX = GUI_PREFIX + "upgrades.";
 	private static final String GUI_SETTINGS_PREFIX = GUI_PREFIX + "settings.";
-	private static final String BUTTONS_PREFIX = GUI_PREFIX + "buttons.";
+	private static final String BUTTONS_SUFFIX = "buttons.";
+	private static final String BUTTONS_PREFIX = GUI_PREFIX + BUTTONS_SUFFIX;
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
-	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + "buttons.";
+	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + BUTTONS_SUFFIX;
 	private static final String KEYBIND_PREFIX = "keybind.sophisticatedbackpacks.";
 
-	public static String translUpgrade(String upgradeName) {
+	public static ITextComponent translUpgrade(String upgradeName) {
+		return new TranslationTextComponent(translUpgradeKey(upgradeName));
+	}
+
+	public static String translUpgradeKey(String upgradeName) {
 		return GUI_UPGRADE_PREFIX + upgradeName;
 	}
 
@@ -34,11 +39,11 @@ public class TranslationHelper {
 	}
 
 	public static String translSettingsButton(String buttonName) {
-		return translSettings("buttons." + buttonName);
+		return translSettings(BUTTONS_SUFFIX + buttonName);
 	}
 
-	public static String translUpgradeTooltip(String upgradeName) {
-		return translUpgrade(upgradeName) + TOOLTIP_SUFFIX;
+	public static ITextComponent translUpgradeTooltip(String upgradeName) {
+		return new TranslationTextComponent(translUpgradeKey(upgradeName) + TOOLTIP_SUFFIX);
 	}
 
 	public static String translSettingsTooltip(String categoryName) {
