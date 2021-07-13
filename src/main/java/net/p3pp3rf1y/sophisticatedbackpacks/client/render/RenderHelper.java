@@ -11,12 +11,17 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.FluidStack;
 
 public class RenderHelper {
 	private RenderHelper() {}
 
 	public static void renderFluid(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, Fluid fluid, float fill, float xOffset, float yOffset, int fillYOffsetMultiplier, float zOffset) {
+		if (MathHelper.epsilonEquals(fill, 0.0f)) {
+			return;
+		}
+
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(new FluidStack(fluid, 5000));
 		TextureAtlasSprite still = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(texture);
 		IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.getEntityTranslucent(PlayerContainer.LOCATION_BLOCKS_TEXTURE));

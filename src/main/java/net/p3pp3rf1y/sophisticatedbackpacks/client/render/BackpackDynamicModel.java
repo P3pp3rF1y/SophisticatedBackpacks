@@ -30,6 +30,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.TransformationMatrix;
@@ -194,6 +195,10 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addFluid(List<BakedQuad> ret, Fluid fluid, float ratio, double xMin) {
+			if (MathHelper.epsilonEquals(ratio, 0.0f)) {
+				return;
+			}
+
 			double yMin = 1.5 / 16d;
 			double yMax = yMin + (ratio * 6) / 16d;
 			AxisAlignedBB bounds = new AxisAlignedBB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
