@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
+import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -35,7 +36,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 		}
 
 		if (!errorSlots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.tank_slots_not_empty"), Collections.emptySet(), errorSlots);
+			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots);
 		}
 
 		return new UpgradeSlotChangeResult.Success();
