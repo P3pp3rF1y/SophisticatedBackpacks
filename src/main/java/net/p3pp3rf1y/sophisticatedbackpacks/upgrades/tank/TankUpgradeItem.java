@@ -23,6 +23,17 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 
 	@Override
 	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+		Set<Integer> errorUpgradeSlots = new HashSet<>();
+		backpackWrapper.getUpgradeHandler().getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof TankUpgradeWrapper) {
+				errorUpgradeSlots.add(slot);
+			}
+		});
+
+		if (errorUpgradeSlots.size() >= 2) {
+			return new UpgradeSlotChangeResult.Fail(translError("add.two_tank_upgrades_present"), errorUpgradeSlots, Collections.emptySet());
+		}
+
 		int numberOfRows;
 		int slots = backpackWrapper.getInventoryHandler().getSlots();
 		numberOfRows = getNumberOfRows(slots);
