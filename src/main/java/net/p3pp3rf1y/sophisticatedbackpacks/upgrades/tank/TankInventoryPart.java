@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
@@ -10,11 +11,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeInventoryPartBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
@@ -23,6 +26,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -37,8 +41,8 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 	private final int height;
 	private final BackpackScreen screen;
 
-	public TankInventoryPart(TankUpgradeContainer container, Position pos, int height, BackpackScreen screen) {
-		super(container);
+	public TankInventoryPart(int upgradeSlot, TankUpgradeContainer container, Position pos, int height, BackpackScreen screen) {
+		super(upgradeSlot, container);
 		this.pos = pos;
 		this.height = height;
 		this.screen = screen;
@@ -46,21 +50,43 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY) {
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, pos.getX() + 9, pos.getY(), TANK_BACKGROUND_TOP);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY(), TANK_BACKGROUND_TOP);
 		int yOffset = 18;
 		for (int i = 0; i < (height - 36) / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, pos.getX() + 9, pos.getY() + yOffset, TANK_BACKGROUND_MIDDLE);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_MIDDLE);
 			yOffset += 18;
 		}
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, pos.getX() + 9, pos.getY() + yOffset, TANK_BACKGROUND_BOTTOM);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_BOTTOM);
 
 		renderFluid(matrixStack, mouseX, mouseY);
 
 		yOffset = 0;
 		for (int i = 0; i < height / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, pos.getX() + 10, pos.getY() + yOffset, OVERLAY);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + yOffset, OVERLAY);
 			yOffset += 18;
 		}
+	}
+
+	private int getTankLeft() {
+		return pos.getX() + 9;
+	}
+
+	@Override
+	public boolean handleMouseReleased(double mouseX, double mouseY, int button) {
+		if (mouseX < screen.getGuiLeft() + getTankLeft() || mouseX >= screen.getGuiLeft() + getTankLeft() + 18 ||
+				mouseY < screen.getGuiTop() + pos.getY() || mouseY >= screen.getGuiTop() + pos.getY() + height) {
+			return false;
+		}
+
+		ClientPlayerEntity player = screen.getMinecraft().player;
+		ItemStack cursorStack = player.inventory.getItemStack();
+		if (!cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+			return false;
+		}
+
+		PacketHandler.sendToServer(new TankClickMessage(upgradeSlot));
+
+		return true;
 	}
 
 	private void renderTooltip(int mouseX, int mouseY, FluidStack contents, int capacity) {

@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -125,8 +126,9 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 		Position pos = new Position(SLOTS_X_OFFSET + container.getSlotsOnLine() * 18, SLOTS_Y_OFFSET);
 		int height = container.getNumberOfRows() * 18;
-		for (UpgradeContainerBase<?, ?> container : getContainer().getUpgradeContainers().values()) {
-			UpgradeGuiManager.getInventoryPart(container, pos, height, this).ifPresent(inventoryParts::add);
+		for (Map.Entry<Integer, UpgradeContainerBase<?, ?>> entry : getContainer().getUpgradeContainers().entrySet()) {
+			UpgradeContainerBase<?, ?> container = entry.getValue();
+			UpgradeGuiManager.getInventoryPart(entry.getKey(), container, pos, height, this).ifPresent(inventoryParts::add);
 			pos = new Position(pos.getX() + 36, pos.getY());
 		}
 	}
@@ -444,8 +446,13 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		Slot slot = getSelectedSlot(mouseX, mouseY);
+		for (UpgradeInventoryPartBase<?> inventoryPart : inventoryParts) {
+			if (inventoryPart.handleMouseReleased(mouseX, mouseY, button)) {
+				return true;
+			}
+		}
 
+		Slot slot = getSelectedSlot(mouseX, mouseY);
 		if (doubleClick && slot != null && button == 0 && container.canMergeSlot(ItemStack.EMPTY, slot) && hasShiftDown() && !shiftClickedSlot.isEmpty()) {
 			for (Slot slot2 : container.upgradeSlots) {
 				if (slot2 != null && slot2.canTakeStack(minecraft.player) && slot2.getHasStack() && slot2.isSameInventory(slot) && BackpackContainer.canMergeItemToSlot(slot2, shiftClickedSlot)) {

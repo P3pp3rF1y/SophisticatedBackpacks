@@ -165,10 +165,10 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 
 		AtomicBoolean didSomething = new AtomicBoolean(false);
 		inventory.getStackInSlot(INPUT_SLOT).getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(fluidHandler ->
-				didSomething.set(drainHandler(fluidHandler))
+				didSomething.set(drainHandler(fluidHandler, stack -> inventory.setStackInSlot(INPUT_SLOT, stack)))
 		);
 		inventory.getStackInSlot(OUTPUT_SLOT).getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(fluidHandler ->
-				didSomething.set(fillHandler(fluidHandler))
+				didSomething.set(fillHandler(fluidHandler, stack -> inventory.setStackInSlot(OUTPUT_SLOT, stack)))
 		);
 
 		if (didSomething.get()) {
@@ -176,7 +176,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 		}
 	}
 
-	private boolean fillHandler(IFluidHandlerItem fluidHandler) {
+	public boolean fillHandler(IFluidHandlerItem fluidHandler, Consumer<ItemStack> updateContainerStack) {
 		if (!contents.isEmpty() && isValidFluidHandler(fluidHandler, true)) {
 			Fluid fluid = contents.getFluid();
 			int filled = fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
@@ -185,13 +185,13 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			}
 			FluidStack drained = drain(filled, IFluidHandler.FluidAction.EXECUTE);
 			fluidHandler.fill(drained, IFluidHandler.FluidAction.EXECUTE);
-			inventory.setStackInSlot(OUTPUT_SLOT, fluidHandler.getContainer());
+			updateContainerStack.accept(fluidHandler.getContainer());
 			return true;
 		}
 		return false;
 	}
 
-	private boolean drainHandler(IFluidHandlerItem fluidHandler) {
+	public boolean drainHandler(IFluidHandlerItem fluidHandler, Consumer<ItemStack> updateContainerStack) {
 		if (isValidFluidHandler(fluidHandler, false)) {
 			Fluid fluid = contents.getFluid();
 			FluidStack extracted = contents.isEmpty() ?
@@ -203,7 +203,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			int filled = fill(extracted, IFluidHandler.FluidAction.EXECUTE);
 			FluidStack toExtract = filled == extracted.getAmount() ? extracted : new FluidStack(extracted.getFluid(), filled);
 			fluidHandler.drain(toExtract, IFluidHandler.FluidAction.EXECUTE);
-			inventory.setStackInSlot(INPUT_SLOT, fluidHandler.getContainer());
+			updateContainerStack.accept(fluidHandler.getContainer());
 			return true;
 		}
 		return false;

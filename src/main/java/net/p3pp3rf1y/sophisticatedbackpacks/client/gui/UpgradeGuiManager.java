@@ -27,8 +27,8 @@ public class UpgradeGuiManager {
 		return getTabFactory(container).create(container, position, screen);
 	}
 
-	public static <C extends UpgradeContainerBase<?, ?>> Optional<UpgradeInventoryPartBase<C>> getInventoryPart(C container, Position position, int height, BackpackScreen screen) {
-		return getInventoryPartFactory(container).map(f -> f.create(container, position, height, screen));
+	public static <C extends UpgradeContainerBase<?, ?>> Optional<UpgradeInventoryPartBase<C>> getInventoryPart(int upgradeSlot, C container, Position position, int height, BackpackScreen screen) {
+		return getInventoryPartFactory(container).map(f -> f.create(upgradeSlot, container, position, height, screen));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,6 +60,6 @@ public class UpgradeGuiManager {
 	}
 
 	public interface IUpgradeInventoryPartFactory<C extends UpgradeContainerBase<?, ?>, I extends UpgradeInventoryPartBase<C>> {
-		I create(C container, Position position, int height, BackpackScreen screen);
+		I create(int upgradeSlot, C container, Position position, int height, BackpackScreen screen);
 	}
 }
