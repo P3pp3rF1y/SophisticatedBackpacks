@@ -96,6 +96,9 @@ dependencies {
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     compile fg.deobf("crafting-tweaks:CraftingTweaks_${crafting_tweaks_mc_version}:${crafting_tweaks_version}")
+
+    runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.4-1.6.47")
+    runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.4-3.0.1.37")
 }
 
 test {

@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	public static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final IBackpackWrapper backpackWrapper;
-	private final Runnable backpackSaveHandler;
+	private final Runnable backpackContentsSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
 	private final CompoundNBT contentsNbt;
 	@Nullable
@@ -36,11 +36,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 	private boolean persistent = true;
 
-	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
+	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackContentsSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(numberOfUpgradeSlots);
 		this.contentsNbt = contentsNbt;
 		this.backpackWrapper = backpackWrapper;
-		this.backpackSaveHandler = backpackSaveHandler;
+		this.backpackContentsSaveHandler = backpackContentsSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
 		deserializeNBT(contentsNbt.getCompound(UPGRADE_INVENTORY_TAG));
 	}
@@ -55,7 +55,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		super.onContentsChanged(slot);
 		if (persistent) {
 			saveInventory();
-			backpackSaveHandler.run();
+			backpackContentsSaveHandler.run();
 		}
 		if (!justSavingNbtChange) {
 			refreshUpgradeWrappers();

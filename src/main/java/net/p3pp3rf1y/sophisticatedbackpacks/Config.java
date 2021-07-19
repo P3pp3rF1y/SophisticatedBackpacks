@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Config {
@@ -324,7 +325,7 @@ public class Config {
 
 		public static class EnabledItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new HashMap<>();
+			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());

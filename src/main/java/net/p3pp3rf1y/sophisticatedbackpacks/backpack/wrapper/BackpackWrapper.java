@@ -9,9 +9,11 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
@@ -58,11 +60,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private InventoryModificationHandler inventoryModificationHandler = null;
 	@Nullable
 	private BackpackSettingsHandler settingsHandler = null;
+	@Nullable
+	private IFluidHandler fluidHandler = null;
+
 	private final BackpackRenderInfo renderInfo;
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
-		renderInfo = new BackpackRenderInfo(backpack);
+		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
 
 	@Override
@@ -127,6 +132,22 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public IFluidHandler getFluidHandler() {
+		if (fluidHandler == null) {
+			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
+
+			IFluidHandler wrappedHandler = new BackpackFluidHandler(this);
+			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
+				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler);
+			}
+
+			fluidHandler = wrappedHandler;
+		}
+
+		return fluidHandler;
+	}
+
+	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
 		getContentsUuid().ifPresent(originalUuid -> {
 			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
@@ -159,6 +180,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 					getInventoryHandler().clearListeners();
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;
+					fluidHandler = null;
 				});
 			} else {
 				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
@@ -393,6 +415,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
+		fluidHandler = null;
 		refreshInventoryForInputOutput();
 	}
 

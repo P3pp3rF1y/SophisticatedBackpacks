@@ -1,9 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IUpgradeWrapperAccessor;
@@ -13,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import java.util.function.Consumer;
 
 public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgradeWrapper, InceptionUpgradeItem>
-		implements IInventoryWrapperUpgrade, IUpgradeAccessModifier {
+		implements IInventoryWrapperUpgrade, IUpgradeAccessModifier, IFluidHandlerWrapperUpgrade {
 	private SubBackpacksHandler subBackpacksHandler = null;
 
 	public InceptionUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -40,9 +42,9 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get())) {
 			initSubBackpacksHandler();
 			return new InceptionInventoryHandler(inventory, getInventoryOrder(), subBackpacksHandler);
-		} else {
-			return inventory;
 		}
+		return inventory;
+
 	}
 
 	private void initSubBackpacksHandler() {
@@ -54,8 +56,16 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesInContainedBackpacksAreFunctional.get())) {
 			initSubBackpacksHandler();
 			return new InceptionWrapperAccessor(backpackWrapper, subBackpacksHandler);
-		} else {
-			return upgradeWrapperAccessor;
 		}
+		return upgradeWrapperAccessor;
+	}
+
+	@Override
+	public IFluidHandler wrapHandler(IFluidHandler fluidHandler) {
+		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesInContainedBackpacksAreFunctional.get())) {
+			initSubBackpacksHandler();
+			return new InceptionFluidHandler(fluidHandler, getInventoryOrder(), subBackpacksHandler);
+		}
+		return fluidHandler;
 	}
 }

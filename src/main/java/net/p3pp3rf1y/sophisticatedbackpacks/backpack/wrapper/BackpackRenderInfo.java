@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class BackpackRenderInfo {
 	private static final String RENDER_INFO_TAG = "renderInfo";
@@ -17,15 +18,21 @@ public class BackpackRenderInfo {
 	private static final String TANK_INFO_TAG = "info";
 
 	private final ItemStack backpack;
+	private final Supplier<Runnable> getBackpackSaveHandler;
 	private final Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = new LinkedHashMap<>();
 
-	public BackpackRenderInfo(ItemStack backpack) {
+	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getBackpackSaveHandler) {
 		this.backpack = backpack;
+		this.getBackpackSaveHandler = getBackpackSaveHandler;
 		deserialize();
 	}
 
 	private void deserialize() {
 		deserializeTanks();
+	}
+
+	private void save() {
+		getBackpackSaveHandler.get().run();
 	}
 
 	public void deserializeFrom(CompoundNBT renderInfoNbt) {
@@ -41,11 +48,13 @@ public class BackpackRenderInfo {
 	public void reset() {
 		tankRenderInfos.clear();
 		NBTHelper.removeTag(backpack, RENDER_INFO_TAG);
+		save();
 	}
 
 	public void setTankRenderInfo(TankPosition tankPosition, IRenderedTankUpgrade.TankRenderInfo tankRenderInfo) {
 		tankRenderInfos.put(tankPosition, tankRenderInfo);
 		serializeTank(tankPosition, tankRenderInfo);
+		save();
 	}
 
 	private void deserializeTanks() {

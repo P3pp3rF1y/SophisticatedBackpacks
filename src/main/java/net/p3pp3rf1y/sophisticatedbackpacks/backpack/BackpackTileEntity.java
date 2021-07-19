@@ -10,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -26,6 +27,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
 	private IBackpackWrapper backpackWrapper = NoopBackpackWrapper.INSTANCE;
+	private boolean updateBlockRender = true;
 
 	public BackpackTileEntity() {
 		super(BACKPACK_TILE_TYPE.get());
@@ -33,7 +35,11 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackWrapper.setBackpackSaveHandler(this::markDirty);
+		backpackWrapper.setBackpackSaveHandler(() -> {
+			markDirty();
+			updateBlockRender = false;
+			WorldHelper.notifyBlockUpdate(this);
+		});
 	}
 
 	@Override
@@ -70,13 +76,19 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Nullable
 	@Override
 	public SUpdateTileEntityPacket getUpdatePacket() {
-		return new SUpdateTileEntityPacket(pos, 1, getUpdateTag());
+		CompoundNBT updateTag = getUpdateTag();
+		updateTag.putBoolean("updateBlockRender", updateBlockRender);
+		updateBlockRender = true;
+		return new SUpdateTileEntityPacket(pos, 1, updateTag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		setBackpackFromNbt(pkt.getNbtCompound());
-		WorldHelper.notifyBlockUpdate(this);
+		CompoundNBT tag = pkt.getNbtCompound();
+		setBackpackFromNbt(tag);
+		if (tag.getBoolean("updateBlockRender")) {
+			WorldHelper.notifyBlockUpdate(this);
+		}
 	}
 
 	public IBackpackWrapper getBackpackWrapper() {
@@ -96,6 +108,8 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
+		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+			return LazyOptional.of(() -> getBackpackWrapper().getFluidHandler()).cast();
 		}
 		return super.getCapability(cap, side);
 	}
@@ -112,6 +126,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 			}
 		}
 		world.setBlockState(pos, state);
+		world.notifyNeighborsOfStateChange(pos, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
 	}
 }
