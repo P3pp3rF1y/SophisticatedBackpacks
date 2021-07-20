@@ -82,6 +82,7 @@ public class Config {
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+		public final TankUpgradeConfig tankUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -119,6 +120,7 @@ public class Config {
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			tankUpgrade = new TankUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
@@ -229,6 +231,16 @@ public class Config {
 			protected ToolSwapperUpgradeConfig(ForgeConfigSpec.Builder builder) {
 				builder.comment("Tool Swapper Upgrade" + SETTINGS).push("toolSwapperUpgrade");
 				slotsInRow = builder.comment("Number of tool filter slots displayed in a row").defineInRange("slotsInRow", 4, 1, 6);
+				builder.pop();
+			}
+		}
+
+		public static class TankUpgradeConfig {
+			public final ForgeConfigSpec.IntValue capacityPerSlotRow;
+
+			protected TankUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 2000, 500, 20000);
 				builder.pop();
 			}
 		}

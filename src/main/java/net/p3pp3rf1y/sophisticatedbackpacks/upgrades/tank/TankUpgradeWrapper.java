@@ -13,6 +13,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IStackableContentsUpgrade;
@@ -67,7 +68,11 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 
 		};
 		NBTHelper.getCompound(upgrade, "inventory").ifPresent(inventory::deserializeNBT);
-		contents = NBTHelper.getCompound(upgrade, CONTENTS_TAG).map(FluidStack::loadFluidStackFromNBT).orElse(FluidStack.EMPTY);
+		contents = getContents(upgrade);
+	}
+
+	public static FluidStack getContents(ItemStack upgrade) {
+		return NBTHelper.getCompound(upgrade, CONTENTS_TAG).map(FluidStack::loadFluidStackFromNBT).orElse(FluidStack.EMPTY);
 	}
 
 	private boolean isValidFluidItem(ItemStack stack, boolean isOutput) {
@@ -110,7 +115,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	private int getBaseCapacity() {
-		return 2000 * backpackWrapper.getNumberOfSlotRows();
+		return Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows();
 	}
 
 	public IItemHandler getInventory() {

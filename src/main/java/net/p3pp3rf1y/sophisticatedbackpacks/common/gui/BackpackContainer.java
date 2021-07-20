@@ -708,7 +708,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			if (stack.isEmpty() || !(stack.getItem() instanceof IBackpackUpgradeItem)) {
 				return false;
 			}
-			UpgradeSlotChangeResult result = ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, isFirstLevelBackpack());
+			UpgradeSlotChangeResult result = ((IBackpackUpgradeItem<?>) stack.getItem()).canAddUpgradeTo(backpackWrapper, stack, isFirstLevelBackpack());
 			updateSlotChangeError(result);
 
 			return result.isSuccessful();

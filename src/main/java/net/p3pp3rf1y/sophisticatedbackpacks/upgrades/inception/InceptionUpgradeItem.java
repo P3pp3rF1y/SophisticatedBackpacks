@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
+import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -22,7 +23,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	}
 
 	@Override
-	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, ItemStack upgradeStack, boolean firstLevelBackpack) {
 		if (!firstLevelBackpack) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}

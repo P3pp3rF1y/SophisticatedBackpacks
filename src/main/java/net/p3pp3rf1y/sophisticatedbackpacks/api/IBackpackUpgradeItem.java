@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 public interface IBackpackUpgradeItem<T extends IUpgradeWrapper> {
 	UpgradeType<T> getType();
 
-	default UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+	default UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, ItemStack upgradeStack, boolean firstLevelBackpack) {
 		return new UpgradeSlotChangeResult.Success();
 	}
 

@@ -1,11 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
 import net.minecraft.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +24,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 	}
 
 	@Override
-	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
+	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, ItemStack upgradeStack, boolean firstLevelBackpack) {
 		Set<Integer> errorUpgradeSlots = new HashSet<>();
 		backpackWrapper.getUpgradeHandler().getSlotWrappers().forEach((slot, wrapper) -> {
 			if (wrapper instanceof TankUpgradeWrapper) {
@@ -48,6 +50,12 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 
 		if (!errorSlots.isEmpty()) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots, Collections.emptySet());
+		}
+
+		int backpackStackMultiplier = StackUpgradeItem.getInventorySlotLimit(backpackWrapper) / 64;
+		int multiplierRequired = (int) Math.ceil((float) TankUpgradeWrapper.getContents(upgradeStack).getAmount() / (Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows() * backpackStackMultiplier));
+		if (multiplierRequired / backpackStackMultiplier > 1) {
+			return new UpgradeSlotChangeResult.Fail(translError("add.tank_capacity_high", multiplierRequired), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 
 		return new UpgradeSlotChangeResult.Success();
