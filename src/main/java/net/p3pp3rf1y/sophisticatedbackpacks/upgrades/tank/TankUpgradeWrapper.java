@@ -179,7 +179,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	public boolean fillHandler(IFluidHandlerItem fluidHandler, Consumer<ItemStack> updateContainerStack) {
 		if (!contents.isEmpty() && isValidFluidHandler(fluidHandler, true)) {
 			Fluid fluid = contents.getFluid();
-			int filled = fluidHandler.fill(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
+			int filled = fluidHandler.fill(new FluidStack(fluid, Math.min(FluidAttributes.BUCKET_VOLUME, contents.getAmount())), IFluidHandler.FluidAction.SIMULATE);
 			if (filled == 0) {
 				return false;
 			}
@@ -196,7 +196,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			Fluid fluid = contents.getFluid();
 			FluidStack extracted = contents.isEmpty() ?
 					fluidHandler.drain(FluidAttributes.BUCKET_VOLUME, IFluidHandler.FluidAction.SIMULATE) :
-					fluidHandler.drain(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
+					fluidHandler.drain(new FluidStack(fluid, Math.min(FluidAttributes.BUCKET_VOLUME, getTankCapacity() - contents.getAmount())), IFluidHandler.FluidAction.SIMULATE);
 			if (extracted.isEmpty()) {
 				return false;
 			}
