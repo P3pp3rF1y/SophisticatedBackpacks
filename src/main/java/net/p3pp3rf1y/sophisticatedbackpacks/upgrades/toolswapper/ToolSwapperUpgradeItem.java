@@ -43,7 +43,7 @@ public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWr
 			}
 		});
 		if (!errorUpgradeSlots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.tool_swapper_exists"), errorUpgradeSlots, Collections.emptySet());
+			return new UpgradeSlotChangeResult.Fail(translError("add.tool_swapper_exists"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
 		}
 		return new UpgradeSlotChangeResult.Success();
 	}

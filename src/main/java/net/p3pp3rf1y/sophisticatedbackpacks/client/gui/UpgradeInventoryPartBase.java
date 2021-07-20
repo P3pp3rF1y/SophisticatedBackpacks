@@ -15,4 +15,6 @@ public abstract class UpgradeInventoryPartBase<C extends UpgradeContainerBase<?,
 	public abstract void render(MatrixStack matrixStack, int mouseX, int mouseY);
 
 	public abstract boolean handleMouseReleased(double mouseX, double mouseY, int button);
+
+	public abstract void renderErrorOverlay(MatrixStack matrixStack);
 }

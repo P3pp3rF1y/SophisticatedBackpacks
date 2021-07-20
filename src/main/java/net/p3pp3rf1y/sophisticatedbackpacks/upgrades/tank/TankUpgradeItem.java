@@ -31,7 +31,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 		});
 
 		if (errorUpgradeSlots.size() >= 2) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.two_tank_upgrades_present"), errorUpgradeSlots, Collections.emptySet());
+			return new UpgradeSlotChangeResult.Fail(translError("add.two_tank_upgrades_present"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
 		}
 
 		int numberOfRows;
@@ -47,7 +47,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 		}
 
 		if (!errorSlots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots);
+			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots, Collections.emptySet());
 		}
 
 		return new UpgradeSlotChangeResult.Success();

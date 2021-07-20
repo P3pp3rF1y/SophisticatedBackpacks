@@ -24,7 +24,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	@Override
 	public UpgradeSlotChangeResult canAddUpgradeTo(IBackpackWrapper backpackWrapper, boolean firstLevelBackpack) {
 		if (!firstLevelBackpack) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet());
+			return new UpgradeSlotChangeResult.Fail(translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 
 		Set<Integer> errorUpgradeSlots = new HashSet<>();
@@ -35,7 +35,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 		});
 
 		if (!errorUpgradeSlots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.inception_exists"), errorUpgradeSlots, Collections.emptySet());
+			return new UpgradeSlotChangeResult.Fail(translError("add.inception_exists"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
 		}
 
 		return new UpgradeSlotChangeResult.Success();
@@ -45,7 +45,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IBackpackWrapper backpackWrapper) {
 		Set<Integer> slots = InventoryHelper.getItemSlots(backpackWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
 		if (!slots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("remove.inception_sub_backpack"), Collections.emptySet(), slots);
+			return new UpgradeSlotChangeResult.Fail(translError("remove.inception_sub_backpack"), Collections.emptySet(), slots, Collections.emptySet());
 		}
 		return new UpgradeSlotChangeResult.Success();
 	}

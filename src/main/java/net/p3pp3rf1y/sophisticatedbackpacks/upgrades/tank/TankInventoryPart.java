@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -87,6 +88,11 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		PacketHandler.sendToServer(new TankClickMessage(upgradeSlot));
 
 		return true;
+	}
+
+	@Override
+	public void renderErrorOverlay(MatrixStack matrixStack) {
+		screen.renderOverlay(matrixStack, DyeColor.RED.getColorValue() | 0xAA000000, getTankLeft() + 1, pos.getY() + 1, 16, height - 2);
 	}
 
 	private void renderTooltip(int mouseX, int mouseY, FluidStack contents, int capacity) {

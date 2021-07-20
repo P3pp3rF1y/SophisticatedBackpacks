@@ -531,7 +531,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		}
 
 		if (!errorSlots.isEmpty()) {
-			upgradeSlot.updateSlotChangeError(new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", slotsToCheck, cursorStack.getDisplayName()), Collections.emptySet(), errorSlots));
+			upgradeSlot.updateSlotChangeError(new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", slotsToCheck, cursorStack.getDisplayName()), Collections.emptySet(), errorSlots, Collections.emptySet()));
 			return true;
 		}
 		return false;

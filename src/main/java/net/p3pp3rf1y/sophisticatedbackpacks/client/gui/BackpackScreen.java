@@ -48,6 +48,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private ToggleButton<SortBy> sortByButton = null;
 	private final Set<ToggleButton<Boolean>> upgradeSwitches = new HashSet<>();
 
-	private final List<UpgradeInventoryPartBase<?>> inventoryParts = new ArrayList<>();
+	private final Map<Integer, UpgradeInventoryPartBase<?>> inventoryParts = new LinkedHashMap<>();
 
 	private static ICraftingUIPart craftingUIPart = ICraftingUIPart.NOOP;
 
@@ -128,7 +129,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		int height = container.getNumberOfRows() * 18;
 		for (Map.Entry<Integer, UpgradeContainerBase<?, ?>> entry : getContainer().getUpgradeContainers().entrySet()) {
 			UpgradeContainerBase<?, ?> container = entry.getValue();
-			UpgradeGuiManager.getInventoryPart(entry.getKey(), container, pos, height, this).ifPresent(inventoryParts::add);
+			UpgradeGuiManager.getInventoryPart(entry.getKey(), container, pos, height, this).ifPresent(part -> inventoryParts.put(entry.getKey(), part));
 			pos = new Position(pos.getX() + 36, pos.getY());
 		}
 	}
@@ -231,7 +232,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void renderUpgradeInventoryParts(MatrixStack matrixStack, int mouseX, int mouseY) {
-		inventoryParts.forEach(ip -> ip.render(matrixStack, mouseX, mouseY));
+		inventoryParts.values().forEach(ip -> ip.render(matrixStack, mouseX, mouseY));
 	}
 
 	private void renderRealInventorySlots(MatrixStack matrixStack, int mouseX, int mouseY) {
@@ -335,11 +336,13 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
+		renderOverlay(matrixStack, slotColor, slot.xPos, slot.yPos, 16, 16);
+	}
+
+	public void renderOverlay(MatrixStack matrixStack, int slotColor, int xPos, int yPos, int width, int height) {
 		RenderSystem.disableDepthTest();
-		int xPos = slot.xPos;
-		int yPos = slot.yPos;
 		RenderSystem.colorMask(true, true, true, false);
-		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
+		fillGradient(matrixStack, xPos, yPos, xPos + width, yPos + height, slotColor, slotColor);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableDepthTest();
 	}
@@ -446,7 +449,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		for (UpgradeInventoryPartBase<?> inventoryPart : inventoryParts) {
+		for (UpgradeInventoryPartBase<?> inventoryPart : inventoryParts.values()) {
 			if (inventoryPart.handleMouseReleased(mouseX, mouseY, button)) {
 				return true;
 			}
@@ -588,6 +591,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);
 			upgradeSlotChangeResult.getErrorUpgradeSlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, container.getSlot(container.getFirstUpgradeSlot() + slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
 			upgradeSlotChangeResult.getErrorInventorySlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, container.getSlot(slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
+			upgradeSlotChangeResult.getErrorInventoryParts().forEach(slotIndex -> inventoryParts.get(slotIndex).renderErrorOverlay(matrixStack));
 			RenderSystem.popMatrix();
 
 			renderErrorMessage(matrixStack, overlayErrorMessage);

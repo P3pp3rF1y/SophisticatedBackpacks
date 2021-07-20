@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack;
 
 import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IStackableContentsUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
@@ -80,8 +81,16 @@ public class StackUpgradeItem extends UpgradeItemBase<StackUpgradeItem.Wrapper> 
 			}
 		});
 
-		if (!slotsOverMultiplier.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("remove.stack_low_multiplier", multiplier), Collections.emptySet(), slotsOverMultiplier);
+		Set<Integer> errorInventoryParts = new HashSet<>();
+
+		backpackWrapper.getUpgradeHandler().getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IStackableContentsUpgrade && ((IStackableContentsUpgrade) wrapper).getMinimumMultiplierRequired() > multiplier) {
+				errorInventoryParts.add(slot);
+			}
+		});
+
+		if (!slotsOverMultiplier.isEmpty() || !errorInventoryParts.isEmpty()) {
+			return new UpgradeSlotChangeResult.Fail(translError("remove.stack_low_multiplier", multiplier), Collections.emptySet(), slotsOverMultiplier, errorInventoryParts);
 		}
 
 		return new UpgradeSlotChangeResult.Success();

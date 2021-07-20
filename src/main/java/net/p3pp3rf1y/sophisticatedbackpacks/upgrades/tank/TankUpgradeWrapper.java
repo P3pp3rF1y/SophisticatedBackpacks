@@ -15,6 +15,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IStackableContentsUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -24,7 +25,8 @@ import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, TankUpgradeItem> implements IRenderedTankUpgrade, ITickableUpgrade {
+public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, TankUpgradeItem>
+		implements IRenderedTankUpgrade, ITickableUpgrade, IStackableContentsUpgrade {
 	public static final int INPUT_SLOT = 0;
 	public static final int OUTPUT_SLOT = 1;
 	private static final String CONTENTS_TAG = "contents";
@@ -104,7 +106,11 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	public int getTankCapacity() {
-		return 2000 * backpackWrapper.getNumberOfSlotRows() * backpackWrapper.getInventoryHandler().getStackSizeMultiplier();
+		return getBaseCapacity() * backpackWrapper.getInventoryHandler().getStackSizeMultiplier();
+	}
+
+	private int getBaseCapacity() {
+		return 2000 * backpackWrapper.getNumberOfSlotRows();
 	}
 
 	public IItemHandler getInventory() {
@@ -207,5 +213,10 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public int getMinimumMultiplierRequired() {
+		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity());
 	}
 }

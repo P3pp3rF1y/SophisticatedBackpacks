@@ -13,28 +13,34 @@ public class UpgradeSlotChangeResult {
 	private final ITextComponent errorMessage;
 	private final Set<Integer> errorUpgradeSlots;
 	private final Set<Integer> errorInventorySlots;
+	private final Set<Integer> errorInventoryParts;
 
 	private UpgradeSlotChangeResult(boolean successful,
-			@Nullable ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots) {
+			@Nullable ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
 		this.successful = successful;
 		this.errorMessage = errorMessage;
 		this.errorUpgradeSlots = errorUpgradeSlots;
 		this.errorInventorySlots = errorInventorySlots;
+		this.errorInventoryParts = errorInventoryParts;
 	}
 
 	public Set<Integer> getErrorInventorySlots() {
 		return errorInventorySlots;
 	}
 
+	public Set<Integer> getErrorInventoryParts() {
+		return errorInventoryParts;
+	}
+
 	public static class Fail extends UpgradeSlotChangeResult {
-		public Fail(ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots) {
-			super(false, errorMessage, errorUpgradeSlots, errorInventorySlots);
+		public Fail(ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
+			super(false, errorMessage, errorUpgradeSlots, errorInventorySlots, errorInventoryParts);
 		}
 	}
 
 	public static class Success extends UpgradeSlotChangeResult {
 		public Success() {
-			super(true, null, Collections.emptySet(), Collections.emptySet());
+			super(true, null, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 	}
 
