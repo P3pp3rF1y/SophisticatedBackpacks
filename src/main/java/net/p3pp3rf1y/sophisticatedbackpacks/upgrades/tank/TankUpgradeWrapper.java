@@ -228,4 +228,9 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	public int getMinimumMultiplierRequired() {
 		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity());
 	}
+
+	@Override
+	public boolean canBeDisabled() {
+		return false;
+	}
 }
