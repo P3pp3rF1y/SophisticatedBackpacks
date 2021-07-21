@@ -35,7 +35,6 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	private final ItemStackHandler inventory;
 	private FluidStack contents;
 	private long cooldownTime = 0;
-	private static final int COOLDOWN = 20; //TODO change to config
 
 	protected TankUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
@@ -111,7 +110,12 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	public int getTankCapacity() {
-		return getBaseCapacity() * backpackWrapper.getInventoryHandler().getStackSizeMultiplier();
+		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
+		return getBaseCapacity() * stackMultiplier;
+	}
+
+	public static int getAdjustedStackMultiplier(IBackpackWrapper backpackWrapper) {
+		return 1 + (int) (Config.COMMON.tankUpgrade.stackMultiplierRatio.get() * (backpackWrapper.getInventoryHandler().getStackSizeMultiplier() - 1));
 	}
 
 	private int getBaseCapacity() {
@@ -183,7 +187,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 		);
 
 		if (didSomething.get()) {
-			cooldownTime = world.getGameTime() + COOLDOWN;
+			cooldownTime = world.getGameTime() + Config.COMMON.tankUpgrade.autoFillDrainContainerCooldown.get();
 		}
 	}
 

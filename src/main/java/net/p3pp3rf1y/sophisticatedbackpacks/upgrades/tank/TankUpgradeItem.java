@@ -7,7 +7,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,7 +51,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots, Collections.emptySet());
 		}
 
-		int backpackStackMultiplier = StackUpgradeItem.getInventorySlotLimit(backpackWrapper) / 64;
+		int backpackStackMultiplier = TankUpgradeWrapper.getAdjustedStackMultiplier(backpackWrapper);
 		int multiplierRequired = (int) Math.ceil((float) TankUpgradeWrapper.getContents(upgradeStack).getAmount() / (Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows() * backpackStackMultiplier));
 		if (multiplierRequired / backpackStackMultiplier > 1) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.tank_capacity_high", multiplierRequired), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
