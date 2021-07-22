@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.GUI_CONTROLS;
 
@@ -125,12 +126,14 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			return;
 		}
 
-		Position pos = new Position(SLOTS_X_OFFSET + container.getSlotsOnLine() * 18, SLOTS_Y_OFFSET);
+		AtomicReference<Position> pos = new AtomicReference<>(new Position(SLOTS_X_OFFSET + container.getSlotsOnLine() * 18, SLOTS_Y_OFFSET));
 		int height = container.getNumberOfRows() * 18;
 		for (Map.Entry<Integer, UpgradeContainerBase<?, ?>> entry : getContainer().getUpgradeContainers().entrySet()) {
 			UpgradeContainerBase<?, ?> container = entry.getValue();
-			UpgradeGuiManager.getInventoryPart(entry.getKey(), container, pos, height, this).ifPresent(part -> inventoryParts.put(entry.getKey(), part));
-			pos = new Position(pos.getX() + 36, pos.getY());
+			UpgradeGuiManager.getInventoryPart(entry.getKey(), container, pos.get(), height, this).ifPresent(part -> {
+				inventoryParts.put(entry.getKey(), part);
+				pos.set(new Position(pos.get().getX() + 36, pos.get().getY()));
+			});
 		}
 	}
 
