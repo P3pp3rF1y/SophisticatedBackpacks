@@ -42,6 +42,7 @@ public class GiveCommand {
 			}
 			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
+				backpackWrapper.setColumnsTaken(alr.getColumnsTaken());
 				backpackWrapper.setContentsUuid(backpackUuid);
 			});
 

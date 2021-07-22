@@ -125,7 +125,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		{
 			ItemStack backpack = backpackWrapper.getBackpack();
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getDisplayName().getString(),
-					backpackWrapper.getClothColor(), backpackWrapper.getBorderColor());
+					backpackWrapper.getClothColor(), backpackWrapper.getBorderColor(), backpackWrapper.getColumnsTaken());
 		});
 	}
 
