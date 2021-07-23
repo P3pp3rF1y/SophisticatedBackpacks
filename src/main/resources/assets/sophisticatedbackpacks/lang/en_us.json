@@ -81,6 +81,7 @@
     "keybind.sophisticatedbackpacks.open_backpack": "Open Backpack",
     "keybind.sophisticatedbackpacks.inventory_interaction": "Run Inventory Interaction Upgrades",
     "keybind.sophisticatedbackpacks.tool_swap": "Swap tool based on current block/entity",
+    "keybind.sophisticatedbackpacks.sort": "Sort Backpack",
     "keybind.sophisticatedbackpacks.toggle_upgrade_1": "Switch Upgrade in the 1st Slot On/Off",
     "keybind.sophisticatedbackpacks.toggle_upgrade_2": "Switch Upgrade in the 2nd Slot On/Off",
     "keybind.sophisticatedbackpacks.toggle_upgrade_3": "Switch Upgrade in the 3rd Slot On/Off",
