@@ -40,8 +40,12 @@ public class BackpackSettingsManager {
 		return setting.getValue(getPlayerBackpackSettingsTag(player));
 	}
 
-	private static CompoundNBT getPlayerBackpackSettingsTag(PlayerEntity player) {
+	public static CompoundNBT getPlayerBackpackSettingsTag(PlayerEntity player) {
 		return player.getPersistentData().getCompound(SOPHISTICATED_BACKPACK_SETTINGS_TAG);
+	}
+
+	public static void setPlayerBackpackSettingsTag(PlayerEntity player, CompoundNBT settingsNbt) {
+		player.getPersistentData().put(SOPHISTICATED_BACKPACK_SETTINGS_TAG, settingsNbt);
 	}
 
 	public static <T> void setPlayerSetting(PlayerEntity player, BackpackSetting<T> setting, T value) {
