@@ -48,6 +48,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRendere
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
@@ -128,7 +129,7 @@ public class ClientProxy extends CommonProxy {
 
 	public static void handleKeyInputEvent(TickEvent.ClientTickEvent event) {
 		if (BACKPACK_OPEN_KEYBIND.isPressed()) {
-			sendBackpackOpenMessage();
+			sendBackpackOpenOrCloseMessage();
 		} else if (INVENTORY_INTERACTION_KEYBIND.isPressed()) {
 			sendInteractWithInventoryMessage();
 		} else if (TOOL_SWAP_KEYBIND.isPressed()) {
@@ -179,7 +180,8 @@ public class ClientProxy extends CommonProxy {
 		PacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getFace()));
 	}
 
-	private static void sendBackpackOpenMessage() {
+	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
+	private static void sendBackpackOpenOrCloseMessage() {
 		if (!GUI.isActive()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
 		} else {
@@ -189,6 +191,8 @@ public class ClientProxy extends CommonProxy {
 				Slot slot = backpackScreen.getSlotUnderMouse();
 				if (slot != null && slot.getStack().getItem() instanceof BackpackItem) {
 					PacketHandler.sendToServer(new BackpackOpenMessage(slot.slotNumber));
+				} else {
+					PacketHandler.sendToServer(new BackpackCloseMessage());
 				}
 			}
 		}

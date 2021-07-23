@@ -28,6 +28,7 @@ public class PacketHandler {
 	private static final String PROTOCOL = "1";
 	private static int idx = 0;
 
+	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
 	public static void init() {
 		networkWrapper = NetworkRegistry.newSimpleChannel(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "channel"),
 				() -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
@@ -50,6 +51,7 @@ public class PacketHandler {
 		registerMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::encode, SyncClientInfoMessage::decode, SyncClientInfoMessage::onMessage);
 		registerMessage(TankClickMessage.class, TankClickMessage::encode, TankClickMessage::decode, TankClickMessage::onMessage);
 		registerMessage(SyncPlayerSettingsMessage.class, SyncPlayerSettingsMessage::encode, SyncPlayerSettingsMessage::decode, SyncPlayerSettingsMessage::onMessage);
+		registerMessage(BackpackCloseMessage.class, (backpackCloseMessage, packetBuffer) -> {}, packetBuffer -> new BackpackCloseMessage(), (backpackCloseMessage, contextSupplier) -> BackpackCloseMessage.onMessage(contextSupplier));
 	}
 
 	@SuppressWarnings("SameParameterValue")

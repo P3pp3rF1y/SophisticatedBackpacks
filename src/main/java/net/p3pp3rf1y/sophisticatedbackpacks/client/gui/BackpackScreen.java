@@ -177,12 +177,11 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == 256 && !getContainer().isFirstLevelBackpack()) {
+	public void onClose() {
+		super.onClose();
+		if (!getContainer().isFirstLevelBackpack()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
-			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	private Position getSortButtonsPosition(SortButtonsPosition sortButtonsPosition) {
