@@ -459,15 +459,6 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 		Slot slot = getSelectedSlot(mouseX, mouseY);
 		if (doubleClick && slot != null && button == 0 && container.canMergeSlot(ItemStack.EMPTY, slot) && hasShiftDown() && !shiftClickedSlot.isEmpty()) {
-			for (Slot slot2 : container.upgradeSlots) {
-				if (slot2 != null && slot2.canTakeStack(minecraft.player) && slot2.getHasStack() && slot2.isSameInventory(slot) && BackpackContainer.canMergeItemToSlot(slot2, shiftClickedSlot)) {
-					handleMouseClick(slot2, slot2.slotNumber, button, ClickType.QUICK_MOVE);
-					return true;
-				}
-			}
-		}
-
-		if (doubleClick && slot != null && button == 0 && container.canMergeSlot(ItemStack.EMPTY, slot) && hasShiftDown() && !shiftClickedSlot.isEmpty()) {
 			for (Slot slot2 : container.realInventorySlots) {
 				if (slot2 != null && slot2.canTakeStack(minecraft.player) && slot2.getHasStack() && slot2.isSameInventory(slot) && Container.canAddItemToSlot(slot2, shiftClickedSlot, true)) {
 					handleMouseClick(slot2, slot2.slotNumber, button, ClickType.QUICK_MOVE);
