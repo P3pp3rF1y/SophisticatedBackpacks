@@ -206,7 +206,7 @@ public class BackpackTooltipRenderer {
 		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
 			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW)),
-					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer);
+					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer, -1);
 			renderTypeBuffer.finish();
 			return topY;
 		}

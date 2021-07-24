@@ -11,7 +11,7 @@ public class UpgradeSettingsTabControl extends SettingsTabControl<BackpackScreen
 		addChild(new BackpackSettingsTab(new Position(x, getTopY()), screen));
 		for (Map.Entry<Integer, UpgradeContainerBase<?, ?>> entry : screen.getContainer().getUpgradeContainers().entrySet()) {
 			addSettingsTab(() -> screen.getContainer().setOpenTabId(entry.getKey()), () -> screen.getContainer().removeOpenTabId(),
-					UpgradeSettingsTabManager.getTab(entry.getValue(), new Position(x, getTopY()), screen))
+					UpgradeGuiManager.getTab(entry.getValue(), new Position(x, getTopY()), screen))
 					.onAfterInit();
 		}
 	}

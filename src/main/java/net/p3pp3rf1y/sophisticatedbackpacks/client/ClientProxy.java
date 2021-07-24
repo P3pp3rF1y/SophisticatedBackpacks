@@ -20,12 +20,16 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -37,11 +41,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTESR;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
@@ -49,8 +56,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperFilterContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import java.util.Map;
@@ -65,6 +74,7 @@ public class ClientProxy extends CommonProxy {
 	private static final int KEY_Z = 90;
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
+	private static final int MIDDLE_BUTTON = 2;
 
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
 
@@ -74,6 +84,8 @@ public class ClientProxy extends CommonProxy {
 			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyBinding TOOL_SWAP_KEYBIND = new KeyBinding(translKeybind("tool_swap"),
 			KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final KeyBinding SORT_KEYBIND = new KeyBinding(translKeybind("sort"),
+			BackpackGuiKeyConflictContext.INSTANCE, InputMappings.Type.MOUSE.getOrMakeInput(MIDDLE_BUTTON), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyBinding BACKPACK_TOGGLE_UPGRADE_1 = new KeyBinding(translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputMappings.Type.KEYSYM.getOrMakeInput(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -94,9 +106,30 @@ public class ClientProxy extends CommonProxy {
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
 
+	private static void callSort() {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player != null && mc.player.openContainer instanceof BackpackContainer) {
+			((BackpackContainer) mc.player.openContainer).sort();
+		}
+	}
+
+	public static void handleGuiKeyPress(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.getInputByCode(event.getKeyCode(), event.getScanCode()))) {
+			callSort();
+			event.setCanceled(true);
+		}
+	}
+
+	public static void handleGuiMouseKeyPress(GuiScreenEvent.MouseClickedEvent.Pre event) {
+		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.Type.MOUSE.getOrMakeInput(event.getButton()))) {
+			callSort();
+			event.setCanceled(true);
+		}
+	}
+
 	public static void handleKeyInputEvent(TickEvent.ClientTickEvent event) {
 		if (BACKPACK_OPEN_KEYBIND.isPressed()) {
-			sendBackpackOpenMessage();
+			sendBackpackOpenOrCloseMessage();
 		} else if (INVENTORY_INTERACTION_KEYBIND.isPressed()) {
 			sendInteractWithInventoryMessage();
 		} else if (TOOL_SWAP_KEYBIND.isPressed()) {
@@ -147,7 +180,8 @@ public class ClientProxy extends CommonProxy {
 		PacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getFace()));
 	}
 
-	private static void sendBackpackOpenMessage() {
+	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
+	private static void sendBackpackOpenOrCloseMessage() {
 		if (!GUI.isActive()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
 		} else {
@@ -157,6 +191,8 @@ public class ClientProxy extends CommonProxy {
 				Slot slot = backpackScreen.getSlotUnderMouse();
 				if (slot != null && slot.getStack().getItem() instanceof BackpackItem) {
 					PacketHandler.sendToServer(new BackpackOpenMessage(slot.slotNumber));
+				} else {
+					PacketHandler.sendToServer(new BackpackCloseMessage());
 				}
 			}
 		}
@@ -169,8 +205,11 @@ public class ClientProxy extends CommonProxy {
 		modBus.addListener(this::loadComplete);
 		modBus.addListener(this::clientSetup);
 		modBus.addListener(this::stitchTextures);
+		modBus.addListener(this::onModelRegistry);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
+		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiMouseKeyPress);
+		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiKeyPress);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
 		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
@@ -186,11 +225,16 @@ public class ClientProxy extends CommonProxy {
 		});
 	}
 
+	private void onModelRegistry(ModelRegistryEvent event) {
+		ModelLoaderRegistry.registerLoader(RegistryHelper.getRL("backpack"), BackpackDynamicModel.Loader.INSTANCE);
+	}
+
 	private void clientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(() -> {
 			ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND);
 			ClientRegistry.registerKeyBinding(INVENTORY_INTERACTION_KEYBIND);
 			ClientRegistry.registerKeyBinding(TOOL_SWAP_KEYBIND);
+			ClientRegistry.registerKeyBinding(SORT_KEYBIND);
 			UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> ClientRegistry.registerKeyBinding(keybind));
 		});
 		RenderTypeLookup.setRenderLayer(ModBlocks.BACKPACK.get(), RenderType.getCutout());
@@ -199,6 +243,7 @@ public class ClientProxy extends CommonProxy {
 		RenderTypeLookup.setRenderLayer(ModBlocks.DIAMOND_BACKPACK.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(ModBlocks.NETHERITE_BACKPACK.get(), RenderType.getCutout());
 		RenderingRegistry.registerEntityRenderingHandler(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), renderManager -> new ItemRenderer(renderManager, Minecraft.getInstance().getItemRenderer()));
+		ClientRegistry.bindTileEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), BackpackTESR::new);
 	}
 
 	@SuppressWarnings("java:S3740") //explanation below
@@ -222,6 +267,8 @@ public class ClientProxy extends CommonProxy {
 			evt.addSprite(BackpackContainer.EMPTY_UPGRADE_SLOT_BACKGROUND);
 			evt.addSprite(ToolSwapperFilterContainer.EMPTY_WEAPON_SLOT_BACKGROUND);
 			ToolSwapperFilterContainer.EMPTY_TOOL_SLOT_BACKGROUNDS.values().forEach(evt::addSprite);
+			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_INPUT_SLOT_BACKGROUND);
+			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_OUTPUT_SLOT_BACKGROUND);
 		}
 	}
 
@@ -231,7 +278,6 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	private static class BackpackKeyConflictContext implements IKeyConflictContext {
-
 		public static final BackpackKeyConflictContext INSTANCE = new BackpackKeyConflictContext();
 
 		@Override
@@ -244,5 +290,19 @@ public class ClientProxy extends CommonProxy {
 			return this == other;
 		}
 
+	}
+
+	private static class BackpackGuiKeyConflictContext implements IKeyConflictContext {
+		public static final BackpackGuiKeyConflictContext INSTANCE = new BackpackGuiKeyConflictContext();
+
+		@Override
+		public boolean isActive() {
+			return GUI.isActive() && Minecraft.getInstance().currentScreen instanceof BackpackScreen;
+		}
+
+		@Override
+		public boolean conflicts(IKeyConflictContext other) {
+			return this == other;
+		}
 	}
 }

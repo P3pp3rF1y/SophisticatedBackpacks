@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -18,8 +17,7 @@ public class AutoSmeltingUpgradeTab extends UpgradeSettingsTab<AutoSmeltingUpgra
 	private final SmeltingLogicControl smeltingLogicControl;
 
 	public AutoSmeltingUpgradeTab(AutoSmeltingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("auto_smelting")),
-				new TranslationTextComponent(translUpgradeTooltip("auto_smelting")));
+		super(upgradeContainer, position, screen, translUpgrade("auto_smelting"), translUpgradeTooltip("auto_smelting"));
 		inputFilterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getInputFilterLogicContainer(),
 				Config.COMMON.autoSmeltingUpgrade.inputFilterSlotsInRow.get()));
 		smeltingLogicControl = addHideableChild(new SmeltingLogicControl(new Position(x + 3, y + 84), getContainer().getSmeltingLogicContainer()));

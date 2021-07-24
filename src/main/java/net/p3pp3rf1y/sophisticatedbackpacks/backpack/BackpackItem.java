@@ -201,7 +201,10 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> {
+				te.setBackpack(getBackpackCopy(player, backpack));
+				te.refreshRenderState();
+			});
 
 			if (!world.isRemote) {
 				stopBackpackSounds(backpack, world, pos);

@@ -10,7 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 public class ItemEnabledCondition implements ICondition {
-	private static final ResourceLocation NAME = RegistryHelper.getModRegistryResourceLocation("item_enabled");
+	private static final ResourceLocation NAME = RegistryHelper.getRL("item_enabled");
 	private final String itemRegistryName;
 
 	public ItemEnabledCondition(Item item) {

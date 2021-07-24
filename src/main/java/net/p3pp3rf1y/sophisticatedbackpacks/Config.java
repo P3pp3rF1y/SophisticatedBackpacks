@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Config {
@@ -81,6 +82,7 @@ public class Config {
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+		public final TankUpgradeConfig tankUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -118,6 +120,7 @@ public class Config {
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			tankUpgrade = new TankUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
@@ -232,6 +235,20 @@ public class Config {
 			}
 		}
 
+		public static class TankUpgradeConfig {
+			public final ForgeConfigSpec.IntValue capacityPerSlotRow;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue autoFillDrainContainerCooldown;
+
+			protected TankUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 2000, 500, 20000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to tank capacity. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting tank capacity").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				autoFillDrainContainerCooldown = builder.comment("Cooldown between fill/drain actions done on fluid containers in tank slots. Only fills/drains one bucket worth to/from container after this cooldown and then waits again.").defineInRange("autoFillDrainContainerCooldown", 20, 1, 100);
+				builder.pop();
+			}
+		}
+
 		public static class InceptionUpgradeConfig {
 			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
 			public final ForgeConfigSpec.BooleanValue upgradesInContainedBackpacksAreFunctional;
@@ -324,7 +341,7 @@ public class Config {
 
 		public static class EnabledItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new HashMap<>();
+			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
