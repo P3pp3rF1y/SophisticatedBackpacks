@@ -496,9 +496,15 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			} else if (!slotStack.isEmpty() && slot.canTakeStack(player)) {
 				int k2 = dragType == 0 ? Math.min(slotStack.getCount(), slotStack.getMaxStackSize()) : Math.min(slotStack.getMaxStackSize() + 1, slotStack.getCount() + 1) / 2;
 				int columnsTaken = ((IBackpackUpgradeItem<?>) slotStack.getItem()).getInventoryColumnsTaken();
-				player.inventory.setItemStack(slot.decrStackSize(k2));
+				ItemStack result = ItemStack.EMPTY;
+				if (clickType == ClickType.QUICK_MOVE) {
+					result = transferStackInSlot(player, slotId);
+				} else {
+					player.inventory.setItemStack(slot.decrStackSize(k2));
+				}
 				updateColumnsTaken(-columnsTaken);
 				slot.onTake(player, player.inventory.getItemStack());
+				return result;
 			}
 			return ItemStack.EMPTY;
 		}
@@ -508,7 +514,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	private void updateColumnsTaken(int columnsToRemove) {
 		if (columnsToRemove != 0) {
-			backpackWrapper.setColumnsTaken(backpackWrapper.getColumnsTaken() + columnsToRemove);
+			backpackWrapper.setColumnsTaken(Math.max(0, backpackWrapper.getColumnsTaken() + columnsToRemove));
 			backpackWrapper.onContentsNbtUpdated();
 			refreshAllSlots();
 		}
@@ -1296,16 +1302,26 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 					break;
 				}
 
-				Slot destStack = getSlot(i);
-				ItemStack itemstack1 = destStack.getStack();
-				if (itemstack1.isEmpty() && destStack.isItemValid(sourceStack) && !(destStack instanceof IFilterSlot)) {
-					if (toTransfer > destStack.getSlotStackLimit()) {
-						destStack.putStack(sourceStack.split(destStack.getSlotStackLimit()));
+				Slot destSlot = getSlot(i);
+				ItemStack itemstack1 = destSlot.getStack();
+				if (itemstack1.isEmpty() && destSlot.isItemValid(sourceStack) && !(destSlot instanceof IFilterSlot)) {
+					if (toTransfer > destSlot.getSlotStackLimit()) {
+						destSlot.putStack(sourceStack.split(destSlot.getSlotStackLimit()));
 					} else {
-						destStack.putStack(sourceStack.split(toTransfer));
+						if (isUpgradeSlot(i)) {
+							BackpackUpgradeSlot upgradeSlot = (BackpackUpgradeSlot) getSlot(i);
+							IBackpackUpgradeItem<?> backpackUpgradeItem = (IBackpackUpgradeItem<?>) sourceStack.getItem();
+							int newColumnsTaken = backpackUpgradeItem.getInventoryColumnsTaken();
+							if (!needsSlotsThatAreOccupied(sourceStack, 0, upgradeSlot, newColumnsTaken)) {
+								destSlot.putStack(sourceStack.split(toTransfer));
+								updateColumnsTaken(newColumnsTaken);
+							}
+						} else {
+							destSlot.putStack(sourceStack.split(toTransfer));
+						}
 					}
 
-					destStack.onSlotChanged();
+					destSlot.onSlotChanged();
 					flag = true;
 					break;
 				}
