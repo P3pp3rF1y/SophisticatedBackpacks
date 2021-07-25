@@ -27,6 +27,12 @@ repositories {
     maven { url "https://maven.tterrag.com/" }
     maven { url = "https://modmaven.dev/" }
     maven { url "https://minecraft.curseforge.com/api/maven/"}
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
     maven { url "http://maven.blamejared.com/" }
 }
 
@@ -99,6 +105,9 @@ dependencies {
 
     runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.4-1.6.47")
     runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.4-3.0.1.37")
+    runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
+    runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
+    runtimeOnly fg.deobf("curse.maven:charm-reforged-430988:3214651")
 }
 
 test {
