@@ -56,14 +56,14 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 	}
 
 	private void tryFeedingFoodFromBackpack(World world, int hungerLevel, PlayerEntity player) {
-		boolean isHurt = player.getHealth() < player.getMaxHealth() - 1;
+		boolean isHurt = player.getHealth() < player.getMaxHealth() - 0.1F;
 		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
 			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
 				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().onItemUseFinish(stack, world, player));
 				inventory.setStackInSlot(slot, stack);
-				if (containerItem != stack) {
+				if (!ItemStack.areItemStacksEqual(containerItem, stack)) {
 					//not handling the case where player doesn't have item handler cap as the player should always have it. if that changes in the future well I guess I fix it
 					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
 							.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, containerItem, inventory, playerInventory));
