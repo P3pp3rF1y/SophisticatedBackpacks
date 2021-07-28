@@ -22,7 +22,7 @@ public class LootHelper {
 
 	public static List<ItemStack> getLoot(ResourceLocation lootTableName, MinecraftServer server, ServerWorld world, Entity entity) {
 		LootTable lootTable = server.getLootTableManager().getLootTableFromLocation(lootTableName);
-		LootContext.Builder lootBuilder = (new LootContext.Builder(world)).withParameter(LootParameters.field_237457_g_, Vector3d.copyCentered(entity.getPosition())).withSeed(world.rand.nextLong());
+		LootContext.Builder lootBuilder = (new LootContext.Builder(world)).withParameter(LootParameters.ORIGIN, Vector3d.copyCentered(entity.getPosition())).withSeed(world.rand.nextLong());
 		List<ItemStack> lootStacks = new ArrayList<>();
 		lootTable.recursiveGenerate(lootBuilder.build(LootParameterSets.CHEST), lootStacks::add);
 		return lootStacks;

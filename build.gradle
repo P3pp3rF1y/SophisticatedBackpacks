@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.0.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
 
@@ -22,7 +22,7 @@ apply plugin: 'idea'
 
 repositories {
     mavenCentral()
-    maven { url "http://dvs1.progwml6.com/files/maven" }
+    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { url "https://maven.theillusivec4.top/" }
     maven { url "https://maven.tterrag.com/" }
     maven { url = "https://modmaven.dev/" }
@@ -33,7 +33,7 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven { url "http://maven.blamejared.com/" }
+    maven { url "https://maven.blamejared.com/" }
 }
 
 group = 'sophisticatedbackpacks'
@@ -47,10 +47,11 @@ minecraft {
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
-            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
-            properties 'forge.logging.console.level': 'debug'
-            properties 'mixin.env.disableRefMap': 'true'
             workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 sophisticatedbackpacks {
                     source sourceSets.main
@@ -58,9 +59,10 @@ minecraft {
             }
         }
         server {
-            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
-            properties 'forge.logging.console.level': 'debug'
-            properties 'mixin.env.disableRefMap': 'true'
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -69,10 +71,11 @@ minecraft {
             }
         }
         data {
-            properties 'forge.logging.markers': 'REGISTRIES,REGISTRYDUMP'
-            properties 'forge.logging.console.level': 'debug'
-            properties 'fml.earlyprogresswindow': 'false'
-            properties 'mixin.env.disableRefMap': 'true'
+            property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            property 'fml.earlyprogresswindow', 'false'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -101,13 +104,13 @@ dependencies {
     runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-    compile fg.deobf("crafting-tweaks:CraftingTweaks_${crafting_tweaks_mc_version}:${crafting_tweaks_version}")
+    compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
 
-    runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.4-1.6.47")
-    runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.4-3.0.1.37")
+    runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
+    runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
     runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
     runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
-    runtimeOnly fg.deobf("curse.maven:charm-reforged-430988:3214651")
 }
 
 test {
