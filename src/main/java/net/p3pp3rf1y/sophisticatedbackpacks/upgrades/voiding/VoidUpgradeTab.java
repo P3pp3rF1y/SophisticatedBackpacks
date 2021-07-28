@@ -1,19 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding;
 
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgrade;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgrade;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeTooltip;
 
 public class VoidUpgradeTab extends UpgradeSettingsTab<VoidUpgradeContainer> {
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
@@ -31,8 +30,7 @@ public class VoidUpgradeTab extends UpgradeSettingsTab<VoidUpgradeContainer> {
 
 	public static class Basic extends VoidUpgradeTab {
 		public Basic(VoidUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("void")),
-					new TranslationTextComponent(translUpgradeTooltip("void")));
+			super(upgradeContainer, position, screen, translUpgrade("void"), translUpgradeTooltip("void"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.voidUpgrade.slotsInRow.get()));
 		}
@@ -40,8 +38,7 @@ public class VoidUpgradeTab extends UpgradeSettingsTab<VoidUpgradeContainer> {
 
 	public static class Advanced extends VoidUpgradeTab {
 		public Advanced(VoidUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("advanced_void")),
-					new TranslationTextComponent(translUpgradeTooltip("advanced_void")));
+			super(upgradeContainer, position, screen, translUpgrade("advanced_void"), translUpgradeTooltip("advanced_void"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedVoidUpgrade.slotsInRow.get()));
 		}

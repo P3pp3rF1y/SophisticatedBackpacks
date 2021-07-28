@@ -1,8 +1,4 @@
 {
-    "credit": "Made with Blockbench",
-    "parent": "sophisticatedbackpacks:block/backpack",
-    "texture_size": [32, 32],
-    "textures": {
-        "clips": "sophisticatedbackpacks:block/diamond_clips"
-    }
+    "loader": "sophisticatedbackpacks:backpack",
+    "clipsTexture": "sophisticatedbackpacks:block/diamond_clips"
 }

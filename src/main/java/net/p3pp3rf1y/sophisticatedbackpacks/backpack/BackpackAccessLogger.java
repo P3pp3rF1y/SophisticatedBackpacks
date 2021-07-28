@@ -20,12 +20,12 @@ public class BackpackAccessLogger {
 	private static long lastCacheRefresh = 0;
 	private static final Map<String, Set<AccessLogRecord>> playerLogCache = new HashMap<>();
 
-	public static void logPlayerAccess(PlayerEntity player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor) {
+	public static void logPlayerAccess(PlayerEntity player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor, int columnsTaken) {
 		if (player.world.isRemote) {
 			return;
 		}
 		//noinspection ConstantConditions - at this point the registry name of item exists for sure otherwise the player wouldn't be able to open the backpack
-		BackpackStorage.get().putAccessLog(new AccessLogRecord(backpackItem.getRegistryName(), backpackUuid, player.getDisplayName().getString(), backpackName, clothColor, trimColor, Util.millisecondsSinceEpoch()));
+		BackpackStorage.get().putAccessLog(new AccessLogRecord(backpackItem.getRegistryName(), backpackUuid, player.getDisplayName().getString(), backpackName, clothColor, trimColor, Util.millisecondsSinceEpoch(), columnsTaken));
 	}
 
 	public static Set<String> getPlayerNames() {

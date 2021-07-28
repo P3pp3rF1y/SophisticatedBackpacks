@@ -1,0 +1,25 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "tank_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "GGG",
+        "GBG",
+        "GGG"
+    ],
+    "key": {
+        "G": {
+            "tag": "forge:glass"
+        },
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:tank_upgrade"
+    }
+}

@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help us fix
 title: ''
 labels: ''
 assignees: ''
@@ -9,6 +9,7 @@ assignees: ''
 
 **Describe the bug**
 A clear and concise description of what the bug is.
+Crash log if it's a crash.
 Info on what other mods you're using that may cause a conflict here if applicable.
 
 Please go to [Discussions](https://github.com/P3pp3rF1y/SophisticatedBackpacks/discussions) to add new feature requests / suggestions or comment on existing ones.

@@ -13,6 +13,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -33,7 +34,13 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -49,12 +56,15 @@ import javax.annotation.Nullable;
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackBlock extends Block implements IWaterLoggable {
+	public static final BooleanProperty LEFT_TANK = BooleanProperty.create("left_tank");
+	public static final BooleanProperty RIGHT_TANK = BooleanProperty.create("right_tank");
+
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final int BEDROCK_RESISTANCE = 3600000;
 
 	public BackpackBlock() {
 		super(Properties.create(Material.WOOL).notSolid().hardnessAndResistance(0.8F).sound(SoundType.CLOTH));
-		setDefaultState(stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false));
+		setDefaultState(stateContainer.getBaseState().with(FACING, Direction.NORTH).with(WATERLOGGED, false).with(LEFT_TANK, false).with(RIGHT_TANK, false));
 	}
 
 	@Override
@@ -73,7 +83,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED);
+		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK);
 	}
 
 	@Override
@@ -90,19 +100,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		Direction facing = state.get(FACING);
-
-		switch (facing) {
-			case NORTH:
-				return BackpackShapes.NORTH_SHAPE;
-			case SOUTH:
-				return BackpackShapes.SOUTH_SHAPE;
-			case WEST:
-				return BackpackShapes.WEST_SHAPE;
-			case EAST:
-			default:
-				return BackpackShapes.EAST_SHAPE;
-		}
+		return BackpackShapes.getShape(state.get(FACING), state.get(LEFT_TANK), state.get(RIGHT_TANK), false);
 	}
 
 	@Override
@@ -122,13 +120,33 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 			return ActionResultType.SUCCESS;
 		}
 
-		if (player.isSneaking() && player.getHeldItem(hand).isEmpty()) {
+		ItemStack heldItem = player.getHeldItem(hand);
+		if (player.isSneaking() && heldItem.isEmpty()) {
 			putInPlayersHandAndRemove(state, world, pos, player, hand);
 			return ActionResultType.SUCCESS;
 		}
 
-		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Block(pos)),
-				getBackpackDisplayName(world, pos)), buf -> buf.writeLong(pos.toLong()));
+		if (!heldItem.isEmpty() && heldItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> {
+				IFluidHandler backpackFluidHandler = te.getBackpackWrapper().getFluidHandler();
+				player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
+					FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+					if (resultOfEmptying.isSuccess()) {
+						player.setHeldItem(hand, resultOfEmptying.getResult());
+					} else {
+						FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+						if (resultOfFilling.isSuccess()) {
+							player.setHeldItem(hand, resultOfFilling.getResult());
+						}
+					}
+				});
+			});
+			return ActionResultType.SUCCESS;
+		}
+
+		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
+		NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
+				getBackpackDisplayName(world, pos)), backpackContext::toBuffer);
 		return ActionResultType.SUCCESS;
 	}
 
@@ -213,4 +231,5 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 			itemEntity.setItem(remainingStack);
 		}
 	}
+
 }

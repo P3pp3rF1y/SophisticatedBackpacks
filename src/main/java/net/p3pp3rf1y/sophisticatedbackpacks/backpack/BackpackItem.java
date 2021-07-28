@@ -43,6 +43,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -88,7 +89,7 @@ public class BackpackItem extends ItemBase {
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
 		super.fillItemGroup(group, items);
 
-		if (!isInGroup(group) || this != ModItems.BACKPACK.get()) {
+		if (!isInGroup(group) || this != ModItems.BACKPACK.get() || !Config.COMMON.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
@@ -200,7 +201,10 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockState(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItem();
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> te.setBackpack(getBackpackCopy(player, backpack)));
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> {
+				te.setBackpack(getBackpackCopy(player, backpack));
+				te.refreshRenderState();
+			});
 
 			if (!world.isRemote) {
 				stopBackpackSounds(backpack, world, pos);
@@ -244,11 +248,9 @@ public class BackpackItem extends ItemBase {
 		if (!world.isRemote && player instanceof ServerPlayerEntity) {
 			String handlerName = hand == Hand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == Hand.MAIN_HAND ? player.inventory.currentItem : 0;
-			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, new BackpackContext.Item(handlerName, slot)), stack.getDisplayName()),
-					buf -> {
-						buf.writeString(handlerName);
-						buf.writeInt(slot);
-					});
+			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);
+			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getDisplayName()),
+					context::toBuffer);
 		}
 		return ActionResult.resultSuccess(stack);
 	}

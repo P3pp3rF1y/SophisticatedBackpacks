@@ -5,6 +5,7 @@ import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackInventorySlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
@@ -27,6 +28,7 @@ public class InventorySorterCompat implements ICompat {
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, FilterLogicContainer.FilterLogicSlot.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, SlotSuppliedHandler.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, ToolFilterSlot.class::getName);
+			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, BackpackInventorySlot.class::getName);
 		});
 	}
 

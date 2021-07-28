@@ -14,16 +14,16 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BackpackSoundHandler {
 	private static final int SOUND_STOP_CHECK_INTERVAL = 10;
 
 	private BackpackSoundHandler() {}
 
-	private static final Map<UUID, ISound> backpackSounds = new HashMap<>();
+	private static final Map<UUID, ISound> backpackSounds = new ConcurrentHashMap<>();
 	private static long lastPlaybackChecked = 0;
 
 	public static void playBackpackSound(UUID backpackUuid, ISound sound) {

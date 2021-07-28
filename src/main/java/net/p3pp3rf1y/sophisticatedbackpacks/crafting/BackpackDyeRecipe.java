@@ -158,7 +158,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 
 	@Override
 	public boolean canFit(int width, int height) {
-		return width >= 3 && height >= 1;
+		return width >= 2 && height >= 1;
 	}
 
 	@Override

@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import java.util.function.Supplier;
 

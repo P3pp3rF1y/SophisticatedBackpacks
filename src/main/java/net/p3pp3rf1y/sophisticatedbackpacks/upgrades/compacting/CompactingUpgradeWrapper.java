@@ -34,7 +34,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
 
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(),
-				stack -> !RecipeHelper.getItemCompactingShapes(stack.getItem()).isEmpty());
+				stack -> !stack.hasTag() && !RecipeHelper.getItemCompactingShapes(stack.getItem()).isEmpty());
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 	private void compactSlot(IItemHandler inventoryHandler, int slot) {
 		ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 
-		if (!filterLogic.matchesFilter(slotStack)) {
+		if (slotStack.hasTag() || !filterLogic.matchesFilter(slotStack)) {
 			return;
 		}
 

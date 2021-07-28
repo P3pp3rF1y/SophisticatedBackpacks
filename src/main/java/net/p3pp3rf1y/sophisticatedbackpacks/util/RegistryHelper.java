@@ -12,7 +12,7 @@ import java.util.Optional;
 public class RegistryHelper {
 	private RegistryHelper() {}
 
-	public static ResourceLocation getModRegistryResourceLocation(String regName) {
+	public static ResourceLocation getRL(String regName) {
 		return new ResourceLocation(getModRegistryName(regName));
 	}
 

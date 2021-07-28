@@ -409,6 +409,15 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion("has_tool_swapper_upgrade", hasItem(ModItems.TOOL_SWAPPER_UPGRADE.get()))
 				.build(consumer);
 
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.TANK_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("GGG")
+				.patternLine("GBG")
+				.patternLine("GGG")
+				.key('G', Tags.Items.GLASS)
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
 		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.fromItems(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.fromItems(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.addCriterion("has_diamond_backpack", hasItem(ModItems.DIAMOND_BACKPACK.get()))

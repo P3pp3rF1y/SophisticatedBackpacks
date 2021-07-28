@@ -19,12 +19,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
@@ -71,11 +71,13 @@ public class BackpackTooltipRenderer {
 			refreshContents(wrapper, minecraft);
 
 			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-			int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
-			if (multiplier > 1) {
-				lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
-						new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
-				).mergeStyle(TextFormatting.GREEN));
+			if (backpackUuid != null) {
+				int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
+				if (multiplier > 1) {
+					lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
+							new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
+					).mergeStyle(TextFormatting.GREEN));
+				}
 			}
 			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
 			event.setCanceled(true);
@@ -83,10 +85,10 @@ public class BackpackTooltipRenderer {
 
 	}
 
-	private static void requestContents(ClientPlayerEntity player, net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper wrapper) {
+	private static void requestContents(ClientPlayerEntity player, IBackpackWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
 			lastRequestTime = player.world.getGameTime();
-			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackContentsMessage(uuid)));
+			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
 		}
 	}
 
@@ -204,7 +206,7 @@ public class BackpackTooltipRenderer {
 		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
 			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW)),
-					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer);
+					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer, -1);
 			renderTypeBuffer.finish();
 			return topY;
 		}

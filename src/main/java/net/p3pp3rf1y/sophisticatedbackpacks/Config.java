@@ -1,11 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Item;
 import net.minecraft.loot.LootTables;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -15,10 +18,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Config {
-
 	private static final String SETTINGS = " Settings";
 
 	private Config() {}
@@ -78,8 +81,13 @@ public class Config {
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
-		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+		public final TankUpgradeConfig tankUpgrade;
+
+		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
+		public void onConfigReload(ModConfig.Reloading event) {
+			enabledItems.enabledMap.clear();
+		}
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -112,12 +120,10 @@ public class Config {
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			tankUpgrade = new TankUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
-
-			shiftClickIntoOpenTabFirst = builder.comment("Shift clicking will first move the stack into open tab and only then to player's inventory or to backpack (based on where shift clicking from backpack or from player's inventory).",
-					"Setting this to false will move stacks to backpack/inventory first.").define("shiftClickIntoOpenTabFirst", true);
 
 			builder.pop();
 		}
@@ -229,6 +235,20 @@ public class Config {
 			}
 		}
 
+		public static class TankUpgradeConfig {
+			public final ForgeConfigSpec.IntValue capacityPerSlotRow;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue autoFillDrainContainerCooldown;
+
+			protected TankUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 2000, 500, 20000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to tank capacity. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting tank capacity").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				autoFillDrainContainerCooldown = builder.comment("Cooldown between fill/drain actions done on fluid containers in tank slots. Only fills/drains one bucket worth to/from container after this cooldown and then waits again.").defineInRange("autoFillDrainContainerCooldown", 20, 1, 100);
+				builder.pop();
+			}
+		}
+
 		public static class InceptionUpgradeConfig {
 			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
 			public final ForgeConfigSpec.BooleanValue upgradesInContainedBackpacksAreFunctional;
@@ -321,13 +341,20 @@ public class Config {
 
 		public static class EnabledItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new HashMap<>();
+			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
 			}
 
+			public boolean isItemEnabled(Item item) {
+				return RegistryHelper.getRegistryName(item).map(rn -> isItemEnabled(rn.getPath())).orElse(false);
+			}
+
 			public boolean isItemEnabled(String itemRegistryName) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
 				if (enabledMap.isEmpty()) {
 					loadEnabledMap();
 				}
