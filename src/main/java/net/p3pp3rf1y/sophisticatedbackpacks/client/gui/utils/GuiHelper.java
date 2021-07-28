@@ -227,7 +227,7 @@ public class GuiHelper {
 		for (int i = 0; i < textLines.size(); ++i) {
 			ITextProperties line = textLines.get(i);
 			if (line != null) {
-				font.func_238416_a_(LanguageMap.getInstance().func_241870_a(line), leftX, (float) topY, color, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
+				font.drawEntityText(LanguageMap.getInstance().func_241870_a(line), leftX, (float) topY, color, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
 			}
 
 			if (i == 0) {

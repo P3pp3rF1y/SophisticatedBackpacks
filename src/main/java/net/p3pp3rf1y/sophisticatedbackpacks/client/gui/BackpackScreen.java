@@ -431,7 +431,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Nullable
 	@Override
-	protected Slot getSelectedSlot(double mouseX, double mouseY) {
+	public Slot getSelectedSlot(double mouseX, double mouseY) {
 		for (int i = 0; i < container.upgradeSlots.size(); ++i) {
 			Slot slot = container.upgradeSlots.get(i);
 			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {

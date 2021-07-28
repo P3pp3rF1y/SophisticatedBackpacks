@@ -193,7 +193,7 @@ public class ModItems {
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.create(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
-					.size(0.25F, 0.25F).trackingRange(6).func_233608_b_(20).build("")
+					.size(0.25F, 0.25F).trackingRange(6).updateInterval(20).build("")
 	);
 
 	public static void registerHandlers(IEventBus modBus) {

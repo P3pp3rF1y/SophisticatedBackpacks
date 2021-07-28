@@ -424,6 +424,10 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return mergeItemStack(slotStack, getNumberOfSlots(), getInventorySlotsSize(), true, transferMaxStackSizeFromSource);
 	}
 
+	public boolean isPlayersInventorySlot(int slotNumber) {
+		return slotNumber >= getNumberOfSlots() && slotNumber < getInventorySlotsSize();
+	}
+
 	private boolean isUpgradeSettingsSlot(int index) {
 		return index >= getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}

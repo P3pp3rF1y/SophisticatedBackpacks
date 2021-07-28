@@ -2,7 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -106,23 +108,31 @@ public class ClientProxy extends CommonProxy {
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
 
-	private static void callSort() {
+	private static boolean tryCallSort(Screen gui) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player != null && mc.player.openContainer instanceof BackpackContainer) {
-			((BackpackContainer) mc.player.openContainer).sort();
+		if (mc.player != null && mc.player.openContainer instanceof BackpackContainer && gui instanceof BackpackScreen) {
+			BackpackScreen screen = (BackpackScreen) gui;
+			MouseHelper mh = mc.mouseHelper;
+			double mouseX = mh.getMouseX() * mc.getMainWindow().getScaledWidth() / mc.getMainWindow().getWidth();
+			double mouseY = mh.getMouseY() * mc.getMainWindow().getScaledHeight() / mc.getMainWindow().getHeight();
+			BackpackContainer container = (BackpackContainer) mc.player.openContainer;
+			Slot selectedSlot = screen.getSelectedSlot(mouseX, mouseY);
+			if (selectedSlot != null && !container.isPlayersInventorySlot(selectedSlot.slotNumber)) {
+				container.sort();
+				return true;
+			}
 		}
+		return false;
 	}
 
 	public static void handleGuiKeyPress(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.getInputByCode(event.getKeyCode(), event.getScanCode()))) {
-			callSort();
+		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.getInputByCode(event.getKeyCode(), event.getScanCode())) && tryCallSort(event.getGui())) {
 			event.setCanceled(true);
 		}
 	}
 
 	public static void handleGuiMouseKeyPress(GuiScreenEvent.MouseClickedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.Type.MOUSE.getOrMakeInput(event.getButton()))) {
-			callSort();
+		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.Type.MOUSE.getOrMakeInput(event.getButton())) && tryCallSort(event.getGui())) {
 			event.setCanceled(true);
 		}
 	}

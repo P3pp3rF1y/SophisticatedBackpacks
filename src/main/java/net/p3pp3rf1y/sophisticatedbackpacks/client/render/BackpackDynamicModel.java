@@ -133,7 +133,6 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(0.75f, 0.75f, 0.75f), null
 			));
-
 			TRANSFORMS = builder.build();
 		}
 
@@ -261,6 +260,10 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		@Override
 		public IBakedModel handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack matrixStack) {
+			if (cameraTransformType == ItemCameraTransforms.TransformType.NONE) {
+				return this;
+			}
+
 			TransformationMatrix tr = TRANSFORMS.get(cameraTransformType);
 
 			if (!tr.isIdentity()) {
