@@ -31,7 +31,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 	}
 
 	@Override
-	protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
+	protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BACKPACK.get())
 				.patternLine("SLS")
 				.patternLine("SCS")
@@ -39,10 +39,10 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('L', Tags.Items.LEATHER)
 				.key('C', Tags.Items.CHESTS_WOODEN)
 				.key('S', Tags.Items.STRING)
-				.addCriterion("has_leather", hasItem(Tags.Items.LEATHER))
+				.addCriterion("has_leather", has(Tags.Items.LEATHER))
 				.build(consumer);
 
-		CustomRecipeBuilder.customRecipe(BackpackDyeRecipe.SERIALIZER).build(consumer, getModRegistryName("backpack_dye"));
+		CustomRecipeBuilder.special(BackpackDyeRecipe.SERIALIZER).save(consumer, getModRegistryName("backpack_dye"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")
@@ -50,7 +50,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("DDD")
 				.key('D', Tags.Items.GEMS_DIAMOND)
 				.key('B', ModItems.GOLD_BACKPACK.get())
-				.addCriterion("has_gold_backpack", hasItem(ModItems.GOLD_BACKPACK.get()))
+				.addCriterion("has_gold_backpack", has(ModItems.GOLD_BACKPACK.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.GOLD_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
@@ -59,7 +59,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("GGG")
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('B', ModItems.IRON_BACKPACK.get())
-				.addCriterion("has_iron_backpack", hasItem(ModItems.IRON_BACKPACK.get()))
+				.addCriterion("has_iron_backpack", has(ModItems.IRON_BACKPACK.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.IRON_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
@@ -68,7 +68,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("III")
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('B', ModItems.BACKPACK.get())
-				.addCriterion("has_backpack", hasItem(ModItems.BACKPACK.get()))
+				.addCriterion("has_backpack", has(ModItems.BACKPACK.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.PICKUP_UPGRADE.get())
@@ -79,7 +79,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('S', Tags.Items.STRING)
 				.key('P', Blocks.STICKY_PISTON)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.UPGRADE_BASE.get())
@@ -89,7 +89,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('L', Tags.Items.LEATHER)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('S', Tags.Items.STRING)
-				.addCriterion("has_leather", hasItem(Tags.Items.LEATHER))
+				.addCriterion("has_leather", has(Tags.Items.LEATHER))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_PICKUP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -100,7 +100,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', ModItems.PICKUP_UPGRADE.get())
-				.addCriterion("has_pickup_upgrade", hasItem(ModItems.PICKUP_UPGRADE.get()))
+				.addCriterion("has_pickup_upgrade", has(ModItems.PICKUP_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.FILTER_UPGRADE.get())
@@ -110,7 +110,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('B', ModItems.UPGRADE_BASE.get())
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('S', Tags.Items.STRING)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_FILTER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -119,7 +119,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', ModItems.FILTER_UPGRADE.get())
-				.addCriterion("has_filter_upgrade", hasItem(ModItems.FILTER_UPGRADE.get()))
+				.addCriterion("has_filter_upgrade", has(ModItems.FILTER_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -131,7 +131,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('L', Tags.Items.GEMS_LAPIS)
 				.key('P', ModItems.PICKUP_UPGRADE.get())
-				.addCriterion("has_pickup_upgrade", hasItem(ModItems.PICKUP_UPGRADE.get()))
+				.addCriterion("has_pickup_upgrade", has(ModItems.PICKUP_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -143,7 +143,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('L', Tags.Items.GEMS_LAPIS)
 				.key('P', ModItems.ADVANCED_PICKUP_UPGRADE.get())
-				.addCriterion("has_advanced_pickup_upgrade", hasItem(ModItems.ADVANCED_PICKUP_UPGRADE.get()))
+				.addCriterion("has_advanced_pickup_upgrade", has(ModItems.ADVANCED_PICKUP_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_MAGNET_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -154,7 +154,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('M', ModItems.MAGNET_UPGRADE.get())
-				.addCriterion("has_magnet_upgrade", hasItem(ModItems.MAGNET_UPGRADE.get()))
+				.addCriterion("has_magnet_upgrade", has(ModItems.MAGNET_UPGRADE.get()))
 				.build(consumer, new ResourceLocation(RegistryHelper.getModRegistryName("advanced_magnet_upgrade_from_basic")));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.FEEDING_UPGRADE.get())
@@ -166,7 +166,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('A', Items.GOLDEN_APPLE)
 				.key('M', Items.GLISTERING_MELON_SLICE)
 				.key('E', Tags.Items.ENDER_PEARLS)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.COMPACTING_UPGRADE.get())
@@ -177,7 +177,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('P', Items.PISTON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_COMPACTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -188,7 +188,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('C', ModItems.COMPACTING_UPGRADE.get())
-				.addCriterion("has_compacting_upgrade", hasItem(ModItems.COMPACTING_UPGRADE.get()))
+				.addCriterion("has_compacting_upgrade", has(ModItems.COMPACTING_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.VOID_UPGRADE.get())
@@ -199,7 +199,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('E', Tags.Items.ENDER_PEARLS)
 				.key('O', Tags.Items.OBSIDIAN)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_VOID_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -210,7 +210,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.VOID_UPGRADE.get())
-				.addCriterion("has_void_upgrade", hasItem(ModItems.VOID_UPGRADE.get()))
+				.addCriterion("has_void_upgrade", has(ModItems.VOID_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.RESTOCK_UPGRADE.get())
@@ -222,7 +222,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', Items.STICKY_PISTON)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_RESTOCK_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -233,7 +233,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.RESTOCK_UPGRADE.get())
-				.addCriterion("has_restock_upgrade", hasItem(ModItems.RESTOCK_UPGRADE.get()))
+				.addCriterion("has_restock_upgrade", has(ModItems.RESTOCK_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DEPOSIT_UPGRADE.get())
@@ -245,7 +245,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('P', Items.PISTON)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_DEPOSIT_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -256,7 +256,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.DEPOSIT_UPGRADE.get())
-				.addCriterion("has_deposit_upgrade", hasItem(ModItems.DEPOSIT_UPGRADE.get()))
+				.addCriterion("has_deposit_upgrade", has(ModItems.DEPOSIT_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.REFILL_UPGRADE.get())
@@ -268,7 +268,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('E', Tags.Items.ENDER_PEARLS)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.INCEPTION_UPGRADE.get())
@@ -279,7 +279,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('S', Tags.Items.NETHER_STARS)
 				.key('D', Tags.Items.GEMS_DIAMOND)
 				.key('E', Items.ENDER_EYE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.EVERLASTING_UPGRADE.get())
@@ -289,7 +289,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('B', ModItems.UPGRADE_BASE.get())
 				.key('S', Tags.Items.NETHER_STARS)
 				.key('C', Items.END_CRYSTAL)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.SMELTING_UPGRADE.get())
@@ -300,7 +300,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('F', Items.FURNACE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMELTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -312,7 +312,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('H', Items.HOPPER)
 				.key('S', ModItems.SMELTING_UPGRADE.get())
-				.addCriterion("has_smelting_upgrade", hasItem(ModItems.SMELTING_UPGRADE.get()))
+				.addCriterion("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.CRAFTING_UPGRADE.get())
@@ -323,7 +323,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('C', Tags.Items.CHESTS)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('T', Items.CRAFTING_TABLE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STONECUTTER_UPGRADE.get())
@@ -334,7 +334,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('S', Items.STONECUTTER)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_1.get())
@@ -343,7 +343,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("III")
 				.key('B', ModItems.UPGRADE_BASE.get())
 				.key('I', Tags.Items.STORAGE_BLOCKS_IRON)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_2.get())
@@ -352,7 +352,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("GGG")
 				.key('S', ModItems.STACK_UPGRADE_TIER_1.get())
 				.key('G', Tags.Items.STORAGE_BLOCKS_GOLD)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_1.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_1.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_3.get())
@@ -361,7 +361,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("DDD")
 				.key('S', ModItems.STACK_UPGRADE_TIER_2.get())
 				.key('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_2.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_2.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.STACK_UPGRADE_TIER_4.get())
@@ -370,7 +370,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("NNN")
 				.key('S', ModItems.STACK_UPGRADE_TIER_3.get())
 				.key('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.STACK_UPGRADE_TIER_3.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_3.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.JUKEBOX_UPGRADE.get())
@@ -381,7 +381,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('J', Items.JUKEBOX)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.TOOL_SWAPPER_UPGRADE.get())
@@ -395,7 +395,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('W', Items.WOODEN_SWORD)
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.ADVANCED_TOOL_SWAPPER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -406,7 +406,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('G', Tags.Items.INGOTS_GOLD)
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('V', ModItems.TOOL_SWAPPER_UPGRADE.get())
-				.addCriterion("has_tool_swapper_upgrade", hasItem(ModItems.TOOL_SWAPPER_UPGRADE.get()))
+				.addCriterion("has_tool_swapper_upgrade", has(ModItems.TOOL_SWAPPER_UPGRADE.get()))
 				.build(consumer);
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.TANK_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -415,12 +415,12 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.patternLine("GGG")
 				.key('G', Tags.Items.GLASS)
 				.key('B', ModItems.UPGRADE_BASE.get())
-				.addCriterion(HAS_UPGRADE_BASE_CRITERION, hasItem(ModItems.UPGRADE_BASE.get()))
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
 				.build(consumer);
 
-		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.fromItems(ModItems.DIAMOND_BACKPACK.get()),
-				Ingredient.fromItems(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
-				.addCriterion("has_diamond_backpack", hasItem(ModItems.DIAMOND_BACKPACK.get()))
-				.build(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
+		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
+				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
+				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
+				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
 	}
 }

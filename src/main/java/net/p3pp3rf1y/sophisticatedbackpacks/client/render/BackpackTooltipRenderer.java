@@ -70,13 +70,13 @@ public class BackpackTooltipRenderer {
 			requestContents(player, wrapper);
 			refreshContents(wrapper, minecraft);
 
-			List<ITextComponent> lines = backpack.getTooltip(player, minecraft.gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+			List<ITextComponent> lines = backpack.getTooltipLines(player, minecraft.options.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
 			if (backpackUuid != null) {
 				int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
 				if (multiplier > 1) {
 					lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
-							new StringTextComponent(Integer.toString(multiplier)).mergeStyle(TextFormatting.WHITE)
-					).mergeStyle(TextFormatting.GREEN));
+							new StringTextComponent(Integer.toString(multiplier)).withStyle(TextFormatting.WHITE)
+					).withStyle(TextFormatting.GREEN));
 				}
 			}
 			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
@@ -86,8 +86,8 @@ public class BackpackTooltipRenderer {
 	}
 
 	private static void requestContents(ClientPlayerEntity player, IBackpackWrapper wrapper) {
-		if (lastRequestTime + REFRESH_INTERVAL < player.world.getGameTime()) {
-			lastRequestTime = player.world.getGameTime();
+		if (lastRequestTime + REFRESH_INTERVAL < player.level.getGameTime()) {
+			lastRequestTime = player.level.getGameTime();
 			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
 		}
 	}
@@ -153,7 +153,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int calculateContentsWidth() {
-			FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+			FontRenderer fontRenderer = Minecraft.getInstance().font;
 			int contentsWidth = 0;
 			for (int i = 0; i < backpackContents.size() && i < MAX_STACKS_ON_LINE; i++) {
 				int countWidth = getStackCountWidth(fontRenderer, backpackContents.get(i));
@@ -164,7 +164,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int getStackCountWidth(FontRenderer fontRenderer, ItemStack stack) {
-			return fontRenderer.getStringWidth(CountAbbreviator.abbreviate(stack.getCount())) + COUNT_PADDING;
+			return fontRenderer.width(CountAbbreviator.abbreviate(stack.getCount())) + COUNT_PADDING;
 		}
 
 		private void calculateHeight() {
@@ -180,7 +180,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int getEmptyTooltipWidth() {
-			return Minecraft.getInstance().fontRenderer.func_243245_a(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + "empty").func_241878_f());
+			return Minecraft.getInstance().font.width(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + "empty").getVisualOrderText());
 		}
 
 		@Override
@@ -204,10 +204,10 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
-			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).mergeStyle(TextFormatting.YELLOW)),
-					font, leftX, topY, matrixStack.getLast().getMatrix(), renderTypeBuffer, -1);
-			renderTypeBuffer.finish();
+			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).withStyle(TextFormatting.YELLOW)),
+					font, leftX, topY, matrixStack.last().pose(), renderTypeBuffer, -1);
+			renderTypeBuffer.endBatch();
 			return topY;
 		}
 
@@ -233,7 +233,7 @@ public class BackpackTooltipRenderer {
 					x = leftX;
 				}
 				ItemStack stack = backpackContents.get(i);
-				int stackWidth = Math.max(getStackCountWidth(minecraft.fontRenderer, stack), DEFAULT_STACK_WIDTH);
+				int stackWidth = Math.max(getStackCountWidth(minecraft.font, stack), DEFAULT_STACK_WIDTH);
 				int xOffset = stackWidth - DEFAULT_STACK_WIDTH;
 				GuiHelper.renderItemInGUI(matrixStack, minecraft, stack, x + xOffset, y, true, CountAbbreviator.abbreviate(stack.getCount()));
 				x += stackWidth;

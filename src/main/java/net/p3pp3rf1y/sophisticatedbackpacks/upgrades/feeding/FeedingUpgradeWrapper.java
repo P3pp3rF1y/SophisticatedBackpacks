@@ -29,7 +29,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 
 	public FeedingUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.feedingUpgrade.filterSlots.get(), ItemStack::isFood);
+		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.feedingUpgrade.filterSlots.get(), ItemStack::isEdible);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		}
 
 		if (entity == null) {
-			world.getEntitiesWithinAABB(EntityType.PLAYER, new AxisAlignedBB(pos).grow(FEEDING_RANGE), p -> true).forEach(p -> feedPlayer(p, world));
+			world.getEntities(EntityType.PLAYER, new AxisAlignedBB(pos).inflate(FEEDING_RANGE), p -> true).forEach(p -> feedPlayer(p, world));
 		} else {
 			feedPlayer((PlayerEntity) entity, world);
 		}
@@ -48,7 +48,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 	}
 
 	private void feedPlayer(PlayerEntity player, World world) {
-		int hungerLevel = 20 - player.getFoodStats().getFoodLevel();
+		int hungerLevel = 20 - player.getFoodData().getFoodLevel();
 		if (hungerLevel == 0) {
 			return;
 		}
@@ -60,10 +60,10 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			//noinspection ConstantConditions - isFood check makes sure that food isn't null
-			if (stack.isFood() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFood().getHealing() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
-				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().onItemUseFinish(stack, world, player));
+			if (stack.isEdible() && filterLogic.matchesFilter(stack) && ((stack.getItem().getFoodProperties().getNutrition() / 2) < hungerLevel || hungerLevel > 0 && isHurt)) {
+				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().finishUsingItem(stack, world, player));
 				inventory.setStackInSlot(slot, stack);
-				if (!ItemStack.areItemStacksEqual(containerItem, stack)) {
+				if (!ItemStack.matches(containerItem, stack)) {
 					//not handling the case where player doesn't have item handler cap as the player should always have it. if that changes in the future well I guess I fix it
 					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
 							.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, containerItem, inventory, playerInventory));

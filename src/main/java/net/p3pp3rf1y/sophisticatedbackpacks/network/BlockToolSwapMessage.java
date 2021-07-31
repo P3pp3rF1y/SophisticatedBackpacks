@@ -21,11 +21,11 @@ public class BlockToolSwapMessage {
 	}
 
 	public static void encode(BlockToolSwapMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeLong(msg.pos.toLong());
+		packetBuffer.writeLong(msg.pos.asLong());
 	}
 
 	public static BlockToolSwapMessage decode(PacketBuffer packetBuffer) {
-		return new BlockToolSwapMessage(BlockPos.fromLong(packetBuffer.readLong()));
+		return new BlockToolSwapMessage(BlockPos.of(packetBuffer.readLong()));
 	}
 
 	static void onMessage(BlockToolSwapMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -49,7 +49,7 @@ public class BlockToolSwapMessage {
 										}
 										anyUpgradeCanInteract.set(true);
 
-										result.set(upgrade.onBlockInteract(sender.world, msg.pos, sender.world.getBlockState(msg.pos), sender));
+										result.set(upgrade.onBlockInteract(sender.level, msg.pos, sender.level.getBlockState(msg.pos), sender));
 									});
 							return result.get();
 						}
@@ -57,11 +57,11 @@ public class BlockToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
+			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
 		}
 	}
 }

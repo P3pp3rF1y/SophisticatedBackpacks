@@ -36,26 +36,26 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper.setBackpackSaveHandler(() -> {
-			markDirty();
+			setChanged();
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
 		});
 	}
 
 	@Override
-	public void read(BlockState state, CompoundNBT nbt) {
-		super.read(state, nbt);
+	public void load(BlockState state, CompoundNBT nbt) {
+		super.load(state, nbt);
 		setBackpackFromNbt(nbt);
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	private void setBackpackFromNbt(CompoundNBT nbt) {
-		setBackpack(ItemStack.read(nbt.getCompound("backpackData")));
+		setBackpack(ItemStack.of(nbt.getCompound("backpackData")));
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound) {
-		CompoundNBT ret = super.write(compound);
+	public CompoundNBT save(CompoundNBT compound) {
+		CompoundNBT ret = super.save(compound);
 		writeBackpack(ret);
 		return ret;
 	}
@@ -63,7 +63,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	private void writeBackpack(CompoundNBT ret) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
 		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
-		ret.put("backpackData", backpackCopy.write(new CompoundNBT()));
+		ret.put("backpackData", backpackCopy.save(new CompoundNBT()));
 	}
 
 	@Override
@@ -79,12 +79,12 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		CompoundNBT updateTag = getUpdateTag();
 		updateTag.putBoolean("updateBlockRender", updateBlockRender);
 		updateBlockRender = true;
-		return new SUpdateTileEntityPacket(pos, 1, updateTag);
+		return new SUpdateTileEntityPacket(worldPosition, 1, updateTag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		CompoundNBT tag = pkt.getNbtCompound();
+		CompoundNBT tag = pkt.getTag();
 		setBackpackFromNbt(tag);
 		if (tag.getBoolean("updateBlockRender")) {
 			WorldHelper.notifyBlockUpdate(this);
@@ -98,10 +98,10 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public void tick() {
 		//noinspection ConstantConditions - world is always non null at this point
-		if (world.isRemote) {
+		if (level.isClientSide) {
 			return;
 		}
-		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos()));
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, getBlockPos()));
 	}
 
 	@Override
@@ -116,17 +116,17 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public void refreshRenderState() {
 		BlockState state = getBlockState();
-		state = state.with(LEFT_TANK, false);
-		state = state.with(RIGHT_TANK, false);
+		state = state.setValue(LEFT_TANK, false);
+		state = state.setValue(RIGHT_TANK, false);
 		for (TankPosition pos : backpackWrapper.getRenderInfo().getTankRenderInfos().keySet()) {
 			if (pos == TankPosition.LEFT) {
-				state = state.with(LEFT_TANK, true);
+				state = state.setValue(LEFT_TANK, true);
 			} else if (pos == TankPosition.RIGHT) {
-				state = state.with(RIGHT_TANK, true);
+				state = state.setValue(RIGHT_TANK, true);
 			}
 		}
-		world.setBlockState(pos, state);
-		world.notifyNeighborsOfStateChange(pos, state.getBlock());
+		level.setBlockAndUpdate(worldPosition, state);
+		level.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
 	}
 }

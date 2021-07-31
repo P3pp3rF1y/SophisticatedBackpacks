@@ -18,12 +18,12 @@ public class SmithingBackpackUpgradeRecipe extends SmithingRecipe implements IWr
 
 	public SmithingBackpackUpgradeRecipe(SmithingRecipe compose) {
 		super(compose.getId(), Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(SmithingRecipe.class, compose, "field_234837_a_")),
-				Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(SmithingRecipe.class, compose, "field_234838_b_")), compose.getRecipeOutput());
+				Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(SmithingRecipe.class, compose, "field_234838_b_")), compose.getResultItem());
 		this.compose = compose;
 	}
 
 	@Override
-	public ItemStack getCraftingResult(IInventory inv) {
+	public ItemStack assemble(IInventory inv) {
 		ItemStack upgradedBackpack = getCraftingResult().copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
@@ -41,7 +41,7 @@ public class SmithingBackpackUpgradeRecipe extends SmithingRecipe implements IWr
 	}
 
 	private Optional<ItemStack> getBackpack(IInventory inv) {
-		ItemStack slotStack = inv.getStackInSlot(0);
+		ItemStack slotStack = inv.getItem(0);
 		if (slotStack.getItem() instanceof BackpackItem) {
 			return Optional.of(slotStack);
 		}

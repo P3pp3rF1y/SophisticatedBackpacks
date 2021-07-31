@@ -37,7 +37,7 @@ public class BackpackRenderInfo {
 
 	public void deserializeFrom(CompoundNBT renderInfoNbt) {
 		reset();
-		backpack.setTagInfo(RENDER_INFO_TAG, renderInfoNbt);
+		backpack.addTagElement(RENDER_INFO_TAG, renderInfoNbt);
 		deserialize();
 	}
 
@@ -75,14 +75,14 @@ public class BackpackRenderInfo {
 		boolean infoSet = false;
 		for (int i = 0; i < tanks.size(); i++) {
 			CompoundNBT tank = tanks.getCompound(i);
-			if (tank.getString(TANK_POSITION_TAG).equals(tankPosition.getString())) {
+			if (tank.getString(TANK_POSITION_TAG).equals(tankPosition.getSerializedName())) {
 				tank.put(TANK_INFO_TAG, tankInfo);
 				infoSet = true;
 			}
 		}
 		if (!infoSet) {
 			CompoundNBT tankPositionInfo = new CompoundNBT();
-			tankPositionInfo.putString(TANK_POSITION_TAG, tankPosition.getString());
+			tankPositionInfo.putString(TANK_POSITION_TAG, tankPosition.getSerializedName());
 			tankPositionInfo.put(TANK_INFO_TAG, tankInfo);
 			tanks.add(tankPositionInfo);
 			renderInfo.put(TANKS_TAG, tanks);

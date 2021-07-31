@@ -59,7 +59,7 @@ public class SophisticatedBackpacks {
 	}
 
 	private static void serverStarted(FMLServerStartedEvent event) {
-		ServerWorld world = event.getServer().getWorld(World.OVERWORLD);
+		ServerWorld world = event.getServer().getLevel(World.OVERWORLD);
 		if (world != null) {
 			RecipeHelper.setWorld(world);
 		}

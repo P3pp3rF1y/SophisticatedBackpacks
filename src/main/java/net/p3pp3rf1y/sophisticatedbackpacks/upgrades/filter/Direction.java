@@ -17,7 +17,7 @@ public enum Direction implements IStringSerializable {
 	}
 
 	@Override
-	public String getString() {
+	public String getSerializedName() {
 		return name;
 	}
 
@@ -31,7 +31,7 @@ public enum Direction implements IStringSerializable {
 	static {
 		ImmutableMap.Builder<String, Direction> builder = new ImmutableMap.Builder<>();
 		for (Direction value : Direction.values()) {
-			builder.put(value.getString(), value);
+			builder.put(value.getSerializedName(), value);
 		}
 		NAME_VALUES = builder.build();
 		VALUES = values();

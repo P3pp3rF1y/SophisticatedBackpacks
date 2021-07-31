@@ -32,7 +32,7 @@ public class SmeltingLogicControl extends CompositeWidget<Widget> {
 
 	private float getBurnProgress() {
 		//noinspection ConstantConditions - world is not null by this point
-		return smeltingLogicContainer.isBurning(Minecraft.getInstance().world) ? getProgress(smeltingLogicContainer.getBurnTimeFinish(), smeltingLogicContainer.getBurnTimeTotal()) : 0;
+		return smeltingLogicContainer.isBurning(Minecraft.getInstance().level) ? getProgress(smeltingLogicContainer.getBurnTimeFinish(), smeltingLogicContainer.getBurnTimeTotal()) : 0;
 	}
 
 	private float getCookProgress() {
@@ -40,7 +40,7 @@ public class SmeltingLogicControl extends CompositeWidget<Widget> {
 	}
 
 	private float getProgress(long finishTime, int timeTotal) {
-		World world = Minecraft.getInstance().world;
+		World world = Minecraft.getInstance().level;
 		if (world == null) {
 			return 0;
 		}
@@ -70,7 +70,7 @@ public class SmeltingLogicControl extends CompositeWidget<Widget> {
 	}
 
 	private void positionSlot(Slot slot, int screenGuiLeft, int screenGuiTop, int xOffset, int yOffset) {
-		slot.xPos = x - screenGuiLeft + xOffset;
-		slot.yPos = y - screenGuiTop + yOffset;
+		slot.x = x - screenGuiLeft + xOffset;
+		slot.y = y - screenGuiTop + yOffset;
 	}
 }

@@ -31,12 +31,12 @@ public class DyeRecipesMaker {
 
 	private static void addMultipleColorsRecipe(Set<ICraftingRecipe> recipes) {
 		NonNullList<Ingredient> ingredients = NonNullList.create();
-		ingredients.add(Ingredient.fromTag(DyeColor.YELLOW.getTag()));
-		ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
+		ingredients.add(Ingredient.of(DyeColor.YELLOW.getTag()));
+		ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));
 		ingredients.add(Ingredient.EMPTY);
-		ingredients.add(Ingredient.fromTag(DyeColor.LIME.getTag()));
-		ingredients.add(Ingredient.fromTag(DyeColor.BLUE.getTag()));
-		ingredients.add(Ingredient.fromTag(DyeColor.BLACK.getTag()));
+		ingredients.add(Ingredient.of(DyeColor.LIME.getTag()));
+		ingredients.add(Ingredient.of(DyeColor.BLUE.getTag()));
+		ingredients.add(Ingredient.of(DyeColor.BLACK.getTag()));
 
 		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 		int clothColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, ImmutableList.of(
@@ -54,12 +54,12 @@ public class DyeRecipesMaker {
 
 	private static void addSingleColorRecipes(Set<ICraftingRecipe> recipes) {
 		for (DyeColor color : DyeColor.values()) {
-			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getString());
+			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 			backpackOutput.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.setColors(color.getColorValue(), color.getColorValue()));
 			NonNullList<Ingredient> ingredients = NonNullList.create();
-			ingredients.add(Ingredient.fromItems(ModItems.BACKPACK.get()));
-			ingredients.add(Ingredient.fromTag(color.getTag()));
+			ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));
+			ingredients.add(Ingredient.of(color.getTag()));
 			recipes.add(new ShapedRecipe(id, "", 1, 2, ingredients, backpackOutput));
 		}
 	}

@@ -17,11 +17,11 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationH
 
 public abstract class UpgradeItemBase<T extends IUpgradeWrapper> extends ItemBase implements IBackpackUpgradeItem<T> {
 	protected UpgradeItemBase() {
-		super(new Properties().maxStackSize(1));
+		super(new Properties().stacksTo(1));
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		//noinspection ConstantConditions - item is registered at this point and thus registry name can't be null
 		tooltip.addAll(getTranslatedLines(translUpgradeItemTooltip(stack.getItem().getRegistryName().getPath()), null, TextFormatting.DARK_GRAY));
 	}

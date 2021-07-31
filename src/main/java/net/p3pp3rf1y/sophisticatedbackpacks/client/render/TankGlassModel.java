@@ -14,24 +14,24 @@ public class TankGlassModel extends AgeableModel<LivingEntity> {
 	public final ModelRenderer rightTankGlass;
 
 	public TankGlassModel() {
-		textureWidth = 32;
-		textureHeight = 32;
+		texWidth = 32;
+		texHeight = 32;
 
 		leftTankGlass = new ModelRenderer(this);
-		leftTankGlass.setRotationPoint(0.0F, 24.0F, 0.0F);
-		leftTankGlass.setTextureOffset(18, 5).addBox(-15F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, 0.0F, false);
-		leftTankGlass.setTextureOffset(0, 0).addBox(-15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, 0.0F, false);
-		leftTankGlass.setTextureOffset(10, 5).addBox(-15F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, 0.0F, false);
+		leftTankGlass.setPos(0.0F, 24.0F, 0.0F);
+		leftTankGlass.texOffs(18, 5).addBox(-15F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, 0.0F, false);
+		leftTankGlass.texOffs(0, 0).addBox(-15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, 0.0F, false);
+		leftTankGlass.texOffs(10, 5).addBox(-15F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, 0.0F, false);
 
 		rightTankGlass = new ModelRenderer(this);
-		rightTankGlass.setRotationPoint(0.0F, 24.0F, 0.0F);
-		rightTankGlass.setTextureOffset(18, 5).addBox(11F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, 0.0F, true);
-		rightTankGlass.setTextureOffset(0, 0).addBox(15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, 0.0F, true);
-		rightTankGlass.setTextureOffset(10, 5).addBox(11F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, 0.0F, true);
+		rightTankGlass.setPos(0.0F, 24.0F, 0.0F);
+		rightTankGlass.texOffs(18, 5).addBox(11F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, 0.0F, true);
+		rightTankGlass.texOffs(0, 0).addBox(15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, 0.0F, true);
+		rightTankGlass.texOffs(10, 5).addBox(11F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, 0.0F, true);
 	}
 
 	@Override
-	public void setRotationAngles(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		//noop
 	}
 
@@ -45,17 +45,17 @@ public class TankGlassModel extends AgeableModel<LivingEntity> {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 		//noop
 	}
 
 	@Override
-	protected Iterable<ModelRenderer> getHeadParts() {
+	protected Iterable<ModelRenderer> headParts() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	protected Iterable<ModelRenderer> getBodyParts() {
+	protected Iterable<ModelRenderer> bodyParts() {
 		return Collections.emptyList();
 	}
 }

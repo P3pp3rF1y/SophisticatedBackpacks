@@ -26,12 +26,12 @@ public class SyncClientInfoMessage {
 
 	public static void encode(SyncClientInfoMessage msg, PacketBuffer packetBuffer) {
 		packetBuffer.writeInt(msg.slotIndex);
-		packetBuffer.writeCompoundTag(msg.renderInfoNbt);
+		packetBuffer.writeNbt(msg.renderInfoNbt);
 		packetBuffer.writeInt(msg.columnsTaken);
 	}
 
 	public static SyncClientInfoMessage decode(PacketBuffer packetBuffer) {
-		return new SyncClientInfoMessage(packetBuffer.readInt(), packetBuffer.readCompoundTag(), packetBuffer.readInt());
+		return new SyncClientInfoMessage(packetBuffer.readInt(), packetBuffer.readNbt(), packetBuffer.readInt());
 	}
 
 	static void onMessage(SyncClientInfoMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -42,10 +42,10 @@ public class SyncClientInfoMessage {
 
 	private static void handleMessage(SyncClientInfoMessage msg) {
 		ClientPlayerEntity player = Minecraft.getInstance().player;
-		if (player == null || msg.renderInfoNbt == null || !(player.openContainer instanceof BackpackContainer)) {
+		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
-		ItemStack backpack = player.inventory.mainInventory.get(msg.slotIndex);
+		ItemStack backpack = player.inventory.items.get(msg.slotIndex);
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken);

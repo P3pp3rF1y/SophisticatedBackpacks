@@ -73,7 +73,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 	public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
 		ImmutableMap.Builder<ModelPart, IBakedModel> builder = ImmutableMap.builder();
 		modelParts.forEach((part, model) -> {
-			IBakedModel bakedModel = model.bakeModel(bakery, spriteGetter, modelTransform, modelLocation);
+			IBakedModel bakedModel = model.bake(bakery, spriteGetter, modelTransform, modelLocation);
 			if (bakedModel != null) {
 				builder.put(part, bakedModel);
 			}
@@ -84,7 +84,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 	@Override
 	public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 		ImmutableSet.Builder<RenderMaterial> builder = ImmutableSet.builder();
-		modelParts.forEach((part, model) -> builder.addAll(model.getTextures(modelGetter, missingTextureErrors)));
+		modelParts.forEach((part, model) -> builder.addAll(model.getMaterials(modelGetter, missingTextureErrors)));
 		return builder.build();
 	}
 
@@ -161,8 +161,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 				addLeftSide(state, side, rand, extraData, ret, tankLeft);
 				addRightSide(state, side, rand, extraData, ret, tankRight);
 			} else {
-				addLeftSide(state, side, rand, extraData, ret, state.get(LEFT_TANK));
-				addRightSide(state, side, rand, extraData, ret, state.get(RIGHT_TANK));
+				addLeftSide(state, side, rand, extraData, ret, state.getValue(LEFT_TANK));
+				addRightSide(state, side, rand, extraData, ret, state.getValue(RIGHT_TANK));
 			}
 			ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData));
 
@@ -194,7 +194,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addFluid(List<BakedQuad> ret, Fluid fluid, float ratio, double xMin) {
-			if (MathHelper.epsilonEquals(ratio, 0.0f)) {
+			if (MathHelper.equal(ratio, 0.0f)) {
 				return;
 			}
 
@@ -205,7 +205,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			ResourceLocation texture = fluid.getAttributes().getStillTexture();
 			int color = fluid.getAttributes().getColor();
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
-			TextureAtlasSprite still = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(texture);
+			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
 			float bx2 = 5;
 			float by1 = 0;
@@ -227,7 +227,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		@Override
-		public boolean isAmbientOcclusion() {
+		public boolean useAmbientOcclusion() {
 			return true;
 		}
 
@@ -237,20 +237,20 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		@Override
-		public boolean isSideLit() {
+		public boolean usesBlockLight() {
 			return true;
 		}
 
 		@Override
-		public boolean isBuiltInRenderer() {
+		public boolean isCustomRenderer() {
 			return false;
 		}
 
 		@SuppressWarnings("java:S1874") //don't have model data to pass in here and just calling getParticleTexture of baked model that doesn't need model data
 		@Override
-		public TextureAtlasSprite getParticleTexture() {
+		public TextureAtlasSprite getParticleIcon() {
 			//noinspection deprecation
-			return models.get(ModelPart.BASE).getParticleTexture();
+			return models.get(ModelPart.BASE).getParticleIcon();
 		}
 
 		@Override
@@ -274,12 +274,12 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
 			BakedQuadBuilder builder = new BakedQuadBuilder(sprite);
-			Vector3i dirVec = face.getDirectionVec();
+			Vector3i dirVec = face.getNormal();
 			Vector3f normal = new Vector3f(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			putVertex(builder, normal, vecs.get(0).getX(), vecs.get(0).getY(), vecs.get(0).getZ(), u1, v1, sprite, colors);
-			putVertex(builder, normal, vecs.get(1).getX(), vecs.get(1).getY(), vecs.get(1).getZ(), u1, v2, sprite, colors);
-			putVertex(builder, normal, vecs.get(2).getX(), vecs.get(2).getY(), vecs.get(2).getZ(), u2, v2, sprite, colors);
-			putVertex(builder, normal, vecs.get(3).getX(), vecs.get(3).getY(), vecs.get(3).getZ(), u2, v1, sprite, colors);
+			putVertex(builder, normal, vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z(), u1, v1, sprite, colors);
+			putVertex(builder, normal, vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z(), u1, v2, sprite, colors);
+			putVertex(builder, normal, vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z(), u2, v2, sprite, colors);
+			putVertex(builder, normal, vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z(), u2, v1, sprite, colors);
 			builder.setQuadOrientation(face);
 			return builder.build();
 		}
@@ -297,15 +297,15 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 						break;
 					case UV:
 						if (elements.get(e).getIndex() == 0) {
-							float iu = sprite.getInterpolatedU(u);
-							float iv = sprite.getInterpolatedV(v);
+							float iu = sprite.getU(u);
+							float iv = sprite.getV(v);
 							builder.put(e, iu, iv);
 						} else {
 							builder.put(e);
 						}
 						break;
 					case NORMAL:
-						builder.put(e, normal.getX(), normal.getY(), normal.getZ());
+						builder.put(e, normal.x(), normal.y(), normal.z());
 						break;
 					default:
 						builder.put(e);
@@ -316,9 +316,9 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		private void rotate(Vector3f posIn, Matrix4f transformIn) {
 			Vector3f originIn = new Vector3f(0.5f, 0.5f, 0.5f);
-			Vector4f vector4f = new Vector4f(posIn.getX() - originIn.getX(), posIn.getY() - originIn.getY(), posIn.getZ() - originIn.getZ(), 1.0F);
+			Vector4f vector4f = new Vector4f(posIn.x() - originIn.x(), posIn.y() - originIn.y(), posIn.z() - originIn.z(), 1.0F);
 			vector4f.transform(transformIn);
-			posIn.set(vector4f.getX() + originIn.getX(), vector4f.getY() + originIn.getY(), vector4f.getZ() + originIn.getZ());
+			posIn.set(vector4f.x() + originIn.x(), vector4f.y() + originIn.y(), vector4f.z() + originIn.z());
 		}
 	}
 
@@ -331,7 +331,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		@Nullable
 		@Override
-		public IBakedModel getOverrideModel(IBakedModel model, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity livingEntity) {
+		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity livingEntity) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
@@ -365,9 +365,9 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 			ImmutableMap.Builder<String, Either<RenderMaterial, String>> texturesBuilder = ImmutableMap.builder();
 			if (modelContents.has("clipsTexture")) {
-				ResourceLocation clipsTexture = ResourceLocation.tryCreate(modelContents.get("clipsTexture").getAsString());
+				ResourceLocation clipsTexture = ResourceLocation.tryParse(modelContents.get("clipsTexture").getAsString());
 				if (clipsTexture != null) {
-					texturesBuilder.put("clips", Either.left(new RenderMaterial(PlayerContainer.LOCATION_BLOCKS_TEXTURE, clipsTexture)));
+					texturesBuilder.put("clips", Either.left(new RenderMaterial(PlayerContainer.BLOCK_ATLAS, clipsTexture)));
 				}
 			}
 			ImmutableMap<String, Either<RenderMaterial, String>> textures = texturesBuilder.build();
@@ -378,7 +378,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, IUnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<RenderMaterial, String>> textures) {
-			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase()), Collections.emptyList(), textures, true, null, ItemCameraTransforms.DEFAULT, Collections.emptyList()));
+			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase()), Collections.emptyList(), textures, true, null, ItemCameraTransforms.NO_TRANSFORMS, Collections.emptyList()));
 		}
 	}
 

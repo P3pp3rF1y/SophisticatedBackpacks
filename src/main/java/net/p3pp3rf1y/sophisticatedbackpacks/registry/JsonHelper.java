@@ -12,7 +12,7 @@ public class JsonHelper {
 	private JsonHelper() {}
 
 	public static <V> Set<V> setFromJson(JsonElement element, Function<JsonElement, V> getElement) {
-		return setFromJson(JSONUtils.getJsonArray(element, ""), getElement);
+		return setFromJson(JSONUtils.convertToJsonArray(element, ""), getElement);
 	}
 
 	private static <V> Set<V> setFromJson(JsonArray array, Function<JsonElement, V> getElement) {

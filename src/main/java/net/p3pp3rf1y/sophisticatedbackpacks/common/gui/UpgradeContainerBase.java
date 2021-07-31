@@ -49,7 +49,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 
 	@Override
 	public void sendBooleanToServer(String key, boolean value) {
-		if (!player.world.isRemote) {
+		if (!player.level.isClientSide) {
 			return;
 		}
 		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), key, value));
@@ -57,7 +57,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 
 	@Override
 	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
-		if (!player.world.isRemote) {
+		if (!player.level.isClientSide) {
 			return;
 		}
 		CompoundNBT data = supplyData.get();
@@ -94,7 +94,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	}
 
 	public ItemStack getSlotStackToTransfer(Slot slot) {
-		return slot.getStack();
+		return slot.getItem();
 	}
 
 	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {

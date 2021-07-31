@@ -79,17 +79,17 @@ public class BackpackItem extends ItemBase {
 	}
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, Properties properties) {
-		super(properties.maxStackSize(1));
+		super(properties.stacksTo(1));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
 	}
 
 	@Override
-	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-		super.fillItemGroup(group, items);
+	public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+		super.fillItemCategory(group, items);
 
-		if (!isInGroup(group) || this != ModItems.BACKPACK.get() || !Config.COMMON.enabledItems.isItemEnabled(this)) {
+		if (!allowdedIn(group) || this != ModItems.BACKPACK.get() || !Config.COMMON.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
@@ -113,17 +113,17 @@ public class BackpackItem extends ItemBase {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 		if (flagIn == ITooltipFlag.TooltipFlags.ADVANCED) {
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(new StringTextComponent("UUID: " + uuid).mergeStyle(TextFormatting.DARK_GRAY))));
+					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(new StringTextComponent("UUID: " + uuid).withStyle(TextFormatting.DARK_GRAY))));
 		}
 		if (!Screen.hasShiftDown()) {
 			tooltip.add(new TranslationTextComponent(
 					BACKPACK_TOOLTIP + "press_for_contents",
-					new TranslationTextComponent(BACKPACK_TOOLTIP + "shift").mergeStyle(TextFormatting.AQUA)
-			).mergeStyle(TextFormatting.GRAY));
+					new TranslationTextComponent(BACKPACK_TOOLTIP + "shift").withStyle(TextFormatting.AQUA)
+			).withStyle(TextFormatting.GRAY));
 		}
 	}
 
@@ -149,11 +149,11 @@ public class BackpackItem extends ItemBase {
 	private EverlastingBackpackItemEntity createEverlastingBackpack(World world, ItemEntity itemEntity, ItemStack itemstack) {
 		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.get().create(world);
 		if (backpackItemEntity != null) {
-			backpackItemEntity.setPosition(itemEntity.getPosX(), itemEntity.getPosY(), itemEntity.getPosZ());
+			backpackItemEntity.setPos(itemEntity.getX(), itemEntity.getY(), itemEntity.getZ());
 			backpackItemEntity.setItem(itemstack);
-			backpackItemEntity.setPickupDelay(getPickupDelay(itemEntity));
-			backpackItemEntity.setThrowerId(itemEntity.getThrowerId());
-			backpackItemEntity.setMotion(itemEntity.getMotion());
+			backpackItemEntity.setPickUpDelay(getPickupDelay(itemEntity));
+			backpackItemEntity.setThrower(itemEntity.getThrower());
+			backpackItemEntity.setDeltaMovement(itemEntity.getDeltaMovement());
 		}
 		return backpackItemEntity;
 	}
@@ -161,16 +161,16 @@ public class BackpackItem extends ItemBase {
 	private int getPickupDelay(ItemEntity itemEntity) {
 		Integer result = ObfuscationReflectionHelper.getPrivateValue(ItemEntity.class, itemEntity, "field_145804_b");
 		if (result == null) {
-			SophisticatedBackpacks.LOGGER.error("Reflection get of pickupDelay (field_145804_b) from ItemEntity returned null");
+			SophisticatedBackpacks.LOGGER.error("Reflection get of pickupDelay (pickupDelay) from ItemEntity returned null");
 			return 20;
 		}
 		return result;
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context) {
+	public ActionResultType useOn(ItemUseContext context) {
 		PlayerEntity player = context.getPlayer();
-		if (player == null || !player.isSneaking()) {
+		if (player == null || !player.isShiftKeyDown()) {
 			return ActionResultType.PASS;
 		}
 
@@ -178,35 +178,35 @@ public class BackpackItem extends ItemBase {
 			return ActionResultType.SUCCESS;
 		}
 
-		Direction direction = player.getHorizontalFacing().getOpposite();
+		Direction direction = player.getDirection().getOpposite();
 
 		BlockItemUseContext blockItemUseContext = new BlockItemUseContext(context);
 		ActionResultType result = tryPlace(player, direction, blockItemUseContext);
-		return result == ActionResultType.PASS ? super.onItemUse(context) : result;
+		return result == ActionResultType.PASS ? super.useOn(context) : result;
 	}
 
 	public ActionResultType tryPlace(@Nullable PlayerEntity player, Direction direction, BlockItemUseContext blockItemUseContext) {
 		if (!blockItemUseContext.canPlace()) {
 			return ActionResultType.FAIL;
 		}
-		World world = blockItemUseContext.getWorld();
-		BlockPos pos = blockItemUseContext.getPos();
+		World world = blockItemUseContext.getLevel();
+		BlockPos pos = blockItemUseContext.getClickedPos();
 
-		FluidState fluidstate = blockItemUseContext.getWorld().getFluidState(pos);
-		BlockState placementState = blockSupplier.get().getDefaultState().with(BackpackBlock.FACING, direction)
-				.with(WATERLOGGED, fluidstate.getFluid() == Fluids.WATER);
+		FluidState fluidstate = blockItemUseContext.getLevel().getFluidState(pos);
+		BlockState placementState = blockSupplier.get().defaultBlockState().setValue(BackpackBlock.FACING, direction)
+				.setValue(WATERLOGGED, fluidstate.getType() == Fluids.WATER);
 		if (!canPlace(blockItemUseContext, placementState)) {
 			return ActionResultType.FAIL;
 		}
 
-		if (world.setBlockState(pos, placementState)) {
-			ItemStack backpack = blockItemUseContext.getItem();
+		if (world.setBlockAndUpdate(pos, placementState)) {
+			ItemStack backpack = blockItemUseContext.getItemInHand();
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> {
 				te.setBackpack(getBackpackCopy(player, backpack));
 				te.refreshRenderState();
 			});
 
-			if (!world.isRemote) {
+			if (!world.isClientSide) {
 				stopBackpackSounds(backpack, world, pos);
 			}
 
@@ -223,7 +223,7 @@ public class BackpackItem extends ItemBase {
 
 	private static void stopBackpackSounds(ItemStack backpack, World world, BlockPos pos) {
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
-				ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) world, Vector3d.copyCentered(pos), uuid))
+				ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) world, Vector3d.atCenterOf(pos), uuid))
 		);
 	}
 
@@ -237,22 +237,22 @@ public class BackpackItem extends ItemBase {
 
 	protected boolean canPlace(BlockItemUseContext context, BlockState state) {
 		PlayerEntity playerentity = context.getPlayer();
-		ISelectionContext iselectioncontext = playerentity == null ? ISelectionContext.dummy() : ISelectionContext.forEntity(playerentity);
-		return (state.isValidPosition(context.getWorld(), context.getPos())) && context.getWorld().placedBlockCollides(state, context.getPos(), iselectioncontext);
+		ISelectionContext iselectioncontext = playerentity == null ? ISelectionContext.empty() : ISelectionContext.of(playerentity);
+		return (state.canSurvive(context.getLevel(), context.getClickedPos())) && context.getLevel().isUnobstructed(state, context.getClickedPos(), iselectioncontext);
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-		ItemStack stack = player.getHeldItem(hand);
+	public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+		ItemStack stack = player.getItemInHand(hand);
 
-		if (!world.isRemote && player instanceof ServerPlayerEntity) {
+		if (!world.isClientSide && player instanceof ServerPlayerEntity) {
 			String handlerName = hand == Hand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
-			int slot = hand == Hand.MAIN_HAND ? player.inventory.currentItem : 0;
+			int slot = hand == Hand.MAIN_HAND ? player.inventory.selected : 0;
 			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);
-			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getDisplayName()),
+			NetworkHooks.openGui((ServerPlayerEntity) player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getHoverName()),
 					context::toBuffer);
 		}
-		return ActionResult.resultSuccess(stack);
+		return ActionResult.success(stack);
 	}
 
 	@Override
@@ -281,13 +281,13 @@ public class BackpackItem extends ItemBase {
 
 	@Override
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (worldIn.isRemote || !(entityIn instanceof PlayerEntity)) {
+		if (worldIn.isClientSide || !(entityIn instanceof PlayerEntity)) {
 			return;
 		}
 		PlayerEntity player = (PlayerEntity) entityIn;
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.world, player.getPosition()))
+						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
 		);
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}

@@ -20,8 +20,8 @@ public class BackpackCloseMessage {
 			return;
 		}
 
-		if (player.openContainer instanceof BackpackContainer) {
-			player.closeScreen();
+		if (player.containerMenu instanceof BackpackContainer) {
+			player.closeContainer();
 		}
 	}
 }

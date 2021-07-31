@@ -204,22 +204,22 @@ public class Config {
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
 				Map<EntityType<?>, ResourceLocation> mapping = new LinkedHashMap<>();
-				mapping.put(EntityType.CREEPER, LootTables.CHESTS_DESERT_PYRAMID);
-				mapping.put(EntityType.DROWNED, LootTables.CHESTS_SHIPWRECK_TREASURE);
-				mapping.put(EntityType.ENDERMAN, LootTables.CHESTS_END_CITY_TREASURE);
-				mapping.put(EntityType.EVOKER, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.HUSK, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.CREEPER, LootTables.DESERT_PYRAMID);
+				mapping.put(EntityType.DROWNED, LootTables.SHIPWRECK_TREASURE);
+				mapping.put(EntityType.ENDERMAN, LootTables.END_CITY_TREASURE);
+				mapping.put(EntityType.EVOKER, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.HUSK, LootTables.DESERT_PYRAMID);
 				mapping.put(EntityType.PIGLIN, LootTables.BASTION_BRIDGE);
-				mapping.put(EntityType.field_242287_aj, LootTables.BASTION_TREASURE);
-				mapping.put(EntityType.PILLAGER, LootTables.CHESTS_PILLAGER_OUTPOST);
-				mapping.put(EntityType.SKELETON, LootTables.CHESTS_SIMPLE_DUNGEON);
-				mapping.put(EntityType.STRAY, LootTables.CHESTS_IGLOO_CHEST);
-				mapping.put(EntityType.VEX, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.VINDICATOR, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.WITCH, LootTables.CHESTS_BURIED_TREASURE);
-				mapping.put(EntityType.WITHER_SKELETON, LootTables.CHESTS_NETHER_BRIDGE);
-				mapping.put(EntityType.ZOMBIE, LootTables.CHESTS_SIMPLE_DUNGEON);
-				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.CHESTS_VILLAGE_VILLAGE_ARMORER);
+				mapping.put(EntityType.PIGLIN_BRUTE, LootTables.BASTION_TREASURE);
+				mapping.put(EntityType.PILLAGER, LootTables.PILLAGER_OUTPOST);
+				mapping.put(EntityType.SKELETON, LootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.STRAY, LootTables.IGLOO_CHEST);
+				mapping.put(EntityType.VEX, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.VINDICATOR, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.WITCH, LootTables.BURIED_TREASURE);
+				mapping.put(EntityType.WITHER_SKELETON, LootTables.NETHER_BRIDGE);
+				mapping.put(EntityType.ZOMBIE, LootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.VILLAGE_ARMORER);
 				mapping.put(EntityType.ZOMBIFIED_PIGLIN, LootTables.BASTION_OTHER);
 				return mapping;
 			}

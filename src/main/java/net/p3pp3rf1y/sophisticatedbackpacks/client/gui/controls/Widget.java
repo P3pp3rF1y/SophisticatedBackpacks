@@ -21,20 +21,20 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 		x = position.getX();
 		y = position.getY();
 		minecraft = Minecraft.getInstance();
-		font = minecraft.fontRenderer;
+		font = minecraft.font;
 	}
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (zOffset != 0) {
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, zOffset);
 		}
 		RenderSystem.enableDepthTest();
 		renderBg(matrixStack, minecraft, mouseX, mouseY);
 		renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 		if (zOffset != 0) {
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 

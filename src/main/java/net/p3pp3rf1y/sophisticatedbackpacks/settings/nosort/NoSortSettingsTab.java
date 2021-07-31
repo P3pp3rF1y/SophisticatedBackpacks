@@ -58,9 +58,9 @@ public class NoSortSettingsTab extends SettingsTab<NoSortSettingsContainer> {
 	@Override
 	public void handleSlotClick(Slot slot, int mouseButton) {
 		if (mouseButton == 0) {
-			getSettingsContainer().selectSlot(slot.slotNumber);
+			getSettingsContainer().selectSlot(slot.index);
 		} else if (mouseButton == 1) {
-			getSettingsContainer().unselectSlot(slot.slotNumber);
+			getSettingsContainer().unselectSlot(slot.index);
 		}
 	}
 }

@@ -64,12 +64,12 @@ public class PacketHandler {
 	}
 
 	public static <M> void sendToClient(ServerPlayerEntity player, M message) {
-		networkWrapper.sendTo(message, player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+		networkWrapper.sendTo(message, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 	}
 
 	public static <M> void sendToAllNear(ServerWorld world, RegistryKey<World> dimension, Vector3d position, int range, M message) {
-		world.getPlayers().forEach(player -> {
-			if (player.world.getDimensionKey() == dimension && player.getDistanceSq(position) <= range * range) {
+		world.players().forEach(player -> {
+			if (player.level.dimension() == dimension && player.distanceToSqr(position) <= range * range) {
 				sendToClient(player, message);
 			}
 		});

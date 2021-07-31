@@ -38,17 +38,17 @@ public class BackpackStorage extends WorldSavedData {
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
-				ServerWorld overworld = server.getWorld(World.OVERWORLD);
+				ServerWorld overworld = server.getLevel(World.OVERWORLD);
 				//noinspection ConstantConditions - by this time overworld is loaded
-				DimensionSavedDataManager storage = overworld.getSavedData();
-				return storage.getOrCreate(BackpackStorage::new, SAVED_DATA_NAME);
+				DimensionSavedDataManager storage = overworld.getDataStorage();
+				return storage.computeIfAbsent(BackpackStorage::new, SAVED_DATA_NAME);
 			}
 		}
 		return clientStorageCopy;
 	}
 
 	@Override
-	public void read(CompoundNBT nbt) {
+	public void load(CompoundNBT nbt) {
 		readBackpackContents(nbt);
 		readAccessLogs(nbt);
 	}
@@ -63,14 +63,14 @@ public class BackpackStorage extends WorldSavedData {
 	private void readBackpackContents(CompoundNBT nbt) {
 		for (INBT n : nbt.getList("backpackContents", Constants.NBT.TAG_COMPOUND)) {
 			CompoundNBT uuidContentsPair = (CompoundNBT) n;
-			UUID uuid = NBTUtil.readUniqueId(Objects.requireNonNull(uuidContentsPair.get("uuid")));
+			UUID uuid = NBTUtil.loadUUID(Objects.requireNonNull(uuidContentsPair.get("uuid")));
 			CompoundNBT contents = uuidContentsPair.getCompound("contents");
 			backpackContents.put(uuid, contents);
 		}
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound) {
+	public CompoundNBT save(CompoundNBT compound) {
 		CompoundNBT ret = new CompoundNBT();
 		writeBackpackContents(ret);
 		writeAccessLogs(ret);
@@ -81,7 +81,7 @@ public class BackpackStorage extends WorldSavedData {
 		ListNBT backpackContentsNbt = new ListNBT();
 		for (Map.Entry<UUID, CompoundNBT> entry : backpackContents.entrySet()) {
 			CompoundNBT uuidContentsPair = new CompoundNBT();
-			uuidContentsPair.put("uuid", NBTUtil.func_240626_a_(entry.getKey()));
+			uuidContentsPair.put("uuid", NBTUtil.createUUID(entry.getKey()));
 			uuidContentsPair.put("contents", entry.getValue());
 			backpackContentsNbt.add(uuidContentsPair);
 		}
@@ -98,14 +98,14 @@ public class BackpackStorage extends WorldSavedData {
 
 	public CompoundNBT getOrCreateBackpackContents(UUID backpackUuid) {
 		return backpackContents.computeIfAbsent(backpackUuid, uuid -> {
-			markDirty();
+			setDirty();
 			return new CompoundNBT();
 		});
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {
 		accessLogRecords.put(alr.getBackpackUuid(), alr);
-		markDirty();
+		setDirty();
 	}
 
 	public void removeBackpackContents(UUID backpackUuid) {
@@ -118,7 +118,7 @@ public class BackpackStorage extends WorldSavedData {
 			updatedBackpackSettingsFlags.add(backpackUuid);
 		} else {
 			CompoundNBT currentContents = backpackContents.get(backpackUuid);
-			for (String key : contents.keySet()) {
+			for (String key : contents.getAllKeys()) {
 				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 				currentContents.put(key, contents.get(key));
 
@@ -143,7 +143,7 @@ public class BackpackStorage extends WorldSavedData {
 			return false;
 		});
 		if (numberRemoved.get() > 0) {
-			markDirty();
+			setDirty();
 		}
 		return numberRemoved.get();
 	}

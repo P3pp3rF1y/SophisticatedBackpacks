@@ -25,47 +25,47 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 	public SettingsScreen(SettingsContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
-		ySize = 114 + getContainer().getNumberOfRows() * 18;
-		xSize = getContainer().getBackpackBackgroundProperties().getSlotsOnLine() * 18 + 14;
-		playerInventoryTitleY = ySize - 94;
-		playerInventoryTitleX = 8 + getContainer().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
+		imageHeight = 114 + getMenu().getNumberOfRows() * 18;
+		imageWidth = getMenu().getBackpackBackgroundProperties().getSlotsOnLine() * 18 + 14;
+		inventoryLabelY = imageHeight - 94;
+		inventoryLabelX = 8 + getMenu().getBackpackBackgroundProperties().getPlayerInventoryXOffset();
 	}
 
 	@Override
 	protected void init() {
 		super.init();
 
-		settingsTabControl = new BackpackSettingsTabControl(this, new Position(guiLeft + xSize, guiTop + 4));
+		settingsTabControl = new BackpackSettingsTabControl(this, new Position(leftPos + imageWidth, topPos + 4));
 		children.add(settingsTabControl);
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int x, int y) {
-		BackpackBackgroundProperties backpackBackgroundProperties = getContainer().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - xSize) / 2, (height - ySize) / 2), matrixStack, getContainer().getBackpackInventorySlots().size(), getContainer().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), xSize, minecraft, container.getNumberOfRows());
+	protected void renderBg(MatrixStack matrixStack, float partialTicks, int x, int y) {
+		BackpackBackgroundProperties backpackBackgroundProperties = getMenu().getBackpackBackgroundProperties();
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getBackpackInventorySlots().size(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, minecraft, menu.getNumberOfRows());
 	}
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		container.detectSettingsChangeAndReload();
+		menu.detectSettingsChangeAndReload();
 		renderBackground(matrixStack);
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		settingsTabControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
-		renderHoveredTooltip(matrixStack, mouseX, mouseY);
+		renderTooltip(matrixStack, mouseX, mouseY);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
-		super.drawGuiContainerForegroundLayer(matrixStack, mouseX, mouseY);
-		for (int slotId = 0; slotId < container.ghostSlots.size(); ++slotId) {
-			Slot slot = container.ghostSlots.get(slotId);
-			moveItems(matrixStack, slot);
+	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
+		super.renderLabels(matrixStack, mouseX, mouseY);
+		for (int slotId = 0; slotId < menu.ghostSlots.size(); ++slotId) {
+			Slot slot = menu.ghostSlots.get(slotId);
+			renderSlot(matrixStack, slot);
 
 			settingsTabControl.renderSlotOverlays(matrixStack, slot, this::renderSlotOverlay);
 
-			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+			if (isHovering(slot, mouseX, mouseY) && slot.isActive()) {
 				hoveredSlot = slot;
 				renderSlotOverlay(matrixStack, slot, getSlotColor(slotId));
 			}
@@ -73,19 +73,19 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	@Override
-	protected void moveItems(MatrixStack matrixStack, Slot slot) {
-		int i = slot.xPos;
-		int j = slot.yPos;
-		ItemStack itemstack = slot.getStack();
-		boolean flag1 = slot == clickedSlot && !draggedStack.isEmpty() && !isRightMouseClick;
+	protected void renderSlot(MatrixStack matrixStack, Slot slot) {
+		int i = slot.x;
+		int j = slot.y;
+		ItemStack itemstack = slot.getItem();
+		boolean flag1 = slot == clickedSlot && !draggingItem.isEmpty() && !isSplittingStack;
 
 		setBlitOffset(100);
-		itemRenderer.zLevel = 100.0F;
-		if (itemstack.isEmpty() && slot.isEnabled()) {
-			Pair<ResourceLocation, ResourceLocation> pair = slot.getBackground();
+		itemRenderer.blitOffset = 100.0F;
+		if (itemstack.isEmpty() && slot.isActive()) {
+			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
 			if (pair != null) {
-				TextureAtlasSprite textureatlassprite = minecraft.getAtlasSpriteGetter(pair.getFirst()).apply(pair.getSecond());
-				minecraft.getTextureManager().bindTexture(textureatlassprite.getAtlasTexture().getTextureLocation());
+				TextureAtlasSprite textureatlassprite = minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+				minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
 				blit(matrixStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
 				flag1 = true;
 			}
@@ -93,16 +93,16 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 		if (!flag1) {
 			RenderSystem.enableDepthTest();
-			itemRenderer.renderItemAndEffectIntoGUI(minecraft.player, itemstack, i, j);
+			itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, i, j);
 		}
 
-		itemRenderer.zLevel = 0.0F;
+		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
 	}
 
 	@SuppressWarnings("java:S2589") // slot can actually be null despite being marked non null
 	@Override
-	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
+	protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
 		//noinspection ConstantConditions
 		if (slot != null) {
 			settingsTabControl.handleSlotClick(slot, mouseButton);
@@ -111,7 +111,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-		Slot slot = getSelectedSlot(mouseX, mouseY);
+		Slot slot = findSlot(mouseX, mouseY);
 		if (slot != null) {
 			settingsTabControl.handleSlotClick(slot, button);
 		}
@@ -120,10 +120,10 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 	@Nullable
 	@Override
-	protected Slot getSelectedSlot(double mouseX, double mouseY) {
-		for (int i = 0; i < container.ghostSlots.size(); ++i) {
-			Slot slot = container.ghostSlots.get(i);
-			if (isSlotSelected(slot, mouseX, mouseY) && slot.isEnabled()) {
+	protected Slot findSlot(double mouseX, double mouseY) {
+		for (int i = 0; i < menu.ghostSlots.size(); ++i) {
+			Slot slot = menu.ghostSlots.get(i);
+			if (isHovering(slot, mouseX, mouseY) && slot.isActive()) {
 				return slot;
 			}
 		}
@@ -142,8 +142,8 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
 		RenderSystem.disableDepthTest();
-		int xPos = slot.xPos;
-		int yPos = slot.yPos;
+		int xPos = slot.x;
+		int yPos = slot.y;
 		RenderSystem.colorMask(true, true, true, false);
 		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
 		RenderSystem.colorMask(true, true, true, true);
@@ -160,8 +160,8 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	@Override
-	protected void renderHoveredTooltip(MatrixStack matrixStack, int x, int y) {
-		super.renderHoveredTooltip(matrixStack, x, y);
+	protected void renderTooltip(MatrixStack matrixStack, int x, int y) {
+		super.renderTooltip(matrixStack, x, y);
 		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
 	}
 

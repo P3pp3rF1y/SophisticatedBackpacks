@@ -43,15 +43,15 @@ public class BackpackOpenMessage {
 			return;
 		}
 
-		if (player.openContainer instanceof BackpackContainer) {
-			BackpackContext backpackContext = ((BackpackContainer) player.openContainer).getBackpackContext();
+		if (player.containerMenu instanceof BackpackContainer) {
+			BackpackContext backpackContext = ((BackpackContainer) player.containerMenu).getBackpackContext();
 			if (msg.subBackpackSlotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else {
 				openBackpack(player, backpackContext.getSubBackpackContext(msg.subBackpackSlotIndex));
 			}
-		} else if (player.openContainer instanceof IContextAwareContainer) {
-			BackpackContext backpackContext = ((IContextAwareContainer) player.openContainer).getBackpackContext();
+		} else if (player.containerMenu instanceof IContextAwareContainer) {
+			BackpackContext backpackContext = ((IContextAwareContainer) player.containerMenu).getBackpackContext();
 			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);
@@ -61,7 +61,7 @@ public class BackpackOpenMessage {
 	private static void findAndOpenFirstBackpack(ServerPlayerEntity player) {
 		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryName, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, slot);
-			NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getDisplayName()),
+			NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 					backpackContext::toBuffer);
 			return true;
 		});

@@ -28,7 +28,7 @@ public class BackpackPlayerArgumentType implements ArgumentType<String> {
 			return ISuggestionProvider.suggest(BackpackAccessLogger.getPlayerNames().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList()), builder);
 		} else if (context.getSource() instanceof ISuggestionProvider) {
 			ISuggestionProvider isuggestionprovider = (ISuggestionProvider) context.getSource();
-			return isuggestionprovider.getSuggestionsFromServer((CommandContext<ISuggestionProvider>) context, builder);
+			return isuggestionprovider.customSuggestion((CommandContext<ISuggestionProvider>) context, builder);
 		}
 		return Suggestions.empty();
 	}

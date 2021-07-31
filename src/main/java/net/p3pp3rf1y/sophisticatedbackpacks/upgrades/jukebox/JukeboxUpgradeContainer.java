@@ -17,8 +17,8 @@ public class JukeboxUpgradeContainer extends UpgradeContainerBase<JukeboxUpgrade
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		slots.add(new SlotItemHandler(upgradeWrapper.getDiscInventory(), 0, -100, -100) {
 			@Override
-			public void onSlotChanged() {
-				super.onSlotChanged();
+			public void setChanged() {
+				super.setChanged();
 				if (upgradeWrapper.isPlaying()) {
 					upgradeWrapper.stop(player);
 				}
@@ -31,11 +31,11 @@ public class JukeboxUpgradeContainer extends UpgradeContainerBase<JukeboxUpgrade
 		if (data.contains(ACTION_DATA)) {
 			String actionName = data.getString(ACTION_DATA);
 			if (actionName.equals("play")) {
-				if (player.openContainer instanceof BackpackContainer) {
-					BackpackContext context = ((BackpackContainer) player.openContainer).getBackpackContext();
+				if (player.containerMenu instanceof BackpackContainer) {
+					BackpackContext context = ((BackpackContainer) player.containerMenu).getBackpackContext();
 
 					if (isBlockBackpack(context)) {
-						upgradeWrapper.play(player.world, context.getBackpackPosition(player));
+						upgradeWrapper.play(player.level, context.getBackpackPosition(player));
 					} else {
 						upgradeWrapper.play(player);
 					}

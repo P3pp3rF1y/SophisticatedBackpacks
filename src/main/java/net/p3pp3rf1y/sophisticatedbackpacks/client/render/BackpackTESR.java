@@ -21,13 +21,13 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 	@Override
 	public void render(BackpackTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlayIn) {
 		BlockState state = tileEntityIn.getBlockState();
-		Direction facing = state.get(BackpackBlock.FACING);
-		boolean showLeftTank = state.get(BackpackBlock.LEFT_TANK);
-		boolean showRightTank = state.get(BackpackBlock.RIGHT_TANK);
+		Direction facing = state.getValue(BackpackBlock.FACING);
+		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
+		boolean showRightTank = state.getValue(BackpackBlock.RIGHT_TANK);
 		BackpackRenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
-		matrixStack.push();
+		matrixStack.pushPose();
 		matrixStack.translate(0.5, 0, 0.5);
-		matrixStack.rotate(Vector3f.YN.rotationDegrees(facing.getHorizontalAngle()));
+		matrixStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
 		matrixStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
@@ -41,6 +41,6 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 				tankRenderInfo.getFluid().ifPresent(fluid -> RenderHelper.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), 8.7F, 2.5F, 0, -2F));
 			}
 		}
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 }

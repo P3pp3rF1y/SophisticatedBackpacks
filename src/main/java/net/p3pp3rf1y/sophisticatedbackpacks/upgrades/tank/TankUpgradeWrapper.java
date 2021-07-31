@@ -43,7 +43,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			@Override
 			protected void onContentsChanged(int slot) {
 				super.onContentsChanged(slot);
-				upgrade.setTagInfo("inventory", serializeNBT());
+				upgrade.addTagElement("inventory", serializeNBT());
 				save();
 			}
 
@@ -148,7 +148,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	private void serializeContents() {
-		upgrade.setTagInfo(CONTENTS_TAG, contents.writeToNBT(new CompoundNBT()));
+		upgrade.addTagElement(CONTENTS_TAG, contents.writeToNBT(new CompoundNBT()));
 		save();
 		forceUpdateTankRenderInfo();
 	}

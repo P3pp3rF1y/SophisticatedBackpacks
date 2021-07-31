@@ -48,7 +48,7 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 		}
 
 		if (!errorSlots.isEmpty()) {
-			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getDisplayName()), Collections.emptySet(), errorSlots, Collections.emptySet());
+			return new UpgradeSlotChangeResult.Fail(translError("add.needs_occupied_inventory_slots", 2 * numberOfRows, new ItemStack(this).getHoverName()), Collections.emptySet(), errorSlots, Collections.emptySet());
 		}
 
 		int backpackStackMultiplier = TankUpgradeWrapper.getAdjustedStackMultiplier(backpackWrapper);

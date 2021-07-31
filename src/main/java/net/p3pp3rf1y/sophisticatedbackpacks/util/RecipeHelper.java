@@ -120,31 +120,31 @@ public class RecipeHelper {
 
 	private static ItemStack getCraftingResultAndRemainingItems(Item item, World w, int width, int height, List<ItemStack> remainingItems) {
 		CraftingInventory craftingInventory = getFilledCraftingInventory(item, width, height);
-		return w.getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
+		return w.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
 			r.getRemainingItems(craftingInventory).forEach(stack -> {
 				if (!stack.isEmpty()) {
 					remainingItems.add(stack);
 				}
 			});
-			return r.getCraftingResult(craftingInventory);
+			return r.assemble(craftingInventory);
 		}).orElse(ItemStack.EMPTY);
 	}
 
 	private static CraftingInventory getFilledCraftingInventory(Item item, int width, int height) {
 		CraftingInventory craftinginventory = new CraftingInventory(new Container(null, -1) {
-			public boolean canInteractWith(PlayerEntity playerIn) {
+			public boolean stillValid(PlayerEntity playerIn) {
 				return false;
 			}
 		}, width, height);
 
-		for (int i = 0; i < craftinginventory.getSizeInventory(); i++) {
-			craftinginventory.setInventorySlotContents(i, new ItemStack(item));
+		for (int i = 0; i < craftinginventory.getContainerSize(); i++) {
+			craftinginventory.setItem(i, new ItemStack(item));
 		}
 		return craftinginventory;
 	}
 
 	public static Optional<FurnaceRecipe> getSmeltingRecipe(ItemStack stack) {
-		return getWorld().flatMap(w -> w.getRecipeManager().getRecipe(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.from(ItemStack.EMPTY, stack))), w));
+		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
 	}
 
 	public static Set<CompactingShape> getItemCompactingShapes(Item item) {
@@ -152,7 +152,7 @@ public class RecipeHelper {
 	}
 
 	public static List<StonecuttingRecipe> getStonecuttingRecipes(IInventory inventory) {
-		return getWorld().map(w -> w.getRecipeManager().getRecipes(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
+		return getWorld().map(w -> w.getRecipeManager().getRecipesFor(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
 	}
 
 	public enum CompactingShape {

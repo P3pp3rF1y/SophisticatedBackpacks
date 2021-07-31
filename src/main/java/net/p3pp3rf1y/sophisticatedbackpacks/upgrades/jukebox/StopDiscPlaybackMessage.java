@@ -14,11 +14,11 @@ public class StopDiscPlaybackMessage {
 	}
 
 	public static void encode(StopDiscPlaybackMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeUniqueId(msg.backpackUuid);
+		packetBuffer.writeUUID(msg.backpackUuid);
 	}
 
 	public static StopDiscPlaybackMessage decode(PacketBuffer packetBuffer) {
-		return new StopDiscPlaybackMessage(packetBuffer.readUniqueId());
+		return new StopDiscPlaybackMessage(packetBuffer.readUUID());
 	}
 
 	public static void onMessage(StopDiscPlaybackMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

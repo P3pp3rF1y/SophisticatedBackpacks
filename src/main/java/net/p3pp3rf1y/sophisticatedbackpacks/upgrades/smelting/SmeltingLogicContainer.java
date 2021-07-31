@@ -22,7 +22,7 @@ public class SmeltingLogicContainer {
 		addSmeltingSlot(addSlot, new SlotSuppliedHandler(() -> supplySmeltingLogic.get().getSmeltingInventory(), SmeltingLogic.FUEL_SLOT, -100, -100));
 		addSmeltingSlot(addSlot, new SlotSuppliedHandler(() -> supplySmeltingLogic.get().getSmeltingInventory(), SmeltingLogic.COOK_OUTPUT_SLOT, -100, -100) {
 			@Override
-			public boolean isItemValid(ItemStack stack) {
+			public boolean mayPlace(ItemStack stack) {
 				return false; //needs to not allow player putting anything in
 			}
 		});

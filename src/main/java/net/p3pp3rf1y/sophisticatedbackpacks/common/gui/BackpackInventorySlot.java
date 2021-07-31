@@ -22,8 +22,8 @@ public class BackpackInventorySlot extends SlotItemHandler {
 	}
 
 	@Override
-	public void onSlotChanged() {
-		super.onSlotChanged();
+	public void setChanged() {
+		super.setChanged();
 		// saving here as well because there are many cases where vanilla modifies stack directly without and inventory handler isn't aware of it
 		// however it does notify the slot of change
 		backpackWrapper.getInventoryHandler().onContentsChanged(slotIndex);
@@ -37,7 +37,7 @@ public class BackpackInventorySlot extends SlotItemHandler {
 	}
 
 	@Override
-	public int getItemStackLimit(ItemStack stack) {
+	public int getMaxStackSize(ItemStack stack) {
 		return inventoryHandler.getStackLimit(slotIndex, stack);
 	}
 }

@@ -42,7 +42,7 @@ public class ItemEnabledCondition implements ICondition {
 
 		@Override
 		public ItemEnabledCondition read(JsonObject json) {
-			return new ItemEnabledCondition(JSONUtils.getString(json, "itemRegistryName"));
+			return new ItemEnabledCondition(JSONUtils.getAsString(json, "itemRegistryName"));
 		}
 
 		@Override

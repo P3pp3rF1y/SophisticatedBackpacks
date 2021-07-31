@@ -80,7 +80,7 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		}
 
 		ClientPlayerEntity player = screen.getMinecraft().player;
-		ItemStack cursorStack = player.inventory.getItemStack();
+		ItemStack cursorStack = player.inventory.getCarried();
 		if (!cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
 			return false;
 		}
@@ -122,18 +122,18 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		int displayLevel = (int) ((height - 2) * ((float) fill / capacity));
 
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(contents);
-		TextureAtlasSprite still = Minecraft.getInstance().getAtlasSpriteGetter(PlayerContainer.LOCATION_BLOCKS_TEXTURE).apply(texture);
+		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(texture);
 		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.getX() + 10, pos.getY() + 1 + height - 2 - displayLevel, displayLevel);
 		renderTooltip(mouseX, mouseY, contents, capacity);
 	}
 
 	private void renderTiledFluidTextureAtlas(MatrixStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
-		screen.getMinecraft().getTextureManager().bindTexture(sprite.getAtlasTexture().getTextureLocation());
-		BufferBuilder builder = Tessellator.getInstance().getBuffer();
+		screen.getMinecraft().getTextureManager().bind(sprite.atlas().location());
+		BufferBuilder builder = Tessellator.getInstance().getBuilder();
 		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
 
-		float u1 = sprite.getMinU();
-		float v1 = sprite.getMinV();
+		float u1 = sprite.getU0();
+		float v1 = sprite.getV0();
 		int spriteHeight = sprite.getHeight();
 		int spriteWidth = sprite.getWidth();
 		int startY = y;
@@ -143,23 +143,23 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		do {
 			int renderHeight = Math.min(spriteHeight, height);
 			height -= renderHeight;
-			float v2 = sprite.getInterpolatedV((16f * renderHeight) / spriteHeight);
+			float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
 
 			// we need to draw the quads per width too
-			Matrix4f matrix = matrixStack.getLast().getMatrix();
-			float u2 = sprite.getInterpolatedU((16f * 16) / spriteWidth);
-			builder.pos(matrix, x, (float) startY + renderHeight, 100).color(red, green, blue, 1).tex(u1, v2).endVertex();
-			builder.pos(matrix, (float) x + 16, (float) startY + renderHeight, 100).color(red, green, blue, 1).tex(u2, v2).endVertex();
-			builder.pos(matrix, (float) x + 16, startY, 100).color(red, green, blue, 1).tex(u2, v1).endVertex();
-			builder.pos(matrix, x, startY, 100).color(red, green, blue, 1).tex(u1, v1).endVertex();
+			Matrix4f matrix = matrixStack.last().pose();
+			float u2 = sprite.getU((16f * 16) / spriteWidth);
+			builder.vertex(matrix, x, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u1, v2).endVertex();
+			builder.vertex(matrix, (float) x + 16, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u2, v2).endVertex();
+			builder.vertex(matrix, (float) x + 16, startY, 100).color(red, green, blue, 1).uv(u2, v1).endVertex();
+			builder.vertex(matrix, x, startY, 100).color(red, green, blue, 1).uv(u1, v1).endVertex();
 
 			startY += renderHeight;
 		} while (height > 0);
 
 		// finish drawing sprites
-		builder.finishDrawing();
+		builder.end();
 		RenderSystem.enableAlphaTest();
-		WorldVertexBufferUploader.draw(builder);
+		WorldVertexBufferUploader.end(builder);
 	}
 
 }

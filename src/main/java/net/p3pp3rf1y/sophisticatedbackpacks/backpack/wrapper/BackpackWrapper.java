@@ -120,7 +120,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void markBackpackContentsDirty() {
-		BackpackStorage.get().markDirty();
+		BackpackStorage.get().setDirty();
 	}
 
 	@Override
@@ -270,14 +270,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setColors(int clothColor, int borderColor) {
-		backpack.setTagInfo(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
-		backpack.setTagInfo(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
+		backpack.addTagElement(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
+		backpack.addTagElement(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void setSortBy(SortBy sortBy) {
-		backpack.setTagInfo(SORT_BY_TAG, StringNBT.valueOf(sortBy.getString()));
+		backpack.addTagElement(SORT_BY_TAG, StringNBT.valueOf(sortBy.getSerializedName()));
 		backpackSaveHandler.run();
 	}
 
@@ -328,7 +328,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
-		backpackCopy.removeChildTag(CONTENTS_UUID_TAG);
+		backpackCopy.removeTagKey(CONTENTS_UUID_TAG);
 		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
@@ -356,14 +356,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
-		backpack.setTagInfo(LOOT_TABLE_NAME_TAG, StringNBT.valueOf(lootTableName.toString()));
-		backpack.setTagInfo(LOOT_PERCENTAGE_TAG, FloatNBT.valueOf(lootPercentage));
+		backpack.addTagElement(LOOT_TABLE_NAME_TAG, StringNBT.valueOf(lootTableName.toString()));
+		backpack.addTagElement(LOOT_PERCENTAGE_TAG, FloatNBT.valueOf(lootPercentage));
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void fillWithLoot(PlayerEntity playerEntity) {
-		if (playerEntity.world.isRemote) {
+		if (playerEntity.level.isClientSide) {
 			return;
 		}
 		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
@@ -390,22 +390,22 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {
-		MinecraftServer server = playerEntity.world.getServer();
-		if (server == null || !(playerEntity.world instanceof ServerWorld)) {
+		MinecraftServer server = playerEntity.level.getServer();
+		if (server == null || !(playerEntity.level instanceof ServerWorld)) {
 			return;
 		}
 
 		ResourceLocation lootTableName = new ResourceLocation(lootName);
 		float lootPercentage = NBTHelper.getFloat(backpack, LOOT_PERCENTAGE_TAG).orElse(0f);
 
-		backpack.removeChildTag(LOOT_TABLE_NAME_TAG);
-		backpack.removeChildTag(LOOT_PERCENTAGE_TAG);
+		backpack.removeTagKey(LOOT_TABLE_NAME_TAG);
+		backpack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
-		ServerWorld world = (ServerWorld) playerEntity.world;
+		ServerWorld world = (ServerWorld) playerEntity.level;
 
 		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
 		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
-		LootHelper.fillWithLoot(world.rand, loot, getInventoryHandler());
+		LootHelper.fillWithLoot(world.random, loot, getInventoryHandler());
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {

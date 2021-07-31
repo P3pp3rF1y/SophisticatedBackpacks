@@ -106,7 +106,7 @@ public class InventorySorter {
 			countPlaced = Math.min(count, copy.getMaxStackSize());
 		}
 		copy.setCount(countPlaced);
-		if (!ItemStack.areItemStacksEqual(handler.getStackInSlot(slot), copy)) {
+		if (!ItemStack.matches(handler.getStackInSlot(slot), copy)) {
 			handler.setStackInSlot(slot, copy);
 		}
 		return countPlaced;

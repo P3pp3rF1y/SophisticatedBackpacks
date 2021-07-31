@@ -83,11 +83,11 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 
 	@OnlyIn(Dist.CLIENT)
 	private int getButtonX(Slot firstSlot) {
-		return firstSlot.xPos - 19;
+		return firstSlot.x - 19;
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	private int getButtonY(Slot firstSlot, int index) {
-		return firstSlot.yPos + 18 * index;
+		return firstSlot.y + 18 * index;
 	}
 }

@@ -33,7 +33,7 @@ public class PlayDiscMessage {
 
 	public static void encode(PlayDiscMessage msg, PacketBuffer packetBuffer) {
 		packetBuffer.writeBoolean(msg.blockBackpack);
-		packetBuffer.writeUniqueId(msg.backpackUuid);
+		packetBuffer.writeUUID(msg.backpackUuid);
 		packetBuffer.writeInt(msg.musicDiscItemId);
 		if (msg.blockBackpack) {
 			packetBuffer.writeBlockPos(msg.pos);
@@ -44,9 +44,9 @@ public class PlayDiscMessage {
 
 	public static PlayDiscMessage decode(PacketBuffer packetBuffer) {
 		if (packetBuffer.readBoolean()) {
-			return new PlayDiscMessage(packetBuffer.readUniqueId(), packetBuffer.readInt(), packetBuffer.readBlockPos());
+			return new PlayDiscMessage(packetBuffer.readUUID(), packetBuffer.readInt(), packetBuffer.readBlockPos());
 		}
-		return new PlayDiscMessage(packetBuffer.readUniqueId(), packetBuffer.readInt(), packetBuffer.readInt());
+		return new PlayDiscMessage(packetBuffer.readUUID(), packetBuffer.readInt(), packetBuffer.readInt());
 	}
 
 	public static void onMessage(PlayDiscMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -56,7 +56,7 @@ public class PlayDiscMessage {
 	}
 
 	private static void handleMessage(PlayDiscMessage msg) {
-		Item discItem = Item.getItemById(msg.musicDiscItemId);
+		Item discItem = Item.byId(msg.musicDiscItemId);
 		if (!(discItem instanceof MusicDiscItem)) {
 			return;
 		}

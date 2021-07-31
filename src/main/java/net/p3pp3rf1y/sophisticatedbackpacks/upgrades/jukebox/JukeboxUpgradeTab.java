@@ -53,7 +53,7 @@ public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContaine
 	@Override
 	protected void moveSlotsToTab() {
 		Slot discSlot = getContainer().getSlots().get(0);
-		discSlot.xPos = x - screen.getGuiLeft() + 4;
-		discSlot.yPos = y - screen.getGuiTop() + 25;
+		discSlot.x = x - screen.getGuiLeft() + 4;
+		discSlot.y = y - screen.getGuiTop() + 25;
 	}
 }

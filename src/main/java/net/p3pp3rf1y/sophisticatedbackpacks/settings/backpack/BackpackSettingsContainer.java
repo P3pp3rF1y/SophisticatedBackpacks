@@ -19,7 +19,7 @@ public class BackpackSettingsContainer extends SettingsContainerBase<BackpackSet
 		if (data.contains(CONTEXT_TAG)) {
 			context = Context.fromId(data.getInt(CONTEXT_TAG));
 		} else {
-			for (String tagName : data.keySet()) {
+			for (String tagName : data.getAllKeys()) {
 				BackpackSettingsManager.getBackpackSetting(tagName).ifPresent(setting -> setSettingValue(getPlayer(), setting, data));
 			}
 		}

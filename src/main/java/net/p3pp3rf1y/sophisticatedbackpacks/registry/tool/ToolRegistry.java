@@ -68,8 +68,8 @@ public class ToolRegistry {
 		itemMatcherFactories.add(new ItemMatcherFactory("tag") {
 			@Override
 			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				String tagName = JSONUtils.getString(jsonObject, "tag");
-				ITag<Item> tag = TagCollectionManager.getManager().getItemTags().get(new ResourceLocation(tagName));
+				String tagName = JSONUtils.getAsString(jsonObject, "tag");
+				ITag<Item> tag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tagName));
 				return tag == null ? Optional.empty() : Optional.of(new ItemTagMatcher(tag));
 			}
 		});
@@ -77,14 +77,14 @@ public class ToolRegistry {
 		itemMatcherFactories.add(new ItemMatcherFactory("tool") {
 			@Override
 			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				String toolName = JSONUtils.getString(jsonObject, "tool");
+				String toolName = JSONUtils.getAsString(jsonObject, "tool");
 				return TOOL_TYPES.containsKey(toolName) ? Optional.of(new ToolTypeMatcher(TOOL_TYPES.get(toolName))) : Optional.empty();
 			}
 		});
 		itemMatcherFactories.add(new ItemMatcherFactory("emptynbt") {
 			@Override
 			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				ResourceLocation itemName = new ResourceLocation(JSONUtils.getString(jsonObject, "item"));
+				ResourceLocation itemName = new ResourceLocation(JSONUtils.getAsString(jsonObject, "item"));
 				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
@@ -185,7 +185,7 @@ public class ToolRegistry {
 
 		@Override
 		public void parse(JsonObject json) {
-			JsonArray toolsMap = JSONUtils.getJsonArray(json, name);
+			JsonArray toolsMap = JSONUtils.getAsJsonArray(json, name);
 
 			for (JsonElement jsonElement : toolsMap) {
 				if (!jsonElement.isJsonObject()) {
@@ -208,7 +208,7 @@ public class ToolRegistry {
 				parseFromProperty(entry);
 			} else {
 				if (entry.size() == 2 && entry.has(objectJsonArrayName) && entry.has("tools")) {
-					parseFromArrays(JSONUtils.getJsonArray(entry, objectJsonArrayName), JSONUtils.getJsonArray(entry, "tools"));
+					parseFromArrays(JSONUtils.getAsJsonArray(entry, objectJsonArrayName), JSONUtils.getAsJsonArray(entry, "tools"));
 				} else {
 					SophisticatedBackpacks.LOGGER.error("Invalid block tools entry - needs to have either 1 array property with mod/block name or \"blocks\" and \"tools\" array properties {}", entry);
 				}
@@ -281,7 +281,7 @@ public class ToolRegistry {
 
 		protected Tuple<Set<Item>, Set<CacheableStackPredicate>> getTools(Map.Entry<String, JsonElement> property) {
 			if (property.getValue().isJsonArray()) {
-				JsonArray toolArray = JSONUtils.getJsonArray(property.getValue(), "");
+				JsonArray toolArray = JSONUtils.convertToJsonArray(property.getValue(), "");
 				return getTools(toolArray);
 			} else {
 				SophisticatedBackpacks.LOGGER.error("Invalid tools list - needs to be an array {}", property.getValue());
@@ -333,7 +333,7 @@ public class ToolRegistry {
 		}
 
 		public boolean appliesTo(JsonElement jsonElement) {
-			return jsonElement.isJsonObject() && JSONUtils.getString(jsonElement.getAsJsonObject(), "type").equals(typeName);
+			return jsonElement.isJsonObject() && JSONUtils.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
 		}
 
 		public Optional<CacheableStackPredicate> getPredicate(JsonElement jsonElement) {
@@ -352,7 +352,7 @@ public class ToolRegistry {
 
 		@Override
 		public boolean appliesTo(JsonElement jsonElement) {
-			return jsonElement.isJsonObject() && JSONUtils.getString(jsonElement.getAsJsonObject(), "type").equals(typeName);
+			return jsonElement.isJsonObject() && JSONUtils.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
 		}
 
 		@Override

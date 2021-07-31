@@ -42,7 +42,7 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 				@Override
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
-					upgrade.setTagInfo("discInventory", serializeNBT());
+					upgrade.addTagElement("discInventory", serializeNBT());
 					save();
 				}
 
@@ -65,13 +65,13 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 
 		public void play(World world, BlockPos pos) {
 			play(world, (serverWorld, backpackUuid) ->
-					ServerBackpackSoundHandler.startPlayingDisc(serverWorld, pos, backpackUuid, Item.getIdFromItem(getDisc().getItem()), () -> setIsPlaying(false)));
+					ServerBackpackSoundHandler.startPlayingDisc(serverWorld, pos, backpackUuid, Item.getId(getDisc().getItem()), () -> setIsPlaying(false)));
 		}
 
 		public void play(LivingEntity entity) {
-			play(entity.world, (world, backpackUuid) ->
-					ServerBackpackSoundHandler.startPlayingDisc(world, entity.getPositionVec(), backpackUuid, entity.getEntityId(),
-							Item.getIdFromItem(getDisc().getItem()), () -> setIsPlaying(false)));
+			play(entity.level, (world, backpackUuid) ->
+					ServerBackpackSoundHandler.startPlayingDisc(world, entity.position(), backpackUuid, entity.getId(),
+							Item.getId(getDisc().getItem()), () -> setIsPlaying(false)));
 		}
 
 		private void play(World world, BiConsumer<ServerWorld, UUID> play) {
@@ -89,11 +89,11 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		}
 
 		public void stop(LivingEntity entity) {
-			if (!(entity.world instanceof ServerWorld)) {
+			if (!(entity.level instanceof ServerWorld)) {
 				return;
 			}
 			backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
-					ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) entity.world, entity.getPositionVec(), backpackUuid)
+					ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) entity.level, entity.position(), backpackUuid)
 			);
 			setIsPlaying(false);
 		}
@@ -106,7 +106,7 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
 			if (isPlaying && lastKeepAliveSendTime < world.getGameTime() - KEEP_ALIVE_SEND_INTERVAL) {
 				backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
-						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, entity != null ? entity.getPositionVec() : Vector3d.copyCentered(pos), () -> setIsPlaying(false))
+						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, entity != null ? entity.position() : Vector3d.atCenterOf(pos), () -> setIsPlaying(false))
 				);
 				lastKeepAliveSendTime = world.getGameTime();
 			}

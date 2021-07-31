@@ -24,9 +24,9 @@ public class TankUpgradeContainer extends UpgradeContainerBase<TankUpgradeWrappe
 	public TankUpgradeContainer(PlayerEntity player, int upgradeContainerId, TankUpgradeWrapper upgradeWrapper, UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		slots.add(new TankIOSlot(() -> this.upgradeWrapper.getInventory(), TankUpgradeWrapper.INPUT_SLOT, -100, -100, translUpgradeSlotTooltip("tank_input"))
-				.setBackground(PlayerContainer.LOCATION_BLOCKS_TEXTURE, EMPTY_TANK_INPUT_SLOT_BACKGROUND));
+				.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_TANK_INPUT_SLOT_BACKGROUND));
 		slots.add(new TankIOSlot(() -> this.upgradeWrapper.getInventory(), TankUpgradeWrapper.OUTPUT_SLOT, -100, -100, translUpgradeSlotTooltip("tank_output"))
-				.setBackground(PlayerContainer.LOCATION_BLOCKS_TEXTURE, EMPTY_TANK_OUTPUT_SLOT_BACKGROUND));
+				.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_TANK_OUTPUT_SLOT_BACKGROUND));
 	}
 
 	@Override
