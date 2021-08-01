@@ -71,6 +71,8 @@
     "item.sophisticatedbackpacks.stack_upgrade_tier_3.tooltip": "Multiplies the number of stacks that can fit in a slot by 8",
     "item.sophisticatedbackpacks.stack_upgrade_tier_4": "Stack Upgrade Tier 4",
     "item.sophisticatedbackpacks.stack_upgrade_tier_4.tooltip": "Multiplies the number of stacks that can fit in a slot by 16",
+    "item.sophisticatedbackpacks.battery_upgrade": "Battery Upgrade",
+    "item.sophisticatedbackpacks.battery_upgrade.tooltip": "Replaces part of backpack's inventory with energy storage",
     "item.sophisticatedbackpacks.tank_upgrade": "Tank Upgrade",
     "item.sophisticatedbackpacks.tank_upgrade.tooltip": "Replaces part of backpack's inventory with fluid storage",
     "item.sophisticatedbackpacks.tool_swapper_upgrade": "Tool Swapper Upgrade",

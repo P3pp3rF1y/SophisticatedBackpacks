@@ -15,14 +15,14 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
@@ -118,13 +118,15 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		BlockState state = getBlockState();
 		state = state.setValue(LEFT_TANK, false);
 		state = state.setValue(RIGHT_TANK, false);
-		for (TankPosition pos : backpackWrapper.getRenderInfo().getTankRenderInfos().keySet()) {
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		for (TankPosition pos : renderInfo.getTankRenderInfos().keySet()) {
 			if (pos == TankPosition.LEFT) {
 				state = state.setValue(LEFT_TANK, true);
 			} else if (pos == TankPosition.RIGHT) {
 				state = state.setValue(RIGHT_TANK, true);
 			}
 		}
+		state = state.setValue(BATTERY, renderInfo.getBatteryRenderInfo().isPresent());
 		level.setBlockAndUpdate(worldPosition, state);
 		level.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);

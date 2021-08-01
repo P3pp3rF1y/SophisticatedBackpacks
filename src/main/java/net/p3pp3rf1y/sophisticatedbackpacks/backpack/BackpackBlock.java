@@ -58,6 +58,7 @@ import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 public class BackpackBlock extends Block implements IWaterLoggable {
 	public static final BooleanProperty LEFT_TANK = BooleanProperty.create("left_tank");
 	public static final BooleanProperty RIGHT_TANK = BooleanProperty.create("right_tank");
+	public static final BooleanProperty BATTERY = BooleanProperty.create("battery");
 
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final int BEDROCK_RESISTANCE = 3600000;
@@ -83,7 +84,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK);
+		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK, BATTERY);
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-		return BackpackShapes.getShape(state.getValue(FACING), state.getValue(LEFT_TANK), state.getValue(RIGHT_TANK), false);
+		return BackpackShapes.getShape(state.getValue(FACING), state.getValue(LEFT_TANK), state.getValue(RIGHT_TANK), state.getValue(BATTERY));
 	}
 
 	@Override

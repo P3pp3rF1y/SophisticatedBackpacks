@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
@@ -207,6 +208,13 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			}
 			currentTankPos = TankPosition.RIGHT;
 		}
+
+		getWrappersThatImplement(IRenderedBatteryUpgrade.class).forEach(upgrade -> {
+			upgrade.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
+			if (forceUpdateRenderInfo) {
+				upgrade.forceUpdateBatteryRenderInfo();
+			}
+		});
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {

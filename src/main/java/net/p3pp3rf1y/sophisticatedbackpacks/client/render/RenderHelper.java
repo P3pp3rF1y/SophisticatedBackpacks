@@ -13,8 +13,11 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.FluidStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
 public class RenderHelper {
+	static final ResourceLocation BACKPACK_ENTITY_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
+
 	private RenderHelper() {}
 
 	public static void renderFluid(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, Fluid fluid, float fill, float xOffset, float yOffset, int fillYOffsetMultiplier, float zOffset) {
@@ -34,5 +37,15 @@ public class RenderHelper {
 		float green = (color >> 8 & 255) / 255.0F;
 		float blue = (color & 255) / 255.0F;
 		fluidBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
+	}
+
+	public static void renderBatteryCharge(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float charge) {
+		int pixels = (int) (charge * 4);
+
+		ModelRenderer chargeBox = new ModelRenderer(64, 64, 18, 55);
+		chargeBox.addBox(-2.0F, -3.0F, -6.05F, pixels, 1.0F, 1.0F, 0.0F, false);
+		IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(BACKPACK_ENTITY_TEXTURE));
+
+		chargeBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 	}
 }

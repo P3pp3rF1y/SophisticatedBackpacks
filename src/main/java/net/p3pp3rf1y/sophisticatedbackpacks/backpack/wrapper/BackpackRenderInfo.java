@@ -4,22 +4,29 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraftforge.common.util.Constants;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class BackpackRenderInfo {
 	private static final String RENDER_INFO_TAG = "renderInfo";
 	private static final String TANKS_TAG = "tanks";
+	private static final String BATTERY_TAG = "battery";
 	private static final String TANK_POSITION_TAG = "position";
 	private static final String TANK_INFO_TAG = "info";
 
 	private final ItemStack backpack;
 	private final Supplier<Runnable> getBackpackSaveHandler;
 	private final Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = new LinkedHashMap<>();
+	@Nullable
+	private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
 	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getBackpackSaveHandler) {
 		this.backpack = backpack;
@@ -29,6 +36,7 @@ public class BackpackRenderInfo {
 
 	private void deserialize() {
 		deserializeTanks();
+		deserializeBattery();
 	}
 
 	private void save() {
@@ -42,11 +50,12 @@ public class BackpackRenderInfo {
 	}
 
 	public CompoundNBT getNbt() {
-		return NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundNBT());
+		return getRenderInfoTag();
 	}
 
 	public void reset() {
 		tankRenderInfos.clear();
+		batteryRenderInfo = null;
 		NBTHelper.removeTag(backpack, RENDER_INFO_TAG);
 		save();
 	}
@@ -58,7 +67,7 @@ public class BackpackRenderInfo {
 	}
 
 	private void deserializeTanks() {
-		CompoundNBT renderInfo = NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundNBT());
+		CompoundNBT renderInfo = getRenderInfoTag();
 		ListNBT tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tanks.size(); i++) {
 			CompoundNBT tank = tanks.getCompound(i);
@@ -66,10 +75,14 @@ public class BackpackRenderInfo {
 		}
 	}
 
+	private void deserializeBattery() {
+		batteryRenderInfo = NBTHelper.getCompound(getRenderInfoTag(), BATTERY_TAG).map(IRenderedBatteryUpgrade.BatteryRenderInfo::deserialize).orElse(null);
+	}
+
 	private void serializeTank(TankPosition tankPosition, IRenderedTankUpgrade.TankRenderInfo tankRenderInfo) {
 		CompoundNBT tankInfo = tankRenderInfo.serialize();
 
-		CompoundNBT renderInfo = NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundNBT());
+		CompoundNBT renderInfo = getRenderInfoTag();
 		ListNBT tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
 
 		boolean infoSet = false;
@@ -93,5 +106,23 @@ public class BackpackRenderInfo {
 
 	public Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> getTankRenderInfos() {
 		return tankRenderInfos;
+	}
+
+	public Optional<IRenderedBatteryUpgrade.BatteryRenderInfo> getBatteryRenderInfo() {
+		return Optional.ofNullable(batteryRenderInfo);
+	}
+
+	public void setBatteryRenderInfo(IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo) {
+		this.batteryRenderInfo = batteryRenderInfo;
+		CompoundNBT batteryInfo = batteryRenderInfo.serialize();
+		CompoundNBT renderInfo = getRenderInfoTag();
+		renderInfo.put(BATTERY_TAG, batteryInfo);
+		NBTHelper.setCompoundNBT(backpack, RENDER_INFO_TAG, renderInfo);
+		save();
+	}
+
+	@Nonnull
+	private CompoundNBT getRenderInfoTag() {
+		return NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundNBT());
 	}
 }

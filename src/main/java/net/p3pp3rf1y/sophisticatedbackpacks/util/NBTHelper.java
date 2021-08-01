@@ -51,6 +51,10 @@ public class NBTHelper {
 		return getTagValue(tag, key, CompoundNBT::getBoolean);
 	}
 
+	public static Optional<CompoundNBT> getCompound(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getCompound);
+	}
+
 	private static <T> Optional<T> getTagValue(CompoundNBT tag, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();

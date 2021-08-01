@@ -24,10 +24,12 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 		Direction facing = state.getValue(BackpackBlock.FACING);
 		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
 		boolean showRightTank = state.getValue(BackpackBlock.RIGHT_TANK);
+		boolean showBattery = state.getValue(BackpackBlock.BATTERY);
 		BackpackRenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
 		matrixStack.pushPose();
 		matrixStack.translate(0.5, 0, 0.5);
 		matrixStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
+		matrixStack.pushPose();
 		matrixStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
@@ -40,6 +42,15 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 			if (tankRenderInfo != null) {
 				tankRenderInfo.getFluid().ifPresent(fluid -> RenderHelper.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), 8.7F, 2.5F, 0, -2F));
 			}
+		}
+		matrixStack.popPose();
+		if (showBattery) {
+			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
+				matrixStack.pushPose();
+				matrixStack.mulPose(Vector3f.XN.rotationDegrees(180));
+				RenderHelper.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
+				matrixStack.popPose();
+			});
 		}
 		matrixStack.popPose();
 	}

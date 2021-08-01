@@ -44,7 +44,9 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
@@ -59,8 +61,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
 public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel> {
 	private final Map<ModelPart, IUnbakedModel> modelParts;
@@ -90,6 +91,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 	private static final class BakedModel implements IDynamicBakedModel {
 		private static final Map<ItemCameraTransforms.TransformType, TransformationMatrix> TRANSFORMS;
+		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
 		static {
 			ImmutableMap.Builder<ItemCameraTransforms.TransformType, TransformationMatrix> builder = ImmutableMap.builder();
@@ -147,6 +149,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		@Nullable
 		private IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = null;
 		private boolean battery;
+		@Nullable
+		private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
 		public BakedModel(Map<ModelPart, IBakedModel> models, IModelTransform modelTransform) {
 			this.models = models;
@@ -160,13 +164,39 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			if (state == null) {
 				addLeftSide(state, side, rand, extraData, ret, tankLeft);
 				addRightSide(state, side, rand, extraData, ret, tankRight);
+				addFront(state, side, rand, extraData, ret, battery);
 			} else {
 				addLeftSide(state, side, rand, extraData, ret, state.getValue(LEFT_TANK));
 				addRightSide(state, side, rand, extraData, ret, state.getValue(RIGHT_TANK));
+				addFront(state, side, rand, extraData, ret, state.getValue(BATTERY));
 			}
-			ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData));
-
 			return ret;
+		}
+
+		private void addFront(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean battery) {
+			if (battery) {
+				if (batteryRenderInfo != null) {
+					addCharge(ret, batteryRenderInfo.getChargeRatio());
+				}
+				ret.addAll(models.get(ModelPart.BATTERY).getQuads(state, side, rand, extraData));
+			} else {
+				ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData));
+			}
+		}
+
+		private void addCharge(List<BakedQuad> ret, float chargeRatio) {
+			if (MathHelper.equal(chargeRatio, 0)) {
+				return;
+			}
+			int pixels = (int) (chargeRatio * 4);
+			float minX = (10 - pixels) / 16f;
+			float minY = 2 / 16f;
+			float minZ = 1.95f / 16f;
+			float maxX = minX + pixels / 16f;
+			float maxY = minY + 1 / 16f;
+			float[] cols = new float[] {1f, 1f, 1f, 1f};
+			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(BACKPACK_MODULES_TEXTURE);
+			ret.add(createQuad(ImmutableList.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
 		}
 
 		private void addRightSide(
@@ -334,8 +364,10 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity livingEntity) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
+			backpackModel.battery = false;
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = backpackWrapper.getRenderInfo().getTankRenderInfos();
+				BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
 				tankRenderInfos.forEach((pos, info) -> {
 					if (pos == TankPosition.LEFT) {
 						backpackModel.tankLeft = true;
@@ -344,6 +376,10 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 						backpackModel.tankRight = true;
 						backpackModel.rightTankRenderInfo = info;
 					}
+				});
+				renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
+					backpackModel.battery = true;
+					backpackModel.batteryRenderInfo = batteryRenderInfo;
 				});
 			});
 

@@ -66,6 +66,29 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + yOffset, OVERLAY);
 			yOffset += 18;
 		}
+
+		int segmentHeight = 4;
+		int numberOfSegments = height / segmentHeight;
+		int initialColor = 0xffdf00;
+		int finalColor = 0xf00000;
+
+		int initialRed = initialColor >> 16 & 255;
+		int initialGreen = initialColor >> 8 & 255;
+		int initialBlue = initialColor & 255;
+
+		int finalRed = finalColor >> 16 & 255;
+		int finalGreen = finalColor >> 8 & 255;
+		int finalBlue = finalColor & 255;
+
+		for (int i = 0; i < numberOfSegments; i++) {
+			float percentage = (float) i / (numberOfSegments - 1);
+			int red = (int) (initialRed * percentage + finalRed * (1 - percentage));
+			int green = (int) (initialGreen * percentage + finalGreen * (1 - percentage));
+			int blue = (int) (initialBlue * percentage + finalBlue * (1 - percentage));
+			int color = red << 16 | green << 8 | blue | 255 << 24;
+
+			screen.renderOverlay(matrixStack, color, getTankLeft() + 1, pos.getY() + 1 + i * segmentHeight, 16, segmentHeight);
+		}
 	}
 
 	private int getTankLeft() {

@@ -18,6 +18,7 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 	private final Map<Item, ModelRenderer> clipsLeftPouches;
 	private final Map<Item, ModelRenderer> clipsRightPouches;
 	private final Map<Item, ModelRenderer> clipsFrontPouch;
+	private final Map<Item, ModelRenderer> clipsBattery;
 
 	public final ModelRenderer cloth;
 	private final ModelRenderer rightPouchesBorder;
@@ -32,6 +33,7 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 	private final ModelRenderer fabricLeft;
 	public final ModelRenderer fabric;
 	private final ModelRenderer battery;
+	private final ModelRenderer batteryBorder;
 	private final ModelRenderer leftTank;
 	private final ModelRenderer leftTankBorder;
 	private final ModelRenderer rightTank;
@@ -108,17 +110,18 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 		fabric.texOffs(16, 44).addBox(0.0F, -5.5F, 2.5F, 1.0F, 4.0F, 7.0F, 0.0F, false);
 		fabric.texOffs(0, 44).addBox(5.5F, -5.5F, 2.5F, 1.0F, 4.0F, 7.0F, 0.0F, false);
 
+		batteryBorder = new ModelRenderer(this);
+		batteryBorder.setPos(0.0F, 24.0F, 0.0F);
+		batteryBorder.texOffs(28, 38).addBox(-4.25F, -5.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
+		batteryBorder.texOffs(28, 43).addBox(-3.5F, -5.25F, -6.25F, 7.0F, 1.0F, 1.0F, 0.0F, false);
+		batteryBorder.texOffs(33, 38).addBox(-4.25F, -1.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
+		batteryBorder.texOffs(33, 38).addBox(3.25F, -5.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
+		batteryBorder.texOffs(27, 45).addBox(-3.5F, -1.25F, -6.25F, 7.0F, 1.0F, 1.0F, 0.0F, false);
+		batteryBorder.texOffs(39, 37).addBox(3.25F, -1.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
+
 		battery = new ModelRenderer(this);
 		battery.setPos(0.0F, 24.0F, 0.0F);
 		battery.texOffs(28, 29).addBox(-4.0F, -6.0F, -6.0F, 8.0F, 6.0F, 3.0F, 0.0F, false);
-		battery.texOffs(33, 38).addBox(-4.25F, -1.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
-		battery.texOffs(28, 38).addBox(-4.25F, -5.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
-		battery.texOffs(27, 45).addBox(-3.5F, -1.25F, -6.25F, 7.0F, 1.0F, 1.0F, 0.0F, false);
-		battery.texOffs(28, 43).addBox(-3.5F, -5.25F, -6.25F, 7.0F, 1.0F, 1.0F, 0.0F, false);
-		battery.texOffs(39, 37).addBox(3.25F, -1.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
-		battery.texOffs(33, 38).addBox(3.25F, -5.25F, -6.25F, 1.0F, 1.0F, 4.0F, 0.0F, false);
-		battery.texOffs(21, 30).addBox(1.0F, -1.25F, -6.15F, 1.0F, 1.0F, 1.0F, 0.2F, false);
-		battery.texOffs(24, 30).addBox(1.0F, -5.25F, -6.15F, 1.0F, 1.0F, 1.0F, 0.2F, false);
 		battery.texOffs(28, 53).addBox(-2.0F, -6.25F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 		battery.texOffs(28, 53).addBox(-0.75F, -6.25F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 		battery.texOffs(28, 53).addBox(-2.0F, -8.0F, -3.25F, 1.0F, 1.0F, 1.0F, 0.0F, false);
@@ -180,6 +183,14 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 				ModItems.DIAMOND_BACKPACK.get(), getFrontPouchClipsRenderer(38),
 				ModItems.NETHERITE_BACKPACK.get(), getFrontPouchClipsRenderer(41)
 		);
+
+		clipsBattery = ImmutableMap.of(
+				ModItems.BACKPACK.get(), getBatteryClipsRenderer(30),
+				ModItems.IRON_BACKPACK.get(), getBatteryClipsRenderer(33),
+				ModItems.GOLD_BACKPACK.get(), getBatteryClipsRenderer(36),
+				ModItems.DIAMOND_BACKPACK.get(), getBatteryClipsRenderer(39),
+				ModItems.NETHERITE_BACKPACK.get(), getBatteryClipsRenderer(42)
+		);
 	}
 
 	public void render(MatrixStack matrixStack, int packedLight, IVertexBuilder vertexBuilder, int clothColor, int borderColor, Item backpackItem, boolean showLeftTank, boolean showRightTank, boolean showBattery) {
@@ -212,6 +223,8 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 
 		if (showBattery) {
 			battery.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+			batteryBorder.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderRed, borderGreen, borderBlue, 1);
+			clipsBattery.get(backpackItem).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 		} else {
 			fabricFront.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 			clipsFrontPouch.get(backpackItem).render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
@@ -256,6 +269,14 @@ public class BackpackModel extends AgeableModel<LivingEntity> {
 		temp.setPos(0.0F, 24.0F, 0.0F);
 		temp.texOffs(0, yTextureOffset).addBox(2.0F, -5.0F, -5.25F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 		temp.texOffs(3, yTextureOffset).addBox(-3.0F, -5.0F, -5.25F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+		return temp;
+	}
+
+	private ModelRenderer getBatteryClipsRenderer(int yTextureOffset) {
+		ModelRenderer temp = new ModelRenderer(this);
+		temp.setPos(0.0F, 24.0F, 0.0F);
+		temp.texOffs(24, yTextureOffset).addBox(1.0F, -5.25F, -6.15F, 1.0F, 1.0F, 1.0F, 0.2F, false);
+		temp.texOffs(21, yTextureOffset).addBox(1.0F, -1.25F, -6.15F, 1.0F, 1.0F, 1.0F, 0.2F, false);
 		return temp;
 	}
 
