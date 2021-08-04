@@ -83,6 +83,7 @@ public class Config {
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
+		public final BatteryUpgradeConfig batteryUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -121,6 +122,7 @@ public class Config {
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
 			tankUpgrade = new TankUpgradeConfig(builder);
+			batteryUpgrade = new BatteryUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
@@ -245,6 +247,20 @@ public class Config {
 				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 2000, 500, 20000);
 				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to tank capacity. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting tank capacity").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
 				autoFillDrainContainerCooldown = builder.comment("Cooldown between fill/drain actions done on fluid containers in tank slots. Only fills/drains one bucket worth to/from container after this cooldown and then waits again.").defineInRange("autoFillDrainContainerCooldown", 20, 1, 100);
+				builder.pop();
+			}
+		}
+
+		public static class BatteryUpgradeConfig {
+			public final ForgeConfigSpec.IntValue energyPerSlotRow;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue maxInputOutput;
+
+			protected BatteryUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				energyPerSlotRow = builder.comment("Energy in FE the battery upgrade will have per row of backpack slots").defineInRange("energyPerSlotRow", 10000, 500, 50000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to max energy of the battery and max in/out. Value lower than 1 makes stack multiplier affect the max energy less, higher makes it affect the max energy more. 0 turns off stack multiplier affecting battery upgrade").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				maxInputOutput = builder.comment("How much FE can be transfered in / out per tick. This is a base transfer rate and same as max storage gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
 				builder.pop();
 			}
 		}

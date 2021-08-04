@@ -34,9 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeContainer> {
-	private static final TextureBlitData TANK_BACKGROUND_TOP = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 30), Dimension.SQUARE_18);
-	private static final TextureBlitData TANK_BACKGROUND_MIDDLE = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 48), Dimension.SQUARE_18);
-	private static final TextureBlitData TANK_BACKGROUND_BOTTOM = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 66), Dimension.SQUARE_18);
 	private static final TextureBlitData OVERLAY = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(47, 30), new Dimension(16, 18));
 	private final Position pos;
 	private final int height;
@@ -51,13 +48,13 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY) {
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY(), TANK_BACKGROUND_TOP);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY(), GuiHelper.BAR_BACKGROUND_TOP);
 		int yOffset = 18;
 		for (int i = 0; i < (height - 36) / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_MIDDLE);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, GuiHelper.BAR_BACKGROUND_MIDDLE);
 			yOffset += 18;
 		}
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_BOTTOM);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, GuiHelper.BAR_BACKGROUND_BOTTOM);
 
 		renderFluid(matrixStack, mouseX, mouseY);
 
@@ -65,29 +62,6 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		for (int i = 0; i < height / 18; i++) {
 			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + yOffset, OVERLAY);
 			yOffset += 18;
-		}
-
-		int segmentHeight = 4;
-		int numberOfSegments = height / segmentHeight;
-		int initialColor = 0xffdf00;
-		int finalColor = 0xf00000;
-
-		int initialRed = initialColor >> 16 & 255;
-		int initialGreen = initialColor >> 8 & 255;
-		int initialBlue = initialColor & 255;
-
-		int finalRed = finalColor >> 16 & 255;
-		int finalGreen = finalColor >> 8 & 255;
-		int finalBlue = finalColor & 255;
-
-		for (int i = 0; i < numberOfSegments; i++) {
-			float percentage = (float) i / (numberOfSegments - 1);
-			int red = (int) (initialRed * percentage + finalRed * (1 - percentage));
-			int green = (int) (initialGreen * percentage + finalGreen * (1 - percentage));
-			int blue = (int) (initialBlue * percentage + finalBlue * (1 - percentage));
-			int color = red << 16 | green << 8 | blue | 255 << 24;
-
-			screen.renderOverlay(matrixStack, color, getTankLeft() + 1, pos.getY() + 1 + i * segmentHeight, 16, segmentHeight);
 		}
 	}
 

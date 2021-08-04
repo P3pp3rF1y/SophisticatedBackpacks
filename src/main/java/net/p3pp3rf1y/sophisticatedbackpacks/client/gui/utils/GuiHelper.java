@@ -36,6 +36,9 @@ import java.util.Map;
 
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
+	public static final TextureBlitData BAR_BACKGROUND_BOTTOM = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 66), Dimension.SQUARE_18);
+	public static final TextureBlitData BAR_BACKGROUND_MIDDLE = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 48), Dimension.SQUARE_18);
+	public static final TextureBlitData BAR_BACKGROUND_TOP = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 30), Dimension.SQUARE_18);
 	public static final ResourceLocation ICONS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/icons.png");
 	public static final TextureBlitData CRAFTING_RESULT_SLOT = new TextureBlitData(GUI_CONTROLS, new UV(71, 216), new Dimension(26, 26));
 	public static final TextureBlitData DEFAULT_BUTTON_HOVERED_BACKGROUND = new TextureBlitData(GUI_CONTROLS, new UV(47, 0), Dimension.SQUARE_18);
@@ -87,6 +90,34 @@ public class GuiHelper {
 	public static void blit(Minecraft minecraft, MatrixStack matrixStack, int x, int y, TextureBlitData texData) {
 		minecraft.getTextureManager().bind(texData.getTextureName());
 		AbstractGui.blit(matrixStack, x + texData.getXOffset(), y + texData.getYOffset(), texData.getU(), texData.getV(), texData.getWidth(), texData.getHeight(), texData.getTextureWidth(), texData.getTextureHeight());
+	}
+
+	public static void coloredBlit(Matrix4f matrix, int x, int y, TextureBlitData texData, int color) {
+		float red = (color >> 16 & 255) / 255F;
+		float green = (color >> 8 & 255) / 255F;
+		float blue = (color & 255) / 255F;
+		float alpha = (color >> 24 & 255) / 255F;
+
+		int xMin = x + texData.getXOffset();
+		int yMin = y + texData.getYOffset();
+		int xMax = xMin + texData.getWidth();
+		int yMax = yMin + texData.getHeight();
+
+		float minU = (float) texData.getU() / texData.getTextureWidth();
+		float maxU = minU + ((float) texData.getWidth() / texData.getTextureWidth());
+		float minV = (float) texData.getV() / texData.getTextureHeight();
+		float maxV = minV + ((float) texData.getHeight() / texData.getTextureWidth());
+
+		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
+		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR_TEX);
+		bufferbuilder.vertex(matrix, xMin, yMax, 0).color(red, green, blue, alpha).uv(minU, maxV).endVertex();
+		bufferbuilder.vertex(matrix, xMax, yMax, 0).color(red, green, blue, alpha).uv(maxU, maxV).endVertex();
+		bufferbuilder.vertex(matrix, xMax, yMin, 0).color(red, green, blue, alpha).uv(maxU, minV).endVertex();
+		bufferbuilder.vertex(matrix, xMin, yMin, 0).color(red, green, blue, alpha).uv(minU, minV).endVertex();
+		bufferbuilder.end();
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		WorldVertexBufferUploader.end(bufferbuilder);
 	}
 
 	private static List<? extends ITextProperties> tooltipToRender = Collections.emptyList();

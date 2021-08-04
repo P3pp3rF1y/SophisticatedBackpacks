@@ -10,4 +10,9 @@ public class BatteryUpgradeItem extends UpgradeItemBase<BatteryUpgradeWrapper> {
 	public UpgradeType<BatteryUpgradeWrapper> getType() {
 		return TYPE;
 	}
+
+	@Override
+	public int getInventoryColumnsTaken() {
+		return 2;
+	}
 }

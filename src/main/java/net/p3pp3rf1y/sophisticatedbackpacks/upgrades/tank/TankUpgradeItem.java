@@ -69,5 +69,4 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 	public int getInventoryColumnsTaken() {
 		return 2;
 	}
-
 }
