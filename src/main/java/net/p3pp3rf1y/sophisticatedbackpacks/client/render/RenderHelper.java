@@ -43,7 +43,7 @@ public class RenderHelper {
 		int pixels = (int) (charge * 4);
 
 		ModelRenderer chargeBox = new ModelRenderer(64, 64, 18, 55);
-		chargeBox.addBox(-2.0F, -3.0F, -6.05F, pixels, 1.0F, 1.0F, 0.0F, false);
+		chargeBox.addBox(-2.0F, -3.0F, -6.01F, pixels, 1.0F, 1.0F, 0.0F, false);
 		IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(BACKPACK_ENTITY_TEXTURE));
 
 		chargeBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);

@@ -46,10 +46,12 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 		matrixStack.popPose();
 		if (showBattery) {
 			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
-				matrixStack.pushPose();
-				matrixStack.mulPose(Vector3f.XN.rotationDegrees(180));
-				RenderHelper.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
-				matrixStack.popPose();
+				if (batteryRenderInfo.getChargeRatio() > 0.1f) {
+					matrixStack.pushPose();
+					matrixStack.mulPose(Vector3f.XN.rotationDegrees(180));
+					RenderHelper.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
+					matrixStack.popPose();
+				}
 			});
 		}
 		matrixStack.popPose();

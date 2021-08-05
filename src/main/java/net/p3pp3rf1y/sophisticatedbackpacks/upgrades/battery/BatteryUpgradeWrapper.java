@@ -76,11 +76,16 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 		int ret = Math.min(getMaxEnergyStored() - energyStored, Math.min(getMaxInOut() - inputThisTick, maxReceive));
 		if (!simulate) {
 			energyStored += ret;
-			NBTHelper.setInteger(upgrade, ENERGY_STORED_TAG, energyStored);
-			save();
+			serializeEnergyStored();
 			inputThisTick += ret;
 		}
 		return ret;
+	}
+
+	private void serializeEnergyStored() {
+		NBTHelper.setInteger(upgrade, ENERGY_STORED_TAG, energyStored);
+		save();
+		forceUpdateBatteryRenderInfo();
 	}
 
 	@Override
@@ -93,8 +98,7 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 		if (!simulate) {
 			energyStored -= ret;
-			NBTHelper.setInteger(upgrade, ENERGY_STORED_TAG, energyStored);
-			save();
+			serializeEnergyStored();
 			outputThisTick += ret;
 		}
 		return ret;
@@ -144,7 +148,9 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public void forceUpdateBatteryRenderInfo() {
-		updateTankRenderInfoCallback.accept(new BatteryRenderInfo(1f));
+		BatteryRenderInfo batteryRenderInfo = new BatteryRenderInfo(1f);
+		batteryRenderInfo.setChargeRatio((float) Math.round((float) energyStored / getMaxEnergyStored() * 4) / 4);
+		updateTankRenderInfoCallback.accept(batteryRenderInfo);
 	}
 
 	@Override
