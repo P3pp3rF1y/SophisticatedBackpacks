@@ -10,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -110,6 +111,8 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
 			return LazyOptional.of(() -> getBackpackWrapper().getFluidHandler()).cast();
+		} else if (cap == CapabilityEnergy.ENERGY) {
+			return getBackpackWrapper().getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
 		}
 		return super.getCapability(cap, side);
 	}

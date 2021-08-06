@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.api;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -84,4 +85,6 @@ public interface IBackpackWrapper {
 	default IFluidHandler getFluidHandler() {
 		return EmptyFluidHandler.INSTANCE;
 	}
+
+	default Optional<IEnergyStorage> getEnergyStorage() { return Optional.empty(); }
 }

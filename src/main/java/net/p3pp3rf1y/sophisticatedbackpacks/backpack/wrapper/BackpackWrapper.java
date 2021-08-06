@@ -9,10 +9,12 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -62,6 +64,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private BackpackSettingsHandler settingsHandler = null;
 	@Nullable
 	private IFluidHandler fluidHandler = null;
+	private boolean energyStorageInitialized = false;
+	@Nullable
+	private IEnergyStorage energyStorage = null;
 
 	private final BackpackRenderInfo renderInfo;
 
@@ -145,6 +150,21 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 
 		return fluidHandler;
+	}
+
+	@Override
+	public Optional<IEnergyStorage> getEnergyStorage() {
+		if (!energyStorageInitialized) {
+			IEnergyStorage wrappedStorage = getUpgradeHandler().getWrappersThatImplement(IEnergyStorage.class).stream().findFirst().orElse(null);
+
+			for (IEnergyStorageUpgradeWrapper energyStorageWrapperUpgrade : getUpgradeHandler().getWrappersThatImplement(IEnergyStorageUpgradeWrapper.class)) {
+				wrappedStorage = energyStorageWrapperUpgrade.wrapStorage(wrappedStorage);
+			}
+
+			energyStorage = wrappedStorage;
+		}
+
+		return Optional.ofNullable(energyStorage);
 	}
 
 	@Override
@@ -416,6 +436,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
 		fluidHandler = null;
+		energyStorage = null;
+		energyStorageInitialized = false;
 		refreshInventoryForInputOutput();
 	}
 

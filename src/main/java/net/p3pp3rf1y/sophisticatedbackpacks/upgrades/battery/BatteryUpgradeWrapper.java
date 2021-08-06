@@ -15,7 +15,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
@@ -28,9 +27,6 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 	private final ItemStackHandler inventory;
 	private int energyStored;
 
-	private int outputThisTick = 0;
-	private int inputThisTick = 0;
-
 	protected BatteryUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		inventory = new ItemStackHandler(2) {
@@ -42,7 +38,7 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 			}
 
 			@Override
-			public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+			public boolean isItemValid(int slot, ItemStack stack) {
 				if (slot == INPUT_SLOT) {
 					return isValidInputItem(stack);
 				} else if (slot == OUTPUT_SLOT) {
@@ -69,15 +65,14 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public int receiveEnergy(int maxReceive, boolean simulate) {
-		if (inputThisTick >= getMaxInOut()) {
-			return 0;
-		}
+		return innerReceiveEnergy(maxReceive, simulate);
+	}
 
-		int ret = Math.min(getMaxEnergyStored() - energyStored, Math.min(getMaxInOut() - inputThisTick, maxReceive));
+	private int innerReceiveEnergy(int maxReceive, boolean simulate) {
+		int ret = Math.min(getMaxEnergyStored() - energyStored, Math.min(getMaxInOut(), maxReceive));
 		if (!simulate) {
 			energyStored += ret;
 			serializeEnergyStored();
-			inputThisTick += ret;
 		}
 		return ret;
 	}
@@ -90,16 +85,15 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public int extractEnergy(int maxExtract, boolean simulate) {
-		if (outputThisTick > getMaxInOut()) {
-			return 0;
-		}
+		return innerExtractEnergy(maxExtract, simulate);
+	}
 
-		int ret = Math.min(energyStored, Math.min(getMaxInOut() - outputThisTick, maxExtract));
+	private int innerExtractEnergy(int maxExtract, boolean simulate) {
+		int ret = Math.min(energyStored, Math.min(getMaxInOut(), maxExtract));
 
 		if (!simulate) {
 			energyStored -= ret;
 			serializeEnergyStored();
-			outputThisTick += ret;
 		}
 		return ret;
 	}
@@ -155,9 +149,6 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
-		inputThisTick = 0;
-		outputThisTick = 0;
-
 		if (energyStored < getMaxEnergyStored()) {
 			inventory.getStackInSlot(INPUT_SLOT).getCapability(CapabilityEnergy.ENERGY).ifPresent(this::receiveFromStorage);
 		}
@@ -168,23 +159,23 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 	}
 
 	private void extractToStorage(IEnergyStorage energyStorage) {
-		int toExtract = extractEnergy(getMaxInOut(), true);
+		int toExtract = innerExtractEnergy(getMaxInOut(), true);
 		if (toExtract > 0) {
 			toExtract = energyStorage.receiveEnergy(toExtract, true);
 			if (toExtract > 0) {
 				energyStorage.receiveEnergy(toExtract, false);
-				extractEnergy(toExtract, false);
+				innerExtractEnergy(toExtract, false);
 			}
 		}
 	}
 
 	private void receiveFromStorage(IEnergyStorage energyStorage) {
-		int toReceive = receiveEnergy(getMaxInOut(), true);
+		int toReceive = innerReceiveEnergy(getMaxInOut(), true);
 		if (toReceive > 0) {
 			toReceive = energyStorage.extractEnergy(toReceive, true);
 			if (toReceive > 0) {
 				energyStorage.extractEnergy(toReceive, false);
-				receiveEnergy(toReceive, false);
+				innerReceiveEnergy(toReceive, false);
 			}
 		}
 	}
