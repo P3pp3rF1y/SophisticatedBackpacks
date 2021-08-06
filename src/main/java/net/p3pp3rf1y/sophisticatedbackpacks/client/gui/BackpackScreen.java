@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
@@ -27,6 +28,7 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -177,11 +179,12 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	}
 
 	@Override
-	public void removed() {
-		super.removed();
-		if (!getMenu().isFirstLevelBackpack()) {
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if ((keyCode == 256 || ClientProxy.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputMappings.getKey(keyCode, scanCode))) && !getMenu().isFirstLevelBackpack()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
+			return true;
 		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	private Position getSortButtonsPosition(SortButtonsPosition sortButtonsPosition) {
