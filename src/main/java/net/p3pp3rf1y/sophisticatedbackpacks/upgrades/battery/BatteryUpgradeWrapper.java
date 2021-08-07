@@ -11,6 +11,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IStackableContentsUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -19,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrapper, BatteryUpgradeItem>
-		implements IRenderedBatteryUpgrade, IEnergyStorage, ITickableUpgrade {
+		implements IRenderedBatteryUpgrade, IEnergyStorage, ITickableUpgrade, IStackableContentsUpgrade {
 	public static final int INPUT_SLOT = 0;
 	public static final int OUTPUT_SLOT = 1;
 	public static final String ENERGY_STORED_TAG = "energyStored";
@@ -182,5 +183,10 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	public IItemHandler getInventory() {
 		return inventory;
+	}
+
+	@Override
+	public int getMinimumMultiplierRequired() {
+		return (int) Math.ceil((float) energyStored / getMaxEnergyBase());
 	}
 }

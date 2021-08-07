@@ -586,8 +586,17 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(getGuiLeft(), (float) getGuiTop(), 0.0F);
 			upgradeSlotChangeResult.getErrorUpgradeSlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, menu.getSlot(menu.getFirstUpgradeSlot() + slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
-			upgradeSlotChangeResult.getErrorInventorySlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, menu.getSlot(slotIndex), DyeColor.RED.getColorValue() | 0xAA000000));
-			upgradeSlotChangeResult.getErrorInventoryParts().forEach(slotIndex -> inventoryParts.get(slotIndex).renderErrorOverlay(matrixStack));
+			upgradeSlotChangeResult.getErrorInventorySlots().forEach(slotIndex -> {
+				Slot slot = menu.getSlot(slotIndex);
+				if (slot != null) {
+					renderSlotOverlay(matrixStack, slot, DyeColor.RED.getColorValue() | 0xAA000000);
+				}
+			});
+			upgradeSlotChangeResult.getErrorInventoryParts().forEach(partIndex -> {
+				if (inventoryParts.size() > partIndex) {
+					inventoryParts.get(partIndex).renderErrorOverlay(matrixStack);
+				}
+			});
 			RenderSystem.popMatrix();
 
 			renderErrorMessage(matrixStack, overlayErrorMessage);
