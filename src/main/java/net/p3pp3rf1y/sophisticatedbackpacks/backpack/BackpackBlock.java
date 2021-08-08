@@ -38,7 +38,6 @@ import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -128,20 +127,19 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		}
 
 		if (!heldItem.isEmpty() && heldItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
-			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> {
-				IFluidHandler backpackFluidHandler = te.getBackpackWrapper().getFluidHandler();
-				player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
-					FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
-					if (resultOfEmptying.isSuccess()) {
-						player.setItemInHand(hand, resultOfEmptying.getResult());
-					} else {
-						FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
-						if (resultOfFilling.isSuccess()) {
-							player.setItemInHand(hand, resultOfFilling.getResult());
+			WorldHelper.getTile(world, pos, BackpackTileEntity.class)
+					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
+					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
+						FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+						if (resultOfEmptying.isSuccess()) {
+							player.setItemInHand(hand, resultOfEmptying.getResult());
+						} else {
+							FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+							if (resultOfFilling.isSuccess()) {
+								player.setItemInHand(hand, resultOfFilling.getResult());
+							}
 						}
-					}
-				});
-			});
+					}));
 			return ActionResultType.SUCCESS;
 		}
 

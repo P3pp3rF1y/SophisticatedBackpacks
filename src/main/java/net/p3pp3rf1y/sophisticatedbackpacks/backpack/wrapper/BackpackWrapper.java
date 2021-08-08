@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
@@ -62,8 +63,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private InventoryModificationHandler inventoryModificationHandler = null;
 	@Nullable
 	private BackpackSettingsHandler settingsHandler = null;
+	private boolean fluidHandlerInitialized = false;
 	@Nullable
-	private IFluidHandler fluidHandler = null;
+	private IFluidHandlerItem fluidHandler = null;
 	private boolean energyStorageInitialized = false;
 	@Nullable
 	private IEnergyStorage energyStorage = null;
@@ -137,19 +139,19 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IFluidHandler getFluidHandler() {
-		if (fluidHandler == null) {
+	public Optional<IFluidHandlerItem> getFluidHandler() {
+		if (!fluidHandlerInitialized) {
+			IFluidHandlerItem wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
 			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
 
-			IFluidHandler wrappedHandler = new BackpackFluidHandler(this);
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
-				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler);
+				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler, backpack);
 			}
 
 			fluidHandler = wrappedHandler;
 		}
 
-		return fluidHandler;
+		return Optional.ofNullable(fluidHandler);
 	}
 
 	@Override
@@ -200,7 +202,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 					getInventoryHandler().clearListeners();
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;
+					fluidHandlerInitialized = false;
 					fluidHandler = null;
+					energyStorageInitialized = false;
+					energyStorage = null;
 				});
 			} else {
 				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
@@ -436,6 +441,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
 		fluidHandler = null;
+		fluidHandlerInitialized = false;
 		energyStorage = null;
 		energyStorageInitialized = false;
 		refreshInventoryForInputOutput();

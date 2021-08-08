@@ -1,7 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
@@ -9,7 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class BackpackFluidHandler implements IFluidHandler {
+public class BackpackFluidHandler implements IFluidHandlerItem {
 	private final IBackpackWrapper backpackWrapper;
 
 	public BackpackFluidHandler(IBackpackWrapper backpackWrapper) {
@@ -92,5 +93,11 @@ public class BackpackFluidHandler implements IFluidHandler {
 
 	private boolean isInvalidTank(int tank) {
 		return tank < 0 || tank >= getTanks();
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack getContainer() {
+		return backpackWrapper.getBackpack();
 	}
 }

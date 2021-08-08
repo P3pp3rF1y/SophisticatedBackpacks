@@ -110,7 +110,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().getFluidHandler()).cast();
+			return getBackpackWrapper().getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
 		} else if (cap == CapabilityEnergy.ENERGY) {
 			return getBackpackWrapper().getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
 		}

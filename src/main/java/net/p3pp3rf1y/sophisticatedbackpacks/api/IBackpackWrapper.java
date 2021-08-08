@@ -4,8 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
@@ -82,8 +81,8 @@ public interface IBackpackWrapper {
 		return 0;
 	}
 
-	default IFluidHandler getFluidHandler() {
-		return EmptyFluidHandler.INSTANCE;
+	default Optional<IFluidHandlerItem> getFluidHandler() {
+		return Optional.empty();
 	}
 
 	default Optional<IEnergyStorage> getEnergyStorage() { return Optional.empty(); }

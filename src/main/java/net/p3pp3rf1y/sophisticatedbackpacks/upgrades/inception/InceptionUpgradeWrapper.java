@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -64,10 +64,11 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	@Override
-	public IFluidHandler wrapHandler(IFluidHandler fluidHandler) {
+	@Nullable
+	public IFluidHandlerItem wrapHandler(@Nullable IFluidHandlerItem fluidHandler, ItemStack backpack) {
 		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesInContainedBackpacksAreFunctional.get())) {
 			initSubBackpacksHandler();
-			return new InceptionFluidHandler(fluidHandler, getInventoryOrder(), subBackpacksHandler);
+			return new InceptionFluidHandler(fluidHandler, backpack, getInventoryOrder(), subBackpacksHandler);
 		}
 		return fluidHandler;
 	}

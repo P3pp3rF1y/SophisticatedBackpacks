@@ -126,6 +126,10 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 		return inventory;
 	}
 
+	private int getMaxInOut() {
+		return Math.max(FluidAttributes.BUCKET_VOLUME, Config.COMMON.tankUpgrade.maxInputOutput.get() * backpackWrapper.getNumberOfSlotRows() * getAdjustedStackMultiplier(backpackWrapper));
+	}
+
 	public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
 		int capacity = getTankCapacity();
 
@@ -133,7 +137,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			return 0;
 		}
 
-		int toFill = Math.min(capacity - contents.getAmount(), resource.getAmount());
+		int toFill = Math.min(getMaxInOut(), Math.min(capacity - contents.getAmount(), resource.getAmount()));
 
 		if (action == IFluidHandler.FluidAction.EXECUTE) {
 			if (contents.isEmpty()) {
@@ -158,7 +162,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			return FluidStack.EMPTY;
 		}
 
-		int toDrain = Math.min(maxDrain, contents.getAmount());
+		int toDrain = Math.min(getMaxInOut(), Math.min(maxDrain, contents.getAmount()));
 		FluidStack ret = new FluidStack(contents.getFluid(), toDrain);
 		if (action == IFluidHandler.FluidAction.EXECUTE) {
 			if (toDrain == contents.getAmount()) {
