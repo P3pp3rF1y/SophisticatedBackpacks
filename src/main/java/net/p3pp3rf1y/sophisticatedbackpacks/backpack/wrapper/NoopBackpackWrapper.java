@@ -17,8 +17,10 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public static final NoopBackpackWrapper INSTANCE = new NoopBackpackWrapper();
 
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
+	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(new CompoundNBT(), () -> {});
 	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundNBT(), () -> {}, () -> {});
 	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundNBT(), () -> {}, 64);
+	private final BackpackRenderInfo backpackRenderInfo = new BackpackRenderInfo(backpack, () -> () -> {});
 
 	private NoopBackpackWrapper() {}
 
@@ -45,6 +47,11 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
 		//noop
+	}
+
+	@Override
+	public BackpackSettingsHandler getSettingsHandler() {
+		return settingsHandler;
 	}
 
 	@Override
@@ -150,5 +157,20 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setContentsUuid(UUID backpackUuid) {
 		//noop
+	}
+
+	@Override
+	public BackpackRenderInfo getRenderInfo() {
+		return backpackRenderInfo;
+	}
+
+	@Override
+	public void setColumnsTaken(int columnsTaken) {
+		//noop
+	}
+
+	@Override
+	public int getColumnsTaken() {
+		return 0;
 	}
 }

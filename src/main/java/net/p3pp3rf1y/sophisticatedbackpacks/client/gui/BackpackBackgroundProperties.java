@@ -5,9 +5,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 public class BackpackBackgroundProperties {
 	public static final BackpackBackgroundProperties REGULAR = new BackpackBackgroundProperties(9, 0,
-			RegistryHelper.getModRegistryResourceLocation("textures/gui/backpack_background_9.png"));
+			RegistryHelper.getRL("textures/gui/backpack_background_9.png"));
 	public static final BackpackBackgroundProperties WIDE = new BackpackBackgroundProperties(12, 27,
-			RegistryHelper.getModRegistryResourceLocation("textures/gui/backpack_background_12.png"));
+			RegistryHelper.getRL("textures/gui/backpack_background_12.png"));
 
 	private final int slotsOnLine;
 	private final int playerInventoryXOffset;

@@ -5,31 +5,30 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper.*;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgrade;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgrade;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeTooltip;
 
 public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContainer> {
-	private static final TextureBlitData PLAY_FOREGROUND = new TextureBlitData(GUI_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, new UV(48, 96), Dimension.SQUARE_16);
+	private static final TextureBlitData PLAY_FOREGROUND = new TextureBlitData(ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(16, 64), Dimension.SQUARE_16);
 	private static final ButtonDefinition PLAY = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, PLAY_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translUpgradeButton("play")));
-	private static final TextureBlitData STOP_FOREGROUND = new TextureBlitData(GUI_CONTROLS, new Position(1, 1), Dimension.SQUARE_256, new UV(32, 96), Dimension.SQUARE_16);
+	private static final TextureBlitData STOP_FOREGROUND = new TextureBlitData(ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(0, 64), Dimension.SQUARE_16);
 	private static final ButtonDefinition STOP = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, STOP_FOREGROUND,
 			new TranslationTextComponent(TranslationHelper.translUpgradeButton("stop")));
 
 	public JukeboxUpgradeTab(JukeboxUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
-		super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("jukebox")),
-				new TranslationTextComponent(translUpgradeTooltip("jukebox")));
+		super(upgradeContainer, position, screen, translUpgrade("jukebox"), translUpgradeTooltip("jukebox"));
 
 		addHideableChild(new Button(new Position(x + 3, y + 44), STOP, button -> {
 			if (button == 0) {
@@ -54,7 +53,7 @@ public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContaine
 	@Override
 	protected void moveSlotsToTab() {
 		Slot discSlot = getContainer().getSlots().get(0);
-		discSlot.xPos = x - screen.getGuiLeft() + 4;
-		discSlot.yPos = y - screen.getGuiTop() + 25;
+		discSlot.x = x - screen.getGuiLeft() + 4;
+		discSlot.y = y - screen.getGuiTop() + 25;
 	}
 }

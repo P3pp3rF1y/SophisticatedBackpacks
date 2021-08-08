@@ -14,7 +14,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	private final ShapedRecipe compose;
 
 	public BackpackUpgradeRecipe(ShapedRecipe compose) {
-		super(compose.getId(), compose.getGroup(), compose.getRecipeWidth(), compose.getRecipeHeight(), compose.getIngredients(), compose.getRecipeOutput());
+		super(compose.getId(), compose.getGroup(), compose.getRecipeWidth(), compose.getRecipeHeight(), compose.getIngredients(), compose.getResultItem());
 		this.compose = compose;
 	}
 
@@ -24,8 +24,8 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
-	public ItemStack getCraftingResult(CraftingInventory inv) {
-		ItemStack upgradedBackpack = super.getCraftingResult(inv);
+	public ItemStack assemble(CraftingInventory inv) {
+		ItemStack upgradedBackpack = super.assemble(inv);
 		getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
 		upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
@@ -36,8 +36,8 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	private Optional<ItemStack> getBackpack(CraftingInventory inv) {
-		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
-			ItemStack slotStack = inv.getStackInSlot(slot);
+		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
+			ItemStack slotStack = inv.getItem(slot);
 			if (slotStack.getItem() instanceof BackpackItem) {
 				return Optional.of(slotStack);
 			}
@@ -53,7 +53,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BackpackUpgradeRecipe> {
 		public Serializer() {
-			super(BackpackUpgradeRecipe::new, IRecipeSerializer.CRAFTING_SHAPED);
+			super(BackpackUpgradeRecipe::new, IRecipeSerializer.SHAPED_RECIPE);
 		}
 	}
 }

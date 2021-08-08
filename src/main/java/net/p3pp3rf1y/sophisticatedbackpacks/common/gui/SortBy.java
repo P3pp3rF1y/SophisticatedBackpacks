@@ -17,7 +17,7 @@ public enum SortBy implements IStringSerializable {
 	}
 
 	@Override
-	public String getString() {
+	public String getSerializedName() {
 		return name;
 	}
 
@@ -31,7 +31,7 @@ public enum SortBy implements IStringSerializable {
 	static {
 		ImmutableMap.Builder<String, SortBy> builder = new ImmutableMap.Builder<>();
 		for (SortBy value : SortBy.values()) {
-			builder.put(value.getString(), value);
+			builder.put(value.getSerializedName(), value);
 		}
 		NAME_VALUES = builder.build();
 		VALUES = values();

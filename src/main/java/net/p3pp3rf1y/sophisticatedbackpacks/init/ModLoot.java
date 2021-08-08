@@ -41,10 +41,10 @@ public class ModLoot {
 	}
 
 	private static LootPool getInjectPool(String entryName) {
-		return LootPool.builder().addEntry(getInjectEntry(entryName)).bonusRolls(0, 1).name("sophisticatedbackpacks_inject_pool").build();
+		return LootPool.lootPool().add(getInjectEntry(entryName)).bonusRolls(0, 1).name("sophisticatedbackpacks_inject_pool").build();
 	}
 
 	private static LootEntry.Builder<?> getInjectEntry(String name) {
-		return TableLootEntry.builder(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "inject/" + name)).weight(1);
+		return TableLootEntry.lootTableReference(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "inject/" + name)).setWeight(1);
 	}
 }

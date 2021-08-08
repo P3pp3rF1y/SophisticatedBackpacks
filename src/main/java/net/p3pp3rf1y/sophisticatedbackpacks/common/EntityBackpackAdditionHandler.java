@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,7 +30,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeItem;
@@ -58,41 +58,38 @@ public class EntityBackpackAdditionHandler {
 			new WeightedElement<>(3, Items.DIAMOND_HELMET),
 			new WeightedElement<>(9, Items.GOLDEN_HELMET),
 			new WeightedElement<>(27, Items.IRON_HELMET),
-			new WeightedElement<>(81, Items.LEATHER_HELMET),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_HELMET)
 	);
 	private static final List<WeightedElement<Item>> LEGGINGS_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, Items.NETHERITE_LEGGINGS),
 			new WeightedElement<>(3, Items.DIAMOND_LEGGINGS),
 			new WeightedElement<>(9, Items.GOLDEN_LEGGINGS),
 			new WeightedElement<>(27, Items.IRON_LEGGINGS),
-			new WeightedElement<>(81, Items.LEATHER_LEGGINGS),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_LEGGINGS)
 	);
 	private static final List<WeightedElement<Item>> BOOTS_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, Items.NETHERITE_BOOTS),
 			new WeightedElement<>(3, Items.DIAMOND_BOOTS),
 			new WeightedElement<>(9, Items.GOLDEN_BOOTS),
 			new WeightedElement<>(27, Items.IRON_BOOTS),
-			new WeightedElement<>(81, Items.LEATHER_BOOTS),
-			new WeightedElement<>(243, Items.AIR)
+			new WeightedElement<>(81, Items.LEATHER_BOOTS)
 	);
 
 	private static final List<WeightedElement<BackpackAddition>> BACKPACK_CHANCES = ImmutableList.of(
 			new WeightedElement<>(1, new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
-					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 3))),
+					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1))),
 			new WeightedElement<>(5, new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3,
-					HELMET_CHANCES.subList(0, 3), LEGGINGS_CHANCES.subList(0, 3), BOOTS_CHANCES.subList(0, 3))),
+					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 2))),
 			new WeightedElement<>(25, new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2,
-					HELMET_CHANCES.subList(1, 4), LEGGINGS_CHANCES.subList(1, 4), BOOTS_CHANCES.subList(1, 4))),
+					HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3), BOOTS_CHANCES.subList(1, 3))),
 			new WeightedElement<>(125, new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1,
-					HELMET_CHANCES.subList(2, 5), LEGGINGS_CHANCES.subList(2, 5), BOOTS_CHANCES.subList(2, 5))),
+					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4), BOOTS_CHANCES.subList(2, 4))),
 			new WeightedElement<>(625, new BackpackAddition(ModItems.BACKPACK.get(), 0,
-					HELMET_CHANCES.subList(3, 6), LEGGINGS_CHANCES.subList(3, 6), BOOTS_CHANCES.subList(3, 6)))
+					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5)))
 	);
 
 	static void addBackpack(MonsterEntity monster) {
-		Random rnd = monster.world.rand;
+		Random rnd = monster.level.random;
 		if (!Config.COMMON.entityBackpackAdditions.canWearBackpack(monster.getType())
 				|| rnd.nextInt((int) (1 / Config.COMMON.entityBackpackAdditions.chance.get())) != 0) {
 			return;
@@ -119,11 +116,11 @@ public class EntityBackpackAdditionHandler {
 			if (armorPiece != Items.AIR) {
 				ItemStack armorStack = new ItemStack(armorPiece);
 				if (rnd.nextInt(6 - minDifficulty) == 0) {
-					float additionalDifficulty = monster.world.getDifficultyForLocation(monster.getPosition()).getClampedAdditionalDifficulty();
+					float additionalDifficulty = monster.level.getCurrentDifficultyAt(monster.blockPosition()).getSpecialMultiplier();
 					int level = (int) (5F + additionalDifficulty * 18F + minDifficulty * 6);
-					EnchantmentHelper.addRandomEnchantment(rnd, armorStack, level, true);
+					EnchantmentHelper.enchantItem(rnd, armorStack, level, true);
 				}
-				monster.setItemStackToSlot(slot, armorStack);
+				monster.setItemSlot(slot, armorStack);
 			}
 		});
 	}
@@ -141,7 +138,8 @@ public class EntityBackpackAdditionHandler {
 						}
 					}
 				}));
-		monster.setItemStackToSlot(EquipmentSlotType.CHEST, backpack);
+		monster.setItemSlot(EquipmentSlotType.CHEST, backpack);
+		monster.setDropChance(EquipmentSlotType.CHEST, 0);
 	}
 
 	private static void addJukeboxUpgradeAndRandomDisc(MonsterEntity monster, IBackpackWrapper w) {
@@ -150,7 +148,7 @@ public class EntityBackpackAdditionHandler {
 		if (it.hasNext()) {
 			JukeboxUpgradeItem.Wrapper wrapper = it.next();
 			List<MusicDiscItem> musicDiscs = getMusicDiscs();
-			wrapper.setDisc(new ItemStack(musicDiscs.get(monster.world.rand.nextInt(musicDiscs.size()))));
+			wrapper.setDisc(new ItemStack(musicDiscs.get(monster.level.random.nextInt(musicDiscs.size()))));
 		}
 	}
 
@@ -184,7 +182,7 @@ public class EntityBackpackAdditionHandler {
 		if (maxHealth != null) {
 			double healthAddition = maxHealth.getBaseValue() * minDifficulty;
 			if (healthAddition > 0.1D) {
-				maxHealth.applyPersistentModifier(new AttributeModifier("Backpack bearer health bonus", healthAddition, AttributeModifier.Operation.ADDITION));
+				maxHealth.addPermanentModifier(new AttributeModifier("Backpack bearer health bonus", healthAddition, AttributeModifier.Operation.ADDITION));
 			}
 			monster.setHealth(monster.getMaxHealth());
 		}
@@ -206,16 +204,16 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = ImmutableList.of(
-			new ApplicableEffect(Effects.RESISTANCE, 3),
+			new ApplicableEffect(Effects.DAMAGE_RESISTANCE, 3),
 			new ApplicableEffect(Effects.FIRE_RESISTANCE),
 			new ApplicableEffect(Effects.ABSORPTION),
 			new ApplicableEffect(Effects.HEALTH_BOOST),
 			new ApplicableEffect(Effects.REGENERATION),
-			new ApplicableEffect(Effects.SPEED),
-			new ApplicableEffect(Effects.STRENGTH));
+			new ApplicableEffect(Effects.MOVEMENT_SPEED),
+			new ApplicableEffect(Effects.DAMAGE_BOOST));
 
 	private static void setLoot(MonsterEntity monster, IBackpackWrapper backpackWrapper, int difficulty) {
-		MinecraftServer server = monster.world.getServer();
+		MinecraftServer server = monster.level.getServer();
 		if (server == null) {
 			return;
 		}
@@ -229,8 +227,8 @@ public class EntityBackpackAdditionHandler {
 		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.buffWithPotionEffects.get())) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(applicableEffect -> {
-						int amplifier = Math.min(Math.max(minDifficulty, monster.world.rand.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
-						monster.addPotionEffect(new EffectInstance(applicableEffect.getEffect(), 30 * 60 * 20, amplifier));
+						int amplifier = Math.min(Math.max(minDifficulty, monster.level.random.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
+						monster.addEffect(new EffectInstance(applicableEffect.getEffect(), 30 * 60 * 20, amplifier));
 					});
 		}
 	}
@@ -245,29 +243,31 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
-		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK) && (!(event.getSource().getTrueSource() instanceof PlayerEntity) || event.getSource().getTrueSource() instanceof FakePlayer)) {
-			event.getDrops().removeIf(drop -> {
-				if (drop.getItem().getItem() instanceof BackpackItem) {
-					removeContentsUuid(drop.getItem());
-					return true;
-				}
-				return false;
-			});
+		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
+			LivingEntity mob = event.getEntityLiving();
+			ItemStack backpack = mob.getItemBySlot(EquipmentSlotType.CHEST);
+			if (event.getSource().getEntity() instanceof PlayerEntity && !(event.getSource().getEntity() instanceof FakePlayer) &&
+					Math.max(mob.level.random.nextFloat() - (float) event.getLootingLevel() * 0.01F, 0.0F) < 0.085F) {
+				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
+				event.getDrops().add(backpackEntity);
+			} else {
+				removeContentsUuid(backpack);
+			}
 		}
 	}
 
 	public static void removeBeneficialEffects(CreeperEntity creeper) {
 		if (creeper.getTags().contains(SPAWNED_WITH_BACKPACK)) {
-			creeper.getActivePotionEffects().removeIf(e -> e.getPotion().isBeneficial());
+			creeper.getActiveEffects().removeIf(e -> e.getEffect().isBeneficial());
 		}
 	}
 
 	public static void removeBackpackUuid(MonsterEntity entity) {
-		if (!entity.getShouldBeDead() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (!entity.isDeadOrDying() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 
-		ItemStack stack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+		ItemStack stack = entity.getItemBySlot(EquipmentSlotType.CHEST);
 		removeContentsUuid(stack);
 	}
 
@@ -281,10 +281,10 @@ public class EntityBackpackAdditionHandler {
 		if (!entity.getTags().contains(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
 			return;
 		}
-		entity.getItemStackFromSlot(EquipmentSlotType.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		entity.getItemBySlot(EquipmentSlotType.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.ifPresent(backpackWrapper -> backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
 					if (wrapper.isPlaying()) {
-						wrapper.tick(entity, entity.world, entity.getPosition());
+						wrapper.tick(entity, entity.level, entity.blockPosition());
 					} else {
 						wrapper.play(entity);
 					}

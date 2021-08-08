@@ -42,6 +42,7 @@ public class SophisticatedBackpacks {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(Config.COMMON::onConfigReload);
 		ModLoot.init();
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
@@ -58,7 +59,7 @@ public class SophisticatedBackpacks {
 	}
 
 	private static void serverStarted(FMLServerStartedEvent event) {
-		ServerWorld world = event.getServer().getWorld(World.OVERWORLD);
+		ServerWorld world = event.getServer().getLevel(World.OVERWORLD);
 		if (world != null) {
 			RecipeHelper.setWorld(world);
 		}

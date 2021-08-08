@@ -12,12 +12,12 @@ public class FilterSlotItemHandler extends SlotSuppliedHandler implements IFilte
 	}
 
 	@Override
-	public boolean canTakeStack(PlayerEntity playerIn) {
+	public boolean mayPickup(PlayerEntity playerIn) {
 		return false;
 	}
 
 	@Override
-	public int getItemStackLimit(ItemStack stack) {
+	public int getMaxStackSize(ItemStack stack) {
 		return 1;
 	}
 

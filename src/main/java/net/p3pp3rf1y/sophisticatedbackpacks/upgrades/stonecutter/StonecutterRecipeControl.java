@@ -10,12 +10,12 @@ import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 
 import java.util.List;
 
@@ -48,11 +48,11 @@ public class StonecutterRecipeControl extends Widget {
 
 	public void moveSlotsToView() {
 		Slot inputSlot = container.getInputSlot();
-		inputSlot.xPos = x + getCenteredX(16) - screen.getGuiLeft();
-		inputSlot.yPos = y - screen.getGuiTop() + 1;
+		inputSlot.x = x + getCenteredX(16) - screen.getGuiLeft();
+		inputSlot.y = y - screen.getGuiTop() + 1;
 		Slot outputSlot = container.getOutputSlot();
-		outputSlot.xPos = x + getCenteredX(16) - screen.getGuiLeft();
-		outputSlot.yPos = inputSlot.yPos + INPUT_SLOT_HEIGHT + SPACING + LIST_BACKGROUND.getHeight() + SPACING + 4;
+		outputSlot.x = x + getCenteredX(16) - screen.getGuiLeft();
+		outputSlot.y = inputSlot.y + INPUT_SLOT_HEIGHT + SPACING + LIST_BACKGROUND.getHeight() + SPACING + 4;
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class StonecutterRecipeControl extends Widget {
 			int k = listInnerLeftX + j % 4 * 16;
 			int l = j / 4;
 			int i1 = top + l * 18 + 2;
-			GuiHelper.renderItemInGUI(matrixStack, minecraft, list.get(i).getRecipeOutput(), k, i1);
+			GuiHelper.renderItemInGUI(matrixStack, minecraft, list.get(i).getResultItem(), k, i1);
 		}
 
 	}
@@ -131,7 +131,7 @@ public class StonecutterRecipeControl extends Widget {
 				int recipeLeftX = x + inviewRecipeIndex % 4 * 16;
 				int k1 = listTopY + inviewRecipeIndex / 4 * 18 + 2;
 				if (mouseX >= recipeLeftX && mouseX < recipeLeftX + 16 && mouseY >= k1 && mouseY < k1 + 18) {
-					renderTooltip(matrixStack, list.get(recipeIndex).getRecipeOutput(), mouseX, mouseY);
+					renderTooltip(matrixStack, list.get(recipeIndex).getResultItem(), mouseX, mouseY);
 				}
 			}
 		}
@@ -168,7 +168,7 @@ public class StonecutterRecipeControl extends Widget {
 				double relativeX = mouseX - (double) (listInnerLeftX + visibleRecipeIndex % 4 * 16);
 				double relativeY = mouseY - (double) (listInnerTopY + Math.floorDiv(visibleRecipeIndex, 4) * 18);
 				if (relativeX >= 0.0D && relativeY >= 0.0D && relativeX < 16.0D && relativeY < 18.0D && container.selectRecipe(recipeIndex)) {
-					Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+					Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
 					return true;
 				}
 			}

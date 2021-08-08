@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.INestedGuiEventHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	}
 
 	@Override
-	public List<? extends IGuiEventListener> getEventListeners() {
+	public List<? extends IGuiEventListener> children() {
 		return children;
 	}
 
@@ -48,9 +48,9 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		return getEventListenerForPos(mouseX, mouseY).map(l -> {
+		return getChildAt(mouseX, mouseY).map(l -> {
 			if (l.mouseClicked(mouseX, mouseY, button)) {
-				setListener(l);
+				setFocused(l);
 				if (button == 0) {
 					setDragging(true);
 				}
@@ -67,12 +67,12 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	@Nullable
 	@Override
-	public IGuiEventListener getListener() {
+	public IGuiEventListener getFocused() {
 		return listener;
 	}
 
 	@Override
-	public void setListener(@Nullable IGuiEventListener listener) {
+	public void setFocused(@Nullable IGuiEventListener listener) {
 		this.listener = listener;
 	}
 

@@ -25,10 +25,10 @@ license = "GNU General Public License v3.0"
 logoFile = "logo.png" #optional
 
 # A text field displayed in the mod UI
-credits = "Created by P3pp3rF1y with art help from WinDanesz." #optional
+credits = "Created by P3pp3rF1y and art done by Ridanisaurus." #optional
 
 # A text field displayed in the mod UI
-authors="P3pp3rF1y, WinDanesz" #optional
+authors="P3pp3rF1y, Ridanisaurus" #optional
 
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory

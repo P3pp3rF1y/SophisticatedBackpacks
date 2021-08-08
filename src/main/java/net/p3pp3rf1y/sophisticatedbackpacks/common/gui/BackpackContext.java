@@ -1,38 +1,32 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
-
 public abstract class BackpackContext {
-	private final ContainerType<BackpackContainer> containerType;
-
-	protected BackpackContext(ContainerType<BackpackContainer> containerType) {
-		this.containerType = containerType;
-	}
-
 	public abstract Optional<IBackpackWrapper> getParentBackpackWrapper(PlayerEntity player);
 
 	public abstract boolean shouldLockBackpackSlot();
 
 	public abstract IBackpackWrapper getBackpackWrapper(PlayerEntity player);
-
-	public ContainerType<BackpackContainer> getContainerType() {
-		return containerType;
-	}
 
 	public abstract int getBackpackSlotIndex();
 
@@ -40,12 +34,77 @@ public abstract class BackpackContext {
 
 	public abstract BackpackContext getParentBackpackContext();
 
-	public abstract void toBuffer(PacketBuffer packetBuffer);
+	public abstract ContextType getType();
+
+	public void toBuffer(PacketBuffer packetBuffer) {
+		getType().toBuffer(packetBuffer);
+		addToBuffer(packetBuffer);
+	}
+
+	public abstract void addToBuffer(PacketBuffer packetBuffer);
 
 	public abstract boolean canInteractWith(PlayerEntity player);
 
 	public BlockPos getBackpackPosition(PlayerEntity playerEntity) {
-		return playerEntity.getPosition();
+		return playerEntity.blockPosition();
+	}
+
+	public ITextComponent getDisplayName(PlayerEntity player) {
+		return getBackpackWrapper(player).getBackpack().getHoverName();
+	}
+
+	public abstract void onUpgradeChanged(PlayerEntity player);
+
+	public static BackpackContext fromBuffer(PacketBuffer buffer) {
+		ContextType type = ContextType.fromBuffer(buffer);
+		switch (type) {
+			case BLOCK_BACKPACK:
+				return Block.fromBuffer(buffer);
+			case BLOCK_SUB_BACKPACK:
+				return BlockSubBackpack.fromBuffer(buffer);
+			case ITEM_SUB_BACKPACK:
+				return ItemSubBackpack.fromBuffer(buffer);
+			case ITEM_BACKPACK:
+			default:
+				return Item.fromBuffer(buffer);
+		}
+	}
+
+	public enum ContextType {
+		BLOCK_BACKPACK(0, false),
+		BLOCK_SUB_BACKPACK(1, true),
+		ITEM_BACKPACK(2, false),
+		ITEM_SUB_BACKPACK(3, true);
+
+		private final int id;
+		private final boolean isSubBackpack;
+
+		ContextType(int id, boolean isSubBackpack) {
+			this.id = id;
+			this.isSubBackpack = isSubBackpack;
+		}
+
+		public void toBuffer(PacketBuffer buffer) {
+			buffer.writeShort(id);
+		}
+
+		private static final Map<Integer, ContextType> ID_CONTEXTS;
+
+		public boolean isSubBackpack() {
+			return isSubBackpack;
+		}
+
+		static {
+			ImmutableMap.Builder<Integer, ContextType> builder = new ImmutableMap.Builder<>();
+			for (ContextType value : ContextType.values()) {
+				builder.put(value.id, value);
+			}
+			ID_CONTEXTS = builder.build();
+		}
+
+		public static ContextType fromBuffer(PacketBuffer buffer) {
+			return ID_CONTEXTS.getOrDefault((int) buffer.readShort(), ContextType.ITEM_BACKPACK);
+		}
 	}
 
 	public static class Item extends BackpackContext {
@@ -53,11 +112,6 @@ public abstract class BackpackContext {
 		protected final int backpackSlotIndex;
 
 		public Item(String handlerName, int backpackSlotIndex) {
-			this(BACKPACK_ITEM_CONTAINER_TYPE.get(), handlerName, backpackSlotIndex);
-		}
-
-		public Item(ContainerType<BackpackContainer> containerType, String handlerName, int backpackSlotIndex) {
-			super(containerType);
 			this.handlerName = handlerName;
 			this.backpackSlotIndex = backpackSlotIndex;
 		}
@@ -80,6 +134,14 @@ public abstract class BackpackContext {
 		}
 
 		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			if (!player.level.isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+				IBackpackWrapper backpackWrapper = getBackpackWrapper(player);
+				PacketHandler.sendToClient((ServerPlayerEntity) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
+			}
+		}
+
+		@Override
 		public int getBackpackSlotIndex() {
 			return backpackSlotIndex;
 		}
@@ -94,13 +156,18 @@ public abstract class BackpackContext {
 			return this;
 		}
 
+		@Override
+		public ContextType getType() {
+			return ContextType.ITEM_BACKPACK;
+		}
+
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.Item(packetBuffer.readString(), packetBuffer.readInt());
+			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readInt());
 		}
 
 		@Override
-		public void toBuffer(PacketBuffer packetBuffer) {
-			packetBuffer.writeString(handlerName);
+		public void addToBuffer(PacketBuffer packetBuffer) {
+			packetBuffer.writeUtf(handlerName);
 			packetBuffer.writeInt(backpackSlotIndex);
 		}
 
@@ -116,7 +183,7 @@ public abstract class BackpackContext {
 		private IBackpackWrapper parentWrapper;
 
 		public ItemSubBackpack(String handlerName, int backpackSlotIndex, int subBackpackSlotIndex) {
-			super(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), handlerName, backpackSlotIndex);
+			super(handlerName, backpackSlotIndex);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -135,12 +202,12 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readString(), packetBuffer.readInt(), packetBuffer.readInt());
+			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
 		}
 
 		@Override
-		public void toBuffer(PacketBuffer packetBuffer) {
-			super.toBuffer(packetBuffer);
+		public void addToBuffer(PacketBuffer packetBuffer) {
+			super.addToBuffer(packetBuffer);
 			packetBuffer.writeInt(subBackpackSlotIndex);
 		}
 
@@ -148,23 +215,40 @@ public abstract class BackpackContext {
 		public BackpackContext getParentBackpackContext() {
 			return new BackpackContext.Item(handlerName, backpackSlotIndex);
 		}
+
+		@Override
+		public ContextType getType() {
+			return ContextType.ITEM_SUB_BACKPACK;
+		}
+
+		@Override
+		public ITextComponent getDisplayName(PlayerEntity player) {
+			return new StringTextComponent("... > " + super.getDisplayName(player).getString());
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			//noop
+		}
 	}
 
 	public static class Block extends BackpackContext {
 		protected final BlockPos pos;
 
 		public Block(BlockPos pos) {
-			this(BACKPACK_BLOCK_CONTAINER_TYPE.get(), pos);
-		}
-
-		public Block(ContainerType<BackpackContainer> containerType, BlockPos pos) {
-			super(containerType);
 			this.pos = pos;
 		}
 
 		@Override
 		public BlockPos getBackpackPosition(PlayerEntity playerEntity) {
 			return pos;
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			if (!player.level.isClientSide) {
+				WorldHelper.getTile(player.level, pos, BackpackTileEntity.class).ifPresent(BackpackTileEntity::refreshRenderState);
+			}
 		}
 
 		@Override
@@ -179,7 +263,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(PlayerEntity player) {
-			return WorldHelper.getTile(player.world, pos, BackpackTileEntity.class).map(BackpackTileEntity::getBackpackWrapper).orElse(NoopBackpackWrapper.INSTANCE);
+			return WorldHelper.getTile(player.level, pos, BackpackTileEntity.class).map(BackpackTileEntity::getBackpackWrapper).orElse(NoopBackpackWrapper.INSTANCE);
 		}
 
 		@Override
@@ -198,18 +282,23 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.Block(BlockPos.fromLong(packetBuffer.readLong()));
+			return new BackpackContext.Block(BlockPos.of(packetBuffer.readLong()));
 		}
 
 		@Override
-		public void toBuffer(PacketBuffer packetBuffer) {
-			packetBuffer.writeLong(pos.toLong());
+		public void addToBuffer(PacketBuffer packetBuffer) {
+			packetBuffer.writeLong(pos.asLong());
 		}
 
 		@Override
 		public boolean canInteractWith(PlayerEntity player) {
-			return player.world.getTileEntity(pos) instanceof BackpackTileEntity
-					&& (player.getDistanceSq((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D);
+			return player.level.getBlockEntity(pos) instanceof BackpackTileEntity
+					&& (player.distanceToSqr((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D);
+		}
+
+		@Override
+		public ContextType getType() {
+			return ContextType.BLOCK_BACKPACK;
 		}
 	}
 
@@ -219,7 +308,7 @@ public abstract class BackpackContext {
 		private IBackpackWrapper parentWrapper;
 
 		public BlockSubBackpack(BlockPos pos, int subBackpackSlotIndex) {
-			super(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), pos);
+			super(pos);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -238,18 +327,33 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.BlockSubBackpack(BlockPos.fromLong(packetBuffer.readLong()), packetBuffer.readInt());
+			return new BackpackContext.BlockSubBackpack(BlockPos.of(packetBuffer.readLong()), packetBuffer.readInt());
 		}
 
 		@Override
-		public void toBuffer(PacketBuffer packetBuffer) {
-			super.toBuffer(packetBuffer);
+		public void addToBuffer(PacketBuffer packetBuffer) {
+			super.addToBuffer(packetBuffer);
 			packetBuffer.writeInt(subBackpackSlotIndex);
 		}
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
 			return new BackpackContext.Block(pos);
+		}
+
+		@Override
+		public ContextType getType() {
+			return ContextType.BLOCK_SUB_BACKPACK;
+		}
+
+		@Override
+		public ITextComponent getDisplayName(PlayerEntity player) {
+			return new StringTextComponent("... > " + super.getDisplayName(player).getString());
+		}
+
+		@Override
+		public void onUpgradeChanged(PlayerEntity player) {
+			//noop
 		}
 	}
 }

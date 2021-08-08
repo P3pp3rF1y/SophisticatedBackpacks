@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.ServerBackpackDataMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -49,7 +49,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 
 	@Override
 	public void sendBooleanToServer(String key, boolean value) {
-		if (!player.world.isRemote) {
+		if (!player.level.isClientSide) {
 			return;
 		}
 		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), key, value));
@@ -57,12 +57,12 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 
 	@Override
 	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
-		if (!player.world.isRemote) {
+		if (!player.level.isClientSide) {
 			return;
 		}
 		CompoundNBT data = supplyData.get();
 		data.putInt("containerId", upgradeContainerId);
-		PacketHandler.sendToServer(new ServerBackpackDataMessage(data));
+		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 	}
 
 	public void onInit() {
@@ -94,7 +94,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	}
 
 	public ItemStack getSlotStackToTransfer(Slot slot) {
-		return slot.getStack();
+		return slot.getItem();
 	}
 
 	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {

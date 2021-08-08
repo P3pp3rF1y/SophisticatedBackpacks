@@ -14,27 +14,27 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BackpackSoundHandler {
 	private static final int SOUND_STOP_CHECK_INTERVAL = 10;
 
 	private BackpackSoundHandler() {}
 
-	private static final Map<UUID, ISound> backpackSounds = new HashMap<>();
+	private static final Map<UUID, ISound> backpackSounds = new ConcurrentHashMap<>();
 	private static long lastPlaybackChecked = 0;
 
 	public static void playBackpackSound(UUID backpackUuid, ISound sound) {
 		stopBackpackSound(backpackUuid);
 		backpackSounds.put(backpackUuid, sound);
-		Minecraft.getInstance().getSoundHandler().play(sound);
+		Minecraft.getInstance().getSoundManager().play(sound);
 	}
 
 	public static void stopBackpackSound(UUID backpackUuid) {
 		if (backpackSounds.containsKey(backpackUuid)) {
-			Minecraft.getInstance().getSoundHandler().stop(backpackSounds.remove(backpackUuid));
+			Minecraft.getInstance().getSoundManager().stop(backpackSounds.remove(backpackUuid));
 			PacketHandler.sendToServer(new SoundStopNotificationMessage(backpackUuid));
 		}
 	}
@@ -43,7 +43,7 @@ public class BackpackSoundHandler {
 		if (!backpackSounds.isEmpty() && lastPlaybackChecked < event.world.getGameTime() - SOUND_STOP_CHECK_INTERVAL) {
 			lastPlaybackChecked = event.world.getGameTime();
 			backpackSounds.entrySet().removeIf(entry -> {
-				if (!Minecraft.getInstance().getSoundHandler().isPlaying(entry.getValue())) {
+				if (!Minecraft.getInstance().getSoundManager().isActive(entry.getValue())) {
 					PacketHandler.sendToServer(new SoundStopNotificationMessage(entry.getKey()));
 					return true;
 				}
@@ -53,16 +53,16 @@ public class BackpackSoundHandler {
 	}
 
 	public static void playBackpackSound(SoundEvent soundEvent, UUID backpackUuid, BlockPos pos) {
-		playBackpackSound(backpackUuid, SimpleSound.record(soundEvent, pos.getX(), pos.getY(), pos.getZ()));
+		playBackpackSound(backpackUuid, SimpleSound.forRecord(soundEvent, pos.getX(), pos.getY(), pos.getZ()));
 	}
 
 	public static void playBackpackSound(SoundEvent soundEvent, UUID backpackUuid, int entityId) {
-		ClientWorld world = Minecraft.getInstance().world;
+		ClientWorld world = Minecraft.getInstance().level;
 		if (world == null) {
 			return;
 		}
 
-		Entity entity = world.getEntityByID(entityId);
+		Entity entity = world.getEntity(entityId);
 		if (!(entity instanceof LivingEntity)) {
 			return;
 		}

@@ -26,8 +26,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTabManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
@@ -37,6 +39,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeReci
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilteredUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryInventoryPart;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting.CompactingUpgradeTab;
@@ -89,6 +96,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter.StonecutterUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankInventoryPart;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeTab;
@@ -115,7 +127,7 @@ public class ModItems {
 	public static final RegistryObject<BackpackItem> DIAMOND_BACKPACK = ITEMS.register("diamond_backpack",
 			() -> new BackpackItem(Config.COMMON.diamondBackpack.inventorySlotCount::get, Config.COMMON.diamondBackpack.upgradeSlotCount::get, ModBlocks.DIAMOND_BACKPACK));
 	public static final RegistryObject<BackpackItem> NETHERITE_BACKPACK = ITEMS.register("netherite_backpack",
-			() -> new BackpackItem(Config.COMMON.netheriteBackpack.inventorySlotCount::get, Config.COMMON.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, new Item.Properties().isImmuneToFire()));
+			() -> new BackpackItem(Config.COMMON.netheriteBackpack.inventorySlotCount::get, Config.COMMON.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, new Item.Properties().fireResistant()));
 	public static final RegistryObject<PickupUpgradeItem> PICKUP_UPGRADE = ITEMS.register("pickup_upgrade",
 			() -> new PickupUpgradeItem(Config.COMMON.pickupUpgrade.filterSlots::get));
 	public static final RegistryObject<PickupUpgradeItem> ADVANCED_PICKUP_UPGRADE = ITEMS.register("advanced_pickup_upgrade",
@@ -174,21 +186,20 @@ public class ModItems {
 			() -> new ToolSwapperUpgradeItem(false, false));
 	public static final RegistryObject<ToolSwapperUpgradeItem> ADVANCED_TOOL_SWAPPER_UPGRADE = ITEMS.register("advanced_tool_swapper_upgrade",
 			() -> new ToolSwapperUpgradeItem(true, true));
+	public static final RegistryObject<TankUpgradeItem> TANK_UPGRADE = ITEMS.register("tank_upgrade", TankUpgradeItem::new);
+	public static final RegistryObject<BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.register("battery_upgrade", BatteryUpgradeItem::new);
 
-	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().maxStackSize(16)));
+	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
-	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_ITEM_CONTAINER_TYPE = CONTAINERS.register("backpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferItem));
-	public static final RegistryObject<ContainerType<BackpackContainer>> BLOCK_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("block_subbackpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlockSubBackpack));
-	public static final RegistryObject<ContainerType<BackpackContainer>> ITEM_SUBBACKPACK_CONTAINER_TYPE = CONTAINERS.register("item_subbackpack",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferItemSubBackpack));
-	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_BLOCK_CONTAINER_TYPE = CONTAINERS.register("backpack_block",
-			() -> IForgeContainerType.create(BackpackContainer::fromBufferBlock));
+	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
+			() -> IForgeContainerType.create(BackpackContainer::fromBuffer));
+
+	public static final RegistryObject<ContainerType<SettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
+			() -> IForgeContainerType.create(SettingsContainer::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
-			"everlasting_backpack_item", () -> EntityType.Builder.create(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
-					.size(0.25F, 0.25F).trackingRange(6).func_233608_b_(20).build("")
+			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
+					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
 	);
 
 	public static void registerHandlers(IEventBus modBus) {
@@ -220,6 +231,8 @@ public class ModItems {
 	private static final UpgradeContainerType<StonecutterUpgradeWrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(StonecutterUpgradeContainer::new);
 	private static final UpgradeContainerType<JukeboxUpgradeItem.Wrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
 	private static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(ToolSwapperUpgradeContainer::new);
+	private static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
+	private static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(BatteryUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -245,36 +258,40 @@ public class ModItems {
 		UpgradeContainerRegistry.register(STONECUTTER_UPGRADE.getId(), STONECUTTER_TYPE);
 		UpgradeContainerRegistry.register(JUKEBOX_UPGRADE.getId(), JUKEBOX_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_TOOL_SWAPPER_UPGRADE.getId(), TOOL_SWAPPER_TYPE);
+		UpgradeContainerRegistry.register(TANK_UPGRADE.getId(), TANK_TYPE);
+		UpgradeContainerRegistry.register(BATTERY_UPGRADE.getId(), BATTERY_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			ScreenManager.registerFactory(BACKPACK_ITEM_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(BACKPACK_BLOCK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(ITEM_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.registerFactory(BLOCK_SUBBACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			ScreenManager.register(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
 
-			UpgradeSettingsTabManager.register(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(MAGNET_BASIC_TYPE, MagnetUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(MAGNET_ADVANCED_TYPE, MagnetUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(FEEDING_TYPE, FeedingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(COMPACTING_TYPE, CompactingUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_COMPACTING_TYPE, CompactingUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(VOID_TYPE, VoidUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_VOID_TYPE, VoidUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(RESTOCK_TYPE, RestockUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_RESTOCK_TYPE, RestockUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
-			UpgradeSettingsTabManager.register(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
-			UpgradeSettingsTabManager.register(REFILL_TYPE, RefillUpgradeTab::new);
-			UpgradeSettingsTabManager.register(SMELTING_TYPE, SmeltingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(AUTO_SMELTING_TYPE, AutoSmeltingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(CRAFTING_TYPE, CraftingUpgradeTab::new);
-			UpgradeSettingsTabManager.register(INCEPTION_TYPE, InceptionUpgradeTab::new);
-			UpgradeSettingsTabManager.register(STONECUTTER_TYPE, StonecutterUpgradeTab::new);
-			UpgradeSettingsTabManager.register(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
-			UpgradeSettingsTabManager.register(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
+			UpgradeGuiManager.registerTab(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(FilterUpgradeContainer.BASIC_TYPE, FilterUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(MAGNET_BASIC_TYPE, MagnetUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(MAGNET_ADVANCED_TYPE, MagnetUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(FEEDING_TYPE, FeedingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(COMPACTING_TYPE, CompactingUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_COMPACTING_TYPE, CompactingUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(VOID_TYPE, VoidUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_VOID_TYPE, VoidUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(RESTOCK_TYPE, RestockUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_RESTOCK_TYPE, RestockUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(REFILL_TYPE, RefillUpgradeTab::new);
+			UpgradeGuiManager.registerTab(SMELTING_TYPE, SmeltingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(AUTO_SMELTING_TYPE, AutoSmeltingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(CRAFTING_TYPE, CraftingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(INCEPTION_TYPE, InceptionUpgradeTab::new);
+			UpgradeGuiManager.registerTab(STONECUTTER_TYPE, StonecutterUpgradeTab::new);
+			UpgradeGuiManager.registerTab(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
+			UpgradeGuiManager.registerTab(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
+			UpgradeGuiManager.registerTab(TANK_TYPE, TankUpgradeTab::new);
+			UpgradeGuiManager.registerTab(BATTERY_TYPE, BatteryUpgradeTab::new);
+			UpgradeGuiManager.registerInventoryPart(TANK_TYPE, TankInventoryPart::new);
+			UpgradeGuiManager.registerInventoryPart(BATTERY_TYPE, BatteryInventoryPart::new);
 		});
 	}
 
@@ -288,24 +305,24 @@ public class ModItems {
 	}
 
 	public static void registerDispenseBehavior() {
-		DispenserBlock.registerDispenseBehavior(BACKPACK.get(), new BackpackDispenseBehavior());
-		DispenserBlock.registerDispenseBehavior(IRON_BACKPACK.get(), new BackpackDispenseBehavior());
-		DispenserBlock.registerDispenseBehavior(GOLD_BACKPACK.get(), new BackpackDispenseBehavior());
-		DispenserBlock.registerDispenseBehavior(DIAMOND_BACKPACK.get(), new BackpackDispenseBehavior());
-		DispenserBlock.registerDispenseBehavior(NETHERITE_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(IRON_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(GOLD_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(DIAMOND_BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(NETHERITE_BACKPACK.get(), new BackpackDispenseBehavior());
 	}
 
 	private static class BackpackDispenseBehavior extends OptionalDispenseBehavior {
 		@Override
-		protected ItemStack dispenseStack(IBlockSource source, ItemStack stack) {
-			setSuccessful(false);
+		protected ItemStack execute(IBlockSource source, ItemStack stack) {
+			setSuccess(false);
 			Item item = stack.getItem();
 			if (item instanceof BackpackItem) {
-				Direction dispenserDirection = source.getBlockState().get(DispenserBlock.FACING);
-				BlockPos blockpos = source.getBlockPos().offset(dispenserDirection);
-				Direction against = source.getWorld().isAirBlock(blockpos.down()) ? dispenserDirection.getOpposite() : Direction.UP;
+				Direction dispenserDirection = source.getBlockState().getValue(DispenserBlock.FACING);
+				BlockPos blockpos = source.getPos().relative(dispenserDirection);
+				Direction against = source.getLevel().isEmptyBlock(blockpos.below()) ? dispenserDirection.getOpposite() : Direction.UP;
 
-				setSuccessful(((BackpackItem) item).tryPlace(null, dispenserDirection.getOpposite(), new DirectionalPlaceContext(source.getWorld(), blockpos, dispenserDirection, stack, against)).isSuccessOrConsume());
+				setSuccess(((BackpackItem) item).tryPlace(null, dispenserDirection.getOpposite(), new DirectionalPlaceContext(source.getLevel(), blockpos, dispenserDirection, stack, against)).consumesAction());
 			}
 
 			return stack;

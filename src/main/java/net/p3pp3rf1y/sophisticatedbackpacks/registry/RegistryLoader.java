@@ -93,7 +93,7 @@ public class RegistryLoader extends JsonReloadListener {
 		}
 
 		if (json.has("load_after")) {
-			Set<String> dependencies = JsonHelper.setFromJson(json.get("load_after"), e -> JSONUtils.getString(e, ""));
+			Set<String> dependencies = JsonHelper.setFromJson(json.get("load_after"), e -> JSONUtils.convertToString(e, ""));
 			if (!areDependenciesLoaded(dependencies)) {
 				loadLater.add(new DependentFile(name, dependencies));
 				SophisticatedBackpacks.LOGGER.debug("Registry data at {} depend on {} which are not all loaded, skipping for now.", name, dependencies);
@@ -125,17 +125,17 @@ public class RegistryLoader extends JsonReloadListener {
 	}
 
 	private boolean isModLoaded(JsonObject json) {
-		return !JSONUtils.hasField(json, "mod") || ModList.get().isLoaded(JSONUtils.getString(json, "mod"));
+		return !JSONUtils.isValidNode(json, "mod") || ModList.get().isLoaded(JSONUtils.getAsString(json, "mod"));
 	}
 
 	private boolean isDisabled(JsonObject json) {
-		return json.has("disabled") && JSONUtils.getBoolean(json, "disabled");
+		return json.has("disabled") && JSONUtils.getAsBoolean(json, "disabled");
 	}
 
 	private Optional<IRegistryDataLoader> getLoader(String fileName, JsonObject json) {
 		String parserName = fileName;
 		if (json.has("type")) {
-			parserName = JSONUtils.getString(json, "type");
+			parserName = JSONUtils.getAsString(json, "type");
 		}
 		return loaders.containsKey(parserName) ? Optional.of(loaders.get(parserName)) : Optional.empty();
 	}

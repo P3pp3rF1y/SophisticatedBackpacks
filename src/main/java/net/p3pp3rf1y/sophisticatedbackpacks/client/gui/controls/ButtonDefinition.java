@@ -2,14 +2,15 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
 public class ButtonDefinition {
 	private final Dimension dimension;
+	@Nullable
 	private final TextureBlitData backgroundTexture;
 	@Nullable
 	private final TextureBlitData hoveredBackgroundTexture;
@@ -17,11 +18,11 @@ public class ButtonDefinition {
 	private final TextureBlitData foregroundTexture;
 	private final ITextComponent tooltip;
 
-	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
+	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
 		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new StringTextComponent(""));
 	}
 
-	public ButtonDefinition(Dimension dimension, TextureBlitData backgroundTexture,
+	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture,
 			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, ITextComponent tooltip) {
 		this.dimension = dimension;
 		this.backgroundTexture = backgroundTexture;
@@ -34,6 +35,7 @@ public class ButtonDefinition {
 		return dimension;
 	}
 
+	@Nullable
 	public TextureBlitData getBackgroundTexture() {
 		return backgroundTexture;
 	}

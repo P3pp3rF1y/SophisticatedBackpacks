@@ -31,41 +31,41 @@ public class ToolFilterSlot extends Slot implements IFilterSlot, INameableEmptyS
 	}
 
 	@Override
-	public void onSlotChange(ItemStack oldStackIn, ItemStack newStackIn) {
+	public void onQuickCraft(ItemStack oldStackIn, ItemStack newStackIn) {
 		//noop
 	}
 
 	@Override
-	public ItemStack getStack() {
+	public ItemStack getItem() {
 		return getTool.get();
 	}
 
 	@Override
-	public void putStack(ItemStack stack) {
+	public void set(ItemStack stack) {
 		setTool.accept(stack);
-		onSlotChanged();
+		setChanged();
 	}
 
 	@Override
-	public void onSlotChanged() {
+	public void setChanged() {
 		//noop
 	}
 
 	@Override
-	public int getSlotStackLimit() {
+	public int getMaxStackSize() {
 		return 1;
 	}
 
 	@Override
-	public ItemStack decrStackSize(int amount) {
+	public ItemStack remove(int amount) {
 		if (amount > 0) {
-			putStack(ItemStack.EMPTY);
+			set(ItemStack.EMPTY);
 		}
-		return getStack();
+		return getItem();
 	}
 
 	@Override
-	public boolean canTakeStack(PlayerEntity playerIn) {
+	public boolean mayPickup(PlayerEntity playerIn) {
 		return false;
 	}
 
@@ -75,7 +75,7 @@ public class ToolFilterSlot extends Slot implements IFilterSlot, INameableEmptyS
 	}
 
 	@Override
-	public boolean isItemValid(ItemStack stack) {
+	public boolean mayPlace(ItemStack stack) {
 		return stack.isEmpty() || (stack.getMaxStackSize() == 1 && isToolTypeValid.test(stack));
 	}
 

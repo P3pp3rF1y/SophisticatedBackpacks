@@ -19,7 +19,7 @@ public class CraftingItemHandler extends CraftingInventory {
 	public CraftingItemHandler(Supplier<IItemHandlerModifiable> supplyInventory, Consumer<IInventory> onCraftingMatrixChanged) {
 		super(new Container(null, -1) {
 			@Override
-			public boolean canInteractWith(PlayerEntity playerIn) {
+			public boolean stillValid(PlayerEntity playerIn) {
 				return false;
 			}
 		}, 3, 3);
@@ -28,7 +28,7 @@ public class CraftingItemHandler extends CraftingInventory {
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return supplyInventory.get().getSlots();
 	}
 
@@ -38,18 +38,18 @@ public class CraftingItemHandler extends CraftingInventory {
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int index) {
+	public ItemStack getItem(int index) {
 		IItemHandlerModifiable itemHandler = supplyInventory.get();
 		return index >= itemHandler.getSlots() ? ItemStack.EMPTY : itemHandler.getStackInSlot(index);
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(int index) {
+	public ItemStack removeItemNoUpdate(int index) {
 		return InventoryHelper.getAndRemove(supplyInventory.get(), index);
 	}
 
 	@Override
-	public ItemStack decrStackSize(int index, int count) {
+	public ItemStack removeItem(int index, int count) {
 		ItemStack itemstack = supplyInventory.get().extractItem(index, count, false);
 		if (!itemstack.isEmpty()) {
 			onCraftingMatrixChanged.accept(this);
@@ -59,14 +59,14 @@ public class CraftingItemHandler extends CraftingInventory {
 	}
 
 	@Override
-	public void setInventorySlotContents(int index, ItemStack stack) {
+	public void setItem(int index, ItemStack stack) {
 		supplyInventory.get().setStackInSlot(index, stack);
 		onCraftingMatrixChanged.accept(this);
 	}
 
 	@Override
 	public void fillStackedContents(RecipeItemHelper helper) {
-		InventoryHelper.iterate(supplyInventory.get(), (slot, stack) -> helper.accountPlainStack(stack));
+		InventoryHelper.iterate(supplyInventory.get(), (slot, stack) -> helper.accountSimpleStack(stack));
 	}
 
 }

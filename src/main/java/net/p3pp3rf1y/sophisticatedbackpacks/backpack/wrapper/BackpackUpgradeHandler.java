@@ -1,13 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -20,11 +19,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BackpackUpgradeHandler extends ItemStackHandler {
 	public static final String UPGRADE_INVENTORY_TAG = "upgradeInventory";
 	private final IBackpackWrapper backpackWrapper;
-	private final Runnable backpackSaveHandler;
+	private final Runnable backpackContentsSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
 	private final CompoundNBT contentsNbt;
 	@Nullable
@@ -37,24 +37,13 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 	private boolean persistent = true;
 
-	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler, Runnable onInvalidateUpgradeCaches) {
+	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackContentsSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(numberOfUpgradeSlots);
 		this.contentsNbt = contentsNbt;
 		this.backpackWrapper = backpackWrapper;
-		this.backpackSaveHandler = backpackSaveHandler;
+		this.backpackContentsSaveHandler = backpackContentsSaveHandler;
 		this.onInvalidateUpgradeCaches = onInvalidateUpgradeCaches;
 		deserializeNBT(contentsNbt.getCompound(UPGRADE_INVENTORY_TAG));
-	}
-
-	//TODO: remove this in the future - is only meant to remove items that got there through bug in BackpackContainer
-	public void runTemporaryBugFixToRemoveInvalidItems(PlayerEntity player) {
-		InventoryHelper.iterate(this, (slot, stack) -> {
-			if (!stack.isEmpty() && !(stack.getItem() instanceof IBackpackUpgradeItem)) {
-				player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
-						.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, stack, backpackWrapper.getInventoryHandler(), playerInventory));
-				setStackInSlot(slot, ItemStack.EMPTY);
-			}
-		});
 	}
 
 	@Override
@@ -67,7 +56,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		super.onContentsChanged(slot);
 		if (persistent) {
 			saveInventory();
-			backpackSaveHandler.run();
+			backpackContentsSaveHandler.run();
 		}
 		if (!justSavingNbtChange) {
 			refreshUpgradeWrappers();
@@ -118,6 +107,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				addTypeWrapper(type, wrapper);
 			}
 		});
+
+		initRenderInfoCallbacks(false);
 	}
 
 	private <T extends IUpgradeWrapper> void addTypeWrapper(UpgradeType<?> type, T wrapper) {
@@ -186,6 +177,54 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			refreshCallBack.run();
 		}
 		onInvalidateUpgradeCaches.run();
+
+		initRenderInfoCallbacks(true);
+	}
+
+	private void initRenderInfoCallbacks(boolean forceUpdateRenderInfo) {
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		if (forceUpdateRenderInfo) {
+			renderInfo.reset();
+		}
+
+		initTankRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+		initBatteryRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+	}
+
+	private void initBatteryRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
+		getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IRenderedBatteryUpgrade) {
+				IRenderedBatteryUpgrade batteryWrapper = (IRenderedBatteryUpgrade) wrapper;
+				batteryWrapper.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
+				if (forceUpdateRenderInfo) {
+					batteryWrapper.forceUpdateBatteryRenderInfo();
+				}
+			}
+		});
+	}
+
+	private void initTankRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
+		AtomicBoolean singleTankRight = new AtomicBoolean(false);
+		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
+		int minRightSlot = getSlots() / 2;
+		getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IRenderedTankUpgrade) {
+				tankRenderWrappers.add((IRenderedTankUpgrade) wrapper);
+				if (slot >= minRightSlot) {
+					singleTankRight.set(true);
+				}
+			}
+		});
+
+		TankPosition currentTankPos = tankRenderWrappers.size() == 1 && singleTankRight.get() ? TankPosition.RIGHT : TankPosition.LEFT;
+		for (IRenderedTankUpgrade tankRenderWrapper : tankRenderWrappers) {
+			TankPosition finalCurrentTankPos = currentTankPos;
+			tankRenderWrapper.setTankRenderInfoUpdateCallback(tankRenderInfo -> renderInfo.setTankRenderInfo(finalCurrentTankPos, tankRenderInfo));
+			if (forceUpdateRenderInfo) {
+				tankRenderWrapper.forceUpdateTankRenderInfo();
+			}
+			currentTankPos = TankPosition.RIGHT;
+		}
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {

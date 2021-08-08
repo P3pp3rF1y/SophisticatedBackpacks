@@ -18,7 +18,7 @@ public class CraftingUpgradeWrapper extends UpgradeWrapperBase<CraftingUpgradeWr
 			@Override
 			protected void onContentsChanged(int slot) {
 				super.onContentsChanged(slot);
-				upgrade.setTagInfo("craftingInventory", serializeNBT());
+				upgrade.addTagElement("craftingInventory", serializeNBT());
 				save();
 			}
 		};

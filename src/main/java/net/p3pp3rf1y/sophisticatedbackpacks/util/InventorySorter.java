@@ -64,8 +64,8 @@ public class InventorySorter {
 		return itemStackKey.getStack().getItem().getRegistryName().toString();
 	}
 
-	public static void sortHandler(IItemHandlerModifiable handler, Comparator<? super Map.Entry<ItemStackKey, Integer>> comparator) {
-		Map<ItemStackKey, Integer> compactedStacks = InventoryHelper.getCompactedStacks(handler);
+	public static void sortHandler(IItemHandlerModifiable handler, Comparator<? super Map.Entry<ItemStackKey, Integer>> comparator, Set<Integer> noSortSlots) {
+		Map<ItemStackKey, Integer> compactedStacks = InventoryHelper.getCompactedStacks(handler, noSortSlots);
 		List<Map.Entry<ItemStackKey, Integer>> sortedList = new ArrayList<>(compactedStacks.entrySet());
 		sortedList.sort(comparator);
 
@@ -74,31 +74,42 @@ public class InventorySorter {
 		ItemStackKey current = null;
 		int count = 0;
 		for (int slot = 0; slot < slots; slot++) {
+			if (noSortSlots.contains(slot)) {
+				continue;
+			}
 			if ((current == null || count <= 0) && it.hasNext()) {
 				Map.Entry<ItemStackKey, Integer> entry = it.next();
 				current = entry.getKey();
 				count = entry.getValue();
 			}
 			if (current != null && count > 0) {
-				ItemStack copy = current.getStack().copy();
-				int slotLimit = handler.getSlotLimit(slot);
-				int countToPlace;
-				if (slotLimit > 64) {
-					countToPlace = Math.min(count, slotLimit / 64 * copy.getMaxStackSize());
-				} else {
-					countToPlace = Math.min(count, copy.getMaxStackSize());
-				}
-				copy.setCount(countToPlace);
-				if (!ItemStack.areItemStacksEqual(handler.getStackInSlot(slot), copy)) {
-					handler.setStackInSlot(slot, copy);
-				}
-				count -= countToPlace;
+				count -= placeStack(handler, current, count, slot);
 			} else {
-				if (!handler.getStackInSlot(slot).isEmpty()) {
-					handler.setStackInSlot(slot, ItemStack.EMPTY);
-				}
+				emptySlot(handler, slot);
 			}
 		}
+	}
+
+	private static void emptySlot(IItemHandlerModifiable handler, int slot) {
+		if (!handler.getStackInSlot(slot).isEmpty()) {
+			handler.setStackInSlot(slot, ItemStack.EMPTY);
+		}
+	}
+
+	private static int placeStack(IItemHandlerModifiable handler, ItemStackKey current, int count, int slot) {
+		ItemStack copy = current.getStack().copy();
+		int slotLimit = handler.getSlotLimit(slot);
+		int countPlaced;
+		if (slotLimit > 64) {
+			countPlaced = Math.min(count, slotLimit / 64 * copy.getMaxStackSize());
+		} else {
+			countPlaced = Math.min(count, copy.getMaxStackSize());
+		}
+		copy.setCount(countPlaced);
+		if (!ItemStack.matches(handler.getStackInSlot(slot), copy)) {
+			handler.setStackInSlot(slot, copy);
+		}
+		return countPlaced;
 	}
 
 }

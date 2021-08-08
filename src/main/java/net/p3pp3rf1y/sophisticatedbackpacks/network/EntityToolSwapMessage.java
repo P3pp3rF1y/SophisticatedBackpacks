@@ -40,8 +40,8 @@ public class EntityToolSwapMessage {
 			return;
 		}
 
-		World world = sender.world;
-		Entity entity = world.getEntityByID(msg.entityId);
+		World world = sender.level;
+		Entity entity = world.getEntity(msg.entityId);
 
 		if (entity == null) {
 			return;
@@ -51,7 +51,7 @@ public class EntityToolSwapMessage {
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
 		PlayerInventoryProvider.runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(backpackWrapper -> {
-							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
+					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
 									.forEach(upgrade -> {
 										if (!upgrade.canProcessEntityInteract() || result.get()) {
 											return;
@@ -66,11 +66,11 @@ public class EntityToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.sendStatusMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
+			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
 		}
 	}
 }

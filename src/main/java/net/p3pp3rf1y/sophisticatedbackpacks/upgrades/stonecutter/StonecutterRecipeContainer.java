@@ -33,7 +33,7 @@ public class StonecutterRecipeContainer {
 	private final Slot outputSlot;
 	private final CraftResultInventory resultInventory = new CraftResultInventory();
 	private List<StonecuttingRecipe> recipes = Lists.newArrayList();
-	private final IntReferenceHolder selectedRecipe = IntReferenceHolder.single();
+	private final IntReferenceHolder selectedRecipe = IntReferenceHolder.standalone();
 	private Item inputItem = Items.AIR;
 	private final CraftingItemHandler inputInventory;
 	private Runnable inventoryUpdateListener = () -> {};
@@ -44,16 +44,16 @@ public class StonecutterRecipeContainer {
 	public StonecutterRecipeContainer(StonecutterUpgradeContainer upgradeContainer, Consumer<Slot> addSlot, IServerUpdater serverUpdater, IWorldPosCallable worldPosCallable) {
 		inputSlot = new SlotSuppliedHandler(upgradeContainer.getUpgradeWrapper()::getInputInventory, 0, -1, -1) {
 			@Override
-			public void onSlotChanged() {
-				super.onSlotChanged();
+			public void setChanged() {
+				super.setChanged();
 				onCraftMatrixChanged(inputInventory);
 			}
 
 			@Override
-			public ItemStack decrStackSize(int amount) {
-				ItemStack ret = super.decrStackSize(amount);
-				if (getStack().isEmpty()) {
-					onSlotChanged();
+			public ItemStack remove(int amount) {
+				ItemStack ret = super.remove(amount);
+				if (getItem().isEmpty()) {
+					setChanged();
 				}
 				return ret;
 			}
@@ -71,7 +71,7 @@ public class StonecutterRecipeContainer {
 	}
 
 	private void onCraftMatrixChanged(IInventory inventoryIn) {
-		ItemStack itemstack = inputSlot.getStack();
+		ItemStack itemstack = inputSlot.getItem();
 		if (itemstack.getItem() != inputItem) {
 			inputItem = itemstack.getItem();
 			updateAvailableRecipes(inventoryIn, itemstack);
@@ -82,7 +82,7 @@ public class StonecutterRecipeContainer {
 	private void updateAvailableRecipes(IInventory inventory, ItemStack stack) {
 		recipes.clear();
 		selectedRecipe.set(-1);
-		outputSlot.putStack(ItemStack.EMPTY);
+		outputSlot.set(ItemStack.EMPTY);
 		if (!stack.isEmpty()) {
 			recipes = RecipeHelper.getStonecuttingRecipes(inventory);
 			getLastSelectedRecipeId.get().ifPresent(id -> {
@@ -117,7 +117,7 @@ public class StonecutterRecipeContainer {
 	}
 
 	public boolean hasItemsInInputSlot() {
-		return inputSlot.getHasStack() && !recipes.isEmpty();
+		return inputSlot.hasItem() && !recipes.isEmpty();
 	}
 
 	public boolean selectRecipe(int recipeIndex) {
@@ -138,9 +138,9 @@ public class StonecutterRecipeContainer {
 		if (!recipes.isEmpty() && isIndexInRecipeBounds(selectedRecipe.get())) {
 			StonecuttingRecipe stonecuttingrecipe = recipes.get(selectedRecipe.get());
 			resultInventory.setRecipeUsed(stonecuttingrecipe);
-			outputSlot.putStack(stonecuttingrecipe.getCraftingResult(inputInventory));
+			outputSlot.set(stonecuttingrecipe.assemble(inputInventory));
 		} else {
-			outputSlot.putStack(ItemStack.EMPTY);
+			outputSlot.set(ItemStack.EMPTY);
 		}
 	}
 
@@ -165,20 +165,20 @@ public class StonecutterRecipeContainer {
 		}
 
 		@Override
-		public boolean isItemValid(ItemStack stack) {
+		public boolean mayPlace(ItemStack stack) {
 			return false;
 		}
 
 		@Override
 		public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
-			stack.onCrafting(thePlayer.world, thePlayer, stack.getCount());
-			resultInventory.onCrafting(thePlayer);
-			ItemStack itemstack = inputSlot.decrStackSize(1);
+			stack.onCraftedBy(thePlayer.level, thePlayer, stack.getCount());
+			resultInventory.awardUsedRecipes(thePlayer);
+			ItemStack itemstack = inputSlot.remove(1);
 			if (!itemstack.isEmpty()) {
 				updateRecipeResultSlot();
 			}
 
-			worldPosCallable.consume((world, pos) -> {
+			worldPosCallable.execute((world, pos) -> {
 				long l = world.getGameTime();
 				if (lastOnTake != l) {
 					world.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundCategory.BLOCKS, 1.0F, 1.0F);

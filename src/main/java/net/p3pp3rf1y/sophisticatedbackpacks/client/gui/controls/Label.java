@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 public class Label extends Widget {
 	public static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
@@ -27,12 +27,12 @@ public class Label extends Widget {
 
 	@Override
 	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		minecraft.fontRenderer.func_243248_b(matrixStack, labelText, x, y, color);
+		minecraft.font.draw(matrixStack, labelText, x, y, color);
 	}
 
 	@Override
 	public int getWidth() {
-		return minecraft.fontRenderer.getStringPropertyWidth(labelText);
+		return minecraft.font.width(labelText);
 	}
 
 	@Override

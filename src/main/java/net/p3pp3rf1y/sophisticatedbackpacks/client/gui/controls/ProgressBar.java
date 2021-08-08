@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import java.util.function.Supplier;
 
@@ -39,7 +39,7 @@ public class ProgressBar extends Widget {
 		} else if (dir == ProgressDirection.LEFT_RIGHT) {
 			width = (int) (width * progress);
 		}
-		minecraft.getTextureManager().bindTexture(progressTexture.getTextureName());
+		minecraft.getTextureManager().bind(progressTexture.getTextureName());
 		blit(matrixStack, x, y + yOffset, progressTexture.getU(), (float) progressTexture.getV() + yOffset, width, height, progressTexture.getTextureWidth(), progressTexture.getTextureHeight());
 	}
 

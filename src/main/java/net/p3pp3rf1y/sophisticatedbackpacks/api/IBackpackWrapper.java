@@ -3,8 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.api;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 
@@ -22,6 +26,8 @@ public interface IBackpackWrapper {
 	IItemHandlerModifiable getInventoryForInputOutput();
 
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
+
+	BackpackSettingsHandler getSettingsHandler();
 
 	BackpackUpgradeHandler getUpgradeHandler();
 
@@ -64,4 +70,20 @@ public interface IBackpackWrapper {
 	void fillWithLoot(PlayerEntity playerEntity);
 
 	void setContentsUuid(UUID backpackUuid);
+
+	BackpackRenderInfo getRenderInfo();
+
+	void setColumnsTaken(int columnsTaken);
+
+	int getColumnsTaken();
+
+	default int getNumberOfSlotRows() {
+		return 0;
+	}
+
+	default Optional<IFluidHandlerItem> getFluidHandler() {
+		return Optional.empty();
+	}
+
+	default Optional<IEnergyStorage> getEnergyStorage() { return Optional.empty(); }
 }

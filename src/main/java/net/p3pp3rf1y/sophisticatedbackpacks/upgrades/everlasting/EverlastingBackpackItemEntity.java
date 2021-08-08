@@ -21,22 +21,22 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public void tick() {
-		if (!world.isRemote) {
-			double d0 = getPosX() + 0.5F - rand.nextFloat();
-			double d1 = getPosY() + rand.nextFloat() * 0.5F;
-			double d2 = getPosZ() + 0.5F - rand.nextFloat();
-			ServerWorld serverWorld = (ServerWorld) world;
-			if (rand.nextInt(20) == 0) {
-				serverWorld.spawnParticle(ParticleTypes.HAPPY_VILLAGER, d0, d1, d2, 0, 0, 0.1D, 0, 1f);
+		if (!level.isClientSide) {
+			double d0 = getX() + 0.5F - random.nextFloat();
+			double d1 = getY() + random.nextFloat() * 0.5F;
+			double d2 = getZ() + 0.5F - random.nextFloat();
+			ServerWorld serverWorld = (ServerWorld) level;
+			if (random.nextInt(20) == 0) {
+				serverWorld.sendParticles(ParticleTypes.HAPPY_VILLAGER, d0, d1, d2, 0, 0, 0.1D, 0, 1f);
 			}
 		}
-		if (!hasNoGravity()) {
+		if (!isNoGravity()) {
 			if (isInWater() || isInLava()) {
-				onEnterBubbleColumn(false);
+				onInsideBubbleColumn(false);
 				wasFloatingUp = true;
 			} else if (wasFloatingUp) {
 				setNoGravity(true);
-				setMotion(Vector3d.ZERO);
+				setDeltaMovement(Vector3d.ZERO);
 			}
 		}
 		super.tick();
@@ -44,16 +44,16 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public boolean isInWater() {
-		return getPosY() < 1 || super.isInWater();
+		return getY() < 1 || super.isInWater();
 	}
 
 	@Override
-	public boolean isImmuneToFire() {
+	public boolean fireImmune() {
 		return true;
 	}
 
 	@Override
-	public boolean isImmuneToExplosions() {
+	public boolean ignoreExplosion() {
 		return true;
 	}
 
@@ -68,7 +68,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 	}
 
 	@Override
-	public IPacket<?> createSpawnPacket() {
+	public IPacket<?> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 }

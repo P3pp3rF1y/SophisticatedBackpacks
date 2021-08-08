@@ -1,11 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.Item;
 import net.minecraft.loot.LootTables;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -15,10 +18,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Config {
-
 	private static final String SETTINGS = " Settings";
 
 	private Config() {}
@@ -78,8 +81,14 @@ public class Config {
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
-		public final ForgeConfigSpec.BooleanValue shiftClickIntoOpenTabFirst;
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+		public final TankUpgradeConfig tankUpgrade;
+		public final BatteryUpgradeConfig batteryUpgrade;
+
+		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
+		public void onConfigReload(ModConfig.Reloading event) {
+			enabledItems.enabledMap.clear();
+		}
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
@@ -112,12 +121,11 @@ public class Config {
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			tankUpgrade = new TankUpgradeConfig(builder);
+			batteryUpgrade = new BatteryUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
-
-			shiftClickIntoOpenTabFirst = builder.comment("Shift clicking will first move the stack into open tab and only then to player's inventory or to backpack (based on where shift clicking from backpack or from player's inventory).",
-					"Setting this to false will move stacks to backpack/inventory first.").define("shiftClickIntoOpenTabFirst", true);
 
 			builder.pop();
 		}
@@ -198,22 +206,22 @@ public class Config {
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
 				Map<EntityType<?>, ResourceLocation> mapping = new LinkedHashMap<>();
-				mapping.put(EntityType.CREEPER, LootTables.CHESTS_DESERT_PYRAMID);
-				mapping.put(EntityType.DROWNED, LootTables.CHESTS_SHIPWRECK_TREASURE);
-				mapping.put(EntityType.ENDERMAN, LootTables.CHESTS_END_CITY_TREASURE);
-				mapping.put(EntityType.EVOKER, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.HUSK, LootTables.CHESTS_DESERT_PYRAMID);
+				mapping.put(EntityType.CREEPER, LootTables.DESERT_PYRAMID);
+				mapping.put(EntityType.DROWNED, LootTables.SHIPWRECK_TREASURE);
+				mapping.put(EntityType.ENDERMAN, LootTables.END_CITY_TREASURE);
+				mapping.put(EntityType.EVOKER, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.HUSK, LootTables.DESERT_PYRAMID);
 				mapping.put(EntityType.PIGLIN, LootTables.BASTION_BRIDGE);
-				mapping.put(EntityType.field_242287_aj, LootTables.BASTION_TREASURE);
-				mapping.put(EntityType.PILLAGER, LootTables.CHESTS_PILLAGER_OUTPOST);
-				mapping.put(EntityType.SKELETON, LootTables.CHESTS_SIMPLE_DUNGEON);
-				mapping.put(EntityType.STRAY, LootTables.CHESTS_IGLOO_CHEST);
-				mapping.put(EntityType.VEX, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.VINDICATOR, LootTables.CHESTS_WOODLAND_MANSION);
-				mapping.put(EntityType.WITCH, LootTables.CHESTS_BURIED_TREASURE);
-				mapping.put(EntityType.WITHER_SKELETON, LootTables.CHESTS_NETHER_BRIDGE);
-				mapping.put(EntityType.ZOMBIE, LootTables.CHESTS_SIMPLE_DUNGEON);
-				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.CHESTS_VILLAGE_VILLAGE_ARMORER);
+				mapping.put(EntityType.PIGLIN_BRUTE, LootTables.BASTION_TREASURE);
+				mapping.put(EntityType.PILLAGER, LootTables.PILLAGER_OUTPOST);
+				mapping.put(EntityType.SKELETON, LootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.STRAY, LootTables.IGLOO_CHEST);
+				mapping.put(EntityType.VEX, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.VINDICATOR, LootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.WITCH, LootTables.BURIED_TREASURE);
+				mapping.put(EntityType.WITHER_SKELETON, LootTables.NETHER_BRIDGE);
+				mapping.put(EntityType.ZOMBIE, LootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.VILLAGE_ARMORER);
 				mapping.put(EntityType.ZOMBIFIED_PIGLIN, LootTables.BASTION_OTHER);
 				return mapping;
 			}
@@ -225,6 +233,36 @@ public class Config {
 			protected ToolSwapperUpgradeConfig(ForgeConfigSpec.Builder builder) {
 				builder.comment("Tool Swapper Upgrade" + SETTINGS).push("toolSwapperUpgrade");
 				slotsInRow = builder.comment("Number of tool filter slots displayed in a row").defineInRange("slotsInRow", 4, 1, 6);
+				builder.pop();
+			}
+		}
+
+		public static class TankUpgradeConfig {
+			public final ForgeConfigSpec.IntValue capacityPerSlotRow;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue autoFillDrainContainerCooldown;
+			public final ForgeConfigSpec.IntValue maxInputOutput;
+
+			protected TankUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 2000, 500, 20000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to tank capacity. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting tank capacity").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				autoFillDrainContainerCooldown = builder.comment("Cooldown between fill/drain actions done on fluid containers in tank slots. Only fills/drains one bucket worth to/from container after this cooldown and then waits again.").defineInRange("autoFillDrainContainerCooldown", 20, 1, 100);
+				maxInputOutput = builder.comment("How much mB can be transfered in / out per operation. This is a base transfer rate and same as max tank capacity gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
+				builder.pop();
+			}
+		}
+
+		public static class BatteryUpgradeConfig {
+			public final ForgeConfigSpec.IntValue energyPerSlotRow;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue maxInputOutput;
+
+			protected BatteryUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
+				energyPerSlotRow = builder.comment("Energy in FE the battery upgrade will have per row of backpack slots").defineInRange("energyPerSlotRow", 10000, 500, 50000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to max energy of the battery and max in/out. Value lower than 1 makes stack multiplier affect the max energy less, higher makes it affect the max energy more. 0 turns off stack multiplier affecting battery upgrade").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				maxInputOutput = builder.comment("How much FE can be transfered in / out per operation. This is a base transfer rate and same as max storage gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
 				builder.pop();
 			}
 		}
@@ -321,13 +359,20 @@ public class Config {
 
 		public static class EnabledItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new HashMap<>();
+			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
 			}
 
+			public boolean isItemEnabled(Item item) {
+				return RegistryHelper.getRegistryName(item).map(rn -> isItemEnabled(rn.getPath())).orElse(false);
+			}
+
 			public boolean isItemEnabled(String itemRegistryName) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
 				if (enabledMap.isEmpty()) {
 					loadEnabledMap();
 				}

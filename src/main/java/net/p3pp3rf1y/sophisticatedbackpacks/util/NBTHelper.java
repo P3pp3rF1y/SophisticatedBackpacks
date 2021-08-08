@@ -21,6 +21,10 @@ public class NBTHelper {
 		return getTagValue(stack, key, CompoundNBT::getInt);
 	}
 
+	public static Optional<Integer> getInt(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getInt);
+	}
+
 	private static <T> Optional<T> getTagValue(ItemStack stack, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		return getTagValue(stack, "", key, getValue);
 	}
@@ -40,6 +44,18 @@ public class NBTHelper {
 			tag = (CompoundNBT) parentTag;
 		}
 
+		return getTagValue(tag, key, getValue);
+	}
+
+	public static Optional<Boolean> getBoolean(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getBoolean);
+	}
+
+	public static Optional<CompoundNBT> getCompound(CompoundNBT tag, String key) {
+		return getTagValue(tag, key, CompoundNBT::getCompound);
+	}
+
+	private static <T> Optional<T> getTagValue(CompoundNBT tag, String key, BiFunction<CompoundNBT, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();
 		}
@@ -77,7 +93,7 @@ public class NBTHelper {
 
 	public static Optional<UUID> getUniqueId(ItemStack stack, String key) {
 		//noinspection ConstantConditions - contains check is run before this get so it won't be null
-		return getTagValue(stack, key, (compound, k) -> NBTUtil.readUniqueId(compound.get(k)));
+		return getTagValue(stack, key, (compound, k) -> NBTUtil.loadUUID(compound.get(k)));
 	}
 
 	public static void setCompoundNBT(ItemStack stack, String key, CompoundNBT tag) {
@@ -89,7 +105,7 @@ public class NBTHelper {
 			stack.getOrCreateTag().put(key, tag);
 			return;
 		}
-		stack.getOrCreateChildTag(parentKey).put(key, tag);
+		stack.getOrCreateTagElement(parentKey).put(key, tag);
 	}
 
 	public static void setBoolean(ItemStack stack, String parentKey, String key, boolean value) {
@@ -97,7 +113,7 @@ public class NBTHelper {
 			setBoolean(stack, key, value);
 			return;
 		}
-		putBoolean(stack.getOrCreateChildTag(parentKey), key, value);
+		putBoolean(stack.getOrCreateTagElement(parentKey), key, value);
 	}
 
 	public static void setBoolean(ItemStack stack, String key, boolean value) {
@@ -109,7 +125,7 @@ public class NBTHelper {
 			setEnumConstant(stack, key, enumConstant);
 			return;
 		}
-		putEnumConstant(stack.getOrCreateChildTag(parentKey), key, enumConstant);
+		putEnumConstant(stack.getOrCreateTagElement(parentKey), key, enumConstant);
 	}
 
 	public static <T extends Enum<T> & IStringSerializable> void setEnumConstant(ItemStack stack, String key, T enumConstant) {
@@ -132,7 +148,7 @@ public class NBTHelper {
 	}
 
 	public static <T extends Enum<T> & IStringSerializable> CompoundNBT putEnumConstant(CompoundNBT tag, String key, T enumConstant) {
-		tag.putString(key, enumConstant.getString());
+		tag.putString(key, enumConstant.getSerializedName());
 		return tag;
 	}
 
@@ -145,7 +161,7 @@ public class NBTHelper {
 	}
 
 	public static void setUniqueId(ItemStack stack, String key, UUID uuid) {
-		stack.getOrCreateTag().putIntArray(key, UUIDCodec.encodeUUID(uuid));
+		stack.getOrCreateTag().putIntArray(key, UUIDCodec.uuidToIntArray(uuid));
 	}
 
 	public static void removeTag(ItemStack stack, String key) {
@@ -172,7 +188,7 @@ public class NBTHelper {
 		CompoundNBT tag = parentTag.get();
 		Map<K, V> map = new HashMap<>();
 
-		for (String tagName : tag.keySet()) {
+		for (String tagName : tag.getAllKeys()) {
 			map.put(getKey.apply(tagName), getValue.apply(tagName, tag.get(tagName)));
 		}
 

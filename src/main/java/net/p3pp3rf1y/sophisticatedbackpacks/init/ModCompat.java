@@ -9,7 +9,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks.CraftingTweaks
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.inventorysorter.InventorySorterCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.JeiCompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.quark.QuarkCompat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,6 @@ public class ModCompat {
 		compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new);
 		compatFactories.put(CompatModIds.JEI, () -> JeiCompat::new);
 		compatFactories.put(CompatModIds.CRAFTING_TWEAKS, () -> CraftingTweaksCompat::new);
-		compatFactories.put(CompatModIds.QUARK, () -> QuarkCompat::new);
 	}
 
 	public static void initCompats() {

@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.PlayDiscMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.SoundStopNotificationMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.StopDiscPlaybackMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankClickMessage;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -27,14 +28,15 @@ public class PacketHandler {
 	private static final String PROTOCOL = "1";
 	private static int idx = 0;
 
+	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
 	public static void init() {
 		networkWrapper = NetworkRegistry.newSimpleChannel(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "channel"),
 				() -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
 
 		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::encode, BackpackOpenMessage::decode, BackpackOpenMessage::onMessage);
-		registerMessage(ServerBackpackDataMessage.class, ServerBackpackDataMessage::encode, ServerBackpackDataMessage::decode, ServerBackpackDataMessage::onMessage);
+		registerMessage(SyncContainerClientDataMessage.class, SyncContainerClientDataMessage::encode, SyncContainerClientDataMessage::decode, SyncContainerClientDataMessage::onMessage);
 		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
-		registerMessage(RequestBackpackContentsMessage.class, RequestBackpackContentsMessage::encode, RequestBackpackContentsMessage::decode, RequestBackpackContentsMessage::onMessage);
+		registerMessage(RequestBackpackInventoryContentsMessage.class, RequestBackpackInventoryContentsMessage::encode, RequestBackpackInventoryContentsMessage::decode, RequestBackpackInventoryContentsMessage::onMessage);
 		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::encode, BackpackContentsMessage::decode, BackpackContentsMessage::onMessage);
 		registerMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::encode, InventoryInteractionMessage::decode, InventoryInteractionMessage::onMessage);
 		registerMessage(TransferFullSlotMessage.class, TransferFullSlotMessage::encode, TransferFullSlotMessage::decode, TransferFullSlotMessage::onMessage);
@@ -46,6 +48,10 @@ public class PacketHandler {
 		registerMessage(SoundStopNotificationMessage.class, SoundStopNotificationMessage::encode, SoundStopNotificationMessage::decode, SoundStopNotificationMessage::onMessage);
 		registerMessage(BlockToolSwapMessage.class, BlockToolSwapMessage::encode, BlockToolSwapMessage::decode, BlockToolSwapMessage::onMessage);
 		registerMessage(EntityToolSwapMessage.class, EntityToolSwapMessage::encode, EntityToolSwapMessage::decode, EntityToolSwapMessage::onMessage);
+		registerMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::encode, SyncClientInfoMessage::decode, SyncClientInfoMessage::onMessage);
+		registerMessage(TankClickMessage.class, TankClickMessage::encode, TankClickMessage::decode, TankClickMessage::onMessage);
+		registerMessage(SyncPlayerSettingsMessage.class, SyncPlayerSettingsMessage::encode, SyncPlayerSettingsMessage::decode, SyncPlayerSettingsMessage::onMessage);
+		registerMessage(BackpackCloseMessage.class, (backpackCloseMessage, packetBuffer) -> {}, packetBuffer -> new BackpackCloseMessage(), (backpackCloseMessage, contextSupplier) -> BackpackCloseMessage.onMessage(contextSupplier));
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -58,12 +64,12 @@ public class PacketHandler {
 	}
 
 	public static <M> void sendToClient(ServerPlayerEntity player, M message) {
-		networkWrapper.sendTo(message, player.connection.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+		networkWrapper.sendTo(message, player.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
 	}
 
 	public static <M> void sendToAllNear(ServerWorld world, RegistryKey<World> dimension, Vector3d position, int range, M message) {
-		world.getPlayers().forEach(player -> {
-			if (player.world.getDimensionKey() == dimension && player.getDistanceSq(position) <= range * range) {
+		world.players().forEach(player -> {
+			if (player.level.dimension() == dimension && player.distanceToSqr(position) <= range * range) {
 				sendToClient(player, message);
 			}
 		});

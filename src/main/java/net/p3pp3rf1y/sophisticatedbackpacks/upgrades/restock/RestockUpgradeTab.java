@@ -1,16 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilteredUpgradeContainer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgrade;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.TranslationHelper.translUpgradeTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgrade;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeTooltip;
 
 public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> {
 	protected ContentsFilterControl filterLogicControl;
@@ -26,8 +25,7 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 
 	public static class Basic extends RestockUpgradeTab {
 		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("restock")),
-					new TranslationTextComponent(translUpgradeTooltip("restock")));
+			super(upgradeContainer, position, screen, translUpgrade("restock"), translUpgradeTooltip("restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.restockUpgrade.slotsInRow.get()));
 		}
@@ -35,8 +33,7 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 
 	public static class Advanced extends RestockUpgradeTab {
 		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, new TranslationTextComponent(translUpgrade("advanced_restock")),
-					new TranslationTextComponent(translUpgradeTooltip("advanced_restock")));
+			super(upgradeContainer, position, screen, translUpgrade("advanced_restock"), translUpgradeTooltip("advanced_restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedRestockUpgrade.slotsInRow.get()));
 		}

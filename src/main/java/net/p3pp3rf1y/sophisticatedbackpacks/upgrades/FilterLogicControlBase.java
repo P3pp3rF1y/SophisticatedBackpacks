@@ -3,12 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
 
@@ -76,8 +76,8 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {
 		int upgradeSlotNumber = 0;
 		for (S slot : container.getFilterSlots()) {
-			slot.xPos = x - screenGuiLeft + 1 + (upgradeSlotNumber % slotsPerRow) * 18;
-			slot.yPos = y - screenGuiTop + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
+			slot.x = x - screenGuiLeft + 1 + (upgradeSlotNumber % slotsPerRow) * 18;
+			slot.y = y - screenGuiTop + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
 			upgradeSlotNumber++;
 		}
 	}

@@ -22,12 +22,12 @@ public class InventoryInteractionMessage {
 	}
 
 	public static void encode(InventoryInteractionMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeLong(msg.pos.toLong());
-		packetBuffer.writeEnumValue(msg.face);
+		packetBuffer.writeLong(msg.pos.asLong());
+		packetBuffer.writeEnum(msg.face);
 	}
 
 	public static InventoryInteractionMessage decode(PacketBuffer packetBuffer) {
-		return new InventoryInteractionMessage(BlockPos.fromLong(packetBuffer.readLong()), packetBuffer.readEnumValue(Direction.class));
+		return new InventoryInteractionMessage(BlockPos.of(packetBuffer.readLong()), packetBuffer.readEnum(Direction.class));
 	}
 
 	static void onMessage(InventoryInteractionMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -41,7 +41,7 @@ public class InventoryInteractionMessage {
 			return;
 		}
 		PlayerInventoryProvider.runOnBackpacks(sender, (backpack, inventoryName, slot) -> {
-			InventoryInteractionHelper.tryInventoryInteraction(msg.pos, sender.world, backpack, msg.face, sender);
+			InventoryInteractionHelper.tryInventoryInteraction(msg.pos, sender.level, backpack, msg.face, sender);
 			sender.swing(Hand.MAIN_HAND, true);
 			return true;
 		});

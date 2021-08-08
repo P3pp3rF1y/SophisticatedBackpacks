@@ -17,7 +17,7 @@ public enum DepositFilterType implements IStringSerializable {
 	}
 
 	@Override
-	public String getString() {
+	public String getSerializedName() {
 		return name;
 	}
 
@@ -31,7 +31,7 @@ public enum DepositFilterType implements IStringSerializable {
 	static {
 		ImmutableMap.Builder<String, DepositFilterType> builder = new ImmutableMap.Builder<>();
 		for (DepositFilterType value : values()) {
-			builder.put(value.getString(), value);
+			builder.put(value.getSerializedName(), value);
 		}
 		NAME_VALUES = builder.build();
 		VALUES = values();

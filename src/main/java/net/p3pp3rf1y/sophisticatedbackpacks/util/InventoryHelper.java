@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -36,14 +36,23 @@ public class InventoryHelper {
 	private InventoryHelper() {}
 
 	public static boolean hasItem(IItemHandler inventory, Predicate<ItemStack> matches) {
-		int slots = inventory.getSlots();
-		for (int slot = 0; slot < slots; slot++) {
-			ItemStack slotStack = inventory.getStackInSlot(slot);
-			if (!slotStack.isEmpty() && matches.test(slotStack)) {
-				return true;
+		AtomicBoolean result = new AtomicBoolean(false);
+		iterate(inventory, (slot, stack) -> {
+			if (!stack.isEmpty() && matches.test(stack)) {
+				result.set(true);
 			}
-		}
-		return false;
+		}, result::get);
+		return result.get();
+	}
+
+	public static Set<Integer> getItemSlots(IItemHandler inventory, Predicate<ItemStack> matches) {
+		Set<Integer> slots = new HashSet<>();
+		iterate(inventory, (slot, stack) -> {
+			if (!stack.isEmpty() && matches.test(stack)) {
+				slots.add(slot);
+			}
+		});
+		return slots;
 	}
 
 	public static void copyTo(IItemHandlerModifiable handlerA, IItemHandlerModifiable handlerB) {
@@ -218,21 +227,6 @@ public class InventoryHelper {
 		}
 	}
 
-	public static void moveBetweenInventories(IItemHandler extractFromHandler, IItemHandler insertIntoHandler, ItemStack filter, int count) {
-		ItemStack toMove = filter.copy();
-		toMove.setCount(count);
-		ItemStack extracted = extractFromInventory(toMove, extractFromHandler, true);
-		if (extracted.isEmpty()) {
-			return;
-		}
-		ItemStack remaining = insertIntoInventory(extracted, insertIntoHandler, true);
-		if (remaining.getCount() == extracted.getCount()) {
-			return;
-		}
-		toMove.setCount(extracted.getCount() - remaining.getCount());
-		insertIntoInventory(extractFromInventory(toMove, extractFromHandler, false), insertIntoHandler, false);
-	}
-
 	public static boolean isEmpty(IItemHandler itemHandler) {
 		int slots = itemHandler.getSlots();
 		for (int slot = 0; slot < slots; slot++) {
@@ -259,14 +253,18 @@ public class InventoryHelper {
 			}
 		}
 		if (!ret.isEmpty()) {
-			player.dropItem(ret, true);
+			player.drop(ret, true);
 		}
 	}
 
 	static Map<ItemStackKey, Integer> getCompactedStacks(IItemHandler handler) {
+		return getCompactedStacks(handler, new HashSet<>());
+	}
+
+	static Map<ItemStackKey, Integer> getCompactedStacks(IItemHandler handler, Set<Integer> ignoreSlots) {
 		Map<ItemStackKey, Integer> ret = new HashMap<>();
 		iterate(handler, (slot, stack) -> {
-			if (stack.isEmpty()) {
+			if (stack.isEmpty() || ignoreSlots.contains(slot)) {
 				return;
 			}
 			ItemStackKey itemStackKey = new ItemStackKey(stack);
@@ -348,51 +346,4 @@ public class InventoryHelper {
 		stacks.addAll(list);
 		Collections.shuffle(stacks, rand);
 	}
-
-	public static final IInventory NOOP_INVENTORY = new IInventory() {
-		@Override
-		public int getSizeInventory() {
-			return 0;
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return false;
-		}
-
-		@Override
-		public ItemStack getStackInSlot(int index) {
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public ItemStack decrStackSize(int index, int count) {
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public ItemStack removeStackFromSlot(int index) {
-			return ItemStack.EMPTY;
-		}
-
-		@Override
-		public void setInventorySlotContents(int index, ItemStack stack) {
-			//noop
-		}
-
-		@Override
-		public void markDirty() {
-			//noop
-		}
-
-		@Override
-		public boolean isUsableByPlayer(PlayerEntity player) {
-			return false;
-		}
-
-		@Override
-		public void clear() {
-			//noop
-		}
-	};
 }

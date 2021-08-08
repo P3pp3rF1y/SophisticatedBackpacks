@@ -39,9 +39,9 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		for (slot = 0; slot < upgradeWrapper.getInventory().getSlots(); slot++) {
 			slots.add(new SlotSuppliedHandler(upgradeWrapper::getInventory, slot, -100, -100) {
 				@Override
-				public void onSlotChanged() {
-					super.onSlotChanged();
-					updateCraftingResult(player.world, player, craftMatrix, craftResult, craftingResultSlot);
+				public void setChanged() {
+					super.setChanged();
+					updateCraftingResult(player.level, player, craftMatrix, craftResult, craftingResultSlot);
 				}
 			});
 		}
@@ -49,36 +49,36 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
 			@Override
 			public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
-				onCrafting(stack);
+				checkTakeAchievements(stack);
 				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
 				NonNullList<ItemStack> nonnulllist;
-				if (lastRecipe != null && lastRecipe.matches(craftMatrix, player.world)) {
+				if (lastRecipe != null && lastRecipe.matches(craftMatrix, player.level)) {
 					nonnulllist = lastRecipe.getRemainingItems(craftMatrix);
 				} else {
-					nonnulllist = craftMatrix.stackList;
+					nonnulllist = craftMatrix.items;
 				}
 				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
 				for (int i = 0; i < nonnulllist.size(); ++i) {
-					ItemStack itemstack = craftMatrix.getStackInSlot(i);
+					ItemStack itemstack = craftMatrix.getItem(i);
 					ItemStack itemstack1 = nonnulllist.get(i);
 					if (!itemstack.isEmpty()) {
-						craftMatrix.decrStackSize(i, 1);
-						itemstack = craftMatrix.getStackInSlot(i);
+						craftMatrix.removeItem(i, 1);
+						itemstack = craftMatrix.getItem(i);
 					}
 
 					if (!itemstack1.isEmpty()) {
 						if (itemstack.isEmpty()) {
-							craftMatrix.setInventorySlotContents(i, itemstack1);
-						} else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1)) {
+							craftMatrix.setItem(i, itemstack1);
+						} else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
 							itemstack1.grow(itemstack.getCount());
-							craftMatrix.setInventorySlotContents(i, itemstack1);
-						} else if (!player.inventory.addItemStackToInventory(itemstack1)) {
-							player.dropItem(itemstack1, false);
+							craftMatrix.setItem(i, itemstack1);
+						} else if (!player.inventory.add(itemstack1)) {
+							player.drop(itemstack1, false);
 						}
 					}
-					if (thePlayer.openContainer instanceof BackpackContainer) {
+					if (thePlayer.containerMenu instanceof BackpackContainer) {
 						Slot slot = slots.get(i);
-						((BackpackContainer) thePlayer.openContainer).setSlotStackToUpdate(slot.slotNumber, slot.getStack());
+						((BackpackContainer) thePlayer.containerMenu).setSlotStackToUpdate(slot.index, slot.getItem());
 					}
 				}
 
@@ -95,32 +95,32 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	}
 
 	private void onCraftMatrixChanged(IInventory iInventory) {
-		updateCraftingResult(player.world, player, craftMatrix, craftResult, craftingResultSlot);
+		updateCraftingResult(player.level, player, craftMatrix, craftResult, craftingResultSlot);
 	}
 
 	private void updateCraftingResult(World world, PlayerEntity player, CraftingInventory inventory, CraftResultInventory inventoryResult, CraftingResultSlot craftingResultSlot) {
-		if (!world.isRemote) {
+		if (!world.isClientSide) {
 			ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) player;
 			ItemStack itemstack = ItemStack.EMPTY;
 			if (lastRecipe != null && lastRecipe.matches(inventory, world)) {
-				itemstack = lastRecipe.getCraftingResult(inventory);
+				itemstack = lastRecipe.assemble(inventory);
 			} else {
 				//noinspection ConstantConditions - we're on server and for sure in the world so getServer can't return null here
-				Optional<ICraftingRecipe> optional = world.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, inventory, world);
+				Optional<ICraftingRecipe> optional = world.getServer().getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, inventory, world);
 				if (optional.isPresent()) {
 					ICraftingRecipe craftingRecipe = optional.get();
-					if (inventoryResult.canUseRecipe(world, serverplayerentity, craftingRecipe)) {
+					if (inventoryResult.setRecipeUsed(world, serverplayerentity, craftingRecipe)) {
 						lastRecipe = craftingRecipe;
-						itemstack = lastRecipe.getCraftingResult(inventory);
+						itemstack = lastRecipe.assemble(inventory);
 					} else {
 						lastRecipe = null;
 					}
 				}
 			}
 
-			craftingResultSlot.putStack(itemstack);
-			if (serverplayerentity.openContainer instanceof BackpackContainer) {
-				((BackpackContainer) serverplayerentity.openContainer).setSlotStackToUpdate(craftingResultSlot.slotNumber, itemstack);
+			craftingResultSlot.set(itemstack);
+			if (serverplayerentity.containerMenu instanceof BackpackContainer) {
+				((BackpackContainer) serverplayerentity.containerMenu).setSlotStackToUpdate(craftingResultSlot.index, itemstack);
 			}
 		}
 	}
@@ -135,8 +135,8 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	@Override
 	public ItemStack getSlotStackToTransfer(Slot slot) {
 		if (slot == craftingResultSlot) {
-			ItemStack slotStack = slot.getStack();
-			slotStack.getItem().onCreated(slotStack, player.world, player);
+			ItemStack slotStack = slot.getItem();
+			slotStack.getItem().onCraftedBy(slotStack, player.level, player);
 			return slotStack;
 		}
 		return super.getSlotStackToTransfer(slot);
@@ -146,7 +146,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
 		ItemStack remainder = slot.onTake(player, slotStack);
 		if (!remainder.isEmpty()) {
-			player.dropItem(remainder, false);
+			player.drop(remainder, false);
 		}
 	}
 
