@@ -57,6 +57,7 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 			}
 
 		};
+		NBTHelper.getCompound(upgrade, "inventory").ifPresent(inventory::deserializeNBT);
 		energyStored = getEnergyStored(upgrade);
 	}
 
