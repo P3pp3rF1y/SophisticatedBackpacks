@@ -33,8 +33,8 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 	private final Position pos;
 	private final int height;
 	private final BackpackScreen screen;
-	private static final int TOP_BAR_COLOR = 0xaa0000;
-	private static final int BOTTOM_BAR_COLOR = 0xffeb00;
+	private static final int TOP_BAR_COLOR = 0xff1a1a;
+	private static final int BOTTOM_BAR_COLOR = 0xffff40;
 
 	public BatteryInventoryPart(int upgradeSlot, BatteryUpgradeContainer container, Position pos, int height, BackpackScreen screen) {
 		super(upgradeSlot, container);
