@@ -187,6 +187,23 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			renderInfo.reset();
 		}
 
+		initTankRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+		initBatteryRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+	}
+
+	private void initBatteryRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
+		getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IRenderedBatteryUpgrade) {
+				IRenderedBatteryUpgrade batteryWrapper = (IRenderedBatteryUpgrade) wrapper;
+				batteryWrapper.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
+				if (forceUpdateRenderInfo) {
+					batteryWrapper.forceUpdateBatteryRenderInfo();
+				}
+			}
+		});
+	}
+
+	private void initTankRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
 		AtomicBoolean singleTankRight = new AtomicBoolean(false);
 		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
 		int minRightSlot = getSlots() / 2;
@@ -208,13 +225,6 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			}
 			currentTankPos = TankPosition.RIGHT;
 		}
-
-		getWrappersThatImplement(IRenderedBatteryUpgrade.class).forEach(upgrade -> {
-			upgrade.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
-			if (forceUpdateRenderInfo) {
-				upgrade.forceUpdateBatteryRenderInfo();
-			}
-		});
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {
