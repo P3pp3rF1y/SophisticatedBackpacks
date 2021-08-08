@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
 import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -34,9 +33,8 @@ public class TankUpgradeItem extends UpgradeItemBase<TankUpgradeWrapper> {
 			return new UpgradeSlotChangeResult.Fail(translError("add.two_tank_upgrades_present"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
 		}
 
-		int backpackStackMultiplier = TankUpgradeWrapper.getAdjustedStackMultiplier(backpackWrapper);
-		int multiplierRequired = (int) Math.ceil((float) TankUpgradeWrapper.getContents(upgradeStack).getAmount() / (Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows() * backpackStackMultiplier));
-		if (multiplierRequired / backpackStackMultiplier > 1) {
+		int multiplierRequired = (int) Math.ceil((float) TankUpgradeWrapper.getContents(upgradeStack).getAmount() / TankUpgradeWrapper.getTankCapacity(backpackWrapper));
+		if (multiplierRequired > 1) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.tank_capacity_high", multiplierRequired), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 

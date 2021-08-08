@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery;
 
 import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -14,7 +13,7 @@ import java.util.Set;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translError;
 
 public class BatteryUpgradeItem extends UpgradeItemBase<BatteryUpgradeWrapper> {
-	public static UpgradeType<BatteryUpgradeWrapper> TYPE = new UpgradeType<>(BatteryUpgradeWrapper::new);
+	public static final UpgradeType<BatteryUpgradeWrapper> TYPE = new UpgradeType<>(BatteryUpgradeWrapper::new);
 
 	@Override
 	public UpgradeType<BatteryUpgradeWrapper> getType() {
@@ -39,9 +38,8 @@ public class BatteryUpgradeItem extends UpgradeItemBase<BatteryUpgradeWrapper> {
 			return new UpgradeSlotChangeResult.Fail(translError("add.battery_exists"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
 		}
 
-		int backpackStackMultiplier = BatteryUpgradeWrapper.getAdjustedStackMultiplier(backpackWrapper);
-		int multiplierRequired = (int) Math.ceil((float) BatteryUpgradeWrapper.getEnergyStored(upgradeStack) / (Config.COMMON.batteryUpgrade.energyPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows() * backpackStackMultiplier));
-		if (multiplierRequired / backpackStackMultiplier > 1) {
+		int multiplierRequired = (int) Math.ceil((float) BatteryUpgradeWrapper.getEnergyStored(upgradeStack) / BatteryUpgradeWrapper.getMaxEnergyStored(backpackWrapper));
+		if (multiplierRequired > 1) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.battery_energy_high", multiplierRequired), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 

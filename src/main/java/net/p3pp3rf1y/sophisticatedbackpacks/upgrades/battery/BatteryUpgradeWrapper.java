@@ -107,8 +107,13 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public int getMaxEnergyStored() {
+		return getMaxEnergyStored(backpackWrapper);
+	}
+
+	public static int getMaxEnergyStored(IBackpackWrapper backpackWrapper) {
 		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
-		return getMaxEnergyBase() * stackMultiplier;
+		int maxEnergyBase = getMaxEnergyBase(backpackWrapper);
+		return Integer.MAX_VALUE / stackMultiplier < maxEnergyBase ? Integer.MAX_VALUE : maxEnergyBase * stackMultiplier;
 	}
 
 	@Override
@@ -125,7 +130,7 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 		return 1 + (int) (Config.COMMON.batteryUpgrade.stackMultiplierRatio.get() * (backpackWrapper.getInventoryHandler().getStackSizeMultiplier() - 1));
 	}
 
-	private int getMaxEnergyBase() {
+	private static int getMaxEnergyBase(IBackpackWrapper backpackWrapper) {
 		return Config.COMMON.batteryUpgrade.energyPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows();
 	}
 
@@ -188,6 +193,6 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 	@Override
 	public int getMinimumMultiplierRequired() {
-		return (int) Math.ceil((float) energyStored / getMaxEnergyBase());
+		return (int) Math.ceil((float) energyStored / getMaxEnergyBase(backpackWrapper));
 	}
 }

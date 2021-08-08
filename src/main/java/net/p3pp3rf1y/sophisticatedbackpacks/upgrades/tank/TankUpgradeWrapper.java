@@ -110,16 +110,21 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	public int getTankCapacity() {
-		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
-		return getBaseCapacity() * stackMultiplier;
+		return getTankCapacity(backpackWrapper);
 	}
 
 	public static int getAdjustedStackMultiplier(IBackpackWrapper backpackWrapper) {
 		return 1 + (int) (Config.COMMON.tankUpgrade.stackMultiplierRatio.get() * (backpackWrapper.getInventoryHandler().getStackSizeMultiplier() - 1));
 	}
 
-	private int getBaseCapacity() {
+	private static int getBaseCapacity(IBackpackWrapper backpackWrapper) {
 		return Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows();
+	}
+
+	public static int getTankCapacity(IBackpackWrapper backpackWrapper) {
+		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
+		int baseCapacity = getBaseCapacity(backpackWrapper);
+		return Integer.MAX_VALUE / stackMultiplier < baseCapacity ? Integer.MAX_VALUE : baseCapacity * stackMultiplier;
 	}
 
 	public IItemHandler getInventory() {
@@ -230,7 +235,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 
 	@Override
 	public int getMinimumMultiplierRequired() {
-		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity());
+		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity(backpackWrapper));
 	}
 
 	@Override
