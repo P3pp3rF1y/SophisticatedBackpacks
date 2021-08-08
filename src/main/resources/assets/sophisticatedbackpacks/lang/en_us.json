@@ -225,6 +225,7 @@
     "gui.sophisticatedbackpacks.error.add.needs_occupied_inventory_slots": "There's an item in at least one of the last %s slots needed for %s",
     "gui.sophisticatedbackpacks.error.add.two_tank_upgrades_present": "There are already two Tank Upgrades in other upgrade slots",
     "gui.sophisticatedbackpacks.error.add.tank_capacity_high": "Backpack can't support this tank upgrade. Upgrade backpack or add stack multiplier to get at least %sx higher capacity",
+    "gui.sophisticatedbackpacks.error.add.battery_energy_high": "Backpack can't support this battery upgrade. Upgrade backpack or add stack multiplier to get at least %sx higher max energy",
     "gui.sophisticatedbackpacks.error.add.battery_exists": "There's already Battery Upgrade in another upgrade slot",
     "commands.sophisticatedbackpacks.list.header": "Backpack Name, Colors, Last Open By, Last Open On",
     "commands.sophisticatedbackpacks.list.cloth_color": "Cloth",

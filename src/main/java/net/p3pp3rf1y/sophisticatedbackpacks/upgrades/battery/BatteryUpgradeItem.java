@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery;
 
 import net.minecraft.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
@@ -36,6 +37,12 @@ public class BatteryUpgradeItem extends UpgradeItemBase<BatteryUpgradeWrapper> {
 
 		if (!errorUpgradeSlots.isEmpty()) {
 			return new UpgradeSlotChangeResult.Fail(translError("add.battery_exists"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
+		}
+
+		int backpackStackMultiplier = BatteryUpgradeWrapper.getAdjustedStackMultiplier(backpackWrapper);
+		int multiplierRequired = (int) Math.ceil((float) BatteryUpgradeWrapper.getEnergyStored(upgradeStack) / (Config.COMMON.batteryUpgrade.energyPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows() * backpackStackMultiplier));
+		if (multiplierRequired / backpackStackMultiplier > 1) {
+			return new UpgradeSlotChangeResult.Fail(translError("add.battery_energy_high", multiplierRequired), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
 
 		return new UpgradeSlotChangeResult.Success();
