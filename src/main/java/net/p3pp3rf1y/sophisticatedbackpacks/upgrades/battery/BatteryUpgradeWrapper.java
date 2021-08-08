@@ -195,4 +195,9 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 	public int getMinimumMultiplierRequired() {
 		return (int) Math.ceil((float) energyStored / getMaxEnergyBase(backpackWrapper));
 	}
+
+	@Override
+	public boolean canBeDisabled() {
+		return false;
+	}
 }
