@@ -115,8 +115,6 @@ public class GuiHelper {
 		bufferbuilder.vertex(matrix, xMax, yMin, 0).color(red, green, blue, alpha).uv(maxU, minV).endVertex();
 		bufferbuilder.vertex(matrix, xMin, yMin, 0).color(red, green, blue, alpha).uv(minU, minV).endVertex();
 		bufferbuilder.end();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
 		WorldVertexBufferUploader.end(bufferbuilder);
 	}
 
