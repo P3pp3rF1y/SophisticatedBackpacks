@@ -1,0 +1,28 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "battery_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "GRG",
+        "RBR",
+        "GRG"
+    ],
+    "key": {
+        "R": {
+            "tag": "forge:storage_blocks/redstone"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "B": {
+            "item": "sophisticatedbackpacks:upgrade_base"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:battery_upgrade"
+    }
+}

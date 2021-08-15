@@ -429,6 +429,16 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion("has_feeding_upgrade", has(ModItems.FEEDING_UPGRADE.get()))
 				.build(consumer);
 
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BATTERY_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("GRG")
+				.patternLine("RBR")
+				.patternLine("GRG")
+				.key('R', Tags.Items.STORAGE_BLOCKS_REDSTONE)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
 		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
