@@ -65,6 +65,7 @@ public class Config {
 		public final FilteredUpgradeConfig depositUpgrade;
 		public final FilteredUpgradeConfig advancedDepositUpgrade;
 		public final FilteredUpgradeConfig feedingUpgrade;
+		public final FilteredUpgradeConfig advancedFeedingUpgrade;
 		public final FilteredUpgradeConfig filterUpgrade;
 		public final FilteredUpgradeConfig advancedFilterUpgrade;
 		public final MagnetUpgradeConfig magnetUpgrade;
@@ -106,6 +107,7 @@ public class Config {
 			depositUpgrade = new FilteredUpgradeConfig(builder, "Deposit Upgrade", "depositUpgrade", 9, 3);
 			advancedDepositUpgrade = new FilteredUpgradeConfig(builder, "Advanced Deposit Upgrade", "advancedDepositUpgrade", 16, 4);
 			feedingUpgrade = new FilteredUpgradeConfig(builder, "Feeding Upgrade", "feedingUpgrade", 9, 3);
+			advancedFeedingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Feeding Upgrade", "advancedFeedingUpgrade", 16, 4);
 			filterUpgrade = new FilteredUpgradeConfig(builder, "Filter Upgrade", "filterUpgrade", 9, 3);
 			advancedFilterUpgrade = new FilteredUpgradeConfig(builder, "Advanced Filter Upgrade", "advancedFilterUpgrade", 16, 4);
 			magnetUpgrade = new MagnetUpgradeConfig(builder, "Magnet Upgrade", "magnetUpgrade", 9, 3, 3);

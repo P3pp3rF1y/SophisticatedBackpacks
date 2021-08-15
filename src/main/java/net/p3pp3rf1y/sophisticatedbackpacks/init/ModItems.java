@@ -58,6 +58,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding.FeedingUpgradeWrapper;
@@ -141,7 +142,9 @@ public class ModItems {
 	public static final RegistryObject<MagnetUpgradeItem> ADVANCED_MAGNET_UPGRADE = ITEMS.register("advanced_magnet_upgrade",
 			() -> new MagnetUpgradeItem(Config.COMMON.advancedMagnetUpgrade.magnetRange::get, Config.COMMON.advancedMagnetUpgrade.filterSlots::get));
 	public static final RegistryObject<FeedingUpgradeItem> FEEDING_UPGRADE = ITEMS.register("feeding_upgrade",
-			FeedingUpgradeItem::new);
+			() -> new FeedingUpgradeItem(Config.COMMON.feedingUpgrade.filterSlots::get));
+	public static final RegistryObject<FeedingUpgradeItem> ADVANCED_FEEDING_UPGRADE = ITEMS.register("advanced_feeding_upgrade",
+			() -> new FeedingUpgradeItem(Config.COMMON.advancedFeedingUpgrade.filterSlots::get));
 	public static final RegistryObject<CompactingUpgradeItem> COMPACTING_UPGRADE = ITEMS.register("compacting_upgrade",
 			() -> new CompactingUpgradeItem(false, Config.COMMON.compactingUpgrade.filterSlots::get));
 	public static final RegistryObject<CompactingUpgradeItem> ADVANCED_COMPACTING_UPGRADE = ITEMS.register("advanced_compacting_upgrade",
@@ -214,7 +217,8 @@ public class ModItems {
 	private static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_ADVANCED_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<MagnetUpgradeWrapper, ContentsFilteredUpgradeContainer<MagnetUpgradeWrapper>> MAGNET_BASIC_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
 	private static final UpgradeContainerType<MagnetUpgradeWrapper, ContentsFilteredUpgradeContainer<MagnetUpgradeWrapper>> MAGNET_ADVANCED_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
-	private static final UpgradeContainerType<FeedingUpgradeWrapper, FilteredUpgradeContainer<FeedingUpgradeWrapper>> FEEDING_TYPE = new UpgradeContainerType<>(FilteredUpgradeContainer::new);
+	private static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> FEEDING_TYPE = new UpgradeContainerType<>(FeedingUpgradeContainer::new);
+	private static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> ADVANCED_FEEDING_TYPE = new UpgradeContainerType<>(FeedingUpgradeContainer::new);
 	private static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
 	private static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> ADVANCED_COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
 	private static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> VOID_TYPE = new UpgradeContainerType<>(VoidUpgradeContainer::new);
@@ -242,6 +246,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(MAGNET_UPGRADE.getId(), MAGNET_BASIC_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_MAGNET_UPGRADE.getId(), MAGNET_ADVANCED_TYPE);
 		UpgradeContainerRegistry.register(FEEDING_UPGRADE.getId(), FEEDING_TYPE);
+		UpgradeContainerRegistry.register(ADVANCED_FEEDING_UPGRADE.getId(), ADVANCED_FEEDING_TYPE);
 		UpgradeContainerRegistry.register(COMPACTING_UPGRADE.getId(), COMPACTING_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_COMPACTING_UPGRADE.getId(), ADVANCED_COMPACTING_TYPE);
 		UpgradeContainerRegistry.register(VOID_UPGRADE.getId(), VOID_TYPE);
@@ -271,7 +276,8 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(FilterUpgradeContainer.ADVANCED_TYPE, FilterUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(MAGNET_BASIC_TYPE, MagnetUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(MAGNET_ADVANCED_TYPE, MagnetUpgradeTab.Advanced::new);
-			UpgradeGuiManager.registerTab(FEEDING_TYPE, FeedingUpgradeTab::new);
+			UpgradeGuiManager.registerTab(FEEDING_TYPE, FeedingUpgradeTab.Basic::new);
+			UpgradeGuiManager.registerTab(ADVANCED_FEEDING_TYPE, FeedingUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(COMPACTING_TYPE, CompactingUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_COMPACTING_TYPE, CompactingUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(VOID_TYPE, VoidUpgradeTab.Basic::new);
