@@ -19,14 +19,17 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.SlotTypePreset;
+import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nullable;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -35,21 +38,30 @@ public class CuriosCompat implements ICompat {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.addListener(this::sendImc);
 		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
-		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS,
-				player -> getFromBackStackHandler(player, ICurioStacksHandler::getSlots, 0),
-				(player, slot) -> getFromBackStackHandler(player, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				(player, slot, stack) -> runOnBackStackHandler(player, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true, true
-		);
+		PlayerInventoryProvider.setPlayerInventoryHandlerInitCallback(() -> {
+			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
+
+			for (ISlotType slotType : CuriosApi.getSlotHelper().getSlotTypes()) {
+				String identifier = slotType.getIdentifier();
+				if (identifier.equals(SlotTypePreset.CURIO.getIdentifier()) || backpackCurioTags.contains(identifier)) {
+					PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
+							player -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
+							(player, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
+							(player, slot, stack) -> runOnBackStackHandler(player, identifier, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true, true
+					);
+				}
+			}
+		});
 	}
 
-	public static <T> T getFromBackStackHandler(LivingEntity livingEntity, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
+	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
 		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity)
-				.map(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
 	}
 
-	private void runOnBackStackHandler(PlayerEntity player, Consumer<ICurioStacksHandler> runOnHandler) {
+	private void runOnBackStackHandler(PlayerEntity player, String identifier, Consumer<ICurioStacksHandler> runOnHandler) {
 		CuriosApi.getCuriosHelper().getCuriosHandler(player)
-				.ifPresent(h -> h.getStacksHandler(SlotTypePreset.BACK.getIdentifier()).ifPresent(runOnHandler));
+				.ifPresent(h -> h.getStacksHandler(identifier).ifPresent(runOnHandler));
 	}
 
 	private void sendImc(InterModEnqueueEvent evt) {
