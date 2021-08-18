@@ -70,8 +70,8 @@ public class TranslationHelper {
 		return UPGRADE_BUTTONS_PREFIX + buttonName;
 	}
 
-	public static String translUpgradeItemTooltip(String upgradeName) {
-		return ITEM_UPGRADE_PREFIX + upgradeName + TOOLTIP_SUFFIX;
+	public static String translItemTooltip(String itemName) {
+		return ITEM_UPGRADE_PREFIX + itemName + TOOLTIP_SUFFIX;
 	}
 
 	public static List<StringTextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters, TextFormatting... textFormattings) {
