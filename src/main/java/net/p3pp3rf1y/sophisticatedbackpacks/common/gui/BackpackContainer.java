@@ -497,7 +497,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 				} else {
 					return ItemStack.EMPTY;
 				}
-			} else if (!slotStack.isEmpty() && slot.mayPickup(player)) {
+			} else if ((player.inventory.getCarried().isEmpty() || slot.mayPlace(player.inventory.getCarried())) && !slotStack.isEmpty() && slot.mayPickup(player)) {
 				int k2 = dragType == 0 ? Math.min(slotStack.getCount(), slotStack.getMaxStackSize()) : Math.min(slotStack.getMaxStackSize() + 1, slotStack.getCount() + 1) / 2;
 				int columnsTaken = ((IBackpackUpgradeItem<?>) slotStack.getItem()).getInventoryColumnsTaken();
 				ItemStack result = ItemStack.EMPTY;
