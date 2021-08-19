@@ -374,7 +374,9 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	}
 
 	private boolean mergeSlotStack(Slot slot, int index, ItemStack slotStack, boolean transferMaxStackSizeFromSource) {
-		if (isBackpackInventoryOrUpgradeSlot(index)) {
+		if (isUpgradeSlot(index)) {
+			return mergeStackToBackpack(slotStack) || mergeStackToPlayersInventory(slotStack, true);
+		} else if (isBackpackInventorySlot(index)) {
 			if (shouldShiftClickIntoOpenTabFirst()) {
 				return mergeStackToOpenUpgradeTab(slotStack, transferMaxStackSizeFromSource) || mergeStackToPlayersInventory(slotStack, transferMaxStackSizeFromSource);
 			}
@@ -430,10 +432,6 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	private boolean isUpgradeSettingsSlot(int index) {
 		return index >= getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
-	}
-
-	private boolean isBackpackInventoryOrUpgradeSlot(int index) {
-		return isBackpackInventorySlot(index) || isUpgradeSlot(index);
 	}
 
 	private boolean isBackpackInventorySlot(int index) {
