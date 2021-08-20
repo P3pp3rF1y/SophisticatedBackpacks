@@ -19,7 +19,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper.CompactingShape;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 	private void compactSlot(IItemHandler inventoryHandler, int slot) {
 		ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 
-		if (slotStack.hasTag() || !filterLogic.matchesFilter(slotStack)) {
+		if (slotStack.isEmpty() || slotStack.hasTag() || !filterLogic.matchesFilter(slotStack)) {
 			return;
 		}
 
@@ -67,14 +66,13 @@ public class CompactingUpgradeWrapper extends UpgradeWrapperBase<CompactingUpgra
 
 	private void tryCompacting(IItemHandler inventoryHandler, Item item, int width, int height) {
 		int totalCount = width * height;
-		List<ItemStack> remainingItems = new ArrayList<>();
-		ItemStack result = RecipeHelper.getCraftingResultAndRemainingItems(item, width, height, remainingItems);
-		if (!result.isEmpty()) {
+		RecipeHelper.CompactingResult compactingResult = RecipeHelper.getCompactingResult(item, width, height);
+		if (!compactingResult.getResult().isEmpty()) {
 			ItemStack extractedStack = InventoryHelper.extractFromInventory(item, totalCount, inventoryHandler, true);
-			while (extractedStack.getCount() == totalCount && fitsResultAndRemainingItems(inventoryHandler, remainingItems, result)) {
+			while (extractedStack.getCount() == totalCount && fitsResultAndRemainingItems(inventoryHandler, compactingResult.getRemainingItems(), compactingResult.getResult())) {
 				InventoryHelper.extractFromInventory(item, totalCount, inventoryHandler, false);
-				InventoryHelper.insertIntoInventory(result, inventoryHandler, false);
-				InventoryHelper.insertIntoInventory(remainingItems, inventoryHandler, false);
+				InventoryHelper.insertIntoInventory(compactingResult.getResult(), inventoryHandler, false);
+				InventoryHelper.insertIntoInventory(compactingResult.getRemainingItems(), inventoryHandler, false);
 				extractedStack = InventoryHelper.extractFromInventory(item, totalCount, inventoryHandler, true);
 			}
 		}
