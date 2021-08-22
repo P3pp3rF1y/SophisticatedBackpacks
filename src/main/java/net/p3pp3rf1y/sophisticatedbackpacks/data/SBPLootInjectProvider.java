@@ -33,32 +33,32 @@ public class SBPLootInjectProvider implements IDataProvider {
 	}
 
 	@Override
-	public void act(DirectoryCache cache) throws IOException {
+	public void run(DirectoryCache cache) throws IOException {
 		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
-		tables.put(LootTables.CHESTS_SIMPLE_DUNGEON, getLootTable(92,
+		tables.put(LootTables.SIMPLE_DUNGEON, getLootTable(92,
 				getItemLootEntry(ModItems.BACKPACK.get(), 4),
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 2),
 				getItemLootEntry(ModItems.PICKUP_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_ABANDONED_MINESHAFT, getLootTable(89,
+		tables.put(LootTables.ABANDONED_MINESHAFT, getLootTable(89,
 				getItemLootEntry(ModItems.BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
 				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_DESERT_PYRAMID, getLootTable(89,
+		tables.put(LootTables.DESERT_PYRAMID, getLootTable(89,
 				getItemLootEntry(ModItems.BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
 				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_SHIPWRECK_TREASURE, getLootTable(92,
+		tables.put(LootTables.SHIPWRECK_TREASURE, getLootTable(92,
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
 				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_WOODLAND_MANSION, getLootTable(92,
+		tables.put(LootTables.WOODLAND_MANSION, getLootTable(92,
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
 				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_NETHER_BRIDGE, getLootTable(90,
+		tables.put(LootTables.NETHER_BRIDGE, getLootTable(90,
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
@@ -66,14 +66,14 @@ public class SBPLootInjectProvider implements IDataProvider {
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
-		tables.put(LootTables.CHESTS_END_CITY_TREASURE, getLootTable(90,
+		tables.put(LootTables.END_CITY_TREASURE, getLootTable(90,
 				getItemLootEntry(ModItems.DIAMOND_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
 
 		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
 			Path path = getPath(generator.getOutputFolder(), e.getKey());
-			IDataProvider.save(GSON, cache, LootTableManager.toJson(e.getValue().setParameterSet(LootParameterSets.CHEST).build()), path);
+			IDataProvider.save(GSON, cache, LootTableManager.serialize(e.getValue().setParamSet(LootParameterSets.CHEST).build()), path);
 		}
 	}
 
@@ -87,15 +87,15 @@ public class SBPLootInjectProvider implements IDataProvider {
 	}
 
 	private LootEntry.Builder<?> getItemLootEntry(Item item, int weight) {
-		return ItemLootEntry.builder(item).weight(weight);
+		return ItemLootEntry.lootTableItem(item).setWeight(weight);
 	}
 
 	private static LootTable.Builder getLootTable(int emptyWeight, LootEntry.Builder<?>... entries) {
-		LootPool.Builder pool = LootPool.builder().name("main").rolls(ConstantRange.of(1));
+		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantRange.exactly(1));
 		for (LootEntry.Builder<?> entry : entries) {
-			pool.addEntry(entry);
+			pool.add(entry);
 		}
-		pool.addEntry(EmptyLootEntry.func_216167_a().weight(emptyWeight));
-		return LootTable.builder().addLootPool(pool);
+		pool.add(EmptyLootEntry.emptyItem().setWeight(emptyWeight));
+		return LootTable.lootTable().withPool(pool);
 	}
 }

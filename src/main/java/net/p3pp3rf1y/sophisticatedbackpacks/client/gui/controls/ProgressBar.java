@@ -39,7 +39,7 @@ public class ProgressBar extends Widget {
 		} else if (dir == ProgressDirection.LEFT_RIGHT) {
 			width = (int) (width * progress);
 		}
-		minecraft.getTextureManager().bindTexture(progressTexture.getTextureName());
+		minecraft.getTextureManager().bind(progressTexture.getTextureName());
 		blit(matrixStack, x, y + yOffset, progressTexture.getU(), (float) progressTexture.getV() + yOffset, width, height, progressTexture.getTextureWidth(), progressTexture.getTextureHeight());
 	}
 

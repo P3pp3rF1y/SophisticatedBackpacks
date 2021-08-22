@@ -10,19 +10,20 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
@@ -36,26 +37,26 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
 		backpackWrapper.setBackpackSaveHandler(() -> {
-			markDirty();
+			setChanged();
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
 		});
 	}
 
 	@Override
-	public void read(BlockState state, CompoundNBT nbt) {
-		super.read(state, nbt);
+	public void load(BlockState state, CompoundNBT nbt) {
+		super.load(state, nbt);
 		setBackpackFromNbt(nbt);
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	private void setBackpackFromNbt(CompoundNBT nbt) {
-		setBackpack(ItemStack.read(nbt.getCompound("backpackData")));
+		setBackpack(ItemStack.of(nbt.getCompound("backpackData")));
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound) {
-		CompoundNBT ret = super.write(compound);
+	public CompoundNBT save(CompoundNBT compound) {
+		CompoundNBT ret = super.save(compound);
 		writeBackpack(ret);
 		return ret;
 	}
@@ -63,7 +64,7 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	private void writeBackpack(CompoundNBT ret) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
 		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
-		ret.put("backpackData", backpackCopy.write(new CompoundNBT()));
+		ret.put("backpackData", backpackCopy.save(new CompoundNBT()));
 	}
 
 	@Override
@@ -79,12 +80,12 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		CompoundNBT updateTag = getUpdateTag();
 		updateTag.putBoolean("updateBlockRender", updateBlockRender);
 		updateBlockRender = true;
-		return new SUpdateTileEntityPacket(pos, 1, updateTag);
+		return new SUpdateTileEntityPacket(worldPosition, 1, updateTag);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		CompoundNBT tag = pkt.getNbtCompound();
+		CompoundNBT tag = pkt.getTag();
 		setBackpackFromNbt(tag);
 		if (tag.getBoolean("updateBlockRender")) {
 			WorldHelper.notifyBlockUpdate(this);
@@ -98,10 +99,10 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	@Override
 	public void tick() {
 		//noinspection ConstantConditions - world is always non null at this point
-		if (world.isRemote) {
+		if (level.isClientSide) {
 			return;
 		}
-		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, world, getPos()));
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, getBlockPos()));
 	}
 
 	@Override
@@ -109,24 +110,28 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
 		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().getFluidHandler()).cast();
+			return getBackpackWrapper().getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
+		} else if (cap == CapabilityEnergy.ENERGY) {
+			return getBackpackWrapper().getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
 		}
 		return super.getCapability(cap, side);
 	}
 
 	public void refreshRenderState() {
 		BlockState state = getBlockState();
-		state = state.with(LEFT_TANK, false);
-		state = state.with(RIGHT_TANK, false);
-		for (TankPosition pos : backpackWrapper.getRenderInfo().getTankRenderInfos().keySet()) {
+		state = state.setValue(LEFT_TANK, false);
+		state = state.setValue(RIGHT_TANK, false);
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		for (TankPosition pos : renderInfo.getTankRenderInfos().keySet()) {
 			if (pos == TankPosition.LEFT) {
-				state = state.with(LEFT_TANK, true);
+				state = state.setValue(LEFT_TANK, true);
 			} else if (pos == TankPosition.RIGHT) {
-				state = state.with(RIGHT_TANK, true);
+				state = state.setValue(RIGHT_TANK, true);
 			}
 		}
-		world.setBlockState(pos, state);
-		world.notifyNeighborsOfStateChange(pos, state.getBlock());
+		state = state.setValue(BATTERY, renderInfo.getBatteryRenderInfo().isPresent());
+		level.setBlockAndUpdate(worldPosition, state);
+		level.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
 	}
 }

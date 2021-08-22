@@ -31,7 +31,7 @@ public class SBPBlockLootProvider implements IDataProvider {
 	}
 
 	@Override
-	public void act(DirectoryCache cache) throws IOException {
+	public void run(DirectoryCache cache) throws IOException {
 		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
 		tables.put(ModBlocks.BACKPACK.getId(), getBackpack(ModItems.BACKPACK.get()));
@@ -42,7 +42,7 @@ public class SBPBlockLootProvider implements IDataProvider {
 
 		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
 			Path path = getPath(generator.getOutputFolder(), e.getKey());
-			IDataProvider.save(GSON, cache, LootTableManager.toJson(e.getValue().setParameterSet(LootParameterSets.BLOCK).build()), path);
+			IDataProvider.save(GSON, cache, LootTableManager.serialize(e.getValue().setParamSet(LootParameterSets.BLOCK).build()), path);
 		}
 	}
 
@@ -56,8 +56,8 @@ public class SBPBlockLootProvider implements IDataProvider {
 	}
 
 	private static LootTable.Builder getBackpack(BackpackItem item) {
-		LootEntry.Builder<?> entry = ItemLootEntry.builder(item);
-		LootPool.Builder pool = LootPool.builder().name("main").rolls(ConstantRange.of(1)).addEntry(entry).acceptFunction(CopyBackpackDataFunction.builder());
-		return LootTable.builder().addLootPool(pool);
+		LootEntry.Builder<?> entry = ItemLootEntry.lootTableItem(item);
+		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantRange.exactly(1)).add(entry).apply(CopyBackpackDataFunction.builder());
+		return LootTable.lootTable().withPool(pool);
 	}
 }

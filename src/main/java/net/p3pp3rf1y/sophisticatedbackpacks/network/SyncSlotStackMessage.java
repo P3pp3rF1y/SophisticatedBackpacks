@@ -39,9 +39,9 @@ public class SyncSlotStackMessage {
 
 	private static void handleMessage(SyncSlotStackMessage msg) {
 		ClientPlayerEntity player = Minecraft.getInstance().player;
-		if (player == null || !(player.openContainer instanceof BackpackContainer || player.openContainer instanceof SettingsContainer) || player.openContainer.windowId != msg.windowId) {
+		if (player == null || !(player.containerMenu instanceof BackpackContainer || player.containerMenu instanceof SettingsContainer) || player.containerMenu.containerId != msg.windowId) {
 			return;
 		}
-		player.openContainer.putStackInSlot(msg.slotNumber, msg.stack);
+		player.containerMenu.setItem(msg.slotNumber, msg.stack);
 	}
 }

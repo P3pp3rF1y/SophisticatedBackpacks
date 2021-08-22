@@ -18,11 +18,11 @@ public class SyncContainerClientDataMessage {
 	}
 
 	public static void encode(SyncContainerClientDataMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeCompoundTag(msg.data);
+		packetBuffer.writeNbt(msg.data);
 	}
 
 	public static SyncContainerClientDataMessage decode(PacketBuffer packetBuffer) {
-		return new SyncContainerClientDataMessage(packetBuffer.readCompoundTag());
+		return new SyncContainerClientDataMessage(packetBuffer.readNbt());
 	}
 
 	public static void onMessage(SyncContainerClientDataMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -36,8 +36,8 @@ public class SyncContainerClientDataMessage {
 			return;
 		}
 
-		if (sender.openContainer instanceof ISyncedContainer) {
-			ISyncedContainer container = (ISyncedContainer) sender.openContainer;
+		if (sender.containerMenu instanceof ISyncedContainer) {
+			ISyncedContainer container = (ISyncedContainer) sender.containerMenu;
 			container.handleMessage(message.data);
 		}
 	}

@@ -27,12 +27,12 @@ public class Label extends Widget {
 
 	@Override
 	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		minecraft.fontRenderer.drawText(matrixStack, labelText, x, y, color);
+		minecraft.font.draw(matrixStack, labelText, x, y, color);
 	}
 
 	@Override
 	public int getWidth() {
-		return minecraft.fontRenderer.getStringPropertyWidth(labelText);
+		return minecraft.font.width(labelText);
 	}
 
 	@Override

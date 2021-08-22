@@ -26,11 +26,11 @@ public class ServerBackpackSoundHandler {
 	}
 
 	public static void tick(TickEvent.WorldTickEvent event) {
-		if (event.phase != TickEvent.Phase.END || event.world.isRemote()) {
+		if (event.phase != TickEvent.Phase.END || event.world.isClientSide()) {
 			return;
 		}
 		ServerWorld world = (ServerWorld) event.world;
-		RegistryKey<World> dim = world.getDimensionKey();
+		RegistryKey<World> dim = world.dimension();
 		if (lastWorldCheck.computeIfAbsent(dim, key -> world.getGameTime()) > world.getGameTime() - KEEP_ALIVE_CHECK_INTERVAL || !worldBackpackKeepAlive.containsKey(dim)) {
 			return;
 		}
@@ -46,7 +46,7 @@ public class ServerBackpackSoundHandler {
 	}
 
 	public static void updateKeepAlive(UUID backpackUuid, World world, Vector3d position, Runnable onNoLongerRunning) {
-		RegistryKey<World> dim = world.getDimensionKey();
+		RegistryKey<World> dim = world.dimension();
 		if (!worldBackpackKeepAlive.containsKey(dim) || !worldBackpackKeepAlive.get(dim).containsKey(backpackUuid)) {
 			onNoLongerRunning.run();
 			return;
@@ -93,18 +93,18 @@ public class ServerBackpackSoundHandler {
 	}
 
 	public static void startPlayingDisc(ServerWorld serverWorld, BlockPos position, UUID backpackUuid, int discItemId, Runnable onStopHandler) {
-		Vector3d pos = Vector3d.copyCentered(position);
-		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), pos, 128, new PlayDiscMessage(backpackUuid, discItemId, position));
+		Vector3d pos = Vector3d.atCenterOf(position);
+		PacketHandler.sendToAllNear(serverWorld, serverWorld.dimension(), pos, 128, new PlayDiscMessage(backpackUuid, discItemId, position));
 		putKeepAliveInfo(serverWorld, backpackUuid, onStopHandler, pos);
 	}
 
 	public static void startPlayingDisc(ServerWorld serverWorld, Vector3d position, UUID backpackUuid, int entityId, int discItemId, Runnable onStopHandler) {
-		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), position, 128, new PlayDiscMessage(backpackUuid, discItemId, entityId));
+		PacketHandler.sendToAllNear(serverWorld, serverWorld.dimension(), position, 128, new PlayDiscMessage(backpackUuid, discItemId, entityId));
 		putKeepAliveInfo(serverWorld, backpackUuid, onStopHandler, position);
 	}
 
 	private static void putKeepAliveInfo(ServerWorld serverWorld, UUID backpackUuid, Runnable onStopHandler, Vector3d pos) {
-		worldBackpackKeepAlive.computeIfAbsent(serverWorld.getDimensionKey(), dim -> new HashMap<>()).put(backpackUuid, new KeepAliveInfo(onStopHandler, serverWorld.getGameTime(), pos));
+		worldBackpackKeepAlive.computeIfAbsent(serverWorld.dimension(), dim -> new HashMap<>()).put(backpackUuid, new KeepAliveInfo(onStopHandler, serverWorld.getGameTime(), pos));
 	}
 
 	public static void stopPlayingDisc(ServerWorld serverWorld, Vector3d position, UUID backpackUuid) {
@@ -113,13 +113,13 @@ public class ServerBackpackSoundHandler {
 	}
 
 	private static void removeKeepAliveInfo(ServerWorld serverWorld, UUID backpackUuid) {
-		RegistryKey<World> dim = serverWorld.getDimensionKey();
+		RegistryKey<World> dim = serverWorld.dimension();
 		if (worldBackpackKeepAlive.containsKey(dim) && worldBackpackKeepAlive.get(dim).containsKey(backpackUuid)) {
 			worldBackpackKeepAlive.get(dim).remove(backpackUuid).runOnStop();
 		}
 	}
 
 	private static void sendStopMessage(ServerWorld serverWorld, Vector3d position, UUID backpackUuid) {
-		PacketHandler.sendToAllNear(serverWorld, serverWorld.getDimensionKey(), position, 128, new StopDiscPlaybackMessage(backpackUuid));
+		PacketHandler.sendToAllNear(serverWorld, serverWorld.dimension(), position, 128, new StopDiscPlaybackMessage(backpackUuid));
 	}
 }

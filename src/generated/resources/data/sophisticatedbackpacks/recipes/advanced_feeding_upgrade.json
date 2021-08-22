@@ -1,0 +1,31 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "advanced_feeding_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        " D ",
+        "GVG",
+        "RRR"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "V": {
+            "item": "sophisticatedbackpacks:feeding_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:advanced_feeding_upgrade"
+    }
+}

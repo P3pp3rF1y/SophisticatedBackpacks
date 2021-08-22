@@ -41,14 +41,14 @@ public class FilterLogicBase {
 				return false;
 			}
 		} else if (primaryMatch == PrimaryMatch.ITEM) {
-			if (!ItemStack.areItemsEqual(stack, filter)) {
+			if (!ItemStack.isSame(stack, filter)) {
 				return false;
 			}
 		} else if (primaryMatch == PrimaryMatch.TAGS && !InventoryHelper.anyStackTagMatches(stack, filter)) {
 			return false;
 		}
 
-		if (shouldMatchDurability() && stack.getDamage() != filter.getDamage()) {
+		if (shouldMatchDurability() && stack.getDamageValue() != filter.getDamageValue()) {
 			return false;
 		}
 
@@ -77,7 +77,7 @@ public class FilterLogicBase {
 			return false;
 		}
 
-		for (String key : tagA.keySet()) {
+		for (String key : tagA.getAllKeys()) {
 			if (!tagB.contains(key)) {
 				return false;
 			}

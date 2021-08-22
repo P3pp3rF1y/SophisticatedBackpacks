@@ -33,7 +33,7 @@ public class ShapeBasedRecipeBuilder {
 	private final List<String> pattern = new ArrayList<>();
 	private final Map<Character, Ingredient> keyIngredients = Maps.newLinkedHashMap();
 	private final IRecipeSerializer<?> serializer;
-	private final Advancement.Builder advancementBuilder = Advancement.Builder.builder();
+	private final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
 
 	public ShapeBasedRecipeBuilder(IItemProvider itemResult, IRecipeSerializer<?> serializer) {
 		this.itemResult = itemResult.asItem();
@@ -41,7 +41,7 @@ public class ShapeBasedRecipeBuilder {
 	}
 
 	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult) {
-		return shapedRecipe(itemResult, IRecipeSerializer.CRAFTING_SHAPED);
+		return shapedRecipe(itemResult, IRecipeSerializer.SHAPED_RECIPE);
 	}
 
 	public static ShapeBasedRecipeBuilder shapedRecipe(IItemProvider itemResult, IRecipeSerializer<?> serializer) {
@@ -49,11 +49,11 @@ public class ShapeBasedRecipeBuilder {
 	}
 
 	public ShapeBasedRecipeBuilder key(Character symbol, ITag<Item> tagIn) {
-		return key(symbol, Ingredient.fromTag(tagIn));
+		return key(symbol, Ingredient.of(tagIn));
 	}
 
 	public ShapeBasedRecipeBuilder key(Character symbol, IItemProvider itemIn) {
-		return key(symbol, Ingredient.fromItems(itemIn));
+		return key(symbol, Ingredient.of(itemIn));
 	}
 
 	public ShapeBasedRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
@@ -77,7 +77,7 @@ public class ShapeBasedRecipeBuilder {
 	}
 
 	public ShapeBasedRecipeBuilder addCriterion(String name, ICriterionInstance criterion) {
-		advancementBuilder.withCriterion(name, criterion);
+		advancementBuilder.addCriterion(name, criterion);
 		return this;
 	}
 
@@ -87,12 +87,12 @@ public class ShapeBasedRecipeBuilder {
 
 	public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
 		validate(id);
-		advancementBuilder.withParentId(new ResourceLocation("recipes/root")).withCriterion("has_the_recipe", RecipeUnlockedTrigger.create(id)).withRewards(AdvancementRewards.Builder.recipe(id)).withRequirementsStrategy(IRequirementsStrategy.OR);
+		advancementBuilder.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(IRequirementsStrategy.OR);
 		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + getGroup() + "/" + id.getPath()), serializer));
 	}
 
 	private String getGroup() {
-		return itemResult.getGroup() == null ? "" : itemResult.getGroup().getPath();
+		return itemResult.getItemCategory() == null ? "" : itemResult.getItemCategory().getRecipeFolderName();
 	}
 
 	private void validate(ResourceLocation id) {
@@ -144,7 +144,7 @@ public class ShapeBasedRecipeBuilder {
 			conditions.add(new ItemEnabledCondition(itemResult));
 		}
 
-		public void serialize(JsonObject json) {
+		public void serializeRecipeData(JsonObject json) {
 			JsonArray conditionsArray = new JsonArray();
 			conditions.forEach(c -> conditionsArray.add(CraftingHelper.serialize(c)));
 			json.add("conditions", conditionsArray);
@@ -159,7 +159,7 @@ public class ShapeBasedRecipeBuilder {
 			JsonObject jsonobject = new JsonObject();
 
 			for (Map.Entry<Character, Ingredient> entry : key.entrySet()) {
-				jsonobject.add(String.valueOf(entry.getKey()), entry.getValue().serialize());
+				jsonobject.add(String.valueOf(entry.getKey()), entry.getValue().toJson());
 			}
 
 			json.add("key", jsonobject);
@@ -169,21 +169,21 @@ public class ShapeBasedRecipeBuilder {
 			json.add("result", jsonobject1);
 		}
 
-		public IRecipeSerializer<?> getSerializer() {
+		public IRecipeSerializer<?> getType() {
 			return serializer;
 		}
 
-		public ResourceLocation getID() {
+		public ResourceLocation getId() {
 			return id;
 		}
 
 		@Nullable
-		public JsonObject getAdvancementJson() {
-			return advancementBuilder.serialize();
+		public JsonObject serializeAdvancement() {
+			return advancementBuilder.serializeToJson();
 		}
 
 		@Nullable
-		public ResourceLocation getAdvancementID() {
+		public ResourceLocation getAdvancementId() {
 			return advancementId;
 		}
 	}

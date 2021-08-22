@@ -17,11 +17,11 @@ public class SoundStopNotificationMessage {
 	}
 
 	public static void encode(SoundStopNotificationMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeUniqueId(msg.backpackUuid);
+		packetBuffer.writeUUID(msg.backpackUuid);
 	}
 
 	public static SoundStopNotificationMessage decode(PacketBuffer packetBuffer) {
-		return new SoundStopNotificationMessage(packetBuffer.readUniqueId());
+		return new SoundStopNotificationMessage(packetBuffer.readUUID());
 	}
 
 	public static void onMessage(SoundStopNotificationMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -34,6 +34,6 @@ public class SoundStopNotificationMessage {
 		if (sender == null) {
 			return;
 		}
-		ServerBackpackSoundHandler.onSoundStopped((ServerWorld) sender.world, msg.backpackUuid);
+		ServerBackpackSoundHandler.onSoundStopped((ServerWorld) sender.level, msg.backpackUuid);
 	}
 }

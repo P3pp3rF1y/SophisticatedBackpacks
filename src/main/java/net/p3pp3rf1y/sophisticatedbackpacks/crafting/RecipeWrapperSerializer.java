@@ -21,20 +21,20 @@ public class RecipeWrapperSerializer<T extends IRecipe<?>, R extends IRecipe<?> 
 	}
 
 	@Override
-	public R read(ResourceLocation recipeId, JsonObject json) {
-		return initialize.apply(recipeSerializer.read(recipeId, json));
+	public R fromJson(ResourceLocation recipeId, JsonObject json) {
+		return initialize.apply(recipeSerializer.fromJson(recipeId, json));
 	}
 
 	@Nullable
 	@Override
-	public R read(ResourceLocation recipeId, PacketBuffer buffer) {
-		T compose = recipeSerializer.read(recipeId, buffer);
+	public R fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
+		T compose = recipeSerializer.fromNetwork(recipeId, buffer);
 		return compose == null ? null : initialize.apply(compose);
 	}
 
 	@Override
-	public void write(PacketBuffer buffer, R recipe) {
-		recipeSerializer.write(buffer, recipe.getCompose());
+	public void toNetwork(PacketBuffer buffer, R recipe) {
+		recipeSerializer.toNetwork(buffer, recipe.getCompose());
 	}
 }
 

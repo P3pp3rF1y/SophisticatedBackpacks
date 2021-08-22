@@ -61,7 +61,7 @@ public class AccessLogRecord {
 	public CompoundNBT serializeToNBT() {
 		CompoundNBT ret = new CompoundNBT();
 		ret.putString("backpackItemRegistryName", backpackItemRegistryName.toString());
-		ret.putUniqueId("backpackUuid", backpackUuid);
+		ret.putUUID("backpackUuid", backpackUuid);
 		ret.putString("playerName", playerName);
 		ret.putString("backpackName", backpackName);
 		ret.putInt("clothColor", clothColor);
@@ -74,7 +74,7 @@ public class AccessLogRecord {
 	public static AccessLogRecord deserializeFromNBT(CompoundNBT nbt) {
 		return new AccessLogRecord(
 				new ResourceLocation(nbt.getString("backpackItemRegistryName")),
-				nbt.getUniqueId("backpackUuid"),
+				nbt.getUUID("backpackUuid"),
 				nbt.getString("playerName"),
 				nbt.getString("backpackName"),
 				nbt.getInt("clothColor"),

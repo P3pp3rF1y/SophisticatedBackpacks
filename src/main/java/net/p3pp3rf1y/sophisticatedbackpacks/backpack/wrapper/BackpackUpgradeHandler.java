@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
@@ -186,6 +187,23 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 			renderInfo.reset();
 		}
 
+		initTankRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+		initBatteryRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
+	}
+
+	private void initBatteryRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
+		getSlotWrappers().forEach((slot, wrapper) -> {
+			if (wrapper instanceof IRenderedBatteryUpgrade) {
+				IRenderedBatteryUpgrade batteryWrapper = (IRenderedBatteryUpgrade) wrapper;
+				batteryWrapper.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
+				if (forceUpdateRenderInfo) {
+					batteryWrapper.forceUpdateBatteryRenderInfo();
+				}
+			}
+		});
+	}
+
+	private void initTankRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
 		AtomicBoolean singleTankRight = new AtomicBoolean(false);
 		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
 		int minRightSlot = getSlots() / 2;

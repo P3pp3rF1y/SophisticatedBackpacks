@@ -19,8 +19,8 @@ public class CopyBackpackDataFunction extends LootFunction {
 	}
 
 	@Override
-	protected ItemStack doApply(ItemStack stack, LootContext context) {
-		TileEntity te = context.get(LootParameters.BLOCK_ENTITY);
+	protected ItemStack run(ItemStack stack, LootContext context) {
+		TileEntity te = context.getParamOrNull(LootParameters.BLOCK_ENTITY);
 		if (te instanceof BackpackTileEntity) {
 			return ((BackpackTileEntity) te).getBackpackWrapper().getBackpack();
 		}
@@ -29,7 +29,7 @@ public class CopyBackpackDataFunction extends LootFunction {
 	}
 
 	@Override
-	public LootFunctionType getFunctionType() {
+	public LootFunctionType getType() {
 		return ModLoot.COPY_BACKPACK_DATA;
 	}
 
@@ -47,7 +47,7 @@ public class CopyBackpackDataFunction extends LootFunction {
 
 	public static class Builder extends LootFunction.Builder<CopyBackpackDataFunction.Builder> {
 		@Override
-		protected CopyBackpackDataFunction.Builder doCast() {
+		protected CopyBackpackDataFunction.Builder getThis() {
 			return this;
 		}
 

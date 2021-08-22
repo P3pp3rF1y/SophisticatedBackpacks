@@ -19,20 +19,20 @@ public class HighStackCountListener implements IContainerListener {
 	}
 
 	@Override
-	public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList) {
-		PacketHandler.sendToClient(player, new SyncContainerStacksMessage(containerToSend.windowId, itemsList));
-		player.connection.sendPacket(new SSetSlotPacket(-1, -1, player.inventory.getItemStack()));
+	public void refreshContainer(Container containerToSend, NonNullList<ItemStack> itemsList) {
+		PacketHandler.sendToClient(player, new SyncContainerStacksMessage(containerToSend.containerId, itemsList));
+		player.connection.send(new SSetSlotPacket(-1, -1, player.inventory.getCarried()));
 	}
 
 	@Override
-	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
-		if (!(containerToSend.getSlot(slotInd) instanceof CraftingResultSlot) && !player.isChangingQuantityOnly) {
-			PacketHandler.sendToClient(player, new SyncSlotStackMessage(containerToSend.windowId, slotInd, stack));
+	public void slotChanged(Container containerToSend, int slotInd, ItemStack stack) {
+		if (!(containerToSend.getSlot(slotInd) instanceof CraftingResultSlot) && !player.ignoreSlotUpdateHack) {
+			PacketHandler.sendToClient(player, new SyncSlotStackMessage(containerToSend.containerId, slotInd, stack));
 		}
 	}
 
 	@Override
-	public void sendWindowProperty(Container containerIn, int varToUpdate, int newValue) {
+	public void setContainerData(Container containerIn, int varToUpdate, int newValue) {
 		//noop - not used in BackpackContainer
 	}
 }

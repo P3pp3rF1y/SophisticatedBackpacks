@@ -93,25 +93,25 @@ public class SettingsContainer extends Container implements IContextAwareContain
 
 	@Override
 	protected Slot addSlot(Slot slot) {
-		slot.slotNumber = ghostSlots.size();
+		slot.index = ghostSlots.size();
 		ghostSlots.add(slot);
 		ghostItemStacks.add(ItemStack.EMPTY);
 		return slot;
 	}
 
 	@Override
-	public void detectAndSendChanges() {
+	public void broadcastChanges() {
 		for (int i = 0; i < ghostSlots.size(); ++i) {
-			ItemStack itemstack = ghostSlots.get(i).getStack();
+			ItemStack itemstack = ghostSlots.get(i).getItem();
 			ItemStack itemstack1 = ghostItemStacks.get(i);
-			if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
+			if (!ItemStack.matches(itemstack1, itemstack)) {
 				boolean clientStackChanged = !itemstack1.equals(itemstack, true);
 				ItemStack itemstack2 = itemstack.copy();
 				ghostItemStacks.set(i, itemstack2);
 
 				if (clientStackChanged) {
-					for (IContainerListener icontainerlistener : listeners) {
-						icontainerlistener.sendSlotContents(this, i, itemstack2);
+					for (IContainerListener icontainerlistener : containerListeners) {
+						icontainerlistener.slotChanged(this, i, itemstack2);
 					}
 				}
 			}
@@ -124,7 +124,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	public void detectSettingsChangeAndReload() {
-		if (player.world.isRemote) {
+		if (player.level.isClientSide) {
 			backpackWrapper.getContentsUuid().ifPresent(uuid -> {
 				BackpackStorage storage = BackpackStorage.get();
 				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
@@ -135,7 +135,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	private void sendBackpackSettingsToClient() {
-		if (player.world.isRemote) {
+		if (player.level.isClientSide) {
 			return;
 		}
 
@@ -150,12 +150,12 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public void addListener(IContainerListener listener) {
+	public void addSlotListener(IContainerListener listener) {
 		if (listener instanceof ServerPlayerEntity && backpackWrapper.getInventoryHandler().getStackSizeMultiplier() > 1) {
-			super.addListener(new HighStackCountListener((ServerPlayerEntity) listener));
+			super.addSlotListener(new HighStackCountListener((ServerPlayerEntity) listener));
 			return;
 		}
-		super.addListener(listener);
+		super.addSlotListener(listener);
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public boolean canInteractWith(PlayerEntity player) {
+	public boolean stillValid(PlayerEntity player) {
 		return true;
 	}
 
@@ -196,7 +196,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player) {
+	public ItemStack clicked(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player) {
 		return ItemStack.EMPTY;
 	}
 
@@ -222,7 +222,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		}
 
 		@Override
-		public boolean canTakeStack(PlayerEntity playerIn) {
+		public boolean mayPickup(PlayerEntity playerIn) {
 			return false;
 		}
 	}

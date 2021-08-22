@@ -32,8 +32,8 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 	public boolean matches(CraftingInventory inv, World worldIn) {
 		boolean backpackPresent = false;
 		boolean dyePresent = false;
-		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
-			ItemStack slotStack = inv.getStackInSlot(slot);
+		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
+			ItemStack slotStack = inv.getItem(slot);
 			if (slotStack.isEmpty()) {
 				continue;
 			}
@@ -53,12 +53,12 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public ItemStack getCraftingResult(CraftingInventory inv) {
+	public ItemStack assemble(CraftingInventory inv) {
 		Map<Integer, List<DyeColor>> columnDyes = new HashMap<>();
 		Tuple<Integer, ItemStack> columnBackpack = null;
 
-		for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
-			ItemStack slotStack = inv.getStackInSlot(slot);
+		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
+			ItemStack slotStack = inv.getItem(slot);
 			if (slotStack.isEmpty()) {
 				continue;
 			}
@@ -70,7 +70,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 				}
 
 				columnBackpack = new Tuple<>(column, slotStack);
-			} else if (item.isIn(Tags.Items.DYES)) {
+			} else if (item.is(Tags.Items.DYES)) {
 				DyeColor dyeColor = DyeColor.getColor(slotStack);
 				if (dyeColor == null) {
 					return ItemStack.EMPTY;
@@ -131,7 +131,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 		}
 
 		for (DyeColor dye : dyes) {
-			float[] dyeRgb = dye.getColorComponentValues();
+			float[] dyeRgb = dye.getTextureDiffuseColors();
 			int dyeRed = (int) (dyeRgb[0] * 255.0F);
 			int dyeGreen = (int) (dyeRgb[1] * 255.0F);
 			int dyeBlue = (int) (dyeRgb[2] * 255.0F);
@@ -157,7 +157,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return width >= 2 && height >= 1;
 	}
 

@@ -101,13 +101,13 @@ public class SmeltingLogic {
 		if (isCooking() && finishedCooking(world)) {
 			smelt(smeltingRecipe);
 			if (canSmelt(smeltingRecipe)) {
-				setCookTime(world, (int) (smeltingRecipe.getCookTime() * (1 / smeltingSpeedMultiplier)));
+				setCookTime(world, (int) (smeltingRecipe.getCookingTime() * (1 / smeltingSpeedMultiplier)));
 			} else {
 				setIsCooking(false);
 			}
 		} else if (!isCooking()) {
 			setIsCooking(true);
-			setCookTime(world, (int) (smeltingRecipe.getCookTime() * (1 / smeltingSpeedMultiplier)));
+			setCookTime(world, (int) (smeltingRecipe.getCookingTime() * (1 / smeltingSpeedMultiplier)));
 		}
 	}
 
@@ -125,7 +125,7 @@ public class SmeltingLogic {
 		}
 
 		ItemStack input = getCookInput();
-		ItemStack recipeOutput = recipe.getRecipeOutput();
+		ItemStack recipeOutput = recipe.getResultItem();
 		ItemStack output = getCookOutput();
 		if (output.isEmpty()) {
 			setCookOutput(recipeOutput.copy());
@@ -189,14 +189,14 @@ public class SmeltingLogic {
 		if (getCookInput().isEmpty()) {
 			return false;
 		}
-		ItemStack recipeOutput = smeltingRecipe.getRecipeOutput();
+		ItemStack recipeOutput = smeltingRecipe.getResultItem();
 		if (recipeOutput.isEmpty()) {
 			return false;
 		} else {
 			ItemStack output = getCookOutput();
 			if (output.isEmpty()) {
 				return true;
-			} else if (!output.isItemEqual(recipeOutput)) {
+			} else if (!output.sameItem(recipeOutput)) {
 				return false;
 			} else if (output.getCount() + recipeOutput.getCount() <= 64 && output.getCount() + recipeOutput.getCount() <= output.getMaxStackSize()) {
 				return true;
@@ -232,7 +232,7 @@ public class SmeltingLogic {
 				@Override
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
-					upgrade.setTagInfo("smeltingInventory", serializeNBT());
+					upgrade.addTagElement("smeltingInventory", serializeNBT());
 					save();
 					if (slot == COOK_INPUT_SLOT) {
 						smeltingRecipeInitialized = false;

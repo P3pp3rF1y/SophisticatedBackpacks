@@ -37,7 +37,7 @@ public class TankUpgradeTab extends UpgradeSettingsTab<TankUpgradeContainer> {
 	}
 
 	private void positionSlot(Slot slot, int screenGuiLeft, int screenGuiTop, int xOffset) {
-		slot.xPos = x - screenGuiLeft + xOffset;
-		slot.yPos = y - screenGuiTop + 25;
+		slot.x = x - screenGuiLeft + xOffset;
+		slot.y = y - screenGuiTop + 25;
 	}
 }

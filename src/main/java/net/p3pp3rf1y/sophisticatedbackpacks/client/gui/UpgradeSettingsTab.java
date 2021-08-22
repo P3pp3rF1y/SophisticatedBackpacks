@@ -23,7 +23,7 @@ public abstract class UpgradeSettingsTab<C extends UpgradeContainerBase<?, ?>> e
 	protected abstract void moveSlotsToTab();
 
 	protected void moveSlotsOutOfView() {
-		getContainer().getSlots().forEach(slot -> slot.xPos = BackpackScreen.DISABLED_SLOT_X_POS);
+		getContainer().getSlots().forEach(slot -> slot.x = BackpackScreen.DISABLED_SLOT_X_POS);
 	}
 
 	@Override

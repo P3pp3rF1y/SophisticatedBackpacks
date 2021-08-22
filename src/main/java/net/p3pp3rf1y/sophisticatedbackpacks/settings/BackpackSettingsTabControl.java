@@ -29,7 +29,7 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 	public BackpackSettingsTabControl(SettingsScreen screen, Position position) {
 		super(position);
 		addChild(new BackToBackpackTab(new Position(x, getTopY())));
-		screen.getContainer().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
+		screen.getMenu().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
 				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));
 	}
 
@@ -40,7 +40,7 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 
 	public void renderSlotOverlays(MatrixStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
 		List<Integer> colors = new ArrayList<>();
-		settingsTabs.forEach(tab -> tab.getSlotOverlayColor(slot.slotNumber).ifPresent(colors::add));
+		settingsTabs.forEach(tab -> tab.getSlotOverlayColor(slot.index).ifPresent(colors::add));
 		colors.forEach(c -> overlayRenderer.renderSlotOverlay(matrixStack, slot, c));
 	}
 

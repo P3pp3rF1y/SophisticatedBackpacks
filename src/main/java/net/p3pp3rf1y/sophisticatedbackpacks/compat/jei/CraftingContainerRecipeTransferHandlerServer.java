@@ -20,16 +20,16 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	 * Called server-side to actually put the items in place.
 	 */
 	public static void setItems(PlayerEntity player, Map<Integer, Integer> slotIdMap, List<Integer> craftingSlots, List<Integer> inventorySlots, boolean maxTransfer) {
-		if (!(player.openContainer instanceof BackpackContainer)) {
+		if (!(player.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
-		BackpackContainer container = (BackpackContainer) player.openContainer;
+		BackpackContainer container = (BackpackContainer) player.containerMenu;
 
 		// grab items from slots
 		Map<Integer, ItemStack> slotMap = new HashMap<>(slotIdMap.size());
 		for (Map.Entry<Integer, Integer> entry : slotIdMap.entrySet()) {
 			Slot slot = container.getSlot(entry.getValue());
-			final ItemStack slotStack = slot.getStack();
+			final ItemStack slotStack = slot.getItem();
 			if (slotStack.isEmpty()) {
 				return;
 			}
@@ -50,14 +50,14 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		putIntoInventory(player, inventorySlots, container, clearedCraftingItems);
 
 		container.sendSlotUpdates();
-		container.detectAndSendChanges();
+		container.broadcastChanges();
 	}
 
 	private static void putIntoInventory(PlayerEntity player, List<Integer> inventorySlots, BackpackContainer container, List<ItemStack> clearedCraftingItems) {
 		for (ItemStack oldCraftingItem : clearedCraftingItems) {
 			int added = addStack(container, inventorySlots, oldCraftingItem);
-			if (added < oldCraftingItem.getCount() && !player.inventory.addItemStackToInventory(oldCraftingItem)) {
-				player.dropItem(oldCraftingItem, false);
+			if (added < oldCraftingItem.getCount() && !player.inventory.add(oldCraftingItem)) {
+				player.drop(oldCraftingItem, false);
 			}
 		}
 	}
@@ -68,16 +68,16 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		for (int craftingSlotNumberIndex = 0; craftingSlotNumberIndex < craftingSlots.size(); craftingSlotNumberIndex++) {
 			int craftingSlotNumber = craftingSlots.get(craftingSlotNumberIndex);
 			Slot craftingSlot = container.getSlot(craftingSlotNumber);
-			if (!craftingSlot.canTakeStack(player)) {
+			if (!craftingSlot.mayPickup(player)) {
 				continue;
 			}
-			if (craftingSlot.getHasStack()) {
-				ItemStack craftingItem = craftingSlot.decrStackSize(Integer.MAX_VALUE);
+			if (craftingSlot.hasItem()) {
+				ItemStack craftingItem = craftingSlot.remove(Integer.MAX_VALUE);
 				clearedCraftingItems.add(craftingItem);
 			}
 			ItemStack transferItem = toTransfer.get(craftingSlotNumberIndex);
 			if (transferItem != null) {
-				int slotStackLimit = craftingSlot.getItemStackLimit(transferItem);
+				int slotStackLimit = craftingSlot.getMaxStackSize(transferItem);
 				minSlotStackLimit = Math.min(slotStackLimit, minSlotStackLimit);
 			}
 		}
@@ -94,12 +94,12 @@ public class CraftingContainerRecipeTransferHandlerServer {
 			Slot slot = container.getSlot(slotNumber);
 
 			ItemStack stack = entry.getValue();
-			if (slot.isItemValid(stack)) {
+			if (slot.mayPlace(stack)) {
 				if (stack.getCount() > minSlotStackLimit) {
 					ItemStack remainder = stack.split(stack.getCount() - minSlotStackLimit);
 					clearedCraftingItems.add(remainder);
 				}
-				slot.putStack(stack);
+				slot.set(stack);
 			} else {
 				clearedCraftingItems.add(stack);
 			}
@@ -141,7 +141,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 				// Locate a slot that has what we need.
 				final Slot slot = getSlotWithStack(container, requiredStack, craftingSlots, inventorySlots);
 
-				boolean itemFound = (slot != null) && !slot.getStack().isEmpty() && slot.canTakeStack(player);
+				boolean itemFound = (slot != null) && !slot.getItem().isEmpty() && slot.mayPickup(player);
 				ItemStack resultItemStack = result.get(entry.getKey());
 				boolean resultItemStackLimitReached = (resultItemStack != null) && (resultItemStack.getCount() == resultItemStack.getMaxStackSize());
 
@@ -153,7 +153,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 					// slot changes we've made during this set iteration.
 					for (Map.Entry<Slot, ItemStack> slotEntry : originalSlotContents.entrySet()) {
 						ItemStack stack = slotEntry.getValue();
-						slotEntry.getKey().putStack(stack);
+						slotEntry.getKey().set(stack);
 					}
 					break loopSets;
 
@@ -161,11 +161,11 @@ public class CraftingContainerRecipeTransferHandlerServer {
 
 					// Keep a copy of the slot's original contents in case we need to roll back.
 					if (!originalSlotContents.containsKey(slot)) {
-						originalSlotContents.put(slot, slot.getStack().copy());
+						originalSlotContents.put(slot, slot.getItem().copy());
 					}
 
 					// Reduce the size of the found slot.
-					ItemStack removedItemStack = slot.decrStackSize(1);
+					ItemStack removedItemStack = slot.remove(1);
 					foundItemsInSet.put(entry.getKey(), removedItemStack);
 
 					noItemsFound = false;
@@ -210,15 +210,15 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		for (final Integer slotIndex : slotIndexes) {
 			if (slotIndex >= 0 && slotIndex < getTotalSlotsSize(container)) {
 				final Slot slot = container.getSlot(slotIndex);
-				final ItemStack inventoryStack = slot.getStack();
+				final ItemStack inventoryStack = slot.getItem();
 				// Check that the slot's contents are stackable with this stack
 				if (!inventoryStack.isEmpty() &&
 						inventoryStack.isStackable() &&
-						inventoryStack.isItemEqual(stack) &&
-						ItemStack.areItemStackTagsEqual(inventoryStack, stack)) {
+						inventoryStack.sameItem(stack) &&
+						ItemStack.tagMatches(inventoryStack, stack)) {
 
 					final int remain = stack.getCount() - added;
-					final int maxStackSize = slot.getItemStackLimit(inventoryStack);
+					final int maxStackSize = slot.getMaxStackSize(inventoryStack);
 					final int space = maxStackSize - inventoryStack.getCount();
 					if (space > 0) {
 
@@ -244,11 +244,11 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		for (final Integer slotIndex : slotIndexes) {
 			if (slotIndex >= 0 && slotIndex < getTotalSlotsSize(container)) {
 				final Slot slot = container.getSlot(slotIndex);
-				final ItemStack inventoryStack = slot.getStack();
+				final ItemStack inventoryStack = slot.getItem();
 				if (inventoryStack.isEmpty()) {
 					ItemStack stackToAdd = stack.copy();
 					stackToAdd.setCount(stack.getCount() - added);
-					slot.putStack(stackToAdd);
+					slot.set(stackToAdd);
 					return stack.getCount();
 				}
 			}
@@ -270,8 +270,8 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		for (Integer slotNumber : slotNumbers) {
 			if (slotNumber >= 0 && slotNumber < getTotalSlotsSize(container)) {
 				Slot slot = container.getSlot(slotNumber);
-				ItemStack slotStack = slot.getStack();
-				if (ItemStack.areItemsEqual(itemStack, slotStack) && ItemStack.areItemStackTagsEqual(itemStack, slotStack)) {
+				ItemStack slotStack = slot.getItem();
+				if (ItemStack.isSame(itemStack, slotStack) && ItemStack.tagMatches(itemStack, slotStack)) {
 					return slot;
 				}
 			}

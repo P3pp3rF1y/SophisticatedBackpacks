@@ -76,8 +76,8 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {
 		int upgradeSlotNumber = 0;
 		for (S slot : container.getFilterSlots()) {
-			slot.xPos = x - screenGuiLeft + 1 + (upgradeSlotNumber % slotsPerRow) * 18;
-			slot.yPos = y - screenGuiTop + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
+			slot.x = x - screenGuiLeft + 1 + (upgradeSlotNumber % slotsPerRow) * 18;
+			slot.y = y - screenGuiTop + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
 			upgradeSlotNumber++;
 		}
 	}

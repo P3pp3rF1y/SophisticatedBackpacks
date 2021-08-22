@@ -13,6 +13,6 @@ class ItemTagMatcher implements CacheableStackPredicate {
 
 	@Override
 	public boolean test(ItemStack stack) {
-		return stack.getItem().isIn(itemTag);
+		return stack.getItem().is(itemTag);
 	}
 }

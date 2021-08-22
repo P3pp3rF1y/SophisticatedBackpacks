@@ -32,14 +32,14 @@ public class TransferFullSlotMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayerEntity player, TransferFullSlotMessage msg) {
-		if (player == null || !(player.openContainer instanceof BackpackContainer)) {
+		if (player == null || !(player.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
-		BackpackContainer backpackContainer = (BackpackContainer) player.openContainer;
+		BackpackContainer backpackContainer = (BackpackContainer) player.containerMenu;
 		Slot slot = backpackContainer.getSlot(msg.slotId);
 		ItemStack transferResult;
 		do {
-			transferResult = backpackContainer.transferStackInSlot(player, msg.slotId);
-		} while (!transferResult.isEmpty() && ItemStack.areItemsEqual(slot.getStack(), transferResult));
+			transferResult = backpackContainer.quickMoveStack(player, msg.slotId);
+		} while (!transferResult.isEmpty() && ItemStack.isSame(slot.getItem(), transferResult));
 	}
 }

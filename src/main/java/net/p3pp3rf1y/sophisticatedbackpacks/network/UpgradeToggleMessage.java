@@ -45,7 +45,7 @@ public class UpgradeToggleMessage {
 					IUpgradeWrapper upgradeWrapper = slotWrappers.get(msg.upgradeSlot);
 					upgradeWrapper.setEnabled(!upgradeWrapper.isEnabled());
 					String translKey = upgradeWrapper.isEnabled() ? "gui.sophisticatedbackpacks.status.upgrade_switched_on" : "gui.sophisticatedbackpacks.status.upgrade_switched_off";
-					player.sendStatusMessage(new TranslationTextComponent(translKey, upgradeWrapper.getUpgradeStack().getDisplayName()), true);
+					player.displayClientMessage(new TranslationTextComponent(translKey, upgradeWrapper.getUpgradeStack().getHoverName()), true);
 				}
 			});
 			return true;

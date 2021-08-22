@@ -5,10 +5,11 @@ buildscript {
             name = "forge"
             url = "https://maven.minecraftforge.net"
         }
+        maven { url = 'https://sizableshrimp.me/maven' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'me.sizableshrimp.parchmenttest', name: 'ForgeGradle', version: '4.1.+', changing: true
     }
 }
 
@@ -43,7 +44,7 @@ archivesBaseName = 'sophisticatedbackpacks'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: project.mcp_mappings
+    mappings channel: 'parchment', version: "${project.parchment_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -111,6 +112,8 @@ dependencies {
     runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
     runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
     runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
+    runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
+    runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
 }
 
 test {

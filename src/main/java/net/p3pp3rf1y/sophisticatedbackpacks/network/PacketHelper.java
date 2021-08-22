@@ -14,8 +14,8 @@ public class PacketHelper {
 		} else {
 			int i = packetBuffer.readVarInt();
 			int j = packetBuffer.readInt();
-			ItemStack itemstack = new ItemStack(Item.getItemById(i), j);
-			itemstack.readShareTag(packetBuffer.readCompoundTag());
+			ItemStack itemstack = new ItemStack(Item.byId(i), j);
+			itemstack.readShareTag(packetBuffer.readNbt());
 			return itemstack;
 		}
 	}
@@ -26,14 +26,14 @@ public class PacketHelper {
 		} else {
 			packetBuffer.writeBoolean(true);
 			Item item = stack.getItem();
-			packetBuffer.writeVarInt(Item.getIdFromItem(item));
+			packetBuffer.writeVarInt(Item.getId(item));
 			packetBuffer.writeInt(stack.getCount());
 			CompoundNBT compoundnbt = null;
-			if (item.isDamageable(stack) || item.shouldSyncTag()) {
+			if (item.isDamageable(stack) || item.shouldOverrideMultiplayerNbt()) {
 				compoundnbt = stack.getShareTag();
 			}
 
-			packetBuffer.writeCompoundTag(compoundnbt);
+			packetBuffer.writeNbt(compoundnbt);
 		}
 	}
 }

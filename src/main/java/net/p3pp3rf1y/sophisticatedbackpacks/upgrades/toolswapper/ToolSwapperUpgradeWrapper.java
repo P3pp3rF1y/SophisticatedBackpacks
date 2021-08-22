@@ -67,12 +67,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		ItemStack mainHandItem = player.getHeldItemMainhand();
+		ItemStack mainHandItem = player.getMainHandItem();
 		if (mainHandItem.getItem() instanceof BackpackItem || !(isTool(mainHandItem) || isSword(mainHandItem, player))) {
 			return false;
 		}
 
-		BlockState state = player.world.getBlockState(pos);
+		BlockState state = player.level.getBlockState(pos);
 		Block block = state.getBlock();
 
 		if (getToolTypeEffectiveOnBlock(state, block, mainHandItem).isPresent() || goodAtBreakingBlock(state, mainHandItem)) {
@@ -101,7 +101,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}, finished::get);
 		ItemStack tool = selectedTool.get();
 		if (!tool.isEmpty() && (tool.getCount() == 1 || InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, true).isEmpty())) {
-			player.setHeldItem(Hand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
+			player.setItemInHand(Hand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
 			InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, false);
 			return true;
 		}
@@ -114,7 +114,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean goodAtBreakingBlock(BlockState state, ItemStack stack) {
-		return stack.canHarvestBlock(state) || stack.getDestroySpeed(state) > 1.5;
+		return stack.isCorrectToolForDrops(state) || stack.getDestroySpeed(state) > 1.5;
 	}
 
 	private Optional<ToolType> getToolTypeEffectiveOnBlock(BlockState state, Block block, ItemStack stack) {
@@ -132,7 +132,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		ItemStack mainHandItem = player.getHeldItemMainhand();
+		ItemStack mainHandItem = player.getMainHandItem();
 		if (mainHandItem.getItem() instanceof BackpackItem || !isTool(mainHandItem)) {
 			return false;
 		}
@@ -155,13 +155,13 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isTool(ItemStack stack) {
-		return !stack.getToolTypes().isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().isIn(Tags.Items.SHEARS);
+		return !stack.getToolTypes().isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, PlayerEntity player) {
 		ModifiableAttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (!stack.isEmpty() && stack.getToolTypes().isEmpty()) {
-			return attackDamage != null && attackDamage.getModifier(Item.ATTACK_DAMAGE_MODIFIER) != null;
+			return attackDamage != null && attackDamage.getModifier(Item.BASE_ATTACK_DAMAGE_UUID) != null;
 		}
 		return false;
 	}
@@ -197,7 +197,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 		attributeModifiers.get(Attributes.ATTACK_DAMAGE).forEach(m -> {
 			attribute.removeModifier(m);
-			attribute.applyNonPersistentModifier(m);
+			attribute.addTransientModifier(m);
 		});
 		double damageValue = attribute.getValue();
 		if (stack.getToolTypes().contains(ToolType.AXE)) {
@@ -218,7 +218,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 		InventoryHelper.extractFromInventory(sword, backpackInventory, false);
 		if (InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, true).isEmpty()) {
-			player.setHeldItem(Hand.MAIN_HAND, sword);
+			player.setItemInHand(Hand.MAIN_HAND, sword);
 			InventoryHelper.insertIntoInventory(mainHandItem, backpackInventory, false);
 			return true;
 		} else {
@@ -280,7 +280,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean tryToSwapTool(PlayerEntity player, Predicate<ItemStack> isToolValid, @Nullable ResourceLocation targetRegistryName) {
-		ItemStack mainHandStack = player.getHeldItemMainhand();
+		ItemStack mainHandStack = player.getMainHandItem();
 		if (mainHandStack.getItem() instanceof BackpackItem) {
 			return false;
 		}
@@ -292,7 +292,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		boolean itemInHandIsValid = isToolValid.test(mainHandStack);
 
 		BackpackInventoryHandler backpackInventory = backpackWrapper.getInventoryHandler();
-		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStack.areItemsEqualIgnoreDurability(st, mainHandStack))) {
+		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStack.isSameIgnoreDurability(st, mainHandStack))) {
 			toolCache.offer(mainHandStack);
 		}
 		ItemStack tool = findToolToSwap(backpackInventory, isToolValid);
@@ -304,7 +304,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		tool = tool.copy().split(1);
 
 		if ((tool.getCount() == 1 || InventoryHelper.insertIntoInventory(mainHandStack, backpackInventory, true).isEmpty())) {
-			player.setHeldItem(Hand.MAIN_HAND, InventoryHelper.extractFromInventory(tool, backpackInventory, false));
+			player.setItemInHand(Hand.MAIN_HAND, InventoryHelper.extractFromInventory(tool, backpackInventory, false));
 			InventoryHelper.insertIntoInventory(mainHandStack, backpackInventory, false);
 			toolCache.offer(tool);
 		}
@@ -342,7 +342,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private boolean hasEquivalentItem(Collection<ItemStack> alreadyGivenBefore, ItemStack stack) {
 		for (ItemStack givenTool : alreadyGivenBefore) {
-			if (ItemStack.areItemsEqualIgnoreDurability(givenTool, stack)) {
+			if (ItemStack.isSameIgnoreDurability(givenTool, stack)) {
 				return true;
 			}
 		}
@@ -366,7 +366,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isShearsItem(ItemStack stack) {
-		return stack.getItem() instanceof ShearsItem || stack.getItem().isIn(Tags.Items.SHEARS);
+		return stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isShearInteractionBlock(World world, BlockPos pos, ItemStack stack, Block block) {
@@ -374,7 +374,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isShearableEntity(Entity entity, ItemStack stack) {
-		return entity instanceof IForgeShearable && ((IForgeShearable) entity).isShearable(stack, entity.world, entity.getPosition());
+		return entity instanceof IForgeShearable && ((IForgeShearable) entity).isShearable(stack, entity.level, entity.blockPosition());
 	}
 
 	@Override

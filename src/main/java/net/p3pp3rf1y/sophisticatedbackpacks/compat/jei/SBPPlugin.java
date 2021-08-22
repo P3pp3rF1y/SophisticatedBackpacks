@@ -76,18 +76,18 @@ public class SBPPlugin implements IModPlugin {
 					return targets;
 				}
 				ItemStack ghostStack = (ItemStack) i;
-				BackpackContainer container = screen.getContainer();
+				BackpackContainer container = screen.getMenu();
 				container.getOpenContainer().ifPresent(c -> c.getSlots().forEach(s -> {
-					if (s instanceof IFilterSlot && s.isItemValid(ghostStack)) {
+					if (s instanceof IFilterSlot && s.mayPlace(ghostStack)) {
 						targets.add(new Target<I>() {
 							@Override
 							public Rectangle2d getArea() {
-								return new Rectangle2d(screen.getGuiLeft() + s.xPos, screen.getGuiTop() + s.yPos, 17, 17);
+								return new Rectangle2d(screen.getGuiLeft() + s.x, screen.getGuiTop() + s.y, 17, 17);
 							}
 
 							@Override
 							public void accept(I i) {
-								PacketHandler.sendToServer(new SetGhostSlotMessage(ghostStack, s.slotNumber));
+								PacketHandler.sendToServer(new SetGhostSlotMessage(ghostStack, s.index));
 							}
 						});
 					}

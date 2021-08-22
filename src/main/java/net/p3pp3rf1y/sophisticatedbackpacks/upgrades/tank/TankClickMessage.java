@@ -35,15 +35,15 @@ public class TankClickMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayerEntity sender, TankClickMessage msg) {
-		if (sender == null || !(sender.openContainer instanceof BackpackContainer)) {
+		if (sender == null || !(sender.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
-		UpgradeContainerBase<?, ?> upgradeContainer = ((BackpackContainer) sender.openContainer).getUpgradeContainers().get(msg.upgradeSlot);
+		UpgradeContainerBase<?, ?> upgradeContainer = ((BackpackContainer) sender.containerMenu).getUpgradeContainers().get(msg.upgradeSlot);
 		if (!(upgradeContainer instanceof TankUpgradeContainer)) {
 			return;
 		}
 		TankUpgradeContainer tankContainer = (TankUpgradeContainer) upgradeContainer;
-		ItemStack cursorStack = sender.inventory.getItemStack();
+		ItemStack cursorStack = sender.inventory.getCarried();
 		cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(fluidHandler -> {
 			TankUpgradeWrapper tankWrapper = tankContainer.getUpgradeWrapper();
 			FluidStack tankContents = tankWrapper.getContents();
@@ -51,8 +51,8 @@ public class TankClickMessage {
 				drainHandler(sender, fluidHandler, tankWrapper);
 			} else {
 				if (!tankWrapper.fillHandler(fluidHandler, itemStackIn -> {
-					sender.inventory.setItemStack(itemStackIn);
-					sender.connection.sendPacket(new SSetSlotPacket(-1, -1, sender.inventory.getItemStack()));
+					sender.inventory.setCarried(itemStackIn);
+					sender.connection.send(new SSetSlotPacket(-1, -1, sender.inventory.getCarried()));
 				})) {
 					drainHandler(sender, fluidHandler, tankWrapper);
 				}
@@ -62,8 +62,8 @@ public class TankClickMessage {
 
 	private static void drainHandler(ServerPlayerEntity sender, net.minecraftforge.fluids.capability.IFluidHandlerItem fluidHandler, TankUpgradeWrapper tankWrapper) {
 		tankWrapper.drainHandler(fluidHandler, itemStackIn -> {
-			sender.inventory.setItemStack(itemStackIn);
-			sender.connection.sendPacket(new SSetSlotPacket(-1, -1, sender.inventory.getItemStack()));
+			sender.inventory.setCarried(itemStackIn);
+			sender.connection.send(new SSetSlotPacket(-1, -1, sender.inventory.getCarried()));
 		});
 	}
 }

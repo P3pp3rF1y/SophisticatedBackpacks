@@ -32,12 +32,12 @@ public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> 
 					true, getButtonStateData(new UV(80, 32), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on")),
-									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.on.tooltip")).withStyle(TextFormatting.GRAY))
 					),
 					false, getButtonStateData(new UV(64, 96), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off")),
-									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("shift_click_open_tab.off.tooltip")).withStyle(TextFormatting.GRAY))
 					)
 			));
 	private static final ButtonDefinition.Toggle<Boolean> KEEP_TAB_OPEN = createToggleButtonDefinition(
@@ -45,21 +45,21 @@ public class BackpackSettingsTab extends SettingsTab<BackpackSettingsContainer> 
 					true, getButtonStateData(new UV(80, 80), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.on")),
-									new TranslationTextComponent(translSettingsButton("keep_tab_open.on.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.on.tooltip")).withStyle(TextFormatting.GRAY))
 					),
 					false, getButtonStateData(new UV(80, 96), Dimension.SQUARE_16, new Position(1, 1),
 							ImmutableList.of(
 									new TranslationTextComponent(translSettingsButton("keep_tab_open.off")),
-									new TranslationTextComponent(translSettingsButton("keep_tab_open.off.tooltip")).mergeStyle(TextFormatting.GRAY))
+									new TranslationTextComponent(translSettingsButton("keep_tab_open.off.tooltip")).withStyle(TextFormatting.GRAY))
 					)
 			));
 	private static final List<ITextComponent> PLAYER_CONTEXT_TOOLTIP = ImmutableList.of(
 			new TranslationTextComponent(translSettingsButton("context_player.tooltip")),
-			new TranslationTextComponent(translSettingsButton("context_player.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
+			new TranslationTextComponent(translSettingsButton("context_player.tooltip_detail")).withStyle(TextFormatting.GRAY)
 	);
 	private static final List<ITextComponent> BACKPACK_CONTEXT_TOOLTIP = ImmutableList.of(
 			new TranslationTextComponent(translSettingsButton("context_backpack.tooltip")),
-			new TranslationTextComponent(translSettingsButton("context_backpack.tooltip_detail")).mergeStyle(TextFormatting.GRAY)
+			new TranslationTextComponent(translSettingsButton("context_backpack.tooltip_detail")).withStyle(TextFormatting.GRAY)
 	);
 
 	public BackpackSettingsTab(BackpackSettingsContainer container, Position position, SettingsScreen screen) {

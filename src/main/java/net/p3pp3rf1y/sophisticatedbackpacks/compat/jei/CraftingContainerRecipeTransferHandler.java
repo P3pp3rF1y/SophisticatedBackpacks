@@ -65,15 +65,15 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		Map<Integer, ItemStack> availableItemStacks = new HashMap<>();
 		int filledCraftSlotCount = 0;
 		for (Slot slot : craftingSlots.values()) {
-			ItemStack stack = slot.getStack();
+			ItemStack stack = slot.getItem();
 			if (!stack.isEmpty()) {
-				if (!slot.canTakeStack(player)) {
-					LOGGER.error("Recipe Transfer helper {} does not work for container {}. Player can't move item out of Crafting Slot number {}", BackpackContainer.class, container.getClass(), slot.slotNumber);
+				if (!slot.mayPickup(player)) {
+					LOGGER.error("Recipe Transfer helper {} does not work for container {}. Player can't move item out of Crafting Slot number {}", BackpackContainer.class, container.getClass(), slot.index);
 					return handlerHelper.createInternalError();
 				}
 
 				++filledCraftSlotCount;
-				availableItemStacks.put(slot.slotNumber, stack.copy());
+				availableItemStacks.put(slot.index, stack.copy());
 			}
 		}
 
@@ -114,9 +114,9 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 	private int getEmptySlotCount(Map<Integer, Slot> inventorySlots, Map<Integer, ItemStack> availableItemStacks) {
 		int emptySlotCount = 0;
 		for (Slot slot : inventorySlots.values()) {
-			ItemStack stack = slot.getStack();
+			ItemStack stack = slot.getItem();
 			if (!stack.isEmpty()) {
-				availableItemStacks.put(slot.slotNumber, stack.copy());
+				availableItemStacks.put(slot.index, stack.copy());
 			} else {
 				++emptySlotCount;
 			}
@@ -138,7 +138,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		Map<Integer, Slot> craftingSlots = new HashMap<>();
 		List<Slot> recipeSlots = openOrFirstCraftingContainer.getRecipeSlots();
 		for (Slot slot : recipeSlots) {
-			craftingSlots.put(slot.slotNumber, slot);
+			craftingSlots.put(slot.index, slot);
 		}
 		return craftingSlots;
 	}
@@ -146,7 +146,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 	private Map<Integer, Slot> getInventorySlots(BackpackContainer container) {
 		Map<Integer, Slot> inventorySlots = new HashMap<>();
 		for (Slot slot : container.realInventorySlots) {
-			inventorySlots.put(slot.slotNumber, slot);
+			inventorySlots.put(slot.index, slot);
 		}
 		return inventorySlots;
 	}

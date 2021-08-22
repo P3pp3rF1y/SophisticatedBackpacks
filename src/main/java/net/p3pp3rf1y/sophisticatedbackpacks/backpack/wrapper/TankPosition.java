@@ -7,7 +7,7 @@ public enum TankPosition implements IStringSerializable {
 	RIGHT;
 
 	@Override
-	public String getString() {
+	public String getSerializedName() {
 		return name().toLowerCase();
 	}
 }

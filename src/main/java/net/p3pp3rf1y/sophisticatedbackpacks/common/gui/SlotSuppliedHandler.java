@@ -23,12 +23,12 @@ public class SlotSuppliedHandler extends SlotItemHandler {
 	}
 
 	@Override
-	public boolean isItemValid(ItemStack stack) {
+	public boolean mayPlace(ItemStack stack) {
 		return itemHandlerSupplier.get().isItemValid(slot, stack);
 	}
 
 	@Override
-	public int getSlotStackLimit() {
+	public int getMaxStackSize() {
 		return itemHandlerSupplier.get().getSlotLimit(slot);
 	}
 }

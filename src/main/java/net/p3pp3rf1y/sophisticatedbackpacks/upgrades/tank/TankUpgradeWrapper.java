@@ -43,7 +43,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			@Override
 			protected void onContentsChanged(int slot) {
 				super.onContentsChanged(slot);
-				upgrade.setTagInfo("inventory", serializeNBT());
+				upgrade.addTagElement("inventory", serializeNBT());
 				save();
 			}
 
@@ -110,20 +110,29 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	public int getTankCapacity() {
-		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
-		return getBaseCapacity() * stackMultiplier;
+		return getTankCapacity(backpackWrapper);
 	}
 
 	public static int getAdjustedStackMultiplier(IBackpackWrapper backpackWrapper) {
 		return 1 + (int) (Config.COMMON.tankUpgrade.stackMultiplierRatio.get() * (backpackWrapper.getInventoryHandler().getStackSizeMultiplier() - 1));
 	}
 
-	private int getBaseCapacity() {
+	private static int getBaseCapacity(IBackpackWrapper backpackWrapper) {
 		return Config.COMMON.tankUpgrade.capacityPerSlotRow.get() * backpackWrapper.getNumberOfSlotRows();
+	}
+
+	public static int getTankCapacity(IBackpackWrapper backpackWrapper) {
+		int stackMultiplier = getAdjustedStackMultiplier(backpackWrapper);
+		int baseCapacity = getBaseCapacity(backpackWrapper);
+		return Integer.MAX_VALUE / stackMultiplier < baseCapacity ? Integer.MAX_VALUE : baseCapacity * stackMultiplier;
 	}
 
 	public IItemHandler getInventory() {
 		return inventory;
+	}
+
+	private int getMaxInOut() {
+		return Math.max(FluidAttributes.BUCKET_VOLUME, Config.COMMON.tankUpgrade.maxInputOutput.get() * backpackWrapper.getNumberOfSlotRows() * getAdjustedStackMultiplier(backpackWrapper));
 	}
 
 	public int fill(FluidStack resource, IFluidHandler.FluidAction action) {
@@ -133,7 +142,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			return 0;
 		}
 
-		int toFill = Math.min(capacity - contents.getAmount(), resource.getAmount());
+		int toFill = Math.min(getMaxInOut(), Math.min(capacity - contents.getAmount(), resource.getAmount()));
 
 		if (action == IFluidHandler.FluidAction.EXECUTE) {
 			if (contents.isEmpty()) {
@@ -148,7 +157,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 	}
 
 	private void serializeContents() {
-		upgrade.setTagInfo(CONTENTS_TAG, contents.writeToNBT(new CompoundNBT()));
+		upgrade.addTagElement(CONTENTS_TAG, contents.writeToNBT(new CompoundNBT()));
 		save();
 		forceUpdateTankRenderInfo();
 	}
@@ -158,7 +167,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 			return FluidStack.EMPTY;
 		}
 
-		int toDrain = Math.min(maxDrain, contents.getAmount());
+		int toDrain = Math.min(getMaxInOut(), Math.min(maxDrain, contents.getAmount()));
 		FluidStack ret = new FluidStack(contents.getFluid(), toDrain);
 		if (action == IFluidHandler.FluidAction.EXECUTE) {
 			if (toDrain == contents.getAmount()) {
@@ -226,7 +235,7 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 
 	@Override
 	public int getMinimumMultiplierRequired() {
-		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity());
+		return (int) Math.ceil((float) contents.getAmount() / getBaseCapacity(backpackWrapper));
 	}
 
 	@Override

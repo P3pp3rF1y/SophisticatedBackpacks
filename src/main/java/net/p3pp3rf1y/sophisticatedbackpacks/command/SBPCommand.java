@@ -16,12 +16,12 @@ public class SBPCommand {
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		LiteralCommandNode<CommandSource> mainNode = dispatcher.register(
 				Commands.literal("sbp")
-						.requires(cs -> cs.hasPermissionLevel(OP_LEVEL))
+						.requires(cs -> cs.hasPermission(OP_LEVEL))
 						.then(ListCommand.register())
 						.then(GiveCommand.register())
 						.then(RemoveNonPlayerCommand.register())
 		);
-		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermissionLevel(OP_LEVEL)).redirect(mainNode));
+		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermission(OP_LEVEL)).redirect(mainNode));
 	}
 
 	public static void registerArgumentTypes() {

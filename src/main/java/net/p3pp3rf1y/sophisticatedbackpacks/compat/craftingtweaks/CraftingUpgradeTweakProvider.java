@@ -105,10 +105,10 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			for (int slotNumber = start; slotNumber < start + size; ++slotNumber) {
 				Slot slot = container.getSlot(slotNumber);
 				int slotIndex = slot.getSlotIndex();
-				container.transferStackInSlot(entityPlayer, slotNumber);
-				if (slot.getHasStack() && forced) {
-					entityPlayer.dropItem(slot.getStack(), false);
-					craftMatrix.setInventorySlotContents(slotIndex, ItemStack.EMPTY);
+				container.quickMoveStack(entityPlayer, slotNumber);
+				if (slot.hasItem() && forced) {
+					entityPlayer.drop(slot.getItem(), false);
+					craftMatrix.setItem(slotIndex, ItemStack.EMPTY);
 				}
 			}
 			container.sendSlotUpdates();
@@ -127,13 +127,13 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			int slotIndex;
 			for (i = 0; i < size; ++i) {
 				slotIndex = container.getSlot(start + i).getSlotIndex();
-				matrixClone.setInventorySlotContents(i, craftMatrix.getStackInSlot(slotIndex));
+				matrixClone.setItem(i, craftMatrix.getItem(slotIndex));
 			}
 
 			for (i = 0; i < size; ++i) {
 				if (!ROTATION_HANDLER.ignoreSlotId(i)) {
 					slotIndex = container.getSlot(start + ROTATION_HANDLER.rotateSlotId(i, counterClockwise)).getSlotIndex();
-					craftMatrix.setInventorySlotContents(slotIndex, matrixClone.getStackInSlot(i));
+					craftMatrix.setItem(slotIndex, matrixClone.getItem(i));
 				}
 			}
 
@@ -148,7 +148,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		int start = getCraftingGridStart(entityPlayer, container, id);
 		int size = getCraftingGridSize(entityPlayer, container, id);
 		for (int i = start; i < start + size; i++) {
-			ItemStack itemStack = container.getSlot(i).getStack();
+			ItemStack itemStack = container.getSlot(i).getItem();
 			if (!itemStack.isEmpty() && itemStack.getMaxStackSize() > 1) {
 				ResourceLocation registryName = itemStack.getItem().getRegistryName();
 				String key = Objects.toString(registryName);
@@ -191,7 +191,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			int start = getCraftingGridStart(entityPlayer, container, id);
 			int size = getCraftingGridSize(entityPlayer, container, id);
 			for (int i = start; i < start + size; i++) {
-				ItemStack itemStack = container.getSlot(i).getStack();
+				ItemStack itemStack = container.getSlot(i).getItem();
 				if (!itemStack.isEmpty() && itemStack.getCount() > biggestSlotSize) {
 					biggestSlotStack = itemStack;
 					biggestSlotSize = itemStack.getCount();
@@ -205,10 +205,10 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 			boolean emptyBiggestSlot = false;
 			for (int i = start; i < start + size; i++) {
 				Slot slot = container.getSlot(i);
-				ItemStack itemStack = slot.getStack();
+				ItemStack itemStack = slot.getItem();
 				if (itemStack.isEmpty()) {
 					if (biggestSlotStack.getCount() > 1) {
-						slot.putStack(biggestSlotStack.split(1));
+						slot.set(biggestSlotStack.split(1));
 					} else {
 						emptyBiggestSlot = true;
 					}
@@ -228,7 +228,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		int start = provider.getCraftingGridStart(entityPlayer, container, id);
 		int size = provider.getCraftingGridSize(entityPlayer, container, id);
 		for (int slotNumber = start; slotNumber < start + size; slotNumber++) {
-			ItemStack itemStack = container.getSlot(slotNumber).getStack();
+			ItemStack itemStack = container.getSlot(slotNumber).getItem();
 			if (!itemStack.isEmpty() && itemStack.getMaxStackSize() > 1) {
 				ResourceLocation registryName = itemStack.getItem().getRegistryName();
 				String key = Objects.toString(registryName);
@@ -265,7 +265,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 
 	@Override
 	public boolean canTransferFrom(PlayerEntity entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
-		return sourceSlot.canTakeStack(entityPlayer) && sourceSlot.slotNumber < container.realInventorySlots.size();
+		return sourceSlot.mayPickup(entityPlayer) && sourceSlot.index < container.realInventorySlots.size();
 	}
 
 	@Override
@@ -277,7 +277,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 
 		int start = getCraftingGridStart(entityPlayer, container, id);
 		int size = getCraftingGridSize(entityPlayer, container, id);
-		ItemStack itemStack = sourceSlot.getStack();
+		ItemStack itemStack = sourceSlot.getItem();
 		if (itemStack.isEmpty()) {
 			return false;
 		}
@@ -285,10 +285,10 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		int firstEmptySlot = -1;
 		for (int i = start; i < start + size; i++) {
 			int slotIndex = container.getSlot(i).getSlotIndex();
-			ItemStack craftStack = craftMatrix.getStackInSlot(slotIndex);
+			ItemStack craftStack = craftMatrix.getItem(slotIndex);
 			if (!craftStack.isEmpty()) {
-				if (craftStack.isItemEqual(itemStack) && ItemStack.areItemStackTagsEqual(craftStack, itemStack)) {
-					int spaceLeft = Math.min(craftMatrix.getInventoryStackLimit(), craftStack.getMaxStackSize()) - craftStack.getCount();
+				if (craftStack.sameItem(itemStack) && ItemStack.tagMatches(craftStack, itemStack)) {
+					int spaceLeft = Math.min(craftMatrix.getMaxStackSize(), craftStack.getMaxStackSize()) - craftStack.getCount();
 					if (spaceLeft > 0) {
 						ItemStack splitStack = itemStack.split(Math.min(spaceLeft, itemStack.getCount()));
 						craftStack.grow(splitStack.getCount());
@@ -303,8 +303,8 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		}
 
 		if (itemStack.getCount() > 0 && firstEmptySlot != -1) {
-			ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getInventoryStackLimit()));
-			craftMatrix.setInventorySlotContents(firstEmptySlot, transferStack);
+			ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getMaxStackSize()));
+			craftMatrix.setItem(firstEmptySlot, transferStack);
 			container.sendSlotUpdates();
 			return true;
 		}
@@ -337,7 +337,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		return getOpenCraftingContainer(container).map(cc -> {
 			List<Slot> recipeSlots = cc.getRecipeSlots();
 			if (!recipeSlots.isEmpty()) {
-				return recipeSlots.get(0).slotNumber;
+				return recipeSlots.get(0).index;
 			}
 			return 0;
 		}).orElse(0);

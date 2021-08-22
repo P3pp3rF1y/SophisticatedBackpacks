@@ -49,8 +49,8 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 	protected void moveSlotsToTab() {
 		int slotNumber = 0;
 		for (Slot slot : getContainer().getSlots()) {
-			slot.xPos = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 1 + (slotNumber % 3) * 18;
-			slot.yPos = y + 44 - screen.getGuiTop() + 1 + (slotNumber / 3) * 18;
+			slot.x = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 1 + (slotNumber % 3) * 18;
+			slot.y = y + 44 - screen.getGuiTop() + 1 + (slotNumber / 3) * 18;
 			slotNumber++;
 			if (slotNumber >= 9) {
 				break;
@@ -58,8 +58,8 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 		}
 
 		Slot craftingSlot = getContainer().getSlots().get(9);
-		craftingSlot.xPos = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 19;
-		craftingSlot.yPos = y + 44 - screen.getGuiTop() + 72;
+		craftingSlot.x = x + 3 + craftingUIAddition.getWidth() - screen.getGuiLeft() + 19;
+		craftingSlot.y = y + 44 - screen.getGuiTop() + 72;
 
 		craftingUIAddition.onCraftingSlotsDisplayed(getContainer().getSlots());
 	}

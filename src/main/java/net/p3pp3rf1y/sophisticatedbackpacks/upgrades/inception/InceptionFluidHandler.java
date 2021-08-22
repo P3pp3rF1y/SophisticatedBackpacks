@@ -1,24 +1,31 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class InceptionFluidHandler implements IFluidHandler {
-	private final IFluidHandler wrappedFluidHandler;
+public class InceptionFluidHandler implements IFluidHandlerItem {
+	@Nullable
+	private final IFluidHandlerItem wrappedFluidHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 	private IFluidHandler[] fluidHandlers;
 	protected int[] baseIndex;
 	protected int tankCount;
+	private final ItemStack backpack;
 
-	public InceptionFluidHandler(IFluidHandler wrappedFluidHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionFluidHandler(
+			@Nullable IFluidHandlerItem wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedFluidHandler = wrappedFluidHandler;
+		this.backpack = backpack;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
 		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlers());
@@ -27,11 +34,11 @@ public class InceptionFluidHandler implements IFluidHandler {
 
 	private void refreshHandlers() {
 		List<IFluidHandler> handlers = new ArrayList<>();
-		if (inventoryOrder == InventoryOrder.MAIN_FIRST) {
+		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.MAIN_FIRST) {
 			handlers.add(wrappedFluidHandler);
 		}
-		subBackpacksHandler.getSubBackpacks().forEach(sbp -> handlers.add(sbp.getFluidHandler()));
-		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
+		subBackpacksHandler.getSubBackpacks().forEach(sbp -> sbp.getFluidHandler().ifPresent(handlers::add));
+		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedFluidHandler);
 		}
 		fluidHandlers = handlers.toArray(new IFluidHandler[] {});
@@ -138,5 +145,11 @@ public class InceptionFluidHandler implements IFluidHandler {
 			}
 		}
 		return FluidStack.EMPTY;
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack getContainer() {
+		return backpack;
 	}
 }

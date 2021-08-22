@@ -16,7 +16,7 @@ public class BackpackGuiHelper {
 		int x = position.getX();
 		int y = position.getY();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		minecraft.getTextureManager().bindTexture(textureName);
+		minecraft.getTextureManager().bind(textureName);
 		int slotRows = inventorySlots / slotsOnLine;
 		int remainingSlots = inventorySlots % slotsOnLine;
 		int slotsHeight = 18 * numberOfSlotRows;

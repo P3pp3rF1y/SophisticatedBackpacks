@@ -21,11 +21,11 @@ public class SyncPlayerSettingsMessage {
 	}
 
 	public static void encode(SyncPlayerSettingsMessage msg, PacketBuffer packetBuffer) {
-		packetBuffer.writeCompoundTag(msg.settingsNbt);
+		packetBuffer.writeNbt(msg.settingsNbt);
 	}
 
 	public static SyncPlayerSettingsMessage decode(PacketBuffer packetBuffer) {
-		return new SyncPlayerSettingsMessage(packetBuffer.readCompoundTag());
+		return new SyncPlayerSettingsMessage(packetBuffer.readNbt());
 	}
 
 	static void onMessage(SyncPlayerSettingsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

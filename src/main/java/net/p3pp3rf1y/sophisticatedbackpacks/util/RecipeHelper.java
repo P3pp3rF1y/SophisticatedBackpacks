@@ -1,5 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
@@ -22,16 +25,24 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper.CompactingShape.*;
 
 public class RecipeHelper {
-	private static final Map<Item, Set<CompactingShape>> ITEM_COMPACTING_SHAPES = new HashMap<>();
+	private static final LoadingCache<Item, Set<CompactingShape>> ITEM_COMPACTING_SHAPES = CacheBuilder.newBuilder().expireAfterAccess(120L, TimeUnit.SECONDS).build(new CacheLoader<Item, Set<CompactingShape>>() {
+		@Override
+		public Set<CompactingShape> load(Item item) {
+			return getCompactingShapes(item);
+		}
+	});
 	private static final int MAX_FOLLOW_UP_COMPACTING_RECIPES = 10;
 	private static WeakReference<World> world;
+	private static final Map<CompactedItem, CompactingResult> COMPACTING_RESULTS = new HashMap<>();
 
 	private RecipeHelper() {}
 
@@ -48,23 +59,25 @@ public class RecipeHelper {
 			Set<CompactingShape> compactingShapes = new HashSet<>();
 			getCompactingShape(item, w, 2, 2, TWO_BY_TWO_UNCRAFTABLE, TWO_BY_TWO).ifPresent(compactingShapes::add);
 			getCompactingShape(item, w, 3, 3, THREE_BY_THREE_UNCRAFTABLE, THREE_BY_THREE).ifPresent(compactingShapes::add);
+			if (compactingShapes.isEmpty()) {
+				compactingShapes.add(NONE);
+			}
 			return compactingShapes;
 		}).orElse(Collections.emptySet());
 	}
 
 	private static Optional<CompactingShape> getCompactingShape(Item item, World w, int width, int height, CompactingShape uncraftableShape, CompactingShape shape) {
-		ItemStack compactingResult;
-		compactingResult = getCraftingResultAndRemainingItems(item, w, width, height, new ArrayList<>());
-		if (!compactingResult.isEmpty()) {
-			if (item == compactingResult.getItem()) {
+		CompactingResult compactingResult = getCompactingResult(item, w, width, height);
+		if (!compactingResult.getResult().isEmpty()) {
+			if (item == compactingResult.getResult().getItem()) {
 				return Optional.empty();
 			}
 
-			if (isPartOfCompactingLoop(item, compactingResult.getItem(), w)) {
+			if (isPartOfCompactingLoop(item, compactingResult.getResult().getItem(), w)) {
 				return Optional.empty();
 			}
 
-			if (uncompactMatchesItem(compactingResult, w, item, width * height)) {
+			if (uncompactMatchesItem(compactingResult.getResult(), w, item, width * height)) {
 				return Optional.of(uncraftableShape);
 			} else {
 				return Optional.of(shape);
@@ -74,31 +87,31 @@ public class RecipeHelper {
 	}
 
 	private static boolean isPartOfCompactingLoop(Item firstCompacted, Item firstCompactResult, World w) {
-		ItemStack compactingResult;
+		ItemStack compactingResultStack;
 		int iterations = 0;
 		Set<Item> compactedItems = new HashSet<>();
 		Queue<Item> itemsToCompact = new LinkedList<>();
 		itemsToCompact.add(firstCompactResult);
 		while (!itemsToCompact.isEmpty()) {
 			Item itemToCompact = itemsToCompact.poll();
-			compactingResult = getCraftingResultAndRemainingItems(itemToCompact, w, 2, 2, new ArrayList<>());
-			if (!compactingResult.isEmpty()) {
-				if (compactingResult.getItem() == firstCompacted) {
+			compactingResultStack = getCompactingResult(itemToCompact, w, 2, 2).getResult();
+			if (!compactingResultStack.isEmpty()) {
+				if (compactingResultStack.getItem() == firstCompacted) {
 					return true;
-				} else if (compactedItems.contains(compactingResult.getItem())) {
+				} else if (compactedItems.contains(compactingResultStack.getItem())) {
 					return false; //loop exists but the first compacted item isn't part of it so we will let it be compacted, but no follow up compacting will happen
 				}
-				itemsToCompact.add(compactingResult.getItem());
+				itemsToCompact.add(compactingResultStack.getItem());
 			}
 
-			compactingResult = getCraftingResultAndRemainingItems(itemToCompact, w, 3, 3, new ArrayList<>());
-			if (!compactingResult.isEmpty()) {
-				if (compactingResult.getItem() == firstCompacted) {
+			compactingResultStack = getCompactingResult(itemToCompact, w, 3, 3).getResult();
+			if (!compactingResultStack.isEmpty()) {
+				if (compactingResultStack.getItem() == firstCompacted) {
 					return true;
-				} else if (compactedItems.contains(compactingResult.getItem())) {
+				} else if (compactedItems.contains(compactingResultStack.getItem())) {
 					return false; //loop exists but the first compacted item isn't part of it so we will let it be compacted, but no follow up compacting will happen
 				}
-				itemsToCompact.add(compactingResult.getItem());
+				itemsToCompact.add(compactingResultStack.getItem());
 			}
 			compactedItems.add(itemToCompact);
 			iterations++;
@@ -110,55 +123,120 @@ public class RecipeHelper {
 	}
 
 	private static boolean uncompactMatchesItem(ItemStack result, World w, Item item, int count) {
-		result = getCraftingResultAndRemainingItems(result.getItem(), w, 1, 1, new ArrayList<>());
+		CraftingInventory craftingInventory = getFilledCraftingInventory(result.getItem(), 1, 1);
+		result = w.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, w).map(r -> r.assemble(craftingInventory)).orElse(ItemStack.EMPTY);
 		return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == count;
 	}
 
-	public static ItemStack getCraftingResultAndRemainingItems(Item item, int width, int height, List<ItemStack> remainingItems) {
-		return getWorld().map(w -> getCraftingResultAndRemainingItems(item, w, width, height, remainingItems)).orElse(ItemStack.EMPTY);
+	public static CompactingResult getCompactingResult(Item item, int width, int height) {
+		return getWorld().map(w -> getCompactingResult(item, w, width, height)).orElse(CompactingResult.EMPTY);
 	}
 
-	private static ItemStack getCraftingResultAndRemainingItems(Item item, World w, int width, int height, List<ItemStack> remainingItems) {
+	private static CompactingResult getCompactingResult(Item item, World w, int width, int height) {
+		CompactedItem compactedItem = new CompactedItem(item, width, height);
+		if (COMPACTING_RESULTS.containsKey(compactedItem)) {
+			return COMPACTING_RESULTS.get(compactedItem);
+		}
+
 		CraftingInventory craftingInventory = getFilledCraftingInventory(item, width, height);
-		return w.getRecipeManager().getRecipe(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
+		List<ItemStack> remainingItems = new ArrayList<>();
+		ItemStack result = w.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
 			r.getRemainingItems(craftingInventory).forEach(stack -> {
 				if (!stack.isEmpty()) {
 					remainingItems.add(stack);
 				}
 			});
-			return r.getCraftingResult(craftingInventory);
+			return r.assemble(craftingInventory);
 		}).orElse(ItemStack.EMPTY);
+
+		CompactingResult compactingResult = new CompactingResult(result, remainingItems);
+		if (!result.isEmpty()) {
+			COMPACTING_RESULTS.put(compactedItem, compactingResult);
+		}
+		return compactingResult;
 	}
 
 	private static CraftingInventory getFilledCraftingInventory(Item item, int width, int height) {
 		CraftingInventory craftinginventory = new CraftingInventory(new Container(null, -1) {
-			public boolean canInteractWith(PlayerEntity playerIn) {
+			public boolean stillValid(PlayerEntity playerIn) {
 				return false;
 			}
 		}, width, height);
 
-		for (int i = 0; i < craftinginventory.getSizeInventory(); i++) {
-			craftinginventory.setInventorySlotContents(i, new ItemStack(item));
+		for (int i = 0; i < craftinginventory.getContainerSize(); i++) {
+			craftinginventory.setItem(i, new ItemStack(item));
 		}
 		return craftinginventory;
 	}
 
 	public static Optional<FurnaceRecipe> getSmeltingRecipe(ItemStack stack) {
-		return getWorld().flatMap(w -> w.getRecipeManager().getRecipe(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.from(ItemStack.EMPTY, stack))), w));
+		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
 	}
 
 	public static Set<CompactingShape> getItemCompactingShapes(Item item) {
-		return ITEM_COMPACTING_SHAPES.computeIfAbsent(item, RecipeHelper::getCompactingShapes);
+		return ITEM_COMPACTING_SHAPES.getUnchecked(item);
 	}
 
 	public static List<StonecuttingRecipe> getStonecuttingRecipes(IInventory inventory) {
-		return getWorld().map(w -> w.getRecipeManager().getRecipes(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
+		return getWorld().map(w -> w.getRecipeManager().getRecipesFor(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
 	}
 
 	public enum CompactingShape {
+		NONE,
 		THREE_BY_THREE,
 		TWO_BY_TWO,
 		THREE_BY_THREE_UNCRAFTABLE,
 		TWO_BY_TWO_UNCRAFTABLE
+	}
+
+	public static class CompactingResult {
+		public static final CompactingResult EMPTY = new CompactingResult(ItemStack.EMPTY, Collections.emptyList());
+
+		private final ItemStack result;
+		private final List<ItemStack> remainingItems;
+
+		private CompactingResult(ItemStack result, List<ItemStack> remainingItems) {
+			this.result = result;
+			this.remainingItems = remainingItems;
+		}
+
+		public ItemStack getResult() {
+			return result;
+		}
+
+		public List<ItemStack> getRemainingItems() {
+			return remainingItems;
+		}
+	}
+
+	private static class CompactedItem {
+		private final Item item;
+		private final int width;
+		private final int height;
+
+		private CompactedItem(Item item, int width, int height) {
+			this.item = item;
+			this.width = width;
+			this.height = height;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			CompactedItem that = (CompactedItem) o;
+			return width == that.width &&
+					height == that.height &&
+					item.equals(that.item);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(item, width, height);
+		}
 	}
 }

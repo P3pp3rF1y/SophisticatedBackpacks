@@ -37,8 +37,8 @@ public class GiveCommand {
 		BackpackAccessLogger.getBackpackLog(backpackUuid).ifPresent(alr -> {
 			Item item = ForgeRegistries.ITEMS.getValue(alr.getBackpackItemRegistryName());
 			ItemStack backpack = new ItemStack(item);
-			if (!backpack.getDisplayName().getString().equals(alr.getBackpackName())) {
-				backpack.setDisplayName(new StringTextComponent(alr.getBackpackName()));
+			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
+				backpack.setHoverName(new StringTextComponent(alr.getBackpackName()));
 			}
 			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
@@ -49,34 +49,34 @@ public class GiveCommand {
 			players.forEach(p -> giveBackpackToPlayer(backpack, p));
 
 			if (players.size() == 1) {
-				source.sendFeedback(new TranslationTextComponent("commands.sophisticatedbackpacks.give.success", players.iterator().next().getDisplayName()), true);
+				source.sendSuccess(new TranslationTextComponent("commands.sophisticatedbackpacks.give.success", players.iterator().next().getDisplayName()), true);
 			} else {
-				source.sendFeedback(new TranslationTextComponent("commands.sophisticatedbackpacks.give.success", players.size()), true);
+				source.sendSuccess(new TranslationTextComponent("commands.sophisticatedbackpacks.give.success", players.size()), true);
 			}
 		});
 		return 0;
 	}
 
 	private static void giveBackpackToPlayer(ItemStack backpack, ServerPlayerEntity p) {
-		boolean flag = p.inventory.addItemStackToInventory(backpack);
+		boolean flag = p.inventory.add(backpack);
 		if (flag && backpack.isEmpty()) {
 			backpack.setCount(1);
-			ItemEntity itemEntity = p.dropItem(backpack, false);
+			ItemEntity itemEntity = p.drop(backpack, false);
 			if (itemEntity != null) {
 				itemEntity.makeFakeItem();
 			}
 
-			p.world.playSound(null, p.getPosX(), p.getPosY(), p.getPosZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(p.getRNG()) * 0.7F + 1.0F) * 2.0F);
-			p.container.detectAndSendChanges();
+			p.level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
+			p.inventoryMenu.broadcastChanges();
 		} else {
-			ItemEntity itementity = p.dropItem(backpack, false);
+			ItemEntity itementity = p.drop(backpack, false);
 			if (itementity != null) {
-				itementity.setNoPickupDelay();
-				itementity.setOwnerId(p.getUniqueID());
+				itementity.setNoPickUpDelay();
+				itementity.setOwner(p.getUUID());
 			}
 		}
 
-		ItemEntity itemEntity = p.dropItem(backpack, false);
+		ItemEntity itemEntity = p.drop(backpack, false);
 		if (itemEntity != null) {
 			itemEntity.makeFakeItem();
 		}
