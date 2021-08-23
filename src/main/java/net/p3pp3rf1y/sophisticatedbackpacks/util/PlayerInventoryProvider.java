@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public class PlayerInventoryProvider {
@@ -23,7 +24,7 @@ public class PlayerInventoryProvider {
 	private static final String ARMOR_INVENTORY = "armor";
 
 	private static boolean playerInventoryHandlersInitialized = false;
-	private static Runnable playerInventoryHandlerInitCallback = () -> {};
+	private static BooleanSupplier playerInventoryHandlerInitCallback = () -> false;
 
 	static {
 		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.items.size(),
@@ -34,7 +35,7 @@ public class PlayerInventoryProvider {
 				(player, slot) -> player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armor.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true, false);
 	}
 
-	public static void setPlayerInventoryHandlerInitCallback(Runnable callback) {
+	public static void setPlayerInventoryHandlerInitCallback(BooleanSupplier callback) {
 		playerInventoryHandlerInitCallback = callback;
 	}
 
@@ -73,8 +74,9 @@ public class PlayerInventoryProvider {
 
 	private static void initialize() {
 		if (!playerInventoryHandlersInitialized) {
-			playerInventoryHandlersInitialized = true;
-			playerInventoryHandlerInitCallback.run();
+			if (playerInventoryHandlerInitCallback.getAsBoolean()) {
+				playerInventoryHandlersInitialized = true;
+			}
 		}
 	}
 
