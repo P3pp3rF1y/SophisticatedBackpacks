@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PlayerInventoryProvider {
@@ -24,7 +24,7 @@ public class PlayerInventoryProvider {
 	private static final String ARMOR_INVENTORY = "armor";
 
 	private static boolean playerInventoryHandlersInitialized = false;
-	private static BooleanSupplier playerInventoryHandlerInitCallback = () -> false;
+	private static Consumer<PlayerEntity> playerInventoryHandlerInitCallback = player -> {};
 
 	static {
 		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.items.size(),
@@ -35,7 +35,7 @@ public class PlayerInventoryProvider {
 				(player, slot) -> player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armor.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true, false);
 	}
 
-	public static void setPlayerInventoryHandlerInitCallback(BooleanSupplier callback) {
+	public static void setPlayerInventoryHandlerInitCallback(Consumer<PlayerEntity> callback) {
 		playerInventoryHandlerInitCallback = callback;
 	}
 
@@ -54,7 +54,7 @@ public class PlayerInventoryProvider {
 	}
 
 	public static Optional<RenderInfo> getBackpackFromRendered(PlayerEntity player) {
-		initialize();
+		initialize(player);
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
@@ -67,25 +67,24 @@ public class PlayerInventoryProvider {
 		return Optional.empty();
 	}
 
-	private static Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers() {
-		initialize();
+	private static Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers(PlayerEntity player) {
+		initialize(player);
 		return playerInventoryHandlers;
 	}
 
-	private static void initialize() {
+	private static void initialize(PlayerEntity player) {
 		if (!playerInventoryHandlersInitialized) {
-			if (playerInventoryHandlerInitCallback.getAsBoolean()) {
-				playerInventoryHandlersInitialized = true;
-			}
+			playerInventoryHandlerInitCallback.accept(player);
+			playerInventoryHandlersInitialized = true;
 		}
 	}
 
-	public static Optional<PlayerInventoryHandler> getPlayerInventoryHandler(String name) {
-		return Optional.ofNullable(getPlayerInventoryHandlers().get(name));
+	public static Optional<PlayerInventoryHandler> getPlayerInventoryHandler(PlayerEntity player, String name) {
+		return Optional.ofNullable(getPlayerInventoryHandlers(player).get(name));
 	}
 
 	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
-		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers().entrySet()) {
+		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers(player).entrySet()) {
 			PlayerInventoryHandler invHandler = entry.getValue();
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);

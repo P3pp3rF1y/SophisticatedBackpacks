@@ -120,7 +120,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		backpackWrapper.fillWithLoot(player);
 		backpackBackgroundProperties = (getNumberOfSlots() + backpackWrapper.getColumnsTaken() * backpackWrapper.getNumberOfSlotRows()) <= 81 ? BackpackBackgroundProperties.REGULAR : BackpackBackgroundProperties.WIDE;
 
-		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
+		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
 		backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
 		{
 			ItemStack backpack = backpackWrapper.getBackpack();
@@ -891,7 +891,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		realInventorySlots.clear();
 		realInventoryItemStacks.clear();
 		int yPosition = addBackpackInventorySlots();
-		addPlayerInventorySlots(player.inventory, yPosition, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
+		addPlayerInventorySlots(player.inventory, yPosition, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
 	}
 
 	private void refreshAllSlots() {
@@ -903,7 +903,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		upgradeItemStacks.clear();
 		upgradeContainers.clear();
 
-		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot());
+		initSlotsAndContainers(player, backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
 	}
 
 	private Set<Integer> getNoSortSlotIndexes() {
