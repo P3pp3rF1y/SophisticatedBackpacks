@@ -4,7 +4,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -65,7 +67,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		AtomicBoolean fedPlayer = new AtomicBoolean(false);
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
-			if (stack.isEdible() && filterLogic.matchesFilter(stack) && (isHungryEnoughForFood(hungerLevel, stack) || shouldFeedImmediatelyWhenHurt() && hungerLevel > 0 && isHurt)) {
+			if (stack.isEdible() && filterLogic.matchesFilter(stack) && (isHungryEnoughForFood(hungerLevel, stack) || shouldFeedImmediatelyWhenHurt() && hungerLevel > 0 && isHurt) && stack.use(world, player, Hand.MAIN_HAND).getResult() == ActionResultType.CONSUME) {
 				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().finishUsingItem(stack, world, player));
 				inventory.setStackInSlot(slot, stack);
 				if (!ItemStack.matches(containerItem, stack)) {
