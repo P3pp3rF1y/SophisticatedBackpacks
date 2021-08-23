@@ -24,7 +24,7 @@ import java.util.Optional;
 public abstract class BackpackContext {
 	public abstract Optional<IBackpackWrapper> getParentBackpackWrapper(PlayerEntity player);
 
-	public abstract boolean shouldLockBackpackSlot();
+	public abstract boolean shouldLockBackpackSlot(PlayerEntity player);
 
 	public abstract IBackpackWrapper getBackpackWrapper(PlayerEntity player);
 
@@ -122,13 +122,13 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public boolean shouldLockBackpackSlot() {
-			return PlayerInventoryProvider.getPlayerInventoryHandler(handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
+		public boolean shouldLockBackpackSlot(PlayerEntity player) {
+			return PlayerInventoryProvider.getPlayerInventoryHandler(player, handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
 		}
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(PlayerEntity player) {
-			return PlayerInventoryProvider.getPlayerInventoryHandler(handlerName)
+			return PlayerInventoryProvider.getPlayerInventoryHandler(player, handlerName)
 					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE))
 					.orElse(NoopBackpackWrapper.INSTANCE);
 		}
@@ -257,7 +257,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public boolean shouldLockBackpackSlot() {
+		public boolean shouldLockBackpackSlot(PlayerEntity player) {
 			return false;
 		}
 

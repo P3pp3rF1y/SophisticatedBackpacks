@@ -25,7 +25,6 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.SlotTypePreset;
-import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nullable;
@@ -38,24 +37,15 @@ public class CuriosCompat implements ICompat {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.addListener(this::sendImc);
 		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
-		addSlotProvider(SlotTypePreset.BACK.getIdentifier());
 
-		PlayerInventoryProvider.setPlayerInventoryHandlerInitCallback(() -> {
-			if (CuriosApi.getSlotHelper() == null) {
-				return false;
-			}
-
+		PlayerInventoryProvider.setPlayerInventoryHandlerInitCallback(player -> CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
 			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
-			backpackCurioTags.remove(SlotTypePreset.BACK.getIdentifier());
-
-			for (ISlotType slotType : CuriosApi.getSlotHelper().getSlotTypes()) {
-				String identifier = slotType.getIdentifier();
+			for (String identifier : handler.getCurios().keySet()) {
 				if (identifier.equals(SlotTypePreset.CURIO.getIdentifier()) || backpackCurioTags.contains(identifier)) {
 					addSlotProvider(identifier);
 				}
 			}
-			return true;
-		});
+		}));
 	}
 
 	private void addSlotProvider(String identifier) {
