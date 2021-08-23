@@ -38,20 +38,32 @@ public class CuriosCompat implements ICompat {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.addListener(this::sendImc);
 		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
+		addSlotProvider(SlotTypePreset.BACK.getIdentifier());
+
 		PlayerInventoryProvider.setPlayerInventoryHandlerInitCallback(() -> {
+			if (CuriosApi.getSlotHelper() == null) {
+				return false;
+			}
+
 			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
+			backpackCurioTags.remove(SlotTypePreset.BACK.getIdentifier());
 
 			for (ISlotType slotType : CuriosApi.getSlotHelper().getSlotTypes()) {
 				String identifier = slotType.getIdentifier();
 				if (identifier.equals(SlotTypePreset.CURIO.getIdentifier()) || backpackCurioTags.contains(identifier)) {
-					PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
-							player -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
-							(player, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-							(player, slot, stack) -> runOnBackStackHandler(player, identifier, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true, true
-					);
+					addSlotProvider(identifier);
 				}
 			}
+			return true;
 		});
+	}
+
+	private void addSlotProvider(String identifier) {
+		PlayerInventoryProvider.addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
+				player -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
+				(player, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
+				(player, slot, stack) -> runOnBackStackHandler(player, identifier, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true, true
+		);
 	}
 
 	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
