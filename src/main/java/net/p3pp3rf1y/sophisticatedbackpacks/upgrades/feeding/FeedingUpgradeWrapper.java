@@ -4,7 +4,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -66,15 +68,21 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		AtomicBoolean fedPlayer = new AtomicBoolean(false);
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			if (stack.isEdible() && filterLogic.matchesFilter(stack) && (isHungryEnoughForFood(hungerLevel, stack) || shouldFeedImmediatelyWhenHurt() && hungerLevel > 0 && isHurt)) {
-				ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().finishUsingItem(stack, world, player));
-				inventory.setStackInSlot(slot, stack);
-				if (!ItemStack.matches(containerItem, stack)) {
-					//not handling the case where player doesn't have item handler cap as the player should always have it. if that changes in the future well I guess I fix it
-					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
-							.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, containerItem, inventory, playerInventory));
+				ItemStack mainHandItem = player.getMainHandItem();
+				player.inventory.items.set(player.inventory.selected, stack);
+				if (stack.use(world, player, Hand.MAIN_HAND).getResult() == ActionResultType.CONSUME) {
+					player.inventory.items.set(player.inventory.selected, mainHandItem);
+					ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().finishUsingItem(stack, world, player));
+					inventory.setStackInSlot(slot, stack);
+					if (!ItemStack.matches(containerItem, stack)) {
+						//not handling the case where player doesn't have item handler cap as the player should always have it. if that changes in the future well I guess I fix it
+						player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP)
+								.ifPresent(playerInventory -> InventoryHelper.insertOrDropItem(player, containerItem, inventory, playerInventory));
+					}
+					fedPlayer.set(true);
+					return true;
 				}
-				fedPlayer.set(true);
-				return true;
+				player.inventory.items.set(player.inventory.selected, mainHandItem);
 			}
 			return false;
 		}, () -> false, ret -> ret);
