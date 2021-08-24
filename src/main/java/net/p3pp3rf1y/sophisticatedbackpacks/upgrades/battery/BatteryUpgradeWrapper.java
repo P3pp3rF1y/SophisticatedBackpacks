@@ -56,6 +56,10 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 				return isValidEnergyItem(stack, true);
 			}
 
+			@Override
+			public int getSlotLimit(int slot) {
+				return 1;
+			}
 		};
 		NBTHelper.getCompound(upgrade, "inventory").ifPresent(inventory::deserializeNBT);
 		energyStored = getEnergyStored(upgrade);

@@ -65,6 +65,10 @@ public class TankUpgradeWrapper extends UpgradeWrapperBase<TankUpgradeWrapper, T
 				return isValidFluidItem(stack, true);
 			}
 
+			@Override
+			public int getSlotLimit(int slot) {
+				return 1;
+			}
 		};
 		NBTHelper.getCompound(upgrade, "inventory").ifPresent(inventory::deserializeNBT);
 		contents = getContents(upgrade);
