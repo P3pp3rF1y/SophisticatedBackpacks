@@ -3,19 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.block.AbstractRailBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.BeeEntity;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Tuple;
@@ -24,15 +17,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,111 +39,29 @@ import java.util.function.Supplier;
 public class ToolRegistry {
 	private ToolRegistry() {}
 
+	private static final String TOOLS_PROPERTY = "tools";
+
 	public static Map<String, ToolType> getToolTypes() {
 		return TOOL_TYPES;
 	}
 
 	private static final Map<String, ToolType> TOOL_TYPES = new HashMap<>(Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(ToolType.class, null, "VALUES")));
 
-	private static final Set<String> modsWithMapping = new HashSet<>();
-
-	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(BlockContext::getBlock);
-	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(Entity::getType);
-
-	private static final List<ItemMatcherFactory> itemMatcherFactories = new ArrayList<>();
-	private static final List<IMatcherFactory<BlockContext>> blockMatcherFactories = new ArrayList<>();
-	private static final List<IMatcherFactory<Entity>> entityMatcherFactories = new ArrayList<>();
-
 	static {
-		itemMatcherFactories.add(new ItemMatcherFactory("tag") {
-			@Override
-			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				String tagName = JSONUtils.getAsString(jsonObject, "tag");
-				ITag<Item> tag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tagName));
-				return tag == null ? Optional.empty() : Optional.of(new ItemTagMatcher(tag));
-			}
-		});
-
-		itemMatcherFactories.add(new ItemMatcherFactory("tool") {
+		Matchers.addItemMatcherFactory(new ItemMatcherFactory("tool") {
 			@Override
 			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
 				String toolName = JSONUtils.getAsString(jsonObject, "tool");
 				return TOOL_TYPES.containsKey(toolName) ? Optional.of(new ToolTypeMatcher(TOOL_TYPES.get(toolName))) : Optional.empty();
 			}
 		});
-		itemMatcherFactories.add(new ItemMatcherFactory("emptynbt") {
-			@Override
-			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				ResourceLocation itemName = new ResourceLocation(JSONUtils.getAsString(jsonObject, "item"));
-				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
-					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
-				}
-				Item item = ForgeRegistries.ITEMS.getValue(itemName);
-				return Optional.of(st -> st.getItem() == item && (st.getTag() == null || st.getTag().isEmpty()));
-			}
-		});
-
-		blockMatcherFactories.add(new IMatcherFactory<BlockContext>() {
-			@Override
-			public boolean appliesTo(JsonElement jsonElement) {
-				return jsonElement.isJsonPrimitive();
-			}
-
-			@Override
-			public Optional<Predicate<BlockContext>> getPredicate(JsonElement jsonElement) {
-				String modId = jsonElement.getAsString();
-				if (!ModList.get().isLoaded(modId)) {
-					SophisticatedBackpacks.LOGGER.debug("{} mod isn't loaded, skipping ...", modId);
-					return Optional.empty();
-				}
-
-				return Optional.of(new ModMatcher<>(modId, BlockContext::getBlock));
-			}
-		});
-		blockMatcherFactories.add(new TypedMatcherFactory<BlockContext>("all") {
-			@Override
-			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(block -> true);
-			}
-		});
-		blockMatcherFactories.add(new TypedMatcherFactory<BlockContext>("rail") {
-			@Override
-			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> blockContext.getBlock() instanceof AbstractRailBlock);
-			}
-		});
-		blockMatcherFactories.add(new TypedMatcherFactory<BlockContext>("item_handler") {
-			@Override
-			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> WorldHelper.getTile(blockContext.getWorld(),
-						blockContext.getPos()).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false));
-			}
-		});
-		entityMatcherFactories.add(new TypedMatcherFactory<Entity>("animal") {
-			@Override
-			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof AnimalEntity);
-			}
-		});
-		entityMatcherFactories.add(new TypedMatcherFactory<Entity>("living") {
-			@Override
-			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof LivingEntity);
-			}
-		});
-		entityMatcherFactories.add(new TypedMatcherFactory<Entity>("bee") {
-			@Override
-			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof BeeEntity);
-			}
-		});
-		entityMatcherFactories.add(new TypedMatcherFactory<Entity>("tameable") {
-			@Override
-			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof TameableEntity);
-			}
-		});
 	}
+
+	private static final Set<String> modsWithMapping = new HashSet<>();
+
+	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(BlockContext::getBlock);
+	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(Entity::getType);
+	private static final ToolTypeMapping TOOL_TYPE_MAPPING = new ToolTypeMapping();
 
 	public static boolean isToolForBlock(ItemStack stack, Block block, World world, BlockState blockState, BlockPos pos) {
 		return BLOCK_TOOL_MAPPING.isToolFor(stack, block, () -> new BlockContext(world, blockState, block, pos));
@@ -161,6 +69,122 @@ public class ToolRegistry {
 
 	public static boolean isToolForEntity(ItemStack stack, Entity entity) {
 		return ENTITY_TOOL_MAPPING.isToolFor(stack, entity.getType(), () -> entity);
+	}
+
+	public static Set<ToolType> getItemToolTypes(ItemStack stack) {
+		return TOOL_TYPE_MAPPING.getItemToolTypes(stack);
+	}
+
+	private static class ToolTypeMapping {
+		private final Map<Item, Set<ToolType>> toolTypes = new HashMap<>();
+		private final Map<Predicate<ItemStack>, Set<ToolType>> predicateToolTypes = new HashMap<>();
+		private final Set<Item> notAToolCache = new HashSet<>();
+
+		public void clear() {
+			toolTypes.clear();
+			predicateToolTypes.clear();
+		}
+
+		public Set<ToolType> getItemToolTypes(ItemStack stack) {
+			if (notAToolCache.contains(stack.getItem())) {
+				return Collections.emptySet();
+			}
+
+			if (toolTypes.containsKey(stack.getItem())) {
+				return toolTypes.get(stack.getItem());
+			}
+
+			for (Map.Entry<Predicate<ItemStack>, Set<ToolType>> entry : predicateToolTypes.entrySet()) {
+				if (entry.getKey().test(stack)) {
+					return entry.getValue();
+				}
+			}
+
+			notAToolCache.add(stack.getItem());
+			return Collections.emptySet();
+		}
+	}
+
+	public static class ToolTypesLoader implements IRegistryDataLoader {
+		@Override
+		public String getName() {
+			return "type_tools";
+		}
+
+		@Override
+		public void parse(JsonObject json) {
+			JsonArray typeTools = json.getAsJsonArray("tool_types");
+			for (JsonElement jsonElement : typeTools) {
+				if (!jsonElement.isJsonObject()) {
+					continue;
+				}
+				JsonObject entry = jsonElement.getAsJsonObject();
+				parseEntry(entry);
+			}
+		}
+
+		private void parseEntry(JsonObject entry) {
+			if (entry.size() == 1) {
+				parseFromProperty(entry);
+			} else {
+				if (entry.size() == 2 && entry.has(TOOLS_PROPERTY) && entry.has("types")) {
+					parseFromArrays(JSONUtils.getAsJsonArray(entry, TOOLS_PROPERTY), JSONUtils.getAsJsonArray(entry, "types"));
+				} else {
+					SophisticatedBackpacks.LOGGER.error("Invalid tool types entry - needs to have either 1 array property with item name or \"tools\" and \"types\" array properties {}", entry);
+				}
+			}
+		}
+
+		private void parseFromArrays(JsonArray tools, JsonArray types) {
+			Set<ToolType> toolTypes = getToolTypes(types);
+
+			for (JsonElement toolElement : tools) {
+				if (toolElement.isJsonPrimitive()) {
+					parseTool(toolElement.getAsString(), toolTypes);
+				} else {
+					Matchers.getItemMatcher(toolElement)
+							.ifPresent(toolMatcher -> TOOL_TYPE_MAPPING.predicateToolTypes.computeIfAbsent(toolMatcher, p -> new HashSet<>()).addAll(toolTypes));
+				}
+			}
+		}
+
+		private void parseFromProperty(JsonObject entry) {
+			for (Map.Entry<String, JsonElement> property : entry.entrySet()) {
+				String toolName = property.getKey();
+				Set<ToolType> toolTypes = getToolTypes(property.getValue().getAsJsonArray());
+				parseTool(toolName, toolTypes);
+			}
+		}
+
+		private void parseTool(String toolName, Set<ToolType> toolTypes) {
+			Item tool = ForgeRegistries.ITEMS.getValue(new ResourceLocation(toolName));
+			if (tool != null) {
+				TOOL_TYPE_MAPPING.toolTypes.computeIfAbsent(tool, t -> new HashSet<>()).addAll(toolTypes);
+			} else {
+				String modId = toolName.split(":")[0];
+				if (!ModList.get().isLoaded(modId)) {
+					SophisticatedBackpacks.LOGGER.debug("Mod {} isn't loaded skipping load of tool types for {}", modId, toolName);
+				} else {
+					SophisticatedBackpacks.LOGGER.warn("Mod {} is loaded and yet tool {} doesn't exist in registry, skipping load of tool types for it", modId, toolName);
+				}
+			}
+		}
+
+		private Set<ToolType> getToolTypes(JsonArray types) {
+			Set<ToolType> toolTypes = new HashSet<>();
+			types.forEach(e -> {
+				String toolTypeString = e.getAsString();
+				if (TOOL_TYPES.containsKey(toolTypeString)) {
+					toolTypes.add(TOOL_TYPES.get(toolTypeString));
+				}
+			});
+			return toolTypes;
+		}
+
+		@Override
+		public void clear() {
+			TOOL_TYPE_MAPPING.clear();
+		}
 	}
 
 	private abstract static class ToolsLoaderBase<T extends ForgeRegistryEntry<?>, C> implements IRegistryDataLoader {
@@ -207,22 +231,22 @@ public class ToolRegistry {
 			if (entry.size() == 1) {
 				parseFromProperty(entry);
 			} else {
-				if (entry.size() == 2 && entry.has(objectJsonArrayName) && entry.has("tools")) {
-					parseFromArrays(JSONUtils.getAsJsonArray(entry, objectJsonArrayName), JSONUtils.getAsJsonArray(entry, "tools"));
+				if (entry.size() == 2 && entry.has(objectJsonArrayName) && entry.has(TOOLS_PROPERTY)) {
+					parseFromArrays(JSONUtils.getAsJsonArray(entry, objectJsonArrayName), JSONUtils.getAsJsonArray(entry, TOOLS_PROPERTY));
 				} else {
-					SophisticatedBackpacks.LOGGER.error("Invalid block tools entry - needs to have either 1 array property with mod/block name or \"blocks\" and \"tools\" array properties {}", entry);
+					SophisticatedBackpacks.LOGGER.error("Invalid block tools entry - needs to have either 1 array property with mod/entity name or \"{}\" and \"tools\" array properties {}", objectJsonArrayName, entry);
 				}
 			}
 		}
 
 		private void parseFromArrays(JsonArray blocksArray, JsonArray toolsArray) {
-			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getTools(toolsArray);
+			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getItemsAndItemPredicates(toolsArray);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
 			for (JsonElement jsonElement : blocksArray) {
 				if (jsonElement.isJsonPrimitive() && jsonElement.getAsString().contains(":")) {
-					parseBlockEntry(tools, jsonElement.getAsString());
+					parseObjectEntry(tools, jsonElement.getAsString());
 				} else {
 					parseObjectPredicateEntry(tools, jsonElement);
 				}
@@ -238,7 +262,7 @@ public class ToolRegistry {
 			}
 		}
 
-		private void parseBlockEntry(Tuple<Set<Item>, Set<CacheableStackPredicate>> tools, String objectName) {
+		private void parseObjectEntry(Tuple<Set<Item>, Set<CacheableStackPredicate>> tools, String objectName) {
 			ResourceLocation registryName = new ResourceLocation(objectName);
 			Optional<T> objectOptional = getObjectFromRegistry.apply(registryName);
 			if (objectOptional.isPresent()) {
@@ -251,7 +275,7 @@ public class ToolRegistry {
 		private void parseFromProperty(JsonObject entry) {
 			for (Map.Entry<String, JsonElement> property : entry.entrySet()) {
 				if (property.getKey().contains(":")) {
-					parseBlockTools(property);
+					parseObjectTools(property);
 				} else {
 					parseModTools(property);
 				}
@@ -264,103 +288,61 @@ public class ToolRegistry {
 				SophisticatedBackpacks.LOGGER.debug("{} mod isn't loaded, skipping ... {} ", modId, property);
 				return;
 			}
-			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getTools(property);
+			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getItemsAndItemPredicates(property);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
 			toolMapping.addModPredicateTools(modId, tools);
 		}
 
-		private void parseBlockTools(Map.Entry<String, JsonElement> property) {
-			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getTools(property);
+		private void parseObjectTools(Map.Entry<String, JsonElement> property) {
+			Tuple<Set<Item>, Set<CacheableStackPredicate>> tools = getItemsAndItemPredicates(property);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
-			parseBlockEntry(tools, property.getKey());
+			parseObjectEntry(tools, property.getKey());
 		}
 
-		protected Tuple<Set<Item>, Set<CacheableStackPredicate>> getTools(Map.Entry<String, JsonElement> property) {
-			if (property.getValue().isJsonArray()) {
-				JsonArray toolArray = JSONUtils.convertToJsonArray(property.getValue(), "");
-				return getTools(toolArray);
-			} else {
-				SophisticatedBackpacks.LOGGER.error("Invalid tools list - needs to be an array {}", property.getValue());
-				return new Tuple<>(Collections.emptySet(), Collections.emptySet());
-			}
-		}
+	}
 
-		protected Tuple<Set<Item>, Set<CacheableStackPredicate>> getTools(JsonArray toolArray) {
-			Set<Item> tools = new HashSet<>();
-			Set<CacheableStackPredicate> toolPredicates = new HashSet<>();
-			for (JsonElement jsonElement : toolArray) {
-				if (jsonElement.isJsonPrimitive()) {
-					ResourceLocation itemName = new ResourceLocation(jsonElement.getAsString());
-					if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
-						SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
-					}
-					Item item = ForgeRegistries.ITEMS.getValue(itemName);
-					tools.add(item);
-				} else if (jsonElement.isJsonObject()) {
-					for (ItemMatcherFactory itemMatcherFactory : itemMatcherFactories) {
-						if (itemMatcherFactory.appliesTo(jsonElement)) {
-							itemMatcherFactory.getPredicate(jsonElement).ifPresent(toolPredicates::add);
-							break;
-						}
-					}
+	protected static Tuple<Set<Item>, Set<CacheableStackPredicate>> getItemsAndItemPredicates(Map.Entry<String, JsonElement> property) {
+		if (property.getValue().isJsonArray()) {
+			JsonArray toolArray = JSONUtils.convertToJsonArray(property.getValue(), "");
+			return getItemsAndItemPredicates(toolArray);
+		} else {
+			SophisticatedBackpacks.LOGGER.error("Invalid tools list - needs to be an array {}", property.getValue());
+			return new Tuple<>(Collections.emptySet(), Collections.emptySet());
+		}
+	}
+
+	protected static Tuple<Set<Item>, Set<CacheableStackPredicate>> getItemsAndItemPredicates(JsonArray toolArray) {
+		Set<Item> items = new HashSet<>();
+		Set<CacheableStackPredicate> itemPredicates = new HashSet<>();
+		for (JsonElement jsonElement : toolArray) {
+			if (jsonElement.isJsonPrimitive()) {
+				ResourceLocation itemName = new ResourceLocation(jsonElement.getAsString());
+				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
+					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
+				Item item = ForgeRegistries.ITEMS.getValue(itemName);
+				items.add(item);
+			} else if (jsonElement.isJsonObject()) {
+				Matchers.getItemMatcher(jsonElement).ifPresent(itemPredicates::add);
 			}
-			return new Tuple<>(tools, toolPredicates);
 		}
+		return new Tuple<>(items, itemPredicates);
 	}
 
 	public static class BlockToolsLoader extends ToolsLoaderBase<Block, BlockContext> {
 		public BlockToolsLoader() {
-			super(blockMatcherFactories, BLOCK_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
+			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
 		}
 	}
 
 	public static class EntityToolsLoader extends ToolsLoaderBase<EntityType<?>, Entity> {
 		public EntityToolsLoader() {
-			super(entityMatcherFactories, ENTITY_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(rn)), "entity_tools", "entities");
+			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(rn)), "entity_tools", "entities");
 		}
-	}
-
-	private abstract static class ItemMatcherFactory {
-		private final String typeName;
-
-		public ItemMatcherFactory(String typeName) {
-			this.typeName = typeName;
-		}
-
-		public boolean appliesTo(JsonElement jsonElement) {
-			return jsonElement.isJsonObject() && JSONUtils.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
-		}
-
-		public Optional<CacheableStackPredicate> getPredicate(JsonElement jsonElement) {
-			return getPredicateFromObject(jsonElement.getAsJsonObject());
-		}
-
-		protected abstract Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject);
-	}
-
-	private abstract static class TypedMatcherFactory<T> implements IMatcherFactory<T> {
-		private final String typeName;
-
-		public TypedMatcherFactory(String typeName) {
-			this.typeName = typeName;
-		}
-
-		@Override
-		public boolean appliesTo(JsonElement jsonElement) {
-			return jsonElement.isJsonObject() && JSONUtils.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
-		}
-
-		@Override
-		public Optional<Predicate<T>> getPredicate(JsonElement jsonElement) {
-			return getPredicateFromObject(jsonElement.getAsJsonObject());
-		}
-
-		protected abstract Optional<Predicate<T>> getPredicateFromObject(JsonObject jsonObject);
 	}
 
 	public static void addModWithMapping(String modId) {
@@ -408,16 +390,16 @@ public class ToolRegistry {
 			}
 
 			AtomicBoolean shouldCache = new AtomicBoolean(true);
-			if (tryToMatchAgainstBlockToolPredicates(stack, object, shouldCache)) {
+			if (tryToMatchAgainstObjectToolPredicates(stack, object, shouldCache)) {
 				return true;
 			}
 
 			C context = getContext.get();
-			if (tryToMatchAgainstBlockPredicateTools(item, context)) {
+			if (tryToMatchAgainstObjectPredicateTools(item, context)) {
 				return true;
 			}
 
-			if (tryToMatchAgainstBlockPredicateToolPredicates(stack, context, shouldCache)) {
+			if (tryToMatchAgainstObjectPredicateToolPredicates(stack, context, shouldCache)) {
 				return true;
 			}
 
@@ -447,7 +429,7 @@ public class ToolRegistry {
 			).orElse(false) && stack.getMaxStackSize() == 1;
 		}
 
-		private boolean tryToMatchAgainstBlockPredicateToolPredicates(ItemStack stack, C context, AtomicBoolean shouldCache) {
+		private boolean tryToMatchAgainstObjectPredicateToolPredicates(ItemStack stack, C context, AtomicBoolean shouldCache) {
 			for (Map.Entry<Predicate<C>, Set<CacheableStackPredicate>> entry : objectPredicateToolPredicates.entrySet()) {
 				if (entry.getKey().test(context)) {
 					Set<CacheableStackPredicate> toolPredicates = entry.getValue();
@@ -459,7 +441,7 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchAgainstBlockToolPredicates(ItemStack stack, T object, AtomicBoolean shouldCache) {
+		private boolean tryToMatchAgainstObjectToolPredicates(ItemStack stack, T object, AtomicBoolean shouldCache) {
 			if (objectToolPredicates.containsKey(object)) {
 				Set<CacheableStackPredicate> toolPredicates = objectToolPredicates.get(object);
 				return tryToMatchTools(stack, object, shouldCache, toolPredicates);
@@ -467,7 +449,7 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchAgainstBlockPredicateTools(Item item, C context) {
+		private boolean tryToMatchAgainstObjectPredicateTools(Item item, C context) {
 			for (Map.Entry<Predicate<C>, Set<Item>> entry : objectPredicateTools.entrySet()) {
 				if (entry.getKey().test(context) && entry.getValue().contains(item)) {
 					addObjectToolMapping(getObjectFromContext.apply(context), item);

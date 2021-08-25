@@ -32,6 +32,7 @@ public class RegistryLoader extends JsonReloadListener {
 	static {
 		registerParser(new ToolRegistry.BlockToolsLoader());
 		registerParser(new ToolRegistry.EntityToolsLoader());
+		registerParser(new ToolRegistry.ToolTypesLoader());
 	}
 
 	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();

@@ -94,7 +94,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			if (isAllowedAndGoodAtBreakingBlock(state, block, stack)) {
 				selectedSlot.set(slot);
 				selectedTool.set(stack);
-				if (!(block instanceof LeavesBlock) || !stack.getToolTypes().contains(ToolType.HOE)) {
+				if (!(block instanceof LeavesBlock) || !getToolTypes(stack).contains(ToolType.HOE)) {
 					finished.set(true);
 				}
 			}
@@ -118,12 +118,22 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private Optional<ToolType> getToolTypeEffectiveOnBlock(BlockState state, Block block, ItemStack stack) {
-		for (ToolType type : stack.getToolTypes()) {
+		for (ToolType type : getToolTypes(stack)) {
 			if (block.isToolEffective(state, type)) {
 				return Optional.of(type);
 			}
 		}
 		return Optional.empty();
+	}
+
+	private Set<ToolType> getToolTypes(ItemStack stack) {
+		Set<ToolType> toolTypes = stack.getToolTypes();
+
+		if (toolTypes.isEmpty()) {
+			return ToolRegistry.getItemToolTypes(stack);
+		}
+
+		return toolTypes;
 	}
 
 	@Override
@@ -155,12 +165,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isTool(ItemStack stack) {
-		return !stack.getToolTypes().isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
+		return !getToolTypes(stack).isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, PlayerEntity player) {
 		ModifiableAttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
-		if (!stack.isEmpty() && stack.getToolTypes().isEmpty()) {
+		if (!stack.isEmpty() && getToolTypes(stack).isEmpty()) {
 			return attackDamage != null && attackDamage.getModifier(Item.BASE_ATTACK_DAMAGE_UUID) != null;
 		}
 		return false;
@@ -200,12 +210,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			attribute.addTransientModifier(m);
 		});
 		double damageValue = attribute.getValue();
-		if (stack.getToolTypes().contains(ToolType.AXE)) {
+		if (getToolTypes(stack).contains(ToolType.AXE)) {
 			if (damageValue > bestAxeDamage.get()) {
 				bestAxe.set(stack);
 				bestAxeDamage.set(damageValue);
 			}
-		} else if (stack.getToolTypes().isEmpty() && damageValue > bestSwordDamage.get()) {
+		} else if (getToolTypes(stack).isEmpty() && damageValue > bestSwordDamage.get()) {
 			bestSword.set(stack);
 			bestSwordDamage.set(damageValue);
 		}
@@ -351,7 +361,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean itemWorksOnBlock(World world, BlockPos pos, BlockState blockState, PlayerEntity player, ItemStack stack) {
-		for (ToolType toolType : stack.getToolTypes()) {
+		for (ToolType toolType : getToolTypes(stack)) {
 			if (blockState.getToolModifiedState(world, pos, player, stack, toolType) != null) {
 				return true;
 			}

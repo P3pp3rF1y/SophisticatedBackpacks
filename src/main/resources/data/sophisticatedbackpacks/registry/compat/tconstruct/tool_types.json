@@ -1,0 +1,44 @@
+{
+    "mod": "tconstruct",
+    "tool_types": [
+        {
+            "tconstruct:excavator": [
+                "shovel"
+            ]
+        },
+        {
+            "tconstruct:mattock": [
+                "shovel",
+                "axe"
+            ]
+        },
+        {
+            "tools": [
+                "tconstruct:pickaxe",
+                "tconstruct:sledge_hammer",
+                "tconstruct:vein_hammer"
+            ],
+            "types": [
+                "pickaxe"
+            ]
+        },
+        {
+            "tools": [
+                "tconstruct:hand_axe",
+                "tconstruct:axe"
+            ],
+            "types": [
+                "axe"
+            ]
+        },
+        {
+            "tools": [
+                "tconstruct:scythe",
+                "tconstruct:kama"
+            ],
+            "types": [
+                "hoe"
+            ]
+        }
+    ]
+}
