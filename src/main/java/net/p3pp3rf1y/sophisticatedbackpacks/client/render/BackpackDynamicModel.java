@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -414,7 +415,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, IUnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<RenderMaterial, String>> textures) {
-			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase()), Collections.emptyList(), textures, true, null, ItemCameraTransforms.NO_TRANSFORMS, Collections.emptyList()));
+			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemCameraTransforms.NO_TRANSFORMS, Collections.emptyList()));
 		}
 	}
 
