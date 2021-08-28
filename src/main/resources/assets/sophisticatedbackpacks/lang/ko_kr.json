@@ -63,7 +63,7 @@
     "item.sophisticatedbackpacks.auto_smelting_upgrade": "자동 제련 강화",
     "item.sophisticatedbackpacks.auto_smelting_upgrade.tooltip": "강화 창에서 화로를 사용할 수 있게 됩니다\n자동으로 화로에 아이템을 넣고 꺼낼 수 있게 됩니다",
     "item.sophisticatedbackpacks.crafting_upgrade": "제작 강화",
-    "item.sophisticatedbackpacks.crafting_upgrade.tooltip": "강화 창에서 재작대를 사용할 수 있게 됩니다",
+    "item.sophisticatedbackpacks.crafting_upgrade.tooltip": "강화 창에서 제작대를 사용할 수 있게 됩니다",
     "item.sophisticatedbackpacks.stonecutter_upgrade": "석재 절단 강화",
     "item.sophisticatedbackpacks.stonecutter_upgrade.tooltip": "강화 창에서 석재 절단기를 사용할 수 있게 됩니다",
     "item.sophisticatedbackpacks.jukebox_upgrade": "주크박스 강화",
