@@ -31,6 +31,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -51,6 +52,8 @@ import java.util.function.Predicate;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
+	private static final ToolType SWORD_TOOL_TYPE = ToolType.get("sword");
+
 	private final ToolSwapperFilterLogic filterLogic;
 	@Nullable
 	private ResourceLocation toolCacheFor = null;
@@ -114,7 +117,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean goodAtBreakingBlock(BlockState state, ItemStack stack) {
-		return stack.isCorrectToolForDrops(state) || stack.getDestroySpeed(state) > 1.5;
+		return stack.isCorrectToolForDrops(state) && stack.getDestroySpeed(state) > 1.5;
 	}
 
 	private Optional<ToolType> getToolTypeEffectiveOnBlock(BlockState state, Block block, ItemStack stack) {
@@ -165,12 +168,16 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isTool(ItemStack stack) {
-		return !getToolTypes(stack).isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
+		return !hasSwordOrNoToolTypes(stack) || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, PlayerEntity player) {
+		if (SwordRegistry.isSword(stack)) {
+			return true;
+		}
+
 		ModifiableAttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
-		if (!stack.isEmpty() && getToolTypes(stack).isEmpty()) {
+		if (!stack.isEmpty() && hasSwordOrNoToolTypes(stack)) {
 			return attackDamage != null && attackDamage.getModifier(Item.BASE_ATTACK_DAMAGE_UUID) != null;
 		}
 		return false;
@@ -215,10 +222,15 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 				bestAxe.set(stack);
 				bestAxeDamage.set(damageValue);
 			}
-		} else if (getToolTypes(stack).isEmpty() && damageValue > bestSwordDamage.get()) {
+		} else if ((SwordRegistry.isSword(stack) || hasSwordOrNoToolTypes(stack)) && damageValue > bestSwordDamage.get()) {
 			bestSword.set(stack);
 			bestSwordDamage.set(damageValue);
 		}
+	}
+
+	private boolean hasSwordOrNoToolTypes(ItemStack stack) {
+		Set<ToolType> toolTypes = getToolTypes(stack);
+		return toolTypes.isEmpty() || toolTypes.contains(SWORD_TOOL_TYPE);
 	}
 
 	private boolean swapWeapon(PlayerEntity player, ItemStack mainHandItem, IItemHandlerModifiable backpackInventory, ItemStack sword) {

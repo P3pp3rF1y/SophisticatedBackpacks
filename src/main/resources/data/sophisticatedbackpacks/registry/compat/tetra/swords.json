@@ -1,0 +1,9 @@
+{
+    "mod": "tetra",
+    "swords": [
+        {
+            "type": "tool",
+            "tool": "cut"
+        }
+    ]
+}

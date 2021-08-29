@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,12 +24,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,20 +41,36 @@ import java.util.function.Supplier;
 public class ToolRegistry {
 	private ToolRegistry() {}
 
+	public static final Set<String> SWORD_TOOL_TYPES_TO_SKIP = ImmutableSet.of("cut", "sword");
+
 	private static final String TOOLS_PROPERTY = "tools";
 
-	public static Map<String, ToolType> getToolTypes() {
-		return TOOL_TYPES;
-	}
+	private static final Field TOOL_TYPES = ObfuscationReflectionHelper.findField(ToolType.class, "VALUES");
 
-	private static final Map<String, ToolType> TOOL_TYPES = new HashMap<>(Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(ToolType.class, null, "VALUES")));
+	public static Map<String, ToolType> getToolTypes() {
+		try {
+			Map<String, ToolType> toolTypes = new HashMap<>();
+
+			//noinspection unchecked
+			((Map<String, ToolType>) TOOL_TYPES.get(null)).forEach((key, value) -> {
+				if (!SWORD_TOOL_TYPES_TO_SKIP.contains(key)) {
+					toolTypes.put(key, value);
+				}
+			});
+
+			return toolTypes;
+		}
+		catch (IllegalAccessException e) {
+			return Collections.emptyMap();
+		}
+	}
 
 	static {
 		Matchers.addItemMatcherFactory(new ItemMatcherFactory("tool") {
 			@Override
 			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
 				String toolName = JSONUtils.getAsString(jsonObject, "tool");
-				return TOOL_TYPES.containsKey(toolName) ? Optional.of(new ToolTypeMatcher(TOOL_TYPES.get(toolName))) : Optional.empty();
+				return Optional.of(new ToolTypeMatcher(ToolType.get(toolName)));
 			}
 		});
 	}
@@ -112,7 +130,7 @@ public class ToolRegistry {
 		}
 
 		@Override
-		public void parse(JsonObject json) {
+		public void parse(JsonObject json, @Nullable String modId) {
 			JsonArray typeTools = json.getAsJsonArray("tool_types");
 			for (JsonElement jsonElement : typeTools) {
 				if (!jsonElement.isJsonObject()) {
@@ -174,9 +192,7 @@ public class ToolRegistry {
 			Set<ToolType> toolTypes = new HashSet<>();
 			types.forEach(e -> {
 				String toolTypeString = e.getAsString();
-				if (TOOL_TYPES.containsKey(toolTypeString)) {
-					toolTypes.add(TOOL_TYPES.get(toolTypeString));
-				}
+				toolTypes.add(ToolType.get(toolTypeString));
 			});
 			return toolTypes;
 		}
@@ -208,7 +224,7 @@ public class ToolRegistry {
 		}
 
 		@Override
-		public void parse(JsonObject json) {
+		public void parse(JsonObject json, @Nullable String modId) {
 			JsonArray toolsMap = JSONUtils.getAsJsonArray(json, name);
 
 			for (JsonElement jsonElement : toolsMap) {
