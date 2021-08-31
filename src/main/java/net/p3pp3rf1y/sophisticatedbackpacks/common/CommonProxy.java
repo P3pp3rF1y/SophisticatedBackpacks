@@ -123,6 +123,9 @@ public class CommonProxy {
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getWorld().isClientSide) {
+			return;
+		}
 		PlayerEntity player = event.getPlayer();
 		BlockPos pos = event.getPos();
 		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -138,6 +141,9 @@ public class CommonProxy {
 
 	private void onAttackEntity(AttackEntityEvent event) {
 		PlayerEntity player = event.getPlayer();
+		if (player.level.isClientSide) {
+			return;
+		}
 		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
