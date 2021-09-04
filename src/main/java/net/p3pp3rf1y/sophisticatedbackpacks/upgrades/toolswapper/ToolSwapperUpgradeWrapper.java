@@ -66,12 +66,13 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	@Override
 	public boolean onBlockClick(PlayerEntity player, BlockPos pos) {
-		if (player.isCreative() || player.isSpectator() || !shouldSwapTools()) {
+		ToolSwapMode toolSwapMode = getToolSwapMode();
+		if (player.isCreative() || player.isSpectator() || toolSwapMode == ToolSwapMode.NO_SWAP) {
 			return false;
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || !(isTool(mainHandItem) || isSword(mainHandItem, player))) {
+		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || !(isTool(mainHandItem))) {
 			return false;
 		}
 
@@ -146,11 +147,13 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || !isTool(mainHandItem)) {
-			return false;
-		}
+
 		if (isSword(mainHandItem, player)) {
 			return true;
+		}
+
+		if (mainHandItem.getItem() instanceof BackpackItem || !isTool(mainHandItem)) {
+			return false;
 		}
 
 		if (filterLogic.isAllowList()) {
@@ -168,7 +171,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isTool(ItemStack stack) {
-		return !hasSwordOrNoToolTypes(stack) || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
+		return (!stack.getToolTypes().isEmpty() || !ToolRegistry.getItemToolTypes(stack).isEmpty()) || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, PlayerEntity player) {
@@ -267,12 +270,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		save();
 	}
 
-	public boolean shouldSwapTools() {
-		return NBTHelper.getBoolean(upgrade, "shouldSwapTools").orElse(true);
+	public ToolSwapMode getToolSwapMode() {
+		return NBTHelper.getEnumConstant(upgrade, "toolSwapMode", ToolSwapMode::fromName).orElse(ToolSwapMode.ANY);
 	}
 
-	public void setSwapTools(boolean shouldSwapTools) {
-		NBTHelper.setBoolean(upgrade, "shouldSwapTools", shouldSwapTools);
+	public void setToolSwapMode(ToolSwapMode toolSwapMode) {
+		NBTHelper.setEnumConstant(upgrade, "toolSwapMode", toolSwapMode);
 		save();
 	}
 

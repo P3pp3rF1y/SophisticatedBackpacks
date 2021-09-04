@@ -9,7 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 public class ToolSwapperUpgradeContainer extends UpgradeContainerBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> {
 	private static final String DATA_SHOULD_SWAP_WEAPON = "shouldSwapWeapon";
-	private static final String DATA_SHOULD_SWAP_TOOLS = "shouldSwapTools";
+	private static final String DATA_TOOL_SWAP_MODE = "toolSwapMode";
 	private final FilterLogicContainerBase<ToolSwapperFilterLogic, ToolFilterSlot> filterLogicContainer;
 
 	public ToolSwapperUpgradeContainer(PlayerEntity player, int upgradeContainerId, ToolSwapperUpgradeWrapper upgradeWrapper, UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> type) {
@@ -22,8 +22,8 @@ public class ToolSwapperUpgradeContainer extends UpgradeContainerBase<ToolSwappe
 	public void handleMessage(CompoundNBT data) {
 		if (data.contains(DATA_SHOULD_SWAP_WEAPON)) {
 			setSwapWeapon(data.getBoolean(DATA_SHOULD_SWAP_WEAPON));
-		} else if (data.contains(DATA_SHOULD_SWAP_TOOLS)) {
-			setSwapTools(data.getBoolean(DATA_SHOULD_SWAP_TOOLS));
+		} else if (data.contains(DATA_TOOL_SWAP_MODE)) {
+			setToolSwapMode(ToolSwapMode.fromName(data.getString(DATA_TOOL_SWAP_MODE)));
 		} else {
 			filterLogicContainer.handleMessage(data);
 		}
@@ -42,12 +42,12 @@ public class ToolSwapperUpgradeContainer extends UpgradeContainerBase<ToolSwappe
 		return upgradeWrapper.shouldSwapWeapon();
 	}
 
-	public void setSwapTools(boolean shouldSwapTools) {
-		upgradeWrapper.setSwapTools(shouldSwapTools);
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHOULD_SWAP_TOOLS, shouldSwapTools));
+	public void setToolSwapMode(ToolSwapMode toolSwapMode) {
+		upgradeWrapper.setToolSwapMode(toolSwapMode);
+		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_TOOL_SWAP_MODE, toolSwapMode));
 	}
 
-	public boolean shouldSwapTools() {
-		return upgradeWrapper.shouldSwapTools();
+	public ToolSwapMode getToolSwapMode() {
+		return upgradeWrapper.getToolSwapMode();
 	}
 }
