@@ -6,8 +6,8 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -40,7 +40,7 @@ public class InventoryInteractionMessage {
 		if (sender == null) {
 			return;
 		}
-		PlayerInventoryProvider.runOnBackpacks(sender, (backpack, inventoryName, slot) -> {
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, slot) -> {
 			InventoryInteractionHelper.tryInventoryInteraction(msg.pos, sender.level, backpack, msg.face, sender);
 			sender.swing(Hand.MAIN_HAND, true);
 			return true;

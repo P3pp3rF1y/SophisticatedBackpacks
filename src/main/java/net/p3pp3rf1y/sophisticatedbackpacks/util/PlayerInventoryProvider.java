@@ -15,31 +15,31 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PlayerInventoryProvider {
-	private PlayerInventoryProvider() {}
-
 	public static final String MAIN_INVENTORY = "main";
 	public static final String OFFHAND_INVENTORY = "offhand";
-	private static final Map<String, PlayerInventoryHandler> playerInventoryHandlers = new LinkedHashMap<>();
-	private static final List<String> renderedHandlers = new ArrayList<>();
 	private static final String ARMOR_INVENTORY = "armor";
 
-	private static boolean playerInventoryHandlersInitialized = false;
-	private static Consumer<PlayerEntity> playerInventoryHandlerInitCallback = player -> {};
+	private final Map<String, PlayerInventoryHandler> playerInventoryHandlers = new LinkedHashMap<>();
+	private final List<String> renderedHandlers = new ArrayList<>();
 
-	static {
-		PlayerInventoryProvider.addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.items.size(),
+	private boolean playerInventoryHandlersInitialized = false;
+	private Consumer<PlayerEntity> playerInventoryHandlerInitCallback = player -> {};
+
+	public PlayerInventoryProvider() {
+		addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.items.size(),
 				(player, slot) -> player.inventory.items.get(slot), (player, slot, stack) -> player.inventory.items.set(slot, stack), true, false, false);
-		PlayerInventoryProvider.addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offhand.size(),
+		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offhand.size(),
 				(player, slot) -> player.inventory.offhand.get(slot), (player, slot, stack) -> player.inventory.offhand.set(slot, stack), false, false, false);
-		PlayerInventoryProvider.addPlayerInventoryHandler(ARMOR_INVENTORY, player -> 1,
+		addPlayerInventoryHandler(ARMOR_INVENTORY, player -> 1,
 				(player, slot) -> player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armor.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true, false);
+
 	}
 
-	public static void setPlayerInventoryHandlerInitCallback(Consumer<PlayerEntity> callback) {
+	public void setPlayerInventoryHandlerInitCallback(Consumer<PlayerEntity> callback) {
 		playerInventoryHandlerInitCallback = callback;
 	}
 
-	public static void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
+	public void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
 		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui, ownRenderer));
@@ -53,7 +53,7 @@ public class PlayerInventoryProvider {
 		}
 	}
 
-	public static Optional<RenderInfo> getBackpackFromRendered(PlayerEntity player) {
+	public Optional<RenderInfo> getBackpackFromRendered(PlayerEntity player) {
 		initialize(player);
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
@@ -67,23 +67,23 @@ public class PlayerInventoryProvider {
 		return Optional.empty();
 	}
 
-	private static Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers(PlayerEntity player) {
+	private Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers(PlayerEntity player) {
 		initialize(player);
 		return playerInventoryHandlers;
 	}
 
-	private static void initialize(PlayerEntity player) {
+	private void initialize(PlayerEntity player) {
 		if (!playerInventoryHandlersInitialized) {
 			playerInventoryHandlerInitCallback.accept(player);
 			playerInventoryHandlersInitialized = true;
 		}
 	}
 
-	public static Optional<PlayerInventoryHandler> getPlayerInventoryHandler(PlayerEntity player, String name) {
+	public Optional<PlayerInventoryHandler> getPlayerInventoryHandler(PlayerEntity player, String name) {
 		return Optional.ofNullable(getPlayerInventoryHandlers(player).get(name));
 	}
 
-	public static void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
+	public void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
 		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers(player).entrySet()) {
 			PlayerInventoryHandler invHandler = entry.getValue();
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
