@@ -126,7 +126,7 @@ public class ToolRegistry {
 	public static class ToolTypesLoader implements IRegistryDataLoader {
 		@Override
 		public String getName() {
-			return "type_tools";
+			return "tool_types";
 		}
 
 		@Override
