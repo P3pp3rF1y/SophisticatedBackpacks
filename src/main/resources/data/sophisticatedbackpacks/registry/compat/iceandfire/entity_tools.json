@@ -1,0 +1,23 @@
+{
+    "mod": "iceandfire",
+    "entity_tools": [
+        {
+            "iceandfire:fire_dragon": [
+                "iceandfire:dragon_horn",
+                "iceandfire:dragon_stick"
+            ]
+        },
+        {
+            "iceandfire:ice_dragon": [
+                "iceandfire:dragon_horn",
+                "iceandfire:dragon_stick"
+            ]
+        },
+        {
+            "iceandfire:lightning_dragon": [
+                "iceandfire:dragon_horn",
+                "iceandfire:dragon_stick"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "mod": "eidolon",
+    "block_tools": [
+        {
+            "eidolon:brazier": [
+                "minecraft:flint_and_steel"
+            ]
+        }
+    ]
+}

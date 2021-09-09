@@ -1,0 +1,10 @@
+{
+    "mod": "immersiveposts",
+    "block_tools": [
+        {
+            "immersiveposts": [
+                "immersiveengineering:hammer"
+            ]
+        }
+    ]
+}

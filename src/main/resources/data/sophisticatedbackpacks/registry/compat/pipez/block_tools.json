@@ -1,0 +1,10 @@
+{
+    "mod": "pipez",
+    "block_tools": [
+        {
+            "pipez": [
+                "pipez:wrench"
+            ]
+        }
+    ]
+}
