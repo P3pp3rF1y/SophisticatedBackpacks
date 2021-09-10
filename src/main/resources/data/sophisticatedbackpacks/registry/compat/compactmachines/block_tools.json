@@ -1,0 +1,10 @@
+{
+    "mod": "compactmachines",
+    "block_tools": [
+        {
+            "compactmachines": [
+                "compactmachines:personal_shrinking_device"
+            ]
+        }
+    ]
+}

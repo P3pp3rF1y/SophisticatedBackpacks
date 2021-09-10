@@ -1,0 +1,10 @@
+{
+    "mod": "woot",
+    "block_tools": [
+        {
+            "woot": [
+                "woot:intern"
+            ]
+        }
+    ]
+}

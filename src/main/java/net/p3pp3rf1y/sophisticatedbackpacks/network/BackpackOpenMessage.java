@@ -5,10 +5,10 @@ import net.minecraft.inventory.container.SimpleNamedContainerProvider;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -59,7 +59,7 @@ public class BackpackOpenMessage {
 	}
 
 	private static void findAndOpenFirstBackpack(ServerPlayerEntity player) {
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryName, slot) -> {
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, inventoryName, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, slot);
 			NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 					backpackContext::toBuffer);

@@ -1351,7 +1351,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	@Override
 	public void removed(PlayerEntity player) {
 		for (Slot slot : upgradeSlots) {
-			if (isInventorySlotInUpgradeTab(player, slot) && slot.getItem().getItem() instanceof BackpackItem &&
+			if (!(slot instanceof BackpackUpgradeSlot) && isInventorySlotInUpgradeTab(player, slot) && slot.getItem().getItem() instanceof BackpackItem &&
 					!backpackWrapper.getInventoryHandler().isItemValid(0, slot.getItem())) {
 				ItemStack slotStack = slot.getItem();
 				slot.set(ItemStack.EMPTY);

@@ -195,16 +195,14 @@ public class ClientProxy extends CommonProxy {
 	private static void sendBackpackOpenOrCloseMessage() {
 		if (!GUI.isActive()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
-		} else {
+		} else if (Minecraft.getInstance().screen instanceof BackpackScreen) {
 			BackpackScreen backpackScreen = (BackpackScreen) Minecraft.getInstance().screen;
 
-			if (backpackScreen != null) {
-				Slot slot = backpackScreen.getSlotUnderMouse();
-				if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
-					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
-				} else {
-					PacketHandler.sendToServer(new BackpackCloseMessage());
-				}
+			Slot slot = backpackScreen.getSlotUnderMouse();
+			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
+				PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
+			} else {
+				PacketHandler.sendToServer(new BackpackCloseMessage());
 			}
 		}
 	}

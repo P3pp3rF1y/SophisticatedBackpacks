@@ -7,6 +7,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
@@ -123,12 +124,12 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean shouldLockBackpackSlot(PlayerEntity player) {
-			return PlayerInventoryProvider.getPlayerInventoryHandler(player, handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
+			return SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(player, handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
 		}
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(PlayerEntity player) {
-			return PlayerInventoryProvider.getPlayerInventoryHandler(player, handlerName)
+			return SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(player, handlerName)
 					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE))
 					.orElse(NoopBackpackWrapper.INSTANCE);
 		}

@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ToolSwapperFilterContainer extends FilterLogicContainerBase<ToolSwapperFilterLogic, ToolFilterSlot> {
-	private static final Set<String> AVAILABLE_TOOL_BACKGROUNDS = ImmutableSet.of("axe", "cut", "hammer", "pickaxe", "shovel", "hoe");
+	private static final Set<String> AVAILABLE_TOOL_BACKGROUNDS = ImmutableSet.of("axe", "hammer", "pickaxe", "shovel", "hoe");
 	public static final ResourceLocation EMPTY_WEAPON_SLOT_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "item/empty_weapon_slot");
 	public static final Map<ToolType, ResourceLocation> EMPTY_TOOL_SLOT_BACKGROUNDS;
 
@@ -43,9 +43,9 @@ public class ToolSwapperFilterContainer extends FilterLogicContainerBase<ToolSwa
 					ToolFilterSlot toolFilterSlot = new ToolFilterSlot(() -> filterLogic.get().getToolFilter(toolType), stack -> filterLogic.get().setToolFilter(toolType, stack), s -> s.getToolTypes().contains(toolType));
 					if (EMPTY_TOOL_SLOT_BACKGROUNDS.containsKey(toolType)) {
 						toolFilterSlot.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_TOOL_SLOT_BACKGROUNDS.get(toolType));
-					} else {
-						toolFilterSlot.setEmptyTooltip(StringUtils.capitalize(toolType.getName()));
 					}
+					toolFilterSlot.setEmptyTooltip(StringUtils.capitalize(toolType.getName()));
+
 					filterSlots.add(toolFilterSlot);
 				}
 		);

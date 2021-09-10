@@ -6,9 +6,9 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,17 +49,17 @@ public class EntityToolSwapMessage {
 
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		PlayerInventoryProvider.runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(backpackWrapper -> {
 					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
-									.forEach(upgrade -> {
-										if (!upgrade.canProcessEntityInteract() || result.get()) {
-											return;
-										}
-										anyUpgradeCanInteract.set(true);
+							.forEach(upgrade -> {
+								if (!upgrade.canProcessEntityInteract() || result.get()) {
+									return;
+								}
+								anyUpgradeCanInteract.set(true);
 
-										result.set(upgrade.onEntityInteract(world, entity, sender));
-									});
+								result.set(upgrade.onEntityInteract(world, entity, sender));
+							});
 							return result.get();
 						}
 				).orElse(false)

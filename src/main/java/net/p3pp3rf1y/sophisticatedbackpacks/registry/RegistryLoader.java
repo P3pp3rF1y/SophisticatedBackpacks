@@ -11,6 +11,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ public class RegistryLoader extends JsonReloadListener {
 	static {
 		registerParser(new ToolRegistry.BlockToolsLoader());
 		registerParser(new ToolRegistry.EntityToolsLoader());
+		registerParser(new ToolRegistry.ToolTypesLoader());
+		registerParser(new SwordRegistry.SwordsLoader());
 	}
 
 	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();
@@ -103,11 +106,17 @@ public class RegistryLoader extends JsonReloadListener {
 
 		loadedRegistries.put(name, loader.get().getName());
 
-		if (isDisabled(json) || !isModLoaded(json)) {
+		String modId = null;
+		if (JSONUtils.isValidNode(json, "mod")) {
+			modId = JSONUtils.getAsString(json, "mod");
+		}
+
+		if (isDisabled(json) || (modId != null && !ModList.get().isLoaded(modId))) {
 			return;
 		}
+
 		try {
-			loader.get().parse(json);
+			loader.get().parse(json, modId);
 			SophisticatedBackpacks.LOGGER.debug("Finished loading registry data for {}", name);
 		}
 		catch (Exception exception) {
@@ -122,10 +131,6 @@ public class RegistryLoader extends JsonReloadListener {
 			}
 		}
 		return true;
-	}
-
-	private boolean isModLoaded(JsonObject json) {
-		return !JSONUtils.isValidNode(json, "mod") || ModList.get().isLoaded(JSONUtils.getAsString(json, "mod"));
 	}
 
 	private boolean isDisabled(JsonObject json) {

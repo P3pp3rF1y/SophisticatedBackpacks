@@ -1,0 +1,18 @@
+{
+    "tool_types": [
+        {
+            "minecraft:iron_pickaxe": [
+            ]
+        },
+        {
+            "tools": [
+                {
+                    "nbt": ""
+                }
+            ],
+            "types": [
+
+            ]
+        }
+    ]
+}

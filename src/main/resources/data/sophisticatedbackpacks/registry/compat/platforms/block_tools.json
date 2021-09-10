@@ -1,0 +1,10 @@
+{
+    "mod": "platforms",
+    "block_tools": [
+        {
+            "platforms": [
+                "platforms:wrench"
+            ]
+        }
+    ]
+}

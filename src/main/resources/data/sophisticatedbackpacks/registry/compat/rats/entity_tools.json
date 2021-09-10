@@ -1,0 +1,12 @@
+{
+    "mod": "rats",
+    "entity_tools": [
+        {
+            "rats:rat": [
+                "rats:cheese_stick",
+                "rats:patrol_stick",
+                "rats:radius_stick"
+            ]
+        }
+    ]
+}

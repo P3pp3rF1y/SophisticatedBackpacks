@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -20,14 +22,20 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBa
 public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
-					false, GuiHelper.getButtonStateData(new UV(48, 64), translUpgradeButton("do_not_swap_weapon"), Dimension.SQUARE_16, new Position(1, 1)),
-					true, GuiHelper.getButtonStateData(new UV(32, 64), translUpgradeButton("swap_weapon"), Dimension.SQUARE_16, new Position(1, 1))
+					false, GuiHelper.getButtonStateData(new UV(48, 64), Dimension.SQUARE_16, new Position(1, 1),
+							new TranslationTextComponent(translUpgradeButton("do_not_swap_weapon")), new TranslationTextComponent(translUpgradeButton("do_not_swap_weapon.detail")).withStyle(TextFormatting.GRAY)),
+					true, GuiHelper.getButtonStateData(new UV(32, 64), Dimension.SQUARE_16, new Position(1, 1),
+							new TranslationTextComponent(translUpgradeButton("swap_weapon")), new TranslationTextComponent(translUpgradeButton("swap_weapon.detail")).withStyle(TextFormatting.GRAY))
 			));
 
-	public static final ButtonDefinition.Toggle<Boolean> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(
+	public static final ButtonDefinition.Toggle<ToolSwapMode> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(
 			ImmutableMap.of(
-					false, GuiHelper.getButtonStateData(new UV(80, 64), translUpgradeButton("do_not_swap_tools"), Dimension.SQUARE_16, new Position(1, 1)),
-					true, GuiHelper.getButtonStateData(new UV(64, 64), translUpgradeButton("swap_tools"), Dimension.SQUARE_16, new Position(1, 1))
+					ToolSwapMode.NO_SWAP, GuiHelper.getButtonStateData(new UV(96, 64), Dimension.SQUARE_16, new Position(1, 1),
+							new TranslationTextComponent(translUpgradeButton("do_not_swap_tools")), new TranslationTextComponent(translUpgradeButton("do_not_swap_tools.detail")).withStyle(TextFormatting.GRAY)),
+					ToolSwapMode.ONLY_TOOLS, GuiHelper.getButtonStateData(new UV(80, 64), Dimension.SQUARE_16, new Position(1, 1),
+							new TranslationTextComponent(translUpgradeButton("only_swap_for_tools")), new TranslationTextComponent(translUpgradeButton("only_swap_for_tools.detail")).withStyle(TextFormatting.GRAY)),
+					ToolSwapMode.ANY, GuiHelper.getButtonStateData(new UV(64, 64), Dimension.SQUARE_16, new Position(1, 1),
+							new TranslationTextComponent(translUpgradeButton("swap_tools")), new TranslationTextComponent(translUpgradeButton("swap_tools.detail")).withStyle(TextFormatting.GRAY))
 			));
 
 	protected ToolSwapperFilterControl filterLogicControl;
@@ -36,8 +44,8 @@ public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgrade
 		super(upgradeContainer, position, screen, translUpgrade("advanced_tool_swapper"), translUpgradeTooltip("advanced_tool_swapper"));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), SWAP_WEAPON, button -> getContainer().setSwapWeapon(!getContainer().shouldSwapWeapon()),
 				getContainer()::shouldSwapWeapon));
-		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), SWAP_TOOLS, button -> getContainer().setSwapTools(!getContainer().shouldSwapTools()),
-				getContainer()::shouldSwapTools));
+		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), SWAP_TOOLS, button -> getContainer().setToolSwapMode(getContainer().getToolSwapMode().next()),
+				getContainer()::getToolSwapMode));
 
 		filterLogicControl = addHideableChild(new ToolSwapperFilterControl(getContainer().getFilterLogicContainer(), new Position(x + 3, y + 44), true,
 				Config.COMMON.toolSwapperUpgrade.slotsInRow.get()));

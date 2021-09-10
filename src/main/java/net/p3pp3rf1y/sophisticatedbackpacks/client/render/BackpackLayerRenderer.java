@@ -23,7 +23,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 	public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if (entity instanceof AbstractClientPlayerEntity) {
 			AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) entity;
-			PlayerInventoryProvider.getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
+			SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 				matrixStack.pushPose();
 				boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()).isEmpty();
 				ItemStack backpack = backpackRenderInfo.getBackpack();

@@ -52,6 +52,7 @@ import java.util.Random;
 
 public class CommonProxy {
 	private final RegistryLoader registryLoader = new RegistryLoader();
+	private final PlayerInventoryProvider playerInventoryProvider = new PlayerInventoryProvider();
 
 	public void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -71,6 +72,10 @@ public class CommonProxy {
 		eventBus.addListener(this::onAddReloadListener);
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
+	}
+
+	public PlayerInventoryProvider getPlayerInventoryProvider() {
+		return playerInventoryProvider;
 	}
 
 	private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
@@ -123,9 +128,12 @@ public class CommonProxy {
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
+		if (event.getWorld().isClientSide) {
+			return;
+		}
 		PlayerEntity player = event.getPlayer();
 		BlockPos pos = event.getPos();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
@@ -138,7 +146,10 @@ public class CommonProxy {
 
 	private void onAttackEntity(AttackEntityEvent event) {
 		PlayerEntity player = event.getPlayer();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		if (player.level.isClientSide) {
+			return;
+		}
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
@@ -181,11 +192,11 @@ public class CommonProxy {
 		ItemStack remainingStackSimulated = itemEntity.getItem().copy();
 		PlayerEntity player = event.getPlayer();
 		World world = player.getCommandSenderWorld();
-		PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated, wrapper, true)).orElse(false));
 		if (remainingStackSimulated.isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
-			PlayerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStack, wrapper, false)).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
