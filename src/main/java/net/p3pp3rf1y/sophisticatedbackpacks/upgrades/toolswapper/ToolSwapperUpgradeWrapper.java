@@ -72,7 +72,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || !(isTool(mainHandItem))) {
+		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || (!isSword(mainHandItem, player) && !isTool(mainHandItem))) {
 			return false;
 		}
 
@@ -171,7 +171,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isTool(ItemStack stack) {
-		return (!stack.getToolTypes().isEmpty() || !ToolRegistry.getItemToolTypes(stack).isEmpty()) || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
+		return !stack.getToolTypes().isEmpty() || !ToolRegistry.getItemToolTypes(stack).isEmpty() || stack.getItem() instanceof ShearsItem || stack.getItem().is(Tags.Items.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, PlayerEntity player) {
