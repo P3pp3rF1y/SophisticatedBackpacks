@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
@@ -20,11 +20,11 @@ public class RequestBackpackInventoryContentsMessage {
 		this.backpackUuid = backpackUuid;
 	}
 
-	public static void encode(RequestBackpackInventoryContentsMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(RequestBackpackInventoryContentsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeUUID(msg.backpackUuid);
 	}
 
-	public static RequestBackpackInventoryContentsMessage decode(PacketBuffer packetBuffer) {
+	public static RequestBackpackInventoryContentsMessage decode(FriendlyByteBuf packetBuffer) {
 		return new RequestBackpackInventoryContentsMessage(packetBuffer.readUUID());
 	}
 
@@ -34,19 +34,19 @@ public class RequestBackpackInventoryContentsMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity player, RequestBackpackInventoryContentsMessage msg) {
+	private static void handleMessage(@Nullable ServerPlayer player, RequestBackpackInventoryContentsMessage msg) {
 		if (player == null) {
 			return;
 		}
 
-		CompoundNBT backpackContents = BackpackStorage.get().getOrCreateBackpackContents(msg.backpackUuid);
+		CompoundTag backpackContents = BackpackStorage.get().getOrCreateBackpackContents(msg.backpackUuid);
 
-		CompoundNBT inventoryContents = new CompoundNBT();
-		INBT inventoryNbt = backpackContents.get(BackpackInventoryHandler.INVENTORY_TAG);
+		CompoundTag inventoryContents = new CompoundTag();
+		Tag inventoryNbt = backpackContents.get(BackpackInventoryHandler.INVENTORY_TAG);
 		if (inventoryNbt != null) {
 			inventoryContents.put(BackpackInventoryHandler.INVENTORY_TAG, inventoryNbt);
 		}
-		INBT upgradeNbt = backpackContents.get(BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG);
+		Tag upgradeNbt = backpackContents.get(BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG);
 		if (upgradeNbt != null) {
 			inventoryContents.put(BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
 		}

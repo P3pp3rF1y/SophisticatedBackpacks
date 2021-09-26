@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum ContentsFilterType implements IStringSerializable {
+public enum ContentsFilterType implements StringRepresentable {
 	ALLOW("allow"),
 	BLOCK("block"),
 	BACKPACK("backpack");

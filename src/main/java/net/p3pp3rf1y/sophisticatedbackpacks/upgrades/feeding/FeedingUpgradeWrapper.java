@@ -1,15 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -37,15 +37,15 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 	}
 
 	@Override
-	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
-		if (isInCooldown(world) || (entity != null && !(entity instanceof PlayerEntity))) {
+	public void tick(@Nullable LivingEntity entity, Level world, BlockPos pos) {
+		if (isInCooldown(world) || (entity != null && !(entity instanceof Player))) {
 			return;
 		}
 
 		if (entity == null) {
-			world.getEntities(EntityType.PLAYER, new AxisAlignedBB(pos).inflate(FEEDING_RANGE), p -> true).forEach(p -> feedPlayerAndGetHungry(p, world));
+			world.getEntities(EntityType.PLAYER, new AABB(pos).inflate(FEEDING_RANGE), p -> true).forEach(p -> feedPlayerAndGetHungry(p, world));
 		} else {
-			if (feedPlayerAndGetHungry((PlayerEntity) entity, world)) {
+			if (feedPlayerAndGetHungry((Player) entity, world)) {
 				setCooldown(world, STILL_HUNGRY_COOLDOWN);
 				return;
 			}
@@ -54,7 +54,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		setCooldown(world, COOLDOWN);
 	}
 
-	private boolean feedPlayerAndGetHungry(PlayerEntity player, World world) {
+	private boolean feedPlayerAndGetHungry(Player player, Level world) {
 		int hungerLevel = 20 - player.getFoodData().getFoodLevel();
 		if (hungerLevel == 0) {
 			return false;
@@ -62,16 +62,16 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 		return tryFeedingFoodFromBackpack(world, hungerLevel, player) && player.getFoodData().getFoodLevel() < 20;
 	}
 
-	private boolean tryFeedingFoodFromBackpack(World world, int hungerLevel, PlayerEntity player) {
+	private boolean tryFeedingFoodFromBackpack(Level world, int hungerLevel, Player player) {
 		boolean isHurt = player.getHealth() < player.getMaxHealth() - 0.1F;
 		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		AtomicBoolean fedPlayer = new AtomicBoolean(false);
 		InventoryHelper.iterate(inventory, (slot, stack) -> {
 			if (stack.isEdible() && filterLogic.matchesFilter(stack) && (isHungryEnoughForFood(hungerLevel, stack) || shouldFeedImmediatelyWhenHurt() && hungerLevel > 0 && isHurt)) {
 				ItemStack mainHandItem = player.getMainHandItem();
-				player.inventory.items.set(player.inventory.selected, stack);
-				if (stack.use(world, player, Hand.MAIN_HAND).getResult() == ActionResultType.CONSUME) {
-					player.inventory.items.set(player.inventory.selected, mainHandItem);
+				player.getInventory().items.set(player.getInventory().selected, stack);
+				if (stack.use(world, player, InteractionHand.MAIN_HAND).getResult() == InteractionResult.CONSUME) {
+					player.getInventory().items.set(player.getInventory().selected, mainHandItem);
 					ItemStack containerItem = ForgeEventFactory.onItemUseFinish(player, stack.copy(), 0, stack.getItem().finishUsingItem(stack, world, player));
 					inventory.setStackInSlot(slot, stack);
 					if (!ItemStack.matches(containerItem, stack)) {
@@ -82,7 +82,7 @@ public class FeedingUpgradeWrapper extends UpgradeWrapperBase<FeedingUpgradeWrap
 					fedPlayer.set(true);
 					return true;
 				}
-				player.inventory.items.set(player.inventory.selected, mainHandItem);
+				player.getInventory().items.set(player.getInventory().selected, mainHandItem);
 			}
 			return false;
 		}, () -> false, ret -> ret);

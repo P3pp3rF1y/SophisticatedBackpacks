@@ -1,20 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 
 @SuppressWarnings("java:S2160") //no need to override equals, the default implementation is good
 public class EverlastingBackpackItemEntity extends ItemEntity {
 	private boolean wasFloatingUp = false;
 
-	public EverlastingBackpackItemEntity(EntityType<? extends ItemEntity> type, World world) {
+	public EverlastingBackpackItemEntity(EntityType<? extends ItemEntity> type, Level world) {
 		super(type, world);
 		lifespan = Integer.MAX_VALUE; //set to not despawn
 	}
@@ -25,7 +25,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 			double d0 = getX() + 0.5F - random.nextFloat();
 			double d1 = getY() + random.nextFloat() * 0.5F;
 			double d2 = getZ() + 0.5F - random.nextFloat();
-			ServerWorld serverWorld = (ServerWorld) level;
+			ServerLevel serverWorld = (ServerLevel) level;
 			if (random.nextInt(20) == 0) {
 				serverWorld.sendParticles(ParticleTypes.HAPPY_VILLAGER, d0, d1, d2, 0, 0, 0.1D, 0, 1f);
 			}
@@ -36,7 +36,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 				wasFloatingUp = true;
 			} else if (wasFloatingUp) {
 				setNoGravity(true);
-				setDeltaMovement(Vector3d.ZERO);
+				setDeltaMovement(Vec3.ZERO);
 			}
 		}
 		super.tick();
@@ -68,7 +68,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 	}
 
 	@Override
-	public IPacket<?> getAddEntityPacket() {
+	public Packet<?> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 }

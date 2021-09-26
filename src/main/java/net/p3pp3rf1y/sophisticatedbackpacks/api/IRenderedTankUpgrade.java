@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -31,8 +31,8 @@ public interface IRenderedTankUpgrade {
 		private ResourceLocation fluidRegistryName;
 		private float fillRatio;
 
-		public CompoundNBT serialize() {
-			CompoundNBT ret = new CompoundNBT();
+		public CompoundTag serialize() {
+			CompoundTag ret = new CompoundTag();
 			if (fluidRegistryName != null) {
 				ret.putString(FLUID_REGISTRY_NAME_TAG, fluidRegistryName.toString());
 				ret.putFloat(FILL_RATIO_TAG, fillRatio);
@@ -40,7 +40,7 @@ public interface IRenderedTankUpgrade {
 			return ret;
 		}
 
-		public static TankRenderInfo deserialize(CompoundNBT tag) {
+		public static TankRenderInfo deserialize(CompoundTag tag) {
 			if (tag.contains(FLUID_REGISTRY_NAME_TAG)) {
 				return new TankRenderInfo(new ResourceLocation(tag.getString(FLUID_REGISTRY_NAME_TAG)), tag.getFloat(FILL_RATIO_TAG));
 			}

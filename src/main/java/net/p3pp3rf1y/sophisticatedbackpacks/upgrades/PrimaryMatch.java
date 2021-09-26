@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum PrimaryMatch implements IStringSerializable {
+public enum PrimaryMatch implements StringRepresentable {
 	ITEM("item"),
 	MOD("mod"),
 	TAGS("tags");

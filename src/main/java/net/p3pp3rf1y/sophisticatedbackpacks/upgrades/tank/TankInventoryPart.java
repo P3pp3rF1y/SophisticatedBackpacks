@@ -1,22 +1,22 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
@@ -28,7 +28,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,37 +46,36 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY) {
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY(), GuiHelper.BAR_BACKGROUND_TOP);
+	public void render(PoseStack matrixStack, int mouseX, int mouseY) {
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y(), GuiHelper.BAR_BACKGROUND_TOP);
 		int yOffset = 18;
 		for (int i = 0; i < (height - 36) / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, GuiHelper.BAR_BACKGROUND_MIDDLE);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y() + yOffset, GuiHelper.BAR_BACKGROUND_MIDDLE);
 			yOffset += 18;
 		}
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, GuiHelper.BAR_BACKGROUND_BOTTOM);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y() + yOffset, GuiHelper.BAR_BACKGROUND_BOTTOM);
 
 		renderFluid(matrixStack, mouseX, mouseY);
 
 		yOffset = 0;
 		for (int i = 0; i < height / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + yOffset, OVERLAY);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.y() + yOffset, OVERLAY);
 			yOffset += 18;
 		}
 	}
 
 	private int getTankLeft() {
-		return pos.getX() + 9;
+		return pos.x() + 9;
 	}
 
 	@Override
 	public boolean handleMouseReleased(double mouseX, double mouseY, int button) {
 		if (mouseX < screen.getGuiLeft() + getTankLeft() || mouseX >= screen.getGuiLeft() + getTankLeft() + 18 ||
-				mouseY < screen.getGuiTop() + pos.getY() || mouseY >= screen.getGuiTop() + pos.getY() + height) {
+				mouseY < screen.getGuiTop() + pos.y() || mouseY >= screen.getGuiTop() + pos.y() + height) {
 			return false;
 		}
 
-		ClientPlayerEntity player = screen.getMinecraft().player;
-		ItemStack cursorStack = player.inventory.getCarried();
+		ItemStack cursorStack = screen.getMenu().getCarried();
 		if (!cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
 			return false;
 		}
@@ -88,24 +86,24 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 	}
 
 	@Override
-	public void renderErrorOverlay(MatrixStack matrixStack) {
-		screen.renderOverlay(matrixStack, DyeColor.RED.getColorValue() | 0xAA000000, getTankLeft() + 1, pos.getY() + 1, 16, height - 2);
+	public void renderErrorOverlay(PoseStack matrixStack) {
+		screen.renderOverlay(matrixStack, BackpackScreen.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
 	}
 
 	private void renderTooltip(int mouseX, int mouseY, FluidStack contents, int capacity) {
-		int screenX = screen.getGuiLeft() + pos.getX() + 10;
-		int screenY = screen.getGuiTop() + pos.getY() + 1;
+		int screenX = screen.getGuiLeft() + pos.x() + 10;
+		int screenY = screen.getGuiTop() + pos.y() + 1;
 		if (mouseX >= screenX && mouseX < screenX + 16 && mouseY >= screenY && mouseY < screenY + height - 2) {
-			List<ITextProperties> tooltip = new ArrayList<>();
+			List<FormattedText> tooltip = new ArrayList<>();
 			if (!contents.isEmpty()) {
 				tooltip.add(contents.getDisplayName());
 			}
-			tooltip.add(new TranslationTextComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity)));
+			tooltip.add(new TranslatableComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity)));
 			GuiHelper.setTooltipToRender(tooltip);
 		}
 	}
 
-	private void renderFluid(MatrixStack matrixStack, int mouseX, int mouseY) {
+	private void renderFluid(PoseStack matrixStack, int mouseX, int mouseY) {
 		FluidStack contents = container.getContents();
 
 		int capacity = container.getTankCapacity();
@@ -119,15 +117,16 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		int displayLevel = (int) ((height - 2) * ((float) fill / capacity));
 
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(contents);
-		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(texture);
-		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.getX() + 10, pos.getY() + 1 + height - 2 - displayLevel, displayLevel);
+		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
+		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.x() + 10, pos.y() + 1 + height - 2 - displayLevel, displayLevel);
 		renderTooltip(mouseX, mouseY, contents, capacity);
 	}
 
-	private void renderTiledFluidTextureAtlas(MatrixStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
-		screen.getMinecraft().getTextureManager().bind(sprite.atlas().location());
-		BufferBuilder builder = Tessellator.getInstance().getBuilder();
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+	private void renderTiledFluidTextureAtlas(PoseStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, sprite.atlas().location());
+		BufferBuilder builder = Tesselator.getInstance().getBuilder();
+		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 
 		float u1 = sprite.getU0();
 		float v1 = sprite.getV0();
@@ -155,8 +154,7 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 		// finish drawing sprites
 		builder.end();
-		RenderSystem.enableAlphaTest();
-		WorldVertexBufferUploader.end(builder);
+		BufferUploader.end(builder);
 	}
 
 }

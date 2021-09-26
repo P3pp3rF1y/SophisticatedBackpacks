@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.inventory.container.Slot;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsTabControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -38,7 +38,7 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 		builder.put(categoryName, factory);
 	}
 
-	public void renderSlotOverlays(MatrixStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
+	public void renderSlotOverlays(PoseStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
 		List<Integer> colors = new ArrayList<>();
 		settingsTabs.forEach(tab -> tab.getSlotOverlayColor(slot.index).ifPresent(colors::add));
 		colors.forEach(c -> overlayRenderer.renderSlotOverlay(matrixStack, slot, c));
@@ -49,7 +49,7 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 	}
 
 	public interface ISlotOverlayRenderer {
-		void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor);
+		void renderSlotOverlay(PoseStack matrixStack, Slot slot, int slotColor);
 	}
 
 	public interface ISettingsTabFactory<C extends SettingsContainerBase<?>, T extends SettingsTab<C>> {

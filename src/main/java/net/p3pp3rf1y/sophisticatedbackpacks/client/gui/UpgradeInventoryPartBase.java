@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 
 public abstract class UpgradeInventoryPartBase<C extends UpgradeContainerBase<?, ?>> {
@@ -12,9 +12,9 @@ public abstract class UpgradeInventoryPartBase<C extends UpgradeContainerBase<?,
 		this.upgradeSlot = upgradeSlot;
 	}
 
-	public abstract void render(MatrixStack matrixStack, int mouseX, int mouseY);
+	public abstract void render(PoseStack matrixStack, int mouseX, int mouseY);
 
 	public abstract boolean handleMouseReleased(double mouseX, double mouseY, int button);
 
-	public abstract void renderErrorOverlay(MatrixStack matrixStack);
+	public abstract void renderErrorOverlay(PoseStack matrixStack);
 }

@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
@@ -14,13 +14,13 @@ public class FeedingUpgradeContainer extends UpgradeContainerBase<FeedingUpgrade
 
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
-	public FeedingUpgradeContainer(PlayerEntity player, int containerId, FeedingUpgradeWrapper wrapper, UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> type) {
+	public FeedingUpgradeContainer(Player player, int containerId, FeedingUpgradeWrapper wrapper, UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 		filterLogicContainer = new FilterLogicContainer<>(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains(DATA_HUNGER_LEVEL)) {
 			setFeedAtHungerLevel(HungerLevel.fromName(data.getString(DATA_HUNGER_LEVEL)));
 		} else if (data.contains(DATA_FEED_IMMEDIATELY_WHEN_HURT)) {
@@ -35,7 +35,7 @@ public class FeedingUpgradeContainer extends UpgradeContainerBase<FeedingUpgrade
 
 	public void setFeedAtHungerLevel(HungerLevel hungerLevel) {
 		upgradeWrapper.setFeedAtHungerLevel(hungerLevel);
-		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_HUNGER_LEVEL, hungerLevel));
+		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundTag(), DATA_HUNGER_LEVEL, hungerLevel));
 	}
 
 	public HungerLevel getFeedAtHungerLevel() {

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 public class ItemStackKey {

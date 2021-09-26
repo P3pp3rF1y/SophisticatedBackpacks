@@ -1,14 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
@@ -17,7 +20,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 
-public abstract class Tab extends CompositeWidget<Widget> {
+public abstract class Tab extends CompositeBackpackWidget<BackpackWidget> {
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;
@@ -25,19 +28,19 @@ public abstract class Tab extends CompositeWidget<Widget> {
 
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
-	private final List<ITextProperties> tooltip;
+	private final List<FormattedText> tooltip;
 
 	private BooleanSupplier shouldShowTooltip = () -> true;
 	private BooleanSupplier shouldRender = () -> true;
 
-	protected Tab(Position position, List<ITextProperties> tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
-		super(position);
+	protected Tab(Position position, List<FormattedText> tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+		super(position, new Dimension(0, 0));
 		this.tooltip = tooltip;
 		addChild(getTabButton.apply(this::onTabIconClicked));
 	}
 
-	protected Tab(Position position, ITextComponent tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
-		this(position, ImmutableList.of(tooltip), getTabButton);
+	protected Tab(Position position, Component tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+		this(position, List.of(tooltip), getTabButton);
 	}
 
 	public void setHandlers(BooleanSupplier shouldShowTooltip, BooleanSupplier shouldRender) {
@@ -46,7 +49,7 @@ public abstract class Tab extends CompositeWidget<Widget> {
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (!shouldRender.getAsBoolean()) {
 			return;
 		}
@@ -74,13 +77,14 @@ public abstract class Tab extends CompositeWidget<Widget> {
 		this.height = height;
 	}
 
-	public Rectangle2d getRectangle() {
-		return new Rectangle2d(x, y, width, height);
+	public Rect2i getRectangle() {
+		return new Rect2i(x, y, width, height);
 	}
 
 	@Override
-	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		minecraft.getTextureManager().bind(GuiHelper.GUI_CONTROLS);
+	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, GuiHelper.GUI_CONTROLS);
 
 		int halfHeight = height / 2;
 		blit(matrixStack, x, y, (float) TEXTURE_WIDTH - width, 0, width, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -101,4 +105,14 @@ public abstract class Tab extends CompositeWidget<Widget> {
 	}
 
 	protected abstract void onTabIconClicked(int button);
+
+	@Override
+	public NarrationPriority narrationPriority() {
+		return NarrationPriority.NONE;
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//noop
+	}
 }

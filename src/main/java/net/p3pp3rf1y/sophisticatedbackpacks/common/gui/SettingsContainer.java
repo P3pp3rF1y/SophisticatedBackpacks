@@ -1,17 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.NonNullList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
-public class SettingsContainer extends Container implements IContextAwareContainer, ISyncedContainer {
+public class SettingsContainer extends AbstractContainerMenu implements IContextAwareContainer, ISyncedContainer {
 	private static final Map<String, ISettingsContainerFactory<?, ?>> SETTINGS_CONTAINER_FACTORIES;
 
 	static {
@@ -46,7 +46,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		SETTINGS_CONTAINER_FACTORIES = builder.build();
 	}
 
-	private final PlayerEntity player;
+	private final Player player;
 	private final BackpackContext backpackContext;
 	private final IBackpackWrapper backpackWrapper;
 	private final BackpackBackgroundProperties backpackBackgroundProperties;
@@ -54,9 +54,9 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	public final NonNullList<ItemStack> ghostItemStacks = NonNullList.create();
 	private final Map<String, SettingsContainerBase<?>> settingsContainers = new LinkedHashMap<>();
 	public final List<Slot> ghostSlots = new ArrayList<>();
-	private CompoundNBT lastSettingsNbt = null;
+	private CompoundTag lastSettingsNbt = null;
 
-	protected SettingsContainer(int windowId, PlayerEntity player, BackpackContext backpackContext) {
+	protected SettingsContainer(int windowId, Player player, BackpackContext backpackContext) {
 		super(SETTINGS_CONTAINER_TYPE.get(), windowId);
 		this.player = player;
 		this.backpackContext = backpackContext;
@@ -110,7 +110,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 				ghostItemStacks.set(i, itemstack2);
 
 				if (clientStackChanged) {
-					for (IContainerListener icontainerlistener : containerListeners) {
+					for (ContainerListener icontainerlistener : containerListeners) {
 						icontainerlistener.slotChanged(this, i, itemstack2);
 					}
 				}
@@ -140,19 +140,19 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		}
 
 		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
-			CompoundNBT settingsContents = new CompoundNBT();
-			CompoundNBT settingsNbt = backpackWrapper.getSettingsHandler().getNbt();
+			CompoundTag settingsContents = new CompoundTag();
+			CompoundTag settingsNbt = backpackWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-				PacketHandler.sendToClient((ServerPlayerEntity) player, new BackpackContentsMessage(uuid, settingsContents));
+				PacketHandler.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
 		});
 	}
 
 	@Override
-	public void addSlotListener(IContainerListener listener) {
-		if (listener instanceof ServerPlayerEntity && backpackWrapper.getInventoryHandler().getStackSizeMultiplier() > 1) {
-			super.addSlotListener(new HighStackCountListener((ServerPlayerEntity) listener));
+	public void addSlotListener(ContainerListener listener) {
+		if (listener instanceof ServerPlayer serverPlayer && backpackWrapper.getInventoryHandler().getStackSizeMultiplier() > 1) {
+			super.setSynchronizer(new HighStackCountSynchronizer(serverPlayer));
 			return;
 		}
 		super.addSlotListener(listener);
@@ -172,7 +172,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
@@ -186,7 +186,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains("categoryName")) {
 			String categoryName = data.getString("categoryName");
 			if (settingsContainers.containsKey(categoryName)) {
@@ -196,15 +196,15 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	@Override
-	public ItemStack clicked(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player) {
-		return ItemStack.EMPTY;
+	public void clicked(int slotId, int dragType, ClickType clickTypeIn, Player player) {
+		//noop
 	}
 
 	public BackpackBackgroundProperties getBackpackBackgroundProperties() {
 		return backpackBackgroundProperties;
 	}
 
-	public static SettingsContainer fromBuffer(int windowId, PlayerInventory playerInventory, PacketBuffer packetBuffer) {
+	public static SettingsContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
 		return new SettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
 	}
 
@@ -212,7 +212,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		settingsContainers.forEach(consumer);
 	}
 
-	public PlayerEntity getPlayer() {
+	public Player getPlayer() {
 		return player;
 	}
 
@@ -222,7 +222,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		}
 
 		@Override
-		public boolean mayPickup(PlayerEntity playerIn) {
+		public boolean mayPickup(Player playerIn) {
 			return false;
 		}
 	}

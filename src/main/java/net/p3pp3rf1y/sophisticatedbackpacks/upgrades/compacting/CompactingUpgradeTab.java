@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -16,13 +15,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
+import java.util.Map;
+
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.ALLOW_LIST;
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.PRIMARY_MATCH;
 
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<CompactingUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> COMPACT_UNCRAFTABLE = ButtonDefinitions.createToggleButtonDefinition(
-			ImmutableMap.of(
+			Map.of(
 					false, GuiHelper.getButtonStateData(new UV(80, 48), translUpgradeButton("compact_only_uncraftable"), Dimension.SQUARE_16, new Position(1, 1)),
 					true, GuiHelper.getButtonStateData(new UV(80, 32), translUpgradeButton("compact_anything"), Dimension.SQUARE_16, new Position(1, 1))
 			));
@@ -30,7 +31,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected CompactingUpgradeTab(CompactingUpgradeContainer container, Position position,
-			BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+			BackpackScreen screen, Component tabLabel, Component closedTooltip) {
 		super(container, position, screen, tabLabel, closedTooltip);
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), COMPACT_UNCRAFTABLE, button -> getContainer().setCompactNonUncraftable(!getContainer().shouldCompactNonUncraftable()),
 				getContainer()::shouldCompactNonUncraftable));

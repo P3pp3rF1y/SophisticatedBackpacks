@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
@@ -30,7 +30,7 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 	}
 
 	@Override
-	public void onHandlerInteract(IItemHandler itemHandler, PlayerEntity player) {
+	public void onHandlerInteract(IItemHandler itemHandler, Player player) {
 		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
 			filterLogic.setInventory(itemHandler);
 		}
@@ -42,6 +42,6 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 		int stacksDeposited = stacksAdded.get();
 		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
-		player.displayClientMessage(new TranslationTextComponent(translKey, stacksDeposited), true);
+		player.displayClientMessage(new TranslatableComponent(translKey, stacksDeposited), true);
 	}
 }

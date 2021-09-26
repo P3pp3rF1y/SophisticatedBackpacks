@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
@@ -21,11 +21,11 @@ public class EntityToolSwapMessage {
 		this.entityId = entityId;
 	}
 
-	public static void encode(EntityToolSwapMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(EntityToolSwapMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.entityId);
 	}
 
-	public static EntityToolSwapMessage decode(PacketBuffer packetBuffer) {
+	public static EntityToolSwapMessage decode(FriendlyByteBuf packetBuffer) {
 		return new EntityToolSwapMessage(packetBuffer.readInt());
 	}
 
@@ -35,12 +35,12 @@ public class EntityToolSwapMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(EntityToolSwapMessage msg, @Nullable ServerPlayerEntity sender) {
+	private static void handleMessage(EntityToolSwapMessage msg, @Nullable ServerPlayer sender) {
 		if (sender == null) {
 			return;
 		}
 
-		World world = sender.level;
+		Level world = sender.level;
 		Entity entity = world.getEntity(msg.entityId);
 
 		if (entity == null) {
@@ -66,11 +66,11 @@ public class EntityToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
+			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
 		}
 	}
 }

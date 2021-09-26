@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.color.item.ItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 

@@ -1,25 +1,28 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 
-public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
-	public BackpackTESR(TileEntityRendererDispatcher rendererDispatcherIn) {
-		super(rendererDispatcherIn);
+public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
+	private final BackpackModel model;
+
+	public BackpackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+		model = new BackpackModel(context.bakeLayer(ClientProxy.BACKPACK_LAYER));
 	}
 
 	@Override
-	public void render(BackpackTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlayIn) {
+	public void render(BackpackBlockEntity tileEntityIn, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlayIn) {
 		BlockState state = tileEntityIn.getBlockState();
 		Direction facing = state.getValue(BackpackBlock.FACING);
 		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
@@ -34,13 +37,13 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
 			if (tankRenderInfo != null) {
-				tankRenderInfo.getFluid().ifPresent(fluid -> RenderHelper.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), -12.2F, 2.5F, 0, -2F));
+				tankRenderInfo.getFluid().ifPresent(fluid -> model.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), true));
 			}
 		}
 		if (showRightTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.RIGHT);
 			if (tankRenderInfo != null) {
-				tankRenderInfo.getFluid().ifPresent(fluid -> RenderHelper.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), 8.7F, 2.5F, 0, -2F));
+				tankRenderInfo.getFluid().ifPresent(fluid -> model.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), false));
 			}
 		}
 		matrixStack.popPose();
@@ -49,7 +52,7 @@ public class BackpackTESR extends TileEntityRenderer<BackpackTileEntity> {
 				if (batteryRenderInfo.getChargeRatio() > 0.1f) {
 					matrixStack.pushPose();
 					matrixStack.mulPose(Vector3f.XN.rotationDegrees(180));
-					RenderHelper.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
+					model.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
 					matrixStack.popPose();
 				}
 			});

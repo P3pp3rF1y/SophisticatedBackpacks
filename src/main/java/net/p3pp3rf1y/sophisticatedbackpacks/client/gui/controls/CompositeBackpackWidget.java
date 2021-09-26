@@ -1,28 +1,29 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.INestedGuiEventHandler;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CompositeWidget<T extends Widget> extends Widget implements INestedGuiEventHandler {
+public abstract class CompositeBackpackWidget<T extends BackpackWidget> extends BackpackWidget implements ContainerEventHandler {
 	protected final List<T> children = new ArrayList<>();
 
 	private boolean dragging = false;
 
 	@Nullable
-	private IGuiEventListener listener;
+	private GuiEventListener listener;
 
-	protected CompositeWidget(Position position) {
-		super(position);
+	protected CompositeBackpackWidget(Position position, Dimension dimension) {
+		super(position, dimension);
 	}
 
 	@Override
-	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		children.forEach(child -> child.render(matrixStack, mouseX, mouseY, partialTicks));
 	}
 
@@ -32,14 +33,14 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	}
 
 	@Override
-	public List<? extends IGuiEventListener> children() {
+	public List<? extends GuiEventListener> children() {
 		return children;
 	}
 
 	@Override
 	public boolean isDragging() {
 		for (T child : children) {
-			if ((child instanceof INestedGuiEventHandler) && ((INestedGuiEventHandler) child).isDragging()) {
+			if (child instanceof ContainerEventHandler containerEventHandler && containerEventHandler.isDragging()) {
 				return true;
 			}
 		}
@@ -67,17 +68,17 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 
 	@Nullable
 	@Override
-	public IGuiEventListener getFocused() {
+	public GuiEventListener getFocused() {
 		return listener;
 	}
 
 	@Override
-	public void setFocused(@Nullable IGuiEventListener listener) {
+	public void setFocused(@Nullable GuiEventListener listener) {
 		this.listener = listener;
 	}
 
 	@Override
-	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void afterScreenRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
 		children.forEach(c -> c.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
 	}

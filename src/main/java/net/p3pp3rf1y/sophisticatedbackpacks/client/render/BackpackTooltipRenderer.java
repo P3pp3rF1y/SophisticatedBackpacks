@@ -1,18 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.FluidStack;
@@ -61,7 +61,7 @@ public class BackpackTooltipRenderer {
 	public static void renderBackpackTooltip(RenderTooltipEvent.Pre event) {
 		ItemStack backpack = event.getStack();
 		Minecraft minecraft = Minecraft.getInstance();
-		ClientPlayerEntity player = minecraft.player;
+		LocalPlayer player = minecraft.player;
 		if (!(backpack.getItem() instanceof BackpackItem) || !Screen.hasShiftDown() || player == null) {
 			return;
 		}
@@ -75,13 +75,13 @@ public class BackpackTooltipRenderer {
 			requestContents(player, wrapper);
 			refreshContents(wrapper, minecraft);
 
-			List<ITextComponent> lines = backpack.getTooltipLines(player, minecraft.options.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+			List<Component> lines = backpack.getTooltipLines(player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 			if (backpackUuid != null) {
 				int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
 				if (multiplier > 1) {
-					lines.add(new TranslationTextComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
-							new StringTextComponent(Integer.toString(multiplier)).withStyle(TextFormatting.WHITE)
-					).withStyle(TextFormatting.GREEN));
+					lines.add(new TranslatableComponent("item.sophisticatedbackpacks.backpack.tooltip.stack_multiplier",
+							new TextComponent(Integer.toString(multiplier)).withStyle(ChatFormatting.WHITE)
+					).withStyle(ChatFormatting.GREEN));
 				}
 				addEnergytooltip(wrapper, lines);
 				addFluidTooltip(wrapper, lines);
@@ -92,22 +92,22 @@ public class BackpackTooltipRenderer {
 
 	}
 
-	private static void addEnergytooltip(IBackpackWrapper wrapper, List<ITextComponent> lines) {
-		wrapper.getEnergyStorage().ifPresent(energyStorage -> lines.add(new TranslationTextComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".energy",
-				new StringTextComponent(CountAbbreviator.abbreviate(energyStorage.getEnergyStored())).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.RED)
+	private static void addEnergytooltip(IBackpackWrapper wrapper, List<Component> lines) {
+		wrapper.getEnergyStorage().ifPresent(energyStorage -> lines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".energy",
+				new TextComponent(CountAbbreviator.abbreviate(energyStorage.getEnergyStored())).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.RED)
 		));
 	}
 
-	private static void addFluidTooltip(IBackpackWrapper wrapper, List<ITextComponent> lines) {
+	private static void addFluidTooltip(IBackpackWrapper wrapper, List<Component> lines) {
 		wrapper.getFluidHandler().ifPresent(fluidHandler -> {
 			for (int tank = 0; tank < fluidHandler.getTanks(); tank++) {
 				FluidStack fluid = fluidHandler.getFluidInTank(tank);
 				if (fluid.isEmpty()) {
-					lines.add(new TranslationTextComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid_empty").withStyle(TextFormatting.BLUE));
+					lines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid_empty").withStyle(ChatFormatting.BLUE));
 				} else {
-					lines.add(new TranslationTextComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid",
-							new StringTextComponent(CountAbbreviator.abbreviate(fluid.getAmount())).withStyle(TextFormatting.WHITE),
-							new TranslationTextComponent(fluid.getTranslationKey()).withStyle(TextFormatting.BLUE)
+					lines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid",
+							new TextComponent(CountAbbreviator.abbreviate(fluid.getAmount())).withStyle(ChatFormatting.WHITE),
+							new TranslatableComponent(fluid.getTranslationKey()).withStyle(ChatFormatting.BLUE)
 
 					));
 				}
@@ -115,7 +115,7 @@ public class BackpackTooltipRenderer {
 		});
 	}
 
-	private static void requestContents(ClientPlayerEntity player, IBackpackWrapper wrapper) {
+	private static void requestContents(LocalPlayer player, IBackpackWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.level.getGameTime()) {
 			lastRequestTime = player.level.getGameTime();
 			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
@@ -183,7 +183,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int calculateContentsWidth() {
-			FontRenderer fontRenderer = Minecraft.getInstance().font;
+			Font fontRenderer = Minecraft.getInstance().font;
 			int contentsWidth = 0;
 			for (int i = 0; i < backpackContents.size() && i < MAX_STACKS_ON_LINE; i++) {
 				int countWidth = getStackCountWidth(fontRenderer, backpackContents.get(i));
@@ -193,7 +193,7 @@ public class BackpackTooltipRenderer {
 			return contentsWidth;
 		}
 
-		private int getStackCountWidth(FontRenderer fontRenderer, ItemStack stack) {
+		private int getStackCountWidth(Font fontRenderer, ItemStack stack) {
 			return fontRenderer.width(CountAbbreviator.abbreviate(stack.getCount())) + COUNT_PADDING;
 		}
 
@@ -210,7 +210,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		private int getEmptyTooltipWidth() {
-			return Minecraft.getInstance().font.width(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + "empty").getVisualOrderText());
+			return Minecraft.getInstance().font.width(new TranslatableComponent(BackpackItem.BACKPACK_TOOLTIP + "empty").getVisualOrderText());
 		}
 
 		@Override
@@ -219,7 +219,7 @@ public class BackpackTooltipRenderer {
 		}
 
 		@Override
-		public void render(MatrixStack matrixStack, int leftX, int topY, FontRenderer font) {
+		public void render(PoseStack matrixStack, int leftX, int topY, Font font) {
 			if (!upgrades.isEmpty()) {
 				topY = renderTooltipLine(leftX, topY, matrixStack, font, "upgrades");
 				topY = renderUpgrades(matrixStack, leftX, topY);
@@ -233,15 +233,15 @@ public class BackpackTooltipRenderer {
 			}
 		}
 
-		private int renderTooltipLine(int leftX, int topY, MatrixStack matrixStack, FontRenderer font, String tooltip) {
-			IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslationTextComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).withStyle(TextFormatting.YELLOW)),
+		private int renderTooltipLine(int leftX, int topY, PoseStack matrixStack, Font font, String tooltip) {
+			MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+			topY = GuiHelper.writeTooltipLines(Collections.singletonList(new TranslatableComponent(BackpackItem.BACKPACK_TOOLTIP + tooltip).withStyle(ChatFormatting.YELLOW)),
 					font, leftX, topY, matrixStack.last().pose(), renderTypeBuffer, -1);
 			renderTypeBuffer.endBatch();
 			return topY;
 		}
 
-		private int renderUpgrades(MatrixStack matrixStack, int leftX, int topY) {
+		private int renderUpgrades(PoseStack matrixStack, int leftX, int topY) {
 			int x = leftX;
 			for (IUpgradeWrapper upgradeWrapper : upgrades.values()) {
 				if (upgradeWrapper.canBeDisabled()) {
@@ -255,7 +255,7 @@ public class BackpackTooltipRenderer {
 			return topY;
 		}
 
-		private void renderContents(MatrixStack matrixStack, int leftX, int topY) {
+		private void renderContents(PoseStack matrixStack, int leftX, int topY) {
 			int x = leftX;
 			for (int i = 0; i < backpackContents.size(); i++) {
 				int y = topY + i / MAX_STACKS_ON_LINE * 20;

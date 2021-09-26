@@ -1,16 +1,16 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -21,15 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BackpackDyeRecipe extends SpecialRecipe {
-	public static final SpecialRecipeSerializer<BackpackDyeRecipe> SERIALIZER = new SpecialRecipeSerializer<>(BackpackDyeRecipe::new);
+public class BackpackDyeRecipe extends CustomRecipe {
+	public static final SimpleRecipeSerializer<BackpackDyeRecipe> SERIALIZER = new SimpleRecipeSerializer<>(BackpackDyeRecipe::new);
 
 	public BackpackDyeRecipe(ResourceLocation registryName) {
 		super(registryName);
 	}
 
 	@Override
-	public boolean matches(CraftingInventory inv, World worldIn) {
+	public boolean matches(CraftingContainer inv, Level worldIn) {
 		boolean backpackPresent = false;
 		boolean dyePresent = false;
 		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
@@ -53,7 +53,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInventory inv) {
+	public ItemStack assemble(CraftingContainer inv) {
 		Map<Integer, List<DyeColor>> columnDyes = new HashMap<>();
 		Tuple<Integer, ItemStack> columnBackpack = null;
 
@@ -70,7 +70,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 				}
 
 				columnBackpack = new Tuple<>(column, slotStack);
-			} else if (item.is(Tags.Items.DYES)) {
+			} else if (slotStack.is(Tags.Items.DYES)) {
 				DyeColor dyeColor = DyeColor.getColor(slotStack);
 				if (dyeColor == null) {
 					return ItemStack.EMPTY;
@@ -123,10 +123,10 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 			float baseRed = (baseColor >> 16 & 255);
 			float baseGreen = (baseColor >> 8 & 255);
 			float baseBlue = (baseColor & 255);
-			sumMaxComponent = (int) ((float) sumMaxComponent + Math.max(baseRed, Math.max(baseGreen, baseBlue)));
-			rgb[0] = (int) ((float) rgb[0] + baseRed);
-			rgb[1] = (int) ((float) rgb[1] + baseGreen);
-			rgb[2] = (int) ((float) rgb[2] + baseBlue);
+			sumMaxComponent = (int) (sumMaxComponent + Math.max(baseRed, Math.max(baseGreen, baseBlue)));
+			rgb[0] = (int) (rgb[0] + baseRed);
+			rgb[1] = (int) (rgb[1] + baseGreen);
+			rgb[2] = (int) (rgb[2] + baseBlue);
 			++numberOfColors;
 		}
 
@@ -146,10 +146,10 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 		int avgGreen = rgb[1] / numberOfColors;
 		int avgBlue = rgb[2] / numberOfColors;
 		float avgMaxComponent = (float) sumMaxComponent / (float) numberOfColors;
-		float maxAvgComponent = (float) Math.max(avgRed, Math.max(avgGreen, avgBlue));
-		avgRed = (int) ((float) avgRed * avgMaxComponent / maxAvgComponent);
-		avgGreen = (int) ((float) avgGreen * avgMaxComponent / maxAvgComponent);
-		avgBlue = (int) ((float) avgBlue * avgMaxComponent / maxAvgComponent);
+		float maxAvgComponent = Math.max(avgRed, Math.max(avgGreen, avgBlue));
+		avgRed = (int) (avgRed * avgMaxComponent / maxAvgComponent);
+		avgGreen = (int) (avgGreen * avgMaxComponent / maxAvgComponent);
+		avgBlue = (int) (avgBlue * avgMaxComponent / maxAvgComponent);
 		int finalColor = (avgRed << 8) + avgGreen;
 		finalColor = (finalColor << 8) + avgBlue;
 
@@ -162,7 +162,7 @@ public class BackpackDyeRecipe extends SpecialRecipe {
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<?> getSerializer() {
 		return SERIALIZER;
 	}
 }

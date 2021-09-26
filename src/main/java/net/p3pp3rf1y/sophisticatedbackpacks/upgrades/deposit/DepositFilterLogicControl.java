@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
-import com.google.common.collect.ImmutableMap;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -10,12 +10,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
+import java.util.Map;
+
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeButton;
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
 
 public abstract class DepositFilterLogicControl extends FilterLogicControl<DepositFilterLogic, DepositFilterLogicContainer> {
 	public static final ButtonDefinition.Toggle<DepositFilterType> DEPOSIT_FILTER_TYPE = ButtonDefinitions.createToggleButtonDefinition(
-			ImmutableMap.of(
+			Map.of(
 					DepositFilterType.ALLOW, GuiHelper.getButtonStateData(new UV(0, 0), translUpgradeButton("allow"), Dimension.SQUARE_16, new Position(1, 1)),
 					DepositFilterType.BLOCK, GuiHelper.getButtonStateData(new UV(16, 0), translUpgradeButton("block"), Dimension.SQUARE_16, new Position(1, 1)),
 					DepositFilterType.INVENTORY, GuiHelper.getButtonStateData(new UV(64, 16), translUpgradeButton("deposit_filter_type_inventory"), Dimension.SQUARE_16, new Position(1, 1))
@@ -31,6 +33,11 @@ public abstract class DepositFilterLogicControl extends FilterLogicControl<Depos
 		container.setDepositFilterType(next);
 
 		container.getFilterSlots().forEach(slot -> slot.setEnabled(next != DepositFilterType.INVENTORY));
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//TODO add narration
 	}
 
 	public static class Basic extends DepositFilterLogicControl {

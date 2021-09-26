@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
@@ -24,11 +24,11 @@ public class BackpackOpenMessage {
 		this.subBackpackSlotIndex = subBackpackSlotIndex;
 	}
 
-	public static void encode(BackpackOpenMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(BackpackOpenMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.subBackpackSlotIndex);
 	}
 
-	public static BackpackOpenMessage decode(PacketBuffer packetBuffer) {
+	public static BackpackOpenMessage decode(FriendlyByteBuf packetBuffer) {
 		return new BackpackOpenMessage(packetBuffer.readInt());
 	}
 
@@ -38,7 +38,7 @@ public class BackpackOpenMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity player, BackpackOpenMessage msg) {
+	private static void handleMessage(@Nullable ServerPlayer player, BackpackOpenMessage msg) {
 		if (player == null) {
 			return;
 		}
@@ -58,17 +58,17 @@ public class BackpackOpenMessage {
 		}
 	}
 
-	private static void findAndOpenFirstBackpack(ServerPlayerEntity player) {
+	private static void findAndOpenFirstBackpack(ServerPlayer player) {
 		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, inventoryName, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, slot);
-			NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
+			NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 					backpackContext::toBuffer);
 			return true;
 		});
 	}
 
-	private static void openBackpack(ServerPlayerEntity player, BackpackContext backpackContext) {
-		NetworkHooks.openGui(player, new SimpleNamedContainerProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
+	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
+		NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
 				backpackContext::toBuffer);
 	}
 }

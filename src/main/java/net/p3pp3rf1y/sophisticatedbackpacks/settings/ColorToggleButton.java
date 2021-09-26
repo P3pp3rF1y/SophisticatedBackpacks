@@ -1,18 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.DyeColor;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -23,9 +25,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.DE
 
 public class ColorToggleButton extends ButtonBase {
 	private static final DyeColor[] DYE_VALUES = DyeColor.values();
-	private static final List<ITextProperties> TOOLTIP = new ImmutableList.Builder<ITextProperties>()
-			.add(new TranslationTextComponent(TranslationHelper.translSettingsButton("toggle_color")))
-			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translSettingsButton("toggle_color_detail"), null, TextFormatting.GRAY))
+	private static final List<FormattedText> TOOLTIP = new ImmutableList.Builder<FormattedText>()
+			.add(new TranslatableComponent(TranslationHelper.translSettingsButton("toggle_color")))
+			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translSettingsButton("toggle_color_detail"), null, ChatFormatting.GRAY))
 			.build();
 
 	private final Supplier<DyeColor> getColor;
@@ -59,7 +61,7 @@ public class ColorToggleButton extends ButtonBase {
 	}
 
 	@Override
-	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
+	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
 			GuiHelper.blit(minecraft, matrixStack, x, y, DEFAULT_BUTTON_HOVERED_BACKGROUND);
 		} else {
@@ -68,10 +70,10 @@ public class ColorToggleButton extends ButtonBase {
 	}
 
 	@Override
-	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		RenderSystem.disableDepthTest();
 		RenderSystem.colorMask(true, true, true, false);
-		int color = getColor.get().getColorValue() | (200 << 24);
+		int color = ColorHelper.getColor(getColor.get().getTextureDiffuseColors()) | (200 << 24);
 		fillGradient(matrixStack, x + 3, y + 3, x + 15, y + 15, color, color);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableDepthTest();
@@ -79,5 +81,10 @@ public class ColorToggleButton extends ButtonBase {
 		if (isMouseOver(mouseX, mouseY)) {
 			GuiHelper.setTooltipToRender(TOOLTIP);
 		}
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//TODO add narration
 	}
 }

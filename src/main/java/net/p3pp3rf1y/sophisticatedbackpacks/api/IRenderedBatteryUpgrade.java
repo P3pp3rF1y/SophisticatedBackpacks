@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -21,13 +21,13 @@ public interface IRenderedBatteryUpgrade {
 			this.chargeRatio = chargeRatio;
 		}
 
-		public CompoundNBT serialize() {
-			CompoundNBT ret = new CompoundNBT();
+		public CompoundTag serialize() {
+			CompoundTag ret = new CompoundTag();
 			ret.putFloat(CHARGE_RATIO_TAG, chargeRatio);
 			return ret;
 		}
 
-		public static BatteryRenderInfo deserialize(CompoundNBT tag) {
+		public static BatteryRenderInfo deserialize(CompoundTag tag) {
 			return new BatteryRenderInfo(tag.getFloat(CHARGE_RATIO_TAG));
 		}
 

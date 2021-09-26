@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
@@ -15,24 +15,24 @@ import java.util.function.Consumer;
 
 public class BackpackSettingsHandler {
 	public static final String SETTINGS_TAG = "settings";
-	private final CompoundNBT backpackContentsNbt;
+	private final CompoundTag backpackContentsNbt;
 	private final Runnable markBackpackContentsDirty;
 	private final Map<Class<?>, List<?>> interfaceCategories = new HashMap<>();
 	private final Map<String, ISettingsCategory> settingsCategories = new LinkedHashMap<>();
 	private final Map<Class<? extends ISettingsCategory>, ISettingsCategory> typeCategories = new HashMap<>();
 
-	public BackpackSettingsHandler(CompoundNBT backpackContentsNbt, Runnable markBackpackContentsDirty) {
+	public BackpackSettingsHandler(CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
 		this.backpackContentsNbt = backpackContentsNbt;
 		this.markBackpackContentsDirty = markBackpackContentsDirty;
 		addSettingsCategories(backpackContentsNbt.getCompound(SETTINGS_TAG));
 	}
 
-	private void addSettingsCategories(CompoundNBT settingsNbt) {
+	private void addSettingsCategories(CompoundTag settingsNbt) {
 		addSettingsCategory(settingsNbt, BackpackSettingsCategory.NAME, markBackpackContentsDirty, BackpackSettingsCategory::new);
 		addSettingsCategory(settingsNbt, NoSortSettingsCategory.NAME, markBackpackContentsDirty, NoSortSettingsCategory::new);
 	}
 
-	private void addSettingsCategory(CompoundNBT settingsNbt, String categoryName, Runnable markBackpackContentsDirty, BiFunction<CompoundNBT, Consumer<CompoundNBT>, ISettingsCategory> instantiateCategory) {
+	private void addSettingsCategory(CompoundTag settingsNbt, String categoryName, Runnable markBackpackContentsDirty, BiFunction<CompoundTag, Consumer<CompoundTag>, ISettingsCategory> instantiateCategory) {
 		ISettingsCategory category = instantiateCategory.apply(settingsNbt.getCompound(categoryName), tag -> {
 			settingsNbt.put(categoryName, tag);
 			backpackContentsNbt.put(SETTINGS_TAG, settingsNbt);
@@ -74,12 +74,12 @@ public class BackpackSettingsHandler {
 		}
 	}
 
-	public CompoundNBT getNbt() {
+	public CompoundTag getNbt() {
 		return backpackContentsNbt.getCompound(SETTINGS_TAG);
 	}
 
-	public void reloadFrom(CompoundNBT backpackContentsNbt) {
-		CompoundNBT settingsNbt = backpackContentsNbt.getCompound(SETTINGS_TAG);
+	public void reloadFrom(CompoundTag backpackContentsNbt) {
+		CompoundTag settingsNbt = backpackContentsNbt.getCompound(SETTINGS_TAG);
 		settingsCategories.forEach((categoryName, category) -> category.reloadFrom(settingsNbt.getCompound(categoryName)));
 	}
 }

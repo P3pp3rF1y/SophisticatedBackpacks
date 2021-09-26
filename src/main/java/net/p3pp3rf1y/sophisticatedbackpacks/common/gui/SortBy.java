@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum SortBy implements IStringSerializable {
+public enum SortBy implements StringRepresentable {
 	NAME("name"),
 	COUNT("count"),
 	TAGS("tags");

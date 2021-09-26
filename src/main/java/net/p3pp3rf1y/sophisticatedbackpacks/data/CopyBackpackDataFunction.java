@@ -2,34 +2,34 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootFunction;
-import net.minecraft.loot.LootFunctionType;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.conditions.ILootCondition;
-import net.minecraft.loot.functions.ILootFunction;
-import net.minecraft.tileentity.TileEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 
-public class CopyBackpackDataFunction extends LootFunction {
-	protected CopyBackpackDataFunction(ILootCondition[] conditionsIn) {
+public class CopyBackpackDataFunction extends LootItemConditionalFunction {
+	protected CopyBackpackDataFunction(LootItemCondition[] conditionsIn) {
 		super(conditionsIn);
 	}
 
 	@Override
 	protected ItemStack run(ItemStack stack, LootContext context) {
-		TileEntity te = context.getParamOrNull(LootParameters.BLOCK_ENTITY);
-		if (te instanceof BackpackTileEntity) {
-			return ((BackpackTileEntity) te).getBackpackWrapper().getBackpack();
+		BlockEntity te = context.getParamOrNull(LootContextParams.BLOCK_ENTITY);
+		if (te instanceof BackpackBlockEntity) {
+			return ((BackpackBlockEntity) te).getBackpackWrapper().getBackpack();
 		}
 
 		return stack;
 	}
 
 	@Override
-	public LootFunctionType getType() {
+	public LootItemFunctionType getType() {
 		return ModLoot.COPY_BACKPACK_DATA;
 	}
 
@@ -37,22 +37,22 @@ public class CopyBackpackDataFunction extends LootFunction {
 		return new CopyBackpackDataFunction.Builder();
 	}
 
-	public static class Serializer extends LootFunction.Serializer<CopyBackpackDataFunction> {
+	public static class Serializer extends LootItemConditionalFunction.Serializer<CopyBackpackDataFunction> {
 
 		@Override
-		public CopyBackpackDataFunction deserialize(JsonObject object, JsonDeserializationContext deserializationContext, ILootCondition[] conditionsIn) {
+		public CopyBackpackDataFunction deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootItemCondition[] conditionsIn) {
 			return new CopyBackpackDataFunction(conditionsIn);
 		}
 	}
 
-	public static class Builder extends LootFunction.Builder<CopyBackpackDataFunction.Builder> {
+	public static class Builder extends LootItemConditionalFunction.Builder<CopyBackpackDataFunction.Builder> {
 		@Override
 		protected CopyBackpackDataFunction.Builder getThis() {
 			return this;
 		}
 
 		@Override
-		public ILootFunction build() {
+		public LootItemFunction build() {
 			return new CopyBackpackDataFunction(getConditions());
 		}
 	}

@@ -1,11 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -14,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class SettingsTabControl<C extends ContainerScreen<?>, T extends SettingsTabBase<C>> extends CompositeWidget<Tab> {
+public abstract class SettingsTabControl<C extends AbstractContainerScreen<?>, T extends SettingsTabBase<C>> extends CompositeBackpackWidget<Tab> {
 	private static final int VERTICAL_SPACE = 1;
 	@Nullable
 	private T openTab = null;
 
 	protected SettingsTabControl(Position position) {
-		super(position);
+		super(position, new Dimension(0, 0));
 	}
 
 	protected <U extends T> U addSettingsTab(Runnable onTabOpenContainerAction, Runnable onTabCloseContainerAction, U tab) {
@@ -63,12 +65,12 @@ public abstract class SettingsTabControl<C extends ContainerScreen<?>, T extends
 	}
 
 	@Override
-	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
+	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		//noop
 	}
 
 	@Override
-	public void afterScreenRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void afterScreenRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		children.forEach(tab -> tab.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
 	}
 
@@ -101,9 +103,19 @@ public abstract class SettingsTabControl<C extends ContainerScreen<?>, T extends
 		return maxWidth.getValue();
 	}
 
-	public List<Rectangle2d> getTabRectangles() {
-		List<Rectangle2d> ret = new ArrayList<>();
+	public List<Rect2i> getTabRectangles() {
+		List<Rect2i> ret = new ArrayList<>();
 		children.forEach(child -> ret.add(child.getRectangle()));
 		return ret;
+	}
+
+	@Override
+	public NarrationPriority narrationPriority() {
+		return NarrationPriority.NONE;
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//noop
 	}
 }

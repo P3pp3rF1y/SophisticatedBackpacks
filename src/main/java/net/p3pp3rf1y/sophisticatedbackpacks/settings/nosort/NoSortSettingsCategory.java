@@ -1,9 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort;
 
-import net.minecraft.item.DyeColor;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.DyeColor;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISlotColorCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.HashSet;
@@ -15,12 +16,12 @@ public class NoSortSettingsCategory implements ISettingsCategory, ISlotColorCate
 	public static final String NAME = "no_sort";
 	private static final String COLOR_TAG = "color";
 	private static final String SELECTED_SLOTS_TAG = "selectedSlots";
-	private CompoundNBT categoryNbt;
-	private final Consumer<CompoundNBT> saveNbt;
+	private CompoundTag categoryNbt;
+	private final Consumer<CompoundTag> saveNbt;
 	private final Set<Integer> selectedSlots = new HashSet<>();
 	private DyeColor color = DyeColor.LIME;
 
-	public NoSortSettingsCategory(CompoundNBT categoryNbt, Consumer<CompoundNBT> saveNbt) {
+	public NoSortSettingsCategory(CompoundTag categoryNbt, Consumer<CompoundTag> saveNbt) {
 		this.categoryNbt = categoryNbt;
 		this.saveNbt = saveNbt;
 
@@ -88,7 +89,7 @@ public class NoSortSettingsCategory implements ISettingsCategory, ISlotColorCate
 
 	@Override
 	public Optional<Integer> getSlotColor(int slotNumber) {
-		return selectedSlots.contains(slotNumber) ? Optional.of(color.getColorValue()) : Optional.empty();
+		return selectedSlots.contains(slotNumber) ? Optional.of(ColorHelper.getColor(color.getTextureDiffuseColors())) : Optional.empty();
 	}
 
 	public Set<Integer> getNoSortSlots() {
@@ -96,7 +97,7 @@ public class NoSortSettingsCategory implements ISettingsCategory, ISlotColorCate
 	}
 
 	@Override
-	public void reloadFrom(CompoundNBT categoryNbt) {
+	public void reloadFrom(CompoundTag categoryNbt) {
 		this.categoryNbt = categoryNbt;
 		selectedSlots.clear();
 		color = DyeColor.LIME;

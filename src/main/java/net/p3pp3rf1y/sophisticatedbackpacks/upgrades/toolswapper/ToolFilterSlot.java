@@ -1,12 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.INameableEmptySlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IFilterSlot;
 
@@ -16,12 +16,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ToolFilterSlot extends Slot implements IFilterSlot, INameableEmptySlot {
-	private static final IInventory EMPTY_INVENTORY = new Inventory(0);
+	private static final Container EMPTY_INVENTORY = new SimpleContainer(0);
 	private final Supplier<ItemStack> getTool;
 	private final Consumer<ItemStack> setTool;
 	private final Predicate<ItemStack> isToolTypeValid;
 	@Nullable
-	private ITextComponent emptyTooltip;
+	private Component emptyTooltip;
 
 	public ToolFilterSlot(Supplier<ItemStack> getTool, Consumer<ItemStack> setTool, Predicate<ItemStack> isToolTypeValid) {
 		super(EMPTY_INVENTORY, 0, -100, -100);
@@ -65,7 +65,7 @@ public class ToolFilterSlot extends Slot implements IFilterSlot, INameableEmptyS
 	}
 
 	@Override
-	public boolean mayPickup(PlayerEntity playerIn) {
+	public boolean mayPickup(Player playerIn) {
 		return false;
 	}
 
@@ -85,11 +85,11 @@ public class ToolFilterSlot extends Slot implements IFilterSlot, INameableEmptyS
 	}
 
 	@Override
-	public ITextComponent getEmptyTooltip() {
-		return emptyTooltip == null ? new StringTextComponent("") : emptyTooltip;
+	public Component getEmptyTooltip() {
+		return emptyTooltip == null ? new TextComponent("") : emptyTooltip;
 	}
 
 	public void setEmptyTooltip(String tooltip) {
-		emptyTooltip = new StringTextComponent(tooltip);
+		emptyTooltip = new TextComponent(tooltip);
 	}
 }

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ImageButton;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
@@ -14,7 +14,7 @@ public class BackpackSettingsTab extends Tab {
 	private final BackpackScreen screen;
 
 	public BackpackSettingsTab(Position position, BackpackScreen screen) {
-		super(position, new TranslationTextComponent(TranslationHelper.translGui("settings.tooltip")), onTabIconClicked -> new ImageButton(new Position(position.getX() + 1, position.getY() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
+		super(position, new TranslatableComponent(TranslationHelper.translGui("settings.tooltip")), onTabIconClicked -> new ImageButton(new Position(position.x() + 1, position.y() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
 		this.screen = screen;
 	}
 

@@ -2,17 +2,18 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.block.AbstractRailBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.BeeEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.item.Item;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -34,17 +35,17 @@ public class Matchers {
 	static {
 		addItemMatcherFactory(new ItemMatcherFactory("tag") {
 			@Override
-			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				String tagName = JSONUtils.getAsString(jsonObject, "tag");
-				ITag<Item> tag = TagCollectionManager.getInstance().getItems().getTag(new ResourceLocation(tagName));
+			protected Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject) {
+				String tagName = GsonHelper.getAsString(jsonObject, "tag");
+				Tag<Item> tag = SerializationTags.getInstance().getOrEmpty(Registry.ITEM_REGISTRY).getTag(new ResourceLocation(tagName));
 				return tag == null ? Optional.empty() : Optional.of(new ItemTagMatcher(tag));
 			}
 		});
 
 		addItemMatcherFactory(new ItemMatcherFactory("emptynbt") {
 			@Override
-			protected Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject) {
-				ResourceLocation itemName = new ResourceLocation(JSONUtils.getAsString(jsonObject, "item"));
+			protected Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject) {
+				ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
 				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
@@ -53,7 +54,7 @@ public class Matchers {
 			}
 		});
 
-		BLOCK_MATCHER_FACTORIES.add(new IMatcherFactory<BlockContext>() {
+		BLOCK_MATCHER_FACTORIES.add(new IMatcherFactory<>() {
 			@Override
 			public boolean appliesTo(JsonElement jsonElement) {
 				return jsonElement.isJsonPrimitive();
@@ -70,47 +71,47 @@ public class Matchers {
 				return Optional.of(new ModMatcher<>(modId, BlockContext::getBlock));
 			}
 		});
-		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<BlockContext>("all") {
+		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("all") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
 				return Optional.of(block -> true);
 			}
 		});
-		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<BlockContext>("rail") {
+		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("rail") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> blockContext.getBlock() instanceof AbstractRailBlock);
+				return Optional.of(blockContext -> blockContext.getBlock() instanceof BaseRailBlock);
 			}
 		});
-		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<BlockContext>("item_handler") {
+		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("item_handler") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
 				return Optional.of(blockContext -> WorldHelper.getTile(blockContext.getWorld(),
 						blockContext.getPos()).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false));
 			}
 		});
-		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<Entity>("animal") {
+		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {
 			@Override
 			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof AnimalEntity);
+				return Optional.of(Animal.class::isInstance);
 			}
 		});
-		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<Entity>("living") {
+		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("living") {
 			@Override
 			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof LivingEntity);
+				return Optional.of(LivingEntity.class::isInstance);
 			}
 		});
-		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<Entity>("bee") {
+		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("bee") {
 			@Override
 			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof BeeEntity);
+				return Optional.of(Bee.class::isInstance);
 			}
 		});
-		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<Entity>("tameable") {
+		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("tameable") {
 			@Override
 			protected Optional<Predicate<Entity>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(entity -> entity instanceof TameableEntity);
+				return Optional.of(TamableAnimal.class::isInstance);
 			}
 		});
 	}
@@ -119,7 +120,7 @@ public class Matchers {
 		ITEM_MATCHER_FACTORIES.add(matcherFactory);
 	}
 
-	public static Optional<CacheableStackPredicate> getItemMatcher(JsonElement jsonElement) {
+	public static Optional<ItemTagMatcher> getItemMatcher(JsonElement jsonElement) {
 		for (ItemMatcherFactory itemMatcherFactory : Matchers.ITEM_MATCHER_FACTORIES) {
 			if (itemMatcherFactory.appliesTo(jsonElement)) {
 				return itemMatcherFactory.getPredicate(jsonElement);

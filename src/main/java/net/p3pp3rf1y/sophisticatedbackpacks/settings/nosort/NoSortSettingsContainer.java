@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort;
 
-import net.minecraft.item.DyeColor;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.DyeColor;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
 
@@ -19,7 +19,7 @@ public class NoSortSettingsContainer extends SettingsContainerBase<NoSortSetting
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains(ACTION_TAG)) {
 			switch (data.getString(ACTION_TAG)) {
 				case SELECT_ALL_ACTION:

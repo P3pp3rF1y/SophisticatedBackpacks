@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import javax.annotation.Nullable;
@@ -19,11 +19,10 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	/**
 	 * Called server-side to actually put the items in place.
 	 */
-	public static void setItems(PlayerEntity player, Map<Integer, Integer> slotIdMap, List<Integer> craftingSlots, List<Integer> inventorySlots, boolean maxTransfer) {
-		if (!(player.containerMenu instanceof BackpackContainer)) {
+	public static void setItems(Player player, Map<Integer, Integer> slotIdMap, List<Integer> craftingSlots, List<Integer> inventorySlots, boolean maxTransfer) {
+		if (!(player.containerMenu instanceof BackpackContainer container)) {
 			return;
 		}
-		BackpackContainer container = (BackpackContainer) player.containerMenu;
 
 		// grab items from slots
 		Map<Integer, ItemStack> slotMap = new HashMap<>(slotIdMap.size());
@@ -53,16 +52,16 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		container.broadcastChanges();
 	}
 
-	private static void putIntoInventory(PlayerEntity player, List<Integer> inventorySlots, BackpackContainer container, List<ItemStack> clearedCraftingItems) {
+	private static void putIntoInventory(Player player, List<Integer> inventorySlots, BackpackContainer container, List<ItemStack> clearedCraftingItems) {
 		for (ItemStack oldCraftingItem : clearedCraftingItems) {
 			int added = addStack(container, inventorySlots, oldCraftingItem);
-			if (added < oldCraftingItem.getCount() && !player.inventory.add(oldCraftingItem)) {
+			if (added < oldCraftingItem.getCount() && !player.getInventory().add(oldCraftingItem)) {
 				player.drop(oldCraftingItem, false);
 			}
 		}
 	}
 
-	private static List<ItemStack> clearAndPutItemsIntoGrid(PlayerEntity player, List<Integer> craftingSlots, Container container, Map<Integer, ItemStack> toTransfer) {
+	private static List<ItemStack> clearAndPutItemsIntoGrid(Player player, List<Integer> craftingSlots, AbstractContainerMenu container, Map<Integer, ItemStack> toTransfer) {
 		List<ItemStack> clearedCraftingItems = new ArrayList<>();
 		int minSlotStackLimit = Integer.MAX_VALUE;
 		for (int craftingSlotNumberIndex = 0; craftingSlotNumberIndex < craftingSlots.size(); craftingSlotNumberIndex++) {
@@ -87,7 +86,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		return clearedCraftingItems;
 	}
 
-	private static void putItemIntoGrid(List<Integer> craftingSlots, Container container, Map<Integer, ItemStack> toTransfer, List<ItemStack> clearedCraftingItems, int minSlotStackLimit) {
+	private static void putItemIntoGrid(List<Integer> craftingSlots, AbstractContainerMenu container, Map<Integer, ItemStack> toTransfer, List<ItemStack> clearedCraftingItems, int minSlotStackLimit) {
 		for (Map.Entry<Integer, ItemStack> entry : toTransfer.entrySet()) {
 			Integer craftNumber = entry.getKey();
 			Integer slotNumber = craftingSlots.get(craftNumber);
@@ -107,7 +106,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	}
 
 	private static Map<Integer, ItemStack> removeItemsFromInventory(
-			PlayerEntity player,
+			Player player,
 			BackpackContainer container,
 			Map<Integer, ItemStack> required,
 			List<Integer> craftingSlots,

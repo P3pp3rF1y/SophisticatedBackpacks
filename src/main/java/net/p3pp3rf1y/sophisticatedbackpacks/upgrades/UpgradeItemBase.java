@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
@@ -21,8 +21,8 @@ public abstract class UpgradeItemBase<T extends IUpgradeWrapper> extends ItemBas
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		//noinspection ConstantConditions - item is registered at this point and thus registry name can't be null
-		tooltip.addAll(getTranslatedLines(translItemTooltip(stack.getItem().getRegistryName().getPath()), null, TextFormatting.DARK_GRAY));
+		tooltip.addAll(getTranslatedLines(translItemTooltip(stack.getItem().getRegistryName().getPath()), null, ChatFormatting.DARK_GRAY));
 	}
 }

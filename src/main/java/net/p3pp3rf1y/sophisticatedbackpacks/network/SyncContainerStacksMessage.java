@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.NonNullList;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import java.util.List;
@@ -13,24 +13,31 @@ import java.util.function.Supplier;
 
 public class SyncContainerStacksMessage {
 	private final int windowId;
+	private final int stateId;
 	private final List<ItemStack> itemStacks;
+	private final ItemStack carriedStack;
 
-	public SyncContainerStacksMessage(int windowId, List<ItemStack> itemStacks) {
+	public SyncContainerStacksMessage(int windowId, int stateId, List<ItemStack> itemStacks, ItemStack carriedStack) {
 		this.windowId = windowId;
+		this.stateId = stateId;
 		this.itemStacks = itemStacks;
+		this.carriedStack = carriedStack;
 	}
 
-	public static void encode(SyncContainerStacksMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(SyncContainerStacksMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeByte(msg.windowId);
+		packetBuffer.writeVarInt(msg.stateId);
 		packetBuffer.writeShort(msg.itemStacks.size());
 
 		for (ItemStack itemstack : msg.itemStacks) {
 			PacketHelper.writeItemStack(itemstack, packetBuffer);
 		}
+		packetBuffer.writeItemStack(msg.carriedStack, true);
 	}
 
-	public static SyncContainerStacksMessage decode(PacketBuffer packetBuffer) {
+	public static SyncContainerStacksMessage decode(FriendlyByteBuf packetBuffer) {
 		int windowId = packetBuffer.readUnsignedByte();
+		int stateId = packetBuffer.readVarInt();
 		int slots = packetBuffer.readShort();
 		List<ItemStack> itemStacks = NonNullList.withSize(slots, ItemStack.EMPTY);
 
@@ -38,7 +45,9 @@ public class SyncContainerStacksMessage {
 			itemStacks.set(j, PacketHelper.readItemStack(packetBuffer));
 		}
 
-		return new SyncContainerStacksMessage(windowId, itemStacks);
+		ItemStack carriedStack = packetBuffer.readItem();
+
+		return new SyncContainerStacksMessage(windowId, stateId, itemStacks, carriedStack);
 	}
 
 	static void onMessage(SyncContainerStacksMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -48,10 +57,10 @@ public class SyncContainerStacksMessage {
 	}
 
 	private static void handleMessage(SyncContainerStacksMessage msg) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || !(player.containerMenu instanceof BackpackContainer) || player.containerMenu.containerId != msg.windowId) {
 			return;
 		}
-		player.containerMenu.setAll(msg.itemStacks);
+		player.containerMenu.initializeContents(msg.stateId, msg.itemStacks, msg.carriedStack);
 	}
 }

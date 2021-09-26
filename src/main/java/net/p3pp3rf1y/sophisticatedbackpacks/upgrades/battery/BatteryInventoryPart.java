@@ -1,12 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TranslationTextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeInventoryPartBase;
@@ -44,40 +42,39 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY) {
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY(), TANK_BACKGROUND_TOP);
+	public void render(PoseStack matrixStack, int mouseX, int mouseY) {
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y(), TANK_BACKGROUND_TOP);
 		int yOffset = 18;
 		for (int i = 0; i < (height - 36) / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_MIDDLE);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y() + yOffset, TANK_BACKGROUND_MIDDLE);
 			yOffset += 18;
 		}
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.getY() + yOffset, TANK_BACKGROUND_BOTTOM);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft(), pos.y() + yOffset, TANK_BACKGROUND_BOTTOM);
 
 		yOffset = 0;
 		for (int i = 0; i < height / 18; i++) {
-			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + yOffset, OVERLAY);
+			GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.y() + yOffset, OVERLAY);
 			yOffset += 18;
 		}
 
 		renderCharge(matrixStack, mouseX, mouseY);
 
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY(), CONNECTION_TOP);
-		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.getY() + height - 4, CONNECTION_BOTTOM);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.y(), CONNECTION_TOP);
+		GuiHelper.blit(screen.getMinecraft(), matrixStack, getTankLeft() + 1, pos.y() + height - 4, CONNECTION_BOTTOM);
 	}
 
 	private int getTankLeft() {
-		return pos.getX() + 9;
+		return pos.x() + 9;
 	}
 
 	@Override
 	public boolean handleMouseReleased(double mouseX, double mouseY, int button) {
 		if (mouseX < screen.getGuiLeft() + getTankLeft() || mouseX >= screen.getGuiLeft() + getTankLeft() + 18 ||
-				mouseY < screen.getGuiTop() + pos.getY() || mouseY >= screen.getGuiTop() + pos.getY() + height) {
+				mouseY < screen.getGuiTop() + pos.y() || mouseY >= screen.getGuiTop() + pos.y() + height) {
 			return false;
 		}
 
-		ClientPlayerEntity player = screen.getMinecraft().player;
-		ItemStack cursorStack = player.inventory.getCarried();
+		ItemStack cursorStack = screen.getMenu().getCarried();
 		if (!cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
 			return false;
 		}
@@ -88,21 +85,21 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 	}
 
 	@Override
-	public void renderErrorOverlay(MatrixStack matrixStack) {
-		screen.renderOverlay(matrixStack, DyeColor.RED.getColorValue() | 0xAA000000, getTankLeft() + 1, pos.getY() + 1, 16, height - 2);
+	public void renderErrorOverlay(PoseStack matrixStack) {
+		screen.renderOverlay(matrixStack, BackpackScreen.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
 	}
 
 	private void renderTooltip(int mouseX, int mouseY, int energyStored, int maxEnergyStored) {
-		int screenX = screen.getGuiLeft() + pos.getX() + 10;
-		int screenY = screen.getGuiTop() + pos.getY() + 1;
+		int screenX = screen.getGuiLeft() + pos.x() + 10;
+		int screenY = screen.getGuiTop() + pos.y() + 1;
 		if (mouseX >= screenX && mouseX < screenX + 16 && mouseY >= screenY && mouseY < screenY + height - 2) {
-			List<ITextProperties> tooltip = new ArrayList<>();
-			tooltip.add(new TranslationTextComponent(TranslationHelper.translUpgradeKey("battery.contents_tooltip"), String.format("%,d", energyStored), String.format("%,d", maxEnergyStored)));
+			List<FormattedText> tooltip = new ArrayList<>();
+			tooltip.add(new TranslatableComponent(TranslationHelper.translUpgradeKey("battery.contents_tooltip"), String.format("%,d", energyStored), String.format("%,d", maxEnergyStored)));
 			GuiHelper.setTooltipToRender(tooltip);
 		}
 	}
 
-	private void renderCharge(MatrixStack matrixStack, int mouseX, int mouseY) {
+	private void renderCharge(PoseStack matrixStack, int mouseX, int mouseY) {
 		int energyStored = container.getEnergyStored();
 
 		int maxEneergyStored = container.getMaxEnergyStored();
@@ -128,7 +125,7 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 			int blue = (int) (initialBlue * (1 - percentage) + finalBlue * percentage);
 			int color = red << 16 | green << 8 | blue | 255 << 24;
 
-			GuiHelper.coloredBlit(matrix, getTankLeft() + 1, pos.getY() + height - (i + 1) * segmentHeight, CHARGE_SEGMENT, color);
+			GuiHelper.coloredBlit(matrix, getTankLeft() + 1, pos.y() + height - (i + 1) * segmentHeight, CHARGE_SEGMENT, color);
 		}
 
 		renderTooltip(mouseX, mouseY, energyStored, maxEneergyStored);

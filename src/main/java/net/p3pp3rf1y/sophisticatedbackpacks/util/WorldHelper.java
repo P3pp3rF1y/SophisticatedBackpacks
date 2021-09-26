@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -11,16 +11,16 @@ import java.util.Optional;
 public class WorldHelper {
 	private WorldHelper() {}
 
-	public static Optional<TileEntity> getTile(@Nullable IBlockReader world, BlockPos pos) {
-		return getTile(world, pos, TileEntity.class);
+	public static Optional<BlockEntity> getTile(@Nullable BlockGetter world, BlockPos pos) {
+		return getTile(world, pos, BlockEntity.class);
 	}
 
-	public static <T> Optional<T> getTile(@Nullable IBlockReader world, BlockPos pos, Class<T> teClass) {
+	public static <T> Optional<T> getTile(@Nullable BlockGetter world, BlockPos pos, Class<T> teClass) {
 		if (world == null) {
 			return Optional.empty();
 		}
 
-		TileEntity te = world.getBlockEntity(pos);
+		BlockEntity te = world.getBlockEntity(pos);
 
 		if (teClass.isInstance(te)) {
 			return Optional.of(teClass.cast(te));
@@ -29,8 +29,8 @@ public class WorldHelper {
 		return Optional.empty();
 	}
 
-	public static void notifyBlockUpdate(TileEntity tile) {
-		World world = tile.getLevel();
+	public static void notifyBlockUpdate(BlockEntity tile) {
+		Level world = tile.getLevel();
 		if (world == null) {
 			return;
 		}

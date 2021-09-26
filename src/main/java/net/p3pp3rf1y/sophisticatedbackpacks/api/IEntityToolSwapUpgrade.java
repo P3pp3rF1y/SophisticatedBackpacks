@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * Implement if you want your upgrade to respond to key press to swap appropriate tool into player's hand based on entity they are looking at
@@ -25,5 +25,5 @@ public interface IEntityToolSwapUpgrade {
 	 * @param player Player that pressed the key
 	 * @return true if the keypress was handled by this upgrade and no other {@link IEntityToolSwapUpgrade} upgrades should process their logic
 	 */
-	boolean onEntityInteract(World world, Entity entity, PlayerEntity player);
+	boolean onEntityInteract(Level world, Entity entity, Player player);
 }

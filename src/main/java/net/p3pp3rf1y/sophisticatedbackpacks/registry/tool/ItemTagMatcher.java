@@ -1,18 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
-class ItemTagMatcher implements CacheableStackPredicate {
-	private final ITag<Item> itemTag;
+import java.util.function.Predicate;
 
-	public ItemTagMatcher(ITag<Item> itemTag) {
+class ItemTagMatcher implements Predicate<ItemStack> {
+	private final Tag<Item> itemTag;
+
+	public ItemTagMatcher(Tag<Item> itemTag) {
 		this.itemTag = itemTag;
 	}
 
 	@Override
 	public boolean test(ItemStack stack) {
-		return stack.getItem().is(itemTag);
+		return stack.is(itemTag);
 	}
 }

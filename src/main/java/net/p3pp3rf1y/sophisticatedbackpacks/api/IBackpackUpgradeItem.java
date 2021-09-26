@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public interface IBackpackUpgradeItem<T extends IUpgradeWrapper> {
 	UpgradeType<T> getType();

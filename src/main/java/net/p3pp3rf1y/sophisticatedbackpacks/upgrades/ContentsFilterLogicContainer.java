@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.function.Consumer;
@@ -19,11 +19,11 @@ public class ContentsFilterLogicContainer extends FilterLogicContainer<ContentsF
 
 	public void setFilterType(ContentsFilterType depositFilterType) {
 		filterLogic.get().setDepositFilterType(depositFilterType);
-		serverUpdater.sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_CONTENTS_FILTER_TYPE, depositFilterType));
+		serverUpdater.sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundTag(), DATA_CONTENTS_FILTER_TYPE, depositFilterType));
 	}
 
 	@Override
-	public boolean handleMessage(CompoundNBT data) {
+	public boolean handleMessage(CompoundTag data) {
 		if (data.contains(DATA_CONTENTS_FILTER_TYPE)) {
 			setFilterType(ContentsFilterType.fromName(data.getString(DATA_CONTENTS_FILTER_TYPE)));
 		}

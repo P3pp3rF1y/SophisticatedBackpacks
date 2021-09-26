@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum InventoryOrder implements IStringSerializable {
+public enum InventoryOrder implements StringRepresentable {
 	MAIN_FIRST("main_first"),
 	INCEPTED_FIRST("incepted_first");
 

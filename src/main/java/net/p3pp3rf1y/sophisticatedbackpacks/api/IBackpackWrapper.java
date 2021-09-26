@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -67,7 +67,7 @@ public interface IBackpackWrapper {
 
 	void setLoot(ResourceLocation lootTableName, float lootPercentage);
 
-	void fillWithLoot(PlayerEntity playerEntity);
+	void fillWithLoot(Player playerEntity);
 
 	void setContentsUuid(UUID backpackUuid);
 

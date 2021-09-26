@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
@@ -14,7 +14,7 @@ public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWr
 	private static final String DATA_DIRECTION = "direction";
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
-	private FilterUpgradeContainer(PlayerEntity player, int containerId, FilterUpgradeWrapper wrapper, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
+	private FilterUpgradeContainer(Player player, int containerId, FilterUpgradeWrapper wrapper, UpgradeContainerType<FilterUpgradeWrapper, FilterUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 		filterLogicContainer = new FilterLogicContainer<>(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
 	}
@@ -29,11 +29,11 @@ public class FilterUpgradeContainer extends UpgradeContainerBase<FilterUpgradeWr
 
 	public void setDirection(Direction direction) {
 		upgradeWrapper.setDirection(direction);
-		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_DIRECTION, direction));
+		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundTag(), DATA_DIRECTION, direction));
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (filterLogicContainer.handleMessage(data)) {
 			return;
 		}

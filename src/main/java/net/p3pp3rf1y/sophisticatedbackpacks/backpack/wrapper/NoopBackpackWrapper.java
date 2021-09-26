@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
@@ -17,9 +17,9 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public static final NoopBackpackWrapper INSTANCE = new NoopBackpackWrapper();
 
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
-	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(new CompoundNBT(), () -> {});
-	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundNBT(), () -> {}, () -> {});
-	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundNBT(), () -> {}, 64);
+	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(new CompoundTag(), () -> {});
+	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundTag(), () -> {}, () -> {});
+	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundTag(), () -> {}, 64);
 	private final BackpackRenderInfo backpackRenderInfo = new BackpackRenderInfo(backpack, () -> () -> {});
 
 	private NoopBackpackWrapper() {}
@@ -150,7 +150,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void fillWithLoot(PlayerEntity playerEntity) {
+	public void fillWithLoot(Player playerEntity) {
 		//noop
 	}
 

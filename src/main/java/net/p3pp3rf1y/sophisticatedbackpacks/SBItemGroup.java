@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
-public class SBItemGroup extends ItemGroup {
+public class SBItemGroup extends CreativeModeTab {
 	private ItemStack tabIcon;
 
 	SBItemGroup() {

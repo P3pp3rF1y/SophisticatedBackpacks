@@ -5,38 +5,38 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.BlockState;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.BlockModel;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.IModelTransform;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.TransformationMatrix;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -65,73 +65,73 @@ import java.util.function.Function;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
 public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel> {
-	private final Map<ModelPart, IUnbakedModel> modelParts;
+	private final Map<ModelPart, UnbakedModel> modelParts;
 
-	public BackpackDynamicModel(Map<ModelPart, IUnbakedModel> modelParts) {
+	public BackpackDynamicModel(Map<ModelPart, UnbakedModel> modelParts) {
 		this.modelParts = modelParts;
 	}
 
 	@Override
-	public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ItemOverrideList overrides, ResourceLocation modelLocation) {
-		ImmutableMap.Builder<ModelPart, IBakedModel> builder = ImmutableMap.builder();
+	public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+		ImmutableMap.Builder<ModelPart, BakedModel> builder = ImmutableMap.builder();
 		modelParts.forEach((part, model) -> {
-			IBakedModel bakedModel = model.bake(bakery, spriteGetter, modelTransform, modelLocation);
+			BakedModel bakedModel = model.bake(bakery, spriteGetter, modelTransform, modelLocation);
 			if (bakedModel != null) {
 				builder.put(part, bakedModel);
 			}
 		});
-		return new BakedModel(builder.build(), modelTransform);
+		return new BackpackBakedModel(builder.build(), modelTransform);
 	}
 
 	@Override
-	public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
-		ImmutableSet.Builder<RenderMaterial> builder = ImmutableSet.builder();
+	public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+		ImmutableSet.Builder<Material> builder = ImmutableSet.builder();
 		modelParts.forEach((part, model) -> builder.addAll(model.getMaterials(modelGetter, missingTextureErrors)));
 		return builder.build();
 	}
 
-	private static final class BakedModel implements IDynamicBakedModel {
-		private static final Map<ItemCameraTransforms.TransformType, TransformationMatrix> TRANSFORMS;
+	private static final class BackpackBakedModel implements IDynamicBakedModel {
+		private static final Map<ItemTransforms.TransformType, Transformation> TRANSFORMS;
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
 		static {
-			ImmutableMap.Builder<ItemCameraTransforms.TransformType, TransformationMatrix> builder = ImmutableMap.builder();
-			builder.put(ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, new TransformationMatrix(
+			ImmutableMap.Builder<ItemTransforms.TransformType, Transformation> builder = ImmutableMap.builder();
+			builder.put(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, new Transformation(
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
 					new Quaternion(85, -90, 0, true),
 					new Vector3f(0.75f, 0.75f, 0.75f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, new Transformation(
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
 					new Quaternion(85, -90, 0, true),
 					new Vector3f(0.75f, 0.75f, 0.75f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, new Transformation(
 					new Vector3f(0, 0, 0),
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(0.5f, 0.5f, 0.5f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, new Transformation(
 					new Vector3f(0, 0, 0),
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(0.5f, 0.5f, 0.5f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.HEAD, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.HEAD, new Transformation(
 					new Vector3f(0, 14.25f / 16f, 0),
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(1, 1, 1), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.GUI, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.GUI, new Transformation(
 					new Vector3f(0, 1.25f / 16f, 0),
 					new Quaternion(30, 225, 0, true),
 					new Vector3f(0.9f, 0.9f, 0.9f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.GROUND, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.GROUND, new Transformation(
 					new Vector3f(0, 3 / 16f, 0),
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(0.5f, 0.5f, 0.5f), null
 			));
-			builder.put(ItemCameraTransforms.TransformType.FIXED, new TransformationMatrix(
+			builder.put(ItemTransforms.TransformType.FIXED, new Transformation(
 					new Vector3f(0, 0, -2.25f / 16f),
 					new Quaternion(0, 0, 0, true),
 					new Vector3f(0.75f, 0.75f, 0.75f), null
@@ -140,8 +140,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
-		private final Map<ModelPart, IBakedModel> models;
-		private final IModelTransform modelTransform;
+		private final Map<ModelPart, BakedModel> models;
+		private final ModelState modelTransform;
 
 		private boolean tankLeft;
 		@Nullable
@@ -153,7 +153,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		@Nullable
 		private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
-		public BakedModel(Map<ModelPart, IBakedModel> models, IModelTransform modelTransform) {
+		public BackpackBakedModel(Map<ModelPart, BakedModel> models, ModelState modelTransform) {
 			this.models = models;
 			this.modelTransform = modelTransform;
 		}
@@ -186,7 +186,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addCharge(List<BakedQuad> ret, float chargeRatio) {
-			if (MathHelper.equal(chargeRatio, 0)) {
+			if (Mth.equal(chargeRatio, 0)) {
 				return;
 			}
 			int pixels = (int) (chargeRatio * 4);
@@ -196,8 +196,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			float maxX = minX + pixels / 16f;
 			float maxY = minY + 1 / 16f;
 			float[] cols = new float[] {1f, 1f, 1f, 1f};
-			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(BACKPACK_MODULES_TEXTURE);
-			ret.add(createQuad(ImmutableList.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
+			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BACKPACK_MODULES_TEXTURE);
+			ret.add(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
 		}
 
 		private void addRightSide(
@@ -225,18 +225,18 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addFluid(List<BakedQuad> ret, Fluid fluid, float ratio, double xMin) {
-			if (MathHelper.equal(ratio, 0.0f)) {
+			if (Mth.equal(ratio, 0.0f)) {
 				return;
 			}
 
 			double yMin = 1.5 / 16d;
 			double yMax = yMin + (ratio * 6) / 16d;
-			AxisAlignedBB bounds = new AxisAlignedBB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
+			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
 			ResourceLocation texture = fluid.getAttributes().getStillTexture();
 			int color = fluid.getAttributes().getColor();
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
-			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(texture);
+			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
 			float bx2 = 5;
 			float by1 = 0;
@@ -244,11 +244,11 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			float bz1 = 0;
 			float bz2 = 5;
 
-			ret.add(createQuad(ImmutableList.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.UP, bx1, bx2, bz1, bz2));
-			ret.add(createQuad(ImmutableList.of(getVector(bounds.maxX, bounds.maxY, bounds.minZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.minZ)), cols, still, Direction.NORTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(ImmutableList.of(getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ)), cols, still, Direction.SOUTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(ImmutableList.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ)), cols, still, Direction.WEST, bz1, bz2, by1, by2));
-			ret.add(createQuad(ImmutableList.of(getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.EAST, bz1, bz2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.UP, bx1, bx2, bz1, bz2));
+			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.minZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.minZ)), cols, still, Direction.NORTH, bx1, bx2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ)), cols, still, Direction.SOUTH, bx1, bx2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ)), cols, still, Direction.WEST, bz1, bz2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.EAST, bz1, bz2, by1, by2));
 		}
 
 		private Vector3f getVector(double x, double y, double z) {
@@ -285,17 +285,17 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		@Override
-		public ItemOverrideList getOverrides() {
+		public ItemOverrides getOverrides() {
 			return overrideList;
 		}
 
 		@Override
-		public IBakedModel handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack matrixStack) {
-			if (cameraTransformType == ItemCameraTransforms.TransformType.NONE) {
+		public BakedModel handlePerspective(ItemTransforms.TransformType cameraTransformType, PoseStack matrixStack) {
+			if (cameraTransformType == ItemTransforms.TransformType.NONE) {
 				return this;
 			}
 
-			TransformationMatrix tr = TRANSFORMS.get(cameraTransformType);
+			Transformation tr = TRANSFORMS.get(cameraTransformType);
 
 			if (!tr.isIdentity()) {
 				tr.push(matrixStack);
@@ -305,7 +305,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
 			BakedQuadBuilder builder = new BakedQuadBuilder(sprite);
-			Vector3i dirVec = face.getNormal();
+			Vec3i dirVec = face.getNormal();
 			Vector3f normal = new Vector3f(dirVec.getX(), dirVec.getY(), dirVec.getZ());
 			putVertex(builder, normal, vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z(), u1, v1, sprite, colors);
 			putVertex(builder, normal, vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z(), u1, v2, sprite, colors);
@@ -353,16 +353,16 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 	}
 
-	private static class BackpackItemOverrideList extends ItemOverrideList {
-		private final BackpackDynamicModel.BakedModel backpackModel;
+	private static class BackpackItemOverrideList extends ItemOverrides {
+		private final BackpackDynamicModel.BackpackBakedModel backpackModel;
 
-		public BackpackItemOverrideList(BackpackDynamicModel.BakedModel backpackModel) {
+		public BackpackItemOverrideList(BackpackDynamicModel.BackpackBakedModel backpackModel) {
 			this.backpackModel = backpackModel;
 		}
 
 		@Nullable
 		@Override
-		public IBakedModel resolve(IBakedModel model, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity livingEntity) {
+		public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity livingEntity, int seed) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
 			backpackModel.battery = false;
@@ -392,30 +392,30 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		public static final Loader INSTANCE = new Loader();
 
 		@Override
-		public void onResourceManagerReload(IResourceManager resourceManager) {
+		public void onResourceManagerReload(ResourceManager resourceManager) {
 			//noop
 		}
 
 		@Override
 		public BackpackDynamicModel read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
-			ImmutableMap.Builder<ModelPart, IUnbakedModel> builder = ImmutableMap.builder();
+			ImmutableMap.Builder<ModelPart, UnbakedModel> builder = ImmutableMap.builder();
 
-			ImmutableMap.Builder<String, Either<RenderMaterial, String>> texturesBuilder = ImmutableMap.builder();
+			ImmutableMap.Builder<String, Either<Material, String>> texturesBuilder = ImmutableMap.builder();
 			if (modelContents.has("clipsTexture")) {
 				ResourceLocation clipsTexture = ResourceLocation.tryParse(modelContents.get("clipsTexture").getAsString());
 				if (clipsTexture != null) {
-					texturesBuilder.put("clips", Either.left(new RenderMaterial(PlayerContainer.BLOCK_ATLAS, clipsTexture)));
+					texturesBuilder.put("clips", Either.left(new Material(InventoryMenu.BLOCK_ATLAS, clipsTexture)));
 				}
 			}
-			ImmutableMap<String, Either<RenderMaterial, String>> textures = texturesBuilder.build();
+			ImmutableMap<String, Either<Material, String>> textures = texturesBuilder.build();
 			for (ModelPart part : ModelPart.values()) {
 				addPartModel(builder, part, textures);
 			}
 			return new BackpackDynamicModel(builder.build());
 		}
 
-		private void addPartModel(ImmutableMap.Builder<ModelPart, IUnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<RenderMaterial, String>> textures) {
-			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemCameraTransforms.NO_TRANSFORMS, Collections.emptyList()));
+		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<Material, String>> textures) {
+			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList()));
 		}
 	}
 

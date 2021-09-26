@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.INameableEmptySlot;
@@ -21,16 +21,16 @@ public class BatteryUpgradeContainer extends UpgradeContainerBase<BatteryUpgrade
 	public static final ResourceLocation EMPTY_BATTERY_INPUT_SLOT_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "item/empty_battery_input_slot");
 	public static final ResourceLocation EMPTY_BATTERY_OUTPUT_SLOT_BACKGROUND = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "item/empty_battery_output_slot");
 
-	public BatteryUpgradeContainer(PlayerEntity player, int upgradeContainerId, BatteryUpgradeWrapper upgradeWrapper, UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> type) {
+	public BatteryUpgradeContainer(Player player, int upgradeContainerId, BatteryUpgradeWrapper upgradeWrapper, UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		slots.add(new BatteryIOSlot(() -> this.upgradeWrapper.getInventory(), TankUpgradeWrapper.INPUT_SLOT, -100, -100, translUpgradeSlotTooltip("battery_input"))
-				.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_BATTERY_INPUT_SLOT_BACKGROUND));
+				.setBackground(InventoryMenu.BLOCK_ATLAS, EMPTY_BATTERY_INPUT_SLOT_BACKGROUND));
 		slots.add(new BatteryIOSlot(() -> this.upgradeWrapper.getInventory(), TankUpgradeWrapper.OUTPUT_SLOT, -100, -100, translUpgradeSlotTooltip("battery_output"))
-				.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_BATTERY_OUTPUT_SLOT_BACKGROUND));
+				.setBackground(InventoryMenu.BLOCK_ATLAS, EMPTY_BATTERY_OUTPUT_SLOT_BACKGROUND));
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		//noop
 	}
 
@@ -43,9 +43,9 @@ public class BatteryUpgradeContainer extends UpgradeContainerBase<BatteryUpgrade
 	}
 
 	private static class BatteryIOSlot extends SlotSuppliedHandler implements INameableEmptySlot {
-		private final ITextComponent emptyTooltip;
+		private final Component emptyTooltip;
 
-		public BatteryIOSlot(Supplier<IItemHandler> itemHandlerSupplier, int slot, int xPosition, int yPosition, ITextComponent emptyTooltip) {
+		public BatteryIOSlot(Supplier<IItemHandler> itemHandlerSupplier, int slot, int xPosition, int yPosition, Component emptyTooltip) {
 			super(itemHandlerSupplier, slot, xPosition, yPosition);
 			this.emptyTooltip = emptyTooltip;
 		}
@@ -56,7 +56,7 @@ public class BatteryUpgradeContainer extends UpgradeContainerBase<BatteryUpgrade
 		}
 
 		@Override
-		public ITextComponent getEmptyTooltip() {
+		public Component getEmptyTooltip() {
 			return emptyTooltip;
 		}
 	}

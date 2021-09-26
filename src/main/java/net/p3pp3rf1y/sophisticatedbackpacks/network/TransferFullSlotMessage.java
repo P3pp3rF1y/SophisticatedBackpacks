@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import javax.annotation.Nullable;
@@ -17,11 +17,11 @@ public class TransferFullSlotMessage {
 		this.slotId = slotId;
 	}
 
-	public static void encode(TransferFullSlotMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(TransferFullSlotMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.slotId);
 	}
 
-	public static TransferFullSlotMessage decode(PacketBuffer packetBuffer) {
+	public static TransferFullSlotMessage decode(FriendlyByteBuf packetBuffer) {
 		return new TransferFullSlotMessage(packetBuffer.readInt());
 	}
 
@@ -31,11 +31,10 @@ public class TransferFullSlotMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity player, TransferFullSlotMessage msg) {
-		if (player == null || !(player.containerMenu instanceof BackpackContainer)) {
+	private static void handleMessage(@Nullable ServerPlayer player, TransferFullSlotMessage msg) {
+		if (player == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
-		BackpackContainer backpackContainer = (BackpackContainer) player.containerMenu;
 		Slot slot = backpackContainer.getSlot(msg.slotId);
 		ItemStack transferResult;
 		do {

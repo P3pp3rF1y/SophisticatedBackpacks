@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
@@ -20,11 +20,11 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 	private final int upgradeContainerId;
 
 	protected W upgradeWrapper;
-	protected final PlayerEntity player;
+	protected final Player player;
 	private final UpgradeContainerType<W, C> type;
 	private boolean isOpen = false;
 
-	protected UpgradeContainerBase(PlayerEntity player, int upgradeContainerId, W upgradeWrapper, UpgradeContainerType<W, C> type) {
+	protected UpgradeContainerBase(Player player, int upgradeContainerId, W upgradeWrapper, UpgradeContainerType<W, C> type) {
 		this.upgradeContainerId = upgradeContainerId;
 		this.upgradeWrapper = upgradeWrapper;
 		this.player = player;
@@ -52,15 +52,15 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		if (!player.level.isClientSide) {
 			return;
 		}
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), key, value));
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundTag(), key, value));
 	}
 
 	@Override
-	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
+	public void sendDataToServer(Supplier<CompoundTag> supplyData) {
 		if (!player.level.isClientSide) {
 			return;
 		}
-		CompoundNBT data = supplyData.get();
+		CompoundTag data = supplyData.get();
 		data.putInt("containerId", upgradeContainerId);
 		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 	}
@@ -69,7 +69,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		//noop by default
 	}
 
-	public abstract void handleMessage(CompoundNBT data);
+	public abstract void handleMessage(CompoundTag data);
 
 	public ItemStack getUpgradeStack() {
 		return upgradeWrapper.getUpgradeStack();
@@ -97,7 +97,7 @@ public abstract class UpgradeContainerBase<W extends IUpgradeWrapper, C extends 
 		return slot.getItem();
 	}
 
-	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
+	public void onTakeFromSlot(Slot slot, Player player, ItemStack slotStack) {
 		slot.onTake(player, slotStack);
 	}
 

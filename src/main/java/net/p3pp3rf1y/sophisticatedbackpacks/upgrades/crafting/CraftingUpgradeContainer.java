@@ -1,18 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.CraftingResultSlot;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ICraftingRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
@@ -26,13 +26,13 @@ import java.util.Optional;
 
 public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgradeWrapper, CraftingUpgradeContainer> implements ICraftingContainer {
 	private static final String DATA_SHIFT_CLICK_INTO_BACKPACK = "shiftClickIntoBackpack";
-	private final CraftResultInventory craftResult = new CraftResultInventory();
+	private final ResultContainer craftResult = new ResultContainer();
 	private final CraftingItemHandler craftMatrix;
-	private final CraftingResultSlot craftingResultSlot;
+	private final ResultSlot craftingResultSlot;
 	@Nullable
-	private ICraftingRecipe lastRecipe = null;
+	private CraftingRecipe lastRecipe = null;
 
-	public CraftingUpgradeContainer(PlayerEntity player, int upgradeContainerId, CraftingUpgradeWrapper upgradeWrapper, UpgradeContainerType<CraftingUpgradeWrapper, CraftingUpgradeContainer> type) {
+	public CraftingUpgradeContainer(Player player, int upgradeContainerId, CraftingUpgradeWrapper upgradeWrapper, UpgradeContainerType<CraftingUpgradeWrapper, CraftingUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 
 		int slot;
@@ -46,9 +46,9 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 			});
 		}
 		craftMatrix = new CraftingItemHandler(upgradeWrapper::getInventory, this::onCraftMatrixChanged);
-		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
+		craftingResultSlot = new ResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
 			@Override
-			public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
+			public void onTake(Player thePlayer, ItemStack stack) {
 				checkTakeAchievements(stack);
 				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
 				NonNullList<ItemStack> nonnulllist;
@@ -72,7 +72,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 						} else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
 							itemstack1.grow(itemstack.getCount());
 							craftMatrix.setItem(i, itemstack1);
-						} else if (!player.inventory.add(itemstack1)) {
+						} else if (!player.getInventory().add(itemstack1)) {
 							player.drop(itemstack1, false);
 						}
 					}
@@ -81,8 +81,6 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 						((BackpackContainer) thePlayer.containerMenu).setSlotStackToUpdate(slot.index, slot.getItem());
 					}
 				}
-
-				return stack;
 			}
 		};
 		slots.add(craftingResultSlot);
@@ -94,21 +92,21 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		onCraftMatrixChanged(craftMatrix);
 	}
 
-	private void onCraftMatrixChanged(IInventory iInventory) {
+	private void onCraftMatrixChanged(Container iInventory) {
 		updateCraftingResult(player.level, player, craftMatrix, craftResult, craftingResultSlot);
 	}
 
-	private void updateCraftingResult(World world, PlayerEntity player, CraftingInventory inventory, CraftResultInventory inventoryResult, CraftingResultSlot craftingResultSlot) {
+	private void updateCraftingResult(Level world, Player player, CraftingContainer inventory, ResultContainer inventoryResult, ResultSlot craftingResultSlot) {
 		if (!world.isClientSide) {
-			ServerPlayerEntity serverplayerentity = (ServerPlayerEntity) player;
+			ServerPlayer serverplayerentity = (ServerPlayer) player;
 			ItemStack itemstack = ItemStack.EMPTY;
 			if (lastRecipe != null && lastRecipe.matches(inventory, world)) {
 				itemstack = lastRecipe.assemble(inventory);
 			} else {
 				//noinspection ConstantConditions - we're on server and for sure in the world so getServer can't return null here
-				Optional<ICraftingRecipe> optional = world.getServer().getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, inventory, world);
+				Optional<CraftingRecipe> optional = world.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, inventory, world);
 				if (optional.isPresent()) {
-					ICraftingRecipe craftingRecipe = optional.get();
+					CraftingRecipe craftingRecipe = optional.get();
 					if (inventoryResult.setRecipeUsed(world, serverplayerentity, craftingRecipe)) {
 						lastRecipe = craftingRecipe;
 						itemstack = lastRecipe.assemble(inventory);
@@ -126,7 +124,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains(DATA_SHIFT_CLICK_INTO_BACKPACK)) {
 			setShiftClickIntoBackpack(data.getBoolean(DATA_SHIFT_CLICK_INTO_BACKPACK));
 		}
@@ -143,20 +141,12 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	}
 
 	@Override
-	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
-		ItemStack remainder = slot.onTake(player, slotStack);
-		if (!remainder.isEmpty()) {
-			player.drop(remainder, false);
-		}
-	}
-
-	@Override
 	public List<Slot> getRecipeSlots() {
 		return slots.subList(0, 9);
 	}
 
 	@Override
-	public IInventory getCraftMatrix() {
+	public Container getCraftMatrix() {
 		return craftMatrix;
 	}
 
@@ -166,12 +156,12 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 
 	public void setShiftClickIntoBackpack(boolean shiftClickIntoBackpack) {
 		upgradeWrapper.setShiftClickIntoBackpack(shiftClickIntoBackpack);
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHIFT_CLICK_INTO_BACKPACK, shiftClickIntoBackpack));
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundTag(), DATA_SHIFT_CLICK_INTO_BACKPACK, shiftClickIntoBackpack));
 	}
 
 	@Override
 	public boolean mergeIntoBackpackFirst(Slot slot) {
-		return !(slot instanceof CraftingResultSlot) || shouldShiftClickIntoBackpack();
+		return !(slot instanceof ResultSlot) || shouldShiftClickIntoBackpack();
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
-import net.minecraft.item.ItemGroup;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -11,8 +11,8 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
@@ -32,7 +32,7 @@ public class SophisticatedBackpacks {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
 	public static final CommonProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
-	public static final ItemGroup ITEM_GROUP = new SBItemGroup();
+	public static final CreativeModeTab ITEM_GROUP = new SBItemGroup();
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
@@ -43,6 +43,7 @@ public class SophisticatedBackpacks {
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
 		modBus.addListener(Config.COMMON::onConfigReload);
+		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		ModLoot.init();
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
@@ -51,15 +52,15 @@ public class SophisticatedBackpacks {
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
-		CapabilityBackpackWrapper.register();
 		PacketHandler.init();
 		ModCompat.initCompats();
 		ModItems.registerDispenseBehavior();
+		ModItems.registerCauldronInteractions();
 		SBPCommand.registerArgumentTypes();
 	}
 
 	private static void serverStarted(FMLServerStartedEvent event) {
-		ServerWorld world = event.getServer().getLevel(World.OVERWORLD);
+		ServerLevel world = event.getServer().getLevel(Level.OVERWORLD);
 		if (world != null) {
 			RecipeHelper.setWorld(world);
 		}

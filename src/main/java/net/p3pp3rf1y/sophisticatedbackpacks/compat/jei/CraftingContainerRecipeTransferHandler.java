@@ -8,10 +8,11 @@ import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
@@ -30,7 +31,7 @@ import java.util.TreeSet;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks.LOGGER;
 
-public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHandler<BackpackContainer> {
+public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHandler<BackpackContainer, CraftingRecipe> {
 	private final IRecipeTransferHandlerHelper handlerHelper;
 	private final IStackHelper stackHelper;
 
@@ -45,9 +46,14 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 	}
 
 	@Override
-	public IRecipeTransferError transferRecipe(BackpackContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
+	public Class<CraftingRecipe> getRecipeClass() {
+		return CraftingRecipe.class;
+	}
+
+	@Override
+	public IRecipeTransferError transferRecipe(BackpackContainer container, CraftingRecipe recipe, IRecipeLayout recipeLayout, Player player, boolean maxTransfer, boolean doTransfer) {
 		Optional<? extends UpgradeContainerBase<?, ?>> potentialCraftingContainer = container.getOpenOrFirstCraftingContainer();
-		if (!potentialCraftingContainer.isPresent()) {
+		if (potentialCraftingContainer.isEmpty()) {
 			return handlerHelper.createInternalError();
 		}
 
@@ -80,14 +86,12 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		int emptySlotCount = getEmptySlotCount(inventorySlots, availableItemStacks);
 
 		if (filledCraftSlotCount - inputCount > emptySlotCount) {
-			String message = TranslationHelper.translate("jei.tooltip.error.recipe.transfer.inventory.full");
-			return handlerHelper.createUserErrorWithTooltip(message);
+			return handlerHelper.createUserErrorWithTooltip(new TranslatableComponent("jei.tooltip.error.recipe.transfer.inventory.full"));
 		}
 
 		MatchingItemsResult matchingItemsResult = getMatchingItems(stackHelper, availableItemStacks, itemStackGroup.getGuiIngredients());
 		if (!matchingItemsResult.missingItems.isEmpty()) {
-			String message = TranslationHelper.translate("jei.tooltip.error.recipe.transfer.missing");
-			return handlerHelper.createUserErrorForSlots(message, matchingItemsResult.missingItems);
+			return handlerHelper.createUserErrorForSlots(new TranslatableComponent("jei.tooltip.error.recipe.transfer.missing"), matchingItemsResult.missingItems);
 		}
 
 		List<Integer> craftingSlotIndexes = new ArrayList<>(craftingSlots.keySet());
@@ -233,10 +237,10 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		}
 
 		public Iterator<ItemStackMatchable<Integer>> iterator() {
-			return new MatchingIterable.DelegateIterator<Map.Entry<Integer, ItemStack>, ItemStackMatchable<Integer>>(map.entrySet().iterator()) {
+			return new MatchingIterable.DelegateIterator<>(map.entrySet().iterator()) {
 				public ItemStackMatchable<Integer> next() {
 					final Map.Entry<Integer, ItemStack> entry = delegate.next();
-					return new ItemStackMatchable<Integer>() {
+					return new ItemStackMatchable<>() {
 						public ItemStack getStack() {
 							return entry.getValue();
 						}
@@ -259,10 +263,10 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 
 		public Iterator<ItemStackMatchable<ItemStack>> iterator() {
 			Iterator<ItemStack> stacks = list.iterator();
-			return new MatchingIterable.DelegateIterator<ItemStack, ItemStackMatchable<ItemStack>>(stacks) {
+			return new MatchingIterable.DelegateIterator<>(stacks) {
 				public ItemStackMatchable<ItemStack> next() {
 					final ItemStack stack = delegate.next();
-					return new ItemStackMatchable<ItemStack>() {
+					return new ItemStackMatchable<>() {
 						@Nullable
 						public ItemStack getStack() {
 							return stack;

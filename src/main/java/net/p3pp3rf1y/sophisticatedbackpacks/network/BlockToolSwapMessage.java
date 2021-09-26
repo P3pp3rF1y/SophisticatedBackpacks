@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
@@ -20,11 +20,11 @@ public class BlockToolSwapMessage {
 		this.pos = pos;
 	}
 
-	public static void encode(BlockToolSwapMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(BlockToolSwapMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeLong(msg.pos.asLong());
 	}
 
-	public static BlockToolSwapMessage decode(PacketBuffer packetBuffer) {
+	public static BlockToolSwapMessage decode(FriendlyByteBuf packetBuffer) {
 		return new BlockToolSwapMessage(BlockPos.of(packetBuffer.readLong()));
 	}
 
@@ -34,7 +34,7 @@ public class BlockToolSwapMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(BlockToolSwapMessage msg, @Nullable ServerPlayerEntity sender) {
+	private static void handleMessage(BlockToolSwapMessage msg, @Nullable ServerPlayer sender) {
 		if (sender == null) {
 			return;
 		}
@@ -57,11 +57,11 @@ public class BlockToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.displayClientMessage(new TranslationTextComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
+			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
 		}
 	}
 }

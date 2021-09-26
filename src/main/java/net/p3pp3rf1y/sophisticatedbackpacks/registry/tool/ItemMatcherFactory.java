@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import java.util.Optional;
 
@@ -14,12 +14,12 @@ abstract class ItemMatcherFactory {
 	}
 
 	public boolean appliesTo(JsonElement jsonElement) {
-		return jsonElement.isJsonObject() && JSONUtils.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
+		return jsonElement.isJsonObject() && GsonHelper.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
 	}
 
-	public Optional<CacheableStackPredicate> getPredicate(JsonElement jsonElement) {
+	public Optional<ItemTagMatcher> getPredicate(JsonElement jsonElement) {
 		return getPredicateFromObject(jsonElement.getAsJsonObject());
 	}
 
-	protected abstract Optional<CacheableStackPredicate> getPredicateFromObject(JsonObject jsonObject);
+	protected abstract Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject);
 }

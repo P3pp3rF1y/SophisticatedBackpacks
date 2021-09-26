@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
@@ -28,7 +28,7 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 
 	public void sendIntToServer(String key, int value) {
 		sendDataToServer(() -> {
-			CompoundNBT data = new CompoundNBT();
+			CompoundTag data = new CompoundTag();
 			data.putInt(key, value);
 			return data;
 		});
@@ -36,17 +36,17 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 
 	public void sendStringToServer(String key, String value) {
 		sendDataToServer(() -> {
-			CompoundNBT data = new CompoundNBT();
+			CompoundTag data = new CompoundTag();
 			data.putString(key, value);
 			return data;
 		});
 	}
 
-	public void sendDataToServer(Supplier<CompoundNBT> supplyData) {
+	public void sendDataToServer(Supplier<CompoundTag> supplyData) {
 		if (isServer()) {
 			return;
 		}
-		CompoundNBT data = supplyData.get();
+		CompoundTag data = supplyData.get();
 		data.putString("categoryName", categoryName);
 		PacketHandler.sendToServer(new SyncContainerClientDataMessage(data));
 	}
@@ -55,5 +55,5 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 		return !settingsContainer.getPlayer().level.isClientSide;
 	}
 
-	public abstract void handleMessage(CompoundNBT data);
+	public abstract void handleMessage(CompoundTag data);
 }

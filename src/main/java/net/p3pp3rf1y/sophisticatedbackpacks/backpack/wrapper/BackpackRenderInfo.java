@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
@@ -44,13 +44,13 @@ public class BackpackRenderInfo {
 		getBackpackSaveHandler.get().run();
 	}
 
-	public void deserializeFrom(CompoundNBT renderInfoNbt) {
+	public void deserializeFrom(CompoundTag renderInfoNbt) {
 		reset();
 		backpack.addTagElement(RENDER_INFO_TAG, renderInfoNbt);
 		deserialize();
 	}
 
-	public CompoundNBT getNbt() {
+	public CompoundTag getNbt() {
 		return getRenderInfoTag();
 	}
 
@@ -68,10 +68,10 @@ public class BackpackRenderInfo {
 	}
 
 	private void deserializeTanks() {
-		CompoundNBT renderInfo = getRenderInfoTag();
-		ListNBT tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
+		CompoundTag renderInfo = getRenderInfoTag();
+		ListTag tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tanks.size(); i++) {
-			CompoundNBT tank = tanks.getCompound(i);
+			CompoundTag tank = tanks.getCompound(i);
 			tankRenderInfos.put(TankPosition.valueOf(tank.getString(TANK_POSITION_TAG).toUpperCase(Locale.ENGLISH)), IRenderedTankUpgrade.TankRenderInfo.deserialize(tank.getCompound(TANK_INFO_TAG)));
 		}
 	}
@@ -81,21 +81,21 @@ public class BackpackRenderInfo {
 	}
 
 	private void serializeTank(TankPosition tankPosition, IRenderedTankUpgrade.TankRenderInfo tankRenderInfo) {
-		CompoundNBT tankInfo = tankRenderInfo.serialize();
+		CompoundTag tankInfo = tankRenderInfo.serialize();
 
-		CompoundNBT renderInfo = getRenderInfoTag();
-		ListNBT tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
+		CompoundTag renderInfo = getRenderInfoTag();
+		ListTag tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
 
 		boolean infoSet = false;
 		for (int i = 0; i < tanks.size(); i++) {
-			CompoundNBT tank = tanks.getCompound(i);
+			CompoundTag tank = tanks.getCompound(i);
 			if (tank.getString(TANK_POSITION_TAG).equals(tankPosition.getSerializedName())) {
 				tank.put(TANK_INFO_TAG, tankInfo);
 				infoSet = true;
 			}
 		}
 		if (!infoSet) {
-			CompoundNBT tankPositionInfo = new CompoundNBT();
+			CompoundTag tankPositionInfo = new CompoundTag();
 			tankPositionInfo.putString(TANK_POSITION_TAG, tankPosition.getSerializedName());
 			tankPositionInfo.put(TANK_INFO_TAG, tankInfo);
 			tanks.add(tankPositionInfo);
@@ -115,15 +115,15 @@ public class BackpackRenderInfo {
 
 	public void setBatteryRenderInfo(IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo) {
 		this.batteryRenderInfo = batteryRenderInfo;
-		CompoundNBT batteryInfo = batteryRenderInfo.serialize();
-		CompoundNBT renderInfo = getRenderInfoTag();
+		CompoundTag batteryInfo = batteryRenderInfo.serialize();
+		CompoundTag renderInfo = getRenderInfoTag();
 		renderInfo.put(BATTERY_TAG, batteryInfo);
 		NBTHelper.setCompoundNBT(backpack, RENDER_INFO_TAG, renderInfo);
 		save();
 	}
 
 	@Nonnull
-	private CompoundNBT getRenderInfoTag() {
-		return NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundNBT());
+	private CompoundTag getRenderInfoTag() {
+		return NBTHelper.getCompound(backpack, RENDER_INFO_TAG).orElse(new CompoundTag());
 	}
 }
