@@ -152,7 +152,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 				int finalSlot = slot;
 				ToggleButton<Boolean> upgradeSwitch = new ToggleButton<>(new Position(leftPos - 22, switchTop), ButtonDefinitions.UPGRADE_SWITCH,
 						button -> getMenu().setUpgradeEnabled(finalSlot, !getMenu().getUpgradeEnabled(finalSlot)), () -> getMenu().getUpgradeEnabled(finalSlot));
-				addRenderableWidget(upgradeSwitch);
+				addWidget(upgradeSwitch);
 				upgradeSwitches.add(upgradeSwitch);
 			}
 			switchTop += 22;
@@ -367,10 +367,8 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 		if (getMenu().getCarried().isEmpty() && hoveredSlot != null) {
 			if (hoveredSlot.hasItem()) {
 				renderTooltip(matrixStack, hoveredSlot.getItem(), x, y);
-			} else if (hoveredSlot instanceof INameableEmptySlot emptySlot) {
-				if (emptySlot.hasEmptyTooltip()) {
-					renderComponentToolTip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
-				}
+			} else if (hoveredSlot instanceof INameableEmptySlot emptySlot && emptySlot.hasEmptyTooltip()) {
+				renderComponentToolTip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
 			}
 		}
 		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);

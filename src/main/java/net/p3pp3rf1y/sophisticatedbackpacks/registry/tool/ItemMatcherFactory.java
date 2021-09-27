@@ -3,8 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 abstract class ItemMatcherFactory {
 	private final String typeName;
@@ -17,9 +19,9 @@ abstract class ItemMatcherFactory {
 		return jsonElement.isJsonObject() && GsonHelper.getAsString(jsonElement.getAsJsonObject(), "type").equals(typeName);
 	}
 
-	public Optional<ItemTagMatcher> getPredicate(JsonElement jsonElement) {
+	public Optional<Predicate<ItemStack>> getPredicate(JsonElement jsonElement) {
 		return getPredicateFromObject(jsonElement.getAsJsonObject());
 	}
 
-	protected abstract Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject);
+	protected abstract Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject);
 }

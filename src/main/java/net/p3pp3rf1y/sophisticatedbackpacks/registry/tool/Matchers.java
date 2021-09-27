@@ -13,6 +13,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -35,7 +36,7 @@ public class Matchers {
 	static {
 		addItemMatcherFactory(new ItemMatcherFactory("tag") {
 			@Override
-			protected Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject) {
+			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				String tagName = GsonHelper.getAsString(jsonObject, "tag");
 				Tag<Item> tag = SerializationTags.getInstance().getOrEmpty(Registry.ITEM_REGISTRY).getTag(new ResourceLocation(tagName));
 				return tag == null ? Optional.empty() : Optional.of(new ItemTagMatcher(tag));
@@ -44,7 +45,7 @@ public class Matchers {
 
 		addItemMatcherFactory(new ItemMatcherFactory("emptynbt") {
 			@Override
-			protected Optional<ItemTagMatcher> getPredicateFromObject(JsonObject jsonObject) {
+			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
 				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
@@ -120,7 +121,7 @@ public class Matchers {
 		ITEM_MATCHER_FACTORIES.add(matcherFactory);
 	}
 
-	public static Optional<ItemTagMatcher> getItemMatcher(JsonElement jsonElement) {
+	public static Optional<Predicate<ItemStack>> getItemMatcher(JsonElement jsonElement) {
 		for (ItemMatcherFactory itemMatcherFactory : Matchers.ITEM_MATCHER_FACTORIES) {
 			if (itemMatcherFactory.appliesTo(jsonElement)) {
 				return itemMatcherFactory.getPredicate(jsonElement);

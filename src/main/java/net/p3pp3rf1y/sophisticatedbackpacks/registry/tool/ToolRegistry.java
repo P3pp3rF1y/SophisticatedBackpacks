@@ -104,7 +104,7 @@ public class ToolRegistry {
 		}
 
 		private void parseFromArrays(JsonArray blocksArray, JsonArray toolsArray) {
-			Tuple<Set<Item>, Set<ItemTagMatcher>> tools = getItemsAndItemPredicates(toolsArray);
+			Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools = getItemsAndItemPredicates(toolsArray);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
@@ -117,7 +117,7 @@ public class ToolRegistry {
 			}
 		}
 
-		private void parseObjectPredicateEntry(Tuple<Set<Item>, Set<ItemTagMatcher>> tools, JsonElement jsonElement) {
+		private void parseObjectPredicateEntry(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, JsonElement jsonElement) {
 			for (IMatcherFactory<C> blockMatcherFactory : objectMatcherFactories) {
 				if (blockMatcherFactory.appliesTo(jsonElement)) {
 					blockMatcherFactory.getPredicate(jsonElement).ifPresent(predicate -> toolMapping.addObjectPredicateTools(tools, predicate));
@@ -126,7 +126,7 @@ public class ToolRegistry {
 			}
 		}
 
-		private void parseObjectEntry(Tuple<Set<Item>, Set<ItemTagMatcher>> tools, String objectName) {
+		private void parseObjectEntry(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, String objectName) {
 			ResourceLocation registryName = new ResourceLocation(objectName);
 			Optional<T> objectOptional = getObjectFromRegistry.apply(registryName);
 			if (objectOptional.isPresent()) {
@@ -152,7 +152,7 @@ public class ToolRegistry {
 				SophisticatedBackpacks.LOGGER.debug("{} mod isn't loaded, skipping ... {} ", modId, property);
 				return;
 			}
-			Tuple<Set<Item>, Set<ItemTagMatcher>> tools = getItemsAndItemPredicates(property);
+			Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools = getItemsAndItemPredicates(property);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
@@ -160,7 +160,7 @@ public class ToolRegistry {
 		}
 
 		private void parseObjectTools(Map.Entry<String, JsonElement> property) {
-			Tuple<Set<Item>, Set<ItemTagMatcher>> tools = getItemsAndItemPredicates(property);
+			Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools = getItemsAndItemPredicates(property);
 			if (tools.getA().isEmpty() && tools.getB().isEmpty()) {
 				return;
 			}
@@ -169,7 +169,7 @@ public class ToolRegistry {
 
 	}
 
-	protected static Tuple<Set<Item>, Set<ItemTagMatcher>> getItemsAndItemPredicates(Map.Entry<String, JsonElement> property) {
+	protected static Tuple<Set<Item>, Set<Predicate<ItemStack>>> getItemsAndItemPredicates(Map.Entry<String, JsonElement> property) {
 		if (property.getValue().isJsonArray()) {
 			JsonArray toolArray = GsonHelper.convertToJsonArray(property.getValue(), "");
 			return getItemsAndItemPredicates(toolArray);
@@ -179,9 +179,9 @@ public class ToolRegistry {
 		}
 	}
 
-	protected static Tuple<Set<Item>, Set<ItemTagMatcher>> getItemsAndItemPredicates(JsonArray toolArray) {
+	protected static Tuple<Set<Item>, Set<Predicate<ItemStack>>> getItemsAndItemPredicates(JsonArray toolArray) {
 		Set<Item> items = new HashSet<>();
-		Set<ItemTagMatcher> itemPredicates = new HashSet<>();
+		Set<Predicate<ItemStack>> itemPredicates = new HashSet<>();
 		for (JsonElement jsonElement : toolArray) {
 			if (jsonElement.isJsonPrimitive()) {
 				ResourceLocation itemName = new ResourceLocation(jsonElement.getAsString());
@@ -218,20 +218,20 @@ public class ToolRegistry {
 		private final Map<T, Set<Item>> notToolCache = new HashMap<>();
 
 		private final Map<T, Set<Item>> objectTools = new HashMap<>();
-		private final Map<T, Set<ItemTagMatcher>> objectToolPredicates = new HashMap<>();
+		private final Map<T, Set<Predicate<ItemStack>>> objectToolPredicates = new HashMap<>();
 		private final Map<Predicate<C>, Set<Item>> objectPredicateTools = new HashMap<>();
-		private final Map<Predicate<C>, Set<ItemTagMatcher>> objectPredicateToolPredicates = new HashMap<>();
+		private final Map<Predicate<C>, Set<Predicate<ItemStack>>> objectPredicateToolPredicates = new HashMap<>();
 
 		public ToolMapping(Function<C, T> getObjectFromContext) {
 			this.getObjectFromContext = getObjectFromContext;
 		}
 
-		private void addObjectPredicateTools(Tuple<Set<Item>, Set<ItemTagMatcher>> tools, Predicate<C> predicate) {
+		private void addObjectPredicateTools(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, Predicate<C> predicate) {
 			tools.getA().forEach(t -> objectPredicateTools.computeIfAbsent(predicate, p -> new HashSet<>()).add(t));
 			tools.getB().forEach(tp -> objectPredicateToolPredicates.computeIfAbsent(predicate, p -> new HashSet<>()).add(tp));
 		}
 
-		private void addObjectTools(Tuple<Set<Item>, Set<ItemTagMatcher>> tools, T object) {
+		private void addObjectTools(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, T object) {
 			tools.getA().forEach(t -> objectTools.computeIfAbsent(object, b -> new HashSet<>()).add(t));
 			tools.getB().forEach(tp -> objectToolPredicates.computeIfAbsent(object, b -> new HashSet<>()).add(tp));
 		}
@@ -291,9 +291,9 @@ public class ToolRegistry {
 		}
 
 		private boolean tryToMatchAgainstObjectPredicateToolPredicates(ItemStack stack, C context) {
-			for (Map.Entry<Predicate<C>, Set<ItemTagMatcher>> entry : objectPredicateToolPredicates.entrySet()) {
+			for (Map.Entry<Predicate<C>, Set<Predicate<ItemStack>>> entry : objectPredicateToolPredicates.entrySet()) {
 				if (entry.getKey().test(context)) {
-					Set<ItemTagMatcher> toolPredicates = entry.getValue();
+					Set<Predicate<ItemStack>> toolPredicates = entry.getValue();
 					if (tryToMatchTools(stack, getObjectFromContext.apply(context), toolPredicates)) {
 						return true;
 					}
@@ -304,7 +304,7 @@ public class ToolRegistry {
 
 		private boolean tryToMatchAgainstObjectToolPredicates(ItemStack stack, T object) {
 			if (objectToolPredicates.containsKey(object)) {
-				Set<ItemTagMatcher> toolPredicates = objectToolPredicates.get(object);
+				Set<Predicate<ItemStack>> toolPredicates = objectToolPredicates.get(object);
 				return tryToMatchTools(stack, object, toolPredicates);
 			}
 			return false;
@@ -320,8 +320,8 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchTools(ItemStack stack, T object, Set<ItemTagMatcher> toolPredicates) {
-			for (ItemTagMatcher itemPredicate : toolPredicates) {
+		private boolean tryToMatchTools(ItemStack stack, T object, Set<Predicate<ItemStack>> toolPredicates) {
+			for (Predicate<ItemStack> itemPredicate : toolPredicates) {
 				if (itemPredicate.test(stack)) {
 					objectTools.computeIfAbsent(object, b -> new HashSet<>()).add(stack.getItem());
 					return true;
@@ -338,7 +338,7 @@ public class ToolRegistry {
 			return objectTools;
 		}
 
-		public void addModPredicateTools(String modId, Tuple<Set<Item>, Set<ItemTagMatcher>> tools) {
+		public void addModPredicateTools(String modId, Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools) {
 			addObjectPredicateTools(tools, new ModMatcher<>(modId, getObjectFromContext));
 		}
 	}

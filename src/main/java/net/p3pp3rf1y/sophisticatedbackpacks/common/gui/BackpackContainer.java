@@ -800,6 +800,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 			slotNumbersToRemove.sort(IntComparators.OPPOSITE_COMPARATOR);
 			for (int slotNumber : slotNumbersToRemove) {
 				lastUpgradeSlots.remove(slotNumber);
+				remoteUpgradeSlots.remove(slotNumber);
 			}
 		}
 
