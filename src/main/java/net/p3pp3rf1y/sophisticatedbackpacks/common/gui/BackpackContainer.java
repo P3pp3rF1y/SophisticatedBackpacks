@@ -1323,6 +1323,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 				Slot destSlot = getSlot(i);
 				ItemStack itemstack1 = destSlot.getItem();
 				if (itemstack1.isEmpty() && destSlot.mayPlace(sourceStack) && !(destSlot instanceof IFilterSlot)) {
+					boolean errorMerging = false;
 					if (toTransfer > destSlot.getMaxStackSize()) {
 						destSlot.set(sourceStack.split(destSlot.getMaxStackSize()));
 					} else {
@@ -1333,15 +1334,18 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 							if (!needsSlotsThatAreOccupied(sourceStack, 0, upgradeSlot, newColumnsTaken)) {
 								destSlot.set(sourceStack.split(toTransfer));
 								updateColumnsTaken(newColumnsTaken);
+							} else {
+								errorMerging = true;
 							}
 						} else {
 							destSlot.set(sourceStack.split(toTransfer));
 						}
 					}
-
-					destSlot.setChanged();
-					flag = true;
-					break;
+					if (!errorMerging) {
+						destSlot.setChanged();
+						flag = true;
+						break;
+					}
 				}
 
 				if (reverseDirection) {
