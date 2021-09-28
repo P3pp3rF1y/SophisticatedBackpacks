@@ -294,7 +294,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 
 		for (int pixels = 1; pixels < 5; pixels++) {
 			partDefinition.addOrReplaceChild(BATTERY_CHARGE_PART + pixels, CubeListBuilder.create()
-							.texOffs(18, 55).addBox(-2.0F, -3.0F, -6.01F, pixels, 1.0F, 1.0F)
+							.texOffs(18, 55).addBox(-2.0F, 21F, -6.01F, pixels, 1.0F, 1.0F)
 					, PartPose.ZERO
 			);
 		}
@@ -389,7 +389,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 	}
 
 	public void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio) {
-		ModelPart charge = batteryCharges.get((int) chargeRatio * 4);
+		ModelPart charge = batteryCharges.get((int) (chargeRatio * 4));
 		if (charge == null) {
 			return;
 		}

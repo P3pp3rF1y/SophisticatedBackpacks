@@ -111,6 +111,7 @@ public class GuiHelper {
 		float minV = (float) texData.getV() / texData.getTextureHeight();
 		float maxV = minV + ((float) texData.getHeight() / texData.getTextureWidth());
 
+		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
 		BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 		bufferbuilder.vertex(matrix, xMin, yMax, 0).color(red, green, blue, alpha).uv(minU, maxV).endVertex();

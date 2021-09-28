@@ -59,6 +59,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 				if (batteryRenderInfo.getChargeRatio() > 0.1f) {
 					matrixStack.pushPose();
 					matrixStack.mulPose(Vector3f.XN.rotationDegrees(180));
+					matrixStack.translate(0, -1.5, 0);
 					model.renderBatteryCharge(matrixStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
 					matrixStack.popPose();
 				}
