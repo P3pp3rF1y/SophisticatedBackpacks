@@ -1410,7 +1410,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		if (slotIndex < getInventorySlotsSize()) {
 			remoteRealSlots.set(slotIndex, stack);
 		} else {
-			remoteUpgradeSlots.set(slotIndex, stack);
+			remoteUpgradeSlots.set(slotIndex - getInventorySlotsSize(), stack);
 		}
 	}
 
