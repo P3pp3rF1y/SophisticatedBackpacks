@@ -331,7 +331,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 				if (stackCountText == null) {
 					stackCountText = CountAbbreviator.abbreviate(itemstack.getCount());
 				}
-				renderStackCount(matrixStack, stackCountText, i, j);
+				renderStackCount(stackCountText, i, j);
 			} else {
 				itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, stackCountText);
 			}
@@ -585,19 +585,17 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 		return numberOfUpgradeSlots == 0 ? Optional.empty() : Optional.of(new Rect2i(leftPos - BackpackScreen.UPGRADE_INVENTORY_OFFSET, topPos + getUpgradeTop(), 32, getUpgradeHeight()));
 	}
 
-	private void renderStackCount(PoseStack matrixStack, String count, int x, int y) {
-		matrixStack.translate(0.0D, 0.0D, itemRenderer.blitOffset + 200.0F);
-		MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-
-		matrixStack.pushPose();
+	private void renderStackCount(String count, int x, int y) {
+		PoseStack posestack = new PoseStack();
+		posestack.translate(0.0D, 0.0D, itemRenderer.blitOffset + 200.0F);
 		float scale = Math.min(1f, (float) 16 / font.width(count));
 		if (scale < 1f) {
-			matrixStack.scale(scale, scale, 1.0F);
+			posestack.scale(scale, scale, 1.0F);
 		}
+		MultiBufferSource.BufferSource renderBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		font.drawInBatch(count, (x + 19 - 2 - (font.width(count) * scale)) / scale,
-				(y + 6 + 3 + (1 / (scale * scale) - 1)) / scale, 16777215, true, matrixStack.last().pose(), renderBuffer, false, 0, 15728880);
+				(y + 6 + 3 + (1 / (scale * scale) - 1)) / scale, 16777215, true, posestack.last().pose(), renderBuffer, false, 0, 15728880);
 		renderBuffer.endBatch();
-		matrixStack.popPose();
 	}
 
 	@Override
