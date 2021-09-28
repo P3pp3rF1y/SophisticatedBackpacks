@@ -30,6 +30,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -117,8 +118,6 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		leftTankBorder = part.getChild(LEFT_TANK_BORDER_PART);
 		rightTank = part.getChild(RIGHT_TANK_PART);
 		rightTankBorder = part.getChild(RIGHT_TANK_BORDER_PART);
-		leftTankGlass = part.getChild(LEFT_TANK_GLASS_PART);
-		rightTankGlass = part.getChild(RIGHT_TANK_GLASS_PART);
 
 		ImmutableMap.Builder<Item, ModelPart> clipsBodyBuilder = ImmutableMap.builder();
 		ImmutableMap.Builder<Item, ModelPart> clipsLeftPouchesBuilder = ImmutableMap.builder();
@@ -145,6 +144,29 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		clipsRightPouches = clipsRightPouchesBuilder.build();
 		clipsFrontPouch = clipsFrontPouchBuilder.build();
 		clipsBattery = clipsBatteryBuilder.build();
+
+		ModelPart modelPart = getGlassModelPart();
+		leftTankGlass = modelPart.getChild(LEFT_TANK_GLASS_PART);
+		rightTankGlass = modelPart.getChild(RIGHT_TANK_GLASS_PART);
+	}
+
+	@Nonnull
+	private ModelPart getGlassModelPart() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshdefinition.getRoot();
+		partDefinition.addOrReplaceChild(LEFT_TANK_GLASS_PART, CubeListBuilder.create()
+						.texOffs(18, 5).addBox(-15F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F)
+						.texOffs(0, 0).addBox(-15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F)
+						.texOffs(10, 5).addBox(-15F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F)
+				, PartPose.offset(0.0F, 24.0F, 0.0F)
+		);
+		partDefinition.addOrReplaceChild(RIGHT_TANK_GLASS_PART, CubeListBuilder.create()
+						.texOffs(18, 5).addBox(11F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, true)
+						.texOffs(0, 0).addBox(15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, true)
+						.texOffs(10, 5).addBox(11F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, true)
+				, PartPose.offset(0.0F, 24.0F, 0.0F)
+		);
+		return partDefinition.bake(32, 32);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -270,18 +292,6 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 				, PartPose.offset(0.0F, 24.0F, 0.0F)
 		);
 
-		partDefinition.addOrReplaceChild(LEFT_TANK_GLASS_PART, CubeListBuilder.create()
-						.texOffs(18, 5).addBox(-15F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F)
-						.texOffs(0, 0).addBox(-15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F)
-						.texOffs(10, 5).addBox(-15F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F)
-				, PartPose.offset(0.0F, 24.0F, 0.0F)
-		);
-		partDefinition.addOrReplaceChild(RIGHT_TANK_GLASS_PART, CubeListBuilder.create()
-						.texOffs(18, 5).addBox(11F, 3.5F, -2.5F, 4.0F, 10.0F, 0.0F, true)
-						.texOffs(0, 0).addBox(15F, 3.5F, -2.5F, 0.0F, 10.0F, 5.0F, true)
-						.texOffs(10, 5).addBox(11F, 3.5F, 2.5F, 4.0F, 10.0F, 0.0F, true)
-				, PartPose.offset(0.0F, 24.0F, 0.0F)
-		);
 		for (int pixels = 1; pixels < 5; pixels++) {
 			partDefinition.addOrReplaceChild(BATTERY_CHARGE_PART + pixels, CubeListBuilder.create()
 							.texOffs(18, 55).addBox(-2.0F, -3.0F, -6.01F, pixels, 1.0F, 1.0F)
@@ -363,14 +373,14 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 
 		poseStack.pushPose();
 		poseStack.scale(1 / 2f, 6 / 10f, 1 / 2f);
-		vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TANK_GLASS_TEXTURE));
-
 		if (showLeftTank) {
+			vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TANK_GLASS_TEXTURE));
 			leftTankGlass.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
 			tankRenderInfo.getFluid().ifPresent(f -> renderFluid(poseStack, buffer, packedLight, f, tankRenderInfo.getFillRatio(), true));
 		}
 		if (showRightTank) {
+			vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TANK_GLASS_TEXTURE));
 			rightTankGlass.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.RIGHT);
 			tankRenderInfo.getFluid().ifPresent(f -> renderFluid(poseStack, buffer, packedLight, f, tankRenderInfo.getFillRatio(), false));
@@ -395,10 +405,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(new FluidStack(fluid, 5000));
 		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
-		int atlasWidth = (int) (still.getWidth() / (still.getU1() - still.getU0()));
-		int atlasHeight = (int) (still.getHeight() / (still.getV1() - still.getV0()));
-
-		ModelPart fluidBox = getFluidBar(atlasWidth, atlasHeight, (int) (fill * 10), left);
+		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
 		int color = fluid.getAttributes().getColor();
 		float red = (color >> 16 & 255) / 255.0F;
 		float green = (color >> 8 & 255) / 255.0F;
@@ -406,32 +413,38 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		fluidBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1);
 	}
 
-	private ModelPart getFluidBar(int atlasWidth, int atlasHeight, int fill, boolean left) {
-		FluidBarCacheKey key = new FluidBarCacheKey(atlasWidth, atlasHeight, fill);
+	private ModelPart getFluidBar(TextureAtlasSprite still, int fill, boolean left) {
+		int atlasWidth = (int) (still.getWidth() / (still.getU1() - still.getU0()));
+		int atlasHeight = (int) (still.getHeight() / (still.getV1() - still.getV0()));
+		int u = (int) (still.getU0() * atlasWidth);
+		int v = (int) (still.getV0() * atlasHeight);
+		FluidBarCacheKey key = new FluidBarCacheKey(u, v, fill);
+
 		Map<FluidBarCacheKey, ModelPart> fluidLevels = left ? fluidLevelsLeft : fluidLevelsRight;
 		return fluidLevels.computeIfAbsent(key, k -> {
 			MeshDefinition meshdefinition = new MeshDefinition();
 			PartDefinition partDefinition = meshdefinition.getRoot();
 			partDefinition.addOrReplaceChild("fluid_fill", CubeListBuilder.create()
-							.addBox(left ? -14.5F : 11F, 3.5F + fill, -3F, 3.5F, fill, 4F, !left)
+							.texOffs(u, v)
+							.addBox(left ? -14.5F : 11F, 13.5F - fill, -2F, 3.5F, fill, 4F, !left)
 					, PartPose.offset(0.0F, 24.0F, 0.0F));
-			ModelPart root = partDefinition.bake(32, 32);
+			ModelPart root = partDefinition.bake(atlasWidth, atlasHeight);
 			return root.getChild("fluid_fill");
 		});
 	}
 
-	private static record FluidBarCacheKey(int atlastWidth, int atlasHeight, int fill) {
+	private static record FluidBarCacheKey(int u, int v, int fill) {
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {return true;}
 			if (o == null || getClass() != o.getClass()) {return false;}
 			FluidBarCacheKey that = (FluidBarCacheKey) o;
-			return atlastWidth == that.atlastWidth && atlasHeight == that.atlasHeight && fill == that.fill;
+			return u == that.u && v == that.v && fill == that.fill;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(atlastWidth, atlasHeight, fill);
+			return Objects.hash(u, v, fill);
 		}
 	}
 

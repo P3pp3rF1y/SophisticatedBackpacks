@@ -34,16 +34,23 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		matrixStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
 		matrixStack.pushPose();
 		matrixStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
+		matrixStack.translate(0, -1.69, 0);
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
 			if (tankRenderInfo != null) {
+				matrixStack.pushPose();
+				matrixStack.translate(0.15, 0, 0);
 				tankRenderInfo.getFluid().ifPresent(fluid -> model.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), true));
+				matrixStack.popPose();
 			}
 		}
 		if (showRightTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.RIGHT);
 			if (tankRenderInfo != null) {
+				matrixStack.pushPose();
+				matrixStack.translate(-0.15, 0, 0);
 				tankRenderInfo.getFluid().ifPresent(fluid -> model.renderFluid(matrixStack, buffer, combinedLight, fluid, tankRenderInfo.getFillRatio(), false));
+				matrixStack.popPose();
 			}
 		}
 		matrixStack.popPose();
