@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import javax.annotation.Nullable;
@@ -18,12 +18,12 @@ public class SetGhostSlotMessage {
 		this.slotNumber = slotNumber;
 	}
 
-	public static void encode(SetGhostSlotMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(SetGhostSlotMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeItem(msg.stack);
 		packetBuffer.writeShort(msg.slotNumber);
 	}
 
-	public static SetGhostSlotMessage decode(PacketBuffer packetBuffer) {
+	public static SetGhostSlotMessage decode(FriendlyByteBuf packetBuffer) {
 		return new SetGhostSlotMessage(packetBuffer.readItem(), packetBuffer.readShort());
 	}
 
@@ -33,7 +33,7 @@ public class SetGhostSlotMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(SetGhostSlotMessage msg, @Nullable ServerPlayerEntity sender) {
+	private static void handleMessage(SetGhostSlotMessage msg, @Nullable ServerPlayer sender) {
 		if (sender == null || !(sender.containerMenu instanceof BackpackContainer)) {
 			return;
 		}

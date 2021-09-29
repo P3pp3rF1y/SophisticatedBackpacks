@@ -3,17 +3,17 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.StonecuttingRecipe;
-import net.minecraft.util.NonNullList;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 
@@ -34,23 +34,23 @@ import java.util.concurrent.TimeUnit;
 import static net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper.CompactingShape.*;
 
 public class RecipeHelper {
-	private static final LoadingCache<Item, Set<CompactingShape>> ITEM_COMPACTING_SHAPES = CacheBuilder.newBuilder().expireAfterAccess(120L, TimeUnit.SECONDS).build(new CacheLoader<Item, Set<CompactingShape>>() {
+	private static final LoadingCache<Item, Set<CompactingShape>> ITEM_COMPACTING_SHAPES = CacheBuilder.newBuilder().expireAfterAccess(120L, TimeUnit.SECONDS).build(new CacheLoader<>() {
 		@Override
 		public Set<CompactingShape> load(Item item) {
 			return getCompactingShapes(item);
 		}
 	});
 	private static final int MAX_FOLLOW_UP_COMPACTING_RECIPES = 10;
-	private static WeakReference<World> world;
+	private static WeakReference<Level> world;
 	private static final Map<CompactedItem, CompactingResult> COMPACTING_RESULTS = new HashMap<>();
 
 	private RecipeHelper() {}
 
-	public static void setWorld(World w) {
+	public static void setWorld(Level w) {
 		world = new WeakReference<>(w);
 	}
 
-	private static Optional<World> getWorld() {
+	private static Optional<Level> getWorld() {
 		return Optional.ofNullable(world.get());
 	}
 
@@ -66,7 +66,7 @@ public class RecipeHelper {
 		}).orElse(Collections.emptySet());
 	}
 
-	private static Optional<CompactingShape> getCompactingShape(Item item, World w, int width, int height, CompactingShape uncraftableShape, CompactingShape shape) {
+	private static Optional<CompactingShape> getCompactingShape(Item item, Level w, int width, int height, CompactingShape uncraftableShape, CompactingShape shape) {
 		CompactingResult compactingResult = getCompactingResult(item, w, width, height);
 		if (!compactingResult.getResult().isEmpty()) {
 			if (item == compactingResult.getResult().getItem()) {
@@ -86,7 +86,7 @@ public class RecipeHelper {
 		return Optional.empty();
 	}
 
-	private static boolean isPartOfCompactingLoop(Item firstCompacted, Item firstCompactResult, World w) {
+	private static boolean isPartOfCompactingLoop(Item firstCompacted, Item firstCompactResult, Level w) {
 		ItemStack compactingResultStack;
 		int iterations = 0;
 		Set<Item> compactedItems = new HashSet<>();
@@ -122,9 +122,9 @@ public class RecipeHelper {
 		return false;
 	}
 
-	private static boolean uncompactMatchesItem(ItemStack result, World w, Item item, int count) {
-		CraftingInventory craftingInventory = getFilledCraftingInventory(result.getItem(), 1, 1);
-		result = w.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, w).map(r -> r.assemble(craftingInventory)).orElse(ItemStack.EMPTY);
+	private static boolean uncompactMatchesItem(ItemStack result, Level w, Item item, int count) {
+		CraftingContainer craftingInventory = getFilledCraftingInventory(result.getItem(), 1, 1);
+		result = w.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInventory, w).map(r -> r.assemble(craftingInventory)).orElse(ItemStack.EMPTY);
 		return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == count;
 	}
 
@@ -132,15 +132,15 @@ public class RecipeHelper {
 		return getWorld().map(w -> getCompactingResult(item, w, width, height)).orElse(CompactingResult.EMPTY);
 	}
 
-	private static CompactingResult getCompactingResult(Item item, World w, int width, int height) {
+	private static CompactingResult getCompactingResult(Item item, Level w, int width, int height) {
 		CompactedItem compactedItem = new CompactedItem(item, width, height);
 		if (COMPACTING_RESULTS.containsKey(compactedItem)) {
 			return COMPACTING_RESULTS.get(compactedItem);
 		}
 
-		CraftingInventory craftingInventory = getFilledCraftingInventory(item, width, height);
+		CraftingContainer craftingInventory = getFilledCraftingInventory(item, width, height);
 		List<ItemStack> remainingItems = new ArrayList<>();
-		ItemStack result = w.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, craftingInventory, w).map(r -> {
+		ItemStack result = w.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInventory, w).map(r -> {
 			r.getRemainingItems(craftingInventory).forEach(stack -> {
 				if (!stack.isEmpty()) {
 					remainingItems.add(stack);
@@ -156,9 +156,9 @@ public class RecipeHelper {
 		return compactingResult;
 	}
 
-	private static CraftingInventory getFilledCraftingInventory(Item item, int width, int height) {
-		CraftingInventory craftinginventory = new CraftingInventory(new Container(null, -1) {
-			public boolean stillValid(PlayerEntity playerIn) {
+	private static CraftingContainer getFilledCraftingInventory(Item item, int width, int height) {
+		CraftingContainer craftinginventory = new CraftingContainer(new AbstractContainerMenu(null, -1) {
+			public boolean stillValid(Player playerIn) {
 				return false;
 			}
 		}, width, height);
@@ -169,16 +169,16 @@ public class RecipeHelper {
 		return craftinginventory;
 	}
 
-	public static Optional<FurnaceRecipe> getSmeltingRecipe(ItemStack stack) {
-		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
+	public static Optional<SmeltingRecipe> getSmeltingRecipe(ItemStack stack) {
+		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
 	}
 
 	public static Set<CompactingShape> getItemCompactingShapes(Item item) {
 		return ITEM_COMPACTING_SHAPES.getUnchecked(item);
 	}
 
-	public static List<StonecuttingRecipe> getStonecuttingRecipes(IInventory inventory) {
-		return getWorld().map(w -> w.getRecipeManager().getRecipesFor(IRecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
+	public static List<StonecutterRecipe> getStonecuttingRecipes(Container inventory) {
+		return getWorld().map(w -> w.getRecipeManager().getRecipesFor(RecipeType.STONECUTTING, inventory, w)).orElse(Collections.emptyList());
 	}
 
 	public enum CompactingShape {

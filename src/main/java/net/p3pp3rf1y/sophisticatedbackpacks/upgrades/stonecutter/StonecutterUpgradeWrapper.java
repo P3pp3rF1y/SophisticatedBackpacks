@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stonecutter;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -41,7 +41,7 @@ public class StonecutterUpgradeWrapper extends UpgradeWrapperBase<StonecutterUpg
 			NBTHelper.removeTag(upgrade, RECIPE_ID_TAG);
 			return;
 		}
-		upgrade.addTagElement(RECIPE_ID_TAG, StringNBT.valueOf(recipeId.toString()));
+		upgrade.addTagElement(RECIPE_ID_TAG, StringTag.valueOf(recipeId.toString()));
 		save();
 	}
 

@@ -1,14 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
 public class DepositUpgradeContainer extends UpgradeContainerBase<DepositUpgradeWrapper, DepositUpgradeContainer> {
 	private final DepositFilterLogicContainer filterLogicContainer;
 
-	public DepositUpgradeContainer(PlayerEntity player, int containerId, DepositUpgradeWrapper wrapper, UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> type) {
+	public DepositUpgradeContainer(Player player, int containerId, DepositUpgradeWrapper wrapper, UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 
 		filterLogicContainer = new DepositFilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
@@ -19,7 +19,7 @@ public class DepositUpgradeContainer extends UpgradeContainerBase<DepositUpgrade
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		filterLogicContainer.handleMessage(data);
 	}
 }

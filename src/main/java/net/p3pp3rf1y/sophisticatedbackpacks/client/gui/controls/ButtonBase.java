@@ -1,24 +1,19 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import java.util.function.IntConsumer;
 
-public abstract class ButtonBase extends Widget {
-	protected final int width;
-	protected final int height;
-
+public abstract class ButtonBase extends BackpackWidget {
 	protected IntConsumer onClick;
 
 	protected ButtonBase(Position position, Dimension dimension, IntConsumer onClick) {
-		super(position);
-		width = dimension.getWidth();
-		height = dimension.getHeight();
+		super(position, dimension);
 		this.onClick = onClick;
 	}
 
@@ -33,18 +28,8 @@ public abstract class ButtonBase extends Widget {
 		}
 		onClick.accept(button);
 		if (Boolean.TRUE.equals(Config.CLIENT.playButtonSound.get())) {
-			Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 		}
 		return true;
-	}
-
-	@Override
-	public int getWidth() {
-		return width;
-	}
-
-	@Override
-	public int getHeight() {
-		return height;
 	}
 }

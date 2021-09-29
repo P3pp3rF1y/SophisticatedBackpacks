@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
@@ -15,7 +15,7 @@ public class AutoSmeltingUpgradeContainer extends UpgradeContainerBase<AutoSmelt
 	private final FilterLogicContainer<FilterLogic> fuelFilterLogicContainer;
 	private final SmeltingLogicContainer smeltingLogicContainer;
 
-	public AutoSmeltingUpgradeContainer(PlayerEntity player, int containerId, AutoSmeltingUpgradeWrapper wrapper, UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> type) {
+	public AutoSmeltingUpgradeContainer(Player player, int containerId, AutoSmeltingUpgradeWrapper wrapper, UpgradeContainerType<AutoSmeltingUpgradeWrapper, AutoSmeltingUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 		inputFilterLogicContainer = new FilterLogicContainer<>(() -> upgradeWrapper.getInputFilterLogic(), this, slots::add);
 		fuelFilterLogicContainer = new FilterLogicContainer<>(() -> upgradeWrapper.getFuelFilterLogic(), this, slots::add);
@@ -23,7 +23,7 @@ public class AutoSmeltingUpgradeContainer extends UpgradeContainerBase<AutoSmelt
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		inputFilterLogicContainer.handleMessage(data);
 	}
 

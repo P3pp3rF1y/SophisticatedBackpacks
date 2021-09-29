@@ -6,8 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 
 import java.util.Collection;
@@ -24,11 +24,11 @@ public class BackpackPlayerArgumentType implements ArgumentType<String> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		if (context.getSource() instanceof CommandSource) {
-			return ISuggestionProvider.suggest(BackpackAccessLogger.getPlayerNames().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList()), builder);
-		} else if (context.getSource() instanceof ISuggestionProvider) {
-			ISuggestionProvider isuggestionprovider = (ISuggestionProvider) context.getSource();
-			return isuggestionprovider.customSuggestion((CommandContext<ISuggestionProvider>) context, builder);
+		if (context.getSource() instanceof CommandSourceStack) {
+			return SharedSuggestionProvider.suggest(BackpackAccessLogger.getPlayerNames().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList()), builder);
+		} else if (context.getSource() instanceof SharedSuggestionProvider isuggestionprovider) {
+			//noinspection unchecked
+			return isuggestionprovider.customSuggestion((CommandContext<SharedSuggestionProvider>) context, builder);
 		}
 		return Suggestions.empty();
 	}

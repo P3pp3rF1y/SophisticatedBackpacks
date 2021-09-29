@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum ToolSwapMode implements IStringSerializable {
+public enum ToolSwapMode implements StringRepresentable {
 	ANY("name"),
 	ONLY_TOOLS("onlyTools"),
 	NO_SWAP("noSwap");

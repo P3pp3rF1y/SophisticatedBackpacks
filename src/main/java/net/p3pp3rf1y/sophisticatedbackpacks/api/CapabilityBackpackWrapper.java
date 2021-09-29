@@ -1,14 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import org.apache.commons.lang3.Validate;
-
-import javax.annotation.Nullable;
 
 public class CapabilityBackpackWrapper {
 	private CapabilityBackpackWrapper() {}
@@ -23,22 +18,7 @@ public class CapabilityBackpackWrapper {
 		return BACKPACK_WRAPPER_CAPABILITY;
 	}
 
-	public static void register() {
-		CapabilityManager.INSTANCE.register(IBackpackWrapper.class, NoopStorage.INSTANCE, () -> NoopBackpackWrapper.INSTANCE);
-	}
-
-	public static class NoopStorage implements Capability.IStorage<IBackpackWrapper> {
-		public static final NoopStorage INSTANCE = new NoopStorage();
-
-		@Nullable
-		@Override
-		public INBT writeNBT(Capability<IBackpackWrapper> capability, IBackpackWrapper instance, Direction side) {
-			return null;
-		}
-
-		@Override
-		public void readNBT(Capability<IBackpackWrapper> capability, IBackpackWrapper instance, Direction side, INBT nbt) {
-			//noop
-		}
+	public static void onRegister(RegisterCapabilitiesEvent event) {
+		event.register(IBackpackWrapper.class);
 	}
 }

@@ -1,30 +1,40 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.dispenser.OptionalDispenseBehavior;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.DirectionalPlaceContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.Direction;
+import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.DirectionalPlaceContext;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeGuiManager;
@@ -116,7 +126,7 @@ public class ModItems {
 	private ModItems() {}
 
 	private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SophisticatedBackpacks.MOD_ID);
-	private static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, SophisticatedBackpacks.MOD_ID);
 	private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, SophisticatedBackpacks.MOD_ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
@@ -194,14 +204,14 @@ public class ModItems {
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
-	public static final RegistryObject<ContainerType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
+	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
 			() -> IForgeContainerType.create(BackpackContainer::fromBuffer));
 
-	public static final RegistryObject<ContainerType<SettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
+	public static final RegistryObject<MenuType<SettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
 			() -> IForgeContainerType.create(SettingsContainer::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
-			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, EntityClassification.MISC)
+			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
 					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
 	);
 
@@ -209,8 +219,8 @@ public class ModItems {
 		ITEMS.register(modBus);
 		CONTAINERS.register(modBus);
 		ENTITIES.register(modBus);
-		modBus.addGenericListener(ContainerType.class, ModItems::registerContainers);
-		modBus.addGenericListener(IRecipeSerializer.class, ModItems::registerRecipeSerializers);
+		modBus.addGenericListener(MenuType.class, ModItems::registerContainers);
+		modBus.addGenericListener(RecipeSerializer.class, ModItems::registerRecipeSerializers);
 	}
 
 	private static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
@@ -238,7 +248,7 @@ public class ModItems {
 	private static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
 	private static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(BatteryUpgradeContainer::new);
 
-	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
+	public static void registerContainers(RegistryEvent.Register<MenuType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PICKUP_ADVANCED_TYPE);
 		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.BASIC_TYPE);
@@ -267,8 +277,8 @@ public class ModItems {
 		UpgradeContainerRegistry.register(BATTERY_UPGRADE.getId(), BATTERY_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			ScreenManager.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
-			ScreenManager.register(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
+			MenuScreens.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
+			MenuScreens.register(SETTINGS_CONTAINER_TYPE.get(), SettingsScreen::constructScreen);
 
 			UpgradeGuiManager.registerTab(PICKUP_BASIC_TYPE, PickupUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(PICKUP_ADVANCED_TYPE, PickupUpgradeTab.Advanced::new);
@@ -301,7 +311,7 @@ public class ModItems {
 		});
 	}
 
-	public static void registerRecipeSerializers(RegistryEvent.Register<IRecipeSerializer<?>> evt) {
+	public static void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> evt) {
 		CraftingHelper.register(ItemEnabledCondition.Serializer.INSTANCE);
 
 		evt.getRegistry().register(BackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_upgrade"));
@@ -318,9 +328,37 @@ public class ModItems {
 		DispenserBlock.registerBehavior(NETHERITE_BACKPACK.get(), new BackpackDispenseBehavior());
 	}
 
-	private static class BackpackDispenseBehavior extends OptionalDispenseBehavior {
+	public static void registerCauldronInteractions() {
+		CauldronInteraction.WATER.put(BACKPACK.get(), new BackpackCauldronInteraction());
+		CauldronInteraction.WATER.put(IRON_BACKPACK.get(), new BackpackCauldronInteraction());
+		CauldronInteraction.WATER.put(GOLD_BACKPACK.get(), new BackpackCauldronInteraction());
+		CauldronInteraction.WATER.put(DIAMOND_BACKPACK.get(), new BackpackCauldronInteraction());
+		CauldronInteraction.WATER.put(NETHERITE_BACKPACK.get(), new BackpackCauldronInteraction());
+	}
+
+	private static boolean hasDefaultColor(IBackpackWrapper wrapper) {
+		return wrapper.getBorderColor() == BackpackWrapper.DEFAULT_BORDER_COLOR && wrapper.getClothColor() == BackpackWrapper.DEFAULT_CLOTH_COLOR;
+	}
+
+	private static class BackpackCauldronInteraction implements CauldronInteraction {
 		@Override
-		protected ItemStack execute(IBlockSource source, ItemStack stack) {
+		public InteractionResult interact(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
+			LazyOptional<IBackpackWrapper> backpackWrapperCapability = stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+			if (backpackWrapperCapability.map(ModItems::hasDefaultColor).orElse(true)) {
+				return InteractionResult.PASS;
+			}
+
+			if (!level.isClientSide) {
+				backpackWrapperCapability.ifPresent(w -> w.setColors(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR));
+			}
+
+			return InteractionResult.sidedSuccess(level.isClientSide);
+		}
+	}
+
+	private static class BackpackDispenseBehavior extends OptionalDispenseItemBehavior {
+		@Override
+		protected ItemStack execute(BlockSource source, ItemStack stack) {
 			setSuccess(false);
 			Item item = stack.getItem();
 			if (item instanceof BackpackItem) {

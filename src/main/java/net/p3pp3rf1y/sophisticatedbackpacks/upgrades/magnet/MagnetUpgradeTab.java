@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -14,7 +14,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationH
 public class MagnetUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgradeContainer<MagnetUpgradeWrapper>> {
 	protected ContentsFilterControl filterLogicControl;
 
-	protected MagnetUpgradeTab(ContentsFilteredUpgradeContainer<MagnetUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+	protected MagnetUpgradeTab(ContentsFilteredUpgradeContainer<MagnetUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen, Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 	}
 

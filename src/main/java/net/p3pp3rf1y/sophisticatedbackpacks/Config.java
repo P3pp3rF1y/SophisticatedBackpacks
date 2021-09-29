@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.loot.LootTables;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
@@ -83,12 +83,12 @@ public class Config {
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
-		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
+		public final FilteredUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
-		public void onConfigReload(ModConfig.Reloading event) {
+		public void onConfigReload(ModConfigEvent.Reloading event) {
 			enabledItems.enabledMap.clear();
 		}
 
@@ -123,7 +123,7 @@ public class Config {
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
-			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
+			toolSwapperUpgrade = new FilteredUpgradeConfig(builder, "Tool Swapper Upgrade", "toolSwapperUpgrade", 8, 4);
 			tankUpgrade = new TankUpgradeConfig(builder);
 			batteryUpgrade = new BatteryUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
@@ -209,34 +209,24 @@ public class Config {
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
 				Map<EntityType<?>, ResourceLocation> mapping = new LinkedHashMap<>();
-				mapping.put(EntityType.CREEPER, LootTables.DESERT_PYRAMID);
-				mapping.put(EntityType.DROWNED, LootTables.SHIPWRECK_TREASURE);
-				mapping.put(EntityType.ENDERMAN, LootTables.END_CITY_TREASURE);
-				mapping.put(EntityType.EVOKER, LootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.HUSK, LootTables.DESERT_PYRAMID);
-				mapping.put(EntityType.PIGLIN, LootTables.BASTION_BRIDGE);
-				mapping.put(EntityType.PIGLIN_BRUTE, LootTables.BASTION_TREASURE);
-				mapping.put(EntityType.PILLAGER, LootTables.PILLAGER_OUTPOST);
-				mapping.put(EntityType.SKELETON, LootTables.SIMPLE_DUNGEON);
-				mapping.put(EntityType.STRAY, LootTables.IGLOO_CHEST);
-				mapping.put(EntityType.VEX, LootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.VINDICATOR, LootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.WITCH, LootTables.BURIED_TREASURE);
-				mapping.put(EntityType.WITHER_SKELETON, LootTables.NETHER_BRIDGE);
-				mapping.put(EntityType.ZOMBIE, LootTables.SIMPLE_DUNGEON);
-				mapping.put(EntityType.ZOMBIE_VILLAGER, LootTables.VILLAGE_ARMORER);
-				mapping.put(EntityType.ZOMBIFIED_PIGLIN, LootTables.BASTION_OTHER);
+				mapping.put(EntityType.CREEPER, BuiltInLootTables.DESERT_PYRAMID);
+				mapping.put(EntityType.DROWNED, BuiltInLootTables.SHIPWRECK_TREASURE);
+				mapping.put(EntityType.ENDERMAN, BuiltInLootTables.END_CITY_TREASURE);
+				mapping.put(EntityType.EVOKER, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.HUSK, BuiltInLootTables.DESERT_PYRAMID);
+				mapping.put(EntityType.PIGLIN, BuiltInLootTables.BASTION_BRIDGE);
+				mapping.put(EntityType.PIGLIN_BRUTE, BuiltInLootTables.BASTION_TREASURE);
+				mapping.put(EntityType.PILLAGER, BuiltInLootTables.PILLAGER_OUTPOST);
+				mapping.put(EntityType.SKELETON, BuiltInLootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.STRAY, BuiltInLootTables.IGLOO_CHEST);
+				mapping.put(EntityType.VEX, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.VINDICATOR, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityType.WITCH, BuiltInLootTables.BURIED_TREASURE);
+				mapping.put(EntityType.WITHER_SKELETON, BuiltInLootTables.NETHER_BRIDGE);
+				mapping.put(EntityType.ZOMBIE, BuiltInLootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityType.ZOMBIE_VILLAGER, BuiltInLootTables.VILLAGE_ARMORER);
+				mapping.put(EntityType.ZOMBIFIED_PIGLIN, BuiltInLootTables.BASTION_OTHER);
 				return mapping;
-			}
-		}
-
-		public static class ToolSwapperUpgradeConfig {
-			public final ForgeConfigSpec.IntValue slotsInRow;
-
-			protected ToolSwapperUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Tool Swapper Upgrade" + SETTINGS).push("toolSwapperUpgrade");
-				slotsInRow = builder.comment("Number of tool filter slots displayed in a row").defineInRange("slotsInRow", 4, 1, 6);
-				builder.pop();
 			}
 		}
 

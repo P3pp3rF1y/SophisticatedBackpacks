@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import com.google.common.collect.ImmutableMap;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
@@ -12,6 +11,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 
+import java.util.Map;
+
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
 
@@ -19,7 +20,7 @@ public class InceptionUpgradeTab extends UpgradeSettingsTab<InceptionUpgradeCont
 	public static final UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> TYPE = new UpgradeContainerType<>(InceptionUpgradeContainer::new);
 
 	private static final ButtonDefinition.Toggle<InventoryOrder> INVENTORY_ORDER = createToggleButtonDefinition(
-			ImmutableMap.of(
+			Map.of(
 					InventoryOrder.MAIN_FIRST, GuiHelper.getButtonStateData(new UV(48, 32), Dimension.SQUARE_16, new Position(1, 1),
 							TranslationHelper.getTranslatedLines(translUpgradeButton("inventory_order_main_first"), null)),
 					InventoryOrder.INCEPTED_FIRST, GuiHelper.getButtonStateData(new UV(64, 32), Dimension.SQUARE_16, new Position(1, 1),

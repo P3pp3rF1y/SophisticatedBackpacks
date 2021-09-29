@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -24,14 +24,14 @@ public class TransferRecipeMessage {
 		this.maxTransfer = maxTransfer;
 	}
 
-	public static void encode(TransferRecipeMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(TransferRecipeMessage msg, FriendlyByteBuf packetBuffer) {
 		writeMap(packetBuffer, msg.matchingItems);
 		writeList(packetBuffer, msg.craftingSlotIndexes);
 		writeList(packetBuffer, msg.inventorySlotIndexes);
 		packetBuffer.writeBoolean(msg.maxTransfer);
 	}
 
-	private static void writeMap(PacketBuffer packetBuffer, Map<Integer, Integer> map) {
+	private static void writeMap(FriendlyByteBuf packetBuffer, Map<Integer, Integer> map) {
 		packetBuffer.writeInt(map.size());
 		map.forEach((key, value) -> {
 			packetBuffer.writeInt(key);
@@ -39,16 +39,16 @@ public class TransferRecipeMessage {
 		});
 	}
 
-	private static void writeList(PacketBuffer packetBuffer, List<Integer> list) {
+	private static void writeList(FriendlyByteBuf packetBuffer, List<Integer> list) {
 		packetBuffer.writeInt(list.size());
 		list.forEach(packetBuffer::writeInt);
 	}
 
-	public static TransferRecipeMessage decode(PacketBuffer packetBuffer) {
+	public static TransferRecipeMessage decode(FriendlyByteBuf packetBuffer) {
 		return new TransferRecipeMessage(readMap(packetBuffer), readList(packetBuffer), readList(packetBuffer), packetBuffer.readBoolean());
 	}
 
-	private static Map<Integer, Integer> readMap(PacketBuffer packetBuffer) {
+	private static Map<Integer, Integer> readMap(FriendlyByteBuf packetBuffer) {
 		Map<Integer, Integer> ret = new HashMap<>();
 		int size = packetBuffer.readInt();
 		for (int i = 0; i < size; i++) {
@@ -57,7 +57,7 @@ public class TransferRecipeMessage {
 		return ret;
 	}
 
-	private static List<Integer> readList(PacketBuffer packetBuffer) {
+	private static List<Integer> readList(FriendlyByteBuf packetBuffer) {
 		List<Integer> ret = new ArrayList<>();
 		int size = packetBuffer.readInt();
 		for (int i = 0; i < size; i++) {
@@ -72,7 +72,7 @@ public class TransferRecipeMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(TransferRecipeMessage msg, @Nullable ServerPlayerEntity sender) {
+	private static void handleMessage(TransferRecipeMessage msg, @Nullable ServerPlayer sender) {
 		if (sender == null) {
 			return;
 		}

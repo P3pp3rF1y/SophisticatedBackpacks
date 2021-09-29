@@ -5,20 +5,22 @@ buildscript {
             name = "forge"
             url = "https://maven.minecraftforge.net"
         }
-        maven { url = 'https://sizableshrimp.me/maven' }
+        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'me.sizableshrimp.parchmenttest', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+', changing: true
     }
 }
 
 plugins {
-    id "org.sonarqube" version "2.6.2"
+    id "org.sonarqube" version "3.3"
     id "maven-publish"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'idea'
 
 repositories {
@@ -41,12 +43,16 @@ group = 'sophisticatedbackpacks'
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 archivesBaseName = 'sophisticatedbackpacks'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '16'
 
 minecraft {
     mappings channel: 'parchment', version: "${project.parchment_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
+        all {
+            //TODO remove this once PR https://github.com/MinecraftForge/MinecraftForge/pull/8064 gets merged
+            property 'ignoreList', "bootstraplauncher,securejarhandler,asm-commons,asm-util,asm-analysis,asm-tree,asm,client-extra,fmlcore,javafmllanguage,mclanguage,forge-${project.minecraft_version}-${project.forge_version},${project.minecraft_version}-forge-${project.forge_version}"
+        }
         client {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -99,21 +105,19 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
-    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}:api")
-    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-${top_mc_version}:${top_mc_version}-${top_version}")
-    compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
-    runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
-    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
-    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-    compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    //compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
+    //runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
+    //compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+    //runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
+    //compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    //runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
 
-    runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
-    runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
-    runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
-    runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
-    runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
-    runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
+    //runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
+    //runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
+    //runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
+    //runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
+    //runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
+    //runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
 }
 
 test {

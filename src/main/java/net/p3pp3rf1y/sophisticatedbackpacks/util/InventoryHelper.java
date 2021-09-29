@@ -1,12 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -141,7 +141,7 @@ public class InventoryHelper {
 		return result;
 	}
 
-	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
+	public static boolean runPickupOnBackpack(Level world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
 		List<IPickupResponseUpgrade> pickupUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IPickupResponseUpgrade.class);
 
 		for (IPickupResponseUpgrade pickupUpgrade : pickupUpgrades) {
@@ -244,7 +244,7 @@ public class InventoryHelper {
 		return itemHandler.extractItem(slot, itemHandler.getStackInSlot(slot).getCount(), false);
 	}
 
-	public static void insertOrDropItem(PlayerEntity player, ItemStack stack, IItemHandler... inventories) {
+	public static void insertOrDropItem(Player player, ItemStack stack, IItemHandler... inventories) {
 		ItemStack ret = stack;
 		for (IItemHandler inventory : inventories) {
 			ret = insertIntoInventory(ret, inventory, false);
@@ -327,8 +327,8 @@ public class InventoryHelper {
 		}
 
 		while (emptySlotsCount - stacks.size() - list.size() > 0 && !list.isEmpty()) {
-			ItemStack itemstack2 = list.remove(MathHelper.nextInt(rand, 0, list.size() - 1));
-			int i = MathHelper.nextInt(rand, 1, itemstack2.getCount() / 2);
+			ItemStack itemstack2 = list.remove(Mth.nextInt(rand, 0, list.size() - 1));
+			int i = Mth.nextInt(rand, 1, itemstack2.getCount() / 2);
 			ItemStack itemstack1 = itemstack2.split(i);
 			if (itemstack2.getCount() > 1 && rand.nextBoolean()) {
 				list.add(itemstack2);

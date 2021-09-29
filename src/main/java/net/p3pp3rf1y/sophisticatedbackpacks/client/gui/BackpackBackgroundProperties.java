@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 public class BackpackBackgroundProperties {

@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
@@ -15,13 +14,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
+import java.util.Map;
+
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions.getBooleanStateData;
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
 
 public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<HungerLevel> HUNGER_LEVEL = createToggleButtonDefinition(
-			ImmutableMap.of(
+			Map.of(
 					HungerLevel.ANY, GuiHelper.getButtonStateData(new UV(128, 0), translUpgradeButton("hunger_level_any"), Dimension.SQUARE_16, new Position(1, 1)),
 					HungerLevel.HALF, GuiHelper.getButtonStateData(new UV(112, 0), translUpgradeButton("hunger_level_half"), Dimension.SQUARE_16, new Position(1, 1)),
 					HungerLevel.FULL, GuiHelper.getButtonStateData(new UV(96, 0), translUpgradeButton("hunger_level_full"), Dimension.SQUARE_16, new Position(1, 1))
@@ -35,7 +36,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
-	protected FeedingUpgradeTab(FeedingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
+	protected FeedingUpgradeTab(FeedingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 	}
 

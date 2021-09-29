@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -13,11 +13,11 @@ public class StopDiscPlaybackMessage {
 		this.backpackUuid = backpackUuid;
 	}
 
-	public static void encode(StopDiscPlaybackMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(StopDiscPlaybackMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeUUID(msg.backpackUuid);
 	}
 
-	public static StopDiscPlaybackMessage decode(PacketBuffer packetBuffer) {
+	public static StopDiscPlaybackMessage decode(FriendlyByteBuf packetBuffer) {
 		return new StopDiscPlaybackMessage(packetBuffer.readUUID());
 	}
 

@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum Direction implements IStringSerializable {
+public enum Direction implements StringRepresentable {
 	BOTH("both"),
 	INPUT("input"),
 	OUTPUT("output");

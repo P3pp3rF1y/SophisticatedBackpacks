@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTileEntity;
+import net.minecraft.client.color.block.BlockColors;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
@@ -18,7 +18,7 @@ public class ModBlockColors {
 			if (tintIndex < 0 || tintIndex > 1 || pos == null) {
 				return -1;
 			}
-			return WorldHelper.getTile(blockDisplayReader, pos, BackpackTileEntity.class)
+			return WorldHelper.getTile(blockDisplayReader, pos, BackpackBlockEntity.class)
 					.map(te -> tintIndex == 0 ? te.getBackpackWrapper().getClothColor() : te.getBackpackWrapper().getBorderColor())
 					.orElse(getDefaultColor(tintIndex));
 		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());

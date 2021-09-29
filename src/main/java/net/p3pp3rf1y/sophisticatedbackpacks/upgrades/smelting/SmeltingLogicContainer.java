@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class SmeltingLogicContainer {
 		return supplySmeltingLogic.get().isCooking();
 	}
 
-	public boolean isBurning(World world) {
+	public boolean isBurning(Level world) {
 		return supplySmeltingLogic.get().isBurning(world);
 	}
 

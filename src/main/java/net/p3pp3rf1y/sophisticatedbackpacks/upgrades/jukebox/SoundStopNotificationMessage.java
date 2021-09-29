@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -16,11 +16,11 @@ public class SoundStopNotificationMessage {
 		this.backpackUuid = backpackUuid;
 	}
 
-	public static void encode(SoundStopNotificationMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(SoundStopNotificationMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeUUID(msg.backpackUuid);
 	}
 
-	public static SoundStopNotificationMessage decode(PacketBuffer packetBuffer) {
+	public static SoundStopNotificationMessage decode(FriendlyByteBuf packetBuffer) {
 		return new SoundStopNotificationMessage(packetBuffer.readUUID());
 	}
 
@@ -30,10 +30,10 @@ public class SoundStopNotificationMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity sender, SoundStopNotificationMessage msg) {
+	private static void handleMessage(@Nullable ServerPlayer sender, SoundStopNotificationMessage msg) {
 		if (sender == null) {
 			return;
 		}
-		ServerBackpackSoundHandler.onSoundStopped((ServerWorld) sender.level, msg.backpackUuid);
+		ServerBackpackSoundHandler.onSoundStopped((ServerLevel) sender.level, msg.backpackUuid);
 	}
 }

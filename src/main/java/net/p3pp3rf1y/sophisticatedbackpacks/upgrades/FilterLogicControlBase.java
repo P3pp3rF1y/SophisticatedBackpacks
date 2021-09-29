@@ -1,30 +1,29 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.world.inventory.Slot;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
 
 public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extends Slot, C extends FilterLogicContainerBase<F, S>>
-		extends CompositeWidget<Widget> {
+		extends CompositeBackpackWidget<BackpackWidget> {
 	protected final Button[] showButtons;
 	protected final int slotsTopYOffset;
 	protected final int slotsPerRow;
 	protected final int slotsInExtraRow;
 	protected final int fullSlotRows;
 	protected final C container;
-	private final int height;
-	private final int width;
 
 	protected FilterLogicControlBase(C container, Position position, boolean buttonsVisible, int slotsPerRow, Button... showButtons) {
-		super(position);
+		super(position, new Dimension(0, 0));
 		this.container = container;
 		slotsTopYOffset = buttonsVisible ? 21 : 0;
 		this.slotsPerRow = slotsPerRow;
@@ -45,17 +44,14 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			addChild(new ToggleButton<>(new Position(x + 54, y), ButtonDefinitions.MATCH_NBT,
 					button -> container.setMatchNbt(!container.shouldMatchNbt()), container::shouldMatchNbt));
 		}
-
-		width = Math.max(slotsPerRow * 18, getMaxButtonWidth());
 		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
 		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
-		height = (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset;
-
+		updateDimensions(Math.max(slotsPerRow * 18, getMaxButtonWidth()), (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset);
 	}
 
 	protected int getMaxButtonWidth() {
 		int maxWidth = 0;
-		for (Widget w : children) {
+		for (BackpackWidget w : children) {
 			int buttonWidth = w.getX() + w.getWidth() - x;
 			if (buttonWidth > maxWidth) {
 				maxWidth = buttonWidth;
@@ -83,17 +79,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	}
 
 	@Override
-	public int getWidth() {
-		return width;
-	}
-
-	@Override
-	public int getHeight() {
-		return height;
-	}
-
-	@Override
-	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
+	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, fullSlotRows, slotsInExtraRow);
 	}
 

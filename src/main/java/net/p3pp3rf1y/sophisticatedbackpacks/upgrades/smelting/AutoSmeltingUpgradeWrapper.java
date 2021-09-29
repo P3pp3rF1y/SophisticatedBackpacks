@@ -1,9 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -38,12 +39,12 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		inputFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.inputFilterSlots.get(),
 				s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), "inputFilter");
 		fuelFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.fuelFilterSlots.get(),
-				s -> ForgeHooks.getBurnTime(s) > 0, "fuelFilter");
+				s -> ForgeHooks.getBurnTime(s, RecipeType.SMELTING) > 0, "fuelFilter");
 		fuelFilterLogic.setAllowByDefault();
 		fuelFilterLogic.setEmptyAllowListMatchesEverything();
 
 		isValidInput = s -> RecipeHelper.getSmeltingRecipe(s).isPresent() && inputFilterLogic.matchesFilter(s);
-		isValidFuel = s -> ForgeHooks.getBurnTime(s) > 0 && fuelFilterLogic.matchesFilter(s);
+		isValidFuel = s -> ForgeHooks.getBurnTime(s, RecipeType.SMELTING) > 0 && fuelFilterLogic.matchesFilter(s);
 		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, isValidFuel, isValidInput, Config.COMMON.autoSmeltingUpgrade.smeltingSpeedMultiplier.get(),
 				Config.COMMON.autoSmeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
@@ -64,14 +65,14 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		}
 
 		ItemStack fuel = smeltingLogic.getFuel();
-		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel, RecipeType.SMELTING) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
 			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, inventory, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
 	}
 
 	@Override
-	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
+	public void tick(@Nullable LivingEntity entity, Level world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}

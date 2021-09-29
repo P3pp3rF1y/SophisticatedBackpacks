@@ -1,15 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.EntityTickableSound;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
@@ -23,10 +23,10 @@ public class BackpackSoundHandler {
 
 	private BackpackSoundHandler() {}
 
-	private static final Map<UUID, ISound> backpackSounds = new ConcurrentHashMap<>();
+	private static final Map<UUID, SoundInstance> backpackSounds = new ConcurrentHashMap<>();
 	private static long lastPlaybackChecked = 0;
 
-	public static void playBackpackSound(UUID backpackUuid, ISound sound) {
+	public static void playBackpackSound(UUID backpackUuid, SoundInstance sound) {
 		stopBackpackSound(backpackUuid);
 		backpackSounds.put(backpackUuid, sound);
 		Minecraft.getInstance().getSoundManager().play(sound);
@@ -53,11 +53,11 @@ public class BackpackSoundHandler {
 	}
 
 	public static void playBackpackSound(SoundEvent soundEvent, UUID backpackUuid, BlockPos pos) {
-		playBackpackSound(backpackUuid, SimpleSound.forRecord(soundEvent, pos.getX(), pos.getY(), pos.getZ()));
+		playBackpackSound(backpackUuid, SimpleSoundInstance.forRecord(soundEvent, pos.getX(), pos.getY(), pos.getZ()));
 	}
 
 	public static void playBackpackSound(SoundEvent soundEvent, UUID backpackUuid, int entityId) {
-		ClientWorld world = Minecraft.getInstance().level;
+		ClientLevel world = Minecraft.getInstance().level;
 		if (world == null) {
 			return;
 		}
@@ -66,7 +66,7 @@ public class BackpackSoundHandler {
 		if (!(entity instanceof LivingEntity)) {
 			return;
 		}
-		playBackpackSound(backpackUuid, new EntityTickableSound(soundEvent, SoundCategory.RECORDS, 2, 1, entity));
+		playBackpackSound(backpackUuid, new EntityBoundSoundInstance(soundEvent, SoundSource.RECORDS, 2, 1, entity));
 	}
 
 	@SuppressWarnings({"unused", "java:S1172"}) // needs to be here for addListener to recognize which event this method should be subscribed to

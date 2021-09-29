@@ -2,10 +2,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import net.minecraft.command.arguments.ArgumentTypes;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 public class SBPCommand {
@@ -13,8 +13,8 @@ public class SBPCommand {
 
 	private SBPCommand() {}
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		LiteralCommandNode<CommandSource> mainNode = dispatcher.register(
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		LiteralCommandNode<CommandSourceStack> mainNode = dispatcher.register(
 				Commands.literal("sbp")
 						.requires(cs -> cs.hasPermission(OP_LEVEL))
 						.then(ListCommand.register())
@@ -25,7 +25,7 @@ public class SBPCommand {
 	}
 
 	public static void registerArgumentTypes() {
-		ArgumentTypes.register(RegistryHelper.getModRegistryName("backpack_uuid"), BackpackUUIDArgumentType.class, new ArgumentSerializer<>(BackpackUUIDArgumentType::backpackUuid));
-		ArgumentTypes.register(RegistryHelper.getModRegistryName("player_name"), BackpackPlayerArgumentType.class, new ArgumentSerializer<>(BackpackPlayerArgumentType::playerName));
+		ArgumentTypes.register(RegistryHelper.getModRegistryName("backpack_uuid"), BackpackUUIDArgumentType.class, new EmptyArgumentSerializer<>(BackpackUUIDArgumentType::backpackUuid));
+		ArgumentTypes.register(RegistryHelper.getModRegistryName("player_name"), BackpackPlayerArgumentType.class, new EmptyArgumentSerializer<>(BackpackPlayerArgumentType::playerName));
 	}
 }

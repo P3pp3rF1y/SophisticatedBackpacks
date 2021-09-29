@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -19,9 +19,9 @@ public class BackpackSettingsManager {
 	private static final Map<String, BackpackSetting<?>> settings = new HashMap<>();
 
 	public static final BackpackSetting<Boolean> SHIFT_CLICK_INTO_OPEN_TAB_FIRST =
-			new BackpackSetting<>("shiftClickOpenTab", NBTHelper::getBoolean, CompoundNBT::putBoolean, true);
+			new BackpackSetting<>("shiftClickOpenTab", NBTHelper::getBoolean, CompoundTag::putBoolean, true);
 	public static final BackpackSetting<Boolean> KEEP_TAB_OPEN =
-			new BackpackSetting<>("keepTabOpen", NBTHelper::getBoolean, CompoundNBT::putBoolean, true);
+			new BackpackSetting<>("keepTabOpen", NBTHelper::getBoolean, CompoundTag::putBoolean, true);
 
 	static {
 		settings.put(SHIFT_CLICK_INTO_OPEN_TAB_FIRST.getName(), SHIFT_CLICK_INTO_OPEN_TAB_FIRST);
@@ -32,25 +32,25 @@ public class BackpackSettingsManager {
 		return Optional.ofNullable(settings.get(settingName));
 	}
 
-	public static <T> T getPlayerSettingOrDefault(PlayerEntity player, BackpackSetting<T> setting) {
+	public static <T> T getPlayerSettingOrDefault(Player player, BackpackSetting<T> setting) {
 		return getPlayerSetting(player, setting).orElse(setting.getDefaultValue());
 	}
 
-	public static <T> Optional<T> getPlayerSetting(PlayerEntity player, BackpackSetting<T> setting) {
+	public static <T> Optional<T> getPlayerSetting(Player player, BackpackSetting<T> setting) {
 		return setting.getValue(getPlayerBackpackSettingsTag(player));
 	}
 
-	public static CompoundNBT getPlayerBackpackSettingsTag(PlayerEntity player) {
+	public static CompoundTag getPlayerBackpackSettingsTag(Player player) {
 		return player.getPersistentData().getCompound(SOPHISTICATED_BACKPACK_SETTINGS_TAG);
 	}
 
-	public static void setPlayerBackpackSettingsTag(PlayerEntity player, CompoundNBT settingsNbt) {
+	public static void setPlayerBackpackSettingsTag(Player player, CompoundTag settingsNbt) {
 		player.getPersistentData().put(SOPHISTICATED_BACKPACK_SETTINGS_TAG, settingsNbt);
 	}
 
-	public static <T> void setPlayerSetting(PlayerEntity player, BackpackSetting<T> setting, T value) {
+	public static <T> void setPlayerSetting(Player player, BackpackSetting<T> setting, T value) {
 		if (!player.getPersistentData().contains(SOPHISTICATED_BACKPACK_SETTINGS_TAG)) {
-			player.getPersistentData().put(SOPHISTICATED_BACKPACK_SETTINGS_TAG, new CompoundNBT());
+			player.getPersistentData().put(SOPHISTICATED_BACKPACK_SETTINGS_TAG, new CompoundTag());
 		}
 		if (value != setting.defaultValue) {
 			setting.setValue(getPlayerBackpackSettingsTag(player), value);
@@ -59,7 +59,7 @@ public class BackpackSettingsManager {
 		}
 	}
 
-	public static <T> void setBackpackSetting(PlayerEntity player, BackpackSettingsCategory category, BackpackSetting<T> setting, T value) {
+	public static <T> void setBackpackSetting(Player player, BackpackSettingsCategory category, BackpackSetting<T> setting, T value) {
 		T playerSettingValue = getPlayerSetting(player, setting).orElse(setting.getDefaultValue());
 		if (playerSettingValue != value) {
 			category.setSettingValue(setting, value);
@@ -68,17 +68,17 @@ public class BackpackSettingsManager {
 		}
 	}
 
-	public static <T> T getBackpackSettingValue(PlayerEntity player, BackpackSettingsCategory category, BackpackSetting<T> setting) {
+	public static <T> T getBackpackSettingValue(Player player, BackpackSettingsCategory category, BackpackSetting<T> setting) {
 		return category.getSettingValue(setting).orElse(getPlayerSetting(player, setting).orElse(setting.getDefaultValue()));
 	}
 
 	public static class BackpackSetting<T> {
 		private final String tagName;
-		private final BiFunction<CompoundNBT, String, Optional<T>> getValue;
-		private final TriConsumer<CompoundNBT, String, T> setValue;
+		private final BiFunction<CompoundTag, String, Optional<T>> getValue;
+		private final TriConsumer<CompoundTag, String, T> setValue;
 		private final T defaultValue;
 
-		public BackpackSetting(String tagName, BiFunction<CompoundNBT, String, Optional<T>> getValue, TriConsumer<CompoundNBT, String, T> setValue, T defaultValue) {
+		public BackpackSetting(String tagName, BiFunction<CompoundTag, String, Optional<T>> getValue, TriConsumer<CompoundTag, String, T> setValue, T defaultValue) {
 			this.tagName = tagName;
 			this.getValue = getValue;
 			this.setValue = setValue;
@@ -89,15 +89,15 @@ public class BackpackSettingsManager {
 			return tagName;
 		}
 
-		public void setValue(CompoundNBT tag, T value) {
+		public void setValue(CompoundTag tag, T value) {
 			setValue.accept(tag, tagName, value);
 		}
 
-		public void removeFrom(CompoundNBT tag) {
+		public void removeFrom(CompoundTag tag) {
 			tag.remove(tagName);
 		}
 
-		public Optional<T> getValue(CompoundNBT tag) {
+		public Optional<T> getValue(CompoundTag tag) {
 			return getValue.apply(tag, tagName);
 		}
 

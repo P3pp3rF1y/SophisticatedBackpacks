@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -69,7 +69,7 @@ public class FilterLogicBase {
 		}
 	}
 
-	private boolean areTagsEqualIgnoreDurability(CompoundNBT tagA, @Nullable CompoundNBT tagB) {
+	private boolean areTagsEqualIgnoreDurability(CompoundTag tagA, @Nullable CompoundTag tagB) {
 		if (tagA == tagB) {
 			return true;
 		}

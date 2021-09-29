@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import javax.annotation.Nullable;
@@ -15,7 +15,7 @@ public class BackpackCloseMessage {
 		context.setPacketHandled(true);
 	}
 
-	private static void handleMessage(@Nullable ServerPlayerEntity player) {
+	private static void handleMessage(@Nullable ServerPlayer player) {
 		if (player == null) {
 			return;
 		}

@@ -1,25 +1,25 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeItemHelper;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class CraftingItemHandler extends CraftingInventory {
+public class CraftingItemHandler extends CraftingContainer {
 	private final Supplier<IItemHandlerModifiable> supplyInventory;
-	private final Consumer<IInventory> onCraftingMatrixChanged;
+	private final Consumer<Container> onCraftingMatrixChanged;
 
-	public CraftingItemHandler(Supplier<IItemHandlerModifiable> supplyInventory, Consumer<IInventory> onCraftingMatrixChanged) {
-		super(new Container(null, -1) {
+	public CraftingItemHandler(Supplier<IItemHandlerModifiable> supplyInventory, Consumer<Container> onCraftingMatrixChanged) {
+		super(new AbstractContainerMenu(null, -1) {
 			@Override
-			public boolean stillValid(PlayerEntity playerIn) {
+			public boolean stillValid(Player playerIn) {
 				return false;
 			}
 		}, 3, 3);
@@ -65,7 +65,7 @@ public class CraftingItemHandler extends CraftingInventory {
 	}
 
 	@Override
-	public void fillStackedContents(RecipeItemHelper helper) {
+	public void fillStackedContents(StackedContents helper) {
 		InventoryHelper.iterate(supplyInventory.get(), (slot, stack) -> helper.accountSimpleStack(stack));
 	}
 

@@ -1,16 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SettingsContainer;
@@ -20,10 +21,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
 
 import javax.annotation.Nullable;
 
-public class SettingsScreen extends ContainerScreen<SettingsContainer> {
+public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 	private BackpackSettingsTabControl settingsTabControl;
 
-	public SettingsScreen(SettingsContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+	public SettingsScreen(SettingsContainer screenContainer, Inventory inv, Component titleIn) {
 		super(screenContainer, inv, titleIn);
 		imageHeight = 114 + getMenu().getNumberOfRows() * 18;
 		imageWidth = getMenu().getBackpackBackgroundProperties().getSlotsOnLine() * 18 + 14;
@@ -36,17 +37,17 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 		super.init();
 
 		settingsTabControl = new BackpackSettingsTabControl(this, new Position(leftPos + imageWidth, topPos + 4));
-		children.add(settingsTabControl);
+		addWidget(settingsTabControl);
 	}
 
 	@Override
-	protected void renderBg(MatrixStack matrixStack, float partialTicks, int x, int y) {
+	protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getMenu().getBackpackBackgroundProperties();
 		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getBackpackInventorySlots().size(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, minecraft, menu.getNumberOfRows());
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		menu.detectSettingsChangeAndReload();
 		renderBackground(matrixStack);
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -57,7 +58,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	@Override
-	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
+	protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY) {
 		super.renderLabels(matrixStack, mouseX, mouseY);
 		for (int slotId = 0; slotId < menu.ghostSlots.size(); ++slotId) {
 			Slot slot = menu.ghostSlots.get(slotId);
@@ -73,7 +74,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	@Override
-	protected void renderSlot(MatrixStack matrixStack, Slot slot) {
+	protected void renderSlot(PoseStack matrixStack, Slot slot) {
 		int i = slot.x;
 		int j = slot.y;
 		ItemStack itemstack = slot.getItem();
@@ -85,7 +86,8 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
 			if (pair != null) {
 				TextureAtlasSprite textureatlassprite = minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-				minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
 				blit(matrixStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
 				flag1 = true;
 			}
@@ -93,7 +95,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 		if (!flag1) {
 			RenderSystem.enableDepthTest();
-			itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, i, j);
+			itemRenderer.renderAndDecorateItem(itemstack, i, j);
 		}
 
 		itemRenderer.blitOffset = 0.0F;
@@ -140,7 +142,7 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 		return settingsTabControl.getTabRectangles().stream().noneMatch(r -> r.contains((int) mouseX, (int) mouseY));
 	}
 
-	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
+	private void renderSlotOverlay(PoseStack matrixStack, Slot slot, int slotColor) {
 		RenderSystem.disableDepthTest();
 		int xPos = slot.x;
 		int yPos = slot.y;
@@ -160,12 +162,12 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	@Override
-	protected void renderTooltip(MatrixStack matrixStack, int x, int y) {
+	protected void renderTooltip(PoseStack matrixStack, int x, int y) {
 		super.renderTooltip(matrixStack, x, y);
 		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
 	}
 
-	public static SettingsScreen constructScreen(SettingsContainer settingsContainer, PlayerInventory playerInventory, ITextComponent title) {
+	public static SettingsScreen constructScreen(SettingsContainer settingsContainer, Inventory playerInventory, Component title) {
 		return new SettingsScreen(settingsContainer, playerInventory, title);
 	}
 

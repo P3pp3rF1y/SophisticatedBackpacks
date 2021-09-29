@@ -1,14 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.FloatNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -122,7 +122,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, itemInventorySlots);
 	}
 
-	private CompoundNBT getBackpackContentsNbt() {
+	private CompoundTag getBackpackContentsNbt() {
 		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
 	}
 
@@ -295,14 +295,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setColors(int clothColor, int borderColor) {
-		backpack.addTagElement(CLOTH_COLOR_TAG, IntNBT.valueOf(clothColor));
-		backpack.addTagElement(BORDER_COLOR_TAG, IntNBT.valueOf(borderColor));
+		backpack.addTagElement(CLOTH_COLOR_TAG, IntTag.valueOf(clothColor));
+		backpack.addTagElement(BORDER_COLOR_TAG, IntTag.valueOf(borderColor));
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void setSortBy(SortBy sortBy) {
-		backpack.addTagElement(SORT_BY_TAG, StringNBT.valueOf(sortBy.getSerializedName()));
+		backpack.addTagElement(SORT_BY_TAG, StringTag.valueOf(sortBy.getSerializedName()));
 		backpackSaveHandler.run();
 	}
 
@@ -381,13 +381,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
-		backpack.addTagElement(LOOT_TABLE_NAME_TAG, StringNBT.valueOf(lootTableName.toString()));
-		backpack.addTagElement(LOOT_PERCENTAGE_TAG, FloatNBT.valueOf(lootPercentage));
+		backpack.addTagElement(LOOT_TABLE_NAME_TAG, StringTag.valueOf(lootTableName.toString()));
+		backpack.addTagElement(LOOT_PERCENTAGE_TAG, FloatTag.valueOf(lootPercentage));
 		backpackSaveHandler.run();
 	}
 
 	@Override
-	public void fillWithLoot(PlayerEntity playerEntity) {
+	public void fillWithLoot(Player playerEntity) {
 		if (playerEntity.level.isClientSide) {
 			return;
 		}
@@ -414,9 +414,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return NBTHelper.getInt(backpack, COLUMNS_TAKEN_TAG).orElse(0);
 	}
 
-	private void fillWithLootFromTable(PlayerEntity playerEntity, String lootName) {
+	private void fillWithLootFromTable(Player playerEntity, String lootName) {
 		MinecraftServer server = playerEntity.level.getServer();
-		if (server == null || !(playerEntity.level instanceof ServerWorld)) {
+		if (server == null || !(playerEntity.level instanceof ServerLevel world)) {
 			return;
 		}
 
@@ -425,8 +425,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		backpack.removeTagKey(LOOT_TABLE_NAME_TAG);
 		backpack.removeTagKey(LOOT_PERCENTAGE_TAG);
-
-		ServerWorld world = (ServerWorld) playerEntity.level;
 
 		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
 		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));

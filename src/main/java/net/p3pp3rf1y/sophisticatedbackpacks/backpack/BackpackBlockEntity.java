@@ -1,13 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -26,12 +27,12 @@ import javax.annotation.Nullable;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-public class BackpackTileEntity extends TileEntity implements ITickableTileEntity {
+public class BackpackBlockEntity extends BlockEntity {
 	private IBackpackWrapper backpackWrapper = NoopBackpackWrapper.INSTANCE;
 	private boolean updateBlockRender = true;
 
-	public BackpackTileEntity() {
-		super(BACKPACK_TILE_TYPE.get());
+	public BackpackBlockEntity(BlockPos pos, BlockState state) {
+		super(BACKPACK_TILE_TYPE.get(), pos, state);
 	}
 
 	public void setBackpack(ItemStack backpack) {
@@ -44,48 +45,48 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 	}
 
 	@Override
-	public void load(BlockState state, CompoundNBT nbt) {
-		super.load(state, nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		setBackpackFromNbt(nbt);
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
-	private void setBackpackFromNbt(CompoundNBT nbt) {
+	private void setBackpackFromNbt(CompoundTag nbt) {
 		setBackpack(ItemStack.of(nbt.getCompound("backpackData")));
 	}
 
 	@Override
-	public CompoundNBT save(CompoundNBT compound) {
-		CompoundNBT ret = super.save(compound);
+	public CompoundTag save(CompoundTag compound) {
+		CompoundTag ret = super.save(compound);
 		writeBackpack(ret);
 		return ret;
 	}
 
-	private void writeBackpack(CompoundNBT ret) {
+	private void writeBackpack(CompoundTag ret) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
 		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
-		ret.put("backpackData", backpackCopy.save(new CompoundNBT()));
+		ret.put("backpackData", backpackCopy.save(new CompoundTag()));
 	}
 
 	@Override
-	public CompoundNBT getUpdateTag() {
-		CompoundNBT ret = super.getUpdateTag();
+	public CompoundTag getUpdateTag() {
+		CompoundTag ret = super.getUpdateTag();
 		writeBackpack(ret);
 		return ret;
 	}
 
 	@Nullable
 	@Override
-	public SUpdateTileEntityPacket getUpdatePacket() {
-		CompoundNBT updateTag = getUpdateTag();
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		CompoundTag updateTag = getUpdateTag();
 		updateTag.putBoolean("updateBlockRender", updateBlockRender);
 		updateBlockRender = true;
-		return new SUpdateTileEntityPacket(worldPosition, 1, updateTag);
+		return new ClientboundBlockEntityDataPacket(worldPosition, 1, updateTag);
 	}
 
 	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		CompoundNBT tag = pkt.getTag();
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+		CompoundTag tag = pkt.getTag();
 		setBackpackFromNbt(tag);
 		if (tag.getBoolean("updateBlockRender")) {
 			WorldHelper.notifyBlockUpdate(this);
@@ -94,15 +95,6 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
-	}
-
-	@Override
-	public void tick() {
-		//noinspection ConstantConditions - world is always non null at this point
-		if (level.isClientSide) {
-			return;
-		}
-		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, getBlockPos()));
 	}
 
 	@Override
@@ -133,5 +125,12 @@ public class BackpackTileEntity extends TileEntity implements ITickableTileEntit
 		level.setBlockAndUpdate(worldPosition, state);
 		level.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
+	}
+
+	public static void serverTick(Level level, BlockPos blockPos, BackpackBlockEntity backpackBlockEntity) {
+		if (level.isClientSide) {
+			return;
+		}
+		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
 	}
 }

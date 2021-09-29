@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.RecordItem;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -31,7 +31,7 @@ public class PlayDiscMessage {
 		this.entityId = entityId;
 	}
 
-	public static void encode(PlayDiscMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(PlayDiscMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeBoolean(msg.blockBackpack);
 		packetBuffer.writeUUID(msg.backpackUuid);
 		packetBuffer.writeInt(msg.musicDiscItemId);
@@ -42,7 +42,7 @@ public class PlayDiscMessage {
 		}
 	}
 
-	public static PlayDiscMessage decode(PacketBuffer packetBuffer) {
+	public static PlayDiscMessage decode(FriendlyByteBuf packetBuffer) {
 		if (packetBuffer.readBoolean()) {
 			return new PlayDiscMessage(packetBuffer.readUUID(), packetBuffer.readInt(), packetBuffer.readBlockPos());
 		}
@@ -57,10 +57,10 @@ public class PlayDiscMessage {
 
 	private static void handleMessage(PlayDiscMessage msg) {
 		Item discItem = Item.byId(msg.musicDiscItemId);
-		if (!(discItem instanceof MusicDiscItem)) {
+		if (!(discItem instanceof RecordItem)) {
 			return;
 		}
-		SoundEvent soundEvent = ((MusicDiscItem) discItem).getSound();
+		SoundEvent soundEvent = ((RecordItem) discItem).getSound();
 		UUID backpackUuid = msg.backpackUuid;
 		if (msg.blockBackpack) {
 			BackpackSoundHandler.playBackpackSound(soundEvent, backpackUuid, msg.pos);

@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class BackpackAccessLogger {
 	private static long lastCacheRefresh = 0;
 	private static final Map<String, Set<AccessLogRecord>> playerLogCache = new HashMap<>();
 
-	public static void logPlayerAccess(PlayerEntity player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor, int columnsTaken) {
+	public static void logPlayerAccess(Player player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor, int columnsTaken) {
 		if (player.level.isClientSide) {
 			return;
 		}

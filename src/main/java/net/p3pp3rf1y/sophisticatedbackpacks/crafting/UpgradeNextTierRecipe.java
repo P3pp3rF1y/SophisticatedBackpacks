@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.ShapedRecipe;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 
 import java.util.Optional;
@@ -23,13 +23,13 @@ public class UpgradeNextTierRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInventory inv) {
+	public ItemStack assemble(CraftingContainer inv) {
 		ItemStack nextTier = super.assemble(inv);
 		getUpgrade(inv).ifPresent(upgrade -> nextTier.setTag(upgrade.getTag()));
 		return nextTier;
 	}
 
-	private Optional<ItemStack> getUpgrade(CraftingInventory inv) {
+	private Optional<ItemStack> getUpgrade(CraftingContainer inv) {
 		for (int slot = 0; slot < inv.getContainerSize(); slot++) {
 			ItemStack slotStack = inv.getItem(slot);
 			if (slotStack.getItem() instanceof IBackpackUpgradeItem) {
@@ -40,13 +40,13 @@ public class UpgradeNextTierRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<?> getSerializer() {
 		return SERIALIZER;
 	}
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, UpgradeNextTierRecipe> {
 		public Serializer() {
-			super(UpgradeNextTierRecipe::new, IRecipeSerializer.SHAPED_RECIPE);
+			super(UpgradeNextTierRecipe::new, RecipeSerializer.SHAPED_RECIPE);
 		}
 	}
 }

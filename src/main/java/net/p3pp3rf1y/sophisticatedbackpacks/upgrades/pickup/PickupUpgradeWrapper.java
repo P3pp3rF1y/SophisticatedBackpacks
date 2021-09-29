@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.pickup;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
@@ -24,7 +24,7 @@ public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrappe
 	}
 
 	@Override
-	public ItemStack pickup(World world, ItemStack stack, boolean simulate) {
+	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
 		if (isInCooldown(world)) {
 			return stack;
 		}

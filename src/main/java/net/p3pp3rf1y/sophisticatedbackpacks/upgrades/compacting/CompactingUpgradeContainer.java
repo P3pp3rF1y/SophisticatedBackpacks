@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.compacting;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
@@ -13,7 +13,7 @@ public class CompactingUpgradeContainer extends UpgradeContainerBase<CompactingU
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 	private static final String DATA_SHOULD_COMPACT_NON_UNCRAFTABLE = "shouldCompactNonUncraftable";
 
-	public CompactingUpgradeContainer(PlayerEntity player, int containerId, CompactingUpgradeWrapper wrapper, UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> type) {
+	public CompactingUpgradeContainer(Player player, int containerId, CompactingUpgradeWrapper wrapper, UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 		filterLogicContainer = new FilterLogicContainer<>(upgradeWrapper::getFilterLogic, this, slots::add);
 	}
@@ -24,7 +24,7 @@ public class CompactingUpgradeContainer extends UpgradeContainerBase<CompactingU
 
 	public void setCompactNonUncraftable(boolean shouldCompactNonUncraftable) {
 		upgradeWrapper.setCompactNonUncraftable(shouldCompactNonUncraftable);
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHOULD_COMPACT_NON_UNCRAFTABLE, shouldCompactNonUncraftable));
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundTag(), DATA_SHOULD_COMPACT_NON_UNCRAFTABLE, shouldCompactNonUncraftable));
 	}
 
 	public boolean shouldCompactNonUncraftable() {
@@ -32,7 +32,7 @@ public class CompactingUpgradeContainer extends UpgradeContainerBase<CompactingU
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains(DATA_SHOULD_COMPACT_NON_UNCRAFTABLE)) {
 			setCompactNonUncraftable(data.getBoolean(DATA_SHOULD_COMPACT_NON_UNCRAFTABLE));
 		} else if (data.contains(DATA_SHOULD_WORKD_IN_GUI)) {
@@ -44,7 +44,7 @@ public class CompactingUpgradeContainer extends UpgradeContainerBase<CompactingU
 
 	public void setShouldWorkdInGUI(boolean shouldWorkdInGUI) {
 		upgradeWrapper.setShouldWorkdInGUI(shouldWorkdInGUI);
-		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHOULD_WORKD_IN_GUI, shouldWorkdInGUI));
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundTag(), DATA_SHOULD_WORKD_IN_GUI, shouldWorkdInGUI));
 	}
 
 	public boolean shouldWorkInGUI() {

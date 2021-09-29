@@ -1,42 +1,39 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
-public class Label extends Widget {
+public class Label extends BackpackWidget {
 	public static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
-	private final ITextComponent labelText;
+	private final Component labelText;
 	private final int color;
 
-	public Label(Position position, ITextComponent labelText) {
+	public Label(Position position, Component labelText) {
 		this(position, labelText, DEFAULT_GUI_TEXT_COLOR);
 	}
 
-	public Label(Position position, ITextComponent labelText, int color) {
-		super(position);
+	public Label(Position position, Component labelText, int color) {
+		super(position, new Dimension(Minecraft.getInstance().font.width(labelText), 8));
 		this.labelText = labelText;
 		this.color = color;
 	}
 
 	@Override
-	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
+	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		//noop
 	}
 
 	@Override
-	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		minecraft.font.draw(matrixStack, labelText, x, y, color);
 	}
 
 	@Override
-	public int getWidth() {
-		return minecraft.font.width(labelText);
-	}
-
-	@Override
-	public int getHeight() {
-		return 8;
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//TODO add narration
 	}
 }

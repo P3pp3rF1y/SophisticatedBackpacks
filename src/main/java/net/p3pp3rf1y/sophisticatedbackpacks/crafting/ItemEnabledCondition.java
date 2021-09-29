@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -42,7 +42,7 @@ public class ItemEnabledCondition implements ICondition {
 
 		@Override
 		public ItemEnabledCondition read(JsonObject json) {
-			return new ItemEnabledCondition(JSONUtils.getAsString(json, "itemRegistryName"));
+			return new ItemEnabledCondition(GsonHelper.getAsString(json, "itemRegistryName"));
 		}
 
 		@Override

@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.feeding;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
 
-public enum HungerLevel implements IStringSerializable {
+public enum HungerLevel implements StringRepresentable {
 	ANY("any"),
 	HALF("half"),
 	FULL("full");

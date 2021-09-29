@@ -1,14 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
 
-import net.blay09.mods.craftingtweaks.api.CraftingTweaksAPI;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting.ICraftingUIPart;
@@ -22,7 +21,7 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	@OnlyIn(Dist.CLIENT)
 	private BackpackScreen backpackScreen;
 
-	private static final Method ADD_BUTTON = ObfuscationReflectionHelper.findMethod(Screen.class, "func_230480_a_", Widget.class);
+	private static final Method ADD_RENDERABLE_WIDGET = ObfuscationReflectionHelper.findMethod(Screen.class, "m_142416_", AbstractWidget.class);
 
 	private final List<Button> buttons = new ArrayList<>();
 
@@ -34,7 +33,7 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	private void addButton(Button button) {
 		buttons.add(button);
 		try {
-			ADD_BUTTON.invoke(backpackScreen, button);
+			ADD_RENDERABLE_WIDGET.invoke(backpackScreen, button);
 		}
 		catch (IllegalAccessException | InvocationTargetException e) {
 			SophisticatedBackpacks.LOGGER.error("Error calling addButton in Screen class", e);
@@ -48,14 +47,14 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 			return;
 		}
 
-		List<IGuiEventListener> screenChildren = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "field_230705_e_");
-		List<Widget> screenButtons = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "field_230710_m_");
-		if (screenChildren == null || screenButtons == null) {
+		List<GuiEventListener> screenChildren = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "f_96540_");
+		List<AbstractWidget> screenRenderables = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "f_169369_");
+		if (screenChildren == null || screenRenderables == null) {
 			return;
 		}
 
 		buttons.forEach(screenChildren::remove);
-		buttons.forEach(screenButtons::remove);
+		buttons.forEach(screenRenderables::remove);
 		buttons.clear();
 	}
 
@@ -76,9 +75,11 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 			return;
 		}
 		Slot firstSlot = slots.get(0);
+/* TODO readd when crafting tweaks is on 1.17
 		addButton(CraftingTweaksAPI.createRotateButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 0)));
 		addButton(CraftingTweaksAPI.createBalanceButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 1)));
 		addButton(CraftingTweaksAPI.createClearButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 2)));
+*/
 	}
 
 	@OnlyIn(Dist.CLIENT)

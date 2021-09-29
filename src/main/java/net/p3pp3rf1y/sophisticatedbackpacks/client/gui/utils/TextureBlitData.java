@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class TextureBlitData {
 	private final ResourceLocation textureName;
@@ -23,14 +23,14 @@ public class TextureBlitData {
 
 	public TextureBlitData(ResourceLocation textureName, Position offset, Dimension textureDimension, UV uv, Dimension dimension) {
 		this.textureName = textureName;
-		xOffset = offset.getX();
-		yOffset = offset.getY();
-		textureWidth = textureDimension.getWidth();
-		textureHeight = textureDimension.getHeight();
-		u = uv.getU();
-		v = uv.getV();
-		width = dimension.getWidth();
-		height = dimension.getHeight();
+		xOffset = offset.x();
+		yOffset = offset.y();
+		textureWidth = textureDimension.width();
+		textureHeight = textureDimension.height();
+		u = uv.u();
+		v = uv.v();
+		width = dimension.width();
+		height = dimension.height();
 	}
 
 	public ResourceLocation getTextureName() {

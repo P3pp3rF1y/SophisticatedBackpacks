@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;

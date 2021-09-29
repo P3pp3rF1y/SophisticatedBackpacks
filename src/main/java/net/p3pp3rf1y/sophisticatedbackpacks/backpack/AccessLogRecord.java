@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
@@ -58,8 +58,8 @@ public class AccessLogRecord {
 		return backpackItemRegistryName;
 	}
 
-	public CompoundNBT serializeToNBT() {
-		CompoundNBT ret = new CompoundNBT();
+	public CompoundTag serializeToNBT() {
+		CompoundTag ret = new CompoundTag();
 		ret.putString("backpackItemRegistryName", backpackItemRegistryName.toString());
 		ret.putUUID("backpackUuid", backpackUuid);
 		ret.putString("playerName", playerName);
@@ -71,7 +71,7 @@ public class AccessLogRecord {
 		return ret;
 	}
 
-	public static AccessLogRecord deserializeFromNBT(CompoundNBT nbt) {
+	public static AccessLogRecord deserializeFromNBT(CompoundTag nbt) {
 		return new AccessLogRecord(
 				new ResourceLocation(nbt.getString("backpackItemRegistryName")),
 				nbt.getUUID("backpackUuid"),

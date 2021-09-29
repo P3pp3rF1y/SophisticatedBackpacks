@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import net.minecraft.util.JSONUtils;
+import net.minecraft.util.GsonHelper;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +12,7 @@ public class JsonHelper {
 	private JsonHelper() {}
 
 	public static <V> Set<V> setFromJson(JsonElement element, Function<JsonElement, V> getElement) {
-		return setFromJson(JSONUtils.convertToJsonArray(element, ""), getElement);
+		return setFromJson(GsonHelper.convertToJsonArray(element, ""), getElement);
 	}
 
 	private static <V> Set<V> setFromJson(JsonArray array, Function<JsonElement, V> getElement) {

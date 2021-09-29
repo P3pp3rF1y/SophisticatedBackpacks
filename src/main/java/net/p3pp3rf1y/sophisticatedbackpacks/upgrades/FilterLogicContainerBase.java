@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.ArrayList;
@@ -60,10 +60,10 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 
 	public void setPrimaryMatch(PrimaryMatch primaryMatch) {
 		filterLogic.get().setPrimaryMatch(primaryMatch);
-		serverUpdater.sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_PRIMARY_MATCH, primaryMatch));
+		serverUpdater.sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundTag(), DATA_PRIMARY_MATCH, primaryMatch));
 	}
 
-	public boolean handleMessage(CompoundNBT data) {
+	public boolean handleMessage(CompoundTag data) {
 		for (String key : data.getAllKeys()) {
 			switch (key) {
 				case DATA_IS_ALLOW_LIST:

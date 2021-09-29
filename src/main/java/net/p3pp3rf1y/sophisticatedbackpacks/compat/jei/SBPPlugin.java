@@ -6,16 +6,16 @@ import mezz.jei.api.constants.VanillaRecipeCategoryUid;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
-import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
@@ -38,9 +38,9 @@ public class SBPPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		ISubtypeInterpreter backpackNbtInterpreter = itemStack -> itemStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		IIngredientSubtypeInterpreter<ItemStack> backpackNbtInterpreter = (itemStack, context) -> itemStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> "{clothColor:" + wrapper.getClothColor() + ",borderColor:" + wrapper.getBorderColor() + "}")
-				.orElse("");
+				.orElse(IIngredientSubtypeInterpreter.NONE);
 		registration.registerSubtypeInterpreter(ModItems.BACKPACK.get(), backpackNbtInterpreter);
 		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
 		registration.registerSubtypeInterpreter(ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
@@ -50,10 +50,10 @@ public class SBPPlugin implements IModPlugin {
 
 	@Override
 	public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<BackpackScreen>() {
+		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<>() {
 			@Override
-			public List<Rectangle2d> getGuiExtraAreas(BackpackScreen gui) {
-				List<Rectangle2d> ret = new ArrayList<>();
+			public List<Rect2i> getGuiExtraAreas(BackpackScreen gui) {
+				List<Rect2i> ret = new ArrayList<>();
 				gui.getUpgradeSlotsRectangle().ifPresent(ret::add);
 				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
 				gui.getSortButtonsRectangle().ifPresent(ret::add);
@@ -61,28 +61,27 @@ public class SBPPlugin implements IModPlugin {
 			}
 		});
 
-		registration.addGuiContainerHandler(SettingsScreen.class, new IGuiContainerHandler<SettingsScreen>() {
+		registration.addGuiContainerHandler(SettingsScreen.class, new IGuiContainerHandler<>() {
 			@Override
-			public List<Rectangle2d> getGuiExtraAreas(SettingsScreen gui) {
+			public List<Rect2i> getGuiExtraAreas(SettingsScreen gui) {
 				return new ArrayList<>(gui.getSettingsTabControl().getTabRectangles());
 			}
 		});
 
-		registration.addGhostIngredientHandler(BackpackScreen.class, new IGhostIngredientHandler<BackpackScreen>() {
+		registration.addGhostIngredientHandler(BackpackScreen.class, new IGhostIngredientHandler<>() {
 			@Override
 			public <I> List<Target<I>> getTargets(BackpackScreen screen, I i, boolean b) {
 				List<Target<I>> targets = new ArrayList<>();
-				if (!(i instanceof ItemStack)) {
+				if (!(i instanceof ItemStack ghostStack)) {
 					return targets;
 				}
-				ItemStack ghostStack = (ItemStack) i;
 				BackpackContainer container = screen.getMenu();
 				container.getOpenContainer().ifPresent(c -> c.getSlots().forEach(s -> {
 					if (s instanceof IFilterSlot && s.mayPlace(ghostStack)) {
-						targets.add(new Target<I>() {
+						targets.add(new Target<>() {
 							@Override
-							public Rectangle2d getArea() {
-								return new Rectangle2d(screen.getGuiLeft() + s.x, screen.getGuiTop() + s.y, 17, 17);
+							public Rect2i getArea() {
+								return new Rect2i(screen.getGuiLeft() + s.x, screen.getGuiTop() + s.y, 17, 17);
 							}
 
 							@Override

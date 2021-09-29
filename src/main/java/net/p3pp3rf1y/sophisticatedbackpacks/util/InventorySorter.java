@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class InventorySorter {
 		return ret != 0 ? ret : getRegistryName(first.getKey()).compareTo(getRegistryName(second.getKey()));
 	};
 
-	public static final Comparator<Map.Entry<ItemStackKey, Integer>> BY_TAGS = new Comparator<Map.Entry<ItemStackKey, Integer>>() {
+	public static final Comparator<Map.Entry<ItemStackKey, Integer>> BY_TAGS = new Comparator<>() {
 		@Override
 		public int compare(Map.Entry<ItemStackKey, Integer> first, Map.Entry<ItemStackKey, Integer> second) {
 			Item firstItem = first.getKey().getStack().getItem();

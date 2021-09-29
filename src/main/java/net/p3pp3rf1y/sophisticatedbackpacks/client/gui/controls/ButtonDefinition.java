@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
@@ -16,14 +16,14 @@ public class ButtonDefinition {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private final ITextComponent tooltip;
+	private final Component tooltip;
 
 	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
-		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new StringTextComponent(""));
+		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new TextComponent(""));
 	}
 
 	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture,
-			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, ITextComponent tooltip) {
+			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, Component tooltip) {
 		this.dimension = dimension;
 		this.backgroundTexture = backgroundTexture;
 		this.hoveredBackgroundTexture = hoveredBackgroundTexture;
@@ -50,7 +50,7 @@ public class ButtonDefinition {
 		return foregroundTexture;
 	}
 
-	public ITextComponent getTooltip() {
+	public Component getTooltip() {
 		return tooltip;
 	}
 

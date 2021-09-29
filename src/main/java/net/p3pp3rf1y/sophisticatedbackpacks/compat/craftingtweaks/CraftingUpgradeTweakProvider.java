@@ -1,3 +1,4 @@
+/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -7,14 +8,14 @@ import net.blay09.mods.craftingtweaks.api.CraftingTweaksAPI;
 import net.blay09.mods.craftingtweaks.api.DefaultProviderV2;
 import net.blay09.mods.craftingtweaks.api.RotationHandler;
 import net.blay09.mods.craftingtweaks.api.TweakProvider;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -96,8 +97,8 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public void clearGrid(PlayerEntity entityPlayer, BackpackContainer container, int id, boolean forced) {
-		IInventory craftMatrix = getCraftMatrix(entityPlayer, container, id);
+	public void clearGrid(Player entityPlayer, BackpackContainer container, int id, boolean forced) {
+		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
 		if (craftMatrix != null) {
 			int start = getCraftingGridStart(entityPlayer, container, id);
 			int size = getCraftingGridSize(entityPlayer, container, id);
@@ -116,12 +117,12 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public void rotateGrid(PlayerEntity entityPlayer, BackpackContainer container, int id, boolean counterClockwise) {
-		IInventory craftMatrix = getCraftMatrix(entityPlayer, container, id);
+	public void rotateGrid(Player entityPlayer, BackpackContainer container, int id, boolean counterClockwise) {
+		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
 		if (craftMatrix != null) {
 			int start = getCraftingGridStart(entityPlayer, container, id);
 			int size = getCraftingGridSize(entityPlayer, container, id);
-			IInventory matrixClone = new Inventory(size);
+			Container matrixClone = new SimpleContainer(size);
 
 			int i;
 			int slotIndex;
@@ -142,7 +143,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public void balanceGrid(PlayerEntity entityPlayer, BackpackContainer container, int id) {
+	public void balanceGrid(Player entityPlayer, BackpackContainer container, int id) {
 		ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
 		Multiset<String> itemCount = HashMultiset.create();
 		int start = getCraftingGridStart(entityPlayer, container, id);
@@ -184,7 +185,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public void spreadGrid(PlayerEntity entityPlayer, BackpackContainer container, int id) {
+	public void spreadGrid(Player entityPlayer, BackpackContainer container, int id) {
 		while (true) {
 			ItemStack biggestSlotStack = null;
 			int biggestSlotSize = 1;
@@ -222,7 +223,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		balanceGrid(this, id, entityPlayer, container);
 	}
 
-	private <T extends BackpackContainer> void balanceGrid(TweakProvider<T> provider, int id, PlayerEntity entityPlayer, T container) {
+	private <T extends BackpackContainer> void balanceGrid(TweakProvider<T> provider, int id, Player entityPlayer, T container) {
 		ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
 		Multiset<String> itemCount = HashMultiset.create();
 		int start = provider.getCraftingGridStart(entityPlayer, container, id);
@@ -264,13 +265,13 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public boolean canTransferFrom(PlayerEntity entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
+	public boolean canTransferFrom(Player entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
 		return sourceSlot.mayPickup(entityPlayer) && sourceSlot.index < container.realInventorySlots.size();
 	}
 
 	@Override
-	public boolean transferIntoGrid(PlayerEntity entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
-		IInventory craftMatrix = getCraftMatrix(entityPlayer, container, id);
+	public boolean transferIntoGrid(Player entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
+		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
 		if (craftMatrix == null) {
 			return false;
 		}
@@ -313,13 +314,13 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public ItemStack putIntoGrid(PlayerEntity entityPlayer, BackpackContainer container, int id, ItemStack itemStack, int index) {
+	public ItemStack putIntoGrid(Player entityPlayer, BackpackContainer container, int id, ItemStack itemStack, int index) {
 		return defaultProvider.putIntoGrid(this, id, entityPlayer, container, itemStack, index);
 	}
 
 	@Override
 	@Nullable
-	public IInventory getCraftMatrix(PlayerEntity entityPlayer, BackpackContainer container, int id) {
+	public Container getCraftMatrix(Player entityPlayer, BackpackContainer container, int id) {
 		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix).orElse(null);
 	}
 
@@ -333,7 +334,7 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public int getCraftingGridStart(PlayerEntity entityPlayer, BackpackContainer container, int id) {
+	public int getCraftingGridStart(Player entityPlayer, BackpackContainer container, int id) {
 		return getOpenCraftingContainer(container).map(cc -> {
 			List<Slot> recipeSlots = cc.getRecipeSlots();
 			if (!recipeSlots.isEmpty()) {
@@ -344,18 +345,19 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public int getCraftingGridSize(PlayerEntity entityPlayer, BackpackContainer container, int id) {
+	public int getCraftingGridSize(Player entityPlayer, BackpackContainer container, int id) {
 		return getOpenCraftingContainer(container).isPresent() ? 9 : 0;
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initGui(ContainerScreen<BackpackContainer> guiContainer, GuiScreenEvent.InitGuiEvent event) {
+	public void initGui(AbstractContainerScreen<BackpackContainer> guiContainer, GuiScreenEvent.InitGuiEvent event) {
 		//noop - needs to add buttons earlier than in the event so that upgrade tab can display the buttons on screen open
 	}
 
 	@Override
-	public boolean isValidContainer(Container container) {
+	public boolean isValidContainer(AbstractContainerMenu container) {
 		return container instanceof BackpackContainer;
 	}
 }
+*/

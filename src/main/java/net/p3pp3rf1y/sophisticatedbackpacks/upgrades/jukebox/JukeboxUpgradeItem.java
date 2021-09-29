@@ -1,13 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -48,7 +48,7 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 
 				@Override
 				public boolean isItemValid(int slot, ItemStack stack) {
-					return stack.getItem() instanceof MusicDiscItem;
+					return stack.getItem() instanceof RecordItem;
 				}
 			};
 			NBTHelper.getCompound(upgrade, "discInventory").ifPresent(discInventory::deserializeNBT);
@@ -63,7 +63,7 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 			return discInventory.getStackInSlot(0);
 		}
 
-		public void play(World world, BlockPos pos) {
+		public void play(Level world, BlockPos pos) {
 			play(world, (serverWorld, backpackUuid) ->
 					ServerBackpackSoundHandler.startPlayingDisc(serverWorld, pos, backpackUuid, Item.getId(getDisc().getItem()), () -> setIsPlaying(false)));
 		}
@@ -74,11 +74,11 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 							Item.getId(getDisc().getItem()), () -> setIsPlaying(false)));
 		}
 
-		private void play(World world, BiConsumer<ServerWorld, UUID> play) {
-			if (!(world instanceof ServerWorld) || getDisc().isEmpty()) {
+		private void play(Level world, BiConsumer<ServerLevel, UUID> play) {
+			if (!(world instanceof ServerLevel) || getDisc().isEmpty()) {
 				return;
 			}
-			backpackWrapper.getContentsUuid().ifPresent(backpackUuid -> play.accept((ServerWorld) world, backpackUuid));
+			backpackWrapper.getContentsUuid().ifPresent(backpackUuid -> play.accept((ServerLevel) world, backpackUuid));
 			setIsPlaying(true);
 		}
 
@@ -89,11 +89,11 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		}
 
 		public void stop(LivingEntity entity) {
-			if (!(entity.level instanceof ServerWorld)) {
+			if (!(entity.level instanceof ServerLevel)) {
 				return;
 			}
 			backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
-					ServerBackpackSoundHandler.stopPlayingDisc((ServerWorld) entity.level, entity.position(), backpackUuid)
+					ServerBackpackSoundHandler.stopPlayingDisc((ServerLevel) entity.level, entity.position(), backpackUuid)
 			);
 			setIsPlaying(false);
 		}
@@ -103,10 +103,10 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		}
 
 		@Override
-		public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
+		public void tick(@Nullable LivingEntity entity, Level world, BlockPos pos) {
 			if (isPlaying && lastKeepAliveSendTime < world.getGameTime() - KEEP_ALIVE_SEND_INTERVAL) {
 				backpackWrapper.getContentsUuid().ifPresent(backpackUuid ->
-						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, entity != null ? entity.position() : Vector3d.atCenterOf(pos), () -> setIsPlaying(false))
+						ServerBackpackSoundHandler.updateKeepAlive(backpackUuid, world, entity != null ? entity.position() : Vec3.atCenterOf(pos), () -> setIsPlaying(false))
 				);
 				lastKeepAliveSendTime = world.getGameTime();
 			}

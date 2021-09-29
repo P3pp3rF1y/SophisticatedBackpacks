@@ -1,14 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class PacketHelper {
 	private PacketHelper() {}
 
-	public static ItemStack readItemStack(PacketBuffer packetBuffer) {
+	public static ItemStack readItemStack(FriendlyByteBuf packetBuffer) {
 		if (!packetBuffer.readBoolean()) {
 			return ItemStack.EMPTY;
 		} else {
@@ -20,7 +20,7 @@ public class PacketHelper {
 		}
 	}
 
-	public static void writeItemStack(ItemStack stack, PacketBuffer packetBuffer) {
+	public static void writeItemStack(ItemStack stack, FriendlyByteBuf packetBuffer) {
 		if (stack.isEmpty()) {
 			packetBuffer.writeBoolean(false);
 		} else {
@@ -28,7 +28,7 @@ public class PacketHelper {
 			Item item = stack.getItem();
 			packetBuffer.writeVarInt(Item.getId(item));
 			packetBuffer.writeInt(stack.getCount());
-			CompoundNBT compoundnbt = null;
+			CompoundTag compoundnbt = null;
 			if (item.isDamageable(stack) || item.shouldOverrideMultiplayerNbt()) {
 				compoundnbt = stack.getShareTag();
 			}

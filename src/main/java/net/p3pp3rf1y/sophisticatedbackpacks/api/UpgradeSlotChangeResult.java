@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -10,13 +10,13 @@ import java.util.Set;
 public class UpgradeSlotChangeResult {
 	private final boolean successful;
 	@Nullable
-	private final ITextComponent errorMessage;
+	private final Component errorMessage;
 	private final Set<Integer> errorUpgradeSlots;
 	private final Set<Integer> errorInventorySlots;
 	private final Set<Integer> errorInventoryParts;
 
 	private UpgradeSlotChangeResult(boolean successful,
-			@Nullable ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
+			@Nullable Component errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
 		this.successful = successful;
 		this.errorMessage = errorMessage;
 		this.errorUpgradeSlots = errorUpgradeSlots;
@@ -33,7 +33,7 @@ public class UpgradeSlotChangeResult {
 	}
 
 	public static class Fail extends UpgradeSlotChangeResult {
-		public Fail(ITextComponent errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
+		public Fail(Component errorMessage, Set<Integer> errorUpgradeSlots, Set<Integer> errorInventorySlots, Set<Integer> errorInventoryParts) {
 			super(false, errorMessage, errorUpgradeSlots, errorInventorySlots, errorInventoryParts);
 		}
 	}
@@ -48,7 +48,7 @@ public class UpgradeSlotChangeResult {
 		return successful;
 	}
 
-	public Optional<ITextComponent> getErrorMessage() {
+	public Optional<Component> getErrorMessage() {
 		return Optional.ofNullable(errorMessage);
 	}
 

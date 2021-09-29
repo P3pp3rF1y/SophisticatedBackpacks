@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -26,7 +26,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final IBackpackWrapper backpackWrapper;
 	private final Runnable backpackContentsSaveHandler;
 	private final Runnable onInvalidateUpgradeCaches;
-	private final CompoundNBT contentsNbt;
+	private final CompoundTag contentsNbt;
 	@Nullable
 	private Runnable refreshCallBack = null;
 	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
@@ -37,7 +37,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 	private boolean persistent = true;
 
-	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackContentsSaveHandler, Runnable onInvalidateUpgradeCaches) {
+	public BackpackUpgradeHandler(int numberOfUpgradeSlots, IBackpackWrapper backpackWrapper, CompoundTag contentsNbt, Runnable backpackContentsSaveHandler, Runnable onInvalidateUpgradeCaches) {
 		super(numberOfUpgradeSlots);
 		this.contentsNbt = contentsNbt;
 		this.backpackWrapper = backpackWrapper;
@@ -193,8 +193,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 
 	private void initBatteryRenderInfoCallbacks(boolean forceUpdateRenderInfo, BackpackRenderInfo renderInfo) {
 		getSlotWrappers().forEach((slot, wrapper) -> {
-			if (wrapper instanceof IRenderedBatteryUpgrade) {
-				IRenderedBatteryUpgrade batteryWrapper = (IRenderedBatteryUpgrade) wrapper;
+			if (wrapper instanceof IRenderedBatteryUpgrade batteryWrapper) {
 				batteryWrapper.setBatteryRenderInfoUpdateCallback(renderInfo::setBatteryRenderInfo);
 				if (forceUpdateRenderInfo) {
 					batteryWrapper.forceUpdateBatteryRenderInfo();

@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 
@@ -15,19 +15,19 @@ import java.util.function.Supplier;
 public class BackpackContentsMessage {
 	private final UUID backpackUuid;
 	@Nullable
-	private final CompoundNBT backpackContents;
+	private final CompoundTag backpackContents;
 
-	public BackpackContentsMessage(UUID backpackUuid, @Nullable CompoundNBT backpackContents) {
+	public BackpackContentsMessage(UUID backpackUuid, @Nullable CompoundTag backpackContents) {
 		this.backpackUuid = backpackUuid;
 		this.backpackContents = backpackContents;
 	}
 
-	public static void encode(BackpackContentsMessage msg, PacketBuffer packetBuffer) {
+	public static void encode(BackpackContentsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeUUID(msg.backpackUuid);
 		packetBuffer.writeNbt(msg.backpackContents);
 	}
 
-	public static BackpackContentsMessage decode(PacketBuffer packetBuffer) {
+	public static BackpackContentsMessage decode(FriendlyByteBuf packetBuffer) {
 		return new BackpackContentsMessage(packetBuffer.readUUID(), packetBuffer.readNbt());
 	}
 
@@ -38,7 +38,7 @@ public class BackpackContentsMessage {
 	}
 
 	private static void handleMessage(BackpackContentsMessage msg) {
-		ClientPlayerEntity player = Minecraft.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null || msg.backpackContents == null) {
 			return;
 		}

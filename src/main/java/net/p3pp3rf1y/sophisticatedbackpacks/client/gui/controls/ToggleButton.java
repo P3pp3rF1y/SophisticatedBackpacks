@@ -1,8 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
@@ -26,7 +27,7 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 	}
 
 	@Override
-	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		StateData data = stateData.get(getState.get());
 		GuiHelper.blit(minecraft, matrixStack, x, y, data.getTexture());
 		if (isMouseOver(mouseX, mouseY)) {
@@ -36,14 +37,14 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 
 	public static class StateData {
 		private final TextureBlitData texture;
-		private final List<? extends ITextProperties> tooltip;
+		private final List<? extends FormattedText> tooltip;
 
-		public StateData(TextureBlitData texture, List<? extends ITextComponent> tooltip) {
+		public StateData(TextureBlitData texture, List<? extends Component> tooltip) {
 			this.texture = texture;
 			this.tooltip = tooltip;
 		}
 
-		public StateData(TextureBlitData texture, ITextComponent... tooltip) {
+		public StateData(TextureBlitData texture, Component... tooltip) {
 			this.texture = texture;
 			this.tooltip = Arrays.stream(tooltip).collect(Collectors.toList());
 		}
@@ -52,8 +53,13 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 			return texture;
 		}
 
-		public List<? extends ITextProperties> getTooltip() {
+		public List<? extends FormattedText> getTooltip() {
 			return tooltip;
 		}
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//TODO add narration for toggle button - should be custom for every type with usage saying to click to toggle to next state
 	}
 }

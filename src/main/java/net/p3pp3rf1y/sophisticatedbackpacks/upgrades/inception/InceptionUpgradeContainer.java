@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -9,12 +9,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpgradeWrapper, InceptionUpgradeContainer> {
 	private static final String DATA_INVENTORY_ORDER = "inventoryOrder";
 
-	public InceptionUpgradeContainer(PlayerEntity player, int upgradeContainerId, InceptionUpgradeWrapper upgradeWrapper, UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> type) {
+	public InceptionUpgradeContainer(Player player, int upgradeContainerId, InceptionUpgradeWrapper upgradeWrapper, UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 	}
 
 	@Override
-	public void handleMessage(CompoundNBT data) {
+	public void handleMessage(CompoundTag data) {
 		if (data.contains(DATA_INVENTORY_ORDER)) {
 			setInventoryOrder(InventoryOrder.fromName(data.getString(DATA_INVENTORY_ORDER)));
 		}
@@ -26,6 +26,6 @@ public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpg
 
 	public void setInventoryOrder(InventoryOrder inventoryOrder) {
 		upgradeWrapper.setInventoryOrder(inventoryOrder);
-		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundNBT(), DATA_INVENTORY_ORDER, inventoryOrder));
+		sendDataToServer(() -> NBTHelper.putEnumConstant(new CompoundTag(), DATA_INVENTORY_ORDER, inventoryOrder));
 	}
 }

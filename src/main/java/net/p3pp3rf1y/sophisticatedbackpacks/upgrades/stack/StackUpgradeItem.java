@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IStackableContentsUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
@@ -56,11 +56,10 @@ public class StackUpgradeItem extends UpgradeItemBase<StackUpgradeItem.Wrapper> 
 
 	@Override
 	public UpgradeSlotChangeResult canSwapUpgradeFor(ItemStack upgradeStackToPut, IBackpackWrapper backpackWrapper) {
-		if (!(upgradeStackToPut.getItem() instanceof StackUpgradeItem)) {
+		if (!(upgradeStackToPut.getItem() instanceof StackUpgradeItem otherStackUpgradeItem)) {
 			return canRemoveUpgradeFrom(backpackWrapper);
 		}
 
-		StackUpgradeItem otherStackUpgradeItem = (StackUpgradeItem) upgradeStackToPut.getItem();
 		if (otherStackUpgradeItem.stackSizeMultiplier >= stackSizeMultiplier) {
 			return new UpgradeSlotChangeResult.Success();
 		}

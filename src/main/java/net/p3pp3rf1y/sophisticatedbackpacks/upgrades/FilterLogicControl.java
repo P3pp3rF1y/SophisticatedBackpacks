@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
@@ -12,6 +13,11 @@ public class FilterLogicControl<L extends FilterLogic, C extends FilterLogicCont
 
 	protected FilterLogicControl(Position position, C filterLogicContainer, int slotsPerRow, boolean buttonsVisible, Button... showButtons) {
 		super(filterLogicContainer, position, buttonsVisible, slotsPerRow, showButtons);
+	}
+
+	@Override
+	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+		//TODO add narration
 	}
 
 	public static class Basic extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {

@@ -1,13 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
@@ -51,12 +51,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable LivingEntity entity, World world, BlockPos pos) {
+	public void tick(@Nullable LivingEntity entity, Level world, BlockPos pos) {
 		if (isInCooldown(world)) {
 			return;
 		}
 
-		List<ItemEntity> itemEntities = world.getEntities(EntityType.ITEM, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
+		List<ItemEntity> itemEntities = world.getEntities(EntityType.ITEM, new AABB(pos).inflate(upgradeItem.getRadius()), e -> true);
 		if (itemEntities.isEmpty()) {
 			setCooldown(world, COOLDOWN_TICKS);
 			return;
@@ -94,7 +94,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			return true;
 		}
 
-		CompoundNBT data = itemEntity.getPersistentData();
+		CompoundTag data = itemEntity.getPersistentData();
 		return player != null ? data.contains(PREVENT_REMOTE_MOVEMENT) : data.contains(PREVENT_REMOTE_MOVEMENT) && !data.contains(ALLOW_MACHINE_MOVEMENT);
 	}
 

@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 public class DataGenerators {
 	private DataGenerators() {}
