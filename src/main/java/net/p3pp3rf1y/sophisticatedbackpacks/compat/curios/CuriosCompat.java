@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotTypeMessage;
@@ -48,7 +49,7 @@ public class CuriosCompat implements ICompat {
 
 		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
 
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().setPlayerInventoryHandlerInitCallback(player -> CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
+		PlayerInventoryProvider.get().setPlayerInventoryHandlerInitCallback(player -> CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
 			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
 			for (String identifier : handler.getCurios().keySet()) {
 				if (identifier.equals(SlotTypePreset.CURIO.getIdentifier()) || backpackCurioTags.contains(identifier)) {
@@ -59,7 +60,7 @@ public class CuriosCompat implements ICompat {
 	}
 
 	private void addSlotProvider(String identifier) {
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
+		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
 				player -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
 				(player, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
 				(player, slot, stack) -> runOnBackStackHandler(player, identifier, sh -> sh.getStacks().setStackInSlot(slot, stack)), false, true, true

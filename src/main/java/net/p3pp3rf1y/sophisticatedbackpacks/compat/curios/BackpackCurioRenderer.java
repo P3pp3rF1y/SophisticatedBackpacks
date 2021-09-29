@@ -9,18 +9,19 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BACKPACK_LAYER;
 
 public class BackpackCurioRenderer implements ICurioRenderer {
 	private final BackpackModel model;
 
 	public BackpackCurioRenderer() {
 		EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
-		model = new BackpackModel(entityModels.bakeLayer(ClientProxy.BACKPACK_LAYER));
+		model = new BackpackModel(entityModels.bakeLayer(BACKPACK_LAYER));
 	}
 
 	@Override

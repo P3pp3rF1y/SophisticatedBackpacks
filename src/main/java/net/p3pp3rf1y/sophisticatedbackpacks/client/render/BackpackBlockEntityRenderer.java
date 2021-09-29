@@ -12,13 +12,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BACKPACK_LAYER;
 
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	private final BackpackModel model;
 
 	public BackpackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
-		model = new BackpackModel(context.bakeLayer(ClientProxy.BACKPACK_LAYER));
+		model = new BackpackModel(context.bakeLayer(BACKPACK_LAYER));
 	}
 
 	@Override

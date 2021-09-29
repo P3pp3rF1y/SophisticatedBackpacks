@@ -1361,7 +1361,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 
 	@Override
 	public void setSynchronizer(ContainerSynchronizer synchronizer) {
-		if (synchronizer instanceof ServerPlayer serverPlayer && backpackWrapper.getInventoryHandler().getStackSizeMultiplier() > 1) {
+		if (player instanceof ServerPlayer serverPlayer && backpackWrapper.getInventoryHandler().getStackSizeMultiplier() > 1) {
 			super.setSynchronizer(new HighStackCountSynchronizer(serverPlayer));
 			return;
 		}

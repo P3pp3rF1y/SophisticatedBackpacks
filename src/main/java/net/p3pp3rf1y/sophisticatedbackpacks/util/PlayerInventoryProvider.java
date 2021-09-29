@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.ArrayList;
@@ -25,7 +27,18 @@ public class PlayerInventoryProvider {
 	private boolean playerInventoryHandlersInitialized = false;
 	private Consumer<Player> playerInventoryHandlerInitCallback = player -> {};
 
-	public PlayerInventoryProvider() {
+	private static final PlayerInventoryProvider serverProvider = new PlayerInventoryProvider();
+	private static final PlayerInventoryProvider clientProvider = new PlayerInventoryProvider();
+
+	public static PlayerInventoryProvider get() {
+		if (FMLEnvironment.dist == Dist.CLIENT) {
+			return clientProvider;
+		} else {
+			return serverProvider;
+		}
+	}
+
+	private PlayerInventoryProvider() {
 		addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.getInventory().items.size(),
 				(player, slot) -> player.getInventory().items.get(slot), (player, slot, stack) -> player.getInventory().items.set(slot, stack), true, false, false);
 		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.getInventory().offhand.size(),

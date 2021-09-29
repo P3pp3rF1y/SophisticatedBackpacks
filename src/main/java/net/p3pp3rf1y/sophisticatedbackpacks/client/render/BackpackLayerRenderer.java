@@ -14,16 +14,14 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientProxy;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BACKPACK_LAYER;
 
 public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidModel<T>> extends RenderLayer<T, M> {
 	private static final float CHILD_Y_OFFSET = 0.3F;
@@ -41,13 +39,13 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 	public BackpackLayerRenderer(RenderLayerParent<T, M> entityRendererIn) {
 		super(entityRendererIn);
 		EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
-		model = new BackpackModel(entityModels.bakeLayer(ClientProxy.BACKPACK_LAYER));
+		model = new BackpackModel(entityModels.bakeLayer(BACKPACK_LAYER));
 	}
 
 	@Override
 	public void render(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if (entity instanceof AbstractClientPlayer player) {
-			SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
+			PlayerInventoryProvider.get().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 				matrixStack.pushPose();
 				boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.getInventory().armor.get(EquipmentSlot.CHEST.getIndex()).isEmpty();
 				ItemStack backpack = backpackRenderInfo.getBackpack();
@@ -91,10 +89,6 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 			int clothColor = wrapper.getClothColor();
 			int borderColor = wrapper.getBorderColor();
-
-			BackpackRenderInfo renderInfo = wrapper.getRenderInfo();
-
-			Optional<IRenderedBatteryUpgrade.BatteryRenderInfo> batteryRenderInfo = renderInfo.getBatteryRenderInfo();
 			model.render(matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
 		});
 	}
