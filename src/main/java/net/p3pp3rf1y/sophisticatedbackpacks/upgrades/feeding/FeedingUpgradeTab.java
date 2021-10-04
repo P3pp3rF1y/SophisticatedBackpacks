@@ -41,13 +41,13 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class Basic extends FeedingUpgradeTab {
 		public Basic(FeedingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("feeding"), translUpgradeTooltip("feeding"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.restockUpgrade.slotsInRow.get()));
 		}
 	}
@@ -62,7 +62,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 					button -> getContainer().setFeedImmediatelyWhenHurt(!getContainer().shouldFeedImmediatelyWhenHurt()),
 					() -> getContainer().shouldFeedImmediatelyWhenHurt()));
 
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedRestockUpgrade.slotsInRow.get()));
 		}
 	}

@@ -18,13 +18,13 @@ public class DepositUpgradeTab extends UpgradeSettingsTab<DepositUpgradeContaine
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class Basic extends DepositUpgradeTab {
 		public Basic(DepositUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("deposit"), translUpgradeTooltip("deposit"));
-			filterLogicControl = addHideableChild(new DepositFilterLogicControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new DepositFilterLogicControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.depositUpgrade.slotsInRow.get()));
 		}
 	}
@@ -32,7 +32,7 @@ public class DepositUpgradeTab extends UpgradeSettingsTab<DepositUpgradeContaine
 	public static class Advanced extends DepositUpgradeTab {
 		public Advanced(DepositUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("advanced_deposit"), translUpgradeTooltip("advanced_deposit"));
-			filterLogicControl = addHideableChild(new DepositFilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new DepositFilterLogicControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedDepositUpgrade.slotsInRow.get()));
 		}
 	}

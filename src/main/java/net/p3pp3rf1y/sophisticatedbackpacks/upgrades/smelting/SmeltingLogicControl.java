@@ -4,9 +4,9 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.world.World;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ProgressBar;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -17,7 +17,7 @@ import java.util.List;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.GUI_CONTROLS;
 
-public class SmeltingLogicControl extends CompositeWidget<Widget> {
+public class SmeltingLogicControl extends CompositeBackpackWidget<BackpackWidget> {
 	private static final TextureBlitData FURNACE_BACKGROUND = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 202), new Dimension(68, 54));
 	private static final TextureBlitData COOK_PROGRESS = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(100, 239), new Dimension(22, 16));
 	private static final TextureBlitData BURN_PROGRESS = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(99, 225), new Dimension(14, 14));

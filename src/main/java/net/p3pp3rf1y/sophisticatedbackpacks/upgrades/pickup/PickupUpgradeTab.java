@@ -20,13 +20,13 @@ public class PickupUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgrade
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class Basic extends PickupUpgradeTab {
 		public Basic(ContentsFilteredUpgradeContainer<PickupUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("pickup"), translUpgradeTooltip("pickup"));
-			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.pickupUpgrade.slotsInRow.get()));
 		}
 	}
@@ -34,7 +34,7 @@ public class PickupUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgrade
 	public static class Advanced extends PickupUpgradeTab {
 		public Advanced(ContentsFilteredUpgradeContainer<PickupUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("advanced_pickup"), translUpgradeTooltip("advanced_pickup"));
-			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedPickupUpgrade.slotsInRow.get()));
 		}
 	}

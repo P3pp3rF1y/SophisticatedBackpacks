@@ -9,7 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import java.util.function.IntConsumer;
 
-public abstract class ButtonBase extends Widget {
+public abstract class ButtonBase extends BackpackWidget {
 	protected final int width;
 	protected final int height;
 

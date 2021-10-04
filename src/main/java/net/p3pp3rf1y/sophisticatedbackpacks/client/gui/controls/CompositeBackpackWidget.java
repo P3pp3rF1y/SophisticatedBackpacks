@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CompositeWidget<T extends Widget> extends Widget implements INestedGuiEventHandler {
+public abstract class CompositeBackpackWidget<T extends BackpackWidget> extends BackpackWidget implements INestedGuiEventHandler {
 	protected final List<T> children = new ArrayList<>();
 
 	private boolean dragging = false;
@@ -17,7 +17,7 @@ public abstract class CompositeWidget<T extends Widget> extends Widget implement
 	@Nullable
 	private IGuiEventListener listener;
 
-	protected CompositeWidget(Position position) {
+	protected CompositeBackpackWidget(Position position) {
 		super(position);
 	}
 

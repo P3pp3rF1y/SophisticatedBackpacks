@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
 import com.google.common.collect.ImmutableMap;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -11,7 +12,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeButton;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.*;
 
 public abstract class DepositFilterLogicControl extends FilterLogicControl<DepositFilterLogic, DepositFilterLogicContainer> {
 	public static final ButtonDefinition.Toggle<DepositFilterType> DEPOSIT_FILTER_TYPE = ButtonDefinitions.createToggleButtonDefinition(
@@ -21,8 +22,8 @@ public abstract class DepositFilterLogicControl extends FilterLogicControl<Depos
 					DepositFilterType.INVENTORY, GuiHelper.getButtonStateData(new UV(64, 16), translUpgradeButton("deposit_filter_type_inventory"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
-	protected DepositFilterLogicControl(Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow, Button... buttons) {
-		super(position, filterLogicContainer, slotsPerRow, true, buttons);
+	protected DepositFilterLogicControl(BackpackScreen screen, Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow, MatchButton... matchButtons) {
+		super(screen, position, filterLogicContainer, slotsPerRow, true, matchButtons);
 		addChild(new ToggleButton<>(new Position(x, y), DEPOSIT_FILTER_TYPE, button -> updateDepositFilterType(), container::getDepositFilterType));
 	}
 
@@ -34,14 +35,14 @@ public abstract class DepositFilterLogicControl extends FilterLogicControl<Depos
 	}
 
 	public static class Basic extends DepositFilterLogicControl {
-		public Basic(Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow);
+		public Basic(BackpackScreen screen, Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow);
 		}
 	}
 
 	public static class Advanced extends DepositFilterLogicControl {
-		public Advanced(Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow, PRIMARY_MATCH, DURABILITY, NBT);
+		public Advanced(BackpackScreen screen, Position position, DepositFilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}
 }

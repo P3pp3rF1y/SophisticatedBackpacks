@@ -4,9 +4,9 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Label;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -27,7 +27,7 @@ public abstract class SettingsTabBase<T extends ContainerScreen<?>> extends Tab 
 	protected boolean isOpen = false;
 	private Runnable onOpen = () -> {};
 	private Runnable onClose = () -> {};
-	private final List<Widget> hideableChildren = new ArrayList<>();
+	private final List<BackpackWidget> hideableChildren = new ArrayList<>();
 	private final List<ITextProperties> openTooltip;
 
 	protected SettingsTabBase(Position position, T screen, ITextComponent tabLabel, List<ITextProperties> tooltip, List<ITextProperties> openTooltip, Function<IntConsumer, ButtonBase> getTabButton) {
@@ -48,13 +48,13 @@ public abstract class SettingsTabBase<T extends ContainerScreen<?>> extends Tab 
 		openTooltip = Collections.emptyList();
 	}
 
-	protected <U extends Widget> U addHideableChild(U widget) {
+	protected <U extends BackpackWidget> U addHideableChild(U widget) {
 		hideableChildren.add(widget);
 		updateOpenTabDimension(widget);
 		return widget;
 	}
 
-	private <U extends Widget> void updateOpenTabDimension(U widget) {
+	private <U extends BackpackWidget> void updateOpenTabDimension(U widget) {
 		int widgetMaxWidthExtension = widget.getX() + widget.getWidth() + RIGHT_BORDER_WIDTH - x;
 		int widgetMaxHeightExtension = widget.getY() + widget.getHeight() + BOTTOM_BORDER_HEIGHT - y;
 		openTabDimension = new Dimension(Math.max(openTabDimension.getWidth(), widgetMaxWidthExtension), Math.max(openTabDimension.getHeight(), widgetMaxHeightExtension));

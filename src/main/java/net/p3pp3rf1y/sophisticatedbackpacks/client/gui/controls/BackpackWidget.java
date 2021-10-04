@@ -9,7 +9,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.IRenderable;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
-public abstract class Widget extends AbstractGui implements IRenderable, IGuiEventListener {
+public abstract class BackpackWidget extends AbstractGui implements IRenderable, IGuiEventListener {
 	protected final int x;
 
 	protected final int y;
@@ -17,7 +17,7 @@ public abstract class Widget extends AbstractGui implements IRenderable, IGuiEve
 	protected final Minecraft minecraft;
 	protected final FontRenderer font;
 
-	protected Widget(Position position) {
+	protected BackpackWidget(Position position) {
 		x = position.getX();
 		y = position.getY();
 		minecraft = Minecraft.getInstance();

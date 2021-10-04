@@ -18,12 +18,12 @@ public class RefillUpgradeTab extends UpgradeSettingsTab<FilteredUpgradeContaine
 	public RefillUpgradeTab(FilteredUpgradeContainer<RefillUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, screen, translUpgrade("refill"), translUpgradeTooltip("refill"));
 
-		filterLogicControl = addHideableChild(new FilterLogicControl<>(new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
+		filterLogicControl = addHideableChild(new FilterLogicControl<>(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 				Config.COMMON.refillUpgrade.slotsInRow.get()));
 	}
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 }

@@ -17,7 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.*;
 
 public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(
@@ -47,19 +47,19 @@ public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgrade
 		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), SWAP_TOOLS, button -> getContainer().setToolSwapMode(getContainer().getToolSwapMode().next()),
 				getContainer()::getToolSwapMode));
 
-		filterLogicControl = addHideableChild(new ToolSwapperFilterControl(getContainer().getFilterLogicContainer(), new Position(x + 3, y + 44), true,
+		filterLogicControl = addHideableChild(new ToolSwapperFilterControl(screen, getContainer().getFilterLogicContainer(), new Position(x + 3, y + 44), true,
 				Config.COMMON.toolSwapperUpgrade.slotsInRow.get()));
 	}
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class ToolSwapperFilterControl
 			extends FilterLogicControlBase<ToolSwapperFilterLogic, ToolFilterSlot, FilterLogicContainerBase<ToolSwapperFilterLogic, ToolFilterSlot>> {
-		protected ToolSwapperFilterControl(FilterLogicContainerBase<ToolSwapperFilterLogic, ToolFilterSlot> container, Position position, boolean buttonsVisible, int slotsPerRow) {
-			super(container, position, buttonsVisible, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
+		protected ToolSwapperFilterControl(BackpackScreen screen, FilterLogicContainerBase<ToolSwapperFilterLogic, ToolFilterSlot> container, Position position, boolean buttonsVisible, int slotsPerRow) {
+			super(screen, container, position, buttonsVisible, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}
 }

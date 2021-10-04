@@ -193,10 +193,6 @@ public class InventoryHelper {
 		return ret;
 	}
 
-	public static boolean anyStackTagMatches(ItemStack stackA, ItemStack stackB) {
-		return anyItemTagMatches(stackA.getItem(), stackB.getItem());
-	}
-
 	public static boolean anyItemTagMatches(Item itemA, Item itemB) {
 		for (ResourceLocation tag : itemA.getTags()) {
 			if (itemB.getTags().contains(tag)) {

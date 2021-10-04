@@ -5,7 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.Rectangle2d;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class SettingsTabControl<C extends ContainerScreen<?>, T extends SettingsTabBase<C>> extends CompositeWidget<Tab> {
+public abstract class SettingsTabControl<C extends ContainerScreen<?>, T extends SettingsTabBase<C>> extends CompositeBackpackWidget<Tab> {
 	private static final int VERTICAL_SPACE = 1;
 	@Nullable
 	private T openTab = null;

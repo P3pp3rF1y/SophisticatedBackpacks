@@ -67,7 +67,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	private static final int UPGRADE_BOTTOM_HEIGHT = 7;
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
-	static final int DISABLED_SLOT_X_POS = -1000;
+	public static final int DISABLED_SLOT_X_POS = -1000;
 	static final int SLOTS_Y_OFFSET = 17;
 	static final int SLOTS_X_OFFSET = 7;
 
@@ -293,7 +293,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 				Container.getQuickCraftSlotCount(quickCraftSlots, quickCraftingType, itemstack, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount());
 				int slotLimit = slot.getMaxStackSize(itemstack);
 				if (itemstack.getCount() > slotLimit) {
-					stackCountText = TextFormatting.YELLOW.toString() + CountAbbreviator.abbreviate(slotLimit);
+					stackCountText = TextFormatting.YELLOW + CountAbbreviator.abbreviate(slotLimit);
 					itemstack.setCount(slotLimit);
 				}
 			} else {
