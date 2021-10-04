@@ -14,11 +14,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -86,10 +88,12 @@ public class Config {
 		public final ToolSwapperUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
+		public final StackUpgradeConfig stackUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
 			enabledItems.enabledMap.clear();
+			stackUpgrade.nonStackableItems = null;
 		}
 
 		Common(ForgeConfigSpec.Builder builder) {
@@ -120,6 +124,7 @@ public class Config {
 			advancedRestockUpgrade = new FilteredUpgradeConfig(builder, "Advanced Restock Upgrade", "advancedRestockUpgrade", 16, 4);
 			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
+			stackUpgrade = new StackUpgradeConfig(builder);
 			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
 			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
@@ -399,6 +404,35 @@ public class Config {
 						SophisticatedBackpacks.LOGGER.error("Wrong data for enabledItems - expected name:true/false when {} was provided", itemEnabled);
 					}
 				}
+			}
+		}
+
+		public static class StackUpgradeConfig {
+			private final ForgeConfigSpec.ConfigValue<List<String>> nonStackableItemsList;
+			@Nullable
+			private Set<Item> nonStackableItems = null;
+			public StackUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Stack Upgrade" + SETTINGS).push("stackUpgrade");
+				nonStackableItemsList =  builder.comment("List of items that are not supposed to stack in backpack even when stack upgrade is inserted. Item registry names are expected here.").define("nonStackableItems", new ArrayList<>());
+				builder.pop();
+			}
+
+			public boolean canItemStack(Item item) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
+				if (nonStackableItems == null) {
+					nonStackableItems = new HashSet<>();
+					nonStackableItemsList.get().forEach(name -> {
+						ResourceLocation registryName = new ResourceLocation(name);
+						if (ForgeRegistries.ITEMS.containsKey(registryName)) {
+							nonStackableItems.add(ForgeRegistries.ITEMS.getValue(registryName));
+						} else {
+							SophisticatedBackpacks.LOGGER.error("Item {} is set to be disabled in config, but it does not exist in item registry", name);
+						}
+					});
+				}
+				return !nonStackableItems.contains(item);
 			}
 		}
 	}
