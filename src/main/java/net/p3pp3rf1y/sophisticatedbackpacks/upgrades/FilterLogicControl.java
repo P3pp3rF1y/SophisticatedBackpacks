@@ -1,18 +1,19 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.*;
 
 public class FilterLogicControl<L extends FilterLogic, C extends FilterLogicContainer<L>>
 		extends FilterLogicControlBase<L, FilterLogicContainer.FilterLogicSlot, C> {
-	public FilterLogicControl(Position position, C filterLogicContainer, int slotsPerRow, Button... showButtons) {
-		this(position, filterLogicContainer, slotsPerRow, showButtons.length > 0, showButtons);
+	public FilterLogicControl(BackpackScreen screen, Position position, C filterLogicContainer, int slotsPerRow, MatchButton... showMatchButtons) {
+		this(screen, position, filterLogicContainer, slotsPerRow, showMatchButtons.length > 0, showMatchButtons);
 	}
 
-	protected FilterLogicControl(Position position, C filterLogicContainer, int slotsPerRow, boolean buttonsVisible, Button... showButtons) {
-		super(filterLogicContainer, position, buttonsVisible, slotsPerRow, showButtons);
+	protected FilterLogicControl(BackpackScreen screen, Position position, C filterLogicContainer, int slotsPerRow, boolean buttonsVisible, MatchButton... showMatchButtons) {
+		super(screen, filterLogicContainer, position, buttonsVisible, slotsPerRow, showMatchButtons);
 	}
 
 	@Override
@@ -21,14 +22,14 @@ public class FilterLogicControl<L extends FilterLogic, C extends FilterLogicCont
 	}
 
 	public static class Basic extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {
-		public Basic(Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST);
+		public Basic(BackpackScreen screen, Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow, ALLOW_LIST);
 		}
 	}
 
 	public static class Advanced extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {
-		public Advanced(Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
+		public Advanced(BackpackScreen screen, Position position, FilterLogicContainer<FilterLogic> filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow, ALLOW_LIST, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}
 }

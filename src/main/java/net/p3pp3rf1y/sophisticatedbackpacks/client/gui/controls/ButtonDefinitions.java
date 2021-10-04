@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
@@ -90,4 +91,18 @@ public class ButtonDefinitions {
 					false, getButtonStateData(new UV(48, 48), Dimension.SQUARE_16, new Position(1, 1),
 							TranslationHelper.getTranslatedLines(translUpgradeButton("shift_click_into_inventory")))
 			));
+
+	public static final ButtonDefinition.Toggle<Boolean> MATCH_ANY_TAG = createToggleButtonDefinition(
+			Map.of(
+					true, getButtonStateData(new UV(0, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("match_any_tag"))),
+					false, getButtonStateData(new UV(16, 80), Dimension.SQUARE_16, new Position(1, 1),
+							TranslationHelper.getTranslatedLines(translUpgradeButton("match_all_tags")))
+			));
+
+	private static final TextureBlitData ADD_TAG_FOREGROUND = new TextureBlitData(ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(96, 32), Dimension.SQUARE_16);
+	public static final ButtonDefinition ADD_TAG = new ButtonDefinition(Dimension.SQUARE_18, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, ADD_TAG_FOREGROUND, new TextComponent(""));
+
+	private static final TextureBlitData REMOVE_TAG_FOREGROUND = new TextureBlitData(ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(112, 32), Dimension.SQUARE_16);
+	public static final ButtonDefinition REMOVE_TAG = new ButtonDefinition(Dimension.SQUARE_18, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, REMOVE_TAG_FOREGROUND, new TextComponent(""));
 }

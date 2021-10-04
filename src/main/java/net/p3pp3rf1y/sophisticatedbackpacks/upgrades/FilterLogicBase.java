@@ -1,12 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.minecraftforge.common.util.Constants;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class FilterLogicBase {
@@ -14,6 +20,8 @@ public class FilterLogicBase {
 	protected final Consumer<ItemStack> saveHandler;
 	protected final String parentTagKey;
 	private boolean allowListDefault = false;
+	@Nullable
+	protected Set<ResourceLocation> tagNames = null;
 
 	public FilterLogicBase(ItemStack upgrade, Consumer<ItemStack> saveHandler, String parentTagKey) {
 		this.upgrade = upgrade;
@@ -40,11 +48,7 @@ public class FilterLogicBase {
 			if (!stack.getItem().getRegistryName().getNamespace().equals(filter.getItem().getRegistryName().getNamespace())) {
 				return false;
 			}
-		} else if (primaryMatch == PrimaryMatch.ITEM) {
-			if (!ItemStack.isSame(stack, filter)) {
-				return false;
-			}
-		} else if (primaryMatch == PrimaryMatch.TAGS && !InventoryHelper.anyStackTagMatches(stack, filter)) {
+		} else if (primaryMatch == PrimaryMatch.ITEM && !ItemStack.isSame(stack, filter)) {
 			return false;
 		}
 
@@ -53,6 +57,41 @@ public class FilterLogicBase {
 		}
 
 		return !shouldMatchNbt() || areItemStackTagsEqualIgnoreDurability(stack, filter);
+	}
+
+	public Set<ResourceLocation> getTagNames() {
+		if (tagNames == null) {
+			initTags();
+		}
+		return Collections.unmodifiableSet(tagNames);
+	}
+
+	public void addTagName(ResourceLocation tagName) {
+		if (tagNames == null) {
+			initTags();
+		}
+		tagNames.add(tagName);
+		serializeTags();
+	}
+
+	private void serializeTags() {
+		if (tagNames == null) {
+			return;
+		}
+		NBTHelper.setList(upgrade, parentTagKey, "tags", tagNames, t -> StringTag.valueOf(t.toString()));
+	}
+
+	public void removeTagName(ResourceLocation tagName) {
+		if (tagNames == null) {
+			initTags();
+		}
+		tagNames.remove(tagName);
+		serializeTags();
+	}
+
+	protected void initTags() {
+		tagNames = NBTHelper.getCollection(upgrade, parentTagKey, "tags", Constants.NBT.TAG_STRING,
+				elementNbt -> Optional.of(new ResourceLocation(elementNbt.getAsString())), TreeSet::new).orElse(new TreeSet<>());
 	}
 
 	private boolean areItemStackTagsEqualIgnoreDurability(ItemStack stackA, ItemStack stackB) {
@@ -125,5 +164,14 @@ public class FilterLogicBase {
 
 	public PrimaryMatch getPrimaryMatch() {
 		return NBTHelper.getEnumConstant(upgrade, parentTagKey, "primaryMatch", PrimaryMatch::fromName).orElse(PrimaryMatch.ITEM);
+	}
+
+	public boolean shouldMatchAnyTag() {
+		return NBTHelper.getBoolean(upgrade, parentTagKey, "matchAnyTag").orElse(true);
+	}
+
+	public void setMatchAnyTag(boolean matchAnyTag) {
+		NBTHelper.setBoolean(upgrade, parentTagKey, "matchAnyTag", matchAnyTag);
+		save();
 	}
 }

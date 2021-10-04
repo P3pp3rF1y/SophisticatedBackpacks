@@ -39,13 +39,13 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("filter"), translUpgradeTooltip("filter"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.filterUpgrade.slotsInRow.get()));
 		}
 	}
@@ -53,7 +53,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("advanced_filter"), translUpgradeTooltip("advanced_filter"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedFilterUpgrade.slotsInRow.get()));
 		}
 	}

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
@@ -12,7 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import java.util.Map;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeButton;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.*;
 
 public abstract class ContentsFilterControl extends FilterLogicControl<ContentsFilterLogic, ContentsFilterLogicContainer> {
 	public static final ButtonDefinition.Toggle<ContentsFilterType> BACKPACK_CONTENTS_FILTER_TYPE = ButtonDefinitions.createToggleButtonDefinition(
@@ -22,16 +23,27 @@ public abstract class ContentsFilterControl extends FilterLogicControl<ContentsF
 					ContentsFilterType.BACKPACK, GuiHelper.getButtonStateData(new UV(80, 16), translUpgradeButton("match_backpack_contents"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
-	protected ContentsFilterControl(Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow, Button... buttons) {
-		super(position, filterLogicContainer, slotsPerRow, true, buttons);
+	protected ContentsFilterControl(BackpackScreen screen, Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow, MatchButton... matchButtons) {
+		super(screen, position, filterLogicContainer, slotsPerRow, true, matchButtons);
 		addChild(new ToggleButton<>(new Position(x, y), BACKPACK_CONTENTS_FILTER_TYPE, button -> updateFilterType(), container::getFilterType));
 	}
 
 	private void updateFilterType() {
 		ContentsFilterType next = container.getFilterType().next();
+		if (container.getPrimaryMatch() == PrimaryMatch.TAGS && next == ContentsFilterType.BACKPACK) {
+			next = next.next();
+		}
 		container.setFilterType(next);
 
-		container.getFilterSlots().forEach(slot -> slot.setEnabled(next != ContentsFilterType.BACKPACK));
+		boolean slotsEnabled = next != ContentsFilterType.BACKPACK;
+		container.getFilterSlots().forEach(slot -> slot.setEnabled(slotsEnabled));
+	}
+
+	@Override
+	protected void onTagsMatchSelected() {
+		if (container.getFilterType() == ContentsFilterType.BACKPACK) {
+			updateFilterType();
+		}
 	}
 
 	@Override
@@ -40,14 +52,14 @@ public abstract class ContentsFilterControl extends FilterLogicControl<ContentsF
 	}
 
 	public static class Basic extends ContentsFilterControl {
-		public Basic(Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow);
+		public Basic(BackpackScreen screen, Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow);
 		}
 	}
 
 	public static class Advanced extends ContentsFilterControl {
-		public Advanced(Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow) {
-			super(position, filterLogicContainer, slotsPerRow, PRIMARY_MATCH, DURABILITY, NBT);
+		public Advanced(BackpackScreen screen, Position position, ContentsFilterLogicContainer filterLogicContainer, int slotsPerRow) {
+			super(screen, position, filterLogicContainer, slotsPerRow, PRIMARY_MATCH, DURABILITY, NBT);
 		}
 	}
 }

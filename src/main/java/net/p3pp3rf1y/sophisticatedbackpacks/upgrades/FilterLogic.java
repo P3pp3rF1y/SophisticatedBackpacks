@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -9,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -79,12 +81,50 @@ public class FilterLogic extends FilterLogicBase {
 
 	public boolean matchesFilter(ItemStack stack) {
 		if (isAllowList()) {
-			return (getFilterHandler().hasOnlyEmptyFilters() && emptyAllowListMatchesEverything)
-					|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> stackMatchesFilter(stack, filter), () -> false, returnValue -> returnValue);
+			if (getPrimaryMatch() == PrimaryMatch.TAGS) {
+				return isTagMatch(stack);
+			} else {
+				return (getFilterHandler().hasOnlyEmptyFilters() && emptyAllowListMatchesEverything)
+						|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> stackMatchesFilter(stack, filter), () -> false, returnValue -> returnValue);
+			}
 		} else {
-			return getFilterHandler().hasOnlyEmptyFilters()
-					|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !stackMatchesFilter(stack, filter), () -> true, returnValue -> !returnValue);
+			if (getPrimaryMatch() == PrimaryMatch.TAGS) {
+				return !isTagMatch(stack);
+			} else {
+				return getFilterHandler().hasOnlyEmptyFilters()
+						|| InventoryHelper.iterate(getFilterHandler(), (slot, filter) -> !stackMatchesFilter(stack, filter), () -> true, returnValue -> !returnValue);
+			}
 		}
 	}
 
+	private boolean isTagMatch(ItemStack stack) {
+		if (shouldMatchAnyTag()) {
+			return anyTagMatches(stack.getItem().getTags());
+		}
+		return allTagsMatch(stack.getItem().getTags());
+	}
+
+	private boolean allTagsMatch(Set<ResourceLocation> tags) {
+		if (tagNames == null) {
+			initTags();
+		}
+		for (ResourceLocation tagName : tagNames) {
+			if (!tags.contains(tagName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean anyTagMatches(Set<ResourceLocation> tags) {
+		if (tagNames == null) {
+			initTags();
+		}
+		for (ResourceLocation tag : tags) {
+			if (tagNames.contains(tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -18,8 +18,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 import java.util.Map;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.ALLOW_LIST;
-import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.Button.PRIMARY_MATCH;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.ALLOW_LIST;
+import static net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControlBase.MatchButton.PRIMARY_MATCH;
 
 public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<CompactingUpgradeContainer> {
 	public static final ButtonDefinition.Toggle<Boolean> COMPACT_UNCRAFTABLE = ButtonDefinitions.createToggleButtonDefinition(
@@ -41,13 +41,13 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 
 	@Override
 	protected void moveSlotsToTab() {
-		filterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		filterLogicControl.moveSlotsToView();
 	}
 
 	public static class Basic extends CompactingUpgradeTab {
 		public Basic(CompactingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("compacting"), translUpgradeTooltip("compacting"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.compactingUpgrade.slotsInRow.get()));
 		}
 	}
@@ -55,7 +55,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 	public static class Advanced extends CompactingUpgradeTab {
 		public Advanced(CompactingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("advanced_compacting"), translUpgradeTooltip("advanced_compacting"));
-			filterLogicControl = addHideableChild(new FilterLogicControl<>(new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new FilterLogicControl<>(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedCompactingUpgrade.slotsInRow.get(), ALLOW_LIST, PRIMARY_MATCH));
 		}
 	}

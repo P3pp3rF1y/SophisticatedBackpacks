@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class FilterLogicContainer<T extends FilterLogic> extends FilterLogicContainerBase<T, FilterLogicContainer.FilterLogicSlot> {
 	public FilterLogicContainer(Supplier<T> filterLogic, IServerUpdater serverUpdater, Consumer<Slot> addSlot) {
-		super(serverUpdater, filterLogic);
+		super(serverUpdater, filterLogic, addSlot);
 		ItemStackHandler filterHandler = filterLogic.get().getFilterHandler();
 		InventoryHelper.iterate(filterHandler, (slot, stack) -> {
 			FilterLogicSlot filterSlot = new FilterLogicSlot(() -> filterLogic.get().getFilterHandler(), slot);

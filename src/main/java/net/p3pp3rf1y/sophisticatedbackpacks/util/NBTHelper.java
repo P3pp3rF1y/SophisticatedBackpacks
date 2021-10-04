@@ -2,17 +2,20 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class NBTHelper {
 	private NBTHelper() {}
@@ -61,6 +64,14 @@ public class NBTHelper {
 		}
 
 		return Optional.of(getValue.apply(tag, key));
+	}
+
+	public static <E, C extends Collection<E>> Optional<C> getCollection(ItemStack stack, String parentKey, String tagName, int listType, Function<Tag, Optional<E>> getElement, Supplier<C> initCollection) {
+		return getTagValue(stack, parentKey, tagName, (c, n) -> c.getList(n, listType)).map(listNbt -> {
+			C ret = initCollection.get();
+			listNbt.forEach(elementNbt -> getElement.apply(elementNbt).ifPresent(ret::add));
+			return ret;
+		});
 	}
 
 	public static Optional<CompoundTag> getCompound(ItemStack stack, String parentKey, String tagName) {
@@ -201,5 +212,15 @@ public class NBTHelper {
 			mapNbt.put(getStringKey.apply(entry.getKey()), getNbtValue.apply(entry.getValue()));
 		}
 		stack.getOrCreateTag().put(key, mapNbt);
+	}
+
+	public static <T> void setList(ItemStack stack, String parentKey, String key, Collection<T> values, Function<T, Tag> getNbtValue) {
+		ListTag list = new ListTag();
+		values.forEach(v -> list.add(getNbtValue.apply(v)));
+		if (parentKey.isEmpty()) {
+			stack.getOrCreateTag().put(key, list);
+		} else {
+			stack.getOrCreateTagElement(parentKey).put(key, list);
+		}
 	}
 }
