@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +49,10 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	private final List<FormattedText> addTagTooltip = new ArrayList<>();
 	private final List<FormattedText> removeTagTooltip = new ArrayList<>();
 	private final List<FormattedText> tagListTooltip = new ArrayList<>();
+	@Nullable
+	private ToggleButton<Boolean> nbtButton = null;
+	@Nullable
+	private ToggleButton<Boolean> durabilityButton = null;
 	private int tagButtonsYOffset;
 
 	protected FilterLogicControlBase(BackpackScreen screen, C container, Position position, boolean buttonsVisible, int slotsPerRow, MatchButton... showMatchButtons) {
@@ -70,21 +75,35 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 							onTagsMatchSelected();
 						}
 						container.setPrimaryMatch(next);
+						setDurabilityAndNbtButtonsVisibility();
 						moveSlotsToView();
 					}, container::getPrimaryMatch));
 			addTagButtons();
 		}
 		if (shouldShow(DURABILITY)) {
-			addChild(new ToggleButton<>(new Position(x + 36, y), ButtonDefinitions.MATCH_DURABILITY,
-					button -> container.setMatchDurability(!container.shouldMatchDurability()), container::shouldMatchDurability));
+			durabilityButton = new ToggleButton<>(new Position(x + 36, y), ButtonDefinitions.MATCH_DURABILITY,
+					button -> container.setMatchDurability(!container.shouldMatchDurability()), container::shouldMatchDurability);
+			addChild(durabilityButton);
 		}
 		if (shouldShow(NBT)) {
-			addChild(new ToggleButton<>(new Position(x + 54, y), ButtonDefinitions.MATCH_NBT,
-					button -> container.setMatchNbt(!container.shouldMatchNbt()), container::shouldMatchNbt));
+			nbtButton = new ToggleButton<>(new Position(x + 54, y), ButtonDefinitions.MATCH_NBT,
+					button -> container.setMatchNbt(!container.shouldMatchNbt()), container::shouldMatchNbt);
+			addChild(nbtButton);
 		}
 		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
 		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
 		updateDimensions(Math.max(slotsPerRow * 18, getMaxButtonWidth()), (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset);
+		setDurabilityAndNbtButtonsVisibility();
+	}
+
+	private void setDurabilityAndNbtButtonsVisibility() {
+		boolean visible = container.getPrimaryMatch() != PrimaryMatch.TAGS;
+		if (nbtButton != null) {
+			nbtButton.setVisible(visible);
+		}
+		if (durabilityButton != null) {
+			durabilityButton.setVisible(visible);
+		}
 	}
 
 	protected void onTagsMatchSelected() {
