@@ -142,17 +142,6 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		if (filterLogic.isAllowList()) {
-			BackpackInventoryHandler backpackInventory = backpackWrapper.getInventoryHandler();
-			AtomicBoolean result = new AtomicBoolean(false);
-			InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
-				if (filterLogic.matchesFilter(stack)) {
-					result.set(swapWeapon(player, mainHandItem, backpackInventory, stack));
-				}
-			});
-			return result.get();
-		}
-
 		return tryToSwapInWeapon(player, mainHandItem);
 	}
 
