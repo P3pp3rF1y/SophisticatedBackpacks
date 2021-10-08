@@ -7,7 +7,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import java.util.function.Supplier;
 
-public class ProgressBar extends Widget {
+public class ProgressBar extends BackpackWidget {
 	private final TextureBlitData progressTexture;
 	private final Supplier<Float> getProgress;
 	private final ProgressDirection dir;

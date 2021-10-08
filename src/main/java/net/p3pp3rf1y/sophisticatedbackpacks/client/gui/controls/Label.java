@@ -5,8 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
-public class Label extends Widget {
-	public static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
+public class Label extends BackpackWidget {
+	private static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
 	private final ITextComponent labelText;
 	private final int color;
 

@@ -200,7 +200,9 @@ public class ClientProxy extends CommonProxy {
 
 			Slot slot = backpackScreen.getSlotUnderMouse();
 			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
-				PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
+				if (slot.getItem().getCount() == 1) {
+					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
+				}
 			} else {
 				PacketHandler.sendToServer(new BackpackCloseMessage());
 			}

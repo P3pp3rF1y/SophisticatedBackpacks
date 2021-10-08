@@ -6,9 +6,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeWidget;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Widget;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
@@ -17,7 +17,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 
-public abstract class Tab extends CompositeWidget<Widget> {
+public abstract class Tab extends CompositeBackpackWidget<BackpackWidget> {
 	private static final int TEXTURE_WIDTH = 256;
 	private static final int TEXTURE_HEIGHT = 256;
 	public static final int DEFAULT_HEIGHT = 24;

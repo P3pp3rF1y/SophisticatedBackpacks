@@ -34,7 +34,7 @@ public class ToolSwapperFilterContainer extends FilterLogicContainerBase<ToolSwa
 	}
 
 	public ToolSwapperFilterContainer(IServerUpdater serverUpdater, Supplier<ToolSwapperFilterLogic> filterLogic, Consumer<Slot> addSlot) {
-		super(serverUpdater, filterLogic);
+		super(serverUpdater, filterLogic, addSlot);
 		ToolFilterSlot weaponFilterSlot = new ToolFilterSlot(() -> filterLogic.get().getWeaponFilter(), stack -> filterLogic.get().setWeaponFilter(stack), s -> true);
 		weaponFilterSlot.setBackground(PlayerContainer.BLOCK_ATLAS, EMPTY_WEAPON_SLOT_BACKGROUND);
 		filterSlots.add(weaponFilterSlot);

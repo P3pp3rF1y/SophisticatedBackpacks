@@ -45,7 +45,11 @@ public class Button extends ButtonBase {
 			GuiHelper.blit(minecraft, matrixStack, x, y, foregroundTexture);
 		}
 		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(tooltip);
+			GuiHelper.setTooltipToRender(getTooltip());
 		}
+	}
+
+	protected List<ITextProperties> getTooltip() {
+		return tooltip;
 	}
 }
