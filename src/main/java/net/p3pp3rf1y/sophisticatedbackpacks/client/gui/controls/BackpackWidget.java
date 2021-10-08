@@ -17,6 +17,8 @@ public abstract class BackpackWidget extends AbstractGui implements IRenderable,
 	protected final Minecraft minecraft;
 	protected final FontRenderer font;
 
+	private boolean visible = true;
+
 	protected BackpackWidget(Position position) {
 		x = position.getX();
 		y = position.getY();
@@ -24,8 +26,16 @@ public abstract class BackpackWidget extends AbstractGui implements IRenderable,
 		font = minecraft.font;
 	}
 
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		if (!visible) {
+			return;
+		}
+
 		if (zOffset != 0) {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, zOffset);
