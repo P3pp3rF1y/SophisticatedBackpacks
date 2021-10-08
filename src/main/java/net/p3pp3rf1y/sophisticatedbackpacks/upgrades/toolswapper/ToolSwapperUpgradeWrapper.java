@@ -163,7 +163,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 				if (filterLogic.matchesWeaponFilter(stack)) {
 					result.set(swapWeapon(player, mainHandItem, backpackInventory, stack));
 				}
-			});
+			}, result::get);
 			return result.get();
 		}
 
