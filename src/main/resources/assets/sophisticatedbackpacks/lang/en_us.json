@@ -237,6 +237,7 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "This Backpack's settings",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "Inherited from player or overriden for this backpack",
     "gui.sophisticatedbackpacks.tooltip.stack_count": "Count: %s",
+    "gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack": "Right Click To Add",
     "gui.sophisticatedbackpacks.settings.backpack": "Backpack",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "Backpack Settings",
     "gui.sophisticatedbackpacks.settings.buttons.shift_click_open_tab.on": "Shift Click Into Open Tab First",

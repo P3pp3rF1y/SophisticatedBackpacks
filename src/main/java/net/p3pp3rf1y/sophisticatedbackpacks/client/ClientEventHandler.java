@@ -1,6 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -8,13 +11,18 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -25,6 +33,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
@@ -34,12 +44,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackInsertMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
@@ -61,10 +74,72 @@ public class ClientEventHandler {
 		modBus.addListener(ClientEventHandler::registerReloadListener);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientEventHandler::onPlayerJoinServer);
-		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
+		eventBus.addListener(ClientEventHandler::onDrawScreen);
+		eventBus.addListener(ClientEventHandler::onRightClick);
+		eventBus.addListener(BackpackTooltipRenderer::handleBackpackTooltipRender);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 		eventBus.addListener(BackpackSoundHandler::tick);
 		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
+	}
+
+	private static void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+		Minecraft mc = Minecraft.getInstance();
+		Screen gui = mc.screen;
+		if (!(gui instanceof AbstractContainerScreen<?> containerGui) || mc.player == null) {
+			return;
+		}
+		AbstractContainerMenu menu = containerGui.getMenu();
+		ItemStack held = menu.getCarried();
+		if (!held.isEmpty()) {
+			Slot under = containerGui.getSlotUnderMouse();
+			PoseStack poseStack = event.getMatrixStack();
+
+			for (Slot s : menu.slots) {
+				if (!s.mayPickup(mc.player)) {
+					continue;
+				}
+
+				ItemStack stack = s.getItem();
+				stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+					if (s == under) {
+						int x = event.getMouseX();
+						int y = event.getMouseY();
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 100);
+						BackpackTooltipRenderer.renderTooltipWithContents(stack, mc, poseStack, x, y, mc.font, Collections.singletonList(new TranslatableComponent("gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack")));
+						poseStack.popPose();
+					} else {
+						int x = containerGui.getGuiLeft() + s.x;
+						int y = containerGui.getGuiTop() + s.y;
+
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 499);
+
+						mc.font.drawShadow(poseStack, "+", (float) x + 10, (float) y + 8, 0xFFFF00);
+						poseStack.popPose();
+					}
+				});
+			}
+
+		}
+	}
+
+	private static void onRightClick(GuiScreenEvent.MouseReleasedEvent.Pre event) {
+		Minecraft mc = Minecraft.getInstance();
+		Screen screen = mc.screen;
+		if (screen instanceof AbstractContainerScreen<?> container && event.getButton() == 1) {
+			Slot under = container.getSlotUnderMouse();
+			ItemStack held = container.getMenu().getCarried();
+
+			if (under != null && !held.isEmpty() && mc.player != null && under.mayPickup(mc.player)) {
+				ItemStack stack = under.getItem();
+				if (stack.getItem() instanceof BackpackItem) {
+					PacketHandler.sendToServer(new BackpackInsertMessage(under.index));
+					screen.mouseReleased(0, 0, -1);
+					event.setCanceled(true);
+				}
+			}
+		}
 	}
 
 	private static void loadComplete(FMLLoadCompleteEvent event) {
