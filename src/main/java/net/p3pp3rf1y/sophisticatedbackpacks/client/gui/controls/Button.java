@@ -42,19 +42,23 @@ public class Button extends ButtonBase {
 		}
 	}
 
+	protected List<FormattedText> getTooltip() {
+		return tooltip;
+	}
+
 	@Override
 	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (foregroundTexture != null) {
 			GuiHelper.blit(minecraft, matrixStack, x, y, foregroundTexture);
 		}
 		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(tooltip);
+			GuiHelper.setTooltipToRender(getTooltip());
 		}
 	}
 
 	@Override
 	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-		pNarrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("gui.narrate.button", tooltip));
+		pNarrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("gui.narrate.button", getTooltip()));
 		pNarrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.button.usage.focused"));
 	}
 }

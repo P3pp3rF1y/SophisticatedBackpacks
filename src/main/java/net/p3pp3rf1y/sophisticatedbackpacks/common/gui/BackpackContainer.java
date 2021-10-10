@@ -1277,22 +1277,24 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 				}
 
 				Slot slot = getSlot(i);
-				ItemStack destStack = slot.getItem();
-				if (!destStack.isEmpty() && ItemStack.isSameItemSameTags(sourceStack, destStack)) {
-					int j = destStack.getCount() + toTransfer;
-					int maxSize = calculateMaxCountForStack(slot.getMaxStackSize(), sourceStack);
-					if (j <= maxSize) {
-						sourceStack.shrink(toTransfer);
-						destStack.setCount(j);
-						toTransfer = 0;
-						slot.setChanged();
-						flag = true;
-					} else if (destStack.getCount() < maxSize) {
-						sourceStack.shrink(maxSize - destStack.getCount());
-						toTransfer -= maxSize - destStack.getCount();
-						destStack.setCount(maxSize);
-						slot.setChanged();
-						flag = true;
+				if (slot.mayPlace(sourceStack)) { //Added to vanilla logic as some slots may not want anything to be added to them
+					ItemStack destStack = slot.getItem();
+					if (!destStack.isEmpty() && ItemStack.isSameItemSameTags(sourceStack, destStack)) {
+						int j = destStack.getCount() + toTransfer;
+						int maxSize = calculateMaxCountForStack(slot.getMaxStackSize(), sourceStack);
+						if (j <= maxSize) {
+							sourceStack.shrink(toTransfer);
+							destStack.setCount(j);
+							toTransfer = 0;
+							slot.setChanged();
+							flag = true;
+						} else if (destStack.getCount() < maxSize) {
+							sourceStack.shrink(maxSize - destStack.getCount());
+							toTransfer -= maxSize - destStack.getCount();
+							destStack.setCount(maxSize);
+							slot.setChanged();
+							flag = true;
+						}
 					}
 				}
 

@@ -70,7 +70,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	private static final int UPGRADE_BOTTOM_HEIGHT = 7;
 	private static final int TOTAL_UPGRADE_GUI_HEIGHT = 252;
 	public static final int UPGRADE_INVENTORY_OFFSET = 26;
-	static final int DISABLED_SLOT_X_POS = -1000;
+	public static final int DISABLED_SLOT_X_POS = -1000;
 	static final int SLOTS_Y_OFFSET = 17;
 	static final int SLOTS_X_OFFSET = 7;
 	public static final int ERROR_SLOT_COLOR = ColorHelper.getColor(DyeColor.RED.getTextureDiffuseColors()) | 0xAA000000;

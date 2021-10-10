@@ -58,22 +58,21 @@ public class BackpackTooltipRenderer {
 		lastRequestTime = 0;
 	}
 
-	public static void renderBackpackTooltip(RenderTooltipEvent.Pre event) {
+	public static void handleBackpackTooltipRender(RenderTooltipEvent.Pre event) {
 		ItemStack backpack = event.getStack();
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
 		if (!(backpack.getItem() instanceof BackpackItem) || !Screen.hasShiftDown() || player == null) {
 			return;
 		}
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
-			UUID newUuid = wrapper.getContentsUuid().orElse(null);
-			if (backpackUuid == null && newUuid != null || backpackUuid != null && !backpackUuid.equals(newUuid)) {
-				lastRequestTime = 0;
-				backpackUuid = newUuid;
-				shouldRefreshContents = true;
-			}
-			requestContents(player, wrapper);
-			refreshContents(wrapper, minecraft);
+		if (renderBackpackTooltip(backpack, minecraft, player, event.getMatrixStack(), event.getX(), event.getY(), event.getFontRenderer())) {
+			event.setCanceled(true);
+		}
+	}
+
+	public static boolean renderBackpackTooltip(ItemStack backpack, Minecraft minecraft, LocalPlayer player, PoseStack poseStack, int x, int y, Font font) {
+		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
+			initContents(minecraft, player, wrapper);
 
 			List<Component> lines = backpack.getTooltipLines(player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 			if (backpackUuid != null) {
@@ -86,10 +85,34 @@ public class BackpackTooltipRenderer {
 				addEnergytooltip(wrapper, lines);
 				addFluidTooltip(wrapper, lines);
 			}
-			GuiHelper.renderTooltip(minecraft, event.getMatrixStack(), lines, event.getX(), event.getY(), contentsTooltipPart, event.getFontRenderer(), backpack);
-			event.setCanceled(true);
-		});
+			renderContentsTooltip(backpack, minecraft, poseStack, x, y, font, lines);
 
+			return true;
+		}).orElse(false);
+	}
+
+	public static void renderTooltipWithContents(ItemStack backpack, Minecraft minecraft, PoseStack poseStack, int x, int y, Font font, List<Component> lines) {
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			if (minecraft.player != null) {
+				initContents(minecraft, minecraft.player, wrapper);
+				renderContentsTooltip(backpack, minecraft, poseStack, x, y, font, lines);
+			}
+		});
+	}
+
+	private static void renderContentsTooltip(ItemStack backpack, Minecraft minecraft, PoseStack poseStack, int x, int y, Font font, List<Component> lines) {
+		GuiHelper.renderTooltip(minecraft, poseStack, lines, x, y, contentsTooltipPart, font, backpack);
+	}
+
+	private static void initContents(Minecraft minecraft, LocalPlayer player, IBackpackWrapper wrapper) {
+		UUID newUuid = wrapper.getContentsUuid().orElse(null);
+		if (backpackUuid == null && newUuid != null || backpackUuid != null && !backpackUuid.equals(newUuid)) {
+			lastRequestTime = 0;
+			backpackUuid = newUuid;
+			shouldRefreshContents = true;
+		}
+		requestContents(player, wrapper);
+		refreshContents(wrapper, minecraft);
 	}
 
 	private static void addEnergytooltip(IBackpackWrapper wrapper, List<Component> lines) {

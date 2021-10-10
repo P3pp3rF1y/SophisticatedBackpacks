@@ -18,17 +18,17 @@ public class AutoSmeltingUpgradeTab extends UpgradeSettingsTab<AutoSmeltingUpgra
 
 	public AutoSmeltingUpgradeTab(AutoSmeltingUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, screen, translUpgrade("auto_smelting"), translUpgradeTooltip("auto_smelting"));
-		inputFilterLogicControl = addHideableChild(new FilterLogicControl.Advanced(new Position(x + 3, y + 24), getContainer().getInputFilterLogicContainer(),
+		inputFilterLogicControl = addHideableChild(new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getInputFilterLogicContainer(),
 				Config.COMMON.autoSmeltingUpgrade.inputFilterSlotsInRow.get()));
 		smeltingLogicControl = addHideableChild(new SmeltingLogicControl(new Position(x + 3, y + 84), getContainer().getSmeltingLogicContainer()));
-		fuelFilterLogicControl = addHideableChild(new FilterLogicControl<>(new Position(x + 3, y + 142), getContainer().getFuelFilterLogicContainer(),
+		fuelFilterLogicControl = addHideableChild(new FilterLogicControl<>(screen, new Position(x + 3, y + 142), getContainer().getFuelFilterLogicContainer(),
 				Config.COMMON.autoSmeltingUpgrade.fuelFilterSlotsInRow.get()));
 	}
 
 	@Override
 	protected void moveSlotsToTab() {
-		inputFilterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		inputFilterLogicControl.moveSlotsToView();
 		smeltingLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
-		fuelFilterLogicControl.moveSlotsToView(screen.getGuiLeft(), screen.getGuiTop());
+		fuelFilterLogicControl.moveSlotsToView();
 	}
 }

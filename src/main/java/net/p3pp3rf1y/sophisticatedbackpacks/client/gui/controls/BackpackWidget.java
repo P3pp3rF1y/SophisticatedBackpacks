@@ -21,6 +21,7 @@ public abstract class BackpackWidget extends GuiComponent implements Widget, Gui
 	private int height;
 	private int width;
 	protected boolean isHovered;
+	private boolean visible = true;
 
 	protected BackpackWidget(Position position, Dimension dimension) {
 		x = position.x();
@@ -31,8 +32,16 @@ public abstract class BackpackWidget extends GuiComponent implements Widget, Gui
 		font = minecraft.font;
 	}
 
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
 	@Override
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		if (!visible) {
+			return;
+		}
+
 		isHovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
 		if (zOffset != 0) {
 			matrixStack.pushPose();

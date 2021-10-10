@@ -8,7 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 public class Label extends BackpackWidget {
-	public static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
+	private static final int DEFAULT_GUI_TEXT_COLOR = 4210752;
 	private final Component labelText;
 	private final int color;
 

@@ -6,6 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -118,7 +119,9 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	@Override
 	public int getStackLimit(int slot, ItemStack stack) {
-		return Math.min(slotLimit, stack.getMaxStackSize() * maxStackSizeMultiplier);
+		int adjustedMaxStackSizeMultiplier = maxStackSizeMultiplier > 1 && Config.COMMON.stackUpgrade.canItemStack(stack.getItem()) ? maxStackSizeMultiplier : 1;
+
+		return Math.min(slotLimit, stack.getMaxStackSize() * adjustedMaxStackSizeMultiplier);
 	}
 
 	public void setSlotLimit(int slotLimit) {
