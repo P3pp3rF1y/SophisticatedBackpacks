@@ -41,6 +41,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	protected final int slotsPerRow;
 	protected final int slotsInExtraRow;
 	protected final int fullSlotRows;
+	private final int totalSlotRows;
 	private final BackpackScreen screen;
 	protected final C container;
 	private final int height;
@@ -61,6 +62,9 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		slotsTopYOffset = buttonsVisible ? 21 : 0;
 		this.slotsPerRow = slotsPerRow;
 		this.showMatchButtons = showMatchButtons;
+		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
+		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
+		totalSlotRows = fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0);
 
 		if (shouldShow(ALLOW_LIST)) {
 			addChild(new ToggleButton<>(new Position(x, y), ButtonDefinitions.ALLOW_LIST, button -> container.setAllowList(!container.isAllowList()), container::isAllowList));
@@ -91,8 +95,6 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		}
 
 		width = Math.max(slotsPerRow * 18, getMaxButtonWidth());
-		fullSlotRows = container.getFilterSlots().size() / slotsPerRow;
-		slotsInExtraRow = container.getFilterSlots().size() % slotsPerRow;
 		height = (fullSlotRows + (slotsInExtraRow > 0 ? 1 : 0)) * 18 + slotsTopYOffset;
 
 		setDurabilityAndNbtButtonsVisibility();
@@ -113,7 +115,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	}
 
 	private void addTagButtons() {
-		tagButtonsYOffset = slotsTopYOffset + 54;
+		tagButtonsYOffset = slotsTopYOffset + (getTagListHeight());
 		addChild(new TagButton(new Position(x + 36, y + tagButtonsYOffset), ButtonDefinitions.REMOVE_TAG, button -> {
 			container.removeSelectedTag();
 			updateTagListAndRemoveTooltips();
@@ -282,33 +284,42 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	protected void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 		if (container.getPrimaryMatch() == PrimaryMatch.TAGS) {
-			int count = 0;
-			int prefixWidth = font.width("...");
-			Set<ResourceLocation> tagNames = container.getTagNames();
-			for (ResourceLocation tagName : tagNames) {
-				String name = tagName.toString();
-				String shortened = name;
-				if (font.width(name) > MAX_TAG_NAME_WIDTH) {
-					shortened = font.plainSubstrByWidth(name, MAX_TAG_NAME_WIDTH - prefixWidth, true);
-					if (!shortened.equals(name)) {
-						shortened = "..." + shortened;
-					}
-				}
-				font.draw(matrixStack, shortened, (float) x + 2, (float) y + 23 + count * 10, TAG_FONT_COLOR);
-				count++;
-				if (tagNames.size() > 5 && count == 4) {
-					font.draw(matrixStack, new TranslationTextComponent(TranslationHelper.translUpgradeKey("tag_list.tag_overflow"), String.valueOf(tagNames.size() - 4)), (float) x + 2, (float) y + 23 + count * 10, MORE_TAGS_FONT_COLOR);
-					break;
-				}
-			}
-			if (isMouseOverTagList(mouseX, mouseY)) {
-				GuiHelper.setTooltipToRender(tagListTooltip);
-			}
+			renderTagNames(matrixStack, mouseX, mouseY);
 		}
 	}
 
+	private void renderTagNames(MatrixStack matrixStack, int mouseX, int mouseY) {
+		int count = 0;
+		int prefixWidth = font.width("...");
+		Set<ResourceLocation> tagNames = container.getTagNames();
+		int maxTagNameLines = getTagListHeight() / 10;
+		for (ResourceLocation tagName : tagNames) {
+			if (tagNames.size() > maxTagNameLines && count == maxTagNameLines - 1) {
+				font.draw(matrixStack, new TranslationTextComponent(TranslationHelper.translUpgradeKey("tag_list.tag_overflow"), String.valueOf(tagNames.size() - (maxTagNameLines - 1))), (float) x + 2, (float) y + 23 + count * 10, MORE_TAGS_FONT_COLOR);
+				break;
+			}
+			String name = tagName.toString();
+			String shortened = name;
+			if (font.width(name) > MAX_TAG_NAME_WIDTH) {
+				shortened = font.plainSubstrByWidth(name, MAX_TAG_NAME_WIDTH - prefixWidth, true);
+				if (!shortened.equals(name)) {
+					shortened = "..." + shortened;
+				}
+			}
+			font.draw(matrixStack, shortened, (float) x + 2, (float) y + 23 + count * 10, TAG_FONT_COLOR);
+			count++;
+		}
+		if (isMouseOverTagList(mouseX, mouseY)) {
+			GuiHelper.setTooltipToRender(tagListTooltip);
+		}
+	}
+
+	private int getTagListHeight() {
+		return (totalSlotRows - 1) * 18;
+	}
+
 	private boolean isMouseOverTagList(double mouseX, double mouseY) {
-		return mouseX >= x && mouseX < x + 72 && mouseY >= y + slotsTopYOffset && mouseY < y + slotsTopYOffset + 54;
+		return mouseX >= x && mouseX < x + getTagListWidth() && mouseY >= y + slotsTopYOffset && mouseY < y + slotsTopYOffset + getTagListHeight();
 	}
 
 	@Override
@@ -336,8 +347,8 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 
 		int u = 29;
 		int v = 146;
-		int renderWidth = 72;
-		int renderHeight = 54;
+		int renderWidth = getTagListWidth();
+		int renderHeight = getTagListHeight();
 		int textureBgWidth = 66;
 		int textureBgHeight = 56;
 		int halfWidth = renderWidth / 2;
@@ -346,6 +357,10 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		blit(matrixStack, x, y + slotsTopYOffset + halfHeight, u, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 		blit(matrixStack, x + halfWidth, y + slotsTopYOffset, (float) u + textureBgWidth - halfWidth, v, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 		blit(matrixStack, x + halfWidth, y + slotsTopYOffset + halfHeight, (float) u + textureBgWidth - halfWidth, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+	}
+
+	private int getTagListWidth() {
+		return slotsPerRow * 18;
 	}
 
 	private class TagButton extends Button {
