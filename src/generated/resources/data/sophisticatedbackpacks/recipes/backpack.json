@@ -1,28 +1,28 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "backpack",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "SLS",
-        "SCS",
-        "LLL"
-    ],
-    "key": {
-        "L": {
-            "tag": "forge:leather"
-        },
-        "C": {
-            "tag": "forge:chests/wooden"
-        },
-        "S": {
-            "tag": "forge:string"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:backpack"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "backpack",
+      "type": "sophisticatedbackpacks:item_enabled"
     }
+  ],
+  "pattern": [
+    "SLS",
+    "SCS",
+    "LLL"
+  ],
+  "key": {
+    "L": {
+      "tag": "forge:leather"
+    },
+    "C": {
+      "tag": "forge:chests/wooden"
+    },
+    "S": {
+      "tag": "forge:string"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:backpack"
+  }
 }

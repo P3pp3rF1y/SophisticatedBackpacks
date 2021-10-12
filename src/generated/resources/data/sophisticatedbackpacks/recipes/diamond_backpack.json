@@ -1,25 +1,25 @@
 {
-    "type": "sophisticatedbackpacks:backpack_upgrade",
-    "conditions": [
-        {
-            "itemRegistryName": "diamond_backpack",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "DDD",
-        "DBD",
-        "DDD"
-    ],
-    "key": {
-        "D": {
-            "tag": "forge:gems/diamond"
-        },
-        "B": {
-            "item": "sophisticatedbackpacks:gold_backpack"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:diamond_backpack"
+  "type": "sophisticatedbackpacks:backpack_upgrade",
+  "conditions": [
+    {
+      "itemRegistryName": "diamond_backpack",
+      "type": "sophisticatedbackpacks:item_enabled"
     }
+  ],
+  "pattern": [
+    "DDD",
+    "DBD",
+    "DDD"
+  ],
+  "key": {
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "B": {
+      "item": "sophisticatedbackpacks:gold_backpack"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:diamond_backpack"
+  }
 }
