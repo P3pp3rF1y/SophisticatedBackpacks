@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -85,21 +86,21 @@ public class ClientEventHandler {
 	private static void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
 		Minecraft mc = Minecraft.getInstance();
 		Screen gui = mc.screen;
-		if (!(gui instanceof AbstractContainerScreen<?> containerGui) || mc.player == null) {
+		if (!(gui instanceof AbstractContainerScreen<?> containerGui) || gui instanceof CreativeModeInventoryScreen || mc.player == null) {
 			return;
 		}
 		AbstractContainerMenu menu = containerGui.getMenu();
 		ItemStack held = menu.getCarried();
-		if (!held.isEmpty()) {
+		if (!held.isEmpty() && !(held.getItem() instanceof BackpackItem)) {
 			Slot under = containerGui.getSlotUnderMouse();
 			PoseStack poseStack = event.getMatrixStack();
 
 			for (Slot s : menu.slots) {
-				if (!s.mayPickup(mc.player)) {
+				ItemStack stack = s.getItem();
+				if (!s.mayPickup(mc.player) || stack.getCount() != 1) {
 					continue;
 				}
 
-				ItemStack stack = s.getItem();
 				stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 					if (s == under) {
 						int x = event.getMouseX();
@@ -127,13 +128,13 @@ public class ClientEventHandler {
 	private static void onRightClick(GuiScreenEvent.MouseReleasedEvent.Pre event) {
 		Minecraft mc = Minecraft.getInstance();
 		Screen screen = mc.screen;
-		if (screen instanceof AbstractContainerScreen<?> container && event.getButton() == 1) {
+		if (screen instanceof AbstractContainerScreen<?> container && !(screen instanceof CreativeModeInventoryScreen) && event.getButton() == 1) {
 			Slot under = container.getSlotUnderMouse();
 			ItemStack held = container.getMenu().getCarried();
 
 			if (under != null && !held.isEmpty() && mc.player != null && under.mayPickup(mc.player)) {
 				ItemStack stack = under.getItem();
-				if (stack.getItem() instanceof BackpackItem) {
+				if (stack.getItem() instanceof BackpackItem && stack.getCount() == 1) {
 					PacketHandler.sendToServer(new BackpackInsertMessage(under.index));
 					screen.mouseReleased(0, 0, -1);
 					event.setCanceled(true);
