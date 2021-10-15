@@ -141,7 +141,7 @@ public class StonecutterRecipeControl extends BackpackWidget {
 	private void renderTooltip(PoseStack poseStack, ItemStack itemStack, int mouseX, int mouseY) {
 		Font font = net.minecraftforge.client.RenderProperties.get(itemStack).getFont(itemStack);
 		net.minecraftforge.fmlclient.gui.GuiUtils.preItemToolTip(itemStack);
-		screen.renderComponentToolTip(poseStack, screen.getTooltipFromItem(itemStack), mouseX, mouseY, (font == null ? this.font : font));
+		screen.renderComponentTooltip(poseStack, screen.getTooltipFromItem(itemStack), mouseX, mouseY, (font == null ? this.font : font));
 		net.minecraftforge.fmlclient.gui.GuiUtils.postItemToolTip();
 	}
 

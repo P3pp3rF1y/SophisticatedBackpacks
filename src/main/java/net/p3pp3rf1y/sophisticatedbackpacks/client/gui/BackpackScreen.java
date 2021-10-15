@@ -368,7 +368,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 			if (hoveredSlot.hasItem()) {
 				renderTooltip(matrixStack, hoveredSlot.getItem(), x, y);
 			} else if (hoveredSlot instanceof INameableEmptySlot emptySlot && emptySlot.hasEmptyTooltip()) {
-				renderComponentToolTip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
+				renderComponentTooltip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
 			}
 		}
 		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
