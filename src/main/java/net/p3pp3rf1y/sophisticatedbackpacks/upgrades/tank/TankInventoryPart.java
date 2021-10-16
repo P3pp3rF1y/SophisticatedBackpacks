@@ -27,7 +27,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -100,9 +102,19 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 			if (!contents.isEmpty()) {
 				tooltip.add(contents.getDisplayName());
 			}
-			tooltip.add(new TranslationTextComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity)));
+			tooltip.add(getContentsTooltip(contents, capacity));
 			GuiHelper.setTooltipToRender(tooltip);
 		}
+	}
+
+	private TranslationTextComponent getContentsTooltip(FluidStack contents, int capacity) {
+		if (contents.getFluid().is(ModFluids.EXPERIENCE_TAG)) {
+			double contentsLevels = XpHelper.getLevelsForExperience(contents.getAmount());
+			double tankCapacityLevels = XpHelper.getLevelsForExperience(capacity);
+
+			return new TranslationTextComponent(TranslationHelper.translUpgradeKey("tank.xp_contents_tooltip"), String.format("%.1f", contentsLevels), String.format("%.1f", tankCapacityLevels));
+		}
+		return new TranslationTextComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity));
 	}
 
 	private void renderFluid(MatrixStack matrixStack, int mouseX, int mouseY) {

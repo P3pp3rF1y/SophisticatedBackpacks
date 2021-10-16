@@ -39,6 +39,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncPlayerSettingsMessage;
@@ -58,6 +59,7 @@ public class CommonProxy {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
+		ModFluids.registerHandlers(modBus);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(this::onItemPickup);
 		eventBus.addListener(this::onLivingSpecialSpawn);
