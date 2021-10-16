@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.Entity;
 
 public interface IMagnetPreventionChecker {
-	boolean isBlocked(ItemEntity itemEntity);
+	boolean isBlocked(Entity entity);
 }
