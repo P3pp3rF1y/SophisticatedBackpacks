@@ -1,20 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fluids.FluidStack;
@@ -30,7 +24,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,43 +125,8 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(contents);
 		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(texture);
-		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.getX() + 10, pos.getY() + 1 + height - 2 - displayLevel, displayLevel);
+		GuiHelper.renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.getX() + 10, pos.getY() + 1 + height - 2 - displayLevel, displayLevel, screen.getMinecraft());
 		renderTooltip(mouseX, mouseY, contents, capacity);
-	}
-
-	private void renderTiledFluidTextureAtlas(MatrixStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
-		screen.getMinecraft().getTextureManager().bind(sprite.atlas().location());
-		BufferBuilder builder = Tessellator.getInstance().getBuilder();
-		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
-
-		float u1 = sprite.getU0();
-		float v1 = sprite.getV0();
-		int spriteHeight = sprite.getHeight();
-		int spriteWidth = sprite.getWidth();
-		int startY = y;
-		float red = (color >> 16 & 255) / 255.0F;
-		float green = (color >> 8 & 255) / 255.0F;
-		float blue = (color & 255) / 255.0F;
-		do {
-			int renderHeight = Math.min(spriteHeight, height);
-			height -= renderHeight;
-			float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
-
-			// we need to draw the quads per width too
-			Matrix4f matrix = matrixStack.last().pose();
-			float u2 = sprite.getU((16f * 16) / spriteWidth);
-			builder.vertex(matrix, x, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u1, v2).endVertex();
-			builder.vertex(matrix, (float) x + 16, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u2, v2).endVertex();
-			builder.vertex(matrix, (float) x + 16, startY, 100).color(red, green, blue, 1).uv(u2, v1).endVertex();
-			builder.vertex(matrix, x, startY, 100).color(red, green, blue, 1).uv(u1, v1).endVertex();
-
-			startY += renderHeight;
-		} while (height > 0);
-
-		// finish drawing sprites
-		builder.end();
-		RenderSystem.enableAlphaTest();
-		WorldVertexBufferUploader.end(builder);
 	}
 
 }

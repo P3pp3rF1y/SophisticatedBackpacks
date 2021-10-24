@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("java:S1192") //don't complain about repeated config names if two upgrades happen to have the same setting
 public class Config {
 	private static final String SETTINGS = " Settings";
 
@@ -89,6 +90,7 @@ public class Config {
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
 		public final StackUpgradeConfig stackUpgrade;
+		public final PumpUpgradeConfig pumpUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -131,11 +133,26 @@ public class Config {
 			toolSwapperUpgrade = new ToolSwapperUpgradeConfig(builder);
 			tankUpgrade = new TankUpgradeConfig(builder);
 			batteryUpgrade = new BatteryUpgradeConfig(builder);
+			pumpUpgrade = new PumpUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 
 			builder.pop();
+		}
+
+		public static class PumpUpgradeConfig {
+			public final ForgeConfigSpec.IntValue maxInputOutput;
+			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
+			public final ForgeConfigSpec.IntValue filterSlots;
+
+			public PumpUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Pump Upgrade" + SETTINGS).push("pumpUpgrade");
+				filterSlots = builder.comment("Number of fluid filter slots").defineInRange("filterSlots", 4, 1, 20);
+				maxInputOutput = builder.comment("How much mB can be transfered in / out per operation. This is a base transfer rate that gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
+				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to max input/output value. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting input/output").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
+				builder.pop();
+			}
 		}
 
 		public static class EntityBackpackAdditionsConfig {
