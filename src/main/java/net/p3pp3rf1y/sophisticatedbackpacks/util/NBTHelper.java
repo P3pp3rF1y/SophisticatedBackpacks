@@ -32,7 +32,7 @@ public class NBTHelper {
 		return getTagValue(stack, "", key, getValue);
 	}
 
-	private static <T> Optional<T> getTagValue(ItemStack stack, String parentKey, String key, BiFunction<CompoundTag, String, T> getValue) {
+	public static <T> Optional<T> getTagValue(ItemStack stack, String parentKey, String key, BiFunction<CompoundTag, String, T> getValue) {
 		CompoundTag tag = stack.getTag();
 
 		if (tag == null) {

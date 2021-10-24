@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -225,15 +226,15 @@ public class GuiHelper {
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, 400, backgroundColor, backgroundColor);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, 400, backgroundColor, backgroundColor);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
-		fillGradient(matrix4f, bufferbuilder, leftX - 4, topY - 3, leftX - 3, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
-		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 3, topY - 3, leftX + tooltipWidth + 4, topY + tooltipHeight + 3, 400, backgroundColor, backgroundColor);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3 + 1, leftX - 3 + 1, topY + tooltipHeight + 3 - 1, 400, borderColorStart, borderColorEnd);
-		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 2, topY - 3 + 1, leftX + tooltipWidth + 3, topY + tooltipHeight + 3 - 1, 400, borderColorStart, borderColorEnd);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY - 3 + 1, 400, borderColorStart, borderColorStart);
-		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, 400, borderColorEnd, borderColorEnd);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 4, leftX + tooltipWidth + 3, topY - 3, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 4, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 4, topY - 3, leftX - 3, topY + tooltipHeight + 3, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 3, topY - 3, leftX + tooltipWidth + 4, topY + tooltipHeight + 3, backgroundColor, backgroundColor);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3 + 1, leftX - 3 + 1, topY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+		fillGradient(matrix4f, bufferbuilder, leftX + tooltipWidth + 2, topY - 3 + 1, leftX + tooltipWidth + 3, topY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY - 3, leftX + tooltipWidth + 3, topY - 3 + 1, borderColorStart, borderColorStart);
+		fillGradient(matrix4f, bufferbuilder, leftX - 3, topY + tooltipHeight + 2, leftX + tooltipWidth + 3, topY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
 		RenderSystem.enableDepthTest();
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
@@ -271,19 +272,19 @@ public class GuiHelper {
 		return topY;
 	}
 
-	private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int z, int colorA, int colorB) {
-		float f = (float) (colorA >> 24 & 255) / 255.0F;
-		float f1 = (float) (colorA >> 16 & 255) / 255.0F;
-		float f2 = (float) (colorA >> 8 & 255) / 255.0F;
-		float f3 = (float) (colorA & 255) / 255.0F;
-		float f4 = (float) (colorB >> 24 & 255) / 255.0F;
-		float f5 = (float) (colorB >> 16 & 255) / 255.0F;
-		float f6 = (float) (colorB >> 8 & 255) / 255.0F;
-		float f7 = (float) (colorB & 255) / 255.0F;
-		builder.vertex(matrix, (float) x2, (float) y1, (float) z).color(f1, f2, f3, f).endVertex();
-		builder.vertex(matrix, (float) x1, (float) y1, (float) z).color(f1, f2, f3, f).endVertex();
-		builder.vertex(matrix, (float) x1, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
-		builder.vertex(matrix, (float) x2, (float) y2, (float) z).color(f5, f6, f7, f4).endVertex();
+	private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int colorA, int colorB) {
+		float f = (colorA >> 24 & 255) / 255.0F;
+		float f1 = (colorA >> 16 & 255) / 255.0F;
+		float f2 = (colorA >> 8 & 255) / 255.0F;
+		float f3 = (colorA & 255) / 255.0F;
+		float f4 = (colorB >> 24 & 255) / 255.0F;
+		float f5 = (colorB >> 16 & 255) / 255.0F;
+		float f6 = (colorB >> 8 & 255) / 255.0F;
+		float f7 = (colorB & 255) / 255.0F;
+		builder.vertex(matrix, x2, y1, 400).color(f1, f2, f3, f).endVertex();
+		builder.vertex(matrix, x1, y1, 400).color(f1, f2, f3, f).endVertex();
+		builder.vertex(matrix, x1, y2, 400).color(f5, f6, f7, f4).endVertex();
+		builder.vertex(matrix, x2, y2, 400).color(f5, f6, f7, f4).endVertex();
 	}
 
 	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, Position offset, Component... tooltip) {
@@ -309,6 +310,41 @@ public class GuiHelper {
 		if (extraRowSlots > 0) {
 			renderSlotsBackground(minecraft, matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
 		}
+	}
+
+	public static void renderTiledFluidTextureAtlas(PoseStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShaderTexture(0, sprite.atlas().location());
+		BufferBuilder builder = Tesselator.getInstance().getBuilder();
+		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+
+		float u1 = sprite.getU0();
+		float v1 = sprite.getV0();
+		int spriteHeight = sprite.getHeight();
+		int spriteWidth = sprite.getWidth();
+		int startY = y;
+		float red = (color >> 16 & 255) / 255.0F;
+		float green = (color >> 8 & 255) / 255.0F;
+		float blue = (color & 255) / 255.0F;
+		do {
+			int renderHeight = Math.min(spriteHeight, height);
+			height -= renderHeight;
+			float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
+
+			// we need to draw the quads per width too
+			Matrix4f matrix = matrixStack.last().pose();
+			float u2 = sprite.getU((16f * 16) / spriteWidth);
+			builder.vertex(matrix, x, (float) startY + renderHeight, 100).uv(u1, v2).color(red, green, blue, 1).endVertex();
+			builder.vertex(matrix, (float) x + 16, (float) startY + renderHeight, 100).uv(u2, v2).color(red, green, blue, 1).endVertex();
+			builder.vertex(matrix, (float) x + 16, startY, 100).uv(u2, v1).color(red, green, blue, 1).endVertex();
+			builder.vertex(matrix, x, startY, 100).uv(u1, v1).color(red, green, blue, 1).endVertex();
+
+			startY += renderHeight;
+		} while (height > 0);
+
+		// finish drawing sprites
+		builder.end();
+		BufferUploader.end(builder);
 	}
 
 	public interface ITooltipRenderPart {
