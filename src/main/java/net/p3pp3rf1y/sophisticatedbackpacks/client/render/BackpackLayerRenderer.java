@@ -34,12 +34,14 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 		entityTranslations.put(EntityType.ENDERMAN, new Vec3(0, -0.8, 0));
 	}
 
-	private final BackpackModel model;
+	private static BackpackModel model;
 
 	public BackpackLayerRenderer(RenderLayerParent<T, M> entityRendererIn) {
 		super(entityRendererIn);
-		EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
-		model = new BackpackModel(entityModels.bakeLayer(BACKPACK_LAYER));
+		if (model == null) {
+			EntityModelSet entityModels = Minecraft.getInstance().getEntityModels();
+			model = new BackpackModel(entityModels.bakeLayer(BACKPACK_LAYER));
+		}
 	}
 
 	@Override
