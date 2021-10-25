@@ -7,6 +7,6 @@ import vazkii.botania.api.BotaniaAPI;
 public class BotaniaCompat implements ICompat {
 	@Override
 	public void setup() {
-		MagnetUpgradeWrapper.addMagnetPreventionChecker(itemEntity -> BotaniaAPI.instance().hasSolegnoliaAround(itemEntity));
+		MagnetUpgradeWrapper.addMagnetPreventionChecker(entity -> BotaniaAPI.instance().hasSolegnoliaAround(entity));
 	}
 }

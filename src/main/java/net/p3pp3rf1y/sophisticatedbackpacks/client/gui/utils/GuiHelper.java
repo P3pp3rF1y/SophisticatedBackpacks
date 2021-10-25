@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -25,6 +26,7 @@ import net.minecraftforge.fml.client.gui.GuiUtils;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -306,6 +308,41 @@ public class GuiHelper {
 		if (extraRowSlots > 0) {
 			renderSlotsBackground(minecraft, matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
 		}
+	}
+
+	public static void renderTiledFluidTextureAtlas(MatrixStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height, Minecraft minecraft) {
+		minecraft.getTextureManager().bind(sprite.atlas().location());
+		BufferBuilder builder = Tessellator.getInstance().getBuilder();
+		builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+
+		float u1 = sprite.getU0();
+		float v1 = sprite.getV0();
+		int spriteHeight = sprite.getHeight();
+		int spriteWidth = sprite.getWidth();
+		int startY = y;
+		float red = (color >> 16 & 255) / 255.0F;
+		float green = (color >> 8 & 255) / 255.0F;
+		float blue = (color & 255) / 255.0F;
+		do {
+			int renderHeight = Math.min(spriteHeight, height);
+			height -= renderHeight;
+			float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
+
+			// we need to draw the quads per width too
+			Matrix4f matrix = matrixStack.last().pose();
+			float u2 = sprite.getU((16f * 16) / spriteWidth);
+			builder.vertex(matrix, x, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u1, v2).endVertex();
+			builder.vertex(matrix, (float) x + 16, (float) startY + renderHeight, 100).color(red, green, blue, 1).uv(u2, v2).endVertex();
+			builder.vertex(matrix, (float) x + 16, startY, 100).color(red, green, blue, 1).uv(u2, v1).endVertex();
+			builder.vertex(matrix, x, startY, 100).color(red, green, blue, 1).uv(u1, v1).endVertex();
+
+			startY += renderHeight;
+		} while (height > 0);
+
+		// finish drawing sprites
+		builder.end();
+		RenderSystem.enableAlphaTest();
+		WorldVertexBufferUploader.end(builder);
 	}
 
 	public interface ITooltipRenderPart {

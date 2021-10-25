@@ -1,10 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.CreativeScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -13,8 +16,10 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -39,6 +44,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -51,6 +57,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackInsertMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
@@ -65,6 +72,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
@@ -218,11 +226,13 @@ public class ClientProxy extends CommonProxy {
 		modBus.addListener(this::stitchTextures);
 		modBus.addListener(this::onModelRegistry);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addListener(ClientProxy::onDrawScreen);
+		eventBus.addListener(ClientProxy::onRightClick);
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiMouseKeyPress);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiKeyPress);
 		eventBus.addListener(ClientProxy::onPlayerJoinServer);
-		eventBus.addListener(BackpackTooltipRenderer::renderBackpackTooltip);
+		eventBus.addListener(BackpackTooltipRenderer::handleBackpackTooltipRender);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 		eventBus.addListener(BackpackSoundHandler::tick);
 		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
@@ -234,6 +244,70 @@ public class ClientProxy extends CommonProxy {
 			ModBlockColors.init();
 			registerBackpackLayer();
 		});
+	}
+
+	private static void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+		Minecraft mc = Minecraft.getInstance();
+		Screen gui = mc.screen;
+		if (!(gui instanceof ContainerScreen<?>) || gui instanceof CreativeScreen || mc.player == null) {
+			return;
+		}
+
+		ContainerScreen<?> containerGui = (ContainerScreen<?>) gui;
+		Container menu = containerGui.getMenu();
+		ClientPlayerEntity player = mc.player;
+		ItemStack held = player.inventory.getCarried();
+		if (!held.isEmpty() && !(held.getItem() instanceof BackpackItem)) {
+			Slot under = containerGui.getSlotUnderMouse();
+			MatrixStack poseStack = event.getMatrixStack();
+
+			for (Slot s : menu.slots) {
+				ItemStack stack = s.getItem();
+				if (!s.mayPickup(player) || stack.getCount() != 1) {
+					continue;
+				}
+
+				stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+					if (s == under) {
+						int x = event.getMouseX();
+						int y = event.getMouseY();
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 100);
+						BackpackTooltipRenderer.renderTooltipWithContents(stack, mc, poseStack, x, y, mc.font, Collections.singletonList(new TranslationTextComponent("gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack")));
+						poseStack.popPose();
+					} else {
+						int x = containerGui.getGuiLeft() + s.x;
+						int y = containerGui.getGuiTop() + s.y;
+
+						poseStack.pushPose();
+						poseStack.translate(0, 0, 499);
+
+						mc.font.drawShadow(poseStack, "+", (float) x + 10, (float) y + 8, 0xFFFF00);
+						poseStack.popPose();
+					}
+				});
+			}
+
+		}
+	}
+
+	private static void onRightClick(GuiScreenEvent.MouseReleasedEvent.Pre event) {
+		Minecraft mc = Minecraft.getInstance();
+		Screen screen = mc.screen;
+		if (screen instanceof ContainerScreen<?> && !(screen instanceof CreativeScreen) && event.getButton() == 1 && mc.player != null) {
+			ContainerScreen<?> container = (ContainerScreen<?>) screen;
+			Slot under = container.getSlotUnderMouse();
+			ItemStack held = mc.player.inventory.getCarried();
+
+			if (under != null && !held.isEmpty() && under.mayPickup(mc.player)) {
+				ItemStack stack = under.getItem();
+				if (stack.getItem() instanceof BackpackItem && stack.getCount() == 1) {
+					PacketHandler.sendToServer(new BackpackInsertMessage(under.index));
+					screen.mouseReleased(0, 0, -1);
+					event.setCanceled(true);
+				}
+			}
+		}
 	}
 
 	private void onModelRegistry(ModelRegistryEvent event) {

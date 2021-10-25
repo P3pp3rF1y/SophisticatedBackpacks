@@ -1,20 +1,28 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.magnet;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -56,10 +64,61 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			return;
 		}
 
+		int cooldown = shouldPickupItems() ? pickupItems(entity, world, pos) : FULL_COOLDOWN_TICKS;
+
+		if (shouldPickupXp() && canFillBackpackWithXp()) {
+			cooldown = Math.min(cooldown, pickupXpOrbs(entity, world, pos));
+		}
+
+		setCooldown(world, cooldown);
+	}
+
+	private boolean canFillBackpackWithXp() {
+		return backpackWrapper.getFluidHandler().map(fluidHandler -> fluidHandler.fill(new FluidStack(ModFluids.XP_STILL.get(), 1), IFluidHandler.FluidAction.SIMULATE) > 0).orElse(false);
+	}
+
+	private int pickupXpOrbs(@Nullable LivingEntity entity, World world, BlockPos pos) {
+		List<ExperienceOrbEntity> xpEntities = world.getEntities(EntityType.EXPERIENCE_ORB, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
+		if (xpEntities.isEmpty()) {
+			return COOLDOWN_TICKS;
+		}
+
+		int cooldown = FULL_COOLDOWN_TICKS;
+		for (ExperienceOrbEntity xpOrb : xpEntities) {
+			if (xpOrb.isAlive() && !canNotPickup(xpOrb, entity)) {
+				if (tryToFillTank(xpOrb, world)) {
+					cooldown = COOLDOWN_TICKS;
+				} else {
+					break;
+				}
+			}
+		}
+		return cooldown;
+	}
+
+	private boolean tryToFillTank(ExperienceOrbEntity xpOrb, World world) {
+		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.value);
+
+		return backpackWrapper.getFluidHandler().map(fluidHandler -> {
+			int amountAdded = fluidHandler.fill(new FluidStack(ModFluids.XP_STILL.get(), amountToTransfer), IFluidHandler.FluidAction.EXECUTE);
+
+			if (amountAdded > 0) {
+				Vector3d pos = xpOrb.position();
+				xpOrb.remove();
+
+				if (amountToTransfer > amountAdded) {
+					world.addFreshEntity(new ExperienceOrbEntity(world, pos.x(), pos.y(), pos.z(), XpHelper.liquidToExperience(amountToTransfer - amountAdded)));
+				}
+				return true;
+			}
+			return false;
+		}).orElse(false);
+	}
+
+	private int pickupItems(@Nullable LivingEntity entity, World world, BlockPos pos) {
 		List<ItemEntity> itemEntities = world.getEntities(EntityType.ITEM, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
 		if (itemEntities.isEmpty()) {
-			setCooldown(world, COOLDOWN_TICKS);
-			return;
+			return COOLDOWN_TICKS;
 		}
 
 		int cooldown = FULL_COOLDOWN_TICKS;
@@ -77,24 +136,24 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 				cooldown = COOLDOWN_TICKS;
 			}
 		}
-		setCooldown(world, cooldown);
+		return cooldown;
 	}
 
-	private boolean isBlockedBySomething(ItemEntity itemEntity) {
+	private boolean isBlockedBySomething(Entity entity) {
 		for (IMagnetPreventionChecker checker : magnetCheckers) {
-			if (checker.isBlocked(itemEntity)) {
+			if (checker.isBlocked(entity)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean canNotPickup(ItemEntity itemEntity, @Nullable LivingEntity player) {
-		if (isBlockedBySomething(itemEntity)) {
+	private boolean canNotPickup(Entity entity, @Nullable LivingEntity player) {
+		if (isBlockedBySomething(entity)) {
 			return true;
 		}
 
-		CompoundNBT data = itemEntity.getPersistentData();
+		CompoundNBT data = entity.getPersistentData();
 		return player != null ? data.contains(PREVENT_REMOTE_MOVEMENT) : data.contains(PREVENT_REMOTE_MOVEMENT) && !data.contains(ALLOW_MACHINE_MOVEMENT);
 	}
 
@@ -109,5 +168,23 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;
+	}
+
+	public void setPickupItems(boolean pickupItems) {
+		NBTHelper.setBoolean(upgrade, "pickupItems", pickupItems);
+		save();
+	}
+
+	public boolean shouldPickupItems() {
+		return NBTHelper.getBoolean(upgrade, "pickupItems").orElse(true);
+	}
+
+	public void setPickupXp(boolean pickupXp) {
+		NBTHelper.setBoolean(upgrade, "pickupXp", pickupXp);
+		save();
+	}
+
+	public boolean shouldPickupXp() {
+		return NBTHelper.getBoolean(upgrade, "pickupXp").orElse(true);
 	}
 }
