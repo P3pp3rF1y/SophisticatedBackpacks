@@ -11,7 +11,9 @@
             "conditions": {
                 "items": [
                     {
-                        "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+                        "items": [
+                            "sophisticatedbackpacks:advanced_pickup_upgrade"
+                        ]
                     }
                 ]
             }
