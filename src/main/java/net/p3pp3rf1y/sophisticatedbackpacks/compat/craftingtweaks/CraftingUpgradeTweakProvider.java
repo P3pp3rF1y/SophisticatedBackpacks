@@ -1,14 +1,12 @@
-/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import net.blay09.mods.craftingtweaks.api.CraftingTweaksAPI;
-import net.blay09.mods.craftingtweaks.api.DefaultProviderV2;
-import net.blay09.mods.craftingtweaks.api.RotationHandler;
-import net.blay09.mods.craftingtweaks.api.TweakProvider;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.blay09.mods.craftingtweaks.api.CraftingGrid;
+import net.blay09.mods.craftingtweaks.api.CraftingGridBuilder;
+import net.blay09.mods.craftingtweaks.api.CraftingGridProvider;
+import net.blay09.mods.craftingtweaks.api.GridTransferHandler;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -16,75 +14,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackContainer> {
-	private static final RotationHandler ROTATION_HANDLER = new RotationHandler() {
-		public boolean ignoreSlotId(int slotId) {
-			return slotId == 4;
-		}
-
-		public int rotateSlotId(int slotId, boolean counterClockwise) {
-			if (!counterClockwise) {
-				switch (slotId) {
-					case 0:
-						return 1;
-					case 1:
-						return 2;
-					case 2:
-						return 5;
-					case 3:
-						return 0;
-					case 5:
-						return 8;
-					case 6:
-						return 3;
-					case 7:
-						return 6;
-					case 8:
-						return 7;
-					case 4:
-					default:
-						break;
-				}
-			} else {
-				switch (slotId) {
-					case 0:
-						return 3;
-					case 1:
-						return 0;
-					case 2:
-						return 1;
-					case 3:
-						return 6;
-					case 5:
-						return 2;
-					case 6:
-						return 7;
-					case 7:
-						return 8;
-					case 8:
-						return 5;
-					case 4:
-					default:
-						break;
-				}
-			}
-			return 0;
-		}
-	};
-
-	private final DefaultProviderV2 defaultProvider = CraftingTweaksAPI.createDefaultProviderV2();
+@SuppressWarnings("java:S3776") //keeping this as close as possible to default implementation in crafting tweaks hence higher complexity but easier porting
+public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 
 	@Override
 	public String getModId() {
@@ -92,236 +31,131 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 	}
 
 	@Override
-	public boolean load() {
-		return true;
+	public boolean handles(AbstractContainerMenu abstractContainerMenu) {
+		return abstractContainerMenu instanceof BackpackContainer;
 	}
 
 	@Override
-	public void clearGrid(Player entityPlayer, BackpackContainer container, int id, boolean forced) {
-		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
-		if (craftMatrix != null) {
-			int start = getCraftingGridStart(entityPlayer, container, id);
-			int size = getCraftingGridSize(entityPlayer, container, id);
+	public void buildCraftingGrids(CraftingGridBuilder builder, AbstractContainerMenu containerMenu) {
+		if (!(containerMenu instanceof BackpackContainer backpackContainer)) {
+			return;
+		}
+		builder.addGrid(getCraftingGridStart(backpackContainer), getCraftingGridSize(backpackContainer))
+				.clearHandler((craftingGrid, player, menu, forced) -> clearGrid(player, menu, forced))
+				.rotateHandler((craftingGrid, player, menu, reverse) -> rotateGrid(menu, reverse))
+				.balanceHandler(new BackpackCraftingGridBalanceHandler())
+				.transferHandler(new BackpackCraftingGridTransferHandler())
+				.hideAllTweakButtons();
+	}
 
-			for (int slotNumber = start; slotNumber < start + size; ++slotNumber) {
-				Slot slot = container.getSlot(slotNumber);
-				int slotIndex = slot.getSlotIndex();
-				container.quickMoveStack(entityPlayer, slotNumber);
-				if (slot.hasItem() && forced) {
-					entityPlayer.drop(slot.getItem(), false);
-					craftMatrix.setItem(slotIndex, ItemStack.EMPTY);
+	public void clearGrid(Player player, AbstractContainerMenu menu, boolean forced) {
+		if (!(menu instanceof BackpackContainer backpackContainer)) {
+			return;
+		}
+
+		getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+			int start = getCraftingGridStart(backpackContainer);
+			int size = getCraftingGridSize(backpackContainer);
+
+			for (int i = start; i < start + size; ++i) {
+				int slotIndex = (backpackContainer.getSlot(i)).getContainerSlot();
+				ItemStack itemStack = craftMatrix.getItem(slotIndex);
+				if (!itemStack.isEmpty()) {
+					ItemStack returnStack = itemStack.copy();
+					player.getInventory().add(returnStack);
+					craftMatrix.setItem(slotIndex, returnStack.getCount() == 0 ? ItemStack.EMPTY : returnStack);
+					if (returnStack.getCount() > 0 && forced) {
+						player.drop(returnStack, false);
+						craftMatrix.setItem(slotIndex, ItemStack.EMPTY);
+					}
 				}
 			}
-			container.sendSlotUpdates();
-		}
+
+			backpackContainer.broadcastChanges();
+		});
 	}
 
-	@Override
-	public void rotateGrid(Player entityPlayer, BackpackContainer container, int id, boolean counterClockwise) {
-		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
-		if (craftMatrix != null) {
-			int start = getCraftingGridStart(entityPlayer, container, id);
-			int size = getCraftingGridSize(entityPlayer, container, id);
+	private int rotateSlotId(int slotId, boolean counterClockwise) {
+		if (!counterClockwise) {
+			switch (slotId) {
+				case 0:
+					return 1;
+				case 1:
+					return 2;
+				case 2:
+					return 5;
+				case 3:
+					return 0;
+				case 5:
+					return 8;
+				case 6:
+					return 3;
+				case 7:
+					return 6;
+				case 8:
+					return 7;
+				default:
+					break;
+			}
+		} else {
+			switch (slotId) {
+				case 0:
+					return 3;
+				case 1:
+					return 0;
+				case 2:
+					return 1;
+				case 3:
+					return 6;
+				case 5:
+					return 2;
+				case 6:
+					return 7;
+				case 7:
+					return 8;
+				case 8:
+					return 5;
+				default:
+					break;
+			}
+		}
+
+		return 0;
+	}
+
+	private boolean ignoresSlotId(int slotId) {
+		return slotId == 4;
+	}
+
+	private void rotateGrid(AbstractContainerMenu containerMenu, boolean counterClockwise) {
+		if (!(containerMenu instanceof BackpackContainer backpackContainer)) {
+			return;
+		}
+		getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+			int start = getCraftingGridStart(backpackContainer);
+			int size = getCraftingGridSize(backpackContainer);
 			Container matrixClone = new SimpleContainer(size);
 
 			int i;
 			int slotIndex;
 			for (i = 0; i < size; ++i) {
-				slotIndex = container.getSlot(start + i).getSlotIndex();
+				slotIndex = backpackContainer.getSlot(start + i).getContainerSlot();
 				matrixClone.setItem(i, craftMatrix.getItem(slotIndex));
 			}
 
 			for (i = 0; i < size; ++i) {
-				if (!ROTATION_HANDLER.ignoreSlotId(i)) {
-					slotIndex = container.getSlot(start + ROTATION_HANDLER.rotateSlotId(i, counterClockwise)).getSlotIndex();
+				if (!ignoresSlotId(i)) {
+					slotIndex = containerMenu.getSlot(start + rotateSlotId(i, counterClockwise)).getContainerSlot();
 					craftMatrix.setItem(slotIndex, matrixClone.getItem(i));
 				}
 			}
 
-			container.sendSlotUpdates();
-		}
+			backpackContainer.broadcastChanges();
+		});
 	}
 
-	@Override
-	public void balanceGrid(Player entityPlayer, BackpackContainer container, int id) {
-		ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
-		Multiset<String> itemCount = HashMultiset.create();
-		int start = getCraftingGridStart(entityPlayer, container, id);
-		int size = getCraftingGridSize(entityPlayer, container, id);
-		for (int i = start; i < start + size; i++) {
-			ItemStack itemStack = container.getSlot(i).getItem();
-			if (!itemStack.isEmpty() && itemStack.getMaxStackSize() > 1) {
-				ResourceLocation registryName = itemStack.getItem().getRegistryName();
-				String key = Objects.toString(registryName);
-				itemMap.put(key, itemStack);
-				itemCount.add(key, itemStack.getCount());
-			}
-		}
-
-		for (String key : itemMap.keySet()) {
-			List<ItemStack> balanceList = itemMap.get(key);
-			int totalCount = itemCount.count(key);
-			int countPerStack = totalCount / balanceList.size();
-			int restCount = totalCount % balanceList.size();
-			for (ItemStack itemStack : balanceList) {
-				itemStack.setCount(countPerStack);
-			}
-
-			int idx = 0;
-			while (restCount > 0) {
-				ItemStack itemStack = balanceList.get(idx);
-				if (itemStack.getCount() < itemStack.getMaxStackSize()) {
-					itemStack.grow(1);
-					restCount--;
-				}
-				idx++;
-				if (idx >= balanceList.size()) {
-					idx = 0;
-				}
-			}
-		}
-
-		container.sendSlotUpdates();
-	}
-
-	@Override
-	public void spreadGrid(Player entityPlayer, BackpackContainer container, int id) {
-		while (true) {
-			ItemStack biggestSlotStack = null;
-			int biggestSlotSize = 1;
-			int start = getCraftingGridStart(entityPlayer, container, id);
-			int size = getCraftingGridSize(entityPlayer, container, id);
-			for (int i = start; i < start + size; i++) {
-				ItemStack itemStack = container.getSlot(i).getItem();
-				if (!itemStack.isEmpty() && itemStack.getCount() > biggestSlotSize) {
-					biggestSlotStack = itemStack;
-					biggestSlotSize = itemStack.getCount();
-				}
-			}
-
-			if (biggestSlotStack == null) {
-				return;
-			}
-
-			boolean emptyBiggestSlot = false;
-			for (int i = start; i < start + size; i++) {
-				Slot slot = container.getSlot(i);
-				ItemStack itemStack = slot.getItem();
-				if (itemStack.isEmpty()) {
-					if (biggestSlotStack.getCount() > 1) {
-						slot.set(biggestSlotStack.split(1));
-					} else {
-						emptyBiggestSlot = true;
-					}
-				}
-			}
-
-			if (!emptyBiggestSlot) {
-				break;
-			}
-		}
-		balanceGrid(this, id, entityPlayer, container);
-	}
-
-	private <T extends BackpackContainer> void balanceGrid(TweakProvider<T> provider, int id, Player entityPlayer, T container) {
-		ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
-		Multiset<String> itemCount = HashMultiset.create();
-		int start = provider.getCraftingGridStart(entityPlayer, container, id);
-		int size = provider.getCraftingGridSize(entityPlayer, container, id);
-		for (int slotNumber = start; slotNumber < start + size; slotNumber++) {
-			ItemStack itemStack = container.getSlot(slotNumber).getItem();
-			if (!itemStack.isEmpty() && itemStack.getMaxStackSize() > 1) {
-				ResourceLocation registryName = itemStack.getItem().getRegistryName();
-				String key = Objects.toString(registryName);
-				itemMap.put(key, itemStack);
-				itemCount.add(key, itemStack.getCount());
-			}
-		}
-
-		for (String key : itemMap.keySet()) {
-			List<ItemStack> balanceList = itemMap.get(key);
-			int totalCount = itemCount.count(key);
-			int countPerStack = totalCount / balanceList.size();
-			int restCount = totalCount % balanceList.size();
-			for (ItemStack itemStack : balanceList) {
-				itemStack.setCount(countPerStack);
-			}
-
-			int idx = 0;
-			while (restCount > 0) {
-				ItemStack itemStack = balanceList.get(idx);
-				if (itemStack.getCount() < itemStack.getMaxStackSize()) {
-					itemStack.grow(1);
-					restCount--;
-				}
-				idx++;
-				if (idx >= balanceList.size()) {
-					idx = 0;
-				}
-			}
-		}
-
-		container.sendSlotUpdates();
-	}
-
-	@Override
-	public boolean canTransferFrom(Player entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
-		return sourceSlot.mayPickup(entityPlayer) && sourceSlot.index < container.realInventorySlots.size();
-	}
-
-	@Override
-	public boolean transferIntoGrid(Player entityPlayer, BackpackContainer container, int id, Slot sourceSlot) {
-		Container craftMatrix = getCraftMatrix(entityPlayer, container, id);
-		if (craftMatrix == null) {
-			return false;
-		}
-
-		int start = getCraftingGridStart(entityPlayer, container, id);
-		int size = getCraftingGridSize(entityPlayer, container, id);
-		ItemStack itemStack = sourceSlot.getItem();
-		if (itemStack.isEmpty()) {
-			return false;
-		}
-
-		int firstEmptySlot = -1;
-		for (int i = start; i < start + size; i++) {
-			int slotIndex = container.getSlot(i).getSlotIndex();
-			ItemStack craftStack = craftMatrix.getItem(slotIndex);
-			if (!craftStack.isEmpty()) {
-				if (craftStack.sameItem(itemStack) && ItemStack.tagMatches(craftStack, itemStack)) {
-					int spaceLeft = Math.min(craftMatrix.getMaxStackSize(), craftStack.getMaxStackSize()) - craftStack.getCount();
-					if (spaceLeft > 0) {
-						ItemStack splitStack = itemStack.split(Math.min(spaceLeft, itemStack.getCount()));
-						craftStack.grow(splitStack.getCount());
-						if (itemStack.getCount() <= 0) {
-							return true;
-						}
-					}
-				}
-			} else if (firstEmptySlot == -1) {
-				firstEmptySlot = slotIndex;
-			}
-		}
-
-		if (itemStack.getCount() > 0 && firstEmptySlot != -1) {
-			ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getMaxStackSize()));
-			craftMatrix.setItem(firstEmptySlot, transferStack);
-			container.sendSlotUpdates();
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
-	public ItemStack putIntoGrid(Player entityPlayer, BackpackContainer container, int id, ItemStack itemStack, int index) {
-		return defaultProvider.putIntoGrid(this, id, entityPlayer, container, itemStack, index);
-	}
-
-	@Override
-	@Nullable
-	public Container getCraftMatrix(Player entityPlayer, BackpackContainer container, int id) {
-		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix).orElse(null);
+	private static Optional<Container> getCraftMatrix(BackpackContainer container) {
+		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix);
 	}
 
 	@Override
@@ -329,12 +163,11 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		return true;
 	}
 
-	private Optional<ICraftingContainer> getOpenCraftingContainer(BackpackContainer container) {
-		return container.getOpenContainer().flatMap(c -> (c instanceof ICraftingContainer) ? Optional.of((ICraftingContainer) c) : Optional.empty());
+	private static Optional<ICraftingContainer> getOpenCraftingContainer(BackpackContainer container) {
+		return container.getOpenContainer().flatMap(c -> (c instanceof ICraftingContainer craftingContainer) ? Optional.of(craftingContainer) : Optional.empty());
 	}
 
-	@Override
-	public int getCraftingGridStart(Player entityPlayer, BackpackContainer container, int id) {
+	private static int getCraftingGridStart(BackpackContainer container) {
 		return getOpenCraftingContainer(container).map(cc -> {
 			List<Slot> recipeSlots = cc.getRecipeSlots();
 			if (!recipeSlots.isEmpty()) {
@@ -344,20 +177,184 @@ public class CraftingUpgradeTweakProvider implements TweakProvider<BackpackConta
 		}).orElse(0);
 	}
 
-	@Override
-	public int getCraftingGridSize(Player entityPlayer, BackpackContainer container, int id) {
+	private static int getCraftingGridSize(BackpackContainer container) {
 		return getOpenCraftingContainer(container).isPresent() ? 9 : 0;
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public void initGui(AbstractContainerScreen<BackpackContainer> guiContainer, GuiScreenEvent.InitGuiEvent event) {
-		//noop - needs to add buttons earlier than in the event so that upgrade tab can display the buttons on screen open
+	private static class BackpackCraftingGridBalanceHandler implements net.blay09.mods.craftingtweaks.api.GridBalanceHandler<AbstractContainerMenu> {
+		@Override
+		public void balanceGrid(CraftingGrid grid, Player player, AbstractContainerMenu menu) {
+			if (!(menu instanceof BackpackContainer backpackContainer)) {
+				return;
+			}
+			getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+				ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
+				Multiset<String> itemCount = HashMultiset.create();
+				int start = getCraftingGridStart(backpackContainer);
+				int size = getCraftingGridSize(backpackContainer);
+				for (int i = start; i < start + size; i++) {
+					int slotIndex = menu.getSlot(i).getContainerSlot();
+					ItemStack itemStack = craftMatrix.getItem(slotIndex);
+					if (!itemStack.isEmpty() && itemStack.getMaxStackSize() > 1) {
+						ResourceLocation registryName = itemStack.getItem().getRegistryName();
+						String key = Objects.toString(registryName);
+						itemMap.put(key, itemStack);
+						itemCount.add(key, itemStack.getCount());
+					}
+				}
+
+				for (String key : itemMap.keySet()) {
+					List<ItemStack> balanceList = itemMap.get(key);
+					int totalCount = itemCount.count(key);
+					int countPerStack = totalCount / balanceList.size();
+					int restCount = totalCount % balanceList.size();
+					for (ItemStack itemStack : balanceList) {
+						itemStack.setCount(countPerStack);
+					}
+
+					int idx = 0;
+					while (restCount > 0) {
+						ItemStack itemStack = balanceList.get(idx);
+						if (itemStack.getCount() < itemStack.getMaxStackSize()) {
+							itemStack.grow(1);
+							restCount--;
+						}
+						idx++;
+						if (idx >= balanceList.size()) {
+							idx = 0;
+						}
+					}
+				}
+
+				menu.broadcastChanges();
+			});
+		}
+
+		@Override
+		public void spreadGrid(CraftingGrid grid, Player player, AbstractContainerMenu menu) {
+			if (!(menu instanceof BackpackContainer backpackContainer)) {
+				return;
+			}
+			getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+				while (true) {
+					ItemStack biggestSlotStack = null;
+					int biggestSlotSize = 1;
+					int start = getCraftingGridStart(backpackContainer);
+					int size = getCraftingGridSize(backpackContainer);
+					for (int i = start; i < start + size; i++) {
+						int slotIndex = menu.getSlot(i).getContainerSlot();
+						ItemStack itemStack = craftMatrix.getItem(slotIndex);
+						if (!itemStack.isEmpty() && itemStack.getCount() > biggestSlotSize) {
+							biggestSlotStack = itemStack;
+							biggestSlotSize = itemStack.getCount();
+						}
+					}
+
+					if (biggestSlotStack == null) {
+						return;
+					}
+
+					boolean emptyBiggestSlot = false;
+					for (int i = start; i < start + size; i++) {
+						int slotIndex = menu.getSlot(i).getContainerSlot();
+						ItemStack itemStack = craftMatrix.getItem(slotIndex);
+						if (itemStack.isEmpty()) {
+							if (biggestSlotStack.getCount() > 1) {
+								craftMatrix.setItem(slotIndex, biggestSlotStack.split(1));
+							} else {
+								emptyBiggestSlot = true;
+							}
+						}
+					}
+
+					if (!emptyBiggestSlot) {
+						break;
+					}
+				}
+
+				balanceGrid(grid, player, menu);
+			});
+		}
 	}
 
-	@Override
-	public boolean isValidContainer(AbstractContainerMenu container) {
-		return container instanceof BackpackContainer;
+	private static class BackpackCraftingGridTransferHandler implements GridTransferHandler<AbstractContainerMenu> {
+		@Override
+		public ItemStack putIntoGrid(CraftingGrid craftingGrid, Player player, AbstractContainerMenu menu, int slotId, ItemStack itemStack) {
+			if (!(menu instanceof BackpackContainer backpackContainer)) {
+				return itemStack;
+			}
+			return getCraftMatrix(backpackContainer).map(craftMatrix -> {
+				ItemStack craftStack = craftMatrix.getItem(slotId);
+				if (!craftStack.isEmpty()) {
+					if (craftStack.sameItem(itemStack) && ItemStack.tagMatches(craftStack, itemStack)) {
+						int spaceLeft = Math.min(craftMatrix.getMaxStackSize(), craftStack.getMaxStackSize()) - craftStack.getCount();
+						if (spaceLeft > 0) {
+							ItemStack splitStack = itemStack.split(Math.min(spaceLeft, itemStack.getCount()));
+							craftStack.grow(splitStack.getCount());
+							if (itemStack.getCount() <= 0) {
+								return ItemStack.EMPTY;
+							}
+						}
+					}
+				} else {
+					ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getMaxStackSize()));
+					craftMatrix.setItem(slotId, transferStack);
+				}
+
+				return itemStack.getCount() <= 0 ? ItemStack.EMPTY : itemStack;
+			}).orElse(itemStack);
+		}
+
+		@Override
+		public boolean transferIntoGrid(CraftingGrid craftingGrid, Player player, AbstractContainerMenu menu, Slot fromSlot) {
+			if (!(menu instanceof BackpackContainer backpackContainer)) {
+				return false;
+			}
+			return getCraftMatrix(backpackContainer).map(craftMatrix -> {
+				int start = getCraftingGridStart(backpackContainer);
+				int size = getCraftingGridSize(backpackContainer);
+				ItemStack itemStack = fromSlot.getItem();
+				if (itemStack.isEmpty()) {
+					return false;
+				} else {
+					int firstEmptySlot = -1;
+
+					for (int i = start; i < start + size; ++i) {
+						int slotIndex = menu.getSlot(i).getContainerSlot();
+						ItemStack craftStack = craftMatrix.getItem(slotIndex);
+						if (!craftStack.isEmpty()) {
+							if (craftStack.sameItem(itemStack) && ItemStack.tagMatches(craftStack, itemStack)) {
+								int spaceLeft = Math.min(craftMatrix.getMaxStackSize(), craftStack.getMaxStackSize()) - craftStack.getCount();
+								if (spaceLeft > 0) {
+									ItemStack splitStack = itemStack.split(Math.min(spaceLeft, itemStack.getCount()));
+									craftStack.grow(splitStack.getCount());
+									if (itemStack.getCount() <= 0) {
+										return true;
+									}
+								}
+							}
+						} else if (firstEmptySlot == -1) {
+							firstEmptySlot = slotIndex;
+						}
+					}
+
+					if (itemStack.getCount() > 0 && firstEmptySlot != -1) {
+						ItemStack transferStack = itemStack.split(Math.min(itemStack.getCount(), craftMatrix.getMaxStackSize()));
+						craftMatrix.setItem(firstEmptySlot, transferStack);
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}).orElse(false);
+		}
+
+		@Override
+		public boolean canTransferFrom(Player player, AbstractContainerMenu menu, Slot sourceSlot, CraftingGrid craftingGrid) {
+			if (!(menu instanceof BackpackContainer backpackContainer)) {
+				return false;
+			}
+			return sourceSlot.mayPickup(player) && sourceSlot.index < backpackContainer.realInventorySlots.size();
+		}
 	}
 }
-*/
