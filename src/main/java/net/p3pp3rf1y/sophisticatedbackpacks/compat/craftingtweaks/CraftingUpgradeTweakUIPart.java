@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
 
+import net.blay09.mods.craftingtweaks.CraftingTweaksProviderManager;
+import net.blay09.mods.craftingtweaks.api.CraftingTweaksClientAPI;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -21,7 +23,7 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	@OnlyIn(Dist.CLIENT)
 	private BackpackScreen backpackScreen;
 
-	private static final Method ADD_RENDERABLE_WIDGET = ObfuscationReflectionHelper.findMethod(Screen.class, "m_142416_", AbstractWidget.class);
+	private static final Method ADD_RENDERABLE_WIDGET = ObfuscationReflectionHelper.findMethod(Screen.class, "m_142416_", GuiEventListener.class);
 
 	private final List<Button> buttons = new ArrayList<>();
 
@@ -75,11 +77,11 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 			return;
 		}
 		Slot firstSlot = slots.get(0);
-/* TODO readd when crafting tweaks is on 1.17
-		addButton(CraftingTweaksAPI.createRotateButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 0)));
-		addButton(CraftingTweaksAPI.createBalanceButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 1)));
-		addButton(CraftingTweaksAPI.createClearButtonRelative(0, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 2)));
-*/
+		CraftingTweaksProviderManager.getDefaultCraftingGrid(backpackScreen.getMenu()).ifPresent(craftingGrid -> {
+			addButton(CraftingTweaksClientAPI.createRotateButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 0)));
+			addButton(CraftingTweaksClientAPI.createBalanceButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 1)));
+			addButton(CraftingTweaksClientAPI.createClearButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 2)));
+		});
 	}
 
 	@OnlyIn(Dist.CLIENT)

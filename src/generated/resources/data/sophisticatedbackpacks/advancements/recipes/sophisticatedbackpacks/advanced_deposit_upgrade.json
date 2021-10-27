@@ -11,7 +11,9 @@
             "conditions": {
                 "items": [
                     {
-                        "item": "sophisticatedbackpacks:deposit_upgrade"
+                        "items": [
+                            "sophisticatedbackpacks:deposit_upgrade"
+                        ]
                     }
                 ]
             }

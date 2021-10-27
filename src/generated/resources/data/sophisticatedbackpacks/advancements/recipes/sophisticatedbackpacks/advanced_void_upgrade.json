@@ -11,7 +11,9 @@
             "conditions": {
                 "items": [
                     {
-                        "item": "sophisticatedbackpacks:void_upgrade"
+                        "items": [
+                            "sophisticatedbackpacks:void_upgrade"
+                        ]
                     }
                 ]
             }

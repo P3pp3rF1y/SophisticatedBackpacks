@@ -11,5 +11,6 @@ public class DataGenerators {
 		generator.addProvider(new SBPBlockLootProvider(generator));
 		generator.addProvider(new SBPRecipeProvider(generator));
 		generator.addProvider(new SBPLootInjectProvider(generator));
+		generator.addProvider(new SBPFluidTagsProvider(generator, evt.getExistingFileHelper()));
 	}
 }

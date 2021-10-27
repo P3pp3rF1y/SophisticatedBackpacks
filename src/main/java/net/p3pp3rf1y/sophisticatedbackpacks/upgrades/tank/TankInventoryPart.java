@@ -1,15 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -27,7 +19,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,9 +92,19 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 			if (!contents.isEmpty()) {
 				tooltip.add(contents.getDisplayName());
 			}
-			tooltip.add(new TranslatableComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity)));
+			tooltip.add(getContentsTooltip(contents, capacity));
 			GuiHelper.setTooltipToRender(tooltip);
 		}
+	}
+
+	private TranslatableComponent getContentsTooltip(FluidStack contents, int capacity) {
+		if (contents.getFluid().is(ModFluids.EXPERIENCE_TAG)) {
+			double contentsLevels = XpHelper.getLevelsForExperience(contents.getAmount());
+			double tankCapacityLevels = XpHelper.getLevelsForExperience(capacity);
+
+			return new TranslatableComponent(TranslationHelper.translUpgradeKey("tank.xp_contents_tooltip"), String.format("%.1f", contentsLevels), String.format("%.1f", tankCapacityLevels));
+		}
+		return new TranslatableComponent(TranslationHelper.translUpgradeKey("tank.contents_tooltip"), String.format("%,d", contents.getAmount()), String.format("%,d", capacity));
 	}
 
 	private void renderFluid(PoseStack matrixStack, int mouseX, int mouseY) {
@@ -118,43 +122,8 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 		ResourceLocation texture = fluid.getAttributes().getStillTexture(contents);
 		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
-		renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.x() + 10, pos.y() + 1 + height - 2 - displayLevel, displayLevel);
+		GuiHelper.renderTiledFluidTextureAtlas(matrixStack, still, fluid.getAttributes().getColor(), pos.x() + 10, pos.y() + 1 + height - 2 - displayLevel, displayLevel);
 		renderTooltip(mouseX, mouseY, contents, capacity);
-	}
-
-	private void renderTiledFluidTextureAtlas(PoseStack matrixStack, TextureAtlasSprite sprite, int color, int x, int y, int height) {
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-		RenderSystem.setShaderTexture(0, sprite.atlas().location());
-		BufferBuilder builder = Tesselator.getInstance().getBuilder();
-		builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-
-		float u1 = sprite.getU0();
-		float v1 = sprite.getV0();
-		int spriteHeight = sprite.getHeight();
-		int spriteWidth = sprite.getWidth();
-		int startY = y;
-		float red = (color >> 16 & 255) / 255.0F;
-		float green = (color >> 8 & 255) / 255.0F;
-		float blue = (color & 255) / 255.0F;
-		do {
-			int renderHeight = Math.min(spriteHeight, height);
-			height -= renderHeight;
-			float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
-
-			// we need to draw the quads per width too
-			Matrix4f matrix = matrixStack.last().pose();
-			float u2 = sprite.getU((16f * 16) / spriteWidth);
-			builder.vertex(matrix, x, (float) startY + renderHeight, 100).uv(u1, v2).color(red, green, blue, 1).endVertex();
-			builder.vertex(matrix, (float) x + 16, (float) startY + renderHeight, 100).uv(u2, v2).color(red, green, blue, 1).endVertex();
-			builder.vertex(matrix, (float) x + 16, startY, 100).uv(u2, v1).color(red, green, blue, 1).endVertex();
-			builder.vertex(matrix, x, startY, 100).uv(u1, v1).color(red, green, blue, 1).endVertex();
-
-			startY += renderHeight;
-		} while (height > 0);
-
-		// finish drawing sprites
-		builder.end();
-		BufferUploader.end(builder);
 	}
 
 }
