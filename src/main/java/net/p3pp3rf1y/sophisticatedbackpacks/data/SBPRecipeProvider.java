@@ -463,6 +463,17 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion("has_pump_upgrade", has(ModItems.PUMP_UPGRADE.get()))
 				.build(consumer);
 
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.XP_PUMP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("RER")
+				.patternLine("CPC")
+				.patternLine("RER")
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('E', Items.ENDER_EYE)
+				.key('C', Items.EXPERIENCE_BOTTLE)
+				.key('P', ModItems.ADVANCED_PUMP_UPGRADE.get())
+				.addCriterion("has_advanced_pump_upgrade", has(ModItems.ADVANCED_PUMP_UPGRADE.get()))
+				.build(consumer);
+
 		new SmithingRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))

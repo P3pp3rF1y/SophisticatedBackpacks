@@ -1,0 +1,31 @@
+{
+  "type": "sophisticatedbackpacks:upgrade_next_tier",
+  "conditions": [
+    {
+      "itemRegistryName": "xp_pump_upgrade",
+      "type": "sophisticatedbackpacks:item_enabled"
+    }
+  ],
+  "pattern": [
+    "RER",
+    "CPC",
+    "RER"
+  ],
+  "key": {
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "C": {
+      "item": "minecraft:experience_bottle"
+    },
+    "P": {
+      "item": "sophisticatedbackpacks:advanced_pump_upgrade"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:xp_pump_upgrade"
+  }
+}

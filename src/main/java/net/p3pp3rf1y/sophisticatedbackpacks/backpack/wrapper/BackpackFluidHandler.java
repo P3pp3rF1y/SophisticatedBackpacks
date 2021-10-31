@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
@@ -10,7 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class BackpackFluidHandler implements IFluidHandlerItem {
+public class BackpackFluidHandler implements IBackpackFluidHandler {
 	private final IBackpackWrapper backpackWrapper;
 
 	public BackpackFluidHandler(IBackpackWrapper backpackWrapper) {
@@ -22,7 +22,6 @@ public class BackpackFluidHandler implements IFluidHandlerItem {
 		return getAllTanks().size();
 	}
 
-	@Nonnull
 	@Override
 	public FluidStack getFluidInTank(int tank) {
 		return isInvalidTank(tank) ? FluidStack.EMPTY : getAllTanks().get(tank).getContents();
@@ -49,11 +48,11 @@ public class BackpackFluidHandler implements IFluidHandlerItem {
 	}
 
 	@Override
-	public int fill(FluidStack resource, FluidAction action) {
+	public int fill(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
 		int filled = 0;
 		FluidStack toFill = resource;
 		for (TankUpgradeWrapper tank : getAllTanks()) {
-			filled += tank.fill(toFill, action);
+			filled += tank.fill(toFill, action, ignoreInOutLimit);
 			if (filled == resource.getAmount()) {
 				return resource.getAmount();
 			}
@@ -61,29 +60,40 @@ public class BackpackFluidHandler implements IFluidHandlerItem {
 		}
 
 		return filled;
+
 	}
 
-	@Nonnull
 	@Override
-	public FluidStack drain(FluidStack resource, FluidAction action) {
+	public int fill(FluidStack resource, FluidAction action) {
+		return fill(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
 		int drained = 0;
 		int toDrain = resource.getAmount();
 		for (TankUpgradeWrapper tank : getAllTanks()) {
-			drained += tank.drain(toDrain, action).getAmount();
-			if (drained == resource.getAmount()) {
-				return resource;
+			if (tank.getContents().getFluid() == resource.getFluid()) {
+				drained += tank.drain(toDrain, action, ignoreInOutLimit).getAmount();
+				if (drained == resource.getAmount()) {
+					return resource;
+				}
+				toDrain = resource.getAmount() - drained;
 			}
-			toDrain = resource.getAmount() - drained;
 		}
 
 		return drained == 0 ? FluidStack.EMPTY : new FluidStack(resource.getFluid(), drained);
 	}
 
-	@Nonnull
 	@Override
-	public FluidStack drain(int maxDrain, FluidAction action) {
+	public FluidStack drain(FluidStack resource, FluidAction action) {
+		return drain(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
 		for (TankUpgradeWrapper tank : getAllTanks()) {
-			FluidStack drained = tank.drain(maxDrain, action);
+			FluidStack drained = tank.drain(maxDrain, action, ignoreInOutLimit);
 			if (!drained.isEmpty()) {
 				return drained;
 			}
@@ -91,11 +101,15 @@ public class BackpackFluidHandler implements IFluidHandlerItem {
 		return FluidStack.EMPTY;
 	}
 
+	@Override
+	public FluidStack drain(int maxDrain, FluidAction action) {
+		return drain(maxDrain, action, false);
+	}
+
 	private boolean isInvalidTank(int tank) {
 		return tank < 0 || tank >= getTanks();
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack getContainer() {
 		return backpackWrapper.getBackpack();
