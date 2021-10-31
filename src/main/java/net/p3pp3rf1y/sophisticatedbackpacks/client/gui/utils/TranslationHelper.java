@@ -21,9 +21,11 @@ public class TranslationHelper {
 	private static final String GUI_UPGRADE_PREFIX = GUI_PREFIX + "upgrades.";
 	private static final String GUI_SETTINGS_PREFIX = GUI_PREFIX + "settings.";
 	private static final String BUTTONS_SUFFIX = "buttons.";
+	private static final String CONTROLS_SUFFIX = "controls.";
 	private static final String BUTTONS_PREFIX = GUI_PREFIX + BUTTONS_SUFFIX;
 	private static final String ITEM_UPGRADE_PREFIX = "item.sophisticatedbackpacks.";
 	private static final String UPGRADE_BUTTONS_PREFIX = GUI_UPGRADE_PREFIX + BUTTONS_SUFFIX;
+	private static final String UPGRADE_CONTROLS_PREFIX = GUI_UPGRADE_PREFIX + CONTROLS_SUFFIX;
 	private static final String KEYBIND_PREFIX = "keybind.sophisticatedbackpacks.";
 
 	public static Component translUpgrade(String upgradeName) {
@@ -68,6 +70,10 @@ public class TranslationHelper {
 
 	public static String translUpgradeButton(String buttonName) {
 		return UPGRADE_BUTTONS_PREFIX + buttonName;
+	}
+
+	public static String translUpgradeControl(String controlName) {
+		return UPGRADE_CONTROLS_PREFIX + controlName;
 	}
 
 	public static String translItemTooltip(String itemName) {

@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapperAccessor;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
