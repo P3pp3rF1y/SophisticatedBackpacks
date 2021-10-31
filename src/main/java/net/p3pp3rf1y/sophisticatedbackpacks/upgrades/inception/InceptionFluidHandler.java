@@ -3,8 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,18 +12,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class InceptionFluidHandler implements IFluidHandlerItem {
+public class InceptionFluidHandler implements IBackpackFluidHandler {
 	@Nullable
-	private final IFluidHandlerItem wrappedFluidHandler;
+	private final IBackpackFluidHandler wrappedFluidHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
-	private IFluidHandler[] fluidHandlers;
+	private IBackpackFluidHandler[] fluidHandlers;
 	protected int[] baseIndex;
 	protected int tankCount;
 	private final ItemStack backpack;
 
 	public InceptionFluidHandler(
-			@Nullable IFluidHandlerItem wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+			@Nullable IBackpackFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedFluidHandler = wrappedFluidHandler;
 		this.backpack = backpack;
 		this.inventoryOrder = inventoryOrder;
@@ -33,7 +33,7 @@ public class InceptionFluidHandler implements IFluidHandlerItem {
 	}
 
 	private void refreshHandlers() {
-		List<IFluidHandler> handlers = new ArrayList<>();
+		List<IBackpackFluidHandler> handlers = new ArrayList<>();
 		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.MAIN_FIRST) {
 			handlers.add(wrappedFluidHandler);
 		}
@@ -41,7 +41,7 @@ public class InceptionFluidHandler implements IFluidHandlerItem {
 		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedFluidHandler);
 		}
-		fluidHandlers = handlers.toArray(new IFluidHandler[] {});
+		fluidHandlers = handlers.toArray(new IBackpackFluidHandler[] {});
 		baseIndex = new int[fluidHandlers.length];
 		int index = 0;
 		for (int i = 0; i < fluidHandlers.length; i++) {
@@ -105,11 +105,11 @@ public class InceptionFluidHandler implements IFluidHandlerItem {
 	}
 
 	@Override
-	public int fill(FluidStack resource, FluidAction action) {
+	public int fill(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
 		int filled = 0;
 		FluidStack toFill = resource;
-		for (IFluidHandler fluidHandler : fluidHandlers) {
-			filled += fluidHandler.fill(toFill, action);
+		for (IBackpackFluidHandler fluidHandler : fluidHandlers) {
+			filled += fluidHandler.fill(toFill, action, ignoreInOutLimit);
 			if (filled == resource.getAmount()) {
 				return resource.getAmount();
 			}
@@ -119,13 +119,17 @@ public class InceptionFluidHandler implements IFluidHandlerItem {
 		return filled;
 	}
 
-	@Nonnull
 	@Override
-	public FluidStack drain(FluidStack resource, FluidAction action) {
+	public int fill(FluidStack resource, FluidAction action) {
+		return fill(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
 		int drained = 0;
 		FluidStack toDrain = resource;
-		for (IFluidHandler fluidHandler : fluidHandlers) {
-			drained += fluidHandler.drain(toDrain, action).getAmount();
+		for (IBackpackFluidHandler fluidHandler : fluidHandlers) {
+			drained += fluidHandler.drain(toDrain, action, ignoreInOutLimit).getAmount();
 			if (drained == resource.getAmount()) {
 				return resource;
 			}
@@ -137,14 +141,25 @@ public class InceptionFluidHandler implements IFluidHandlerItem {
 
 	@Nonnull
 	@Override
-	public FluidStack drain(int maxDrain, FluidAction action) {
-		for (IFluidHandler fluidHandler : fluidHandlers) {
-			FluidStack drained = fluidHandler.drain(maxDrain, action);
+	public FluidStack drain(FluidStack resource, FluidAction action) {
+		return drain(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+		for (IBackpackFluidHandler fluidHandler : fluidHandlers) {
+			FluidStack drained = fluidHandler.drain(maxDrain, action, ignoreInOutLimit);
 			if (!drained.isEmpty()) {
 				return drained;
 			}
 		}
 		return FluidStack.EMPTY;
+	}
+
+	@Nonnull
+	@Override
+	public FluidStack drain(int maxDrain, FluidAction action) {
+		return drain(maxDrain, action, false);
 	}
 
 	@Nonnull

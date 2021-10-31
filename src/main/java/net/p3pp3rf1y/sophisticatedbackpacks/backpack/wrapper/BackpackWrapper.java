@@ -10,9 +10,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
@@ -65,7 +65,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private BackpackSettingsHandler settingsHandler = null;
 	private boolean fluidHandlerInitialized = false;
 	@Nullable
-	private IFluidHandlerItem fluidHandler = null;
+	private IBackpackFluidHandler fluidHandler = null;
 	private boolean energyStorageInitialized = false;
 	@Nullable
 	private IEnergyStorage energyStorage = null;
@@ -139,9 +139,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public Optional<IFluidHandlerItem> getFluidHandler() {
+	public Optional<IBackpackFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
-			IFluidHandlerItem wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
+			IBackpackFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
 			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {

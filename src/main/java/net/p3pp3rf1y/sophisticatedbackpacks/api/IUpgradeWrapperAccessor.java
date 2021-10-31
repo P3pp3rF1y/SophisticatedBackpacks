@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
+package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import java.util.List;
 

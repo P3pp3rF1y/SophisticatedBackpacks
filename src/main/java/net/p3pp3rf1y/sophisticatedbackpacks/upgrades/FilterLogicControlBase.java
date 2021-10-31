@@ -32,8 +32,6 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		extends CompositeBackpackWidget<BackpackWidget> {
 	public static final int TAG_FONT_COLOR = 16383998;
 	public static final int MORE_TAGS_FONT_COLOR = 13882323;
-	private static final int TEXTURE_WIDTH = 256;
-	private static final int TEXTURE_HEIGHT = 256;
 	private static final int MAX_TAG_NAME_WIDTH = 68;
 
 	protected final MatchButton[] showMatchButtons;
@@ -123,11 +121,10 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		}, delta -> {
 			if (delta < 0) {
 				container.selectNextTagToRemove();
-				updateTagListAndRemoveTooltips();
 			} else {
 				container.selectPreviousTagToRemove();
-				updateTagListAndRemoveTooltips();
 			}
+			updateTagListAndRemoveTooltips();
 		}) {
 			@Override
 			protected List<ITextProperties> getTooltip() {
@@ -143,11 +140,10 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 		}, delta -> {
 			if (delta < 0) {
 				container.selectNextTagToAdd();
-				updateAddTooltip();
 			} else {
 				container.selectPreviousTagToAdd();
-				updateAddTooltip();
 			}
+			updateAddTooltip();
 		}) {
 			@Override
 			protected List<ITextProperties> getTooltip() {
@@ -338,25 +334,8 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, fullSlotRows, slotsInExtraRow);
 		} else {
 			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + tagButtonsYOffset, 1, 1, 0);
-			renderTagListBackground(matrixStack, minecraft);
+			GuiHelper.renderControlBackground(matrixStack, minecraft, x, y + slotsTopYOffset, getTagListWidth(), getTagListHeight());
 		}
-	}
-
-	private void renderTagListBackground(MatrixStack matrixStack, Minecraft minecraft) {
-		minecraft.getTextureManager().bind(GuiHelper.GUI_CONTROLS);
-
-		int u = 29;
-		int v = 146;
-		int renderWidth = getTagListWidth();
-		int renderHeight = getTagListHeight();
-		int textureBgWidth = 66;
-		int textureBgHeight = 56;
-		int halfWidth = renderWidth / 2;
-		int halfHeight = renderHeight / 2;
-		blit(matrixStack, x, y + slotsTopYOffset, u, v, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-		blit(matrixStack, x, y + slotsTopYOffset + halfHeight, u, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-		blit(matrixStack, x + halfWidth, y + slotsTopYOffset, (float) u + textureBgWidth - halfWidth, v, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-		blit(matrixStack, x + halfWidth, y + slotsTopYOffset + halfHeight, (float) u + textureBgWidth - halfWidth, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 	}
 
 	private int getTagListWidth() {

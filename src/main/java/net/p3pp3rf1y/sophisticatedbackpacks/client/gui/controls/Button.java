@@ -8,7 +8,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -18,14 +17,14 @@ public class Button extends ButtonBase {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private final List<ITextProperties> tooltip;
+	private List<ITextProperties> tooltip;
 
 	public Button(Position position, ButtonDefinition buttonDefinition, IntConsumer onClick) {
 		super(position, buttonDefinition.getDimension(), onClick);
 		backgroundTexture = buttonDefinition.getBackgroundTexture();
 		foregroundTexture = buttonDefinition.getForegroundTexture();
 		hoveredBackgroundTexture = buttonDefinition.getHoveredBackgroundTexture();
-		tooltip = Collections.singletonList(buttonDefinition.getTooltip());
+		tooltip = buttonDefinition.getTooltip();
 	}
 
 	@Override
@@ -51,5 +50,9 @@ public class Button extends ButtonBase {
 
 	protected List<ITextProperties> getTooltip() {
 		return tooltip;
+	}
+
+	public void setTooltip(List<ITextProperties> tooltip) {
+		this.tooltip = tooltip;
 	}
 }

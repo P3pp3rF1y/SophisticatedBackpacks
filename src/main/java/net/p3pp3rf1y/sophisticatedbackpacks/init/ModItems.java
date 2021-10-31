@@ -115,6 +115,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeContaine
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding.VoidUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.xppump.XpPumpUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.xppump.XpPumpUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.xppump.XpPumpUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.xppump.XpPumpUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 
 public class ModItems {
@@ -198,6 +202,7 @@ public class ModItems {
 	public static final RegistryObject<BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.register("battery_upgrade", BatteryUpgradeItem::new);
 	public static final RegistryObject<PumpUpgradeItem> PUMP_UPGRADE = ITEMS.register("pump_upgrade", () -> new PumpUpgradeItem(false, false));
 	public static final RegistryObject<PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true));
+	public static final RegistryObject<XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.register("xp_pump_upgrade", XpPumpUpgradeItem::new);
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
@@ -246,6 +251,7 @@ public class ModItems {
 	private static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(BatteryUpgradeContainer::new);
 	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
 	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
+	private static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(XpPumpUpgradeContainer::new);
 
 	public static void registerContainers(RegistryEvent.Register<ContainerType<?>> evt) {
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
@@ -276,6 +282,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(BATTERY_UPGRADE.getId(), BATTERY_TYPE);
 		UpgradeContainerRegistry.register(PUMP_UPGRADE.getId(), PUMP_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_PUMP_UPGRADE.getId(), ADVANCED_PUMP_TYPE);
+		UpgradeContainerRegistry.register(XP_PUMP_UPGRADE.getId(), XP_PUMP_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			ScreenManager.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
@@ -311,6 +318,7 @@ public class ModItems {
 			UpgradeGuiManager.registerInventoryPart(BATTERY_TYPE, BatteryInventoryPart::new);
 			UpgradeGuiManager.registerTab(PUMP_TYPE, PumpUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_PUMP_TYPE, PumpUpgradeTab.Advanced::new);
+			UpgradeGuiManager.registerTab(XP_PUMP_TYPE, XpPumpUpgradeTab::new);
 		});
 	}
 
