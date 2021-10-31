@@ -133,7 +133,7 @@ public class GuiHelper {
 			return;
 		}
 
-		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 150);
+		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 200);
 		tooltipToRender = Collections.emptyList();
 	}
 
