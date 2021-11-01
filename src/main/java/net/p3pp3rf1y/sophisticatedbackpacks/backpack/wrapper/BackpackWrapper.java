@@ -10,9 +10,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
@@ -65,7 +65,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private BackpackSettingsHandler settingsHandler = null;
 	private boolean fluidHandlerInitialized = false;
 	@Nullable
-	private IFluidHandlerItem fluidHandler = null;
+	private IBackpackFluidHandler fluidHandler = null;
 	private boolean energyStorageInitialized = false;
 	@Nullable
 	private IEnergyStorage energyStorage = null;
@@ -139,9 +139,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public Optional<IFluidHandlerItem> getFluidHandler() {
+	public Optional<IBackpackFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
-			IFluidHandlerItem wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
+			IBackpackFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
 			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
@@ -317,15 +317,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {
-		switch (getSortBy()) {
-			case COUNT:
-				return InventorySorter.BY_COUNT;
-			case TAGS:
-				return InventorySorter.BY_TAGS;
-			case NAME:
-			default:
-				return InventorySorter.BY_NAME;
-		}
+		return switch (getSortBy()) {
+			case COUNT -> InventorySorter.BY_COUNT;
+			case TAGS -> InventorySorter.BY_TAGS;
+			case NAME -> InventorySorter.BY_NAME;
+		};
 	}
 
 	@Override

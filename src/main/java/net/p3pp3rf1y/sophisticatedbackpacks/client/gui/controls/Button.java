@@ -11,7 +11,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -21,14 +20,14 @@ public class Button extends ButtonBase {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private final List<FormattedText> tooltip;
+	private List<FormattedText> tooltip;
 
 	public Button(Position position, ButtonDefinition buttonDefinition, IntConsumer onClick) {
 		super(position, buttonDefinition.getDimension(), onClick);
 		backgroundTexture = buttonDefinition.getBackgroundTexture();
 		foregroundTexture = buttonDefinition.getForegroundTexture();
 		hoveredBackgroundTexture = buttonDefinition.getHoveredBackgroundTexture();
-		tooltip = Collections.singletonList(buttonDefinition.getTooltip());
+		tooltip = buttonDefinition.getTooltip();
 	}
 
 	@Override
@@ -60,5 +59,9 @@ public class Button extends ButtonBase {
 	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
 		pNarrationElementOutput.add(NarratedElementType.TITLE, new TranslatableComponent("gui.narrate.button", getTooltip()));
 		pNarrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.button.usage.focused"));
+	}
+
+	public void setTooltip(List<FormattedText> tooltip) {
+		this.tooltip = tooltip;
 	}
 }

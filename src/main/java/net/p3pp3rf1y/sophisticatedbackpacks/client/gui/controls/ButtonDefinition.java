@@ -1,11 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public class ButtonDefinition {
@@ -16,19 +17,19 @@ public class ButtonDefinition {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private final Component tooltip;
+	private final List<FormattedText> tooltip;
 
 	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture, @Nullable TextureBlitData hoveredBackgroundTexture) {
 		this(dimension, backgroundTexture, hoveredBackgroundTexture, null, new TextComponent(""));
 	}
 
 	public ButtonDefinition(Dimension dimension, @Nullable TextureBlitData backgroundTexture,
-			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, Component tooltip) {
+			@Nullable TextureBlitData hoveredBackgroundTexture, @Nullable TextureBlitData foregroundTexture, FormattedText... tooltip) {
 		this.dimension = dimension;
 		this.backgroundTexture = backgroundTexture;
 		this.hoveredBackgroundTexture = hoveredBackgroundTexture;
 		this.foregroundTexture = foregroundTexture;
-		this.tooltip = tooltip;
+		this.tooltip = List.of(tooltip);
 	}
 
 	public Dimension getDimension() {
@@ -50,7 +51,7 @@ public class ButtonDefinition {
 		return foregroundTexture;
 	}
 
-	public Component getTooltip() {
+	public List<FormattedText> getTooltip() {
 		return tooltip;
 	}
 

@@ -39,6 +39,8 @@ import java.util.Map;
 
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
+	private static final int GUI_CONTROLS_TEXTURE_WIDTH = 256;
+	private static final int GUI_CONTROLS_TEXTURE_HEIGHT = 256;
 	public static final TextureBlitData BAR_BACKGROUND_BOTTOM = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 66), Dimension.SQUARE_18);
 	public static final TextureBlitData BAR_BACKGROUND_MIDDLE = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 48), Dimension.SQUARE_18);
 	public static final TextureBlitData BAR_BACKGROUND_TOP = new TextureBlitData(GUI_CONTROLS, Dimension.SQUARE_256, new UV(29, 30), Dimension.SQUARE_18);
@@ -134,7 +136,7 @@ public class GuiHelper {
 			return;
 		}
 
-		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 150);
+		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 200);
 		tooltipToRender = Collections.emptyList();
 	}
 
@@ -211,7 +213,7 @@ public class GuiHelper {
 		MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		matrixStack.translate(0.0D, 0.0D, 400.0D);
 
-		topY = writeTooltipLines(textLines, font, (float) leftX, topY, matrix4f, renderTypeBuffer, -1);
+		topY = writeTooltipLines(textLines, font, leftX, topY, matrix4f, renderTypeBuffer, -1);
 
 		renderTypeBuffer.endBatch();
 		additionalRender.render(matrixStack, leftX, topY, font);
@@ -260,7 +262,7 @@ public class GuiHelper {
 		for (int i = 0; i < textLines.size(); ++i) {
 			FormattedText line = textLines.get(i);
 			if (line != null) {
-				font.drawInBatch(Language.getInstance().getVisualOrder(line), leftX, (float) topY, color, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
+				font.drawInBatch(Language.getInstance().getVisualOrder(line), leftX, topY, color, true, matrix4f, renderTypeBuffer, false, 0, 15728880);
 			}
 
 			if (i == 0) {
@@ -345,6 +347,22 @@ public class GuiHelper {
 		// finish drawing sprites
 		builder.end();
 		BufferUploader.end(builder);
+	}
+
+	public static void renderControlBackground(PoseStack matrixStack, int x, int y, int renderWidth, int renderHeight) {
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, GuiHelper.GUI_CONTROLS);
+
+		int u = 29;
+		int v = 146;
+		int textureBgWidth = 66;
+		int textureBgHeight = 56;
+		int halfWidth = renderWidth / 2;
+		int halfHeight = renderHeight / 2;
+		GuiComponent.blit(matrixStack, x, y, u, v, halfWidth, halfHeight, GUI_CONTROLS_TEXTURE_WIDTH, GUI_CONTROLS_TEXTURE_HEIGHT);
+		GuiComponent.blit(matrixStack, x, y + halfHeight, u, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, GUI_CONTROLS_TEXTURE_WIDTH, GUI_CONTROLS_TEXTURE_HEIGHT);
+		GuiComponent.blit(matrixStack, x + halfWidth, y, (float) u + textureBgWidth - halfWidth, v, halfWidth, halfHeight, GUI_CONTROLS_TEXTURE_WIDTH, GUI_CONTROLS_TEXTURE_HEIGHT);
+		GuiComponent.blit(matrixStack, x + halfWidth, y + halfHeight, (float) u + textureBgWidth - halfWidth, (float) v + textureBgHeight - halfHeight, halfWidth, halfHeight, GUI_CONTROLS_TEXTURE_WIDTH, GUI_CONTROLS_TEXTURE_HEIGHT);
 	}
 
 	public interface ITooltipRenderPart {

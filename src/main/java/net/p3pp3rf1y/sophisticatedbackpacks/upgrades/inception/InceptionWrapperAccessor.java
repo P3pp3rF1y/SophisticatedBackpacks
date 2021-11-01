@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IUpgradeWrapperAccessor;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapperAccessor;
 
 import java.util.ArrayList;
 import java.util.Collection;
