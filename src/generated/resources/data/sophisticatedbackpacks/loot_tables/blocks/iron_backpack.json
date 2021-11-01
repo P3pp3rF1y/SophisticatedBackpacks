@@ -10,6 +10,11 @@
                     "type": "minecraft:item",
                     "name": "sophisticatedbackpacks:iron_backpack"
                 }
+            ],
+            "functions": [
+                {
+                    "function": "sophisticatedbackpacks:copy_backpack_data"
+                }
             ]
         }
     ]
