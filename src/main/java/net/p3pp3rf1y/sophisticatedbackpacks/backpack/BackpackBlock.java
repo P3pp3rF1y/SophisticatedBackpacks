@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,6 +43,11 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.UpgradeRenderRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -51,6 +57,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 import static net.minecraft.state.properties.BlockStateProperties.WATERLOGGED;
 
@@ -129,17 +136,17 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		if (!heldItem.isEmpty() && heldItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class)
 					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
-					player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
-						FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
-						if (resultOfEmptying.isSuccess()) {
-							player.setItemInHand(hand, resultOfEmptying.getResult());
-						} else {
-							FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
-							if (resultOfFilling.isSuccess()) {
-								player.setItemInHand(hand, resultOfFilling.getResult());
-							}
-						}
-					}));
+							player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
+								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+								if (resultOfEmptying.isSuccess()) {
+									player.setItemInHand(hand, resultOfEmptying.getResult());
+								} else {
+									FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
+									if (resultOfFilling.isSuccess()) {
+										player.setItemInHand(hand, resultOfFilling.getResult());
+									}
+								}
+							}));
 			return ActionResultType.SUCCESS;
 		}
 
@@ -231,4 +238,28 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 		}
 	}
 
+	@Override
+	public void animateTick(BlockState state, World level, BlockPos pos, Random rand) {
+		WorldHelper.getTile(level, pos, BackpackTileEntity.class).ifPresent(te -> {
+			BackpackRenderInfo renderInfo = te.getBackpackWrapper().getRenderInfo();
+			renderUpgrades(level, rand, pos, state.getValue(FACING), renderInfo);
+		});
+
+	}
+
+	private static void renderUpgrades(World world, Random rand, BlockPos pos, Direction facing, BackpackRenderInfo renderInfo) {
+		if (Minecraft.getInstance().isPaused()) {
+			return;
+		}
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, world, rand, pos, facing, type, data)));
+	}
+
+	private static Vector3d getBackpackMiddleFacePoint(BlockPos pos, Direction facing, Vector3d vector3d) {
+		return vector3d.add(0, 0, 0.41).yRot((float) (-facing.toYRot() * (Math.PI / 180F))).add(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+	}
+
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, World world, Random rand, BlockPos pos, Direction facing, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		//noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(world, rand, vector3d -> getBackpackMiddleFacePoint(pos, facing, vector3d), (T) renderData));
+	}
 }

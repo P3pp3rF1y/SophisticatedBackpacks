@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -20,6 +21,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
@@ -110,7 +114,24 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 
 			renderFluids(matrixStack, buffer, packedLight, renderInfo, showLeftTank, showRightTank);
 			batteryRenderInfo.ifPresent(info -> renderBatteryCharge(matrixStack, buffer, packedLight, info.getChargeRatio()));
+			renderUpgrades(livingEntity, renderInfo);
 		});
+	}
+
+	private static void renderUpgrades(LivingEntity livingEntity, BackpackRenderInfo renderInfo) {
+		if (Minecraft.getInstance().isPaused() || livingEntity.level.random.nextInt(32) != 0) {
+			return;
+		}
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
+	}
+
+	private static Vector3d getBackpackMiddleFacePoint(LivingEntity livingEntity, Vector3d vector3d) {
+		return vector3d.xRot(livingEntity.isCrouching() ? 25 * ((float) Math.PI / 180F) : 0).add(0, 0.8, livingEntity.isCrouching() ? 0.9 : 0.7).yRot((float) (-livingEntity.yBodyRot * (Math.PI / 180F) - Math.PI)).add(livingEntity.position());
+	}
+
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, LivingEntity livingEntity, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		//noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.level, livingEntity.level.random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
 	}
 
 	private static void renderBatteryCharge(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float chargeRatio) {

@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
@@ -9,6 +10,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -38,12 +40,12 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		inputFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.inputFilterSlots.get(),
 				s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), "inputFilter");
 		fuelFilterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.autoSmeltingUpgrade.fuelFilterSlots.get(),
-				s -> ForgeHooks.getBurnTime(s) > 0, "fuelFilter");
+				s -> ForgeHooks.getBurnTime(s, IRecipeType.SMELTING) > 0, "fuelFilter");
 		fuelFilterLogic.setAllowByDefault();
 		fuelFilterLogic.setEmptyAllowListMatchesEverything();
 
 		isValidInput = s -> RecipeHelper.getSmeltingRecipe(s).isPresent() && inputFilterLogic.matchesFilter(s);
-		isValidFuel = s -> ForgeHooks.getBurnTime(s) > 0 && fuelFilterLogic.matchesFilter(s);
+		isValidFuel = s -> ForgeHooks.getBurnTime(s, IRecipeType.SMELTING) > 0 && fuelFilterLogic.matchesFilter(s);
 		smeltingLogic = new SmeltingLogic(upgrade, upgradeSaveHandler, isValidFuel, isValidInput, Config.COMMON.autoSmeltingUpgrade.smeltingSpeedMultiplier.get(),
 				Config.COMMON.autoSmeltingUpgrade.fuelEfficiencyMultiplier.get());
 	}
@@ -64,7 +66,7 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		}
 
 		ItemStack fuel = smeltingLogic.getFuel();
-		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel, IRecipeType.SMELTING) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
 			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, inventory, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
@@ -81,6 +83,15 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 
 		if (!smeltingLogic.tick(world) && outputCooldown <= 0 && fuelCooldown <= 0 && inputCooldown <= 0) {
 			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
+		}
+		boolean isBurning = smeltingLogic.isBurning(world);
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		if (renderInfo.getUpgradeRenderData(SmeltingUpgradeRenderData.TYPE).map(SmeltingUpgradeRenderData::isBurning).orElse(false) != isBurning) {
+			if (isBurning) {
+				renderInfo.setUpgradeRenderData(SmeltingUpgradeRenderData.TYPE, new SmeltingUpgradeRenderData(true));
+			} else {
+				renderInfo.removeUpgradeRenderData(SmeltingUpgradeRenderData.TYPE);
+			}
 		}
 	}
 
