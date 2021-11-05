@@ -85,6 +85,11 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 		private void setIsPlaying(boolean playing) {
 			isPlaying = playing;
 			NBTHelper.setBoolean(upgrade, "isPlaying", playing);
+			if (isPlaying) {
+				backpackWrapper.getRenderInfo().setUpgradeRenderData(JukeboxUpgradeRenderData.TYPE, new JukeboxUpgradeRenderData(true));
+			} else {
+				backpackWrapper.getRenderInfo().removeUpgradeRenderData(JukeboxUpgradeRenderData.TYPE);
+			}
 			save();
 		}
 
