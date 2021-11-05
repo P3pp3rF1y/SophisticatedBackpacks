@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -18,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BackpackRenderInfo {
@@ -32,7 +34,8 @@ public class BackpackRenderInfo {
 
 	static {
 		RENDER_DATA_TYPES = Map.of(
-				SmeltingUpgradeRenderData.TYPE.getName(), SmeltingUpgradeRenderData.TYPE
+				SmeltingUpgradeRenderData.TYPE.getName(), SmeltingUpgradeRenderData.TYPE,
+				JukeboxUpgradeRenderData.TYPE.getName(), JukeboxUpgradeRenderData.TYPE
 		);
 	}
 
@@ -59,14 +62,14 @@ public class BackpackRenderInfo {
 
 	public <T extends IUpgradeRenderData> void setUpgradeRenderData(UpgradeRenderDataType<T> upgradeRenderDataType, T renderData) {
 		upgradeData.put(upgradeRenderDataType, renderData);
-		serializeUpgradeData(upgradeRenderDataType, renderData);
+		serializeUpgradeData(upgrades -> upgrades.put(upgradeRenderDataType.getName(), renderData.serializeNBT()));
 		save();
 	}
 
-	private <T extends IUpgradeRenderData> void serializeUpgradeData(UpgradeRenderDataType<T> upgradeRenderDataType, T renderData) {
+	private void serializeUpgradeData(Consumer<CompoundTag> modifyUpgradesTag) {
 		CompoundTag renderInfo = getRenderInfoTag();
 		CompoundTag upgrades = renderInfo.getCompound(UPGRADES_TAG);
-		upgrades.put(upgradeRenderDataType.getName(), renderData.serializeNBT());
+		modifyUpgradesTag.accept(upgrades);
 		renderInfo.put(UPGRADES_TAG, upgrades);
 		NBTHelper.setCompoundNBT(backpack, RENDER_INFO_TAG, renderInfo);
 	}
@@ -179,7 +182,9 @@ public class BackpackRenderInfo {
 		return upgradeData;
 	}
 
-	public void removeUpgradeRenderData(UpgradeRenderDataType<SmeltingUpgradeRenderData> type) {
+	public void removeUpgradeRenderData(UpgradeRenderDataType<?> type) {
 		upgradeData.remove(type);
+		serializeUpgradeData(upgrades -> upgrades.remove(type.getName()));
+		save();
 	}
 }

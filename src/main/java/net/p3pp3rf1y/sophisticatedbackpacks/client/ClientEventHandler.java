@@ -45,6 +45,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModParticles;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackInsertMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeContainer;
@@ -73,6 +74,7 @@ public class ClientEventHandler {
 		modBus.addListener(ClientEventHandler::registerLayer);
 		modBus.addListener(ClientEventHandler::registerEntityRenderers);
 		modBus.addListener(ClientEventHandler::registerReloadListener);
+		modBus.addListener(ModParticles::registerFactories);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientEventHandler::onPlayerJoinServer);
 		eventBus.addListener(ClientEventHandler::onDrawScreen);
