@@ -222,7 +222,7 @@ public class BackpackTooltipRenderer {
 
 		private void calculateHeight() {
 			int upgradesHeight = upgrades.isEmpty() ? 0 : 32;
-			int inventoryHeight = backpackContents.isEmpty() ? 0 : 12 + (1 + backpackContents.size() / MAX_STACKS_ON_LINE) * 20;
+			int inventoryHeight = backpackContents.isEmpty() ? 0 : 12 + (1 + (backpackContents.size() - 1)/ MAX_STACKS_ON_LINE) * 20;
 			int totalHeight = upgradesHeight + inventoryHeight;
 			height = totalHeight > 0 ? totalHeight : 12;
 		}
