@@ -197,6 +197,10 @@ public class NBTHelper {
 			return Optional.empty();
 		}
 		CompoundNBT tag = parentTag.get();
+		return getMap(tag, getKey, getValue);
+	}
+
+	public static <K, V> Optional<Map<K, V>> getMap(CompoundNBT tag, Function<String, K> getKey, BiFunction<String, INBT, V> getValue) {
 		Map<K, V> map = new HashMap<>();
 
 		for (String tagName : tag.getAllKeys()) {
@@ -204,6 +208,14 @@ public class NBTHelper {
 		}
 
 		return Optional.of(map);
+	}
+
+	public static <K, V> void putMap(CompoundNBT tag, String key, Map<K, V> map, Function<K, String> getStringKey, Function<V, INBT> getNbtValue) {
+		CompoundNBT mapNbt = new CompoundNBT();
+		for (Map.Entry<K, V> entry : map.entrySet()) {
+			mapNbt.put(getStringKey.apply(entry.getKey()), getNbtValue.apply(entry.getValue()));
+		}
+		tag.put(key, mapNbt);
 	}
 
 	public static <K, V> void setMap(ItemStack stack, String key, Map<K, V> map, Function<K, String> getStringKey, Function<V, INBT> getNbtValue) {

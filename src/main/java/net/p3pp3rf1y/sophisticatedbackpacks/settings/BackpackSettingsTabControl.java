@@ -8,6 +8,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsTabControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsTab;
 
@@ -23,6 +25,7 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 		ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder = new ImmutableMap.Builder<>();
 		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsTab::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsTab::new);
+		addFactory(builder, MemorySettingsCategory.NAME, MemorySettingsTab::new);
 		SETTINGS_TAB_FACTORIES = builder.build();
 	}
 
