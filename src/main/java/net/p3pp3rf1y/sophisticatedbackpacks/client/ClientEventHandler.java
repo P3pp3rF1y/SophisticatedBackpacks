@@ -29,6 +29,7 @@ import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -78,7 +79,7 @@ public class ClientEventHandler {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientEventHandler::onPlayerJoinServer);
 		eventBus.addListener(ClientEventHandler::onDrawScreen);
-		eventBus.addListener(ClientEventHandler::onRightClick);
+		eventBus.addListener(EventPriority.HIGH, ClientEventHandler::onRightClick);
 		eventBus.addListener(BackpackTooltipRenderer::handleBackpackTooltipRender);
 		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
 		eventBus.addListener(BackpackSoundHandler::tick);
