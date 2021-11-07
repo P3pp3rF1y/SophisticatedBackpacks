@@ -25,6 +25,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsContainer;
 
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
@@ -43,6 +46,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		ImmutableMap.Builder<String, ISettingsContainerFactory<?, ?>> builder = new ImmutableMap.Builder<>();
 		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsContainer::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsContainer::new);
+		addFactory(builder, MemorySettingsCategory.NAME, MemorySettingsContainer::new);
 		SETTINGS_CONTAINER_FACTORIES = builder.build();
 	}
 
@@ -163,6 +167,10 @@ public class SettingsContainer extends Container implements IContextAwareContain
 		return ghostSlots.get(slotId);
 	}
 
+	public Optional<ItemStack> getMemorizedStackInSlot(int slotId) {
+		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterStack(slotId);
+	}
+
 	public int getSlotsOnLine() {
 		return backpackBackgroundProperties.getSlotsOnLine() - backpackWrapper.getColumnsTaken();
 	}
@@ -211,6 +219,8 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	public void forEachSettingsContainer(BiConsumer<String, ? super SettingsContainerBase<?>> consumer) {
 		settingsContainers.forEach(consumer);
 	}
+
+
 
 	public PlayerEntity getPlayer() {
 		return player;

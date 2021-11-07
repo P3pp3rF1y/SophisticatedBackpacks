@@ -1,15 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -19,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	private BackpackSettingsTabControl settingsTabControl;
@@ -74,30 +73,35 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 
 	@Override
 	protected void renderSlot(MatrixStack matrixStack, Slot slot) {
-		int i = slot.x;
-		int j = slot.y;
+		Optional<ItemStack> memorizedStack = getMenu().getMemorizedStackInSlot(slot.getSlotIndex());
 		ItemStack itemstack = slot.getItem();
-		boolean flag1 = slot == clickedSlot && !draggingItem.isEmpty() && !isSplittingStack;
+		if (memorizedStack.isPresent()) {
+			itemstack = memorizedStack.get();
+		}
 
 		setBlitOffset(100);
 		itemRenderer.blitOffset = 100.0F;
-		if (itemstack.isEmpty() && slot.isActive()) {
-			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
-			if (pair != null) {
-				TextureAtlasSprite textureatlassprite = minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-				minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
-				blit(matrixStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
-				flag1 = true;
-			}
-		}
 
-		if (!flag1) {
-			RenderSystem.enableDepthTest();
-			itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, i, j);
-		}
+		RenderSystem.enableDepthTest();
+		itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, slot.x, slot.y);
 
 		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
+
+		if (memorizedStack.isPresent()) {
+			drawMemorizedStackOverlay(matrixStack, slot.x, slot.y);
+		}
+	}
+
+	private void drawMemorizedStackOverlay(MatrixStack matrixStack, int x, int y) {
+		matrixStack.pushPose();
+		GlStateManager._enableBlend();
+		GlStateManager._disableDepthTest();
+		minecraft.getTextureManager().bind(GuiHelper.GUI_CONTROLS);
+		blit(matrixStack, x, y, 77, 0, 16, 16);
+		GlStateManager._enableDepthTest();
+		GlStateManager._disableBlend();
+		matrixStack.popPose();
 	}
 
 	@SuppressWarnings("java:S2589") // slot can actually be null despite being marked non null

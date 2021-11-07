@@ -74,7 +74,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 	}
 
 	private void tryGivePlayerExperienceFromTank(PlayerEntity player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
-		int maxXpPointsToGive = XpHelper.getExperienceForLevel(stopAtLevel) - player.totalExperience;
+		int maxXpPointsToGive = XpHelper.getExperienceForLevel(stopAtLevel) - XpHelper.getPlayerTotalExperience(player);
 		FluidStack toDrain = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToGive));
 
 		FluidStack drained = fluidHandler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
@@ -99,7 +99,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 	}
 
 	private void tryFillTankWithPlayerExperience(PlayerEntity player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
-		int maxXpPointsToTake = player.totalExperience - XpHelper.getExperienceForLevel(stopAtLevel);
+		int maxXpPointsToTake = XpHelper.getPlayerTotalExperience(player) - XpHelper.getExperienceForLevel(stopAtLevel);
 		FluidStack toFill = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToTake));
 		int filled = fluidHandler.fill(toFill, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
 

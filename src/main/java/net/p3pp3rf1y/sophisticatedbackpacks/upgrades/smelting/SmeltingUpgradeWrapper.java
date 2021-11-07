@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 
 import javax.annotation.Nullable;
@@ -31,6 +32,16 @@ public class SmeltingUpgradeWrapper extends UpgradeWrapperBase<SmeltingUpgradeWr
 
 		if (!smeltingLogic.tick(world)) {
 			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
+		}
+
+		boolean isBurning = smeltingLogic.isBurning(world);
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		if (renderInfo.getUpgradeRenderData(SmeltingUpgradeRenderData.TYPE).map(SmeltingUpgradeRenderData::isBurning).orElse(false) != isBurning) {
+			if (isBurning) {
+				renderInfo.setUpgradeRenderData(SmeltingUpgradeRenderData.TYPE, new SmeltingUpgradeRenderData(true));
+			} else {
+				renderInfo.removeUpgradeRenderData(SmeltingUpgradeRenderData.TYPE);
+			}
 		}
 	}
 

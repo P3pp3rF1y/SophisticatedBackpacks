@@ -44,6 +44,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncContainerClientDataMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISlotColorCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 
 import javax.annotation.Nullable;
@@ -396,6 +397,10 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	private boolean shouldShiftClickIntoOpenTabFirst() {
 		return BackpackSettingsManager.getBackpackSettingValue(player, backpackWrapper.getSettingsHandler().getTypeCategory(BackpackSettingsCategory.class), BackpackSettingsManager.SHIFT_CLICK_INTO_OPEN_TAB_FIRST);
+	}
+
+	public Optional<ItemStack> getMemorizedStackInSlot(int slotId) {
+		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterStack(slotId);
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {

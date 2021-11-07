@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
@@ -305,35 +306,58 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		setBlitOffset(100);
 		itemRenderer.blitOffset = 100.0F;
 		if (itemstack.isEmpty() && slot.isActive()) {
+			renderSlotBackground(matrixStack, slot, i, j);
+		} else if (!rightClickDragging) {
+			renderStack(matrixStack, slot, i, j, itemstack, flag, stackCountText);
+		}
+
+		itemRenderer.blitOffset = 0.0F;
+		setBlitOffset(0);
+	}
+
+	private void renderStack(MatrixStack matrixStack, Slot slot, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
+		if (flag) {
+			fill(matrixStack, i, j, i + 16, j + 16, -2130706433);
+		}
+
+		RenderSystem.enableDepthTest();
+		itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, i, j);
+		if (shouldUseSpecialCountRender(itemstack)) {
+			itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, "");
+			if (stackCountText == null) {
+				stackCountText = CountAbbreviator.abbreviate(itemstack.getCount());
+			}
+			renderStackCount(stackCountText, i, j);
+		} else {
+			itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, stackCountText);
+		}
+
+	}
+
+	private void renderSlotBackground(MatrixStack matrixStack, Slot slot, int i, int j) {
+		Optional<ItemStack> memorizedStack = getMenu().getMemorizedStackInSlot(slot.index);
+		if (memorizedStack.isPresent()) {
+			itemRenderer.renderAndDecorateItem(minecraft.player, memorizedStack.get(), i, j);
+			drawMemorizedStackOverlay(matrixStack, i, j);
+		} else {
 			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
 			if (pair != null) {
 				TextureAtlasSprite textureatlassprite = minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
 				minecraft.getTextureManager().bind(textureatlassprite.atlas().location());
 				blit(matrixStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
-				rightClickDragging = true;
 			}
 		}
+	}
 
-		if (!rightClickDragging) {
-			if (flag) {
-				fill(matrixStack, i, j, i + 16, j + 16, -2130706433);
-			}
-
-			RenderSystem.enableDepthTest();
-			itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, i, j);
-			if (shouldUseSpecialCountRender(itemstack)) {
-				itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, "");
-				if (stackCountText == null) {
-					stackCountText = CountAbbreviator.abbreviate(itemstack.getCount());
-				}
-				renderStackCount(stackCountText, i, j);
-			} else {
-				itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, stackCountText);
-			}
-		}
-
-		itemRenderer.blitOffset = 0.0F;
-		setBlitOffset(0);
+	private void drawMemorizedStackOverlay(MatrixStack matrixStack, int x, int y) {
+		matrixStack.pushPose();
+		GlStateManager._enableBlend();
+		GlStateManager._disableDepthTest();
+		minecraft.getTextureManager().bind(GuiHelper.GUI_CONTROLS);
+		blit(matrixStack, x, y, 77, 0, 16, 16);
+		GlStateManager._enableDepthTest();
+		GlStateManager._disableBlend();
+		matrixStack.popPose();
 	}
 
 	private boolean shouldUseSpecialCountRender(ItemStack itemstack) {
@@ -619,7 +643,7 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 			for (ITextProperties line : wrappedLine) {
 				int lineWidth = font.width(line);
-				if (lineWidth > wrappedTooltipWidth) { wrappedTooltipWidth = lineWidth; }
+				if (lineWidth > wrappedTooltipWidth) {wrappedTooltipWidth = lineWidth;}
 				wrappedTextLines.add(line);
 			}
 			tooltipWidth = wrappedTooltipWidth;

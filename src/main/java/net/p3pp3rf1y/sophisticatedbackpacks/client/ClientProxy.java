@@ -56,6 +56,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRendere
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonProxy;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModParticles;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackInsertMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
@@ -225,9 +226,10 @@ public class ClientProxy extends CommonProxy {
 		modBus.addListener(this::clientSetup);
 		modBus.addListener(this::stitchTextures);
 		modBus.addListener(this::onModelRegistry);
+		modBus.addListener(ModParticles::registerFactories);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::onDrawScreen);
-		eventBus.addListener(ClientProxy::onRightClick);
+		eventBus.addListener(EventPriority.HIGH, ClientProxy::onRightClick);
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiMouseKeyPress);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiKeyPress);
