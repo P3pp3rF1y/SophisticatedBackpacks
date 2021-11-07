@@ -229,7 +229,7 @@ public class ClientProxy extends CommonProxy {
 		modBus.addListener(ModParticles::registerFactories);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientProxy::onDrawScreen);
-		eventBus.addListener(ClientProxy::onRightClick);
+		eventBus.addListener(EventPriority.HIGH, ClientProxy::onRightClick);
 		eventBus.addListener(ClientProxy::handleKeyInputEvent);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiMouseKeyPress);
 		eventBus.addListener(EventPriority.HIGH, ClientProxy::handleGuiKeyPress);
