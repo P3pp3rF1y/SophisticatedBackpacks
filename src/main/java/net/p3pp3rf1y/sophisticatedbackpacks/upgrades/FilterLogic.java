@@ -14,7 +14,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class FilterLogic extends FilterLogicBase {
+public class
+FilterLogic extends FilterLogicBase {
 	private final int filterSlotCount;
 	private final Predicate<ItemStack> isItemValid;
 	private FilterItemStackHandler filterHandler = null;

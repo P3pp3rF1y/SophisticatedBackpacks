@@ -182,7 +182,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public BackpackSettingsHandler getSettingsHandler() {
 		if (settingsHandler == null) {
 			if (getContentsUuid().isPresent()) {
-				settingsHandler = new BackpackSettingsHandler(getBackpackContentsNbt(), this::markBackpackContentsDirty);
+				settingsHandler = new BackpackSettingsHandler(this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
 			} else {
 				settingsHandler = NoopBackpackWrapper.INSTANCE.getSettingsHandler();
 			}
