@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.minecraft.entity.player.PlayerEntity;
+
 public class XpHelper {
 	private XpHelper() {}
 
@@ -49,5 +51,11 @@ public class XpHelper {
 		int baseLevel = getLevelForExperience(experience);
 		int remainingExperience = experience - getExperienceForLevel(baseLevel);
 		return baseLevel + ((double) remainingExperience / getExperienceLimitOnLevel(baseLevel));
+	}
+
+	public static int getPlayerTotalExperience(PlayerEntity player) {
+		int currentLevelPoints = getExperienceForLevel(player.experienceLevel);
+		int partialLevelPoints = (int) (player.experienceProgress * player.getXpNeededForNextLevel());
+		return currentLevelPoints + partialLevelPoints;
 	}
 }
