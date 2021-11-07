@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrapper, XpPumpUpgradeItem> implements ITickableUpgrade {
 	private static final int DEFAULT_LEVEL = 10;
 	private static final int COOLDOWN = 5;
-	private static final int ALL_LEVELS = 100000;
+	private static final int ALL_LEVELS = 10000;
 	private static final int PLAYER_SEARCH_RANGE = 3;
 
 	protected XpPumpUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -74,7 +74,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 	}
 
 	private void tryGivePlayerExperienceFromTank(Player player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
-		int maxXpPointsToGive = XpHelper.getExperienceForLevel(stopAtLevel) - player.totalExperience;
+		int maxXpPointsToGive = XpHelper.getExperienceForLevel(stopAtLevel) - XpHelper.getPlayerTotalExperience(player);
 		FluidStack toDrain = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToGive));
 
 		FluidStack drained = fluidHandler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
@@ -99,7 +99,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 	}
 
 	private void tryFillTankWithPlayerExperience(Player player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
-		int maxXpPointsToTake = player.totalExperience - XpHelper.getExperienceForLevel(stopAtLevel);
+		int maxXpPointsToTake = XpHelper.getPlayerTotalExperience(player) - XpHelper.getExperienceForLevel(stopAtLevel);
 		FluidStack toFill = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToTake));
 		int filled = fluidHandler.fill(toFill, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
 
