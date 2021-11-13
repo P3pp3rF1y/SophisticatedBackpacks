@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrapper, XpPumpUpgradeItem> implements ITickableUpgrade {
 	private static final int DEFAULT_LEVEL = 10;
 	private static final int COOLDOWN = 5;
-	private static final int ALL_LEVELS = 100000;
+	private static final int ALL_LEVELS = 10000;
 	private static final int PLAYER_SEARCH_RANGE = 3;
 
 	protected XpPumpUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {

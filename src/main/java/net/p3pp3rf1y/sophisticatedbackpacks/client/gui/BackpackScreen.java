@@ -308,14 +308,14 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		if (itemstack.isEmpty() && slot.isActive()) {
 			renderSlotBackground(matrixStack, slot, i, j);
 		} else if (!rightClickDragging) {
-			renderStack(matrixStack, slot, i, j, itemstack, flag, stackCountText);
+			renderStack(matrixStack, i, j, itemstack, flag, stackCountText);
 		}
 
 		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
 	}
 
-	private void renderStack(MatrixStack matrixStack, Slot slot, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
+	private void renderStack(MatrixStack matrixStack, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
 		if (flag) {
 			fill(matrixStack, i, j, i + 16, j + 16, -2130706433);
 		}
