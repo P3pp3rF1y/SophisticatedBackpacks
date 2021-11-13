@@ -193,17 +193,13 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	}
 
 	private Position getSortButtonsPosition(SortButtonsPosition sortButtonsPosition) {
-		switch (sortButtonsPosition) {
-			case ABOVE_UPGRADES:
-				return new Position(leftPos - UPGRADE_INVENTORY_OFFSET - 2, topPos + getUpgradeTop() - 14);
-			case BELOW_UPGRADES:
-				return new Position(leftPos - UPGRADE_INVENTORY_OFFSET - 2, topPos + getUpgradeTop() + getUpgradeHeightWithoutBottom() + UPGRADE_BOTTOM_HEIGHT + 2);
-			case BELOW_UPGRADE_TABS:
-				return settingsTabControl == null ? new Position(0, 0) : new Position(settingsTabControl.getX() + 2, settingsTabControl.getY() + Math.max(0, settingsTabControl.getHeight() + 2));
-			case TITLE_LINE_RIGHT:
-			default:
-				return new Position(leftPos + imageWidth - 34, topPos + 4);
-		}
+		return switch (sortButtonsPosition) {
+			case ABOVE_UPGRADES -> new Position(leftPos - UPGRADE_INVENTORY_OFFSET - 2, topPos + getUpgradeTop() - 14);
+			case BELOW_UPGRADES -> new Position(leftPos - UPGRADE_INVENTORY_OFFSET - 2, topPos + getUpgradeTop() + getUpgradeHeightWithoutBottom() + UPGRADE_BOTTOM_HEIGHT + 2);
+			case BELOW_UPGRADE_TABS -> settingsTabControl == null ? new Position(0, 0) : new Position(settingsTabControl.getX() + 2, settingsTabControl.getY() + Math.max(0, settingsTabControl.getHeight() + 2));
+			case TITLE_LINE_RIGHT -> new Position(leftPos + imageWidth - 34, topPos + 4);
+			default -> new Position(leftPos + imageWidth - 34, topPos + 4);
+		};
 	}
 
 	public Optional<Rect2i> getSortButtonsRectangle() {
@@ -309,36 +305,59 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 		setBlitOffset(100);
 		itemRenderer.blitOffset = 100.0F;
 		if (itemstack.isEmpty() && slot.isActive()) {
+			renderSlotBackground(matrixStack, slot, i, j);
+		} else if (!rightClickDragging) {
+			renderStack(matrixStack, i, j, itemstack, flag, stackCountText);
+		}
+
+		itemRenderer.blitOffset = 0.0F;
+		setBlitOffset(0);
+	}
+
+	private void renderStack(PoseStack poseStack, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
+		if (flag) {
+			fill(poseStack, i, j, i + 16, j + 16, -2130706433);
+		}
+
+		RenderSystem.enableDepthTest();
+		itemRenderer.renderAndDecorateItem(itemstack, i, j);
+		if (shouldUseSpecialCountRender(itemstack)) {
+			itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, "");
+			if (stackCountText == null) {
+				stackCountText = CountAbbreviator.abbreviate(itemstack.getCount());
+			}
+			renderStackCount(stackCountText, i, j);
+		} else {
+			itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, stackCountText);
+		}
+	}
+
+	private void renderSlotBackground(PoseStack poseStack, Slot slot, int i, int j) {
+		Optional<ItemStack> memorizedStack = getMenu().getMemorizedStackInSlot(slot.index);
+		if (memorizedStack.isPresent()) {
+			itemRenderer.renderAndDecorateItem(memorizedStack.get(), i, j);
+			drawMemorizedStackOverlay(poseStack, i, j);
+		} else {
 			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
 			if (pair != null) {
 				TextureAtlasSprite textureatlassprite = minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
-				blit(matrixStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
-				rightClickDragging = true;
+				blit(poseStack, i, j, getBlitOffset(), 16, 16, textureatlassprite);
 			}
 		}
+	}
 
-		if (!rightClickDragging) {
-			if (flag) {
-				fill(matrixStack, i, j, i + 16, j + 16, -2130706433);
-			}
-
-			RenderSystem.enableDepthTest();
-			itemRenderer.renderAndDecorateItem(itemstack, i, j);
-			if (shouldUseSpecialCountRender(itemstack)) {
-				itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, "");
-				if (stackCountText == null) {
-					stackCountText = CountAbbreviator.abbreviate(itemstack.getCount());
-				}
-				renderStackCount(stackCountText, i, j);
-			} else {
-				itemRenderer.renderGuiItemDecorations(font, itemstack, i, j, stackCountText);
-			}
-		}
-
-		itemRenderer.blitOffset = 0.0F;
-		setBlitOffset(0);
+	private void drawMemorizedStackOverlay(PoseStack poseStack, int x, int y) {
+		poseStack.pushPose();
+		RenderSystem.enableBlend();
+		RenderSystem.disableDepthTest();
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderTexture(0, GuiHelper.GUI_CONTROLS);
+		blit(poseStack, x, y, 77, 0, 16, 16);
+		RenderSystem.enableDepthTest();
+		RenderSystem.disableBlend();
+		poseStack.popPose();
 	}
 
 	private boolean shouldUseSpecialCountRender(ItemStack itemstack) {
@@ -629,7 +648,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	private void renderErrorOverlay(PoseStack matrixStack) {
 		menu.getErrorUpgradeSlotChangeResult().ifPresent(upgradeSlotChangeResult -> upgradeSlotChangeResult.getErrorMessage().ifPresent(overlayErrorMessage -> {
 			matrixStack.pushPose();
-			matrixStack.translate(getGuiLeft(), (float) getGuiTop(), 0.0F);
+			matrixStack.translate(getGuiLeft(), getGuiTop(), 0.0F);
 			upgradeSlotChangeResult.getErrorUpgradeSlots().forEach(slotIndex -> renderSlotOverlay(matrixStack, menu.getSlot(menu.getFirstUpgradeSlot() + slotIndex), ERROR_SLOT_COLOR));
 			upgradeSlotChangeResult.getErrorInventorySlots().forEach(slotIndex -> {
 				Slot slot = menu.getSlot(slotIndex);

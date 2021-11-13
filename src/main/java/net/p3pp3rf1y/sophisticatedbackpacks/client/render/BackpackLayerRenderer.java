@@ -15,7 +15,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.HashMap;
@@ -92,6 +96,28 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 			int clothColor = wrapper.getClothColor();
 			int borderColor = wrapper.getBorderColor();
 			model.render(matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
+			renderUpgrades(livingEntity, wrapper.getRenderInfo());
 		});
+	}
+
+	private static void renderUpgrades(LivingEntity livingEntity, BackpackRenderInfo renderInfo) {
+		if (Minecraft.getInstance().isPaused() || livingEntity.level.random.nextInt(32) != 0) {
+			return;
+		}
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
+	}
+
+	private static Vector3f getBackpackMiddleFacePoint(LivingEntity livingEntity, Vector3f vector) {
+		Vector3f point = vector.copy();
+		point.transform(Vector3f.XP.rotationDegrees(livingEntity.isCrouching() ? 25 : 0));
+		point.add(0, 0.8f, livingEntity.isCrouching() ? 0.9f : 0.7f);
+		point.transform(Vector3f.YN.rotationDegrees(livingEntity.yBodyRot - 180));
+		point.add(new Vector3f(livingEntity.position()));
+		return point;
+	}
+
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, LivingEntity livingEntity, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		//noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.level, livingEntity.level.random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
 	}
 }

@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundTag;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 
 import java.util.ArrayList;
@@ -21,15 +23,16 @@ public class BackpackSettingsHandler {
 	private final Map<String, ISettingsCategory> settingsCategories = new LinkedHashMap<>();
 	private final Map<Class<? extends ISettingsCategory>, ISettingsCategory> typeCategories = new HashMap<>();
 
-	public BackpackSettingsHandler(CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
+	public BackpackSettingsHandler(IBackpackWrapper backpackWrapper, CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
 		this.backpackContentsNbt = backpackContentsNbt;
 		this.markBackpackContentsDirty = markBackpackContentsDirty;
-		addSettingsCategories(backpackContentsNbt.getCompound(SETTINGS_TAG));
+		addSettingsCategories(backpackWrapper, backpackContentsNbt.getCompound(SETTINGS_TAG));
 	}
 
-	private void addSettingsCategories(CompoundTag settingsNbt) {
+	private void addSettingsCategories(IBackpackWrapper backpackWrapper, CompoundTag settingsNbt) {
 		addSettingsCategory(settingsNbt, BackpackSettingsCategory.NAME, markBackpackContentsDirty, BackpackSettingsCategory::new);
 		addSettingsCategory(settingsNbt, NoSortSettingsCategory.NAME, markBackpackContentsDirty, NoSortSettingsCategory::new);
+		addSettingsCategory(settingsNbt, MemorySettingsCategory.NAME, markBackpackContentsDirty, (categoryNbt, saveNbt) -> new MemorySettingsCategory(backpackWrapper, categoryNbt, saveNbt));
 	}
 
 	private void addSettingsCategory(CompoundTag settingsNbt, String categoryName, Runnable markBackpackContentsDirty, BiFunction<CompoundTag, Consumer<CompoundTag>, ISettingsCategory> instantiateCategory) {

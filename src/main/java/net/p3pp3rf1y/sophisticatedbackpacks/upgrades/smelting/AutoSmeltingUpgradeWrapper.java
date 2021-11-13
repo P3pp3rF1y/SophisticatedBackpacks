@@ -10,6 +10,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -82,6 +83,15 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 
 		if (!smeltingLogic.tick(world) && outputCooldown <= 0 && fuelCooldown <= 0 && inputCooldown <= 0) {
 			setCooldown(world, NOTHING_TO_DO_COOLDOWN);
+		}
+		boolean isBurning = smeltingLogic.isBurning(world);
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		if (renderInfo.getUpgradeRenderData(SmeltingUpgradeRenderData.TYPE).map(SmeltingUpgradeRenderData::isBurning).orElse(false) != isBurning) {
+			if (isBurning) {
+				renderInfo.setUpgradeRenderData(SmeltingUpgradeRenderData.TYPE, new SmeltingUpgradeRenderData(true));
+			} else {
+				renderInfo.removeUpgradeRenderData(SmeltingUpgradeRenderData.TYPE);
+			}
 		}
 	}
 

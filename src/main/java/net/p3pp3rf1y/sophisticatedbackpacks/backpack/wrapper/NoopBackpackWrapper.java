@@ -17,7 +17,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	public static final NoopBackpackWrapper INSTANCE = new NoopBackpackWrapper();
 
 	private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
-	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(new CompoundTag(), () -> {});
+	private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(this, new CompoundTag(), () -> {});
 	private final BackpackUpgradeHandler backpackUpgradeHandler = new BackpackUpgradeHandler(0, this, new CompoundTag(), () -> {}, () -> {});
 	private final BackpackInventoryHandler backpackInventoryHandler = new BackpackInventoryHandler(0, this, new CompoundTag(), () -> {}, 64);
 	private final BackpackRenderInfo backpackRenderInfo = new BackpackRenderInfo(backpack, () -> () -> {});

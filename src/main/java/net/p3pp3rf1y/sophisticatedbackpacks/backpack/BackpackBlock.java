@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import com.mojang.math.Vector3f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -45,6 +47,11 @@ import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.UpgradeRenderRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -55,6 +62,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
@@ -239,5 +247,34 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typePassedIn, BlockEntityType<E> typeExpected, BlockEntityTicker<? super E> blockEntityTicker) {
 		//noinspection unchecked
 		return typeExpected == typePassedIn ? (BlockEntityTicker<A>) blockEntityTicker : null;
+	}
+
+	@Override
+	public void animateTick(BlockState state, Level level, BlockPos pos, Random rand) {
+		WorldHelper.getTile(level, pos, BackpackBlockEntity.class).ifPresent(te -> {
+			BackpackRenderInfo renderInfo = te.getBackpackWrapper().getRenderInfo();
+			renderUpgrades(level, rand, pos, state.getValue(FACING), renderInfo);
+		});
+
+	}
+
+	private static void renderUpgrades(Level level, Random rand, BlockPos pos, Direction facing, BackpackRenderInfo renderInfo) {
+		if (Minecraft.getInstance().isPaused()) {
+			return;
+		}
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, level, rand, pos, facing, type, data)));
+	}
+
+	private static Vector3f getBackpackMiddleFacePoint(BlockPos pos, Direction facing, Vector3f vector) {
+		Vector3f point = vector.copy();
+		point.add(0, 0, 0.41f);
+		point.transform(Vector3f.YN.rotationDegrees(facing.toYRot()));
+		point.add(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
+		return point;
+	}
+
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, Level level, Random rand, BlockPos pos, Direction facing, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		//noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(level, rand, vector -> getBackpackMiddleFacePoint(pos, facing, vector), (T) renderData));
 	}
 }
