@@ -78,7 +78,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	private int pickupXpOrbs(@Nullable LivingEntity entity, World world, BlockPos pos) {
-		List<ExperienceOrbEntity> xpEntities = world.getEntities(EntityType.EXPERIENCE_ORB, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
+		List<ExperienceOrbEntity> xpEntities = world.getEntitiesOfClass(ExperienceOrbEntity.class, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
 		if (xpEntities.isEmpty()) {
 			return COOLDOWN_TICKS;
 		}
@@ -97,13 +97,14 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	private boolean tryToFillTank(ExperienceOrbEntity xpOrb, World world) {
-		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.value);
+		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.getValue());
 
 		return backpackWrapper.getFluidHandler().map(fluidHandler -> {
 			int amountAdded = fluidHandler.fill(new FluidStack(ModFluids.XP_STILL.get(), amountToTransfer), IFluidHandler.FluidAction.EXECUTE);
 
 			if (amountAdded > 0) {
 				Vector3d pos = xpOrb.position();
+				xpOrb.value = 0;
 				xpOrb.remove();
 
 				if (amountToTransfer > amountAdded) {
