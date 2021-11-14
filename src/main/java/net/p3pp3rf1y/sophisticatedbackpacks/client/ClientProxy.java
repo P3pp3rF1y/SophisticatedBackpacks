@@ -8,6 +8,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.CreativeScreen;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -117,6 +118,7 @@ public class ClientProxy extends CommonProxy {
 			3, BACKPACK_TOGGLE_UPGRADE_4,
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
+	private static final int CHEST_SLOT_INDEX = 6;
 
 	private static boolean tryCallSort(Screen gui) {
 		Minecraft mc = Minecraft.getInstance();
@@ -204,18 +206,32 @@ public class ClientProxy extends CommonProxy {
 	private static void sendBackpackOpenOrCloseMessage() {
 		if (!GUI.isActive()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
-		} else if (Minecraft.getInstance().screen instanceof BackpackScreen) {
-			BackpackScreen backpackScreen = (BackpackScreen) Minecraft.getInstance().screen;
+			return;
+		}
+
+		Screen screen = Minecraft.getInstance().screen;
+		if (screen instanceof BackpackScreen) {
+			BackpackScreen backpackScreen = (BackpackScreen) screen;
 
 			Slot slot = backpackScreen.getSlotUnderMouse();
 			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
 				if (slot.getItem().getCount() == 1) {
-					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
+					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index, true));
 				}
 			} else {
 				PacketHandler.sendToServer(new BackpackCloseMessage());
 			}
+		} else if (screen instanceof InventoryScreen) {
+			Slot slot = ((InventoryScreen) screen).getSlotUnderMouse();
+
+			if (slot != null && isSupportedPlayerInventorySlot(slot.index) && slot.getItem().getItem() instanceof BackpackItem) {
+				PacketHandler.sendToServer(new BackpackOpenMessage(slot.getSlotIndex(), false));
+			}
 		}
+	}
+
+	private static boolean isSupportedPlayerInventorySlot(int slotIndex) {
+		return slotIndex == CHEST_SLOT_INDEX || (slotIndex > 8 && slotIndex < 46);
 	}
 
 	@Override
@@ -371,7 +387,11 @@ public class ClientProxy extends CommonProxy {
 
 		@Override
 		public boolean isActive() {
-			return !GUI.isActive() || Minecraft.getInstance().screen instanceof BackpackScreen;
+			if (!GUI.isActive()) {
+				return true;
+			}
+			Screen screen = Minecraft.getInstance().screen;
+			return screen instanceof BackpackScreen || screen instanceof InventoryScreen;
 		}
 
 		@Override
