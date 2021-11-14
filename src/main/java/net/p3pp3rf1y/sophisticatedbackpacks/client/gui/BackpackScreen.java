@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
@@ -185,9 +186,15 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if ((keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) && !getMenu().isFirstLevelBackpack()) {
-			PacketHandler.sendToServer(new BackpackOpenMessage());
-			return true;
+		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+			if (getMenu().isFirstLevelBackpack() && getMenu().getBackpackContext().wasOpenFromInventory()) {
+				getMinecraft().player.closeContainer();
+				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+				return true;
+			} else if (!getMenu().isFirstLevelBackpack()) {
+				PacketHandler.sendToServer(new BackpackOpenMessage());
+				return true;
+			}
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
