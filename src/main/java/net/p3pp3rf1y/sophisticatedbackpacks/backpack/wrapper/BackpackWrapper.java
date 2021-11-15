@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
@@ -31,9 +32,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -313,7 +316,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void sort() {
-		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		Set<Integer> slotIndexesExcludedFromSort = new HashSet<>();
+		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotIndexes());
+		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), slotIndexesExcludedFromSort);
 	}
 
 	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {
