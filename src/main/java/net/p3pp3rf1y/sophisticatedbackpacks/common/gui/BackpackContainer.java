@@ -412,7 +412,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	public Optional<ItemStack> getMemorizedStackInSlot(int slotId) {
-		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterStack(slotId);
+		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterItem(slotId).map(ItemStack::new);
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
@@ -956,7 +956,11 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	private Set<Integer> getNoSortSlotIndexes() {
-		return backpackWrapper.getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots();
+		BackpackSettingsHandler settingsHandler = backpackWrapper.getSettingsHandler();
+		Set<Integer> slotIndexesExcludedFromSort = new HashSet<>();
+		slotIndexesExcludedFromSort.addAll(settingsHandler.getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		slotIndexesExcludedFromSort.addAll(settingsHandler.getTypeCategory(MemorySettingsCategory.class).getSlotIndexes());
+		return slotIndexesExcludedFromSort;
 	}
 
 	public void detectSettingsChangeAndReload() {
