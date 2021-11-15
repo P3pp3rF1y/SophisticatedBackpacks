@@ -125,7 +125,7 @@ public class RecipeHelper {
 	private static boolean uncompactMatchesItem(ItemStack result, Level w, Item item, int count) {
 		CraftingContainer craftingInventory = getFilledCraftingInventory(result.getItem(), 1, 1);
 		result = w.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInventory, w).map(r -> r.assemble(craftingInventory)).orElse(ItemStack.EMPTY);
-		return (result.getItem() == item || InventoryHelper.anyItemTagMatches(result.getItem(), item)) && result.getCount() == count;
+		return result.getItem() == item && result.getCount() == count;
 	}
 
 	public static CompactingResult getCompactingResult(Item item, int width, int height) {
