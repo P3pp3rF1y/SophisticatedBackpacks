@@ -18,6 +18,10 @@ public interface IBackpackWrapper {
 
 	void setBackpackSaveHandler(Runnable saveHandler);
 
+	default void setInventorySlotChangeHandler(Runnable slotChangeHandler) {
+		//noop
+	}
+
 	IItemHandlerModifiable getInventoryForUpgradeProcessing();
 
 	BackpackInventoryHandler getInventoryHandler();
