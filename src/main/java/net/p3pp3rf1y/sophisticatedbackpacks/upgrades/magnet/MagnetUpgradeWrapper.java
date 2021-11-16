@@ -15,9 +15,11 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -31,7 +33,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem>
-		implements IContentsFilteredUpgrade, ITickableUpgrade {
+		implements IContentsFilteredUpgrade, ITickableUpgrade, IPickupResponseUpgrade {
 	private static final String PREVENT_REMOTE_MOVEMENT = "PreventRemoteMovement";
 	private static final String ALLOW_MACHINE_MOVEMENT = "AllowMachineRemoteMovement";
 
@@ -56,6 +58,34 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	@Override
 	public ContentsFilterLogic getFilterLogic() {
 		return filterLogic;
+	}
+
+	@Override
+	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
+		if (isInLongCooldown(world)) {
+			return stack;
+		}
+
+		if (filterLogic.getFilterType() == ContentsFilterType.BACKPACK && backpackContentsRefreshCooldown < world.getGameTime()) {
+			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
+			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
+		}
+
+		if (!filterLogic.matchesFilter(stack)) {
+			return stack;
+		}
+
+		int originalCount = stack.getCount();
+		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryForUpgradeProcessing(), simulate);
+		if (originalCount == ret.getCount()) {
+			setCooldown(world, FULL_COOLDOWN_TICKS);
+		}
+
+		return ret;
+	}
+
+	private boolean isInLongCooldown(Level world) {
+		return getCooldownTime() - COOLDOWN_TICKS > world.getGameTime();
 	}
 
 	@Override
@@ -124,7 +154,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 		int cooldown = FULL_COOLDOWN_TICKS;
 
-		if (backpackContentsRefreshCooldown < world.getGameTime()) {
+		if (filterLogic.getFilterType() == ContentsFilterType.BACKPACK && backpackContentsRefreshCooldown < world.getGameTime()) {
 			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
 			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
 		}
