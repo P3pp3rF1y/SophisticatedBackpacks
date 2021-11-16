@@ -1264,7 +1264,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	@SuppressWarnings({"java:S3776", "java:S135"})
 	//need to keep this very close to vanilla for easy port so not refactoring it to lower complexity or less exit points in loops
 	protected boolean mergeItemStack(ItemStack sourceStack, int startIndex, int endIndex, boolean reverseDirection, boolean transferMaxStackSizeFromSource) {
-		boolean flag = false;
+		boolean mergedSomething = false;
 		int i = startIndex;
 		if (reverseDirection) {
 			i = endIndex - 1;
@@ -1292,13 +1292,13 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 							destStack.setCount(j);
 							toTransfer = 0;
 							slot.setChanged();
-							flag = true;
+							mergedSomething = true;
 						} else if (destStack.getCount() < maxSize) {
 							sourceStack.shrink(maxSize - destStack.getCount());
 							toTransfer -= maxSize - destStack.getCount();
 							destStack.setCount(maxSize);
 							slot.setChanged();
-							flag = true;
+							mergedSomething = true;
 						}
 					}
 				}
@@ -1307,6 +1307,25 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 					--i;
 				} else {
 					++i;
+				}
+			}
+		}
+
+		if (toTransfer > 0) {
+			int firstIndex = reverseDirection ? endIndex - 1 : startIndex;
+			int increment = reverseDirection ? -1 : 1;
+
+			MemorySettingsCategory memory = backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class);
+			for (int slotIndex = firstIndex; (reverseDirection ? slotIndex >= startIndex : slotIndex < endIndex) && toTransfer > 0; slotIndex += increment) {
+				if (memory.getSlotIndexes().contains(slotIndex) && memory.matchesFilter(slotIndex, sourceStack)) {
+					Slot slot = getSlot(slotIndex);
+					ItemStack destStack = slot.getItem();
+					if (destStack.isEmpty()) {
+						slot.set(sourceStack.split(slot.getMaxStackSize()));
+						slot.setChanged();
+						toTransfer = sourceStack.getCount();
+						mergedSomething = true;
+					}
 				}
 			}
 		}
@@ -1350,7 +1369,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 					}
 					if (!errorMerging) {
 						destSlot.setChanged();
-						flag = true;
+						mergedSomething = true;
 						break;
 					}
 				}
@@ -1363,7 +1382,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 			}
 		}
 
-		return flag;
+		return mergedSomething;
 	}
 
 	@Override
