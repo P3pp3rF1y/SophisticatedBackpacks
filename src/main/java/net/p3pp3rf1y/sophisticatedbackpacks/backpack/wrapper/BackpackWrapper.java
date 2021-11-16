@@ -55,6 +55,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
+	private Runnable inventorySlotChangeHandler = () -> {};
 
 	@Nullable
 	private BackpackInventoryHandler handler = null;
@@ -87,6 +88,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public void setInventorySlotChangeHandler(Runnable slotChangeHandler) {
+		inventorySlotChangeHandler = slotChangeHandler;
+	}
+
+	@Override
 	public IItemHandlerModifiable getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
 			inventoryModificationHandler = new InventoryModificationHandler(this);
@@ -98,7 +104,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
-					this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
+					this, getBackpackContentsNbt(), () -> {
+				markBackpackContentsDirty();
+				inventorySlotChangeHandler.run();
+			}, StackUpgradeItem.getInventorySlotLimit(this));
 		}
 		return handler;
 	}

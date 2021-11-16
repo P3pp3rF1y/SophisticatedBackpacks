@@ -42,6 +42,7 @@ public class BackpackBlockEntity extends BlockEntity {
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
 		});
+		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
 	}
 
 	@Override
