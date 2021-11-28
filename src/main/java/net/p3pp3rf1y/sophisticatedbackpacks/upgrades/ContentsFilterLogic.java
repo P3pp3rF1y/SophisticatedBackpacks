@@ -6,13 +6,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ContentsFilterLogic extends FilterLogic {
-	private final BackpackInventoryHandler inventoryHandler;
 
-	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, BackpackInventoryHandler inventoryHandler) {
+	private final Supplier<BackpackInventoryHandler> getInventoryHandler;
+
+	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Supplier<BackpackInventoryHandler> getInventoryHandler) {
 		super(upgrade, saveHandler, filterSlotCount);
-		this.inventoryHandler = inventoryHandler;
+		this.getInventoryHandler = getInventoryHandler;
 	}
 
 	public ContentsFilterType getFilterType() {
@@ -45,12 +47,12 @@ public class ContentsFilterLogic extends FilterLogic {
 			return super.matchesFilter(stack);
 		}
 
-		for (ItemStackKey filterStack : inventoryHandler.getSlotTracker().getFullStacks()) {
+		for (ItemStackKey filterStack : getInventoryHandler.get().getSlotTracker().getFullStacks()) {
 			if (stackMatchesFilter(stack, filterStack.getStack())) {
 				return true;
 			}
 		}
-		for (ItemStackKey filterStack : inventoryHandler.getSlotTracker().getPartialStacks()) {
+		for (ItemStackKey filterStack : getInventoryHandler.get().getSlotTracker().getPartialStacks()) {
 			if (stackMatchesFilter(stack, filterStack.getStack())) {
 				return true;
 			}
