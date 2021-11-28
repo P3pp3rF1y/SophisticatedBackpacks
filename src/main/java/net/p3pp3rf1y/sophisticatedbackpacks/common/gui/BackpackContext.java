@@ -163,7 +163,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new ItemSubBackpack(handlerName, backpackSlotIndex, subBackpackSlotIndex);
+			return new ItemSubBackpack(handlerName, backpackSlotIndex, openFromInventory, subBackpackSlotIndex);
 		}
 
 		@Override
@@ -198,8 +198,8 @@ public abstract class BackpackContext {
 		@Nullable
 		private IBackpackWrapper parentWrapper;
 
-		public ItemSubBackpack(String handlerName, int backpackSlotIndex, int subBackpackSlotIndex) {
-			super(handlerName, backpackSlotIndex);
+		public ItemSubBackpack(String handlerName, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
+			super(handlerName, backpackSlotIndex, parentOpenFromInventory);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -218,7 +218,7 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
+			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
 		}
 
 		@Override
@@ -229,7 +229,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.Item(handlerName, backpackSlotIndex);
+			return new BackpackContext.Item(handlerName, backpackSlotIndex, super.wasOpenFromInventory());
 		}
 
 		@Override

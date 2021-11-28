@@ -287,7 +287,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 
 	@Override
 	public void initializeContents(int stateId, List<ItemStack> items, ItemStack carried) {
-		backpackWrapper.setPersistent(false);
+		backpackWrapper.setPersistent(player.level.isClientSide);
 		isUpdatingFromPacket = true;
 		super.initializeContents(stateId, items, carried);
 		isUpdatingFromPacket = false;
@@ -451,7 +451,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		return index >= getNumberOfBackpackInventorySlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	private boolean isBackpackInventorySlot(int index) {
+	public boolean isBackpackInventorySlot(int index) {
 		return index < getNumberOfBackpackInventorySlots();
 	}
 

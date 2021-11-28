@@ -32,6 +32,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
@@ -187,7 +188,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-			if (getMenu().isFirstLevelBackpack() && getMenu().getBackpackContext().wasOpenFromInventory()) {
+			if (getMenu().isFirstLevelBackpack() && getMenu().getBackpackContext().wasOpenFromInventory() && mouseNotOverBackpack()) {
 				getMinecraft().player.closeContainer();
 				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
 				return true;
@@ -197,6 +198,11 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 			}
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+
+	private boolean mouseNotOverBackpack() {
+		Slot selectedSlot = getSlotUnderMouse();
+		return selectedSlot == null || !(selectedSlot.getItem().getItem() instanceof BackpackItem);
 	}
 
 	private Position getSortButtonsPosition(SortButtonsPosition sortButtonsPosition) {
