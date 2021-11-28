@@ -200,7 +200,7 @@ public abstract class BackpackContext {
 		private IBackpackWrapper parentWrapper;
 
 		public ItemSubBackpack(String handlerName, int backpackSlotIndex, int subBackpackSlotIndex) {
-			super(handlerName, backpackSlotIndex);
+			super(handlerName, backpackSlotIndex, false);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -224,7 +224,8 @@ public abstract class BackpackContext {
 
 		@Override
 		public void addToBuffer(PacketBuffer packetBuffer) {
-			super.addToBuffer(packetBuffer);
+			packetBuffer.writeUtf(handlerName);
+			packetBuffer.writeInt(backpackSlotIndex);
 			packetBuffer.writeInt(subBackpackSlotIndex);
 		}
 
