@@ -13,16 +13,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterType;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 
@@ -37,12 +35,9 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	private static final String PREVENT_REMOTE_MOVEMENT = "PreventRemoteMovement";
 	private static final String ALLOW_MACHINE_MOVEMENT = "AllowMachineRemoteMovement";
 
-	private static final int BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS = 10;
 	private static final int COOLDOWN_TICKS = 10;
 	private static final int FULL_COOLDOWN_TICKS = 40;
 	private final ContentsFilterLogic filterLogic;
-
-	private long backpackContentsRefreshCooldown = 0;
 
 	private static final Set<IMagnetPreventionChecker> magnetCheckers = new HashSet<>();
 
@@ -52,7 +47,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	public MagnetUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper.getInventoryHandler());
 	}
 
 	@Override
@@ -66,17 +61,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			return stack;
 		}
 
-		if (filterLogic.getFilterType() == ContentsFilterType.BACKPACK && backpackContentsRefreshCooldown < world.getGameTime()) {
-			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
-			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
-		}
-
 		if (!filterLogic.matchesFilter(stack)) {
 			return stack;
 		}
 
 		int originalCount = stack.getCount();
-		ItemStack ret = InventoryHelper.insertIntoInventory(stack, backpackWrapper.getInventoryForUpgradeProcessing(), simulate);
+		ItemStack ret = backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
 		if (originalCount == ret.getCount()) {
 			setCooldown(world, FULL_COOLDOWN_TICKS);
 		}
@@ -154,11 +144,6 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 		int cooldown = FULL_COOLDOWN_TICKS;
 
-		if (filterLogic.getFilterType() == ContentsFilterType.BACKPACK && backpackContentsRefreshCooldown < world.getGameTime()) {
-			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
-			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
-		}
-
 		for (ItemEntity itemEntity : itemEntities) {
 			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, entity)) {
 				continue;
@@ -190,12 +175,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	private boolean tryToInsertItem(ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, inventory, true);
+		IItemHandlerSimpleInserter inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		ItemStack remaining = inventory.insertItem(stack, true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, inventory, false);
+			remaining = inventory.insertItem(stack, false);
 			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;

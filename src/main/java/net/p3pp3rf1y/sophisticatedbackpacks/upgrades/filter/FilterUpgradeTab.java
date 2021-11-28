@@ -10,9 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterControl;
 
 import java.util.Map;
 
@@ -27,7 +25,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 					Direction.OUTPUT, GuiHelper.getButtonStateData(new UV(32, 32), translUpgradeButton("direction_output"), Dimension.SQUARE_16, new Position(1, 1))
 			));
 
-	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
+	protected ContentsFilterControl filterLogicControl;
 
 	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen,
 			Component tabLabel, Component closedTooltip) {
@@ -45,7 +43,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 	public static class Basic extends FilterUpgradeTab {
 		public Basic(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("filter"), translUpgradeTooltip("filter"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.filterUpgrade.slotsInRow.get()));
 		}
 	}
@@ -53,7 +51,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 	public static class Advanced extends FilterUpgradeTab {
 		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 			super(upgradeContainer, position, screen, translUpgrade("advanced_filter"), translUpgradeTooltip("advanced_filter"));
-			filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
+			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					Config.COMMON.advancedFilterUpgrade.slotsInRow.get()));
 		}
 	}

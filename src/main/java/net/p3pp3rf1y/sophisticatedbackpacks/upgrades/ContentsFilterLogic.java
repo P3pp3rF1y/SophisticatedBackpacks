@@ -1,20 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class ContentsFilterLogic extends FilterLogic {
-	private Set<ItemStackKey> backpackFilterStacks = new HashSet<>();
+	private final BackpackInventoryHandler inventoryHandler;
 
-	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
+	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, BackpackInventoryHandler inventoryHandler) {
 		super(upgrade, saveHandler, filterSlotCount);
+		this.inventoryHandler = inventoryHandler;
 	}
 
 	public ContentsFilterType getFilterType() {
@@ -26,23 +24,19 @@ public class ContentsFilterLogic extends FilterLogic {
 
 	public void setDepositFilterType(ContentsFilterType contentsFilterType) {
 		switch (contentsFilterType) {
-			case ALLOW:
+			case ALLOW -> {
 				setFilterByBackpack(false);
 				setAllowList(true);
-				break;
-			case BLOCK:
+			}
+			case BLOCK -> {
 				setFilterByBackpack(false);
 				setAllowList(false);
-				break;
-			case BACKPACK:
-			default:
+			}
+			case BACKPACK -> {
 				setFilterByBackpack(true);
 				save();
+			}
 		}
-	}
-
-	public void refreshBackpackFilterStacks(IItemHandler backpackInventory) {
-		backpackFilterStacks = InventoryHelper.getUniqueStacks(backpackInventory);
 	}
 
 	@Override
@@ -51,7 +45,12 @@ public class ContentsFilterLogic extends FilterLogic {
 			return super.matchesFilter(stack);
 		}
 
-		for (ItemStackKey filterStack : backpackFilterStacks) {
+		for (ItemStackKey filterStack : inventoryHandler.getSlotTracker().getFullStacks()) {
+			if (stackMatchesFilter(stack, filterStack.getStack())) {
+				return true;
+			}
+		}
+		for (ItemStackKey filterStack : inventoryHandler.getSlotTracker().getPartialStacks()) {
 			if (stackMatchesFilter(stack, filterStack.getStack())) {
 				return true;
 			}

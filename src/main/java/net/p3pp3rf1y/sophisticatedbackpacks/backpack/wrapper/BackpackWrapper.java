@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -23,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCatego
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
@@ -93,7 +93,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInventoryForUpgradeProcessing() {
+	public IItemHandlerSimpleInserter getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
 			inventoryModificationHandler = new InventoryModificationHandler(this);
 		}
@@ -143,7 +143,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInventoryForInputOutput() {
+	public IItemHandlerSimpleInserter getInventoryForInputOutput() {
 		if (inventoryIOHandler == null) {
 			inventoryIOHandler = new InventoryIOHandler(this);
 		}
