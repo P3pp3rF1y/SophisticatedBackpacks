@@ -3,20 +3,21 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.filter;
 import net.minecraft.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IIOFilterUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrapper, FilterUpgradeItem> implements IFilteredUpgrade, IIOFilterUpgrade {
-	private final FilterLogic filterLogic;
+public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrapper, FilterUpgradeItem> implements IContentsFilteredUpgrade, IIOFilterUpgrade {
+	private final ContentsFilterLogic filterLogic;
 
 	public FilterUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper.getInventoryHandler());
 	}
 
 	public void setDirection(Direction direction) {
@@ -30,7 +31,7 @@ public class FilterUpgradeWrapper extends UpgradeWrapperBase<FilterUpgradeWrappe
 	}
 
 	@Override
-	public FilterLogic getFilterLogic() {
+	public ContentsFilterLogic getFilterLogic() {
 		return filterLogic;
 	}
 

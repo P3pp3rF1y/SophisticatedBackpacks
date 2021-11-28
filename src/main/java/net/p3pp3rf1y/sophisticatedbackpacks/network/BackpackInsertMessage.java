@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -40,7 +39,7 @@ public class BackpackInsertMessage {
 		Container containerMenu = player.containerMenu;
 		containerMenu.getSlot(msg.slotIndex).getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 			ItemStack heldItem = player.inventory.getCarried();
-			player.inventory.setCarried(InventoryHelper.insertIntoInventory(heldItem, wrapper.getInventoryForUpgradeProcessing(), false));
+			player.inventory.setCarried(wrapper.getInventoryForUpgradeProcessing().insertItem(heldItem, false));
 			player.ignoreSlotUpdateHack = false;
 			player.broadcastCarriedItem();
 

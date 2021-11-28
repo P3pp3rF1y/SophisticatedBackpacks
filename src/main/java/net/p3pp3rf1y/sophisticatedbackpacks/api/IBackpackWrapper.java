@@ -4,12 +4,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,11 +22,11 @@ public interface IBackpackWrapper {
 		//noop
 	}
 
-	IItemHandlerModifiable getInventoryForUpgradeProcessing();
+	IItemHandlerSimpleInserter getInventoryForUpgradeProcessing();
 
 	BackpackInventoryHandler getInventoryHandler();
 
-	IItemHandlerModifiable getInventoryForInputOutput();
+	IItemHandlerSimpleInserter getInventoryForInputOutput();
 
 	void copyDataTo(IBackpackWrapper otherBackpackWrapper);
 
@@ -88,5 +88,5 @@ public interface IBackpackWrapper {
 		return Optional.empty();
 	}
 
-	default Optional<IEnergyStorage> getEnergyStorage() { return Optional.empty(); }
+	default Optional<IEnergyStorage> getEnergyStorage() {return Optional.empty();}
 }

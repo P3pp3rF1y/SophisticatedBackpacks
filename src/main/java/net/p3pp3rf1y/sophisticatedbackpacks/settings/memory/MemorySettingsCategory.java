@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class MemorySettingsCategory implements ISettingsCategory {
@@ -23,7 +25,8 @@ public class MemorySettingsCategory implements ISettingsCategory {
 	private final IBackpackWrapper backpackWrapper;
 	private CompoundNBT categoryNbt;
 	private final Consumer<CompoundNBT> saveNbt;
-	private final Map<Integer, Item> slotFilterItems = new HashMap<>();
+	private final Map<Integer, Item> slotFilterItems = new TreeMap<>();
+	private final Map<Item, Set<Integer>> filterItemSlots = new HashMap<>();
 
 	public MemorySettingsCategory(IBackpackWrapper backpackWrapper, CompoundNBT categoryNbt, Consumer<CompoundNBT> saveNbt) {
 		this.backpackWrapper = backpackWrapper;
@@ -34,7 +37,7 @@ public class MemorySettingsCategory implements ISettingsCategory {
 	}
 
 	private void deserialize() {
-		//TODO remove this legacy thing in the future - only included here as the tag below is no longer used and fu
+		//TODO remove this legacy thing in the future - only included here as the tag below is no longer used
 		if (categoryNbt.contains("slotFilterStacks")) {
 			categoryNbt.remove("slotFilterStacks");
 			saveNbt.accept(categoryNbt);
@@ -43,7 +46,7 @@ public class MemorySettingsCategory implements ISettingsCategory {
 		NBTHelper.getMap(categoryNbt.getCompound(SLOT_FILTER_ITEMS_TAG),
 						Integer::valueOf,
 						(k, v) -> Optional.ofNullable(ForgeRegistries.ITEMS.getValue(new ResourceLocation(v.getAsString()))))
-				.ifPresent(slotFilterItems::putAll);
+				.ifPresent(map -> map.forEach(this::addSlotItem));
 	}
 
 	public boolean matchesFilter(int slotNumber, ItemStack stack) {
@@ -64,6 +67,7 @@ public class MemorySettingsCategory implements ISettingsCategory {
 
 	public void unselectAllSlots() {
 		slotFilterItems.clear();
+		filterItemSlots.clear();
 		serializeFilterItems();
 	}
 
@@ -80,11 +84,17 @@ public class MemorySettingsCategory implements ISettingsCategory {
 			if (slot < inventoryHandler.getSlots()) {
 				ItemStack stackInSlot = inventoryHandler.getStackInSlot(slot);
 				if (!stackInSlot.isEmpty()) {
-					slotFilterItems.put(slot, stackInSlot.getItem());
+					Item item = stackInSlot.getItem();
+					addSlotItem(slot, item);
 				}
 			}
 		}
 		serializeFilterItems();
+	}
+
+	private void addSlotItem(int slot, Item item) {
+		slotFilterItems.put(slot, item);
+		filterItemSlots.computeIfAbsent(item, k -> new TreeSet<>()).add(slot);
 	}
 
 	public void selectSlot(int slotNumber) {
@@ -92,7 +102,12 @@ public class MemorySettingsCategory implements ISettingsCategory {
 	}
 
 	public void unselectSlot(int slotNumber) {
-		slotFilterItems.remove(slotNumber);
+		Item item = slotFilterItems.remove(slotNumber);
+		Set<Integer> itemSlots = filterItemSlots.get(item);
+		itemSlots.remove(slotNumber);
+		if (itemSlots.isEmpty()) {
+			filterItemSlots.remove(item);
+		}
 		serializeFilterItems();
 	}
 
@@ -106,10 +121,15 @@ public class MemorySettingsCategory implements ISettingsCategory {
 	public void reloadFrom(CompoundNBT categoryNbt) {
 		this.categoryNbt = categoryNbt;
 		slotFilterItems.clear();
+		filterItemSlots.clear();
 		deserialize();
 	}
 
 	public Set<Integer> getSlotIndexes() {
 		return slotFilterItems.keySet();
+	}
+
+	public Map<Item, Set<Integer>> getFilterItemSlots() {
+		return filterItemSlots;
 	}
 }

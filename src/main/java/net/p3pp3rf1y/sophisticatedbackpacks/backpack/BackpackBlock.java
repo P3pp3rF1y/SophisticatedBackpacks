@@ -265,7 +265,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 
 	private void tryToPickup(World world, ItemEntity itemEntity, IBackpackWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();
-		InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
+		remainingStack = InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
 		if (remainingStack.getCount() < itemEntity.getItem().getCount()) {
 			itemEntity.setItem(remainingStack);
 		}

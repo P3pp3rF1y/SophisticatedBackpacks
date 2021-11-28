@@ -4,10 +4,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public BackpackInventoryHandler getInventoryForUpgradeProcessing() {
+	public IItemHandlerSimpleInserter getInventoryForUpgradeProcessing() {
 		return backpackInventoryHandler;
 	}
 
@@ -40,7 +40,7 @@ public class NoopBackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInventoryForInputOutput() {
+	public IItemHandlerSimpleInserter getInventoryForInputOutput() {
 		return backpackInventoryHandler;
 	}
 

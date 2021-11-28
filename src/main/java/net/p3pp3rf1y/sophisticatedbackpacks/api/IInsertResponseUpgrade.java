@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 
 public interface IInsertResponseUpgrade {
-	ItemStack onBeforeInsert(IItemHandler inventoryHandler, int slot, ItemStack stack, boolean simulate);
+	ItemStack onBeforeInsert(IItemHandlerSimpleInserter inventoryHandler, int slot, ItemStack stack, boolean simulate);
 
-	void onAfterInsert(IItemHandler inventoryHandler, int slot);
+	void onAfterInsert(IItemHandlerSimpleInserter inventoryHandler, int slot);
 }

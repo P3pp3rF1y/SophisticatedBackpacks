@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 
 public interface IInventoryWrapperUpgrade {
-	IItemHandlerModifiable wrapInventory(IItemHandlerModifiable inventory);
+	IItemHandlerSimpleInserter wrapInventory(IItemHandlerSimpleInserter inventory);
 }
