@@ -439,7 +439,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return index >= getNumberOfSlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	private boolean isBackpackInventorySlot(int index) {
+	public boolean isBackpackInventorySlot(int index) {
 		return index < getNumberOfSlots();
 	}
 
