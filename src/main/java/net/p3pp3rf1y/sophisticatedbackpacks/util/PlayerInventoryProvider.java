@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class PlayerInventoryProvider {
 	public static final String MAIN_INVENTORY = "main";
 	public static final String OFFHAND_INVENTORY = "offhand";
-	private static final String ARMOR_INVENTORY = "armor";
+	public static final String ARMOR_INVENTORY = "armor";
 
 	private final Map<String, PlayerInventoryHandler> playerInventoryHandlers = new LinkedHashMap<>();
 	private final List<String> renderedHandlers = new ArrayList<>();

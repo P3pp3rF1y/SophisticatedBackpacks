@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
@@ -57,17 +58,17 @@ public class AutoSmeltingUpgradeWrapper extends UpgradeWrapperBase<AutoSmeltingU
 		}
 
 		ItemStack output = smeltingLogic.getCookOutput();
-		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
-		if (!output.isEmpty() && InventoryHelper.insertIntoInventory(output, inventory, true).getCount() < output.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(output, inventory, false);
+		IItemHandlerSimpleInserter inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		if (!output.isEmpty() && inventory.insertItem(output, true).getCount() < output.getCount()) {
+			ItemStack ret = inventory.insertItem(output, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.COOK_OUTPUT_SLOT, output.getCount() - ret.getCount(), false);
 		} else {
 			outputCooldown = NO_INVENTORY_SPACE_COOLDOWN;
 		}
 
 		ItemStack fuel = smeltingLogic.getFuel();
-		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel, IRecipeType.SMELTING) <= 0 && InventoryHelper.insertIntoInventory(fuel, inventory, true).getCount() < fuel.getCount()) {
-			ItemStack ret = InventoryHelper.insertIntoInventory(fuel, inventory, false);
+		if (!fuel.isEmpty() && ForgeHooks.getBurnTime(fuel, IRecipeType.SMELTING) <= 0 && inventory.insertItem(fuel, true).getCount() < fuel.getCount()) {
+			ItemStack ret = inventory.insertItem(fuel, false);
 			smeltingLogic.getSmeltingInventory().extractItem(SmeltingLogic.FUEL_SLOT, fuel.getCount() - ret.getCount(), false);
 		}
 	}

@@ -51,6 +51,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonProxy {
 	private final RegistryLoader registryLoader = new RegistryLoader();
@@ -193,15 +194,18 @@ public class CommonProxy {
 
 	private void onItemPickup(EntityItemPickupEvent event) {
 		ItemEntity itemEntity = event.getItem();
-		ItemStack remainingStackSimulated = itemEntity.getItem().copy();
+		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		PlayerEntity player = event.getPlayer();
 		World world = player.getCommandSenderWorld();
 		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated, wrapper, true)).orElse(false));
-		if (remainingStackSimulated.isEmpty()) {
+				.map(wrapper -> {
+					remainingStackSimulated.set(InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated.get(), wrapper, true));
+					return remainingStackSimulated.get().isEmpty();
+				}).orElse(false));
+		if (remainingStackSimulated.get().isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStack, wrapper, false)).orElse(false)
+					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStack, wrapper, false).isEmpty()).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
 				Random rand = itemEntity.level.random;

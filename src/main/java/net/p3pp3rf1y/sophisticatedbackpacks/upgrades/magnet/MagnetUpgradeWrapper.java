@@ -13,14 +13,14 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 
@@ -31,16 +31,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrapper, MagnetUpgradeItem>
-		implements IContentsFilteredUpgrade, ITickableUpgrade {
+		implements IContentsFilteredUpgrade, ITickableUpgrade, IPickupResponseUpgrade {
 	private static final String PREVENT_REMOTE_MOVEMENT = "PreventRemoteMovement";
 	private static final String ALLOW_MACHINE_MOVEMENT = "AllowMachineRemoteMovement";
 
-	private static final int BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS = 10;
 	private static final int COOLDOWN_TICKS = 10;
 	private static final int FULL_COOLDOWN_TICKS = 40;
 	private final ContentsFilterLogic filterLogic;
-
-	private long backpackContentsRefreshCooldown = 0;
 
 	private static final Set<IMagnetPreventionChecker> magnetCheckers = new HashSet<>();
 
@@ -50,12 +47,35 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	public MagnetUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper::getInventoryHandler);
 	}
 
 	@Override
 	public ContentsFilterLogic getFilterLogic() {
 		return filterLogic;
+	}
+
+	@Override
+	public ItemStack pickup(World world, ItemStack stack, boolean simulate) {
+		if (isInLongCooldown(world)) {
+			return stack;
+		}
+
+		if (!filterLogic.matchesFilter(stack)) {
+			return stack;
+		}
+
+		int originalCount = stack.getCount();
+		ItemStack ret = backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
+		if (originalCount == ret.getCount()) {
+			setCooldown(world, FULL_COOLDOWN_TICKS);
+		}
+
+		return ret;
+	}
+
+	private boolean isInLongCooldown(World world) {
+		return getCooldownTime() - COOLDOWN_TICKS > world.getGameTime();
 	}
 
 	@Override
@@ -78,7 +98,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	private int pickupXpOrbs(@Nullable LivingEntity entity, World world, BlockPos pos) {
-		List<ExperienceOrbEntity> xpEntities = world.getEntities(EntityType.EXPERIENCE_ORB, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
+		List<ExperienceOrbEntity> xpEntities = world.getEntitiesOfClass(ExperienceOrbEntity.class, new AxisAlignedBB(pos).inflate(upgradeItem.getRadius()), e -> true);
 		if (xpEntities.isEmpty()) {
 			return COOLDOWN_TICKS;
 		}
@@ -97,13 +117,14 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 	}
 
 	private boolean tryToFillTank(ExperienceOrbEntity xpOrb, World world) {
-		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.value);
+		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.getValue());
 
 		return backpackWrapper.getFluidHandler().map(fluidHandler -> {
 			int amountAdded = fluidHandler.fill(new FluidStack(ModFluids.XP_STILL.get(), amountToTransfer), IFluidHandler.FluidAction.EXECUTE);
 
 			if (amountAdded > 0) {
 				Vector3d pos = xpOrb.position();
+				xpOrb.value = 0;
 				xpOrb.remove();
 
 				if (amountToTransfer > amountAdded) {
@@ -122,11 +143,6 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		}
 
 		int cooldown = FULL_COOLDOWN_TICKS;
-
-		if (backpackContentsRefreshCooldown < world.getGameTime()) {
-			backpackContentsRefreshCooldown = world.getGameTime() + BACKPACK_FILTER_REFRESH_COOLDOWN_TICKS;
-			filterLogic.refreshBackpackFilterStacks(backpackWrapper.getInventoryForUpgradeProcessing());
-		}
 
 		for (ItemEntity itemEntity : itemEntities) {
 			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, entity)) {
@@ -159,12 +175,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	private boolean tryToInsertItem(ItemEntity itemEntity) {
 		ItemStack stack = itemEntity.getItem();
-		IItemHandlerModifiable inventory = backpackWrapper.getInventoryForUpgradeProcessing();
-		ItemStack remaining = InventoryHelper.insertIntoInventory(stack, inventory, true);
+		IItemHandlerSimpleInserter inventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		ItemStack remaining = inventory.insertItem(stack, true);
 		boolean insertedSomething = false;
 		if (remaining.getCount() != stack.getCount()) {
 			insertedSomething = true;
-			remaining = InventoryHelper.insertIntoInventory(stack, inventory, false);
+			remaining = inventory.insertItem(stack, false);
 			itemEntity.setItem(remaining);
 		}
 		return insertedSomething;

@@ -197,14 +197,14 @@ public class NBTHelper {
 			return Optional.empty();
 		}
 		CompoundNBT tag = parentTag.get();
-		return getMap(tag, getKey, getValue);
+		return getMap(tag, getKey, (k, v) -> Optional.of(getValue.apply(k, v)));
 	}
 
-	public static <K, V> Optional<Map<K, V>> getMap(CompoundNBT tag, Function<String, K> getKey, BiFunction<String, INBT, V> getValue) {
+	public static <K, V> Optional<Map<K, V>> getMap(CompoundNBT tag, Function<String, K> getKey, BiFunction<String, INBT, Optional<V>> getValue) {
 		Map<K, V> map = new HashMap<>();
 
 		for (String tagName : tag.getAllKeys()) {
-			map.put(getKey.apply(tagName), getValue.apply(tagName, tag.get(tagName)));
+			getValue.apply(tagName, tag.get(tagName)).ifPresent(value -> map.put(getKey.apply(tagName), value));
 		}
 
 		return Optional.of(map);

@@ -168,7 +168,7 @@ public class SettingsContainer extends Container implements IContextAwareContain
 	}
 
 	public Optional<ItemStack> getMemorizedStackInSlot(int slotId) {
-		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterStack(slotId);
+		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterItem(slotId).map(ItemStack::new);
 	}
 
 	public int getSlotsOnLine() {

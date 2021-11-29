@@ -9,18 +9,23 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.ISlotTracker;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHandlerSlotTracker;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
-public class BackpackInventoryHandler extends ItemStackHandler {
+public class BackpackInventoryHandler extends ItemStackHandler implements IItemHandlerSimpleInserter {
 	public static final String INVENTORY_TAG = "inventory";
 	private static final String REAL_COUNT_TAG = "realCount";
 	private final IBackpackWrapper backpackWrapper;
@@ -30,18 +35,27 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	private boolean persistent = true;
 	private final Map<Integer, CompoundNBT> stackNbts = new LinkedHashMap<>();
 
-	private int slotLimit;
+	private ISlotTracker slotTracker = new ISlotTracker.Noop();
 
+	private int slotLimit;
 	private int maxStackSizeMultiplier;
+	private boolean isInitializing;
 
 	public BackpackInventoryHandler(int numberOfInventorySlots, IBackpackWrapper backpackWrapper, CompoundNBT contentsNbt, Runnable backpackSaveHandler, int slotLimit) {
 		super(numberOfInventorySlots);
+		isInitializing = true;
 		this.backpackWrapper = backpackWrapper;
 		this.contentsNbt = contentsNbt;
 		this.backpackSaveHandler = backpackSaveHandler;
+		setSlotLimit(slotLimit);
 		deserializeNBT(contentsNbt.getCompound(INVENTORY_TAG));
 		initStackNbts();
-		setSlotLimit(slotLimit);
+		isInitializing = false;
+	}
+
+	public ISlotTracker getSlotTracker() {
+		initSlotTracker();
+		return slotTracker;
 	}
 
 	@Override
@@ -63,7 +77,9 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		super.onContentsChanged(slot);
 		if (persistent && updateSlotNbt(slot)) {
 			saveInventory();
-			onContentsChangedListeners.forEach(l -> l.accept(slot));
+			for (IntConsumer onContentsChangedListener : onContentsChangedListeners) {
+				onContentsChangedListener.accept(slot);
+			}
 		}
 	}
 
@@ -96,6 +112,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	@Override
 	public void deserializeNBT(CompoundNBT nbt) {
+		slotTracker.clear();
 		setSize(nbt.contains("Size", Constants.NBT.TAG_INT) ? nbt.getInt("Size") : stacks.size());
 		ListNBT tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
@@ -110,6 +127,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 				stacks.set(slot, slotStack);
 			}
 		}
+		slotTracker.refreshSlotIndexesFrom(this);
 		onLoad();
 	}
 
@@ -128,6 +146,10 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 	public void setSlotLimit(int slotLimit) {
 		this.slotLimit = slotLimit;
 		maxStackSizeMultiplier = slotLimit / 64;
+
+		if (!isInitializing) {
+			slotTracker.refreshSlotIndexesFrom(this);
+		}
 	}
 
 	@Override
@@ -146,6 +168,7 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 		if (existing.getCount() <= amount) {
 			if (!simulate) {
 				stacks.set(slot, ItemStack.EMPTY);
+				slotTracker.removeAndSetSlotIndexes(this, slot, ItemStack.EMPTY);
 				onContentsChanged(slot);
 				return existing;
 			} else {
@@ -153,12 +176,68 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 			}
 		} else {
 			if (!simulate) {
-				stacks.set(slot, ItemHandlerHelper.copyStackWithSize(existing, existing.getCount() - amount));
+				ItemStack newStack = ItemHandlerHelper.copyStackWithSize(existing, existing.getCount() - amount);
+				stacks.set(slot, newStack);
+				slotTracker.removeAndSetSlotIndexes(this, slot, newStack);
 				onContentsChanged(slot);
 			}
 
 			return ItemHandlerHelper.copyStackWithSize(existing, amount);
 		}
+	}
+
+	@Override
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		initSlotTracker();
+		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, slot, stack, simulate);
+	}
+
+	private void initSlotTracker() {
+		if (!(slotTracker instanceof InventoryHandlerSlotTracker)) {
+			slotTracker = new InventoryHandlerSlotTracker(backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class));
+			slotTracker.refreshSlotIndexesFrom(this);
+		}
+	}
+
+	private ItemStack insertItemInternal(int slot, ItemStack stack, boolean simulate) {
+		ItemStack ret = runOnBeforeInsert(slot, stack, simulate, this, backpackWrapper);
+		if (ret.isEmpty()) {
+			return ret;
+		}
+
+		ret = super.insertItem(slot, ret, simulate);
+
+		if (ret == stack) {
+			return ret;
+		}
+
+		runOnAfterInsert(slot, simulate, this, backpackWrapper);
+
+		return ret;
+	}
+
+	private void runOnAfterInsert(int slot, boolean simulate, IItemHandlerSimpleInserter handler, IBackpackWrapper backpackWrapper) {
+		if (!simulate) {
+			backpackWrapper.getUpgradeHandler().getWrappersThatImplementFromMainBackpack(IInsertResponseUpgrade.class).forEach(u -> u.onAfterInsert(handler, slot));
+		}
+	}
+
+	private ItemStack runOnBeforeInsert(int slot, ItemStack stack, boolean simulate, IItemHandlerSimpleInserter handler, IBackpackWrapper backpackWrapper) {
+		List<IInsertResponseUpgrade> wrappers = backpackWrapper.getUpgradeHandler().getWrappersThatImplementFromMainBackpack(IInsertResponseUpgrade.class);
+		ItemStack remaining = stack;
+		for (IInsertResponseUpgrade upgrade : wrappers) {
+			remaining = upgrade.onBeforeInsert(handler, slot, remaining, simulate);
+			if (remaining.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+		}
+		return remaining;
+	}
+
+	@Override
+	public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+		super.setStackInSlot(slot, stack);
+		slotTracker.removeAndSetSlotIndexes(this, slot, stack);
 	}
 
 	public void setPersistent(boolean persistent) {
@@ -209,5 +288,11 @@ public class BackpackInventoryHandler extends ItemStackHandler {
 
 	public int getStackSizeMultiplier() {
 		return maxStackSizeMultiplier;
+	}
+
+	@Override
+	public ItemStack insertItem(ItemStack stack, boolean simulate) {
+		initSlotTracker();
+		return slotTracker.insertItemIntoHandler(this, super::insertItem, stack, simulate);
 	}
 }

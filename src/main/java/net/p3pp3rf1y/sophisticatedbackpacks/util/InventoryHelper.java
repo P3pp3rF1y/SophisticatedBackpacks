@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
@@ -94,6 +93,10 @@ public class InventoryHelper {
 	}
 
 	public static ItemStack insertIntoInventory(ItemStack stack, IItemHandler inventory, boolean simulate) {
+		if (inventory instanceof IItemHandlerSimpleInserter) {
+			return ((IItemHandlerSimpleInserter) inventory).insertItem(stack, simulate);
+		}
+
 		ItemStack remainingStack = stack.copy();
 		int slots = inventory.getSlots();
 		for (int slot = 0; slot < slots && !remainingStack.isEmpty(); slot++) {
@@ -141,18 +144,17 @@ public class InventoryHelper {
 		return result;
 	}
 
-	public static boolean runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
+	public static ItemStack runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
 		List<IPickupResponseUpgrade> pickupUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IPickupResponseUpgrade.class);
 
 		for (IPickupResponseUpgrade pickupUpgrade : pickupUpgrades) {
-			ItemStack ret = pickupUpgrade.pickup(world, remainingStack, simulate);
-			remainingStack.setCount(ret.getCount());
+			remainingStack = pickupUpgrade.pickup(world, remainingStack, simulate);
 			if (remainingStack.isEmpty()) {
-				return true;
+				return ItemStack.EMPTY;
 			}
 		}
 
-		return false;
+		return remainingStack;
 	}
 
 	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn) {
@@ -191,15 +193,6 @@ public class InventoryHelper {
 			}
 		}
 		return ret;
-	}
-
-	public static boolean anyItemTagMatches(Item itemA, Item itemB) {
-		for (ResourceLocation tag : itemA.getTags()) {
-			if (itemB.getTags().contains(tag)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public static void transfer(IItemHandler handlerA, IItemHandler handlerB, Consumer<Supplier<ItemStack>> onInserted) {

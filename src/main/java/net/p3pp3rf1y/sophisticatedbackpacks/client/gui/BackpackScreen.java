@@ -9,6 +9,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.screen.inventory.InventoryScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.client.renderer.Tessellator;
@@ -181,9 +182,15 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if ((keyCode == 256 || ClientProxy.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputMappings.getKey(keyCode, scanCode))) && !getMenu().isFirstLevelBackpack()) {
-			PacketHandler.sendToServer(new BackpackOpenMessage());
-			return true;
+		if (keyCode == 256 || ClientProxy.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputMappings.getKey(keyCode, scanCode))) {
+			if (getMenu().isFirstLevelBackpack() && getMenu().getBackpackContext().wasOpenFromInventory()) {
+				getMinecraft().player.closeContainer();
+				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+				return true;
+			} else if (!getMenu().isFirstLevelBackpack()) {
+				PacketHandler.sendToServer(new BackpackOpenMessage());
+				return true;
+			}
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
@@ -308,14 +315,14 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		if (itemstack.isEmpty() && slot.isActive()) {
 			renderSlotBackground(matrixStack, slot, i, j);
 		} else if (!rightClickDragging) {
-			renderStack(matrixStack, slot, i, j, itemstack, flag, stackCountText);
+			renderStack(matrixStack, i, j, itemstack, flag, stackCountText);
 		}
 
 		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
 	}
 
-	private void renderStack(MatrixStack matrixStack, Slot slot, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
+	private void renderStack(MatrixStack matrixStack, int i, int j, ItemStack itemstack, boolean flag, @Nullable String stackCountText) {
 		if (flag) {
 			fill(matrixStack, i, j, i + 16, j + 16, -2130706433);
 		}

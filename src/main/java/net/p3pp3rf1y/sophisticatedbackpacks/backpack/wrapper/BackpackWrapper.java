@@ -10,7 +10,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -19,9 +18,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
@@ -31,9 +32,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -52,6 +55,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {};
+	private Runnable inventorySlotChangeHandler = () -> {};
 
 	@Nullable
 	private BackpackInventoryHandler handler = null;
@@ -84,7 +88,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInventoryForUpgradeProcessing() {
+	public void setInventorySlotChangeHandler(Runnable slotChangeHandler) {
+		inventorySlotChangeHandler = slotChangeHandler;
+	}
+
+	@Override
+	public IItemHandlerSimpleInserter getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
 			inventoryModificationHandler = new InventoryModificationHandler(this);
 		}
@@ -95,7 +104,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public BackpackInventoryHandler getInventoryHandler() {
 		if (handler == null) {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
-					this, getBackpackContentsNbt(), this::markBackpackContentsDirty, StackUpgradeItem.getInventorySlotLimit(this));
+					this, getBackpackContentsNbt(), () -> {
+				markBackpackContentsDirty();
+				inventorySlotChangeHandler.run();
+			}, StackUpgradeItem.getInventorySlotLimit(this));
 		}
 		return handler;
 	}
@@ -131,7 +143,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerModifiable getInventoryForInputOutput() {
+	public IItemHandlerSimpleInserter getInventoryForInputOutput() {
 		if (inventoryIOHandler == null) {
 			inventoryIOHandler = new InventoryIOHandler(this);
 		}
@@ -313,7 +325,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void sort() {
-		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		Set<Integer> slotIndexesExcludedFromSort = new HashSet<>();
+		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotIndexes());
+		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), slotIndexesExcludedFromSort);
 	}
 
 	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {

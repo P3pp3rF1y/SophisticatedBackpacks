@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHa
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import javax.annotation.Nullable;
@@ -41,7 +42,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	}
 
 	@Override
-	public ItemStack onBeforeInsert(IItemHandler inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+	public ItemStack onBeforeInsert(IItemHandlerSimpleInserter inventoryHandler, int slot, ItemStack stack, boolean simulate) {
 		if (filterLogic.matchesFilter(stack)) {
 			return ItemStack.EMPTY;
 		}
@@ -49,7 +50,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	}
 
 	@Override
-	public void onAfterInsert(IItemHandler inventoryHandler, int slot) {
+	public void onAfterInsert(IItemHandlerSimpleInserter inventoryHandler, int slot) {
 		//noop
 	}
 
