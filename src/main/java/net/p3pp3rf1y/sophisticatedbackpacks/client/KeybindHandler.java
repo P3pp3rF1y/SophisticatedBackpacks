@@ -5,6 +5,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -50,6 +51,7 @@ public class KeybindHandler {
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
 	private static final int MIDDLE_BUTTON = 2;
+	private static final int CHEST_SLOT_INDEX = 6;
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(translKeybind("toggle_upgrade_5"),
 			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -177,17 +179,30 @@ public class KeybindHandler {
 	private static void sendBackpackOpenOrCloseMessage() {
 		if (!GUI.isActive()) {
 			PacketHandler.sendToServer(new BackpackOpenMessage());
-		} else if (Minecraft.getInstance().screen instanceof BackpackScreen backpackScreen) {
+			return;
+		}
 
+		Screen screen = Minecraft.getInstance().screen;
+		if (screen instanceof BackpackScreen backpackScreen) {
 			Slot slot = backpackScreen.getSlotUnderMouse();
 			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
 				if (slot.getItem().getCount() == 1) {
-					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
+					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index, true));
 				}
 			} else {
 				PacketHandler.sendToServer(new BackpackCloseMessage());
 			}
+		} else if (screen instanceof InventoryScreen inventoryScreen) {
+			Slot slot = inventoryScreen.getSlotUnderMouse();
+
+			if (slot != null && isSupportedPlayerInventorySlot(slot.index) && slot.getItem().getItem() instanceof BackpackItem) {
+				PacketHandler.sendToServer(new BackpackOpenMessage(slot.getSlotIndex(), false));
+			}
 		}
+	}
+
+	private static boolean isSupportedPlayerInventorySlot(int slotIndex) {
+		return slotIndex == CHEST_SLOT_INDEX || (slotIndex > 8 && slotIndex < 46);
 	}
 
 	private static class BackpackKeyConflictContext implements IKeyConflictContext {
@@ -195,7 +210,11 @@ public class KeybindHandler {
 
 		@Override
 		public boolean isActive() {
-			return !GUI.isActive() || Minecraft.getInstance().screen instanceof BackpackScreen;
+			if (!GUI.isActive()) {
+				return true;
+			}
+			Screen screen = Minecraft.getInstance().screen;
+			return screen instanceof BackpackScreen || screen instanceof InventoryScreen;
 		}
 
 		@Override

@@ -1,20 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ContentsFilterLogic extends FilterLogic {
-	private Set<ItemStackKey> backpackFilterStacks = new HashSet<>();
 
-	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount) {
+	private final Supplier<BackpackInventoryHandler> getInventoryHandler;
+
+	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Supplier<BackpackInventoryHandler> getInventoryHandler) {
 		super(upgrade, saveHandler, filterSlotCount);
+		this.getInventoryHandler = getInventoryHandler;
 	}
 
 	public ContentsFilterType getFilterType() {
@@ -26,23 +26,19 @@ public class ContentsFilterLogic extends FilterLogic {
 
 	public void setDepositFilterType(ContentsFilterType contentsFilterType) {
 		switch (contentsFilterType) {
-			case ALLOW:
+			case ALLOW -> {
 				setFilterByBackpack(false);
 				setAllowList(true);
-				break;
-			case BLOCK:
+			}
+			case BLOCK -> {
 				setFilterByBackpack(false);
 				setAllowList(false);
-				break;
-			case BACKPACK:
-			default:
+			}
+			case BACKPACK -> {
 				setFilterByBackpack(true);
 				save();
+			}
 		}
-	}
-
-	public void refreshBackpackFilterStacks(IItemHandler backpackInventory) {
-		backpackFilterStacks = InventoryHelper.getUniqueStacks(backpackInventory);
 	}
 
 	@Override
@@ -51,7 +47,12 @@ public class ContentsFilterLogic extends FilterLogic {
 			return super.matchesFilter(stack);
 		}
 
-		for (ItemStackKey filterStack : backpackFilterStacks) {
+		for (ItemStackKey filterStack : getInventoryHandler.get().getSlotTracker().getFullStacks()) {
+			if (stackMatchesFilter(stack, filterStack.getStack())) {
+				return true;
+			}
+		}
+		for (ItemStackKey filterStack : getInventoryHandler.get().getSlotTracker().getPartialStacks()) {
 			if (stackMatchesFilter(stack, filterStack.getStack())) {
 				return true;
 			}

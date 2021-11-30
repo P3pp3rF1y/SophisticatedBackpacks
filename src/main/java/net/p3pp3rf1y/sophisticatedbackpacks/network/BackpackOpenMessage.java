@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.network;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -14,22 +15,27 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 public class BackpackOpenMessage {
-	private final int subBackpackSlotIndex;
+	private static final int CHEST_SLOT = 38;
+	private static final int OFFHAND_SLOT = 40;
+	private final int slotIndex;
+	private final boolean isSubBackpack;
 
 	public BackpackOpenMessage() {
-		this(-1);
+		this(-1, false);
 	}
 
-	public BackpackOpenMessage(int subBackpackSlotIndex) {
-		this.subBackpackSlotIndex = subBackpackSlotIndex;
+	public BackpackOpenMessage(int backpackSlot, boolean isSubBackpack) {
+		slotIndex = backpackSlot;
+		this.isSubBackpack = isSubBackpack;
 	}
 
 	public static void encode(BackpackOpenMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeInt(msg.subBackpackSlotIndex);
+		packetBuffer.writeInt(msg.slotIndex);
+		packetBuffer.writeBoolean(msg.isSubBackpack);
 	}
 
 	public static BackpackOpenMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BackpackOpenMessage(packetBuffer.readInt());
+		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readBoolean());
 	}
 
 	static void onMessage(BackpackOpenMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -45,13 +51,26 @@ public class BackpackOpenMessage {
 
 		if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 			BackpackContext backpackContext = backpackContainer.getBackpackContext();
-			if (msg.subBackpackSlotIndex == -1) {
+			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
-			} else {
-				openBackpack(player, backpackContext.getSubBackpackContext(msg.subBackpackSlotIndex));
+			} else if (backpackContainer.isBackpackInventorySlot(msg.slotIndex)) {
+				openBackpack(player, backpackContext.getSubBackpackContext(msg.slotIndex));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
-			openBackpack(player, contextAwareContainer.getBackpackContext());
+			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
+			openBackpack(player, backpackContext);
+		} else if (msg.slotIndex > -1 && player.containerMenu instanceof InventoryMenu) {
+			int slotIndex = msg.slotIndex;
+			String inventoryProvider = PlayerInventoryProvider.MAIN_INVENTORY;
+			if (msg.slotIndex == CHEST_SLOT) {
+				inventoryProvider = PlayerInventoryProvider.ARMOR_INVENTORY;
+			} else if (msg.slotIndex == OFFHAND_SLOT) {
+				inventoryProvider = PlayerInventoryProvider.OFFHAND_INVENTORY;
+				slotIndex = 0;
+			}
+
+			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryProvider, slotIndex, true);
+			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);
 		}

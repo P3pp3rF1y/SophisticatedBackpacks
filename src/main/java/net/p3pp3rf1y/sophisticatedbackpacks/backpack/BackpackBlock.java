@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -8,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -34,6 +36,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -45,6 +48,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
@@ -63,6 +67,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
@@ -77,6 +82,34 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	public BackpackBlock() {
 		super(Properties.of(Material.WOOL).noOcclusion().strength(0.8F).sound(SoundType.WOOL));
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false));
+	}
+
+	@Override
+	public PushReaction getPistonPushReaction(BlockState pState) {
+		return PushReaction.DESTROY;
+	}
+
+	@Override
+	public boolean hasAnalogOutputSignal(BlockState pState) {
+		return true;
+	}
+
+	@Override
+	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
+		return WorldHelper.getTile(level, pos, BackpackBlockEntity.class).map(t -> {
+			IItemHandlerModifiable handler = t.getBackpackWrapper().getInventoryForInputOutput();
+			AtomicDouble totalFilled = new AtomicDouble(0);
+			AtomicBoolean isEmpty = new AtomicBoolean(true);
+			InventoryHelper.iterate(handler, (slot, stack) -> {
+				if (!stack.isEmpty()) {
+					int slotLimit = handler.getSlotLimit(slot);
+					totalFilled.addAndGet(stack.getCount() / (slotLimit / ((float) 64 / stack.getMaxStackSize())));
+					isEmpty.set(false);
+				}
+			});
+			double percentFilled = totalFilled.get() / handler.getSlots();
+			return Mth.floor(percentFilled * 14.0F) + (isEmpty.get() ? 0 : 1);
+		}).orElse(0);
 	}
 
 	@Override
@@ -231,7 +264,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private void tryToPickup(Level world, ItemEntity itemEntity, IBackpackWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();
-		InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
+		remainingStack = InventoryHelper.runPickupOnBackpack(world, remainingStack, w, false);
 		if (remainingStack.getCount() < itemEntity.getItem().getCount()) {
 			itemEntity.setItem(remainingStack);
 		}

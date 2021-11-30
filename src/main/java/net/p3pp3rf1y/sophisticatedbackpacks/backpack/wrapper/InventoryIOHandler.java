@@ -1,15 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IIOFilterUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryIOHandler {
-	private final IItemHandlerModifiable filteredItemHandler;
+	private final IItemHandlerSimpleInserter filteredItemHandler;
 
 	public InventoryIOHandler(IBackpackWrapper backpackWrapper) {
 		List<FilterLogic> inputFilters = new ArrayList<>();
@@ -17,7 +17,7 @@ public class InventoryIOHandler {
 
 		addFilters(backpackWrapper, inputFilters, outputFilters);
 
-		IItemHandlerModifiable modifiedInventory = backpackWrapper.getInventoryForUpgradeProcessing();
+		IItemHandlerSimpleInserter modifiedInventory = backpackWrapper.getInventoryForUpgradeProcessing();
 		if (inputFilters.isEmpty() && outputFilters.isEmpty()) {
 			filteredItemHandler = modifiedInventory;
 		} else {
@@ -25,7 +25,7 @@ public class InventoryIOHandler {
 		}
 	}
 
-	public IItemHandlerModifiable getFilteredItemHandler() {
+	public IItemHandlerSimpleInserter getFilteredItemHandler() {
 		return filteredItemHandler;
 	}
 

@@ -70,6 +70,10 @@ public abstract class BackpackContext {
 		}
 	}
 
+	public boolean wasOpenFromInventory() {
+		return false;
+	}
+
 	public enum ContextType {
 		BLOCK_BACKPACK(0, false),
 		BLOCK_SUB_BACKPACK(1, true),
@@ -110,10 +114,21 @@ public abstract class BackpackContext {
 	public static class Item extends BackpackContext {
 		protected final String handlerName;
 		protected final int backpackSlotIndex;
+		private final boolean openFromInventory;
 
 		public Item(String handlerName, int backpackSlotIndex) {
+			this(handlerName, backpackSlotIndex, false);
+		}
+
+		public Item(String handlerName, int backpackSlotIndex, boolean openFromInventory) {
 			this.handlerName = handlerName;
 			this.backpackSlotIndex = backpackSlotIndex;
+			this.openFromInventory = openFromInventory;
+		}
+
+		@Override
+		public boolean wasOpenFromInventory() {
+			return openFromInventory;
 		}
 
 		@Override
@@ -148,7 +163,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new ItemSubBackpack(handlerName, backpackSlotIndex, subBackpackSlotIndex);
+			return new ItemSubBackpack(handlerName, backpackSlotIndex, openFromInventory, subBackpackSlotIndex);
 		}
 
 		@Override
@@ -162,13 +177,14 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readInt());
+			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
 		public void addToBuffer(FriendlyByteBuf packetBuffer) {
 			packetBuffer.writeUtf(handlerName);
 			packetBuffer.writeInt(backpackSlotIndex);
+			packetBuffer.writeBoolean(openFromInventory);
 		}
 
 		@Override
@@ -182,8 +198,8 @@ public abstract class BackpackContext {
 		@Nullable
 		private IBackpackWrapper parentWrapper;
 
-		public ItemSubBackpack(String handlerName, int backpackSlotIndex, int subBackpackSlotIndex) {
-			super(handlerName, backpackSlotIndex);
+		public ItemSubBackpack(String handlerName, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
+			super(handlerName, backpackSlotIndex, parentOpenFromInventory);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -202,7 +218,7 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
+			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
 		}
 
 		@Override
@@ -213,7 +229,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.Item(handlerName, backpackSlotIndex);
+			return new BackpackContext.Item(handlerName, backpackSlotIndex, super.wasOpenFromInventory());
 		}
 
 		@Override

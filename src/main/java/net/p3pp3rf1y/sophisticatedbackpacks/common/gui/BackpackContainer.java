@@ -287,7 +287,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 
 	@Override
 	public void initializeContents(int stateId, List<ItemStack> items, ItemStack carried) {
-		backpackWrapper.setPersistent(false);
+		backpackWrapper.setPersistent(player.level.isClientSide);
 		isUpdatingFromPacket = true;
 		super.initializeContents(stateId, items, carried);
 		isUpdatingFromPacket = false;
@@ -412,7 +412,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	public Optional<ItemStack> getMemorizedStackInSlot(int slotId) {
-		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterStack(slotId);
+		return backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotFilterItem(slotId).map(ItemStack::new);
 	}
 
 	private boolean mergeStackToUpgradeSlots(ItemStack slotStack) {
@@ -451,7 +451,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		return index >= getNumberOfBackpackInventorySlots() + getNumberOfUpgradeSlots() + NUMBER_OF_PLAYER_SLOTS;
 	}
 
-	private boolean isBackpackInventorySlot(int index) {
+	public boolean isBackpackInventorySlot(int index) {
 		return index < getNumberOfBackpackInventorySlots();
 	}
 
@@ -956,7 +956,11 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	private Set<Integer> getNoSortSlotIndexes() {
-		return backpackWrapper.getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots();
+		BackpackSettingsHandler settingsHandler = backpackWrapper.getSettingsHandler();
+		Set<Integer> slotIndexesExcludedFromSort = new HashSet<>();
+		slotIndexesExcludedFromSort.addAll(settingsHandler.getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
+		slotIndexesExcludedFromSort.addAll(settingsHandler.getTypeCategory(MemorySettingsCategory.class).getSlotIndexes());
+		return slotIndexesExcludedFromSort;
 	}
 
 	public void detectSettingsChangeAndReload() {
@@ -1260,7 +1264,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	@SuppressWarnings({"java:S3776", "java:S135"})
 	//need to keep this very close to vanilla for easy port so not refactoring it to lower complexity or less exit points in loops
 	protected boolean mergeItemStack(ItemStack sourceStack, int startIndex, int endIndex, boolean reverseDirection, boolean transferMaxStackSizeFromSource) {
-		boolean flag = false;
+		boolean mergedSomething = false;
 		int i = startIndex;
 		if (reverseDirection) {
 			i = endIndex - 1;
@@ -1288,13 +1292,13 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 							destStack.setCount(j);
 							toTransfer = 0;
 							slot.setChanged();
-							flag = true;
+							mergedSomething = true;
 						} else if (destStack.getCount() < maxSize) {
 							sourceStack.shrink(maxSize - destStack.getCount());
 							toTransfer -= maxSize - destStack.getCount();
 							destStack.setCount(maxSize);
 							slot.setChanged();
-							flag = true;
+							mergedSomething = true;
 						}
 					}
 				}
@@ -1303,6 +1307,25 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 					--i;
 				} else {
 					++i;
+				}
+			}
+		}
+
+		if (toTransfer > 0) {
+			int firstIndex = reverseDirection ? endIndex - 1 : startIndex;
+			int increment = reverseDirection ? -1 : 1;
+
+			MemorySettingsCategory memory = backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class);
+			for (int slotIndex = firstIndex; (reverseDirection ? slotIndex >= startIndex : slotIndex < endIndex) && toTransfer > 0; slotIndex += increment) {
+				if (memory.getSlotIndexes().contains(slotIndex) && memory.matchesFilter(slotIndex, sourceStack)) {
+					Slot slot = getSlot(slotIndex);
+					ItemStack destStack = slot.getItem();
+					if (destStack.isEmpty()) {
+						slot.set(sourceStack.split(slot.getMaxStackSize()));
+						slot.setChanged();
+						toTransfer = sourceStack.getCount();
+						mergedSomething = true;
+					}
 				}
 			}
 		}
@@ -1346,7 +1369,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 					}
 					if (!errorMerging) {
 						destSlot.setChanged();
-						flag = true;
+						mergedSomething = true;
 						break;
 					}
 				}
@@ -1359,7 +1382,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 			}
 		}
 
-		return flag;
+		return mergedSomething;
 	}
 
 	@Override
