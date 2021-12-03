@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
+import com.google.common.primitives.Ints;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
@@ -47,6 +48,7 @@ import java.util.Set;
 
 public class EntityBackpackAdditionHandler {
 	private static final int MAX_DIFFICULTY = 3;
+	private static final float MAX_LOCAL_DIFFICULTY = 6.75f;
 
 	private EntityBackpackAdditionHandler() {}
 
@@ -88,6 +90,12 @@ public class EntityBackpackAdditionHandler {
 					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5)))
 	);
 
+	private static final Map<Integer, List<WeightedElement<BackpackAddition>>> DIFFICULTY_BACKPACK_CHANCES = Map.of(
+			0, BACKPACK_CHANCES,
+			1, BACKPACK_CHANCES.subList(1, 5),
+			2, BACKPACK_CHANCES.subList(2, 5)
+	);
+
 	static void addBackpack(Monster monster) {
 		Random rnd = monster.level.random;
 		if (!Config.COMMON.entityBackpackAdditions.canWearBackpack(monster.getType())
@@ -95,7 +103,11 @@ public class EntityBackpackAdditionHandler {
 			return;
 		}
 
-		RandHelper.getRandomWeightedElement(rnd, BACKPACK_CHANCES).ifPresent(backpackAddition -> {
+		float localDifficulty = monster.level.getCurrentDifficultyAt(monster.blockPosition()).getEffectiveDifficulty();
+		//noinspection UnstableApiUsage
+		int index = Ints.constrainToRange((int) Math.floor(DIFFICULTY_BACKPACK_CHANCES.size() / MAX_LOCAL_DIFFICULTY * localDifficulty - 0.1f), 0, DIFFICULTY_BACKPACK_CHANCES.size());
+
+		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(index)).ifPresent(backpackAddition -> {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
 			int difficulty = Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1));
@@ -208,7 +220,7 @@ public class EntityBackpackAdditionHandler {
 			new ApplicableEffect(MobEffects.FIRE_RESISTANCE),
 			new ApplicableEffect(MobEffects.ABSORPTION),
 			new ApplicableEffect(MobEffects.HEALTH_BOOST),
-			new ApplicableEffect(MobEffects.REGENERATION),
+			new ApplicableEffect(MobEffects.REGENERATION, 3),
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 
