@@ -293,6 +293,6 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 	@Override
 	public ItemStack insertItem(ItemStack stack, boolean simulate) {
 		initSlotTracker();
-		return slotTracker.insertItemIntoHandler(this, super::insertItem, stack, simulate);
+		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, stack, simulate);
 	}
 }
