@@ -171,8 +171,8 @@ public class BackpackTooltipRenderer {
 	}
 
 	private static class ContentsTooltipPart implements GuiHelper.ITooltipRenderPart {
-		private static final TextureBlitData UPGRADE_ON = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(81, 0), Dimension.RECTANGLE_4_10);
-		private static final TextureBlitData UPGRADE_OFF = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(77, 0), Dimension.RECTANGLE_4_10);
+		private static final TextureBlitData UPGRADE_ON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(4, 128), Dimension.RECTANGLE_4_10);
+		private static final TextureBlitData UPGRADE_OFF = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(0, 128), Dimension.RECTANGLE_4_10);
 		private static final int MAX_STACKS_ON_LINE = 9;
 		private static final int DEFAULT_STACK_WIDTH = 18;
 		private static final int COUNT_PADDING = 2;
