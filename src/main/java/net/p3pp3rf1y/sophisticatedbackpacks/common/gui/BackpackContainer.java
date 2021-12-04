@@ -73,6 +73,10 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 	private static final String UPGRADE_SLOT_TAG = "upgradeSlot";
 	private static final String ACTION_TAG = "action";
 
+	public IBackpackWrapper getBackpackWrapper() {
+		return backpackWrapper;
+	}
+
 	private final IBackpackWrapper backpackWrapper;
 	private final PlayerEntity player;
 	private int backpackSlotNumber = -1;
