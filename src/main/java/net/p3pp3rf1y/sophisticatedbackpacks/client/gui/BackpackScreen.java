@@ -10,6 +10,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.screen.inventory.InventoryScreen;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Rectangle2d;
 import net.minecraft.client.renderer.Tessellator;
@@ -73,6 +74,11 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 	public static final int DISABLED_SLOT_X_POS = -1000;
 	static final int SLOTS_Y_OFFSET = 17;
 	static final int SLOTS_X_OFFSET = 7;
+	private static IButtonReplacer buttonReplacer = new IButtonReplacer() {};
+
+	public static void setButtonReplacer(IButtonReplacer replacer) {
+		buttonReplacer = replacer;
+	}
 
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, PlayerInventory inv, ITextComponent title) {
 		return new BackpackScreen(screenContainer, inv, title);
@@ -123,6 +129,20 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			addUpgradeSwitches();
 		});
 		addSortButtons();
+	}
+
+	@Override
+	protected <T extends Widget> T addButton(T widget) {
+		if (!(widget instanceof net.minecraft.client.gui.widget.button.Button)) {
+			return widget;
+		}
+		net.minecraft.client.gui.widget.button.Button button = (net.minecraft.client.gui.widget.button.Button) widget;
+
+		if (buttonReplacer.shouldReplace(this, button)) {
+			return super.addButton((T) buttonReplacer.replace(this, button));
+		}
+
+		return super.addButton(widget);
 	}
 
 	private void initUpgradeInventoryParts() {
@@ -678,5 +698,15 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 		GuiHelper.writeTooltipLines(wrappedTextLines, fontrenderer, leftX, 0, matrix4f, renderTypeBuffer, DyeColor.RED.getColorValue());
 		renderTypeBuffer.endBatch();
 		RenderSystem.popMatrix();
+	}
+
+	public interface IButtonReplacer {
+		default boolean shouldReplace(BackpackScreen screen, net.minecraft.client.gui.widget.button.Button button) {
+			return false;
+		}
+
+		default net.minecraft.client.gui.widget.button.Button replace(BackpackScreen screen, net.minecraft.client.gui.widget.button.Button button) {
+			return button;
+		}
 	}
 }
