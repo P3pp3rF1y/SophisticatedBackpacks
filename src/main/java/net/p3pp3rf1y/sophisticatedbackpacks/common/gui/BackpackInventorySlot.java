@@ -1,66 +1,27 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ISlotChangeResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 
 import javax.annotation.Nonnull;
 
-public class BackpackInventorySlot extends SlotItemHandler {
+public class BackpackInventorySlot extends Slot {
+	private static final IInventory EMPTY_INVENTORY = new Inventory(0);
+
 	private final boolean isClientSide;
 	private final IBackpackWrapper backpackWrapper;
 	private final BackpackInventoryHandler inventoryHandler;
 	private final int slotIndex;
 
-	private static IItemHandler wrapWithNoInsertAndExtractWrapper(IItemHandlerModifiable handler) {
-		return new IItemHandlerModifiable() {
-			@Override
-			public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
-				handler.setStackInSlot(slot, stack);
-			}
-
-			@Override
-			public int getSlots() {
-				return handler.getSlots();
-			}
-
-			@Nonnull
-			@Override
-			public ItemStack getStackInSlot(int slot) {
-				return handler.getStackInSlot(slot);
-			}
-
-			@Nonnull
-			@Override
-			public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-				return stack;
-			}
-
-			@Nonnull
-			@Override
-			public ItemStack extractItem(int slot, int amount, boolean simulate) {
-				return ItemStack.EMPTY;
-			}
-
-			@Override
-			public int getSlotLimit(int slot) {
-				return handler.getSlotLimit(slot);
-			}
-
-			@Override
-			public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-				return handler.isItemValid(slot, stack);
-			}
-		};
-	}
-
 	public BackpackInventorySlot(boolean isClientSide, IBackpackWrapper backpackWrapper, BackpackInventoryHandler inventoryHandler, int slotIndex, int lineIndex, int yPosition) {
-		super(wrapWithNoInsertAndExtractWrapper(inventoryHandler), slotIndex, 8 + lineIndex * 18, yPosition);
+		super(EMPTY_INVENTORY, slotIndex, 8 + lineIndex * 18, yPosition);
 		this.isClientSide = isClientSide;
 		this.backpackWrapper = backpackWrapper;
 		this.inventoryHandler = inventoryHandler;
@@ -82,22 +43,49 @@ public class BackpackInventorySlot extends SlotItemHandler {
 		}
 	}
 
+	@Nonnull
+	@Override
+	public ItemStack getItem() {
+		return inventoryHandler.getStackInSlot(slotIndex);
+	}
+
+	@Override
+	public boolean mayPlace(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return false;
+		}
+		return inventoryHandler.isItemValid(slotIndex, stack);
+	}
+
+	@Override
+	public void set(ItemStack stack) {
+		inventoryHandler.setStackInSlot(slotIndex, stack);
+		setChanged();
+	}
+
+	@Override
+	public int getMaxStackSize() {
+		return inventoryHandler.getSlotLimit(slotIndex);
+	}
+
+	@Override
+	public void onQuickCraft(@Nonnull ItemStack oldStackIn, @Nonnull ItemStack newStackIn) {
+		//noop
+	}
+
 	@Override
 	public int getMaxStackSize(ItemStack stack) {
 		return inventoryHandler.getStackLimit(slotIndex, stack);
 	}
 
 	@Override
-	public boolean mayPickup(PlayerEntity playerIn)
-	{
+	public boolean mayPickup(PlayerEntity playerIn) {
 		return !inventoryHandler.extractItem(slotIndex, 1, true).isEmpty();
 	}
 
 	@Override
 	@Nonnull
-	public ItemStack remove(int amount)
-	{
+	public ItemStack remove(int amount) {
 		return inventoryHandler.extractItem(slotIndex, amount, false);
 	}
-
 }
