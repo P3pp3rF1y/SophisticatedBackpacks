@@ -3,7 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +24,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -43,9 +45,9 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	private final int totalSlotRows;
 	private final BackpackScreen screen;
 	protected final C container;
-	private final List<FormattedText> addTagTooltip = new ArrayList<>();
-	private final List<FormattedText> removeTagTooltip = new ArrayList<>();
-	private final List<FormattedText> tagListTooltip = new ArrayList<>();
+	private final List<Component> addTagTooltip = new ArrayList<>();
+	private final List<Component> removeTagTooltip = new ArrayList<>();
+	private final List<Component> tagListTooltip = new ArrayList<>();
 	@Nullable
 	private ToggleButton<Boolean> nbtButton = null;
 	@Nullable
@@ -123,7 +125,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			updateTagListAndRemoveTooltips();
 		}) {
 			@Override
-			protected List<FormattedText> getTooltip() {
+			protected List<Component> getTooltip() {
 				return removeTagTooltip;
 			}
 		});
@@ -142,7 +144,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			updateAddTooltip();
 		}) {
 			@Override
-			protected List<FormattedText> getTooltip() {
+			protected List<Component> getTooltip() {
 				return addTagTooltip;
 			}
 		});
@@ -276,11 +278,11 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 		if (container.getPrimaryMatch() == PrimaryMatch.TAGS) {
-			renderTagNames(matrixStack, mouseX, mouseY);
+			renderTagNames(matrixStack);
 		}
 	}
 
-	private void renderTagNames(PoseStack matrixStack, int mouseX, int mouseY) {
+	private void renderTagNames(PoseStack matrixStack) {
 		int count = 0;
 		int prefixWidth = font.width("...");
 		Set<ResourceLocation> tagNames = container.getTagNames();
@@ -301,8 +303,13 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			font.draw(matrixStack, shortened, (float) x + 2, (float) y + 23 + count * 10, TAG_FONT_COLOR);
 			count++;
 		}
+	}
+
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
 		if (isMouseOverTagList(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(tagListTooltip);
+			screen.renderTooltip(poseStack, tagListTooltip, Optional.empty(), mouseX, mouseY);
 		}
 	}
 
@@ -317,9 +324,9 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	@Override
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		if (container.getPrimaryMatch() != PrimaryMatch.TAGS) {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + slotsTopYOffset, slotsPerRow, fullSlotRows, slotsInExtraRow);
+			GuiHelper.renderSlotsBackground(matrixStack, x, y + slotsTopYOffset, slotsPerRow, fullSlotRows, slotsInExtraRow);
 		} else {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x, y + tagButtonsYOffset, 1, 1, 0);
+			GuiHelper.renderSlotsBackground(matrixStack, x, y + tagButtonsYOffset, 1, 1, 0);
 			GuiHelper.renderControlBackground(matrixStack, x, y + slotsTopYOffset, getTagListWidth(), getTagListHeight());
 		}
 	}

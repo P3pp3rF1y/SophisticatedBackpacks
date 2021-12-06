@@ -23,9 +23,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
@@ -37,13 +37,14 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackTooltipRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModParticles;
@@ -57,6 +58,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
@@ -80,13 +82,12 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::onPlayerJoinServer);
 		eventBus.addListener(ClientEventHandler::onDrawScreen);
 		eventBus.addListener(EventPriority.HIGH, ClientEventHandler::onRightClick);
-		eventBus.addListener(BackpackTooltipRenderer::handleBackpackTooltipRender);
-		eventBus.addListener(BackpackTooltipRenderer::onWorldLoad);
+		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(BackpackSoundHandler::tick);
 		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
 	}
 
-	private static void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+	private static void onDrawScreen(ScreenEvent.DrawScreenEvent.Post event) {
 		Minecraft mc = Minecraft.getInstance();
 		Screen gui = mc.screen;
 		if (!(gui instanceof AbstractContainerScreen<?> containerGui) || gui instanceof CreativeModeInventoryScreen || mc.player == null) {
@@ -96,7 +97,7 @@ public class ClientEventHandler {
 		ItemStack held = menu.getCarried();
 		if (!held.isEmpty() && !(held.getItem() instanceof BackpackItem)) {
 			Slot under = containerGui.getSlotUnderMouse();
-			PoseStack poseStack = event.getMatrixStack();
+			PoseStack poseStack = event.getPoseStack();
 
 			for (Slot s : menu.slots) {
 				ItemStack stack = s.getItem();
@@ -109,15 +110,15 @@ public class ClientEventHandler {
 						int x = event.getMouseX();
 						int y = event.getMouseY();
 						poseStack.pushPose();
-						poseStack.translate(0, 0, 100);
-						BackpackTooltipRenderer.renderTooltipWithContents(stack, mc, poseStack, x, y, mc.font, Collections.singletonList(new TranslatableComponent("gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack")));
+						poseStack.translate(0, 0, containerGui instanceof BackpackScreen ? -100 : 100);
+						containerGui.renderTooltip(poseStack, Collections.singletonList(new TranslatableComponent("gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack")), Optional.of(new BackpackItem.BackpackContentsTooltip(stack)), x, y, mc.font);
 						poseStack.popPose();
 					} else {
 						int x = containerGui.getGuiLeft() + s.x;
 						int y = containerGui.getGuiTop() + s.y;
 
 						poseStack.pushPose();
-						poseStack.translate(0, 0, 499);
+						poseStack.translate(0, 0, containerGui instanceof BackpackScreen ? 100 : 499);
 
 						mc.font.drawShadow(poseStack, "+", (float) x + 10, (float) y + 8, 0xFFFF00);
 						poseStack.popPose();
@@ -128,7 +129,7 @@ public class ClientEventHandler {
 		}
 	}
 
-	private static void onRightClick(GuiScreenEvent.MouseReleasedEvent.Pre event) {
+	private static void onRightClick(ScreenEvent.MouseReleasedEvent.Pre event) {
 		Minecraft mc = Minecraft.getInstance();
 		Screen screen = mc.screen;
 		if (screen instanceof AbstractContainerScreen<?> container && !(screen instanceof CreativeModeInventoryScreen) && event.getButton() == 1) {
@@ -197,7 +198,7 @@ public class ClientEventHandler {
 	}
 
 	public static void stitchTextures(TextureStitchEvent.Pre evt) {
-		if (evt.getMap().location() == InventoryMenu.BLOCK_ATLAS) {
+		if (evt.getAtlas().location() == InventoryMenu.BLOCK_ATLAS) {
 			evt.addSprite(BackpackContainer.EMPTY_UPGRADE_SLOT_BACKGROUND);
 			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_INPUT_SLOT_BACKGROUND);
 			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_OUTPUT_SLOT_BACKGROUND);

@@ -6,7 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.DyeColor;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
@@ -17,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -25,7 +27,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.DE
 
 public class ColorToggleButton extends ButtonBase {
 	private static final DyeColor[] DYE_VALUES = DyeColor.values();
-	private static final List<FormattedText> TOOLTIP = new ImmutableList.Builder<FormattedText>()
+	private static final List<Component> TOOLTIP = new ImmutableList.Builder<Component>()
 			.add(new TranslatableComponent(TranslationHelper.translSettingsButton("toggle_color")))
 			.addAll(TranslationHelper.getTranslatedLines(TranslationHelper.translSettingsButton("toggle_color_detail"), null, ChatFormatting.GRAY))
 			.build();
@@ -63,9 +65,9 @@ public class ColorToggleButton extends ButtonBase {
 	@Override
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.blit(minecraft, matrixStack, x, y, DEFAULT_BUTTON_HOVERED_BACKGROUND);
+			GuiHelper.blit(matrixStack, x, y, DEFAULT_BUTTON_HOVERED_BACKGROUND);
 		} else {
-			GuiHelper.blit(minecraft, matrixStack, x, y, DEFAULT_BUTTON_BACKGROUND);
+			GuiHelper.blit(matrixStack, x, y, DEFAULT_BUTTON_BACKGROUND);
 		}
 	}
 
@@ -77,9 +79,13 @@ public class ColorToggleButton extends ButtonBase {
 		fillGradient(matrixStack, x + 3, y + 3, x + 15, y + 15, color, color);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableDepthTest();
+	}
 
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
 		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(TOOLTIP);
+			screen.renderTooltip(poseStack, TOOLTIP, Optional.empty(), mouseX, mouseY);
 		}
 	}
 

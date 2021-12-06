@@ -1,19 +1,19 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.Label;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
@@ -28,9 +28,9 @@ public abstract class SettingsTabBase<T extends AbstractContainerScreen<?>> exte
 	private Runnable onOpen = () -> {};
 	private Runnable onClose = () -> {};
 	private final List<BackpackWidget> hideableChildren = new ArrayList<>();
-	private final List<FormattedText> openTooltip;
+	private final List<Component> openTooltip;
 
-	protected SettingsTabBase(Position position, T screen, Component tabLabel, List<FormattedText> tooltip, List<FormattedText> openTooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+	protected SettingsTabBase(Position position, T screen, Component tabLabel, List<Component> tooltip, List<Component> openTooltip, Function<IntConsumer, ButtonBase> getTabButton) {
 		super(position, tooltip, getTabButton);
 		this.screen = screen;
 		this.openTooltip = openTooltip;
@@ -72,11 +72,11 @@ public abstract class SettingsTabBase<T extends AbstractContainerScreen<?>> exte
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
 		if (!openTooltip.isEmpty() && isOpenTooltipVisible(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(openTooltip);
+			screen.renderTooltip(poseStack, openTooltip, Optional.empty(), mouseX, mouseY);
 		}
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 
 	private boolean isOpenTooltipVisible(int mouseX, int mouseY) {

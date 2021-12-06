@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
@@ -120,7 +120,7 @@ public class BackpackRenderInfo {
 
 	private void deserializeTanks() {
 		CompoundTag renderInfo = getRenderInfoTag();
-		ListTag tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
+		ListTag tanks = renderInfo.getList(TANKS_TAG, Tag.TAG_COMPOUND);
 		for (int i = 0; i < tanks.size(); i++) {
 			CompoundTag tank = tanks.getCompound(i);
 			tankRenderInfos.put(TankPosition.valueOf(tank.getString(TANK_POSITION_TAG).toUpperCase(Locale.ENGLISH)), IRenderedTankUpgrade.TankRenderInfo.deserialize(tank.getCompound(TANK_INFO_TAG)));
@@ -135,7 +135,7 @@ public class BackpackRenderInfo {
 		CompoundTag tankInfo = tankRenderInfo.serialize();
 
 		CompoundTag renderInfo = getRenderInfoTag();
-		ListTag tanks = renderInfo.getList(TANKS_TAG, Constants.NBT.TAG_COMPOUND);
+		ListTag tanks = renderInfo.getList(TANKS_TAG, Tag.TAG_COMPOUND);
 
 		boolean infoSet = false;
 		for (int i = 0; i < tanks.size(); i++) {

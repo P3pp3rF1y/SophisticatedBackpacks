@@ -50,7 +50,7 @@ public class SmeltingLogicControl extends CompositeBackpackWidget<BackpackWidget
 
 	@Override
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.blit(minecraft, matrixStack, x, y, FURNACE_BACKGROUND);
+		GuiHelper.blit(matrixStack, x, y, FURNACE_BACKGROUND);
 	}
 
 	public void moveSlotsToView(int screenGuiLeft, int screenGuiTop) {

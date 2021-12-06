@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -30,7 +29,7 @@ public class FluidFilterLogic {
 	}
 
 	private void deserializeFluidFilters() {
-		NBTHelper.getTagValue(upgrade, "", "fluids", (c, n1) -> c.getList(n1, Constants.NBT.TAG_STRING)).ifPresent(listNbt -> {
+		NBTHelper.getTagValue(upgrade, "", "fluids", (c, n1) -> c.getList(n1, Tag.TAG_STRING)).ifPresent(listNbt -> {
 			int i = 0;
 			for (Tag elementNbt : listNbt) {
 				Fluid value = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(elementNbt.getAsString()));

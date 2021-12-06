@@ -232,7 +232,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		settingsTabControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
+		settingsTabControl.renderTooltip(this, matrixStack, mouseX, mouseY);
 		if (sortButton != null && sortByButton != null) {
 			sortButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			sortByButton.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -395,15 +395,24 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	}
 
 	@Override
-	protected void renderTooltip(PoseStack matrixStack, int x, int y) {
+	protected void renderTooltip(PoseStack poseStack, int x, int y) {
+		poseStack.pushPose();
+		poseStack.translate(0, 0, -100);
+		inventoryParts.values().forEach(part -> part.renderTooltip(this, poseStack, x, y));
 		if (getMenu().getCarried().isEmpty() && hoveredSlot != null) {
 			if (hoveredSlot.hasItem()) {
-				renderTooltip(matrixStack, hoveredSlot.getItem(), x, y);
+				renderTooltip(poseStack, hoveredSlot.getItem(), x, y);
 			} else if (hoveredSlot instanceof INameableEmptySlot emptySlot && emptySlot.hasEmptyTooltip()) {
-				renderComponentTooltip(matrixStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
+				renderComponentTooltip(poseStack, Collections.singletonList(emptySlot.getEmptyTooltip()), x, y, font);
 			}
 		}
-		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
+		if (sortButton != null) {
+			sortButton.renderTooltip(this, poseStack, x, y);
+		}
+		if (sortByButton != null) {
+			sortByButton.renderTooltip(this, poseStack, x, y);
+		}
+		poseStack.popPose();
 	}
 
 	@Override
@@ -420,7 +429,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 
 	private void drawInventoryBackground(PoseStack matrixStack) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getMenu().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getNumberOfBackpackInventorySlots(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, minecraft, menu.getNumberOfRows());
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getNumberOfBackpackInventorySlots(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, menu.getNumberOfRows());
 
 		matrixStack.pushPose();
 		matrixStack.translate(getGuiLeft(), getGuiTop(), 0.0F);

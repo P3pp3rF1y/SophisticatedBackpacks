@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -58,11 +59,11 @@ public class StonecutterRecipeControl extends BackpackWidget {
 
 	@Override
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
-		GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + getCenteredX(18), y, 1, 1);
-		GuiHelper.blit(minecraft, matrixStack, x, y + LIST_Y_OFFSET, LIST_BACKGROUND);
-		GuiHelper.blit(minecraft, matrixStack, x + getCenteredX(26), y + INPUT_SLOT_HEIGHT + SPACING + LIST_BACKGROUND.getHeight() + SPACING, GuiHelper.CRAFTING_RESULT_SLOT);
+		GuiHelper.renderSlotsBackground(matrixStack, x + getCenteredX(18), y, 1, 1);
+		GuiHelper.blit(matrixStack, x, y + LIST_Y_OFFSET, LIST_BACKGROUND);
+		GuiHelper.blit(matrixStack, x + getCenteredX(26), y + INPUT_SLOT_HEIGHT + SPACING + LIST_BACKGROUND.getHeight() + SPACING, GuiHelper.CRAFTING_RESULT_SLOT);
 		int sliderYOffset = (int) (39.0F * sliderProgress) + 1;
-		GuiHelper.blit(minecraft, matrixStack, x + 68, y + LIST_Y_OFFSET + sliderYOffset, canScroll() ? SLIDER : DISABLED_SLIDER);
+		GuiHelper.blit(matrixStack, x + 68, y + LIST_Y_OFFSET + sliderYOffset, canScroll() ? SLIDER : DISABLED_SLIDER);
 
 		int listInnerLeftX = x + 1;
 		int listTopY = getListTopY();
@@ -102,7 +103,7 @@ public class StonecutterRecipeControl extends BackpackWidget {
 				background = RECIPE_BACKGROUND_HOVERED;
 			}
 
-			GuiHelper.blit(minecraft, matrixStack, recipeX, recipeY - 1, background);
+			GuiHelper.blit(matrixStack, recipeX, recipeY - 1, background);
 		}
 	}
 
@@ -116,9 +117,9 @@ public class StonecutterRecipeControl extends BackpackWidget {
 	}
 
 	@Override
-	public void afterScreenRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
-		renderHoveredTooltip(matrixStack, mouseX, mouseY);
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
+		renderHoveredTooltip(poseStack, mouseX, mouseY);
 	}
 
 	private void renderHoveredTooltip(PoseStack matrixStack, int mouseX, int mouseY) {
@@ -140,9 +141,7 @@ public class StonecutterRecipeControl extends BackpackWidget {
 
 	private void renderTooltip(PoseStack poseStack, ItemStack itemStack, int mouseX, int mouseY) {
 		Font font = net.minecraftforge.client.RenderProperties.get(itemStack).getFont(itemStack);
-		net.minecraftforge.fmlclient.gui.GuiUtils.preItemToolTip(itemStack);
 		screen.renderComponentTooltip(poseStack, screen.getTooltipFromItem(itemStack), mouseX, mouseY, (font == null ? this.font : font));
-		net.minecraftforge.fmlclient.gui.GuiUtils.postItemToolTip();
 	}
 
 	private void onInventoryUpdate() {

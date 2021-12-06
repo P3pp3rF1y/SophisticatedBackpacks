@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.settings.memory;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
@@ -35,11 +35,11 @@ public class MemorySettingsTab extends SettingsTab<MemorySettingsContainer> {
 
 	public MemorySettingsTab(MemorySettingsContainer container, Position position, SettingsScreen screen) {
 		super(container, position, screen, new TranslatableComponent(translSettings(MemorySettingsCategory.NAME)),
-				new ImmutableList.Builder<FormattedText>()
+				new ImmutableList.Builder<Component>()
 						.add(new TranslatableComponent(translSettingsTooltip(MemorySettingsCategory.NAME)))
 						.addAll(TranslationHelper.getTranslatedLines(translSettingsTooltip(MemorySettingsCategory.NAME) + "_detail", null, ChatFormatting.GRAY))
 						.build(),
-				new ImmutableList.Builder<FormattedText>()
+				new ImmutableList.Builder<Component>()
 						.add(new TranslatableComponent(translSettingsTooltip(MemorySettingsCategory.NAME)))
 						.addAll(TranslationHelper.getTranslatedLines(translSettingsTooltip(MemorySettingsCategory.NAME) + "_open_detail", null, ChatFormatting.GRAY))
 						.build(),

@@ -4,6 +4,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
@@ -70,8 +71,8 @@ public abstract class SettingsTabControl<C extends AbstractContainerScreen<?>, T
 	}
 
 	@Override
-	public void afterScreenRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		children.forEach(tab -> tab.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		children.forEach(tab -> tab.renderTooltip(screen, poseStack, mouseX, mouseY));
 	}
 
 	protected int getTopY() {

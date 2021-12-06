@@ -6,6 +6,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -40,7 +41,7 @@ public class ModLoot {
 	}
 
 	private static LootPool getInjectPool(String entryName) {
-		return LootPool.lootPool().add(getInjectEntry(entryName)).bonusRolls(0, 1).name("sophisticatedbackpacks_inject_pool").build();
+		return LootPool.lootPool().add(getInjectEntry(entryName)).setBonusRolls(UniformGenerator.between(0, 1)).name("sophisticatedbackpacks_inject_pool").build();
 	}
 
 	private static LootPoolEntryContainer.Builder<?> getInjectEntry(String name) {

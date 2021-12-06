@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -29,17 +30,22 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 	@Override
 	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		StateData data = stateData.get(getState.get());
-		GuiHelper.blit(minecraft, matrixStack, x, y, data.getTexture());
+		GuiHelper.blit(matrixStack, x, y, data.getTexture());
+	}
+
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(data.getTooltip());
+			StateData data = stateData.get(getState.get());
+			screen.renderTooltip(poseStack, data.getTooltip(), Optional.empty(), mouseX, mouseY);
 		}
 	}
 
 	public static class StateData {
 		private final TextureBlitData texture;
-		private final List<? extends FormattedText> tooltip;
+		private final List<Component> tooltip;
 
-		public StateData(TextureBlitData texture, List<? extends Component> tooltip) {
+		public StateData(TextureBlitData texture, List<Component> tooltip) {
 			this.texture = texture;
 			this.tooltip = tooltip;
 		}
@@ -53,7 +59,7 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 			return texture;
 		}
 
-		public List<? extends FormattedText> getTooltip() {
+		public List<Component> getTooltip() {
 			return tooltip;
 		}
 	}

@@ -14,7 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -23,7 +24,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
@@ -95,14 +95,14 @@ public class KeybindHandler {
 		});
 	}
 
-	public static void handleGuiKeyPress(GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.getKey(event.getKeyCode(), event.getScanCode())) && tryCallSort(event.getGui())) {
+	public static void handleGuiKeyPress(ScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.getKey(event.getKeyCode(), event.getScanCode())) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);
 		}
 	}
 
-	public static void handleGuiMouseKeyPress(GuiScreenEvent.MouseClickedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.Type.MOUSE.getOrCreate(event.getButton())) && tryCallSort(event.getGui())) {
+	public static void handleGuiMouseKeyPress(ScreenEvent.MouseClickedEvent.Pre event) {
+		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.Type.MOUSE.getOrCreate(event.getButton())) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);
 		}
 	}

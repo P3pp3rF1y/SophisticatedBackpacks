@@ -57,10 +57,9 @@ public class BackpackBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compound) {
-		CompoundTag ret = super.save(compound);
-		writeBackpack(ret);
-		return ret;
+	protected void saveAdditional(CompoundTag tag) {
+		super.saveAdditional(tag);
+		writeBackpack(tag);
 	}
 
 	private void writeBackpack(CompoundTag ret) {
@@ -73,21 +72,24 @@ public class BackpackBlockEntity extends BlockEntity {
 	public CompoundTag getUpdateTag() {
 		CompoundTag ret = super.getUpdateTag();
 		writeBackpack(ret);
+		ret.putBoolean("updateBlockRender", updateBlockRender);
+		updateBlockRender = true;
 		return ret;
 	}
 
 	@Nullable
 	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
-		CompoundTag updateTag = getUpdateTag();
-		updateTag.putBoolean("updateBlockRender", updateBlockRender);
-		updateBlockRender = true;
-		return new ClientboundBlockEntityDataPacket(worldPosition, 1, updateTag);
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
 		CompoundTag tag = pkt.getTag();
+		if (tag == null) {
+			return;
+		}
+
 		setBackpackFromNbt(tag);
 		if (tag.getBoolean("updateBlockRender")) {
 			WorldHelper.notifyBlockUpdate(this);

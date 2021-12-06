@@ -9,9 +9,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
-import net.minecraftforge.fmllegacy.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 
@@ -53,14 +52,14 @@ public class BackpackStorage extends SavedData {
 	}
 
 	private static void readAccessLogs(CompoundTag nbt, BackpackStorage storage) {
-		for (Tag n : nbt.getList("accessLogRecords", Constants.NBT.TAG_COMPOUND)) {
+		for (Tag n : nbt.getList("accessLogRecords", Tag.TAG_COMPOUND)) {
 			AccessLogRecord alr = AccessLogRecord.deserializeFromNBT((CompoundTag) n);
 			storage.accessLogRecords.put(alr.getBackpackUuid(), alr);
 		}
 	}
 
 	private static void readBackpackContents(CompoundTag nbt, BackpackStorage storage) {
-		for (Tag n : nbt.getList("backpackContents", Constants.NBT.TAG_COMPOUND)) {
+		for (Tag n : nbt.getList("backpackContents", Tag.TAG_COMPOUND)) {
 			CompoundTag uuidContentsPair = (CompoundTag) n;
 			UUID uuid = NbtUtils.loadUUID(Objects.requireNonNull(uuidContentsPair.get("uuid")));
 			CompoundTag contents = uuidContentsPair.getCompound("contents");

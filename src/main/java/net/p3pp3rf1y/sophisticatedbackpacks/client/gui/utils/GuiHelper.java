@@ -18,21 +18,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +54,9 @@ public class GuiHelper {
 		renderItemInGUI(matrixStack, minecraft, stack, xPosition, yPosition, false);
 	}
 
-	public static void renderSlotsBackground(Minecraft minecraft, PoseStack matrixStack, int x, int y, int slotWidth, int slotHeight) {
+	public static void renderSlotsBackground(PoseStack matrixStack, int x, int y, int slotWidth, int slotHeight) {
 		int key = getSlotsBackgroundKey(slotWidth, slotHeight);
-		blit(minecraft, matrixStack, x, y, SLOTS_BACKGROUNDS.computeIfAbsent(key, k ->
+		blit(matrixStack, x, y, SLOTS_BACKGROUNDS.computeIfAbsent(key, k ->
 				new TextureBlitData(SLOTS_BACKGROUND, Dimension.SQUARE_256, new UV(0, 0), new Dimension(slotWidth * 18, slotHeight * 18))
 		));
 	}
@@ -92,7 +86,7 @@ public class GuiHelper {
 		return zOffset == null ? 0 : zOffset.intValue();
 	}
 
-	public static void blit(Minecraft minecraft, PoseStack matrixStack, int x, int y, TextureBlitData texData) {
+	public static void blit(PoseStack matrixStack, int x, int y, TextureBlitData texData) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, texData.getTextureName());
 		GuiComponent.blit(matrixStack, x + texData.getXOffset(), y + texData.getYOffset(), texData.getU(), texData.getV(), texData.getWidth(), texData.getHeight(), texData.getTextureWidth(), texData.getTextureHeight());
@@ -125,103 +119,6 @@ public class GuiHelper {
 		BufferUploader.end(bufferbuilder);
 	}
 
-	private static List<? extends FormattedText> tooltipToRender = Collections.emptyList();
-
-	public static void setTooltipToRender(List<? extends FormattedText> tooltip) {
-		tooltipToRender = tooltip;
-	}
-
-	public static void renderTooltip(Minecraft minecraft, PoseStack matrixStack, int mouseX, int mouseY) {
-		if (tooltipToRender.isEmpty()) {
-			return;
-		}
-
-		renderTooltip(minecraft, matrixStack, tooltipToRender, mouseX, mouseY, ITooltipRenderPart.EMPTY, null, ItemStack.EMPTY, 200);
-		tooltipToRender = Collections.emptyList();
-	}
-
-	public static void renderTooltip(Minecraft minecraft, PoseStack matrixStack, List<? extends FormattedText> textLines, int mouseX, int mouseY,
-			ITooltipRenderPart additionalRender, @Nullable Font tooltipRenderFont, ItemStack stack) {
-		renderTooltip(minecraft, matrixStack, textLines, mouseX, mouseY, additionalRender, tooltipRenderFont, stack, 0);
-	}
-
-	public static void renderTooltip(Minecraft minecraft, PoseStack matrixStack, List<? extends FormattedText> textLines, int mouseX, int mouseY,
-			ITooltipRenderPart additionalRender, @Nullable Font tooltipRenderFont, ItemStack stack, int maxTextWidth) {
-
-		Font font = tooltipRenderFont == null ? minecraft.font : tooltipRenderFont;
-
-		int windowWidth = minecraft.getWindow().getGuiScaledWidth();
-		int windowHeight = minecraft.getWindow().getGuiScaledHeight();
-
-		int tooltipWidth = getMaxLineWidth(textLines, font);
-		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
-
-		boolean needsWrap = false;
-
-		if (maxTextWidth > 0 && tooltipWidth > maxTextWidth) {
-			tooltipWidth = maxTextWidth;
-			needsWrap = true;
-		}
-
-		if (needsWrap) {
-			int wrappedTooltipWidth = 0;
-			List<FormattedText> wrappedTextLines = new ArrayList<>();
-			for (FormattedText textLine : textLines) {
-				List<FormattedText> wrappedLine = font.getSplitter().splitLines(textLine, tooltipWidth, Style.EMPTY);
-
-				for (FormattedText line : wrappedLine) {
-					int lineWidth = font.width(line);
-					if (lineWidth > wrappedTooltipWidth) {wrappedTooltipWidth = lineWidth;}
-					wrappedTextLines.add(line);
-				}
-			}
-			tooltipWidth = wrappedTooltipWidth;
-			textLines = wrappedTextLines;
-		}
-
-		int leftX = mouseX + 12;
-		if (leftX + tooltipWidth > windowWidth) {
-			leftX -= 28 + tooltipWidth;
-		}
-
-		int topY = mouseY - 12;
-		int tooltipHeight = 8;
-		if (textLines.size() > 1) {
-			tooltipHeight += 2 + (textLines.size() - 1) * 10;
-		}
-		tooltipHeight += additionalRender.getHeight();
-
-		if (topY + tooltipHeight + 6 > windowHeight) {
-			topY = windowHeight - tooltipHeight - 6;
-		}
-
-		int backgroundColor = GuiUtils.DEFAULT_BACKGROUND_COLOR;
-		int borderColorStart = GuiUtils.DEFAULT_BORDER_COLOR_START;
-		int borderColorEnd = GuiUtils.DEFAULT_BORDER_COLOR_END;
-		RenderTooltipEvent.Color colorEvent = new RenderTooltipEvent.Color(stack, textLines, matrixStack, leftX, topY, font, backgroundColor, borderColorStart, borderColorEnd);
-		MinecraftForge.EVENT_BUS.post(colorEvent);
-		backgroundColor = colorEvent.getBackground();
-		borderColorStart = colorEvent.getBorderStart();
-		borderColorEnd = colorEvent.getBorderEnd();
-
-		matrixStack.pushPose();
-		Matrix4f matrix4f = matrixStack.last().pose();
-		renderTooltipBackground(matrix4f, tooltipWidth, leftX, topY, tooltipHeight, backgroundColor, borderColorStart, borderColorEnd);
-
-		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
-
-		MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		matrixStack.translate(0.0D, 0.0D, 400.0D);
-
-		topY = writeTooltipLines(textLines, font, leftX, topY, matrix4f, renderTypeBuffer, -1);
-
-		renderTypeBuffer.endBatch();
-		additionalRender.render(matrixStack, leftX, topY, font);
-		matrixStack.popPose();
-
-		MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, textLines, matrixStack, leftX, topY, font, tooltipWidth, tooltipHeight));
-	}
-
 	public static void renderTooltipBackground(Matrix4f matrix4f, int tooltipWidth, int leftX, int topY, int tooltipHeight, int backgroundColor, int borderColorStart, int borderColorEnd) {
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
@@ -247,18 +144,7 @@ public class GuiHelper {
 		RenderSystem.enableTexture();
 	}
 
-	private static int getMaxLineWidth(List<? extends FormattedText> tooltips, Font font) {
-		int maxLineWidth = 0;
-		for (FormattedText line : tooltips) {
-			int lineWidth = font.width(line);
-			if (lineWidth > maxLineWidth) {
-				maxLineWidth = lineWidth;
-			}
-		}
-		return maxLineWidth;
-	}
-
-	public static int writeTooltipLines(List<? extends FormattedText> textLines, Font font, float leftX, int topY, Matrix4f matrix4f, MultiBufferSource.BufferSource renderTypeBuffer, int color) {
+	public static void writeTooltipLines(List<? extends FormattedText> textLines, Font font, float leftX, int topY, Matrix4f matrix4f, MultiBufferSource.BufferSource renderTypeBuffer, int color) {
 		for (int i = 0; i < textLines.size(); ++i) {
 			FormattedText line = textLines.get(i);
 			if (line != null) {
@@ -271,7 +157,6 @@ public class GuiHelper {
 
 			topY += 10;
 		}
-		return topY;
 	}
 
 	private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int colorA, int colorB) {
@@ -303,14 +188,14 @@ public class GuiHelper {
 		);
 	}
 
-	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, Position offset, List<? extends Component> tooltip) {
+	public static ToggleButton.StateData getButtonStateData(UV uv, Dimension dimension, Position offset, List<Component> tooltip) {
 		return new ToggleButton.StateData(new TextureBlitData(ICONS, offset, Dimension.SQUARE_256, uv, dimension), tooltip);
 	}
 
-	public static void renderSlotsBackground(Minecraft minecraft, PoseStack matrixStack, int x, int y, int slotsInRow, int fullSlotRows, int extraRowSlots) {
-		renderSlotsBackground(minecraft, matrixStack, x, y, slotsInRow, fullSlotRows);
+	public static void renderSlotsBackground(PoseStack matrixStack, int x, int y, int slotsInRow, int fullSlotRows, int extraRowSlots) {
+		renderSlotsBackground(matrixStack, x, y, slotsInRow, fullSlotRows);
 		if (extraRowSlots > 0) {
-			renderSlotsBackground(minecraft, matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
+			renderSlotsBackground(matrixStack, x, y + fullSlotRows * 18, extraRowSlots, 1);
 		}
 	}
 

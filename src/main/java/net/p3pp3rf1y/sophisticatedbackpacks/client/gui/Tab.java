@@ -4,10 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.CompositeBackpackWidget;
@@ -16,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
@@ -28,12 +29,12 @@ public abstract class Tab extends CompositeBackpackWidget<BackpackWidget> {
 
 	private int width = DEFAULT_WIDTH;
 	private int height = DEFAULT_HEIGHT;
-	private final List<FormattedText> tooltip;
+	private final List<Component> tooltip;
 
 	private BooleanSupplier shouldShowTooltip = () -> true;
 	private BooleanSupplier shouldRender = () -> true;
 
-	protected Tab(Position position, List<FormattedText> tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
+	protected Tab(Position position, List<Component> tooltip, Function<IntConsumer, ButtonBase> getTabButton) {
 		super(position, new Dimension(0, 0));
 		this.tooltip = tooltip;
 		addChild(getTabButton.apply(this::onTabIconClicked));
@@ -53,10 +54,15 @@ public abstract class Tab extends CompositeBackpackWidget<BackpackWidget> {
 		if (!shouldRender.getAsBoolean()) {
 			return;
 		}
-		if (isClosedTooltipVisible(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(tooltip);
-		}
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
+	}
+
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
+		if (shouldRender.getAsBoolean() && isClosedTooltipVisible(mouseX, mouseY)) {
+			screen.renderTooltip(poseStack, tooltip, Optional.empty(), mouseX, mouseY);
+		}
 	}
 
 	@Override

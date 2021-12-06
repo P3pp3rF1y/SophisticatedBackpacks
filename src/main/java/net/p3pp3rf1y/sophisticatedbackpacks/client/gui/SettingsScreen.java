@@ -41,7 +41,7 @@ public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 	@Override
 	protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
 		BackpackBackgroundProperties backpackBackgroundProperties = getMenu().getBackpackBackgroundProperties();
-		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getBackpackInventorySlots().size(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, minecraft, menu.getNumberOfRows());
+		BackpackGuiHelper.renderBackpackBackground(new Position((width - imageWidth) / 2, (height - imageHeight) / 2), matrixStack, getMenu().getBackpackInventorySlots().size(), getMenu().getSlotsOnLine(), backpackBackgroundProperties.getTextureName(), imageWidth, menu.getNumberOfRows());
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 		settingsTabControl.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.translate(0, 0, 200);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		settingsTabControl.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
+		settingsTabControl.renderTooltip(this, matrixStack, mouseX, mouseY);
 		renderTooltip(matrixStack, mouseX, mouseY);
 	}
 
@@ -162,12 +162,6 @@ public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	@Override
-	protected void renderTooltip(PoseStack matrixStack, int x, int y) {
-		super.renderTooltip(matrixStack, x, y);
-		GuiHelper.renderTooltip(minecraft, matrixStack, x, y);
 	}
 
 	public static SettingsScreen constructScreen(SettingsContainer settingsContainer, Inventory playerInventory, Component title) {

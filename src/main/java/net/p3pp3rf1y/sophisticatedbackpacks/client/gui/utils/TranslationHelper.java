@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -80,22 +81,28 @@ public class TranslationHelper {
 		return ITEM_UPGRADE_PREFIX + itemName + TOOLTIP_SUFFIX;
 	}
 
-	public static List<TextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters, ChatFormatting... textFormattings) {
-		List<TextComponent> ret = getTranslatedLines(translateKey, parameters);
-		ret.forEach(l -> l.withStyle(textFormattings));
+	public static List<Component> getTranslatedLines(String translateKey, @Nullable Object parameters, ChatFormatting... textFormattings) {
+		List<Component> ret = new ArrayList<>();
+		for (Component translatedLine : getTranslatedLines(translateKey, parameters)) {
+			if (translatedLine instanceof MutableComponent mutableComponent) {
+				mutableComponent.withStyle(textFormattings);
+				ret.add(translatedLine);
+			}
+		}
+
 		return ret;
 	}
 
-	public static List<TextComponent> getTranslatedLines(String translateKey) {
+	public static List<Component> getTranslatedLines(String translateKey) {
 		return getTranslatedLines(translateKey, null);
 	}
 
-	public static List<TextComponent> getTranslatedLines(String translateKey, @Nullable Object parameters) {
+	public static List<Component> getTranslatedLines(String translateKey, @Nullable Object parameters) {
 		String text = translate(translateKey, parameters);
 
 		String[] lines = text.split("\n");
 
-		List<TextComponent> ret = new ArrayList<>();
+		List<Component> ret = new ArrayList<>();
 		for (String line : lines) {
 			ret.add(new TextComponent(line));
 		}

@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
 
@@ -78,8 +79,8 @@ public abstract class CompositeBackpackWidget<T extends BackpackWidget> extends 
 	}
 
 	@Override
-	public void afterScreenRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		super.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks);
-		children.forEach(c -> c.afterScreenRender(matrixStack, mouseX, mouseY, partialTicks));
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
+		children.forEach(c -> c.renderTooltip(screen, poseStack, mouseX, mouseY));
 	}
 }

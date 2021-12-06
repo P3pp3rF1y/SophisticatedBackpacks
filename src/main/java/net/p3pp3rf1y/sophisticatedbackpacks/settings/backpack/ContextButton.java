@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonBase;
@@ -14,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
@@ -38,22 +40,29 @@ public class ContextButton extends ButtonBase {
 	@Override
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
-			renderBackground(matrixStack, minecraft, LEFT_BUTTON_HOVERED_BACKGROUND, MIDDLE_BUTTON_HOVERED_BACKGROUND, RIGHT_BUTTON_HOVERED_BACKGROUND);
-			GuiHelper.setTooltipToRender(getTooltipKey.get());
+			renderBackground(matrixStack, LEFT_BUTTON_HOVERED_BACKGROUND, MIDDLE_BUTTON_HOVERED_BACKGROUND, RIGHT_BUTTON_HOVERED_BACKGROUND);
 		} else {
-			renderBackground(matrixStack, minecraft, LEFT_BUTTON_BACKGROUND, MIDDLE_BUTTON_BACKGROUND, RIGHT_BUTTON_BACKGROUND);
+			renderBackground(matrixStack, LEFT_BUTTON_BACKGROUND, MIDDLE_BUTTON_BACKGROUND, RIGHT_BUTTON_BACKGROUND);
 		}
 	}
 
-	private void renderBackground(PoseStack matrixStack, Minecraft minecraft, TextureBlitData leftButtonHoveredBackground, TextureBlitData middleButtonHoveredBackground, TextureBlitData rightButtonHoveredBackground) {
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
+		if (isMouseOver(mouseX, mouseY)) {
+			screen.renderTooltip(poseStack, getTooltipKey.get(), Optional.empty(), mouseX, mouseY);
+		}
+	}
+
+	private void renderBackground(PoseStack matrixStack, TextureBlitData leftButtonHoveredBackground, TextureBlitData middleButtonHoveredBackground, TextureBlitData rightButtonHoveredBackground) {
 		int left = x;
-		GuiHelper.blit(minecraft, matrixStack, left, y, leftButtonHoveredBackground);
+		GuiHelper.blit(matrixStack, left, y, leftButtonHoveredBackground);
 		left += leftButtonHoveredBackground.getWidth();
-		GuiHelper.blit(minecraft, matrixStack, left, y, middleButtonHoveredBackground);
+		GuiHelper.blit(matrixStack, left, y, middleButtonHoveredBackground);
 		left += middleButtonHoveredBackground.getWidth();
-		GuiHelper.blit(minecraft, matrixStack, left, y, middleButtonHoveredBackground);
+		GuiHelper.blit(matrixStack, left, y, middleButtonHoveredBackground);
 		left += middleButtonHoveredBackground.getWidth();
-		GuiHelper.blit(minecraft, matrixStack, left, y, rightButtonHoveredBackground);
+		GuiHelper.blit(matrixStack, left, y, rightButtonHoveredBackground);
 	}
 
 	@Override

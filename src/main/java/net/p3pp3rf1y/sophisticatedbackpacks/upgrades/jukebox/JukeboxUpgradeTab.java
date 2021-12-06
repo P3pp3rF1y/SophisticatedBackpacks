@@ -46,7 +46,7 @@ public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContaine
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, minecraft, mouseX, mouseY);
 		if (getContainer().isOpen()) {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 3, y + 24, 1, 1);
+			GuiHelper.renderSlotsBackground(matrixStack, x + 3, y + 24, 1, 1);
 		}
 	}
 

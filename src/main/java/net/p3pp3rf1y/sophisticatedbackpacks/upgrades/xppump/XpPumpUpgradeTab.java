@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.DyeColor;
@@ -24,6 +24,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
@@ -108,7 +109,7 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 		private final Supplier<String> getText;
 		private final DoubleConsumer onScroll;
 
-		private static final List<FormattedText> TOOLTIP = List.of(
+		private static final List<Component> TOOLTIP = List.of(
 				new TranslatableComponent(translUpgradeControl("xp_level_select.tooltip")),
 				new TranslatableComponent(translUpgradeControl("xp_level_select.tooltip.controls")).withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY));
 
@@ -130,9 +131,13 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 			int xOffset = (getWidth() - minecraft.font.width(fullText)) / 2;
 			int yOffset = (int) Math.ceil((getHeight() - minecraft.font.lineHeight) / 2d);
 			minecraft.font.draw(poseStack, fullText, (float) x + xOffset, (float) y + yOffset, DyeColor.BLACK.getTextColor());
+		}
 
+		@Override
+		public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+			super.renderTooltip(screen, poseStack, mouseX, mouseY);
 			if (isMouseOver(mouseX, mouseY)) {
-				GuiHelper.setTooltipToRender(TOOLTIP);
+				screen.renderTooltip(poseStack, TOOLTIP, Optional.empty(), mouseX, mouseY);
 			}
 		}
 

@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
@@ -37,11 +37,11 @@ public class NoSortSettingsTab extends SettingsTab<NoSortSettingsContainer> {
 
 	public NoSortSettingsTab(NoSortSettingsContainer container, Position position, SettingsScreen screen) {
 		super(container, position, screen, new TranslatableComponent(translSettings(NoSortSettingsCategory.NAME)),
-				new ImmutableList.Builder<FormattedText>()
+				new ImmutableList.Builder<Component>()
 						.add(new TranslatableComponent(translSettingsTooltip(NoSortSettingsCategory.NAME)))
 						.addAll(TranslationHelper.getTranslatedLines(translSettingsTooltip(NoSortSettingsCategory.NAME) + "_detail", null, ChatFormatting.GRAY))
 						.build(),
-				new ImmutableList.Builder<FormattedText>()
+				new ImmutableList.Builder<Component>()
 						.add(new TranslatableComponent(translSettingsTooltip(NoSortSettingsCategory.NAME)))
 						.addAll(TranslationHelper.getTranslatedLines(translSettingsTooltip(NoSortSettingsCategory.NAME) + "_open_detail", null, ChatFormatting.GRAY))
 						.build(),

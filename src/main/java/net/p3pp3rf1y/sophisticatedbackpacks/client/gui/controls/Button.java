@@ -4,7 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
@@ -12,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 
 public class Button extends ButtonBase {
@@ -20,7 +22,7 @@ public class Button extends ButtonBase {
 	private final TextureBlitData hoveredBackgroundTexture;
 	@Nullable
 	private final TextureBlitData foregroundTexture;
-	private List<FormattedText> tooltip;
+	private List<Component> tooltip;
 
 	public Button(Position position, ButtonDefinition buttonDefinition, IntConsumer onClick) {
 		super(position, buttonDefinition.getDimension(), onClick);
@@ -34,24 +36,21 @@ public class Button extends ButtonBase {
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
 			if (hoveredBackgroundTexture != null) {
-				GuiHelper.blit(minecraft, matrixStack, x, y, hoveredBackgroundTexture);
+				GuiHelper.blit(matrixStack, x, y, hoveredBackgroundTexture);
 			}
 		} else {
-			GuiHelper.blit(minecraft, matrixStack, x, y, backgroundTexture);
+			GuiHelper.blit(matrixStack, x, y, backgroundTexture);
 		}
 	}
 
-	protected List<FormattedText> getTooltip() {
+	protected List<Component> getTooltip() {
 		return tooltip;
 	}
 
 	@Override
 	protected void renderWidget(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		if (foregroundTexture != null) {
-			GuiHelper.blit(minecraft, matrixStack, x, y, foregroundTexture);
-		}
-		if (isMouseOver(mouseX, mouseY)) {
-			GuiHelper.setTooltipToRender(getTooltip());
+			GuiHelper.blit(matrixStack, x, y, foregroundTexture);
 		}
 	}
 
@@ -61,7 +60,15 @@ public class Button extends ButtonBase {
 		pNarrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.button.usage.focused"));
 	}
 
-	public void setTooltip(List<FormattedText> tooltip) {
+	public void setTooltip(List<Component> tooltip) {
 		this.tooltip = tooltip;
+	}
+
+	@Override
+	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
+		super.renderTooltip(screen, poseStack, mouseX, mouseY);
+		if (isMouseOver(mouseX, mouseY)) {
+			screen.renderTooltip(poseStack, getTooltip(), Optional.empty(), mouseX, mouseY);
+		}
 	}
 }

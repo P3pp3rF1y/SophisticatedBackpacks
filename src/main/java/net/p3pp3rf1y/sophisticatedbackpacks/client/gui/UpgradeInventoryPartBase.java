@@ -17,4 +17,6 @@ public abstract class UpgradeInventoryPartBase<C extends UpgradeContainerBase<?,
 	public abstract boolean handleMouseReleased(double mouseX, double mouseY, int button);
 
 	public abstract void renderErrorOverlay(PoseStack matrixStack);
+
+	public abstract void renderTooltip(BackpackScreen screen, PoseStack matrixStack, int mouseX, int mouseY);
 }

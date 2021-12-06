@@ -4,9 +4,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -15,10 +17,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
@@ -74,9 +77,10 @@ public class SophisticatedBackpacks {
 
 	private static void clientSetup(FMLClientSetupEvent event) {
 		KeybindHandler.register(event);
+		MinecraftForgeClient.registerTooltipComponentFactory(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
 	}
 
-	private static void serverStarted(FMLServerStartedEvent event) {
+	private static void serverStarted(ServerStartedEvent event) {
 		ServerLevel world = event.getServer().getLevel(Level.OVERWORLD);
 		if (world != null) {
 			RecipeHelper.setWorld(world);

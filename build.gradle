@@ -43,10 +43,10 @@ group = 'sophisticatedbackpacks'
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 archivesBaseName = 'sophisticatedbackpacks'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '16'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
-    mappings channel: 'parchment', version: "${project.parchment_version}"
+    mappings channel: 'official', version: "1.18"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         all {
@@ -57,8 +57,8 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property "mixin.env.disableRefMap", "true"
+            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 sophisticatedbackpacks {
                     source sourceSets.main
@@ -68,8 +68,8 @@ minecraft {
         server {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property "mixin.env.disableRefMap", "true"
+            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -81,8 +81,8 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             property 'fml.earlyprogresswindow', 'false'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property "mixin.env.disableRefMap", "true"
+            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
             mods {
                 sophisticatedbackpacks {
@@ -111,8 +111,8 @@ dependencies {
     //runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
     compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-    runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    //runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    //runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
 
     //runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
     //runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")

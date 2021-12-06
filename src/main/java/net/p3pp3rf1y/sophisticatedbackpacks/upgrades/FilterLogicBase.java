@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -89,7 +89,7 @@ public class FilterLogicBase {
 	}
 
 	protected void initTags() {
-		tagNames = NBTHelper.getCollection(upgrade, parentTagKey, "tags", Constants.NBT.TAG_STRING,
+		tagNames = NBTHelper.getCollection(upgrade, parentTagKey, "tags", Tag.TAG_STRING,
 				elementNbt -> Optional.of(new ResourceLocation(elementNbt.getAsString())), TreeSet::new).orElse(new TreeSet<>());
 	}
 

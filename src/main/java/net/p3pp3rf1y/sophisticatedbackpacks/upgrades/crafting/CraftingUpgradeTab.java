@@ -33,9 +33,9 @@ public class CraftingUpgradeTab extends UpgradeSettingsTab<CraftingUpgradeContai
 	protected void renderBg(PoseStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, minecraft, mouseX, mouseY);
 		if (getContainer().isOpen()) {
-			GuiHelper.renderSlotsBackground(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth(), y + 44, 3, 3);
-			GuiHelper.blit(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth() + 19, y + 101, ARROW);
-			GuiHelper.blit(minecraft, matrixStack, x + 3 + craftingUIAddition.getWidth() + 14, y + 111, GuiHelper.CRAFTING_RESULT_SLOT);
+			GuiHelper.renderSlotsBackground(matrixStack, x + 3 + craftingUIAddition.getWidth(), y + 44, 3, 3);
+			GuiHelper.blit(matrixStack, x + 3 + craftingUIAddition.getWidth() + 19, y + 101, ARROW);
+			GuiHelper.blit(matrixStack, x + 3 + craftingUIAddition.getWidth() + 14, y + 111, GuiHelper.CRAFTING_RESULT_SLOT);
 		}
 	}
 

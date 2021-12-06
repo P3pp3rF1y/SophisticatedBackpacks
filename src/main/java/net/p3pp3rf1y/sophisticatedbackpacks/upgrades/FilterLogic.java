@@ -2,9 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.FilterItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
@@ -52,7 +52,7 @@ FilterLogic extends FilterLogicBase {
 				@Override
 				public void deserializeNBT(CompoundTag nbt) {
 					setSize(filterSlotCount);
-					ListTag tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
+					ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
 					for (int i = 0; i < tagList.size(); i++) {
 						CompoundTag itemTags = tagList.getCompound(i);
 						int slot = itemTags.getInt("Slot");
