@@ -249,7 +249,7 @@ public class BackpackBlock extends Block implements IWaterLoggable {
 	@Override
 	public void entityInside(BlockState state, World world, BlockPos pos, Entity entity) {
 		super.entityInside(state, world, pos, entity);
-		if (entity instanceof ItemEntity) {
+		if (!world.isClientSide && entity instanceof ItemEntity) {
 			ItemEntity itemEntity = (ItemEntity) entity;
 			WorldHelper.getTile(world, pos, BackpackTileEntity.class).ifPresent(te -> tryToPickup(world, itemEntity, te.getBackpackWrapper()));
 		}
