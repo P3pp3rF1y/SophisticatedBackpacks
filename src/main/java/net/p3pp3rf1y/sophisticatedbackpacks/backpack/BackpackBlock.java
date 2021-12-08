@@ -249,7 +249,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Override
 	public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
 		super.entityInside(state, world, pos, entity);
-		if (entity instanceof ItemEntity itemEntity) {
+		if (!world.isClientSide && entity instanceof ItemEntity itemEntity) {
 			WorldHelper.getTile(world, pos, BackpackBlockEntity.class).ifPresent(te -> tryToPickup(world, itemEntity, te.getBackpackWrapper()));
 		}
 	}
