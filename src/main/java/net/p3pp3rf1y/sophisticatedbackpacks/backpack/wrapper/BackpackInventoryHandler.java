@@ -206,6 +206,9 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 		}
 
 		ret = super.insertItem(slot, ret, simulate);
+		if (!simulate) {
+			slotTracker.removeAndSetSlotIndexes(this, slot, getStackInSlot(slot));
+		}
 
 		if (ret == stack) {
 			return ret;
