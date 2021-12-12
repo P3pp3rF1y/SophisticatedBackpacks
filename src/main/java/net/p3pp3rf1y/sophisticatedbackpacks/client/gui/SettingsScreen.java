@@ -83,8 +83,9 @@ public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 		itemRenderer.blitOffset = 100.0F;
 
 		RenderSystem.enableDepthTest();
-		itemRenderer.renderAndDecorateItem(itemstack, slot.x, slot.y);
-
+		poseStack.pushPose();
+		settingsTabControl.renderGuiItem(itemRenderer, itemstack, slot);
+		poseStack.popPose();
 		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
 
@@ -146,11 +147,13 @@ public class SettingsScreen extends AbstractContainerScreen<SettingsContainer> {
 	}
 
 	private void renderSlotOverlay(PoseStack matrixStack, Slot slot, int slotColor) {
+		renderSlotOverlay(matrixStack, slot.x, slot.y, 16, slotColor);
+	}
+
+	private void renderSlotOverlay(PoseStack matrixStack, int xPos, int yPos, int height, int slotColor) {
 		RenderSystem.disableDepthTest();
-		int xPos = slot.x;
-		int yPos = slot.y;
 		RenderSystem.colorMask(true, true, true, false);
-		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
+		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + height, slotColor, slotColor);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableDepthTest();
 	}

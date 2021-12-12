@@ -28,4 +28,9 @@ public abstract class SettingsTab<C extends SettingsContainerBase<?>> extends Se
 	public abstract Optional<Integer> getSlotOverlayColor(int slotNumber);
 
 	public abstract void handleSlotClick(Slot slot, int mouseButton);
+
+	@SuppressWarnings("unused") // parameter used in override
+	public int getItemRotation(int slotIndex) {
+		return 0;
+	}
 }

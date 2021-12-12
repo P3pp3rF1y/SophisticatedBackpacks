@@ -378,7 +378,11 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 	}
 
 	private void renderSlotOverlay(PoseStack matrixStack, Slot slot, int slotColor) {
-		renderOverlay(matrixStack, slotColor, slot.x, slot.y, 16, 16);
+		renderSlotOverlay(matrixStack, slot, slotColor, 0, 16);
+	}
+
+	private void renderSlotOverlay(PoseStack matrixStack, Slot slot, int slotColor, int yOffset, int height) {
+		renderOverlay(matrixStack, slotColor, slot.x, slot.y + yOffset, 16, height);
 	}
 
 	public void renderOverlay(PoseStack matrixStack, int slotColor, int xPos, int yPos, int width, int height) {
@@ -436,7 +440,13 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackContainer> {
 		for (int slotNumber = 0; slotNumber < menu.getNumberOfBackpackInventorySlots(); slotNumber++) {
 			List<Integer> colors = menu.getSlotOverlayColors(slotNumber);
 			if (!colors.isEmpty()) {
-				renderSlotOverlay(matrixStack, menu.getSlot(slotNumber), colors.get(0) | (80 << 24)); //TODO needs to support more colors later
+				int stripeHeight = 16 / colors.size();
+				int i = 0;
+				for (int slotColor : colors) {
+					int yOffset = i * stripeHeight;
+					renderSlotOverlay(matrixStack, menu.getSlot(slotNumber), slotColor | (80 << 24), yOffset, i == colors.size() - 1 ? 16 - yOffset : stripeHeight);
+					i++;
+				}
 			}
 		}
 		matrixStack.popPose();

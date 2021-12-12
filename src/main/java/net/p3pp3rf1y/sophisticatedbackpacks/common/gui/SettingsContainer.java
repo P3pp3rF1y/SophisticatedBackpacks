@@ -25,6 +25,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.SettingsContainerBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
@@ -47,6 +49,7 @@ public class SettingsContainer extends AbstractContainerMenu implements IContext
 		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsContainer::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsContainer::new);
 		addFactory(builder, MemorySettingsCategory.NAME, MemorySettingsContainer::new);
+		addFactory(builder, ItemDisplaySettingsCategory.NAME, ItemDisplaySettingsContainer::new);
 		SETTINGS_CONTAINER_FACTORIES = builder.build();
 	}
 

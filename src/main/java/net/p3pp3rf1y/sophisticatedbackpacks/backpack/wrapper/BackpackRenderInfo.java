@@ -29,6 +29,7 @@ public class BackpackRenderInfo {
 	private static final String BATTERY_TAG = "battery";
 	private static final String TANK_POSITION_TAG = "position";
 	private static final String TANK_INFO_TAG = "info";
+	private static final String ITEM_DISPLAY_TAG = "itemDisplay";
 
 	private static final Map<String, UpgradeRenderDataType<?>> RENDER_DATA_TYPES;
 
@@ -46,6 +47,7 @@ public class BackpackRenderInfo {
 	private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
 	private final Map<UpgradeRenderDataType<?>, IUpgradeRenderData> upgradeData = new HashMap<>();
+	private ItemDisplayRenderInfo itemDisplayRenderInfo = new ItemDisplayRenderInfo();
 
 	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getBackpackSaveHandler) {
 		this.backpack = backpack;
@@ -78,6 +80,11 @@ public class BackpackRenderInfo {
 		deserializeTanks();
 		deserializeBattery();
 		deserializeUpgrades();
+		deserializeItemDisplay();
+	}
+
+	private void deserializeItemDisplay() {
+		itemDisplayRenderInfo = ItemDisplayRenderInfo.deserialize(getRenderInfoTag().getCompound(ITEM_DISPLAY_TAG));
 	}
 
 	private void deserializeUpgrades() {
@@ -96,7 +103,7 @@ public class BackpackRenderInfo {
 	}
 
 	public void deserializeFrom(CompoundTag renderInfoNbt) {
-		reset();
+		resetUpgradeInfo();
 		backpack.addTagElement(RENDER_INFO_TAG, renderInfoNbt);
 		deserialize();
 	}
@@ -105,10 +112,11 @@ public class BackpackRenderInfo {
 		return getRenderInfoTag();
 	}
 
-	public void reset() {
+	public void resetUpgradeInfo() {
 		tankRenderInfos.clear();
 		batteryRenderInfo = null;
-		NBTHelper.removeTag(backpack, RENDER_INFO_TAG);
+		getRenderInfoTag().remove(TANKS_TAG);
+		getRenderInfoTag().remove(BATTERY_TAG);
 		save();
 	}
 
@@ -160,6 +168,19 @@ public class BackpackRenderInfo {
 		return tankRenderInfos;
 	}
 
+	public ItemDisplayRenderInfo getItemDisplayRenderInfo() {
+		return itemDisplayRenderInfo;
+	}
+
+	public void setItemDisplayRenderInfo(ItemStack item, int rotation) {
+		itemDisplayRenderInfo.setItem(item);
+		itemDisplayRenderInfo.setRotation(rotation);
+		CompoundTag renderInfo = getRenderInfoTag();
+		renderInfo.put(ITEM_DISPLAY_TAG, itemDisplayRenderInfo.serialize());
+		NBTHelper.setCompoundNBT(backpack, RENDER_INFO_TAG, renderInfo);
+		save();
+	}
+
 	public Optional<IRenderedBatteryUpgrade.BatteryRenderInfo> getBatteryRenderInfo() {
 		return Optional.ofNullable(batteryRenderInfo);
 	}
@@ -186,5 +207,53 @@ public class BackpackRenderInfo {
 		upgradeData.remove(type);
 		serializeUpgradeData(upgrades -> upgrades.remove(type.getName()));
 		save();
+	}
+
+	public static class ItemDisplayRenderInfo {
+		private static final String ITEM_TAG = "item";
+		private static final String ROTATION_TAG = "rotation";
+		private ItemStack item;
+		private int rotation;
+
+		private ItemDisplayRenderInfo(ItemStack item, int rotation) {
+			this.item = item;
+			this.rotation = rotation;
+		}
+
+		public ItemDisplayRenderInfo() {
+			this(ItemStack.EMPTY, 0);
+		}
+
+		public CompoundTag serialize() {
+			CompoundTag ret = new CompoundTag();
+			if (!item.isEmpty()) {
+				ret.put(ITEM_TAG, item.serializeNBT());
+				ret.putInt(ROTATION_TAG, rotation);
+			}
+			return ret;
+		}
+
+		private void setItem(ItemStack item) {
+			this.item = item;
+		}
+
+		public static ItemDisplayRenderInfo deserialize(CompoundTag tag) {
+			if (tag.contains(ITEM_TAG)) {
+				return new ItemDisplayRenderInfo(ItemStack.of(tag.getCompound(ITEM_TAG)), tag.getInt(ROTATION_TAG));
+			}
+			return new ItemDisplayRenderInfo();
+		}
+
+		private void setRotation(int rot) {
+			rotation = rot;
+		}
+
+		public int getRotation() {
+			return rotation;
+		}
+
+		public ItemStack getItem() {
+			return item;
+		}
 	}
 }
