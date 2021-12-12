@@ -83,8 +83,9 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 		itemRenderer.blitOffset = 100.0F;
 
 		RenderSystem.enableDepthTest();
-		itemRenderer.renderAndDecorateItem(minecraft.player, itemstack, slot.x, slot.y);
-
+		RenderSystem.pushMatrix();
+		settingsTabControl.renderGuiItem(itemRenderer, itemstack, slot);
+		RenderSystem.popMatrix();
 		itemRenderer.blitOffset = 0.0F;
 		setBlitOffset(0);
 
@@ -145,11 +146,13 @@ public class SettingsScreen extends ContainerScreen<SettingsContainer> {
 	}
 
 	private void renderSlotOverlay(MatrixStack matrixStack, Slot slot, int slotColor) {
+		renderSlotOverlay(matrixStack, slot.x, slot.y, 16, slotColor);
+	}
+
+	private void renderSlotOverlay(MatrixStack matrixStack, int xPos, int yPos, int height, int slotColor) {
 		RenderSystem.disableDepthTest();
-		int xPos = slot.x;
-		int yPos = slot.y;
 		RenderSystem.colorMask(true, true, true, false);
-		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + 16, slotColor, slotColor);
+		fillGradient(matrixStack, xPos, yPos, xPos + 16, yPos + height, slotColor, slotColor);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.enableDepthTest();
 	}
