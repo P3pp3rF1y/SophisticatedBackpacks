@@ -59,6 +59,7 @@ public class Config {
 
 	public static class Common {
 		public final EnabledItems enabledItems;
+		public final DisallowedItems disallowedItems;
 		public final BackpackConfig leatherBackpack;
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
@@ -95,6 +96,7 @@ public class Config {
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
 			enabledItems.enabledMap.clear();
+			disallowedItems.setInitialized = false;
 			stackUpgrade.nonStackableItems = null;
 		}
 
@@ -102,6 +104,7 @@ public class Config {
 			builder.comment("Common Settings").push("common");
 
 			enabledItems = new EnabledItems(builder);
+			disallowedItems = new DisallowedItems(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
@@ -419,6 +422,37 @@ public class Config {
 						enabledMap.put(data[0], Boolean.valueOf(data[1]));
 					} else {
 						SophisticatedBackpacks.LOGGER.error("Wrong data for enabledItems - expected name:true/false when {} was provided", itemEnabled);
+					}
+				}
+			}
+		}
+
+		public static class DisallowedItems {
+			private final ForgeConfigSpec.ConfigValue<List<String>> disallowedItemsList;
+			private boolean setInitialized = false;
+			private Set<Item> disallowedItemsSet = null;
+
+			DisallowedItems(ForgeConfigSpec.Builder builder) {
+				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
+			}
+
+			public boolean isItemDisallowed(Item item) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
+				if (!setInitialized) {
+					loadDisallowedSet();
+				}
+				return disallowedItemsSet.contains(item);
+			}
+
+			private void loadDisallowedSet() {
+				disallowedItemsSet = new HashSet<>();
+
+				for (String disallowedItemName : disallowedItemsList.get()) {
+					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
+					if (ForgeRegistries.ITEMS.containsKey(registryName)) {
+						disallowedItemsSet.add(ForgeRegistries.ITEMS.getValue(registryName));
 					}
 				}
 			}
