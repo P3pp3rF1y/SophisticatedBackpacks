@@ -207,7 +207,7 @@ public class PumpUpgradeWrapper extends UpgradeWrapperBase<PumpUpgradeWrapper, P
 
 	private boolean handleFluidContainerInHand(IFluidHandler backpackFluidHandler, Player player, InteractionHand hand) {
 		ItemStack itemInHand = player.getItemInHand(hand);
-		if (itemInHand == backpackWrapper.getBackpack()) {
+		if (itemInHand.getCount() > 1 || itemInHand == backpackWrapper.getBackpack()) {
 			return false;
 		}
 		return itemInHand.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).map(itemFluidHandler -> {
