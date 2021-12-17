@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCatego
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -171,7 +172,15 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 			// and going into this logic as well and because of that causing collection to be updated outside of first level iterator. The increment is here just
 			// in case updating cache fails to prevent infinite loop
 			while (!emptySlots.isEmpty() && i++ < sizeBefore) {
-				int slot = emptySlots.iterator().next();
+				Iterator<Integer> it = emptySlots.iterator();
+				int slot = it.next();
+				while (memorySettings.isSlotSelected(slot)) {
+					if (!it.hasNext()) {
+						return remainingStack;
+					}
+					slot = it.next();
+				}
+
 				remainingStack = inserter.insertItem(slot, remainingStack, simulate);
 				if (remainingStack.isEmpty()) {
 					break;
