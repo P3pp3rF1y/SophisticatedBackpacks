@@ -164,28 +164,23 @@ public class GuiHelper {
 		int tooltipWidth = getMaxLineWidth(textLines, font);
 		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
-		boolean needsWrap = false;
-
 		if (maxTextWidth > 0 && tooltipWidth > maxTextWidth) {
 			tooltipWidth = maxTextWidth;
-			needsWrap = true;
 		}
 
-		if (needsWrap) {
-			int wrappedTooltipWidth = 0;
-			List<ITextProperties> wrappedTextLines = new ArrayList<>();
-			for (ITextProperties textLine : textLines) {
-				List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, tooltipWidth, Style.EMPTY);
+		int wrappedTooltipWidth = 0;
+		List<ITextProperties> wrappedTextLines = new ArrayList<>();
+		for (ITextProperties textLine : textLines) {
+			List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, tooltipWidth, Style.EMPTY);
 
-				for (ITextProperties line : wrappedLine) {
-					int lineWidth = font.width(line);
-					if (lineWidth > wrappedTooltipWidth) {wrappedTooltipWidth = lineWidth;}
-					wrappedTextLines.add(line);
-				}
+			for (ITextProperties line : wrappedLine) {
+				int lineWidth = font.width(line);
+				if (lineWidth > wrappedTooltipWidth) {wrappedTooltipWidth = lineWidth;}
+				wrappedTextLines.add(line);
 			}
-			tooltipWidth = wrappedTooltipWidth;
-			textLines = wrappedTextLines;
 		}
+		tooltipWidth = wrappedTooltipWidth;
+		textLines = wrappedTextLines;
 
 		int leftX = mouseX + 12;
 		if (leftX + tooltipWidth > windowWidth) {
