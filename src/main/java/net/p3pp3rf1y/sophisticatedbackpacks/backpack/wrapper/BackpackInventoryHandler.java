@@ -206,7 +206,7 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 		}
 
 		ret = super.insertItem(slot, ret, simulate);
-		if (!simulate) {
+		if (ret != stack && !simulate) {
 			slotTracker.removeAndSetSlotIndexes(this, slot, getStackInSlot(slot));
 		}
 
@@ -249,8 +249,12 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return (!(stack.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(stack)))
-				&& backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(slot, stack);
+		return isNotDisallowed(stack) && backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(slot, stack);
+	}
+
+	private boolean isNotDisallowed(ItemStack stack) {
+		return !Config.COMMON.disallowedItems.isItemDisallowed(stack.getItem())
+				&& (!(stack.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(stack)));
 	}
 
 	private boolean hasInceptionUpgrade() {

@@ -7,8 +7,10 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -97,7 +99,20 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 			int borderColor = wrapper.getBorderColor();
 			model.render(matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
 			renderUpgrades(livingEntity, wrapper.getRenderInfo());
+			renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo());
 		});
+	}
+
+	private static void renderItemShown(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, BackpackRenderInfo renderInfo) {
+		BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = renderInfo.getItemDisplayRenderInfo();
+		if (!itemDisplayRenderInfo.getItem().isEmpty()) {
+			matrixStack.pushPose();
+			matrixStack.translate(0, 0.9, -0.25);
+			matrixStack.scale(0.5f, 0.5f, 0.5f);
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180f + itemDisplayRenderInfo.getRotation()));
+			Minecraft.getInstance().getItemRenderer().renderStatic(itemDisplayRenderInfo.getItem(), ItemTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, matrixStack, buffer, 0);
+			matrixStack.popPose();
+		}
 	}
 
 	private static void renderUpgrades(LivingEntity livingEntity, BackpackRenderInfo renderInfo) {

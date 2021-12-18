@@ -108,13 +108,18 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			}
 		}, finished::get);
 		ItemStack tool = selectedTool.get();
-		if (!tool.isEmpty() && (tool.getCount() == 1 || backpackInventory.insertItem(mainHandItem, true).isEmpty())) {
+		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItem, tool, selectedSlot.get())) {
 			player.setItemInHand(InteractionHand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
 			backpackInventory.insertItem(mainHandItem, false);
 			return true;
 		}
 
 		return false;
+	}
+
+	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemStack mainHandItem, ItemStack tool, int selectedSlot) {
+		return (backpackInventory.insertItem(mainHandItem, true).isEmpty())
+				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
 	}
 
 	private boolean isAllowedAndGoodAtBreakingBlock(BlockState state, ItemStack stack) {

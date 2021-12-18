@@ -216,11 +216,11 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(
-			new ApplicableEffect(MobEffects.DAMAGE_RESISTANCE, 3),
+			new ApplicableEffect(MobEffects.DAMAGE_RESISTANCE, 2),
 			new ApplicableEffect(MobEffects.FIRE_RESISTANCE),
 			new ApplicableEffect(MobEffects.ABSORPTION),
 			new ApplicableEffect(MobEffects.HEALTH_BOOST),
-			new ApplicableEffect(MobEffects.REGENERATION, 3),
+			new ApplicableEffect(MobEffects.REGENERATION, 2),
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 

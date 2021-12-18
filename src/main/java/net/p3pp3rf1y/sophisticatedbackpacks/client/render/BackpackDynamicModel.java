@@ -171,6 +171,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 				addRightSide(state, side, rand, extraData, ret, state.getValue(RIGHT_TANK));
 				addFront(state, side, rand, extraData, ret, state.getValue(BATTERY));
 			}
+
 			return ret;
 		}
 
@@ -274,7 +275,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		@Override
 		public boolean isCustomRenderer() {
-			return false;
+			return true;
 		}
 
 		@SuppressWarnings("java:S1874") //don't have model data to pass in here and just calling getParticleTexture of baked model that doesn't need model data

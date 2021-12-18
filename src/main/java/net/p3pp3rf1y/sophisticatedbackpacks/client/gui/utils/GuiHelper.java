@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -7,29 +9,51 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
@@ -273,5 +297,127 @@ public class GuiHelper {
 		int getHeight();
 
 		void render(PoseStack matrixStack, int leftX, int topY, Font font);
+	}
+
+	public static void tryRenderGuiItem(ItemRenderer itemRenderer, TextureManager textureManager,
+			@Nullable LivingEntity livingEntity, ItemStack stack, int x, int y, int rotation) {
+		if (!stack.isEmpty()) {
+			BakedModel bakedmodel = itemRenderer.getModel(stack, null, livingEntity, 0);
+			itemRenderer.blitOffset += 50.0F;
+
+			try {
+				renderGuiItem(itemRenderer, textureManager, stack, x, y, bakedmodel, rotation);
+			}
+			catch (Throwable throwable) {
+				CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
+				CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
+				crashreportcategory.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
+				crashreportcategory.setDetail("Registry Name", () -> String.valueOf(stack.getItem().getRegistryName()));
+				crashreportcategory.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
+				crashreportcategory.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
+				crashreportcategory.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
+				throw new ReportedException(crashreport);
+			}
+
+			itemRenderer.blitOffset -= 50.0F;
+		}
+	}
+
+	private static void renderGuiItem(ItemRenderer itemRenderer, TextureManager textureManager, ItemStack stack, int x, int y, BakedModel bakedModel, int rotation) {
+		textureManager.getTexture(InventoryMenu.BLOCK_ATLAS).setFilter(false, false);
+		RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		PoseStack posestack = RenderSystem.getModelViewStack();
+		posestack.pushPose();
+		posestack.translate(x, y, 100.0F + itemRenderer.blitOffset);
+		posestack.translate(8.0D, 8.0D, 0.0D);
+		if (rotation != 0) {
+			posestack.mulPose(Vector3f.ZP.rotationDegrees(rotation));
+		}
+		posestack.scale(1.0F, -1.0F, 1.0F);
+		posestack.scale(16.0F, 16.0F, 16.0F);
+		RenderSystem.applyModelViewMatrix();
+		PoseStack posestack1 = new PoseStack();
+		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+		boolean flag = !bakedModel.usesBlockLight();
+		if (flag) {
+			Lighting.setupForFlatItems();
+		}
+
+		itemRenderer.render(stack, ItemTransforms.TransformType.GUI, false, posestack1, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+		bufferSource.endBatch();
+		RenderSystem.enableDepthTest();
+		if (flag) {
+			Lighting.setupFor3DItems();
+		}
+
+		posestack.popPose();
+		RenderSystem.applyModelViewMatrix();
+	}
+
+	private static final Field TOOLTIP_FONT = ObfuscationReflectionHelper.findField(Screen.class, "tooltipFont");
+
+	@Nullable
+	private static Font getTooltipFont(Screen screen) {
+		try {
+			return (Font) TOOLTIP_FONT.get(screen);
+		}
+		catch (IllegalAccessException e) {
+			SophisticatedBackpacks.LOGGER.error("Unable to get value from field tooltipFont in Screen class: ", e);
+			return null;
+		}
+	}
+
+	public static void renderTooltip(Screen screen, PoseStack poseStack, List<Component> components, int x, int y) {
+		List<ClientTooltipComponent> list = gatherTooltipComponents(components, x, screen.width, screen.height, getTooltipFont(screen), screen.font);
+		screen.renderTooltipInternal(poseStack, list, x, y);
+	}
+
+	//copy of ForgeHooksClient.gatherTooltipComponents with splitting always called so that new lines in translation are properly wrapped
+	public static List<ClientTooltipComponent> gatherTooltipComponents(List<? extends FormattedText> textElements, int mouseX, int screenWidth, int screenHeight,
+			@Nullable Font forcedFont, Font fallbackFont) {
+		Font font = ForgeHooksClient.getTooltipFont(forcedFont, ItemStack.EMPTY, fallbackFont);
+		List<Either<FormattedText, TooltipComponent>> elements = textElements.stream()
+				.map((Function<FormattedText, Either<FormattedText, TooltipComponent>>) Either::left)
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		var event = new RenderTooltipEvent.GatherComponents(ItemStack.EMPTY, screenWidth, screenHeight, elements, -1);
+		MinecraftForge.EVENT_BUS.post(event);
+		if (event.isCanceled()) {
+			return List.of();
+		}
+
+		// text wrapping
+		int tooltipTextWidth = event.getTooltipElements().stream()
+				.mapToInt(either -> either.map(font::width, component -> 0))
+				.max()
+				.orElse(0);
+
+		int tooltipX = mouseX + 12;
+		if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+			tooltipX = mouseX - 16 - tooltipTextWidth;
+			if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+			{
+				if (mouseX > screenWidth / 2) {
+					tooltipTextWidth = mouseX - 12 - 8;
+				} else {
+					tooltipTextWidth = screenWidth - 16 - mouseX;
+				}
+			}
+		}
+
+		if (event.getMaxWidth() > 0 && tooltipTextWidth > event.getMaxWidth()) {
+			tooltipTextWidth = event.getMaxWidth();
+		}
+
+		int tooltipTextWidthF = tooltipTextWidth;
+		return event.getTooltipElements().stream()
+				.flatMap(either -> either.map(
+						text -> font.split(text, tooltipTextWidthF).stream().map(ClientTooltipComponent::create),
+						component -> Stream.of(ClientTooltipComponent.create(component))
+				))
+				.toList();
 	}
 }

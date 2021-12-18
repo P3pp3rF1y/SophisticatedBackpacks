@@ -185,7 +185,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private void initRenderInfoCallbacks(boolean forceUpdateRenderInfo) {
 		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
 		if (forceUpdateRenderInfo) {
-			renderInfo.reset();
+			renderInfo.resetUpgradeInfo();
 		}
 
 		initTankRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);
