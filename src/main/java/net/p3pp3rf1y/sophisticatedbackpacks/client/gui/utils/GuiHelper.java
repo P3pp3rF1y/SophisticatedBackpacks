@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -8,10 +9,20 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ReportedException;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -153,28 +164,23 @@ public class GuiHelper {
 		int tooltipWidth = getMaxLineWidth(textLines, font);
 		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
-		boolean needsWrap = false;
-
 		if (maxTextWidth > 0 && tooltipWidth > maxTextWidth) {
 			tooltipWidth = maxTextWidth;
-			needsWrap = true;
 		}
 
-		if (needsWrap) {
-			int wrappedTooltipWidth = 0;
-			List<ITextProperties> wrappedTextLines = new ArrayList<>();
-			for (ITextProperties textLine : textLines) {
-				List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, tooltipWidth, Style.EMPTY);
+		int wrappedTooltipWidth = 0;
+		List<ITextProperties> wrappedTextLines = new ArrayList<>();
+		for (ITextProperties textLine : textLines) {
+			List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, tooltipWidth, Style.EMPTY);
 
-				for (ITextProperties line : wrappedLine) {
-					int lineWidth = font.width(line);
-					if (lineWidth > wrappedTooltipWidth) { wrappedTooltipWidth = lineWidth; }
-					wrappedTextLines.add(line);
-				}
+			for (ITextProperties line : wrappedLine) {
+				int lineWidth = font.width(line);
+				if (lineWidth > wrappedTooltipWidth) {wrappedTooltipWidth = lineWidth;}
+				wrappedTextLines.add(line);
 			}
-			tooltipWidth = wrappedTooltipWidth;
-			textLines = wrappedTextLines;
 		}
+		tooltipWidth = wrappedTooltipWidth;
+		textLines = wrappedTextLines;
 
 		int leftX = mouseX + 12;
 		if (leftX + tooltipWidth > windowWidth) {
@@ -385,5 +391,64 @@ public class GuiHelper {
 		int getHeight();
 
 		void render(MatrixStack matrixStack, int leftX, int topY, FontRenderer font);
+	}
+
+	public static void tryRenderGuiItem(ItemRenderer itemRenderer, TextureManager textureManager,
+			@Nullable LivingEntity livingEntity, ItemStack stack, int x, int y, int rotation) {
+		if (!stack.isEmpty()) {
+			itemRenderer.blitOffset += 50.0F;
+
+			try {
+				renderGuiItem(itemRenderer, textureManager, stack, x, y, itemRenderer.getModel(stack, null, livingEntity), rotation);
+			}
+			catch (Throwable throwable) {
+				CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering item");
+				CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
+				crashreportcategory.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
+				crashreportcategory.setDetail("Registry Name", () -> String.valueOf(stack.getItem().getRegistryName()));
+				crashreportcategory.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
+				crashreportcategory.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
+				crashreportcategory.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
+				throw new ReportedException(crashreport);
+			}
+
+			itemRenderer.blitOffset -= 50.0F;
+		}
+	}
+
+	private static void renderGuiItem(ItemRenderer itemRenderer, TextureManager textureManager, ItemStack pStack, int pX, int pY, IBakedModel pBakedmodel, int rotation) {
+		RenderSystem.pushMatrix();
+		textureManager.bind(AtlasTexture.LOCATION_BLOCKS);
+		textureManager.getTexture(AtlasTexture.LOCATION_BLOCKS).setFilter(false, false);
+		RenderSystem.enableRescaleNormal();
+		RenderSystem.enableAlphaTest();
+		RenderSystem.defaultAlphaFunc();
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.translatef((float) pX, (float) pY, 100.0F + itemRenderer.blitOffset);
+		RenderSystem.translatef(8.0F, 8.0F, 0.0F);
+		if (rotation != 0) {
+			RenderSystem.rotatef(rotation, 0, 0, 1);
+		}
+		RenderSystem.scalef(1.0F, -1.0F, 1.0F);
+		RenderSystem.scalef(16.0F, 16.0F, 16.0F);
+		MatrixStack matrixstack = new MatrixStack();
+		IRenderTypeBuffer.Impl irendertypebuffer$impl = Minecraft.getInstance().renderBuffers().bufferSource();
+		boolean flag = !pBakedmodel.usesBlockLight();
+		if (flag) {
+			RenderHelper.setupForFlatItems();
+		}
+
+		itemRenderer.render(pStack, ItemCameraTransforms.TransformType.GUI, false, matrixstack, irendertypebuffer$impl, 15728880, OverlayTexture.NO_OVERLAY, pBakedmodel);
+		irendertypebuffer$impl.endBatch();
+		RenderSystem.enableDepthTest();
+		if (flag) {
+			RenderHelper.setupFor3DItems();
+		}
+
+		RenderSystem.disableAlphaTest();
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.popMatrix();
 	}
 }

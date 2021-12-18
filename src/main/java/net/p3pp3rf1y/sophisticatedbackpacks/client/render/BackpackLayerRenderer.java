@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -115,7 +117,20 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends BipedModel<
 			renderFluids(matrixStack, buffer, packedLight, renderInfo, showLeftTank, showRightTank);
 			batteryRenderInfo.ifPresent(info -> renderBatteryCharge(matrixStack, buffer, packedLight, info.getChargeRatio()));
 			renderUpgrades(livingEntity, renderInfo);
+			renderItemShown(matrixStack, buffer, packedLight, renderInfo);
 		});
+	}
+
+	private static void renderItemShown(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, BackpackRenderInfo renderInfo) {
+		BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = renderInfo.getItemDisplayRenderInfo();
+		if (!itemDisplayRenderInfo.getItem().isEmpty()) {
+			matrixStack.pushPose();
+			matrixStack.translate(0, 0.9, -0.25);
+			matrixStack.scale(0.5f, 0.5f, 0.5f);
+			matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180f + itemDisplayRenderInfo.getRotation()));
+			Minecraft.getInstance().getItemRenderer().renderStatic(itemDisplayRenderInfo.getItem(), ItemCameraTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, matrixStack, buffer);
+			matrixStack.popPose();
+		}
 	}
 
 	private static void renderUpgrades(LivingEntity livingEntity, BackpackRenderInfo renderInfo) {

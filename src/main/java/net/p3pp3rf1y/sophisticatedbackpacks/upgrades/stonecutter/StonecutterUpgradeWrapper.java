@@ -27,6 +27,7 @@ public class StonecutterUpgradeWrapper extends UpgradeWrapperBase<StonecutterUpg
 				if (slot == 0) {
 					upgrade.addTagElement("input", getStackInSlot(0).serializeNBT());
 				}
+				save();
 			}
 		};
 		NBTHelper.getCompound(upgrade, "input").ifPresent(tag -> inputInventory.setStackInSlot(0, ItemStack.of(tag)));

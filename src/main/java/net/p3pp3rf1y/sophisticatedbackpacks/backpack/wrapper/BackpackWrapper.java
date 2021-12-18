@@ -18,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
@@ -108,6 +109,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				markBackpackContentsDirty();
 				inventorySlotChangeHandler.run();
 			}, StackUpgradeItem.getInventorySlotLimit(this));
+			handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 		}
 		return handler;
 	}
@@ -212,6 +214,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 						handler.setSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
 					}
 					getInventoryHandler().clearListeners();
+					handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;
 					fluidHandlerInitialized = false;
