@@ -11,7 +11,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ public class ToggleButton<T extends Comparable<T>> extends Button {
 	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
 		if (isMouseOver(mouseX, mouseY)) {
 			StateData data = stateData.get(getState.get());
-			screen.renderTooltip(poseStack, data.getTooltip(), Optional.empty(), mouseX, mouseY);
+			GuiHelper.renderTooltip(screen, poseStack, data.getTooltip(), mouseX, mouseY);
 		}
 	}
 

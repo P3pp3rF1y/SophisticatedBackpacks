@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.minecraft.CrashReport;
@@ -17,6 +18,8 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -32,16 +35,25 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GuiHelper {
 	public static final ResourceLocation GUI_CONTROLS = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/gui/gui_controls.png");
@@ -343,5 +355,69 @@ public class GuiHelper {
 
 		posestack.popPose();
 		RenderSystem.applyModelViewMatrix();
+	}
+
+	private static final Field TOOLTIP_FONT = ObfuscationReflectionHelper.findField(Screen.class, "tooltipFont");
+
+	@Nullable
+	private static Font getTooltipFont(Screen screen) {
+		try {
+			return (Font) TOOLTIP_FONT.get(screen);
+		}
+		catch (IllegalAccessException e) {
+			SophisticatedBackpacks.LOGGER.error("Unable to get value from field tooltipFont in Screen class: ", e);
+			return null;
+		}
+	}
+
+	public static void renderTooltip(Screen screen, PoseStack poseStack, List<Component> components, int x, int y) {
+		List<ClientTooltipComponent> list = gatherTooltipComponents(components, x, screen.width, screen.height, getTooltipFont(screen), screen.font);
+		screen.renderTooltipInternal(poseStack, list, x, y);
+	}
+
+	//copy of ForgeHooksClient.gatherTooltipComponents with splitting always called so that new lines in translation are properly wrapped
+	public static List<ClientTooltipComponent> gatherTooltipComponents(List<? extends FormattedText> textElements, int mouseX, int screenWidth, int screenHeight,
+			@Nullable Font forcedFont, Font fallbackFont) {
+		Font font = ForgeHooksClient.getTooltipFont(forcedFont, ItemStack.EMPTY, fallbackFont);
+		List<Either<FormattedText, TooltipComponent>> elements = textElements.stream()
+				.map((Function<FormattedText, Either<FormattedText, TooltipComponent>>) Either::left)
+				.collect(Collectors.toCollection(ArrayList::new));
+
+		var event = new RenderTooltipEvent.GatherComponents(ItemStack.EMPTY, screenWidth, screenHeight, elements, -1);
+		MinecraftForge.EVENT_BUS.post(event);
+		if (event.isCanceled()) {
+			return List.of();
+		}
+
+		// text wrapping
+		int tooltipTextWidth = event.getTooltipElements().stream()
+				.mapToInt(either -> either.map(font::width, component -> 0))
+				.max()
+				.orElse(0);
+
+		int tooltipX = mouseX + 12;
+		if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+			tooltipX = mouseX - 16 - tooltipTextWidth;
+			if (tooltipX < 4) // if the tooltip doesn't fit on the screen
+			{
+				if (mouseX > screenWidth / 2) {
+					tooltipTextWidth = mouseX - 12 - 8;
+				} else {
+					tooltipTextWidth = screenWidth - 16 - mouseX;
+				}
+			}
+		}
+
+		if (event.getMaxWidth() > 0 && tooltipTextWidth > event.getMaxWidth()) {
+			tooltipTextWidth = event.getMaxWidth();
+		}
+
+		int tooltipTextWidthF = tooltipTextWidth;
+		return event.getTooltipElements().stream()
+				.flatMap(either -> either.map(
+						text -> font.split(text, tooltipTextWidthF).stream().map(ClientTooltipComponent::create),
+						component -> Stream.of(ClientTooltipComponent.create(component))
+				))
+				.toList();
 	}
 }
