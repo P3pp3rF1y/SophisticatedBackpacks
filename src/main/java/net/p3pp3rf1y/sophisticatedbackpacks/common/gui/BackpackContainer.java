@@ -31,6 +31,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IOverflowResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
@@ -436,7 +437,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	private boolean mergeStackToBackpack(ItemStack slotStack) {
-		return moveItemStackTo(slotStack, 0, getNumberOfBackpackInventorySlots(), false);
+		return mergeItemStack(slotStack, 0, getNumberOfBackpackInventorySlots(), false, false, true);
 	}
 
 	private boolean mergeStackToPlayersInventory(ItemStack slotStack) {
@@ -452,7 +453,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 	}
 
 	public boolean isBackpackInventorySlot(int index) {
-		return index < getNumberOfBackpackInventorySlots();
+		return index >= 0 && index < getNumberOfBackpackInventorySlots();
 	}
 
 	private boolean isUpgradeSlot(int index) {
@@ -520,9 +521,65 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 				slot.onTake(player, getCarried());
 			}
 			return;
+		} else if (isOverflowLogicSlotAndAction(slotId, clickType) && handleOverflow(slotId, clickType, dragType, player)) {
+			return;
 		}
 
 		super.clicked(slotId, dragType, clickType, player);
+	}
+
+	private boolean handleOverflow(int slotId, ClickType clickType, int dragType, Player player) {
+		ItemStack cursorStack = clickType == ClickType.SWAP ? player.getInventory().getItem(dragType) : getCarried();
+		Consumer<ItemStack> updateCursorStack = clickType == ClickType.SWAP ? s -> player.getInventory().setItem(dragType, s) : this::setCarried;
+		Slot slot = getSlot(slotId);
+		if ((clickType != ClickType.SWAP && cursorStack.isEmpty()) || !slot.mayPlace(cursorStack)) {
+			return false;
+		}
+		ItemStack slotStack = slot.getItem();
+		if (slotStack.isEmpty() || (slot.mayPickup(player) && slotStack.getItem() != cursorStack.getItem() && cursorStack.getCount() <= slot.getMaxStackSize(cursorStack) && slotStack.getCount() <= slotStack.getMaxStackSize())) {
+			return processOverflowIfSlotWithSameItemFound(slotId, cursorStack, updateCursorStack, slotStack);
+		} else if (slotStack.getItem() == cursorStack.getItem()) {
+			return processOverflowForAnythingOverSlotMaxSize(cursorStack, updateCursorStack, slot, slotStack);
+		}
+		return false;
+	}
+
+	private boolean processOverflowForAnythingOverSlotMaxSize(ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, Slot slot, ItemStack slotStack) {
+		int remainingSpaceInSlot = slot.getMaxStackSize(cursorStack) - slotStack.getCount();
+		if (remainingSpaceInSlot < cursorStack.getCount()) {
+			ItemStack overflow = cursorStack.copy();
+			int overflowCount = cursorStack.getCount() - remainingSpaceInSlot;
+			overflow.setCount(overflowCount);
+			ItemStack result = processOverflowLogic(overflow);
+			if (result.getCount() < overflowCount) {
+				cursorStack.shrink(overflowCount - result.getCount());
+				if (cursorStack.isEmpty()) {
+					updateCursorStack.accept(ItemStack.EMPTY);
+					return true;
+				} else {
+					updateCursorStack.accept(cursorStack);
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, ItemStack slotStack) {
+		for (int slotIndex = 0; slotIndex < getNumberOfBackpackInventorySlots(); slotIndex++) {
+			if (slotIndex != slotId && ItemStack.isSameItemSameTags(getSlot(slotIndex).getItem(), cursorStack)) {
+				ItemStack result = processOverflowLogic(cursorStack);
+				if (result.getCount() < cursorStack.getCount()) {
+					updateCursorStack.accept(result);
+					return slotStack.isEmpty();
+				}
+				return false;
+			}
+		}
+		return false;
+	}
+
+	private boolean isOverflowLogicSlotAndAction(int slotId, ClickType clickType) {
+		return isBackpackInventorySlot(slotId) && (clickType == ClickType.SWAP || clickType == ClickType.PICKUP);
 	}
 
 	private void updateColumnsTaken(int columnsToRemove) {
@@ -1025,7 +1082,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 					if (quickcraftSlots.size() == 1) {
 						int l = (quickcraftSlots.iterator().next()).index;
 						resetQuickCraft();
-						doClick(l, quickcraftType, ClickType.PICKUP, player);
+						clicked(l, quickcraftType, ClickType.PICKUP, player);
 						return;
 					}
 
@@ -1259,11 +1316,15 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		return mergeItemStack(stack, startIndex, endIndex, reverseDirection, false);
 	}
 
+	protected boolean mergeItemStack(ItemStack sourceStack, int startIndex, int endIndex, boolean reverseDirection, boolean transferMaxStackSizeFromSource) {
+		return mergeItemStack(sourceStack, startIndex, endIndex, reverseDirection, transferMaxStackSizeFromSource, false);
+	}
+
 	//copy of mergeItemStack from Container - just calling getSlot here to account for upgrade slots instead of direct inventorySlots.get
 	// and minor addition to be able to ignore magetslotx stack size
 	@SuppressWarnings({"java:S3776", "java:S135"})
 	//need to keep this very close to vanilla for easy port so not refactoring it to lower complexity or less exit points in loops
-	protected boolean mergeItemStack(ItemStack sourceStack, int startIndex, int endIndex, boolean reverseDirection, boolean transferMaxStackSizeFromSource) {
+	protected boolean mergeItemStack(ItemStack sourceStack, int startIndex, int endIndex, boolean reverseDirection, boolean transferMaxStackSizeFromSource, boolean runOverflowLogic) {
 		boolean mergedSomething = false;
 		int i = startIndex;
 		if (reverseDirection) {
@@ -1271,7 +1332,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		}
 
 		int toTransfer = transferMaxStackSizeFromSource ? Math.min(sourceStack.getMaxStackSize(), sourceStack.getCount()) : sourceStack.getCount();
-		if (sourceStack.isStackable() || getSlot(startIndex).getMaxStackSize() > 64) {
+		if (runOverflowLogic || sourceStack.isStackable() || getSlot(startIndex).getMaxStackSize() > 64) {
 			while (toTransfer > 0) {
 				if (reverseDirection) {
 					if (i < startIndex) {
@@ -1299,6 +1360,14 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 							destStack.setCount(maxSize);
 							slot.setChanged();
 							mergedSomething = true;
+						}
+
+						if (runOverflowLogic && !sourceStack.isEmpty()) {
+							ItemStack result = processOverflowLogic(sourceStack);
+							if (result != sourceStack) {
+								sourceStack.setCount(result.getCount());
+								mergedSomething = true;
+							}
 						}
 					}
 				}
@@ -1383,6 +1452,19 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 		}
 
 		return mergedSomething;
+	}
+
+	private ItemStack processOverflowLogic(ItemStack stack) {
+		ItemStack result = stack;
+		for (IOverflowResponseUpgrade overflowUpgrade : backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IOverflowResponseUpgrade.class)) {
+			if (overflowUpgrade.worksInGui()) {
+				result = overflowUpgrade.onOverflow(result);
+				if (result.isEmpty()) {
+					break;
+				}
+			}
+		}
+		return result;
 	}
 
 	@Override
