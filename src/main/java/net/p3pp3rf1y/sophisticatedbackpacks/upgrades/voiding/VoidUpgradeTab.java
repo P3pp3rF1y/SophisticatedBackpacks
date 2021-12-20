@@ -1,26 +1,41 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.voiding;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.ToggleButton;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicControl;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgrade;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeTooltip;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper.getButtonStateData;
+import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.*;
 
 public class VoidUpgradeTab extends UpgradeSettingsTab<VoidUpgradeContainer> {
+	private static final ButtonDefinition.Toggle<Boolean> VOID_OVERFLOW = ButtonDefinitions.createToggleButtonDefinition(
+			ImmutableMap.of(
+					true, getButtonStateData(new UV(224, 16), Dimension.SQUARE_16, new Position(1, 1), new TranslationTextComponent(translUpgradeButton("void_overflow"))
+							, new TranslationTextComponent(translUpgradeButton("void_overflow.detail")).withStyle(TextFormatting.GRAY)),
+					false, getButtonStateData(new UV(208, 16), translUpgradeButton("void_any"), Dimension.SQUARE_16, new Position(1, 1))
+			));
+
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected VoidUpgradeTab(VoidUpgradeContainer upgradeContainer, Position position, BackpackScreen screen, ITextComponent tabLabel, ITextComponent closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), ButtonDefinitions.WORK_IN_GUI, button -> getContainer().setShouldWorkdInGUI(!getContainer().shouldWorkInGUI()),
 				getContainer()::shouldWorkInGUI));
+		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), VOID_OVERFLOW, button -> getContainer().setShouldVoidOverflow(!getContainer().shouldVoidOverflow()),
+				getContainer()::shouldVoidOverflow));
 	}
 
 	@Override

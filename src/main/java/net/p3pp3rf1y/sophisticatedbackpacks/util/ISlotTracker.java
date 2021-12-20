@@ -5,6 +5,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHa
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 public interface ISlotTracker {
 
@@ -18,9 +19,9 @@ public interface ISlotTracker {
 
 	void refreshSlotIndexesFrom(BackpackInventoryHandler itemHandler);
 
-	ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate);
+	ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, ItemStack stack, boolean simulate);
 
-	ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, int slot, ItemStack stack, boolean simulate);
+	ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, int slot, ItemStack stack, boolean simulate);
 
 	interface IItemHandlerInserter {
 		ItemStack insertItem(int slot, ItemStack stack, boolean simulate);
@@ -53,7 +54,7 @@ public interface ISlotTracker {
 		}
 
 		@Override
-		public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, InventoryHandlerSlotTracker.IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
+		public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, ItemStack stack, boolean simulate) {
 			ItemStack remainingStack = stack.copy();
 			int slots = itemHandler.getSlots();
 			for (int slot = 0; slot < slots && !remainingStack.isEmpty(); slot++) {
@@ -64,7 +65,7 @@ public interface ISlotTracker {
 		}
 
 		@Override
-		public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, InventoryHandlerSlotTracker.IItemHandlerInserter inserter, int slot, ItemStack stack, boolean simulate) {
+		public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, int slot, ItemStack stack, boolean simulate) {
 			return inserter.insertItem(slot, stack, simulate);
 		}
 	}
