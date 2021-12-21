@@ -205,7 +205,7 @@ public class CommonProxy {
 		if (remainingStackSimulated.get().isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, remainingStack, wrapper, false).isEmpty()).orElse(false)
+					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, player, remainingStack, wrapper, false).isEmpty()).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
 				Random rand = itemEntity.level.random;

@@ -5,8 +5,11 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -25,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.XpHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
@@ -107,7 +111,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		int cooldown = FULL_COOLDOWN_TICKS;
 		for (ExperienceOrbEntity xpOrb : xpEntities) {
 			if (xpOrb.isAlive() && !canNotPickup(xpOrb, entity)) {
-				if (tryToFillTank(xpOrb, world)) {
+				if (tryToFillTank(xpOrb, entity, world)) {
 					cooldown = COOLDOWN_TICKS;
 				} else {
 					break;
@@ -117,7 +121,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 		return cooldown;
 	}
 
-	private boolean tryToFillTank(ExperienceOrbEntity xpOrb, World world) {
+	private boolean tryToFillTank(ExperienceOrbEntity xpOrb, @Nullable LivingEntity entity, World world) {
 		int amountToTransfer = XpHelper.experienceToLiquid(xpOrb.getValue());
 
 		return backpackWrapper.getFluidHandler().map(fluidHandler -> {
@@ -127,6 +131,12 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 				Vector3d pos = xpOrb.position();
 				xpOrb.value = 0;
 				xpOrb.remove();
+
+				PlayerEntity player = (PlayerEntity) entity;
+
+				if (player != null) {
+					playXpPickupSound(world, player);
+				}
 
 				if (amountToTransfer > amountAdded) {
 					world.addFreshEntity(new ExperienceOrbEntity(world, pos.x(), pos.y(), pos.z(), XpHelper.liquidToExperience(amountToTransfer - amountAdded)));
@@ -145,15 +155,30 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 		int cooldown = FULL_COOLDOWN_TICKS;
 
+		PlayerEntity player = (PlayerEntity) entity;
+
 		for (ItemEntity itemEntity : itemEntities) {
 			if (!itemEntity.isAlive() || !filterLogic.matchesFilter(itemEntity.getItem()) || canNotPickup(itemEntity, entity)) {
 				continue;
 			}
 			if (tryToInsertItem(itemEntity)) {
 				cooldown = COOLDOWN_TICKS;
+				if (player != null) {
+					playItemPickupSound(world, player);
+				}
 			}
 		}
 		return cooldown;
+	}
+
+	@SuppressWarnings("squid:S1764") // this actually isn't a case of identical values being used as both side are random float value thus -1 to 1 as a result
+	private static void playItemPickupSound(World world, @Nonnull PlayerEntity player) {
+		world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (world.random.nextFloat() - world.random.nextFloat()) * 1.4F + 2.0F);
+	}
+
+	@SuppressWarnings("squid:S1764") // this actually isn't a case of identical values being used as both side are random float value thus -1 to 1 as a result
+	private static void playXpPickupSound(World world, @Nonnull PlayerEntity player) {
+		world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.1F, (world.random.nextFloat() - world.random.nextFloat()) * 0.35F + 0.9F);
 	}
 
 	private boolean isBlockedBySomething(Entity entity) {
