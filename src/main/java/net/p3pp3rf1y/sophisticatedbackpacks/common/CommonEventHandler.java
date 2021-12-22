@@ -129,6 +129,10 @@ public class CommonEventHandler {
 
 	private void onItemPickup(EntityItemPickupEvent event) {
 		ItemEntity itemEntity = event.getItem();
+		if (itemEntity.getItem().isEmpty()) {
+			return;
+		}
+
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		Player player = event.getPlayer();
 		Level world = player.getCommandSenderWorld();
