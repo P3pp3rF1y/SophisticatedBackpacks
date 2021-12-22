@@ -260,6 +260,8 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.store_levels.controls": "Scroll to change # of levels",
     "gui.sophisticatedbackpacks.upgrades.buttons.take_levels": "Take %s Levels",
     "gui.sophisticatedbackpacks.upgrades.buttons.take_levels.controls": "Scroll to change # of levels",
+    "gui.sophisticatedbackpacks.upgrades.buttons.mend_items": "Repair Items With Mending",
+    "gui.sophisticatedbackpacks.upgrades.buttons.do_not_mend_items": "Do Not Repair Items",
     "gui.sophisticatedbackpacks.upgrades.controls.xp_level_select": "%s lvls",
     "gui.sophisticatedbackpacks.upgrades.controls.xp_level_select.tooltip": "Level at which Pump Stops",
     "gui.sophisticatedbackpacks.upgrades.controls.xp_level_select.tooltip.controls": "Scroll to change",
