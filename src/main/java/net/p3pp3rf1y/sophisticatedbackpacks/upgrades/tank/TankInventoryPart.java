@@ -107,8 +107,8 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 	private TranslatableComponent getContentsTooltip(FluidStack contents, int capacity) {
 		if (contents.getFluid().is(ModFluids.EXPERIENCE_TAG)) {
-			double contentsLevels = XpHelper.getLevelsForExperience(XpHelper.liquidToExperience(contents.getAmount()));
-			double tankCapacityLevels = XpHelper.getLevelsForExperience(XpHelper.liquidToExperience(capacity));
+			double contentsLevels = XpHelper.getLevelsForExperience((int) XpHelper.liquidToExperience(contents.getAmount()));
+			double tankCapacityLevels = XpHelper.getLevelsForExperience((int) XpHelper.liquidToExperience(capacity));
 
 			return new TranslatableComponent(TranslationHelper.translUpgradeKey("tank.xp_contents_tooltip"), String.format("%.1f", contentsLevels), String.format("%.1f", tankCapacityLevels));
 		}

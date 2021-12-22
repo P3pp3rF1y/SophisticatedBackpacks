@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.DyeColor;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.controls.BackpackWidget;
@@ -40,6 +41,11 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 					AutomationDirection.OUTPUT, GuiHelper.getButtonStateData(new UV(128, 16), translUpgradeButton("xp_pump_output"), Dimension.SQUARE_16, new Position(1, 1)),
 					AutomationDirection.OFF, GuiHelper.getButtonStateData(new UV(240, 0), translUpgradeButton("xp_pump_off"), Dimension.SQUARE_16, new Position(1, 1))
 			));
+	private static final ButtonDefinition.Toggle<Boolean> MEND_ITEMS = createToggleButtonDefinition(
+			Map.of(
+					true, GuiHelper.getButtonStateData(new UV(144, 32), translUpgradeButton("mend_items"), Dimension.SQUARE_16, new Position(1, 1)),
+					false, GuiHelper.getButtonStateData(new UV(160, 32), translUpgradeButton("do_not_mend_items"), Dimension.SQUARE_16, new Position(1, 1))
+			));
 	private static final TextureBlitData STORE_ALL_FOREGROUND = new TextureBlitData(GuiHelper.ICONS, new Position(1, 1), Dimension.SQUARE_256, new UV(192, 16), Dimension.SQUARE_16);
 	public static final ButtonDefinition STORE_ALL = new ButtonDefinition(Dimension.SQUARE_18, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, STORE_ALL_FOREGROUND,
 			new TranslatableComponent(TranslationHelper.translUpgradeButton("store_all_experience")));
@@ -55,14 +61,21 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 
 	public XpPumpUpgradeTab(XpPumpUpgradeContainer upgradeContainer, Position position, BackpackScreen screen) {
 		super(upgradeContainer, position, screen, translUpgrade("xp_pump"), translUpgradeTooltip("xp_pump"));
-		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), DIRECTION,
+		int currentYOffset = 24;
+		addHideableChild(new ToggleButton<>(new Position(x + 3, y + currentYOffset), DIRECTION,
 				button -> getContainer().setDirection(getContainer().getDirection().next()),
 				() -> getContainer().getDirection()));
-		addHideableChild(new LevelSelector(new Position(x + 21, y + 24), () -> String.valueOf(upgradeContainer.getLevel()), delta ->
+		addHideableChild(new LevelSelector(new Position(x + 21, y + currentYOffset), () -> String.valueOf(upgradeContainer.getLevel()), delta ->
 				upgradeContainer.setLevel(upgradeContainer.getLevel() + (delta > 0 ? 1 : -1))));
+		currentYOffset += 20;
 
-		addHideableChild(new Button(new Position(x + 3, y + 44), TAKE_ALL, button -> upgradeContainer.takeAllExperience()));
-		takeButton = new Button(new Position(x + 21, y + 44), TAKE, button -> upgradeContainer.takeLevels()) {
+		if (Config.COMMON.xpPumpUpgrade.mendingOn.get()) {
+			addHideableChild(new ToggleButton<>(new Position(x + 3, y + currentYOffset), MEND_ITEMS, button -> upgradeContainer.setMendItems(!upgradeContainer.shouldMendItems()), upgradeContainer::shouldMendItems));
+			currentYOffset += 20;
+		}
+
+		addHideableChild(new Button(new Position(x + 3, y + currentYOffset), TAKE_ALL, button -> upgradeContainer.takeAllExperience()));
+		takeButton = new Button(new Position(x + 21, y + currentYOffset), TAKE, button -> upgradeContainer.takeLevels()) {
 			@Override
 			public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
 				upgradeContainer.setLevelsToTake(upgradeContainer.getLevelsToTake() + (delta > 0 ? 1 : -1));
@@ -72,7 +85,7 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 		};
 		setTakeTooltip();
 		addHideableChild(takeButton);
-		storeButton = new Button(new Position(x + 39, y + 44), STORE, button -> upgradeContainer.storeLevels()) {
+		storeButton = new Button(new Position(x + 39, y + currentYOffset), STORE, button -> upgradeContainer.storeLevels()) {
 			@Override
 			public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
 				upgradeContainer.setLevelsToStore(upgradeContainer.getLevelsToStore() + (delta > 0 ? 1 : -1));
@@ -82,7 +95,7 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 		};
 		setStoreTooltip();
 		addHideableChild(storeButton);
-		addHideableChild(new Button(new Position(x + 57, y + 44), STORE_ALL, button -> upgradeContainer.storeAllExperience()));
+		addHideableChild(new Button(new Position(x + 57, y + currentYOffset), STORE_ALL, button -> upgradeContainer.storeAllExperience()));
 
 	}
 

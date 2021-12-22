@@ -16,6 +16,7 @@ public class XpPumpUpgradeContainer extends UpgradeContainerBase<XpPumpUpgradeWr
 	private static final String ACTION_TAKE_ALL_LEVELS = "takeAll";
 	private static final String DATA_LEVELS_TO_STORE = "levelsToStore";
 	private static final String DATA_LEVELS_TO_TAKE = "levelsToTake";
+	private static final String DATA_MEND_ITEMS = "mendItems";
 
 	public XpPumpUpgradeContainer(Player player, int upgradeContainerId, XpPumpUpgradeWrapper upgradeWrapper, UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
@@ -88,6 +89,15 @@ public class XpPumpUpgradeContainer extends UpgradeContainerBase<XpPumpUpgradeWr
 		return upgradeWrapper.getLevelsToTake();
 	}
 
+	public void setMendItems(boolean mendItems) {
+		upgradeWrapper.setMendItems(mendItems);
+		sendBooleanToServer(DATA_MEND_ITEMS, mendItems);
+	}
+
+	public boolean shouldMendItems() {
+		return upgradeWrapper.shouldMendItems();
+	}
+
 	@Override
 	public void handleMessage(CompoundTag data) {
 		if (data.contains(DATA_DIRECTION)) {
@@ -98,6 +108,8 @@ public class XpPumpUpgradeContainer extends UpgradeContainerBase<XpPumpUpgradeWr
 			setLevelsToStore(data.getInt(DATA_LEVELS_TO_STORE));
 		} else if (data.contains(DATA_LEVELS_TO_TAKE)) {
 			setLevelsToTake(data.getInt(DATA_LEVELS_TO_TAKE));
+		} else if (data.contains(DATA_MEND_ITEMS)) {
+			setMendItems(data.getBoolean(DATA_MEND_ITEMS));
 		} else if (data.contains(DATA_ACTION)) {
 			switch (data.getString(DATA_ACTION)) {
 				case ACTION_TAKE_LEVELS -> upgradeWrapper.giveLevelsToPlayer(player);
