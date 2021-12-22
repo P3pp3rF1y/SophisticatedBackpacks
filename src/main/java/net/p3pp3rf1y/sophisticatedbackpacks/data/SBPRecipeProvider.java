@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeClearRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
@@ -43,6 +44,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.build(consumer);
 
 		SpecialRecipeBuilder.special(BackpackDyeRecipe.SERIALIZER).save(consumer, getModRegistryName("backpack_dye"));
+		SpecialRecipeBuilder.special(UpgradeClearRecipe.SERIALIZER).save(consumer, getModRegistryName("upgrade_clear"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")
