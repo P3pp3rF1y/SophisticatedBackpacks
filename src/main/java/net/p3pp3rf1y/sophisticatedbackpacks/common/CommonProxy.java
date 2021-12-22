@@ -194,6 +194,10 @@ public class CommonProxy {
 
 	private void onItemPickup(EntityItemPickupEvent event) {
 		ItemEntity itemEntity = event.getItem();
+		if (itemEntity.getItem().isEmpty()) {
+			return;
+		}
+
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		PlayerEntity player = event.getPlayer();
 		World world = player.getCommandSenderWorld();
