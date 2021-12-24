@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -59,7 +58,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 	}
 
 	private void mendItems(Player player) {
-		if (!Config.COMMON.xpPumpUpgrade.mendingOn.get() || !shouldMendItems()) {
+		if (Boolean.FALSE.equals(Config.COMMON.xpPumpUpgrade.mendingOn.get()) || !shouldMendItems()) {
 			return;
 		}
 
@@ -104,23 +103,11 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 
 	private void tryGivePlayerExperienceFromTank(Player player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
 		int maxXpPointsToGive = XpHelper.getExperienceForLevel(stopAtLevel) - XpHelper.getPlayerTotalExperience(player);
-		FluidStack toDrain = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToGive));
-
-		FluidStack drained = fluidHandler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
+		FluidStack drained = fluidHandler.drain(ModFluids.EXPERIENCE_TAG, XpHelper.experienceToLiquid(maxXpPointsToGive), IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
 
 		if (!drained.isEmpty()) {
 			player.giveExperiencePoints((int) XpHelper.liquidToExperience(drained.getAmount()));
 		}
-	}
-
-	private Fluid getExperienceFluidFromHandlerOrDefault(IFluidHandler fluidHandler) {
-		for (int tank = 0; tank < fluidHandler.getTanks(); tank++) {
-			Fluid fluidInTank = fluidHandler.getFluidInTank(tank).getFluid();
-			if (fluidInTank.is(ModFluids.EXPERIENCE_TAG)) {
-				return fluidInTank;
-			}
-		}
-		return ModFluids.XP_STILL.get();
 	}
 
 	private void tryFillTankWithPlayerExperience(Player player, IBackpackFluidHandler fluidHandler, int stopAtLevel) {
@@ -129,8 +116,7 @@ public class XpPumpUpgradeWrapper extends UpgradeWrapperBase<XpPumpUpgradeWrappe
 
 	private void tryFillTankWithPlayerExperience(Player player, IBackpackFluidHandler fluidHandler, int stopAtLevel, boolean ignoreInOutLimit) {
 		int maxXpPointsToTake = XpHelper.getPlayerTotalExperience(player) - XpHelper.getExperienceForLevel(stopAtLevel);
-		FluidStack toFill = new FluidStack(getExperienceFluidFromHandlerOrDefault(fluidHandler), XpHelper.experienceToLiquid(maxXpPointsToTake));
-		int filled = fluidHandler.fill(toFill, IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
+		int filled = fluidHandler.fill(ModFluids.EXPERIENCE_TAG, XpHelper.experienceToLiquid(maxXpPointsToTake), ModFluids.XP_STILL.get(), IFluidHandler.FluidAction.EXECUTE, ignoreInOutLimit);
 
 		if (filled > 0) {
 			player.giveExperiencePoints((int) -XpHelper.liquidToExperience(filled));
