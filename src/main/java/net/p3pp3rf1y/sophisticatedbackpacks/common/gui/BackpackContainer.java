@@ -1174,7 +1174,7 @@ public class BackpackContainer extends AbstractContainerMenu implements ISyncedC
 							if (ItemStack.isSameItemSameTags(slotStack, carriedStack)) {
 								int j3 = clickaction == ClickAction.PRIMARY ? carriedStack.getCount() : 1;
 								setCarried(slot7.safeInsert(carriedStack, j3));
-							} else if (carriedStack.getCount() <= slot7.getMaxStackSize(carriedStack)) {
+							} else if (carriedStack.getCount() <= slot7.getMaxStackSize(carriedStack) && slotStack.getCount() <= slotStack.getMaxStackSize()) {
 								slot7.set(carriedStack);
 								setCarried(slotStack);
 							}
