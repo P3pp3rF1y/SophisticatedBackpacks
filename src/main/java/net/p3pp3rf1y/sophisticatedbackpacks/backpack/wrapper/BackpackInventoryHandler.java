@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IOverflowResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
@@ -153,6 +154,7 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 	}
 
 	@Override
+	@Nonnull
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		if (amount == 0) {
 			return ItemStack.EMPTY;
@@ -187,9 +189,10 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 	}
 
 	@Override
+	@Nonnull
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		initSlotTracker();
-		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, slot, stack, simulate);
+		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, this::triggerOverflowUpgrades, slot, stack, simulate);
 	}
 
 	private void initSlotTracker() {
@@ -206,7 +209,12 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 		}
 
 		ret = super.insertItem(slot, ret, simulate);
-		if (ret != stack && !simulate) {
+
+		if (!ret.isEmpty()) {
+			ret = triggerOverflowUpgrades(ret);
+		}
+
+		if (!simulate) {
 			slotTracker.removeAndSetSlotIndexes(this, slot, getStackInSlot(slot));
 		}
 
@@ -216,6 +224,16 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 
 		runOnAfterInsert(slot, simulate, this, backpackWrapper);
 
+		return ret;
+	}
+
+	private ItemStack triggerOverflowUpgrades(ItemStack ret) {
+		for (IOverflowResponseUpgrade overflowUpgrade : backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IOverflowResponseUpgrade.class)) {
+			ret = overflowUpgrade.onOverflow(ret);
+			if (ret.isEmpty()) {
+				break;
+			}
+		}
 		return ret;
 	}
 
@@ -300,6 +318,6 @@ public class BackpackInventoryHandler extends ItemStackHandler implements IItemH
 	@Override
 	public ItemStack insertItem(ItemStack stack, boolean simulate) {
 		initSlotTracker();
-		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, stack, simulate);
+		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, this::triggerOverflowUpgrades, stack, simulate);
 	}
 }

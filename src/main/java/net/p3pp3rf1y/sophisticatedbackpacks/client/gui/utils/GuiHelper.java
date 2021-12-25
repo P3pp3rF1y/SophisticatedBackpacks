@@ -162,7 +162,6 @@ public class GuiHelper {
 		int windowHeight = minecraft.getWindow().getGuiScaledHeight();
 
 		int tooltipWidth = getMaxLineWidth(textLines, font);
-		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
 
 		if (maxTextWidth > 0 && tooltipWidth > maxTextWidth) {
 			tooltipWidth = maxTextWidth;
@@ -180,6 +179,8 @@ public class GuiHelper {
 			}
 		}
 		tooltipWidth = wrappedTooltipWidth;
+		tooltipWidth = Math.max(tooltipWidth, additionalRender.getWidth());
+
 		textLines = wrappedTextLines;
 
 		int leftX = mouseX + 12;

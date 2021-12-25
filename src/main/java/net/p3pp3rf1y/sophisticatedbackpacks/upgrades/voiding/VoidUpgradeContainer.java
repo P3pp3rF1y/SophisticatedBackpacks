@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 public class VoidUpgradeContainer extends UpgradeContainerBase<VoidUpgradeWrapper, VoidUpgradeContainer> {
 	private static final String DATA_SHOULD_WORKD_IN_GUI = "shouldWorkdInGUI";
+	private static final String DATA_SHOULD_VOID_OVERFLOW = "shouldVoidOverflow";
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
 	public VoidUpgradeContainer(PlayerEntity player, int containerId, VoidUpgradeWrapper wrapper, UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> type) {
@@ -21,6 +22,8 @@ public class VoidUpgradeContainer extends UpgradeContainerBase<VoidUpgradeWrappe
 	public void handleMessage(CompoundNBT data) {
 		if (data.contains(DATA_SHOULD_WORKD_IN_GUI)) {
 			setShouldWorkdInGUI(data.getBoolean(DATA_SHOULD_WORKD_IN_GUI));
+		} else if (data.contains(DATA_SHOULD_VOID_OVERFLOW)) {
+			setShouldVoidOverflow(data.getBoolean(DATA_SHOULD_VOID_OVERFLOW));
 		}
 		filterLogicContainer.handleMessage(data);
 	}
@@ -34,7 +37,16 @@ public class VoidUpgradeContainer extends UpgradeContainerBase<VoidUpgradeWrappe
 		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHOULD_WORKD_IN_GUI, shouldWorkdInGUI));
 	}
 
+	public void setShouldVoidOverflow(boolean shouldVoidOverflow) {
+		upgradeWrapper.setShouldVoidOverflow(shouldVoidOverflow);
+		sendDataToServer(() -> NBTHelper.putBoolean(new CompoundNBT(), DATA_SHOULD_VOID_OVERFLOW, shouldVoidOverflow));
+	}
+
 	public boolean shouldWorkInGUI() {
 		return upgradeWrapper.shouldWorkInGUI();
+	}
+
+	public boolean shouldVoidOverflow() {
+		return upgradeWrapper.shouldVoidOverflow();
 	}
 }

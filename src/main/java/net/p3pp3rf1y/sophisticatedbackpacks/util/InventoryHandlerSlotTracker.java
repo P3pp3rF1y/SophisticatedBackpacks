@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.UnaryOperator;
 
 public class InventoryHandlerSlotTracker implements ISlotTracker {
 	private final Map<ItemStackKey, Set<Integer>> fullStackSlots = new HashMap<>();
@@ -115,8 +116,13 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 	}
 
 	@Override
-	public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
-		ItemStack remainingStack = insertIntoSlotsThatMatchStack(inserter, stack, simulate);
+	public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, ItemStack stack, boolean simulate) {
+		ItemStackKey stackKey = new ItemStackKey(stack);
+		ItemStack remainingStack = handleOverflow(overflowHandler, stackKey, stack);
+		if (remainingStack.isEmpty()) {
+			return remainingStack;
+		}
+		remainingStack = insertIntoSlotsThatMatchStack(inserter, remainingStack, simulate, stackKey);
 		if (!remainingStack.isEmpty()) {
 			remainingStack = insertIntoEmptySlots(inserter, remainingStack, simulate);
 		}
@@ -124,14 +130,20 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 	}
 
 	@Override
-	public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, int slot, ItemStack stack, boolean simulate) {
+	public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, UnaryOperator<ItemStack> overflowHandler, int slot, ItemStack stack, boolean simulate) {
+		ItemStackKey stackKey = new ItemStackKey(stack);
+		ItemStack remainingStack = stack;
+		remainingStack = handleOverflow(overflowHandler, stackKey, remainingStack);
+		if (remainingStack.isEmpty()) {
+			return remainingStack;
+		}
+
 		ItemStack existing = itemHandler.getStackInSlot(slot);
 		boolean wasEmpty = existing.isEmpty();
 
-		ItemStack remainingStack = stack;
 		boolean doesNotMatchCurrentSlot = !ItemHandlerHelper.canItemStacksStack(stack, existing);
 		if (wasEmpty || doesNotMatchCurrentSlot) {
-			remainingStack = insertIntoSlotsThatMatchStack(inserter, remainingStack, simulate);
+			remainingStack = insertIntoSlotsThatMatchStack(inserter, remainingStack, simulate, stackKey);
 		}
 		if (!remainingStack.isEmpty() && doesNotMatchCurrentSlot) {
 			remainingStack = insertIntoEmptySlots(inserter, remainingStack, simulate);
@@ -143,9 +155,15 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		return remainingStack;
 	}
 
-	private ItemStack insertIntoSlotsThatMatchStack(IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
+	private ItemStack handleOverflow(UnaryOperator<ItemStack> overflowHandler, ItemStackKey stackKey, ItemStack remainingStack) {
+		if (fullStackSlots.containsKey(stackKey) && !fullStackSlots.get(stackKey).isEmpty()) {
+			remainingStack = overflowHandler.apply(remainingStack);
+		}
+		return remainingStack;
+	}
+
+	private ItemStack insertIntoSlotsThatMatchStack(IItemHandlerInserter inserter, ItemStack stack, boolean simulate, ItemStackKey stackKey) {
 		ItemStack remainingStack = stack;
-		ItemStackKey stackKey = new ItemStackKey(stack);
 
 		int sizeBefore = partiallyFilledStackSlots.containsKey(stackKey) ? partiallyFilledStackSlots.get(stackKey).size() : 0;
 		int i = 0;

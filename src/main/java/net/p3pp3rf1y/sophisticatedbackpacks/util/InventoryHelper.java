@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
@@ -14,6 +16,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -145,16 +149,30 @@ public class InventoryHelper {
 	}
 
 	public static ItemStack runPickupOnBackpack(World world, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
+		return runPickupOnBackpack(world, null, remainingStack, backpackWrapper, simulate);
+	}
+
+	public static ItemStack runPickupOnBackpack(World world, @Nullable PlayerEntity player, ItemStack remainingStack, IBackpackWrapper backpackWrapper, boolean simulate) {
 		List<IPickupResponseUpgrade> pickupUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IPickupResponseUpgrade.class);
 
 		for (IPickupResponseUpgrade pickupUpgrade : pickupUpgrades) {
+			int countBeforePickup = remainingStack.getCount();
 			remainingStack = pickupUpgrade.pickup(world, remainingStack, simulate);
+			if (!simulate && player != null && remainingStack.getCount() != countBeforePickup) {
+				playPickupSound(world, player);
+			}
+
 			if (remainingStack.isEmpty()) {
 				return ItemStack.EMPTY;
 			}
 		}
 
 		return remainingStack;
+	}
+
+	@SuppressWarnings("squid:S1764") // this actually isn't a case of identical values being used as both side are random float value thus -1 to 1 as a result
+	private static void playPickupSound(World world, @Nonnull PlayerEntity player) {
+		world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (world.random.nextFloat() - world.random.nextFloat()) * 1.4F + 2.0F);
 	}
 
 	public static void iterate(IItemHandler handler, BiConsumer<Integer, ItemStack> actOn) {

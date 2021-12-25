@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ITag;
 import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -66,6 +68,30 @@ public class BackpackFluidHandler implements IBackpackFluidHandler {
 	@Override
 	public int fill(FluidStack resource, FluidAction action) {
 		return fill(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(ITag<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+		FluidStack drained = FluidStack.EMPTY;
+		int toDrain = maxDrain;
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			Fluid tankFluid = tank.getContents().getFluid();
+			if ((drained.isEmpty() && tankFluid.is(resourceTag)) || tankFluid == drained.getFluid()) {
+				if (drained.isEmpty()) {
+					drained = tank.drain(toDrain, action, ignoreInOutLimit);
+				} else {
+					drained.grow(tank.drain(toDrain, action, ignoreInOutLimit).getAmount());
+				}
+
+				if (drained.getAmount() == maxDrain) {
+					return drained;
+				}
+
+				toDrain = maxDrain - drained.getAmount();
+			}
+		}
+
+		return drained;
 	}
 
 	@Override
