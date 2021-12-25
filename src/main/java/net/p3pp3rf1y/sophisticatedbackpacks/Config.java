@@ -92,6 +92,7 @@ public class Config {
 		public final BatteryUpgradeConfig batteryUpgrade;
 		public final StackUpgradeConfig stackUpgrade;
 		public final PumpUpgradeConfig pumpUpgrade;
+		public final XpPumpUpgradeConfig xpPumpUpgrade;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfigEvent.Reloading event) {
@@ -137,11 +138,24 @@ public class Config {
 			tankUpgrade = new TankUpgradeConfig(builder);
 			batteryUpgrade = new BatteryUpgradeConfig(builder);
 			pumpUpgrade = new PumpUpgradeConfig(builder);
+			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 
 			builder.pop();
+		}
+
+		public static class XpPumpUpgradeConfig {
+			public final ForgeConfigSpec.IntValue maxXpPointsPerMending;
+			public final ForgeConfigSpec.BooleanValue mendingOn;
+
+			public XpPumpUpgradeConfig(ForgeConfigSpec.Builder builder) {
+				builder.comment("Xp Pump Upgrade" + SETTINGS).push("xpPumpUpgrade");
+				mendingOn = builder.comment("Whether xp pump can mend items with mending. Set false here to turn off the feature altogether.").define("mendingOn", true);
+				maxXpPointsPerMending = builder.comment("How many experience points at a maximum would be used to mend an item per operation (every 5 ticks and 1 xp point usually translates to 2 damage repaired).").defineInRange("maxXpPointsPerMending", 5, 1, 20);
+				builder.pop();
+			}
 		}
 
 		public static class PumpUpgradeConfig {

@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInsertResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IOverflowResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ISlotChangeResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
@@ -23,14 +24,16 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, VoidUpgradeItem>
-		implements IPickupResponseUpgrade, IInsertResponseUpgrade, IFilteredUpgrade, ISlotChangeResponseUpgrade, ITickableUpgrade {
+		implements IPickupResponseUpgrade, IInsertResponseUpgrade, IFilteredUpgrade, ISlotChangeResponseUpgrade, ITickableUpgrade, IOverflowResponseUpgrade {
 	private final FilterLogic filterLogic;
 	private final Set<Integer> slotsToVoid = new HashSet<>();
+	private boolean shouldVoidOverflow;
 
 	public VoidUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount());
 		filterLogic.setAllowByDefault();
+		shouldVoidOverflow = NBTHelper.getBoolean(upgrade, "shouldVoidOverflow").orElse(false);
 	}
 
 	@Override
@@ -43,10 +46,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 
 	@Override
 	public ItemStack onBeforeInsert(IItemHandlerSimpleInserter inventoryHandler, int slot, ItemStack stack, boolean simulate) {
-		if (filterLogic.matchesFilter(stack)) {
-			return ItemStack.EMPTY;
-		}
-		return stack;
+		return !shouldVoidOverflow && filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
 	}
 
 	@Override
@@ -68,9 +68,19 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 		return NBTHelper.getBoolean(upgrade, "shouldWorkInGUI").orElse(false);
 	}
 
+	public void setShouldVoidOverflow(boolean shouldVoidOverflow) {
+		this.shouldVoidOverflow = shouldVoidOverflow;
+		NBTHelper.setBoolean(upgrade, "shouldVoidOverflow", shouldVoidOverflow);
+		save();
+	}
+
+	public boolean shouldVoidOverflow() {
+		return shouldVoidOverflow;
+	}
+
 	@Override
 	public void onSlotChange(IItemHandler inventoryHandler, int slot) {
-		if (!shouldWorkInGUI()) {
+		if (!shouldWorkInGUI() || shouldVoidOverflow()) {
 			return;
 		}
 
@@ -92,5 +102,15 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 		}
 
 		slotsToVoid.clear();
+	}
+
+	@Override
+	public boolean worksInGui() {
+		return shouldWorkInGUI();
+	}
+
+	@Override
+	public ItemStack onOverflow(ItemStack stack) {
+		return filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
 	}
 }

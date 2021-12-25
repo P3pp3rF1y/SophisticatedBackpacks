@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades;
 
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
@@ -11,10 +12,12 @@ import java.util.function.Supplier;
 public class ContentsFilterLogic extends FilterLogic {
 
 	private final Supplier<BackpackInventoryHandler> getInventoryHandler;
+	private final MemorySettingsCategory memorySettings;
 
-	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Supplier<BackpackInventoryHandler> getInventoryHandler) {
+	public ContentsFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, Supplier<BackpackInventoryHandler> getInventoryHandler, MemorySettingsCategory memorySettings) {
 		super(upgrade, saveHandler, filterSlotCount);
 		this.getInventoryHandler = getInventoryHandler;
+		this.memorySettings = memorySettings;
 	}
 
 	public ContentsFilterType getFilterType() {
@@ -57,7 +60,7 @@ public class ContentsFilterLogic extends FilterLogic {
 				return true;
 			}
 		}
-		return false;
+		return memorySettings.getFilterItemSlots().containsKey(stack.getItem());
 	}
 
 	private void setFilterByBackpack(boolean filterByBackpack) {

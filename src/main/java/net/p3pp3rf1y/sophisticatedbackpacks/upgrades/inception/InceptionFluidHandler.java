@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
+import net.minecraft.tags.Tag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
@@ -122,6 +124,32 @@ public class InceptionFluidHandler implements IBackpackFluidHandler {
 	@Override
 	public int fill(FluidStack resource, FluidAction action) {
 		return fill(resource, action, false);
+	}
+
+	@Override
+	public FluidStack drain(Tag<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+		FluidStack drainedStack = FluidStack.EMPTY;
+		FluidStack stackToDrain = FluidStack.EMPTY;
+		for (IBackpackFluidHandler fluidHandler : fluidHandlers) {
+			if (drainedStack.isEmpty()) {
+				drainedStack = fluidHandler.drain(resourceTag, maxDrain, action, ignoreInOutLimit);
+				if (drainedStack.getAmount() == maxDrain) {
+					return drainedStack;
+				}
+				if (!drainedStack.isEmpty()) {
+					stackToDrain = new FluidStack(drainedStack.getFluid(), maxDrain - drainedStack.getAmount());
+				}
+			} else {
+				int amountDrained = fluidHandler.drain(stackToDrain, action, ignoreInOutLimit).getAmount();
+				stackToDrain.shrink(amountDrained);
+				drainedStack.grow(amountDrained);
+				if (drainedStack.getAmount() == maxDrain) {
+					return drainedStack;
+				}
+			}
+		}
+
+		return drainedStack;
 	}
 
 	@Override

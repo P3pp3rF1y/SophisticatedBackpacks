@@ -262,6 +262,8 @@ public class EntityBackpackAdditionHandler {
 					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * 0.01F, 0.0F) < 0.085F) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
+				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+				event.getEntity().getTags().remove(SPAWNED_WITH_BACKPACK);
 			} else {
 				removeContentsUuid(backpack);
 			}
