@@ -29,7 +29,7 @@ public class UpgradeClearRecipe extends SpecialRecipe {
 			}
 		}
 
-		return true;
+		return upgradePresent;
 	}
 
 	@Override
