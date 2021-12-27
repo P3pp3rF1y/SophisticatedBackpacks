@@ -50,6 +50,9 @@ public class PlayerInventoryProvider {
 
 	public void setPlayerInventoryHandlerInitCallback(Consumer<Player> callback) {
 		playerInventoryHandlerInitCallback = callback;
+		//there seems to be a bug where something triggers one of the backpack codes too early before curio has time
+		// to register its callback which causes the callback not to be called if initialized wasn't set to false here
+		playerInventoryHandlersInitialized = false;
 	}
 
 	public void addPlayerInventoryHandler(String name, Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
