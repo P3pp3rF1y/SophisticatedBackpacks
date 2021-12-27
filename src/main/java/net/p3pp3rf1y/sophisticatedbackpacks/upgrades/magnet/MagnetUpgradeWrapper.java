@@ -61,7 +61,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	@Override
 	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
-		if (!filterLogic.matchesFilter(stack)) {
+		if (!shouldPickupItems() || !filterLogic.matchesFilter(stack)) {
 			return stack;
 		}
 
