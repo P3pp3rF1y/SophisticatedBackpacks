@@ -3,10 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.cooking.CookingUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.cooking.CookingUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeRenderData;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeRenderer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class UpgradeRenderRegistry {
 	}
 
 	static {
-		registerUpgradeRenderer(SmeltingUpgradeRenderData.TYPE, new SmeltingUpgradeRenderer());
+		registerUpgradeRenderer(CookingUpgradeRenderData.TYPE, new CookingUpgradeRenderer());
 		registerUpgradeRenderer(JukeboxUpgradeRenderData.TYPE, new JukeboxUpgradeRenderer());
 	}
 

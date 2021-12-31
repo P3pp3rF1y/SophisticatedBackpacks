@@ -9,7 +9,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.NonNullList;
@@ -169,8 +169,8 @@ public class RecipeHelper {
 		return craftinginventory;
 	}
 
-	public static Optional<FurnaceRecipe> getSmeltingRecipe(ItemStack stack) {
-		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(IRecipeType.SMELTING, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
+	public static <T extends AbstractCookingRecipe> Optional<T> getCookingRecipe(ItemStack stack, IRecipeType<T> recipeType) {
+		return getWorld().flatMap(w -> w.getRecipeManager().getRecipeFor(recipeType, new RecipeWrapper(new ItemStackHandler(NonNullList.of(ItemStack.EMPTY, stack))), w));
 	}
 
 	public static Set<CompactingShape> getItemCompactingShapes(Item item) {

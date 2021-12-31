@@ -1,0 +1,34 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:smoking_upgrade_from_smelting_upgrade"
+        ]
+    },
+    "criteria": {
+        "has_smelting_upgrade": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "items": [
+                            "sophisticatedbackpacks:smelting_upgrade"
+                        ]
+                    }
+                ]
+            }
+        },
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:smoking_upgrade_from_smelting_upgrade"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_smelting_upgrade",
+            "has_the_recipe"
+        ]
+    ]
+}

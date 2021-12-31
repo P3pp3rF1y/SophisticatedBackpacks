@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.cooking;
 
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
@@ -10,9 +10,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
 import java.util.Random;
 import java.util.function.UnaryOperator;
 
-public class SmeltingUpgradeRenderer implements IUpgradeRenderer<SmeltingUpgradeRenderData> {
+public class CookingUpgradeRenderer implements IUpgradeRenderer<CookingUpgradeRenderData> {
 	@Override
-	public void render(World world, Random rand, UnaryOperator<Vector3d> getPositionFromOffset, SmeltingUpgradeRenderData upgradeRenderData) {
+	public void render(World world, Random rand, UnaryOperator<Vector3d> getPositionFromOffset, CookingUpgradeRenderData upgradeRenderData) {
 		if (!upgradeRenderData.isBurning()) {
 			return;
 		}
