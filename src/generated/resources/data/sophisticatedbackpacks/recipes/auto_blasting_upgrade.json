@@ -1,0 +1,34 @@
+{
+    "type": "sophisticatedbackpacks:upgrade_next_tier",
+    "conditions": [
+        {
+            "itemRegistryName": "auto_blasting_upgrade",
+            "type": "sophisticatedbackpacks:item_enabled"
+        }
+    ],
+    "pattern": [
+        "DHD",
+        "RSH",
+        "GHG"
+    ],
+    "key": {
+        "D": {
+            "tag": "forge:gems/diamond"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        },
+        "H": {
+            "item": "minecraft:hopper"
+        },
+        "S": {
+            "item": "sophisticatedbackpacks:blasting_upgrade"
+        }
+    },
+    "result": {
+        "item": "sophisticatedbackpacks:auto_blasting_upgrade"
+    }
+}

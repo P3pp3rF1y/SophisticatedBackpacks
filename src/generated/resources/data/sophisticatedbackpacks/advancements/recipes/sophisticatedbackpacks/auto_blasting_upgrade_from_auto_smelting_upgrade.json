@@ -2,17 +2,17 @@
     "parent": "minecraft:recipes/root",
     "rewards": {
         "recipes": [
-            "sophisticatedbackpacks:xp_pump_upgrade"
+            "sophisticatedbackpacks:auto_blasting_upgrade_from_auto_smelting_upgrade"
         ]
     },
     "criteria": {
-        "has_advanced_pump_upgrade": {
+        "has_auto_smelting_upgrade": {
             "trigger": "minecraft:inventory_changed",
             "conditions": {
                 "items": [
                     {
                         "items": [
-                            "sophisticatedbackpacks:advanced_pump_upgrade"
+                            "sophisticatedbackpacks:auto_smelting_upgrade"
                         ]
                     }
                 ]
@@ -21,13 +21,13 @@
         "has_the_recipe": {
             "trigger": "minecraft:recipe_unlocked",
             "conditions": {
-                "recipe": "sophisticatedbackpacks:xp_pump_upgrade"
+                "recipe": "sophisticatedbackpacks:auto_blasting_upgrade_from_auto_smelting_upgrade"
             }
         }
     },
     "requirements": [
         [
-            "has_advanced_pump_upgrade",
+            "has_auto_smelting_upgrade",
             "has_the_recipe"
         ]
     ]

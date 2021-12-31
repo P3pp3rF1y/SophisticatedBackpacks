@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 
 public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrapper, PickupUpgradeItem>
 		implements IPickupResponseUpgrade, IContentsFilteredUpgrade {
-	private static final int FULL_COOLDOWN = 60;
 	private final ContentsFilterLogic filterLogic;
 
 	public PickupUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -23,21 +22,11 @@ public class PickupUpgradeWrapper extends UpgradeWrapperBase<PickupUpgradeWrappe
 
 	@Override
 	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
-		if (isInCooldown(world)) {
-			return stack;
-		}
-
 		if (!filterLogic.matchesFilter(stack)) {
 			return stack;
 		}
 
-		int originalCount = stack.getCount();
-		ItemStack ret = backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
-		if (originalCount == ret.getCount()) {
-			setCooldown(world, FULL_COOLDOWN);
-		}
-
-		return ret;
+		return backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
 	}
 
 	@Override

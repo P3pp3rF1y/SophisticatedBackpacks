@@ -61,25 +61,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 
 	@Override
 	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
-		if (isInLongCooldown(world)) {
+		if (!shouldPickupItems() || !filterLogic.matchesFilter(stack)) {
 			return stack;
 		}
 
-		if (!filterLogic.matchesFilter(stack)) {
-			return stack;
-		}
-
-		int originalCount = stack.getCount();
-		ItemStack ret = backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
-		if (originalCount == ret.getCount()) {
-			setCooldown(world, FULL_COOLDOWN_TICKS);
-		}
-
-		return ret;
-	}
-
-	private boolean isInLongCooldown(Level world) {
-		return getCooldownTime() - COOLDOWN_TICKS > world.getGameTime();
+		return backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
 	}
 
 	@Override
@@ -107,14 +93,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			return COOLDOWN_TICKS;
 		}
 
-		int cooldown = FULL_COOLDOWN_TICKS;
+		int cooldown = COOLDOWN_TICKS;
 		for (ExperienceOrb xpOrb : xpEntities) {
-			if (xpOrb.isAlive() && !canNotPickup(xpOrb, entity)) {
-				if (tryToFillTank(xpOrb, entity, world)) {
-					cooldown = COOLDOWN_TICKS;
-				} else {
-					break;
-				}
+			if (xpOrb.isAlive() && !canNotPickup(xpOrb, entity) && !tryToFillTank(xpOrb, entity, world)) {
+				cooldown = FULL_COOLDOWN_TICKS;
+				break;
 			}
 		}
 		return cooldown;
@@ -152,7 +135,7 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 			return COOLDOWN_TICKS;
 		}
 
-		int cooldown = FULL_COOLDOWN_TICKS;
+		int cooldown = COOLDOWN_TICKS;
 
 		Player player = (Player) entity;
 
@@ -161,10 +144,11 @@ public class MagnetUpgradeWrapper extends UpgradeWrapperBase<MagnetUpgradeWrappe
 				continue;
 			}
 			if (tryToInsertItem(itemEntity)) {
-				cooldown = COOLDOWN_TICKS;
 				if (player != null) {
 					playItemPickupSound(world, player);
 				}
+			} else {
+				cooldown = FULL_COOLDOWN_TICKS;
 			}
 		}
 		return cooldown;

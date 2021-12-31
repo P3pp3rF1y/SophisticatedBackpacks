@@ -308,7 +308,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	@Override
 	public void renderTooltip(Screen screen, PoseStack poseStack, int mouseX, int mouseY) {
 		super.renderTooltip(screen, poseStack, mouseX, mouseY);
-		if (isMouseOverTagList(mouseX, mouseY)) {
+		if (container.getPrimaryMatch() == PrimaryMatch.TAGS && isMouseOverTagList(mouseX, mouseY)) {
 			screen.renderTooltip(poseStack, tagListTooltip, Optional.empty(), mouseX, mouseY);
 		}
 	}
