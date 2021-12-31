@@ -6,6 +6,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
@@ -475,6 +476,90 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('P', ModItems.ADVANCED_PUMP_UPGRADE.get())
 				.addCriterion("has_advanced_pump_upgrade", has(ModItems.ADVANCED_PUMP_UPGRADE.get()))
 				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.SMOKING_UPGRADE.get())
+				.patternLine("RIR")
+				.patternLine("IBI")
+				.patternLine("RSR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('S', Items.SMOKER)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.SMOKING_UPGRADE.get())
+				.patternLine(" L ")
+				.patternLine("LSL")
+				.patternLine(" L ")
+				.key('S', ModItems.SMELTING_UPGRADE.get())
+				.key('L', ItemTags.LOGS)
+				.addCriterion("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
+				.build(consumer, RegistryHelper.getRL("smoking_upgrade_from_smelting_upgrade"));
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMOKING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DHD")
+				.patternLine("RSH")
+				.patternLine("GHG")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('H', Items.HOPPER)
+				.key('S', ModItems.SMOKING_UPGRADE.get())
+				.addCriterion("has_smoking_upgrade", has(ModItems.SMOKING_UPGRADE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMOKING_UPGRADE.get())
+				.patternLine(" L ")
+				.patternLine("LSL")
+				.patternLine(" L ")
+				.key('S', ModItems.AUTO_SMELTING_UPGRADE.get())
+				.key('L', ItemTags.LOGS)
+				.addCriterion("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
+				.build(consumer, RegistryHelper.getRL("auto_smoking_upgrade_from_auto_smelting_upgrade"));
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BLASTING_UPGRADE.get())
+				.patternLine("RIR")
+				.patternLine("IBI")
+				.patternLine("RFR")
+				.key('B', ModItems.UPGRADE_BASE.get())
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('F', Items.BLAST_FURNACE)
+				.addCriterion(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BLASTING_UPGRADE.get())
+				.patternLine("III")
+				.patternLine("ISI")
+				.patternLine("TTT")
+				.key('S', ModItems.SMELTING_UPGRADE.get())
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('T', Items.SMOOTH_STONE)
+				.addCriterion("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
+				.build(consumer, RegistryHelper.getRL("blasting_upgrade_from_smelting_upgrade"));
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_BLASTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+				.patternLine("DHD")
+				.patternLine("RSH")
+				.patternLine("GHG")
+				.key('D', Tags.Items.GEMS_DIAMOND)
+				.key('G', Tags.Items.INGOTS_GOLD)
+				.key('R', Tags.Items.DUSTS_REDSTONE)
+				.key('H', Items.HOPPER)
+				.key('S', ModItems.BLASTING_UPGRADE.get())
+				.addCriterion("has_blasting_upgrade", has(ModItems.BLASTING_UPGRADE.get()))
+				.build(consumer);
+
+		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_BLASTING_UPGRADE.get())
+				.patternLine("III")
+				.patternLine("ISI")
+				.patternLine("TTT")
+				.key('S', ModItems.AUTO_SMELTING_UPGRADE.get())
+				.key('I', Tags.Items.INGOTS_IRON)
+				.key('T', Items.SMOOTH_STONE)
+				.addCriterion("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
+				.build(consumer, RegistryHelper.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
 
 		new UpgradeRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())

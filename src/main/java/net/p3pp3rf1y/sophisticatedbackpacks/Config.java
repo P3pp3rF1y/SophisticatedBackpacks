@@ -82,8 +82,12 @@ public class Config {
 		public final FilteredUpgradeConfig advancedRestockUpgrade;
 		public final FilteredUpgradeConfig voidUpgrade;
 		public final FilteredUpgradeConfig advancedVoidUpgrade;
-		public final SmeltingUpgradeConfig smeltingUpgrade;
-		public final AutoSmeltingUpgradeConfig autoSmeltingUpgrade;
+		public final CookingUpgradeConfig smeltingUpgrade;
+		public final CookingUpgradeConfig smokingUpgrade;
+		public final CookingUpgradeConfig blastingUpgrade;
+		public final AutoCookingUpgradeConfig autoSmeltingUpgrade;
+		public final AutoCookingUpgradeConfig autoSmokingUpgrade;
+		public final AutoCookingUpgradeConfig autoBlastingUpgrade;
 		public final InceptionUpgradeConfig inceptionUpgrade;
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
@@ -131,8 +135,12 @@ public class Config {
 			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			stackUpgrade = new StackUpgradeConfig(builder);
-			smeltingUpgrade = new SmeltingUpgradeConfig(builder);
-			autoSmeltingUpgrade = new AutoSmeltingUpgradeConfig(builder);
+			smeltingUpgrade = new CookingUpgradeConfig(builder, "Smelting Upgrade", "smeltingUpgrade");
+			smokingUpgrade = new CookingUpgradeConfig(builder, "Smoking Upgrade", "smokingUpgrade");
+			blastingUpgrade = new CookingUpgradeConfig(builder, "Blasting Upgrade", "blastingUpgrade");
+			autoSmeltingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smelting Upgrade", "autoSmeltingUpgrade");
+			autoSmokingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smoking Upgrade", "autoSmokingUpgrade");
+			autoBlastingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Blasting Upgrade", "autoBlastingUpgrade");
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new FilteredUpgradeConfig(builder, "Tool Swapper Upgrade", "toolSwapperUpgrade", 8, 4);
 			tankUpgrade = new TankUpgradeConfig(builder);
@@ -313,14 +321,14 @@ public class Config {
 			}
 		}
 
-		public static class AutoSmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {
+		public static class AutoCookingUpgradeConfig extends CookingUpgradeConfig {
 			public final ForgeConfigSpec.IntValue inputFilterSlots;
 			public final ForgeConfigSpec.IntValue inputFilterSlotsInRow;
 			public final ForgeConfigSpec.IntValue fuelFilterSlots;
 			public final ForgeConfigSpec.IntValue fuelFilterSlotsInRow;
 
-			public AutoSmeltingUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				super(builder, "Auto-Smelting Upgrade", "autoSmeltingUpgrade");
+			public AutoCookingUpgradeConfig(ForgeConfigSpec.Builder builder, String upgradeName, String path) {
+				super(builder, upgradeName, path);
 				inputFilterSlots = builder.comment("Number of input filter slots").defineInRange("inputFilterSlots", 8, 1, 20);
 				inputFilterSlotsInRow = builder.comment("Number of input filter slots displayed in a row").defineInRange("inputFilterSlotsInRow", 4, 1, 6);
 				fuelFilterSlots = builder.comment("Number of fuel filter slots").defineInRange("fuelFilterSlots", 4, 1, 20);
@@ -329,20 +337,13 @@ public class Config {
 			}
 		}
 
-		public static class SmeltingUpgradeConfig extends SmeltingUpgradeConfigBase {
-			public SmeltingUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				super(builder, "Smelting Upgrade", "smeltingUpgrade");
-				builder.pop();
-			}
-		}
-
-		public static class SmeltingUpgradeConfigBase {
-			public final ForgeConfigSpec.DoubleValue smeltingSpeedMultiplier;
+		public static class CookingUpgradeConfig {
+			public final ForgeConfigSpec.DoubleValue cookingSpeedMultiplier;
 			public final ForgeConfigSpec.DoubleValue fuelEfficiencyMultiplier;
 
-			protected SmeltingUpgradeConfigBase(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
+			protected CookingUpgradeConfig(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
 				builder.comment(upgradeName + SETTINGS).push(path);
-				smeltingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
+				cookingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
 						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
 				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
 						.defineInRange("fuelEfficiencyMultiplier", 1.0D, 0.25D, 4.0D);
