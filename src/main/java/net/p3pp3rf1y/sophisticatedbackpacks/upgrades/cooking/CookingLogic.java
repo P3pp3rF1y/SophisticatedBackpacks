@@ -1,13 +1,16 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting;
+package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.cooking;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.items.ItemStackHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
 
@@ -17,34 +20,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class SmeltingLogic {
+public class CookingLogic<T extends AbstractCookingRecipe> {
 	private final ItemStack upgrade;
 	private final Consumer<ItemStack> saveHandler;
 
-	private ItemStackHandler smeltingInventory = null;
+	private ItemStackHandler cookingInventory = null;
 	public static final int COOK_INPUT_SLOT = 0;
 	public static final int COOK_OUTPUT_SLOT = 2;
 	public static final int FUEL_SLOT = 1;
 	@Nullable
-	private FurnaceRecipe smeltingRecipe = null;
-	private boolean smeltingRecipeInitialized = false;
+	private T cookingRecipe = null;
+	private boolean cookingRecipeInitialized = false;
 
+	private final float burnTimeModifier;
 	private final Predicate<ItemStack> isFuel;
 	private final Predicate<ItemStack> isInput;
-	private final double smeltingSpeedMultiplier;
+	private final double cookingSpeedMultiplier;
 	private final double fuelEfficiencyMultiplier;
+	private final IRecipeType<T> recipeType;
 
-	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, double smeltingSpeedMultiplier, double fuelEfficiencyMultiplier) {
-		this(upgrade, saveHandler, s -> getBurnTime(s) > 0, s -> RecipeHelper.getSmeltingRecipe(s).isPresent(), smeltingSpeedMultiplier, fuelEfficiencyMultiplier);
+	public CookingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Config.Common.CookingUpgradeConfig cookingUpgradeConfig, IRecipeType<T> recipeType, float burnTimeModifier) {
+		this(upgrade, saveHandler, s -> getBurnTime(s, recipeType, burnTimeModifier) > 0, s -> RecipeHelper.getCookingRecipe(s, recipeType).isPresent(), cookingUpgradeConfig, recipeType, burnTimeModifier);
 	}
 
-	public SmeltingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Predicate<ItemStack> isFuel, Predicate<ItemStack> isInput, double smeltingSpeedMultiplier, double fuelEfficiencyMultiplier) {
+	public CookingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Predicate<ItemStack> isFuel, Predicate<ItemStack> isInput, Config.Common.CookingUpgradeConfig cookingUpgradeConfig, IRecipeType<T> recipeType, float burnTimeModifier) {
 		this.upgrade = upgrade;
 		this.saveHandler = saveHandler;
 		this.isFuel = isFuel;
 		this.isInput = isInput;
-		this.smeltingSpeedMultiplier = smeltingSpeedMultiplier;
-		this.fuelEfficiencyMultiplier = fuelEfficiencyMultiplier;
+		cookingSpeedMultiplier = cookingUpgradeConfig.cookingSpeedMultiplier.get();
+		fuelEfficiencyMultiplier = cookingUpgradeConfig.fuelEfficiencyMultiplier.get();
+		this.recipeType = recipeType;
+		this.burnTimeModifier = burnTimeModifier;
 	}
 
 	private void save() {
@@ -54,7 +61,7 @@ public class SmeltingLogic {
 	public boolean tick(World world) {
 		AtomicBoolean didSomething = new AtomicBoolean(true);
 		if (isBurning(world) || readyToStartCooking()) {
-			Optional<FurnaceRecipe> fr = getSmeltingRecipe();
+			Optional<T> fr = getCookingRecipe();
 			if (!fr.isPresent() && isCooking()) {
 				setIsCooking(false);
 			}
@@ -81,12 +88,12 @@ public class SmeltingLogic {
 		return getBurnTimeFinish() >= world.getGameTime();
 	}
 
-	private Optional<FurnaceRecipe> getSmeltingRecipe() {
-		if (!smeltingRecipeInitialized) {
-			smeltingRecipe = RecipeHelper.getSmeltingRecipe(getCookInput()).orElse(null);
-			smeltingRecipeInitialized = true;
+	private Optional<T> getCookingRecipe() {
+		if (!cookingRecipeInitialized) {
+			cookingRecipe = RecipeHelper.getCookingRecipe(getCookInput(), recipeType).orElse(null);
+			cookingRecipeInitialized = true;
 		}
-		return Optional.ofNullable(smeltingRecipe);
+		return Optional.ofNullable(cookingRecipe);
 	}
 
 	private void updateCookingCooldown(World world) {
@@ -97,17 +104,17 @@ public class SmeltingLogic {
 		}
 	}
 
-	private void updateCookingProgress(World world, FurnaceRecipe smeltingRecipe) {
+	private void updateCookingProgress(World world, T cookingRecipe) {
 		if (isCooking() && finishedCooking(world)) {
-			smelt(smeltingRecipe);
-			if (canSmelt(smeltingRecipe)) {
-				setCookTime(world, (int) (smeltingRecipe.getCookingTime() * (1 / smeltingSpeedMultiplier)));
+			smelt(cookingRecipe);
+			if (canSmelt(cookingRecipe)) {
+				setCookTime(world, (int) (cookingRecipe.getCookingTime() * (1 / cookingSpeedMultiplier)));
 			} else {
 				setIsCooking(false);
 			}
 		} else if (!isCooking()) {
 			setIsCooking(true);
-			setCookTime(world, (int) (smeltingRecipe.getCookingTime() * (1 / smeltingSpeedMultiplier)));
+			setCookTime(world, (int) (cookingRecipe.getCookingTime() * (1 / cookingSpeedMultiplier)));
 		}
 	}
 
@@ -143,11 +150,11 @@ public class SmeltingLogic {
 	}
 
 	public void setCookInput(ItemStack input) {
-		smeltingInventory.setStackInSlot(COOK_INPUT_SLOT, input);
+		cookingInventory.setStackInSlot(COOK_INPUT_SLOT, input);
 	}
 
 	private void setCookOutput(ItemStack stack) {
-		getSmeltingInventory().setStackInSlot(COOK_OUTPUT_SLOT, stack);
+		getCookingInventory().setStackInSlot(COOK_OUTPUT_SLOT, stack);
 	}
 
 	private int getRemainingCookTime(World world) {
@@ -159,13 +166,13 @@ public class SmeltingLogic {
 		setCookTimeTotal(cookTime);
 	}
 
-	private void updateFuel(World world, FurnaceRecipe smeltingRecipe) {
+	private void updateFuel(World world, T cookingRecipe) {
 		ItemStack fuel = getFuel();
-		if (!isBurning(world) && canSmelt(smeltingRecipe)) {
-			if (getBurnTime(fuel) <= 0) {
+		if (!isBurning(world) && canSmelt(cookingRecipe)) {
+			if (getBurnTime(fuel, recipeType, burnTimeModifier) <= 0) {
 				return;
 			}
-			setBurnTime(world, (int) (getBurnTime(fuel) * fuelEfficiencyMultiplier / smeltingSpeedMultiplier));
+			setBurnTime(world, (int) (getBurnTime(fuel, recipeType, burnTimeModifier) * fuelEfficiencyMultiplier / cookingSpeedMultiplier));
 			if (isBurning(world)) {
 				if (fuel.hasContainerItem()) {
 					setFuel(fuel.getContainerItem());
@@ -185,11 +192,11 @@ public class SmeltingLogic {
 		setBurnTimeTotal(burnTime);
 	}
 
-	protected boolean canSmelt(IRecipe<?> smeltingRecipe) {
+	protected boolean canSmelt(IRecipe<?> cookingRecipe) {
 		if (getCookInput().isEmpty()) {
 			return false;
 		}
-		ItemStack recipeOutput = smeltingRecipe.getResultItem();
+		ItemStack recipeOutput = cookingRecipe.getResultItem();
 		if (recipeOutput.isEmpty()) {
 			return false;
 		} else {
@@ -206,36 +213,36 @@ public class SmeltingLogic {
 		}
 	}
 
-	private static int getBurnTime(ItemStack fuel) {
-		return ForgeHooks.getBurnTime(fuel);
+	private static <T extends AbstractCookingRecipe> int getBurnTime(ItemStack fuel, IRecipeType<T> recipeType, float burnTimeModifier) {
+		return (int) (ForgeHooks.getBurnTime(fuel, recipeType) * burnTimeModifier);
 	}
 
 	public ItemStack getCookOutput() {
-		return getSmeltingInventory().getStackInSlot(COOK_OUTPUT_SLOT);
+		return getCookingInventory().getStackInSlot(COOK_OUTPUT_SLOT);
 	}
 
 	public ItemStack getCookInput() {
-		return getSmeltingInventory().getStackInSlot(COOK_INPUT_SLOT);
+		return getCookingInventory().getStackInSlot(COOK_INPUT_SLOT);
 	}
 
 	public ItemStack getFuel() {
-		return getSmeltingInventory().getStackInSlot(FUEL_SLOT);
+		return getCookingInventory().getStackInSlot(FUEL_SLOT);
 	}
 
 	public void setFuel(ItemStack fuel) {
-		getSmeltingInventory().setStackInSlot(FUEL_SLOT, fuel);
+		getCookingInventory().setStackInSlot(FUEL_SLOT, fuel);
 	}
 
-	public ItemStackHandler getSmeltingInventory() {
-		if (smeltingInventory == null) {
-			smeltingInventory = new ItemStackHandler(3) {
+	public ItemStackHandler getCookingInventory() {
+		if (cookingInventory == null) {
+			cookingInventory = new ItemStackHandler(3) {
 				@Override
 				protected void onContentsChanged(int slot) {
 					super.onContentsChanged(slot);
-					upgrade.addTagElement("smeltingInventory", serializeNBT());
+					upgrade.addTagElement("cookingInventory", serializeNBT());
 					save();
 					if (slot == COOK_INPUT_SLOT) {
-						smeltingRecipeInitialized = false;
+						cookingRecipeInitialized = false;
 					}
 				}
 
@@ -251,9 +258,16 @@ public class SmeltingLogic {
 					}
 				}
 			};
-			NBTHelper.getCompound(upgrade, "smeltingInventory").ifPresent(smeltingInventory::deserializeNBT);
+
+			//TODO in the future remove use of this legacy smeltingInventory load as it should no longer be required
+			Optional<CompoundNBT> smeltingInventory = NBTHelper.getCompound(upgrade, "smeltingInventory");
+			if (smeltingInventory.isPresent()) {
+				cookingInventory.deserializeNBT(smeltingInventory.get());
+			} else {
+				NBTHelper.getCompound(upgrade, "cookingInventory").ifPresent(cookingInventory::deserializeNBT);
+			}
 		}
-		return smeltingInventory;
+		return cookingInventory;
 	}
 
 	public long getBurnTimeFinish() {

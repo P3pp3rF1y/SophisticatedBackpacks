@@ -1,0 +1,34 @@
+{
+    "parent": "minecraft:recipes/root",
+    "rewards": {
+        "recipes": [
+            "sophisticatedbackpacks:auto_smoking_upgrade"
+        ]
+    },
+    "criteria": {
+        "has_smoking_upgrade": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "items": [
+                            "sophisticatedbackpacks:smoking_upgrade"
+                        ]
+                    }
+                ]
+            }
+        },
+        "has_the_recipe": {
+            "trigger": "minecraft:recipe_unlocked",
+            "conditions": {
+                "recipe": "sophisticatedbackpacks:auto_smoking_upgrade"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_smoking_upgrade",
+            "has_the_recipe"
+        ]
+    ]
+}

@@ -9,8 +9,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.cooking.CookingUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeRenderData;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smelting.SmeltingUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
 
 import javax.annotation.Nonnull;
@@ -36,7 +36,7 @@ public class BackpackRenderInfo {
 
 	static {
 		ImmutableMap.Builder<String, UpgradeRenderDataType<?>> builder = new ImmutableMap.Builder<>();
-		builder.put(SmeltingUpgradeRenderData.TYPE.getName(), SmeltingUpgradeRenderData.TYPE);
+		builder.put(CookingUpgradeRenderData.TYPE.getName(), CookingUpgradeRenderData.TYPE);
 		builder.put(JukeboxUpgradeRenderData.TYPE.getName(), JukeboxUpgradeRenderData.TYPE);
 		RENDER_DATA_TYPES = builder.build();
 	}
