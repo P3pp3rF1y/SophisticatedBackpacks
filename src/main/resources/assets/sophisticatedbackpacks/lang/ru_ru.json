@@ -93,7 +93,7 @@
     "item.sophisticatedbackpacks.xp_pump_upgrade": "Улучшение «Помпа опыта»",
     "item.sophisticatedbackpacks.xp_pump_upgrade.tooltip": "Перекачивает опыт между баком от соотв. улучшения и игроком",
     "item.sophisticatedbackpacks.advanced_pump_upgrade": "Продвиутое улучшение «Помпа»",
-    "item.sophisticatedbackpacks.advanced_pump_upgrade.tooltip": "Перекачивает жидкости между баком от соотв. улучшения и прилегающими блоками\nРаботает также с жидкостными резервуарами в руке и в мире\nПозволяет фильтровать виды перекачиваемой жидкости",
+    "item.sophisticatedbackpacks.advanced_pump_upgrade.tooltip": "Перекачивает жидкости между баком от соотв. улучшения и прилегающими блоками.\nТакже работает с жидкостными резервуарами в руке и в мире.\nПозволяет фильтровать виды перекачиваемой жидкости",
     "item.sophisticatedbackpacks.tool_swapper_upgrade": "Улучшение «Замена инструмента»",
     "item.sophisticatedbackpacks.tool_swapper_upgrade.tooltip": "Автоматически заменяет инструмент в руке игрока на подходящий блоку или сущности при нажатии ЛКМ",
     "item.sophisticatedbackpacks.advanced_tool_swapper_upgrade": "Продвинутое улучшение «Замена инструмента»",
