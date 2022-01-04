@@ -6,7 +6,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,23 +41,13 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		return partiallyFilledStackSlots.keySet();
 	}
 
-	private void addFull(int slot, ItemStack stack) {
+	public void addFull(int slot, ItemStack stack) {
 		ItemStackKey stackKey = new ItemStackKey(stack);
 		fullStackSlots.computeIfAbsent(stackKey, k -> new HashSet<>()).add(slot);
 		fullSlotStacks.put(slot, stackKey);
 	}
 
-	private void removePartiallyFilled(int slot, Iterator<Integer> iterator) {
-		if (partiallyFilledSlotStacks.containsKey(slot)) {
-			iterator.remove();
-			ItemStackKey stackKey = partiallyFilledSlotStacks.remove(slot);
-			if (partiallyFilledStackSlots.get(stackKey).isEmpty()) {
-				partiallyFilledStackSlots.remove(stackKey);
-			}
-		}
-	}
-
-	private void removePartiallyFilled(int slot) {
+	public void removePartiallyFilled(int slot) {
 		if (partiallyFilledSlotStacks.containsKey(slot)) {
 			ItemStackKey stackKey = partiallyFilledSlotStacks.remove(slot);
 			Set<Integer> partialSlots = partiallyFilledStackSlots.get(stackKey);
@@ -101,15 +90,6 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		}
 	}
 
-	private Set<Integer> getPartiallyFilledStackSlots(ItemStack stack) {
-		ItemStackKey stackKey = new ItemStackKey(stack);
-		return partiallyFilledStackSlots.getOrDefault(stackKey, Collections.emptySet());
-	}
-
-	private Set<Integer> getEmptySlots() {
-		return emptySlots;
-	}
-
 	@Override
 	public void clear() {
 		partiallyFilledStackSlots.clear();
@@ -136,9 +116,9 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 
 	@Override
 	public ItemStack insertItemIntoHandler(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
-		ItemStack remainingStack = insertIntoSlotsThatMatchStack(itemHandler, inserter, stack, simulate);
+		ItemStack remainingStack = insertIntoSlotsThatMatchStack(inserter, stack, simulate);
 		if (!remainingStack.isEmpty()) {
-			remainingStack = insertIntoEmptySlots(itemHandler, inserter, remainingStack, simulate);
+			remainingStack = insertIntoEmptySlots(inserter, remainingStack, simulate);
 		}
 		return remainingStack;
 	}
@@ -151,51 +131,57 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		ItemStack remainingStack = stack;
 		boolean doesNotMatchCurrentSlot = !ItemHandlerHelper.canItemStacksStack(stack, existing);
 		if (wasEmpty || doesNotMatchCurrentSlot) {
-			remainingStack = insertIntoSlotsThatMatchStack(itemHandler, inserter, remainingStack, simulate);
+			remainingStack = insertIntoSlotsThatMatchStack(inserter, remainingStack, simulate);
 		}
 		if (!remainingStack.isEmpty() && doesNotMatchCurrentSlot) {
-			remainingStack = insertIntoEmptySlots(itemHandler, inserter, remainingStack, simulate);
+			remainingStack = insertIntoEmptySlots(inserter, remainingStack, simulate);
 		}
 		if (!remainingStack.isEmpty()) {
-			int countBeforeInsert = remainingStack.getCount();
 			remainingStack = inserter.insertItem(slot, remainingStack, simulate);
-			if (!simulate && doesNotMatchCurrentSlot && countBeforeInsert > remainingStack.getCount()) {
-				set(itemHandler, slot, stack);
-			}
 		}
 
 		return remainingStack;
 	}
 
-	private ItemStack insertIntoSlotsThatMatchStack(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
+	private ItemStack insertIntoSlotsThatMatchStack(IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
 		ItemStack remainingStack = stack;
-		for (Iterator<Integer> iterator = getPartiallyFilledStackSlots(stack).iterator(); iterator.hasNext(); ) {
-			int matchingSlot = iterator.next();
-			int countBeforeInsert = remainingStack.getCount();
+		ItemStackKey stackKey = new ItemStackKey(stack);
+
+		int sizeBefore = partiallyFilledStackSlots.containsKey(stackKey) ? partiallyFilledStackSlots.get(stackKey).size() : 0;
+		int i = 0;
+		// Always taking first element here and iterating while not empty as iterating using iterator would produce CME due to void/compacting reacting to inserts
+		// and going into this logic as well and because of that causing collection to be updated outside of first level iterator. The increment is here just
+		// in case updating cache fails to prevent infinite loop
+		while (partiallyFilledStackSlots.get(stackKey) != null && !partiallyFilledStackSlots.get(stackKey).isEmpty() && i++ < sizeBefore) {
+			int matchingSlot = partiallyFilledStackSlots.get(stackKey).iterator().next();
 			remainingStack = inserter.insertItem(matchingSlot, remainingStack, simulate);
-			if (countBeforeInsert > remainingStack.getCount()) {
-				if (!simulate) {
-					ItemStack stackAfterInsert = itemHandler.getStackInSlot(matchingSlot);
-					if (stackAfterInsert.getCount() == itemHandler.getStackLimit(matchingSlot, stack)) {
-						removePartiallyFilled(matchingSlot, iterator);
-						addFull(matchingSlot, stackAfterInsert);
-					}
-				}
-				if (remainingStack.isEmpty()) {
-					break;
-				}
+			if (remainingStack.isEmpty()) {
+				break;
 			}
 		}
 		return remainingStack;
 	}
 
-	private ItemStack insertIntoEmptySlots(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
+	private ItemStack insertIntoEmptySlots(IItemHandlerInserter inserter, ItemStack stack, boolean simulate) {
 		ItemStack remainingStack = stack.copy();
-		remainingStack = insertIntoEmptyMemorySlots(itemHandler, inserter, simulate, remainingStack);
+		remainingStack = insertIntoEmptyMemorySlots(inserter, simulate, remainingStack);
 		if (!remainingStack.isEmpty()) {
-			for (Iterator<Integer> iterator = getEmptySlots().iterator(); iterator.hasNext(); ) {
-				int slot = iterator.next();
-				remainingStack = insertStackInSlot(itemHandler, inserter, stack, simulate, remainingStack, slot, iterator::remove);
+			int sizeBefore = emptySlots.size();
+			int i = 0;
+			// Always taking first element here and iterating while not empty as iterating using iterator would produce CME due to void/compacting reacting to inserts
+			// and going into this logic as well and because of that causing collection to be updated outside of first level iterator. The increment is here just
+			// in case updating cache fails to prevent infinite loop
+			while (!emptySlots.isEmpty() && i++ < sizeBefore) {
+				Iterator<Integer> it = emptySlots.iterator();
+				int slot = it.next();
+				while (memorySettings.isSlotSelected(slot)) {
+					if (!it.hasNext()) {
+						return remainingStack;
+					}
+					slot = it.next();
+				}
+
+				remainingStack = inserter.insertItem(slot, remainingStack, simulate);
 				if (remainingStack.isEmpty()) {
 					break;
 				}
@@ -205,14 +191,14 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		return remainingStack;
 	}
 
-	private ItemStack insertIntoEmptyMemorySlots(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, boolean simulate, ItemStack stack) {
+	private ItemStack insertIntoEmptyMemorySlots(IItemHandlerInserter inserter, boolean simulate, ItemStack stack) {
 		ItemStack remainingStack = stack;
 		Map<Item, Set<Integer>> memoryFilterItemSlots = memorySettings.getFilterItemSlots();
 		Item item = remainingStack.getItem();
 		if (memoryFilterItemSlots.containsKey(item)) {
 			for (int memorySlot : memoryFilterItemSlots.get(item)) {
-				if (getEmptySlots().contains(memorySlot)) {
-					remainingStack = insertStackInSlot(itemHandler, inserter, stack, simulate, remainingStack, memorySlot, () -> removeEmpty(memorySlot));
+				if (emptySlots.contains(memorySlot)) {
+					remainingStack = inserter.insertItem(memorySlot, remainingStack, simulate);
 					if (remainingStack.isEmpty()) {
 						break;
 					}
@@ -221,18 +207,4 @@ public class InventoryHandlerSlotTracker implements ISlotTracker {
 		}
 		return remainingStack;
 	}
-
-	private ItemStack insertStackInSlot(BackpackInventoryHandler itemHandler, IItemHandlerInserter inserter, ItemStack stack, boolean simulate, ItemStack remainingStack, int slot, Runnable removeEmpty) {
-		remainingStack = inserter.insertItem(slot, remainingStack, simulate);
-		if (!simulate && !itemHandler.getStackInSlot(slot).isEmpty()) {
-			removeEmpty.run();
-			set(itemHandler, slot, stack);
-		}
-		return remainingStack;
-	}
-
-	private void removeEmpty(Integer slot) {
-		emptySlots.remove(slot);
-	}
-
 }
