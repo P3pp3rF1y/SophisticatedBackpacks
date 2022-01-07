@@ -49,6 +49,25 @@ public abstract class CookingUpgradeWrapper<W extends CookingUpgradeWrapper<W, U
 		}
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (!enabled) {
+			pauseAndRemoveRenderInfo();
+		}
+		super.setEnabled(enabled);
+	}
+
+	@Override
+	public void onBeforeRemoved() {
+		pauseAndRemoveRenderInfo();
+	}
+
+	private void pauseAndRemoveRenderInfo() {
+		cookingLogic.pause();
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		renderInfo.removeUpgradeRenderData(CookingUpgradeRenderData.TYPE);
+	}
+
 	public CookingLogic<R> getCookingLogic() {
 		return cookingLogic;
 	}

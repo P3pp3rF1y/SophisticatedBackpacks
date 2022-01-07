@@ -16,4 +16,8 @@ public interface IUpgradeWrapper {
 	default boolean hideSettingsTab() {
 		return false;
 	}
+
+	default void onBeforeRemoved() {
+		//noop
+	}
 }

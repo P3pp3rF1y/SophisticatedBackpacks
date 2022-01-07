@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,10 +31,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	private final CompoundTag contentsNbt;
 	@Nullable
 	private Runnable refreshCallBack = null;
-	private final Map<Integer, IUpgradeWrapper> slotWrappers = new HashMap<>();
+	private final Map<Integer, IUpgradeWrapper> slotWrappers = new LinkedHashMap<>();
 	private final Map<UpgradeType<? extends IUpgradeWrapper>, List<? extends IUpgradeWrapper>> typeWrappers = new HashMap<>();
 	private boolean justSavingNbtChange = false;
 	private boolean wrappersInitialized = false;
+	private boolean typeWrappersInitialized = false;
 	@Nullable
 	private IUpgradeWrapperAccessor wrapperAccessor = null;
 	private boolean persistent = true;
@@ -104,8 +106,36 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 				justSavingNbtChange = false;
 			});
 			slotWrappers.put(slot, wrapper);
-			if (wrapper.isEnabled()) {
-				addTypeWrapper(type, wrapper);
+		});
+
+		initRenderInfoCallbacks(false);
+	}
+
+	@Override
+	public ItemStack extractItem(int slot, int amount, boolean simulate) {
+		ItemStack slotStack = getStackInSlot(slot);
+		if (persistent && !slotStack.isEmpty() && amount == 1) {
+			Map<Integer, IUpgradeWrapper> wrappers = getSlotWrappers();
+			if (wrappers.containsKey(slot)) {
+				wrappers.get(slot).onBeforeRemoved();
+			}
+		}
+		return super.extractItem(slot, amount, simulate);
+	}
+
+	private void initializeTypeWrappers() {
+		if (typeWrappersInitialized) {
+			return;
+		}
+		initializeWrappers();
+		typeWrappersInitialized = true;
+
+		slotWrappers.values().forEach(wrapper -> {
+			if (wrapper.getUpgradeStack().getItem() instanceof IBackpackUpgradeItem<?> upgradeItem) {
+				UpgradeType<?> type = upgradeItem.getType();
+				if (wrapper.isEnabled()) {
+					addTypeWrapper(type, wrapper);
+				}
 			}
 		});
 
@@ -118,7 +148,7 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 	}
 
 	public <T extends IUpgradeWrapper> List<T> getTypeWrappers(UpgradeType<T> type) {
-		initializeWrappers();
+		initializeTypeWrappers();
 		//noinspection unchecked
 		return (List<T>) typeWrappers.getOrDefault(type, Collections.emptyList());
 	}
@@ -168,8 +198,19 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		InventoryHelper.copyTo(this, otherHandler);
 	}
 
+	public void refreshWrappersThatImplementAndTypeWrappers() {
+		typeWrappersInitialized = false;
+		if (wrapperAccessor != null) {
+			wrapperAccessor.clearCache();
+		}
+		if (refreshCallBack != null) {
+			refreshCallBack.run();
+		}
+	}
+
 	public void refreshUpgradeWrappers() {
 		wrappersInitialized = false;
+		typeWrappersInitialized = false;
 		if (wrapperAccessor != null) {
 			wrapperAccessor.onBeforeDeconstruct();
 			wrapperAccessor = null;
@@ -208,8 +249,8 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		List<IRenderedTankUpgrade> tankRenderWrappers = new ArrayList<>();
 		int minRightSlot = getSlots() / 2;
 		getSlotWrappers().forEach((slot, wrapper) -> {
-			if (wrapper instanceof IRenderedTankUpgrade) {
-				tankRenderWrappers.add((IRenderedTankUpgrade) wrapper);
+			if (wrapper instanceof IRenderedTankUpgrade tankUpgrade) {
+				tankRenderWrappers.add(tankUpgrade);
 				if (slot >= minRightSlot) {
 					singleTankRight.set(true);
 				}
@@ -246,6 +287,11 @@ public class BackpackUpgradeHandler extends ItemStackHandler {
 		public <T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass) {
 			//noinspection unchecked
 			return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, upgradeHandler::getListOfWrappersThatImplement);
+		}
+
+		@Override
+		public void clearCache() {
+			interfaceWrappers.clear();
 		}
 	}
 }
