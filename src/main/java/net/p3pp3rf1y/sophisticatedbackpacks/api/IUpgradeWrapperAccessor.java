@@ -7,6 +7,8 @@ public interface IUpgradeWrapperAccessor {
 
 	<T> List<T> getWrappersThatImplementFromMainBackpack(Class<T> upgradeClass);
 
+	void clearCache();
+
 	default void onBeforeDeconstruct() {
 		//noop
 	}

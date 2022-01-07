@@ -39,6 +39,10 @@ public class CookingLogic<T extends AbstractCookingRecipe> {
 	private final double fuelEfficiencyMultiplier;
 	private final IRecipeType<T> recipeType;
 
+	private boolean paused = false;
+	private long remainingCookTime = 0;
+	private long remainingBurnTime = 0;
+
 	public CookingLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, Config.Common.CookingUpgradeConfig cookingUpgradeConfig, IRecipeType<T> recipeType, float burnTimeModifier) {
 		this(upgrade, saveHandler, s -> getBurnTime(s, recipeType, burnTimeModifier) > 0, s -> RecipeHelper.getCookingRecipe(s, recipeType).isPresent(), cookingUpgradeConfig, recipeType, burnTimeModifier);
 	}
@@ -59,6 +63,8 @@ public class CookingLogic<T extends AbstractCookingRecipe> {
 	}
 
 	public boolean tick(World world) {
+		updateTimes(world);
+
 		AtomicBoolean didSomething = new AtomicBoolean(true);
 		if (isBurning(world) || readyToStartCooking()) {
 			Optional<T> fr = getCookingRecipe();
@@ -82,6 +88,36 @@ public class CookingLogic<T extends AbstractCookingRecipe> {
 			didSomething.set(false);
 		}
 		return didSomething.get();
+	}
+
+	private void updateTimes(World world) {
+		if (paused) {
+			unpause(world);
+			return;
+		}
+
+		if (isBurning(world)) {
+			remainingBurnTime = getBurnTimeFinish() - world.getGameTime();
+		} else {
+			remainingBurnTime = 0;
+		}
+		if (isCooking()) {
+			remainingCookTime = getCookTimeFinish() - world.getGameTime();
+		} else {
+			remainingCookTime = 0;
+		}
+	}
+
+	private void unpause(World world) {
+		paused = false;
+
+		if (remainingBurnTime > 0) {
+			setBurnTimeFinish(world.getGameTime() + remainingBurnTime);
+		}
+		if (remainingCookTime > 0) {
+			setCookTimeFinish(world.getGameTime() + remainingCookTime);
+			setIsCooking(true);
+		}
 	}
 
 	public boolean isBurning(World world) {
@@ -164,6 +200,13 @@ public class CookingLogic<T extends AbstractCookingRecipe> {
 	private void setCookTime(World world, int cookTime) {
 		setCookTimeFinish(world.getGameTime() + cookTime);
 		setCookTimeTotal(cookTime);
+	}
+
+	public void pause() {
+		paused = true;
+		setCookTimeFinish(0);
+		setIsCooking(false);
+		setBurnTimeFinish(0);
 	}
 
 	private void updateFuel(World world, T cookingRecipe) {
