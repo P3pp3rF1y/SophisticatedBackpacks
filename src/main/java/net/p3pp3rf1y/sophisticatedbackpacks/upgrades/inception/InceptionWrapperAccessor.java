@@ -59,7 +59,8 @@ public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 		subBackpacksHandler.forEach(sb -> sb.getUpgradeHandler().removeRefreshCallback());
 	}
 
-	private void clearCache() {
+	@Override
+	public void clearCache() {
 		interfaceWrappers.clear();
 	}
 }

@@ -58,6 +58,25 @@ public class AutoCookingUpgradeWrapper<W extends AutoCookingUpgradeWrapper<W, U,
 		cookingLogic = new CookingLogic<>(upgrade, upgradeSaveHandler, isValidFuel, isValidInput, autoCookingConfig, recipeType, burnTimeModifier);
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (!enabled) {
+			pauseAndRemoveRenderInfo();
+		}
+		super.setEnabled(enabled);
+	}
+
+	private void pauseAndRemoveRenderInfo() {
+		cookingLogic.pause();
+		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		renderInfo.removeUpgradeRenderData(CookingUpgradeRenderData.TYPE);
+	}
+
+	@Override
+	public void onBeforeRemoved() {
+		pauseAndRemoveRenderInfo();
+	}
+
 	private void tryPushingOutput() {
 		if (outputCooldown > 0) {
 			outputCooldown--;

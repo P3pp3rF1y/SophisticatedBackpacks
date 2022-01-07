@@ -54,6 +54,6 @@ public abstract class UpgradeWrapperBase<W extends IUpgradeWrapper, T extends Up
 	public void setEnabled(boolean enabled) {
 		NBTHelper.setBoolean(upgrade, "enabled", enabled);
 		save();
-		backpackWrapper.getUpgradeHandler().refreshUpgradeWrappers();
+		backpackWrapper.getUpgradeHandler().refreshWrappersThatImplementAndTypeWrappers();
 	}
 }
