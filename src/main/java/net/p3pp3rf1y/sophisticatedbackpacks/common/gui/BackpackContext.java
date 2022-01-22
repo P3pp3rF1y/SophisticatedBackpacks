@@ -15,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -263,7 +263,7 @@ public abstract class BackpackContext {
 		@Override
 		public void onUpgradeChanged(Player player) {
 			if (!player.level.isClientSide) {
-				WorldHelper.getTile(player.level, pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
+				WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
 			}
 		}
 
@@ -279,7 +279,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return WorldHelper.getTile(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(NoopBackpackWrapper.INSTANCE);
+			return WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(NoopBackpackWrapper.INSTANCE);
 		}
 
 		@Override

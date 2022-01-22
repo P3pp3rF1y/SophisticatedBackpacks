@@ -67,7 +67,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -236,7 +236,7 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockAndUpdate(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItemInHand();
-			WorldHelper.getTile(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
+			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
 				te.setBackpack(getBackpackCopy(player, backpack));
 				te.refreshRenderState();
 			});

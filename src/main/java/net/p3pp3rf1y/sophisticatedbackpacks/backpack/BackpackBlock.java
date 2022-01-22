@@ -63,7 +63,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -96,7 +96,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
-		return WorldHelper.getTile(level, pos, BackpackBlockEntity.class).map(t -> {
+		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(t -> {
 			IItemHandlerModifiable handler = t.getBackpackWrapper().getInventoryForInputOutput();
 			AtomicDouble totalFilled = new AtomicDouble(0);
 			AtomicBoolean isEmpty = new AtomicBoolean(true);
@@ -140,7 +140,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private boolean hasEverlastingUpgrade(BlockGetter world, BlockPos pos) {
-		return WorldHelper.getTile(world, pos, BackpackBlockEntity.class).map(te -> !te.getBackpackWrapper().getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> !te.getBackpackWrapper().getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 
 		if (!heldItem.isEmpty() && heldItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
-			WorldHelper.getTile(world, pos, BackpackBlockEntity.class)
+			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class)
 					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
 							player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(playerInventory -> {
 								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidAttributes.BUCKET_VOLUME, player, true);
@@ -191,11 +191,11 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private Component getBackpackDisplayName(Level world, BlockPos pos) {
 		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getHoverName();
-		return WorldHelper.getTile(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getHoverName()).orElse(defaultDisplayName);
+		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getHoverName()).orElse(defaultDisplayName);
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand) {
-		ItemStack backpack = WorldHelper.getTile(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
+		ItemStack backpack = WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
 		player.setItemInHand(hand, backpack);
 		player.getCooldowns().addCooldown(backpack.getItem(), 5);
 		world.removeBlock(pos, false);
@@ -250,7 +250,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
 		super.entityInside(state, world, pos, entity);
 		if (!world.isClientSide && entity instanceof ItemEntity itemEntity) {
-			WorldHelper.getTile(world, pos, BackpackBlockEntity.class).ifPresent(te -> tryToPickup(world, itemEntity, te.getBackpackWrapper()));
+			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).ifPresent(te -> tryToPickup(world, itemEntity, te.getBackpackWrapper()));
 		}
 	}
 
@@ -284,7 +284,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, Random rand) {
-		WorldHelper.getTile(level, pos, BackpackBlockEntity.class).ifPresent(te -> {
+		WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).ifPresent(te -> {
 			BackpackRenderInfo renderInfo = te.getBackpackWrapper().getRenderInfo();
 			renderUpgrades(level, rand, pos, state.getValue(FACING), renderInfo);
 		});

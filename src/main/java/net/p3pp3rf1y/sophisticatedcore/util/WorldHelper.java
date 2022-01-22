@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.util;
+package net.p3pp3rf1y.sophisticatedcore.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -11,11 +11,11 @@ import java.util.Optional;
 public class WorldHelper {
 	private WorldHelper() {}
 
-	public static Optional<BlockEntity> getTile(@Nullable BlockGetter world, BlockPos pos) {
-		return getTile(world, pos, BlockEntity.class);
+	public static Optional<BlockEntity> getBlockEntity(@Nullable BlockGetter world, BlockPos pos) {
+		return getBlockEntity(world, pos, BlockEntity.class);
 	}
 
-	public static <T> Optional<T> getTile(@Nullable BlockGetter world, BlockPos pos, Class<T> teClass) {
+	public static <T> Optional<T> getBlockEntity(@Nullable BlockGetter world, BlockPos pos, Class<T> teClass) {
 		if (world == null) {
 			return Optional.empty();
 		}

@@ -26,7 +26,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
@@ -93,7 +93,7 @@ public class PumpUpgradeWrapper extends UpgradeWrapperBase<PumpUpgradeWrapper, P
 
 	private Optional<Integer> interactWithAttachedFluidHandlers(Level world, BlockPos pos, IFluidHandler backpackFluidHandler) {
 		for (Direction dir : Direction.values()) {
-			boolean successful = WorldHelper.getTile(world, pos.offset(dir.getNormal())).map(te ->
+			boolean successful = WorldHelper.getBlockEntity(world, pos.offset(dir.getNormal())).map(te ->
 					te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite()).map(fluidHandler -> {
 						if (isInput()) {
 							return fillFromFluidHandler(fluidHandler, backpackFluidHandler, getMaxInOut());

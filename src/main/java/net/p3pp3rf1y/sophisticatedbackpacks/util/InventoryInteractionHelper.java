@@ -11,6 +11,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class InventoryInteractionHelper {
 	}
 
 	public static boolean tryInventoryInteraction(BlockPos pos, Level world, ItemStack backpack, Direction face, Player player) {
-		return WorldHelper.getTile(world, pos)
+		return WorldHelper.getBlockEntity(world, pos)
 				.map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face)
 						.map(itemHandler -> player.level.isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))

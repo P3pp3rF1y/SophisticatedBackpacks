@@ -35,7 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Map;
 
@@ -168,7 +168,7 @@ public class KeybindHandler {
 		BlockHitResult blockraytraceresult = (BlockHitResult) rayTrace;
 		BlockPos pos = blockraytraceresult.getBlockPos();
 
-		if (!WorldHelper.getTile(mc.level, pos, BlockEntity.class).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false)) {
+		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false)) {
 			return;
 		}
 

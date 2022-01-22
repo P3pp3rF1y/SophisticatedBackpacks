@@ -48,7 +48,7 @@ Fancy and functional backpacks.
 '''
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.xreliquary]]
+[[dependencies.sophisticatedbackpacks]]
     modId="forge" #mandatory
     mandatory=true #mandatory
     versionRange="[34.0.0,)" #mandatory
