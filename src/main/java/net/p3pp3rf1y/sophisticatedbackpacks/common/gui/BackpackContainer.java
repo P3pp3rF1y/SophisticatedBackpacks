@@ -1386,6 +1386,9 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 			for (int slotIndex = firstIndex; (reverseDirection ? slotIndex >= startIndex : slotIndex < endIndex) && toTransfer > 0; slotIndex += increment) {
 				if (memory.getSlotIndexes().contains(slotIndex) && memory.matchesFilter(slotIndex, sourceStack)) {
 					Slot slot = getSlot(slotIndex);
+					if (!slot.mayPlace(sourceStack)) {
+						continue;
+					}
 					ItemStack destStack = slot.getItem();
 					if (destStack.isEmpty()) {
 						slot.set(sourceStack.split(slot.getMaxStackSize()));
