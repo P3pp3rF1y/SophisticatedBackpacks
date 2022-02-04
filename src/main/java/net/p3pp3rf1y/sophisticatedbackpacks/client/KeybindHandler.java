@@ -102,8 +102,11 @@ public class KeybindHandler {
 	}
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseClickedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.Type.MOUSE.getOrCreate(event.getButton())) && tryCallSort(event.getScreen())) {
+		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
+		if (SORT_KEYBIND.isActiveAndMatches(input) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);
+		} else if (BACKPACK_OPEN_KEYBIND.isActiveAndMatches(input)) {
+			sendBackpackOpenOrCloseMessage();
 		}
 	}
 
