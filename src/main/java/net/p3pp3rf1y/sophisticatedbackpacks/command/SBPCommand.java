@@ -6,7 +6,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
 public class SBPCommand {
 	private static final int OP_LEVEL = 2;
@@ -25,7 +25,7 @@ public class SBPCommand {
 	}
 
 	public static void registerArgumentTypes() {
-		ArgumentTypes.register(RegistryHelper.getModRegistryName("backpack_uuid"), BackpackUUIDArgumentType.class, new EmptyArgumentSerializer<>(BackpackUUIDArgumentType::backpackUuid));
-		ArgumentTypes.register(RegistryHelper.getModRegistryName("player_name"), BackpackPlayerArgumentType.class, new EmptyArgumentSerializer<>(BackpackPlayerArgumentType::playerName));
+		ArgumentTypes.register(SophisticatedBackpacks.getRegistryName("backpack_uuid"), BackpackUUIDArgumentType.class, new EmptyArgumentSerializer<>(BackpackUUIDArgumentType::backpackUuid));
+		ArgumentTypes.register(SophisticatedBackpacks.getRegistryName("player_name"), BackpackPlayerArgumentType.class, new EmptyArgumentSerializer<>(BackpackPlayerArgumentType::playerName));
 	}
 }

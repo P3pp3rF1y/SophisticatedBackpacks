@@ -7,7 +7,7 @@ import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 
 public class UpgradeClearRecipe extends CustomRecipe {
 	public static final SimpleRecipeSerializer<UpgradeClearRecipe> SERIALIZER = new SimpleRecipeSerializer<>(UpgradeClearRecipe::new);

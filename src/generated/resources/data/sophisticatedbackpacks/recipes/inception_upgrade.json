@@ -1,31 +1,31 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "inception_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "ESE",
-        "DBD",
-        "EDE"
-    ],
-    "key": {
-        "B": {
-            "item": "sophisticatedbackpacks:upgrade_base"
-        },
-        "S": {
-            "tag": "forge:nether_stars"
-        },
-        "D": {
-            "tag": "forge:gems/diamond"
-        },
-        "E": {
-            "item": "minecraft:ender_eye"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:inception_upgrade"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "inception_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    "ESE",
+    "DBD",
+    "EDE"
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "S": {
+      "tag": "forge:nether_stars"
+    },
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:inception_upgrade"
+  }
 }

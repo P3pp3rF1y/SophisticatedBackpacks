@@ -11,18 +11,17 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeClearRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
+import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
+import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 
 import java.util.function.Consumer;
-
-import static net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper.getModRegistryName;
 
 public class SBPRecipeProvider extends RecipeProvider {
 
@@ -44,8 +43,8 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.addCriterion("has_leather", has(Tags.Items.LEATHER))
 				.build(consumer);
 
-		SpecialRecipeBuilder.special(BackpackDyeRecipe.SERIALIZER).save(consumer, getModRegistryName("backpack_dye"));
-		SpecialRecipeBuilder.special(UpgradeClearRecipe.SERIALIZER).save(consumer, getModRegistryName("upgrade_clear"));
+		SpecialRecipeBuilder.special(BackpackDyeRecipe.SERIALIZER).save(consumer, SophisticatedBackpacks.getRegistryName("backpack_dye"));
+		SpecialRecipeBuilder.special(UpgradeClearRecipe.SERIALIZER).save(consumer, SophisticatedBackpacks.getRegistryName("upgrade_clear"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe.SERIALIZER)
 				.patternLine("DDD")
@@ -158,7 +157,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('R', Tags.Items.DUSTS_REDSTONE)
 				.key('M', ModItems.MAGNET_UPGRADE.get())
 				.addCriterion("has_magnet_upgrade", has(ModItems.MAGNET_UPGRADE.get()))
-				.build(consumer, new ResourceLocation(RegistryHelper.getModRegistryName("advanced_magnet_upgrade_from_basic")));
+				.build(consumer, new ResourceLocation(SophisticatedBackpacks.getRegistryName("advanced_magnet_upgrade_from_basic")));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.FEEDING_UPGRADE.get())
 				.patternLine(" C ")
@@ -495,7 +494,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('S', ModItems.SMELTING_UPGRADE.get())
 				.key('L', ItemTags.LOGS)
 				.addCriterion("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
-				.build(consumer, RegistryHelper.getRL("smoking_upgrade_from_smelting_upgrade"));
+				.build(consumer, SophisticatedBackpacks.getRL("smoking_upgrade_from_smelting_upgrade"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_SMOKING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
 				.patternLine("DHD")
@@ -516,7 +515,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('S', ModItems.AUTO_SMELTING_UPGRADE.get())
 				.key('L', ItemTags.LOGS)
 				.addCriterion("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
-				.build(consumer, RegistryHelper.getRL("auto_smoking_upgrade_from_auto_smelting_upgrade"));
+				.build(consumer, SophisticatedBackpacks.getRL("auto_smoking_upgrade_from_auto_smelting_upgrade"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.BLASTING_UPGRADE.get())
 				.patternLine("RIR")
@@ -537,7 +536,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('T', Items.SMOOTH_STONE)
 				.addCriterion("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
-				.build(consumer, RegistryHelper.getRL("blasting_upgrade_from_smelting_upgrade"));
+				.build(consumer, SophisticatedBackpacks.getRL("blasting_upgrade_from_smelting_upgrade"));
 
 		ShapeBasedRecipeBuilder.shapedRecipe(ModItems.AUTO_BLASTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
 				.patternLine("DHD")
@@ -559,7 +558,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.key('I', Tags.Items.INGOTS_IRON)
 				.key('T', Items.SMOOTH_STONE)
 				.addCriterion("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
-				.build(consumer, RegistryHelper.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
+				.build(consumer, SophisticatedBackpacks.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
 
 		new UpgradeRecipeBuilder(SmithingBackpackUpgradeRecipe.SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())

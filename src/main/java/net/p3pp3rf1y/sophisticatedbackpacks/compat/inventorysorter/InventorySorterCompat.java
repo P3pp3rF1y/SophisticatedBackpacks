@@ -5,13 +5,12 @@ import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackInventorySlot;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.FilterSlotItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolFilterSlot;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.FilterSlotItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageInventorySlot;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicContainer;
 
 public class InventorySorterCompat implements ICompat {
 	private static final String SLOTBLACKLIST = "slotblacklist";
@@ -23,12 +22,11 @@ public class InventorySorterCompat implements ICompat {
 
 	private void sendImc(InterModEnqueueEvent evt) {
 		evt.enqueueWork(() -> {
-			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, BackpackContainer.BackpackUpgradeSlot.class::getName);
+			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, BackpackContainer.StorageUpgradeSlot.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, FilterSlotItemHandler.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, FilterLogicContainer.FilterLogicSlot.class::getName);
 			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, SlotSuppliedHandler.class::getName);
-			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, ToolFilterSlot.class::getName);
-			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, BackpackInventorySlot.class::getName);
+			InterModComms.sendTo(CompatModIds.INVENTORY_SORTER, SLOTBLACKLIST, StorageInventorySlot.class::getName);
 		});
 	}
 

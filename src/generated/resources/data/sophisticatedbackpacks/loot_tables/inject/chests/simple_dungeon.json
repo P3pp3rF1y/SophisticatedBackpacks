@@ -1,31 +1,31 @@
 {
-    "type": "minecraft:chest",
-    "pools": [
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "name": "main",
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
         {
-            "name": "main",
-            "rolls": 1.0,
-            "bonus_rolls": 0.0,
-            "entries": [
-                {
-                    "type": "minecraft:item",
-                    "weight": 4,
-                    "name": "sophisticatedbackpacks:backpack"
-                },
-                {
-                    "type": "minecraft:item",
-                    "weight": 2,
-                    "name": "sophisticatedbackpacks:iron_backpack"
-                },
-                {
-                    "type": "minecraft:item",
-                    "weight": 2,
-                    "name": "sophisticatedbackpacks:pickup_upgrade"
-                },
-                {
-                    "type": "minecraft:empty",
-                    "weight": 92
-                }
-            ]
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "sophisticatedbackpacks:backpack"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 2,
+          "name": "sophisticatedbackpacks:iron_backpack"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 2,
+          "name": "sophisticatedbackpacks:pickup_upgrade"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 92
         }
-    ]
+      ]
+    }
+  ]
 }

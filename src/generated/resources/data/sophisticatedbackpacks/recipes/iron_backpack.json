@@ -1,25 +1,25 @@
 {
-    "type": "sophisticatedbackpacks:backpack_upgrade",
-    "conditions": [
-        {
-            "itemRegistryName": "iron_backpack",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "III",
-        "IBI",
-        "III"
-    ],
-    "key": {
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "B": {
-            "item": "sophisticatedbackpacks:backpack"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:iron_backpack"
+  "type": "sophisticatedbackpacks:backpack_upgrade",
+  "conditions": [
+    {
+      "itemRegistryName": "iron_backpack",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    "III",
+    "IBI",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "item": "sophisticatedbackpacks:backpack"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:iron_backpack"
+  }
 }

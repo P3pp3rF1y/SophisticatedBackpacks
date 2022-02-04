@@ -7,14 +7,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class BackpackContext {
-	public abstract Optional<IBackpackWrapper> getParentBackpackWrapper(Player player);
+	public abstract Optional<IStorageWrapper> getParentBackpackWrapper(Player player);
 
 	public abstract boolean shouldLockBackpackSlot(Player player);
 
@@ -57,17 +57,12 @@ public abstract class BackpackContext {
 
 	public static BackpackContext fromBuffer(FriendlyByteBuf buffer) {
 		ContextType type = ContextType.fromBuffer(buffer);
-		switch (type) {
-			case BLOCK_BACKPACK:
-				return Block.fromBuffer(buffer);
-			case BLOCK_SUB_BACKPACK:
-				return BlockSubBackpack.fromBuffer(buffer);
-			case ITEM_SUB_BACKPACK:
-				return ItemSubBackpack.fromBuffer(buffer);
-			case ITEM_BACKPACK:
-			default:
-				return Item.fromBuffer(buffer);
-		}
+		return switch (type) {
+			case BLOCK_BACKPACK -> Block.fromBuffer(buffer);
+			case BLOCK_SUB_BACKPACK -> BlockSubBackpack.fromBuffer(buffer);
+			case ITEM_SUB_BACKPACK -> ItemSubBackpack.fromBuffer(buffer);
+			case ITEM_BACKPACK -> Item.fromBuffer(buffer);
+		};
 	}
 
 	public boolean wasOpenFromInventory() {
@@ -132,7 +127,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public Optional<IBackpackWrapper> getParentBackpackWrapper(Player player) {
+		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			return Optional.empty();
 		}
 
@@ -144,15 +139,15 @@ public abstract class BackpackContext {
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
 			return PlayerInventoryProvider.get().getPlayerInventoryHandler(player, handlerName)
-					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE))
-					.orElse(NoopBackpackWrapper.INSTANCE);
+					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE))
+					.orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
 		public void onUpgradeChanged(Player player) {
 			if (!player.level.isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
-				IBackpackWrapper backpackWrapper = getBackpackWrapper(player);
-				PacketHandler.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
+				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
+				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
 			}
 		}
 
@@ -196,7 +191,7 @@ public abstract class BackpackContext {
 	public static class ItemSubBackpack extends Item {
 		private final int subBackpackSlotIndex;
 		@Nullable
-		private IBackpackWrapper parentWrapper;
+		private IStorageWrapper parentWrapper;
 
 		public ItemSubBackpack(String handlerName, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
 			super(handlerName, backpackSlotIndex, parentOpenFromInventory);
@@ -204,7 +199,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public Optional<IBackpackWrapper> getParentBackpackWrapper(Player player) {
+		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			if (parentWrapper == null) {
 				parentWrapper = super.getBackpackWrapper(player);
 			}
@@ -214,7 +209,7 @@ public abstract class BackpackContext {
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
 			return getParentBackpackWrapper(player).map(parent -> parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
+					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
@@ -268,7 +263,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public Optional<IBackpackWrapper> getParentBackpackWrapper(Player player) {
+		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			return Optional.empty();
 		}
 
@@ -279,7 +274,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(NoopBackpackWrapper.INSTANCE);
+			return WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
@@ -309,7 +304,7 @@ public abstract class BackpackContext {
 		@Override
 		public boolean canInteractWith(Player player) {
 			return player.level.getBlockEntity(pos) instanceof BackpackBlockEntity
-					&& (player.distanceToSqr((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D);
+					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
 		}
 
 		@Override
@@ -321,7 +316,7 @@ public abstract class BackpackContext {
 	public static class BlockSubBackpack extends Block {
 		private final int subBackpackSlotIndex;
 		@Nullable
-		private IBackpackWrapper parentWrapper;
+		private IStorageWrapper parentWrapper;
 
 		public BlockSubBackpack(BlockPos pos, int subBackpackSlotIndex) {
 			super(pos);
@@ -329,7 +324,7 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public Optional<IBackpackWrapper> getParentBackpackWrapper(Player player) {
+		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			if (parentWrapper == null) {
 				parentWrapper = super.getBackpackWrapper(player);
 			}
@@ -339,7 +334,7 @@ public abstract class BackpackContext {
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
 			return getParentBackpackWrapper(player).map(parent -> parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.orElse(NoopBackpackWrapper.INSTANCE)).orElse(NoopBackpackWrapper.INSTANCE);
+					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {

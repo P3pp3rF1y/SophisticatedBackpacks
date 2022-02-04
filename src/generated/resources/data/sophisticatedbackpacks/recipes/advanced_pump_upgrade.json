@@ -1,34 +1,34 @@
 {
-    "type": "sophisticatedbackpacks:upgrade_next_tier",
-    "conditions": [
-        {
-            "itemRegistryName": "advanced_pump_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "DID",
-        "GPG",
-        "RRR"
-    ],
-    "key": {
-        "I": {
-            "item": "minecraft:dispenser"
-        },
-        "D": {
-            "tag": "forge:gems/diamond"
-        },
-        "G": {
-            "tag": "forge:ingots/gold"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        },
-        "P": {
-            "item": "sophisticatedbackpacks:pump_upgrade"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:advanced_pump_upgrade"
+  "type": "sophisticatedcore:upgrade_next_tier",
+  "conditions": [
+    {
+      "itemRegistryName": "advanced_pump_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    "DID",
+    "GPG",
+    "RRR"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:dispenser"
+    },
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "G": {
+      "tag": "forge:ingots/gold"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "P": {
+      "item": "sophisticatedbackpacks:pump_upgrade"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:advanced_pump_upgrade"
+  }
 }

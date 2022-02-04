@@ -2,9 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.Slot;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IServerUpdater;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.IServerUpdater;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicContainer;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

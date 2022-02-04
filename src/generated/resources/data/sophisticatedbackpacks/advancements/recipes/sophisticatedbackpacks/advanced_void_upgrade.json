@@ -1,34 +1,34 @@
 {
-    "parent": "minecraft:recipes/root",
-    "rewards": {
-        "recipes": [
-            "sophisticatedbackpacks:advanced_void_upgrade"
-        ]
-    },
-    "criteria": {
-        "has_void_upgrade": {
-            "trigger": "minecraft:inventory_changed",
-            "conditions": {
-                "items": [
-                    {
-                        "items": [
-                            "sophisticatedbackpacks:void_upgrade"
-                        ]
-                    }
-                ]
-            }
-        },
-        "has_the_recipe": {
-            "trigger": "minecraft:recipe_unlocked",
-            "conditions": {
-                "recipe": "sophisticatedbackpacks:advanced_void_upgrade"
-            }
-        }
-    },
-    "requirements": [
-        [
-            "has_void_upgrade",
-            "has_the_recipe"
-        ]
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:advanced_void_upgrade"
     ]
+  },
+  "criteria": {
+    "has_void_upgrade": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "sophisticatedbackpacks:void_upgrade"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:advanced_void_upgrade"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_void_upgrade",
+      "has_the_recipe"
+    ]
+  ]
 }

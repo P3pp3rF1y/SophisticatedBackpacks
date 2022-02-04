@@ -1,31 +1,31 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "compacting_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        "IPI",
-        "PBP",
-        "RPR"
-    ],
-    "key": {
-        "B": {
-            "item": "sophisticatedbackpacks:upgrade_base"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "P": {
-            "item": "minecraft:piston"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:compacting_upgrade"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "compacting_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    "IPI",
+    "PBP",
+    "RPR"
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:compacting_upgrade"
+  }
 }

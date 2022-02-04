@@ -53,7 +53,7 @@ public class BackpackOpenMessage {
 			BackpackContext backpackContext = backpackContainer.getBackpackContext();
 			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
-			} else if (backpackContainer.isBackpackInventorySlot(msg.slotIndex)) {
+			} else if (backpackContainer.isStorageInventorySlot(msg.slotIndex)) {
 				openBackpack(player, backpackContext.getSubBackpackContext(msg.slotIndex));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {

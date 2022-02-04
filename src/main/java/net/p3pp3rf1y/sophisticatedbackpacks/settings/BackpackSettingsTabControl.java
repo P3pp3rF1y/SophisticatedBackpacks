@@ -1,34 +1,27 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsTabControl;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.backpack.BackpackSettingsTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.Tab;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsContainerBase;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.settings.globaloverridable.GlobalOverridableSettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsTab;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
+public class BackpackSettingsTabControl extends net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControl {
 	private static final Map<String, ISettingsTabFactory<?, ?>> SETTINGS_TAB_FACTORIES;
-	private final List<SettingsTab<?>> settingsTabs = new ArrayList<>();
 
 	static {
 		ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder = new ImmutableMap.Builder<>();
-		addFactory(builder, BackpackSettingsCategory.NAME, BackpackSettingsTab::new);
+		addFactory(builder, GlobalOverridableSettingsCategory.NAME, BackpackGlobalOverridableSettingsTab::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsTab::new);
 		addFactory(builder, MemorySettingsCategory.NAME, MemorySettingsTab::new);
 		addFactory(builder, ItemDisplaySettingsCategory.NAME, ItemDisplaySettingsTab::new);
@@ -36,62 +29,16 @@ public class BackpackSettingsTabControl extends SettingsTabControl<SettingsScree
 	}
 
 	public BackpackSettingsTabControl(SettingsScreen screen, Position position) {
-		super(position);
-		addChild(new BackToBackpackTab(new Position(x, getTopY())));
-		screen.getMenu().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
-				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));
+		super(screen, position);
 	}
 
-	private static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> void addFactory(
-			ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder, String categoryName, ISettingsTabFactory<C, T> factory) {
-		builder.put(categoryName, factory);
+	@Override
+	protected Tab getNewReturnBackTab() {
+		return new BackToBackpackTab(new Position(x, getTopY()));
 	}
 
-	public void renderSlotOverlays(PoseStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
-		List<Integer> colors = new ArrayList<>();
-		settingsTabs.forEach(tab -> tab.getSlotOverlayColor(slot.index).ifPresent(colors::add));
-		if (colors.isEmpty()) {
-			return;
-		}
-
-		int stripeHeight = 16 / colors.size();
-		int i = 0;
-		for (int color : colors) {
-			int yOffset = i * stripeHeight;
-			overlayRenderer.renderSlotOverlay(matrixStack, slot.x, slot.y + yOffset, i == colors.size() - 1 ? 16 - yOffset : stripeHeight, color);
-			i++;
-		}
-	}
-
-	public void handleSlotClick(Slot slot, int mouseButton) {
-		getOpenTab().ifPresent(tab -> tab.handleSlotClick(slot, mouseButton));
-	}
-
-	public void renderGuiItem(ItemRenderer itemRenderer, ItemStack itemstack, Slot slot) {
-		for (SettingsTab<?> tab : settingsTabs) {
-			int rotation = tab.getItemRotation(slot.index);
-			if (rotation != 0) {
-				GuiHelper.tryRenderGuiItem(itemRenderer, minecraft.getTextureManager(), minecraft.player, itemstack, slot.x, slot.y, rotation);
-				return;
-			}
-		}
-		itemRenderer.renderAndDecorateItem(itemstack, slot.x, slot.y);
-	}
-
-	public interface ISlotOverlayRenderer {
-		void renderSlotOverlay(PoseStack matrixStack, int xPos, int yPos, int height, int slotColor);
-	}
-
-	public interface ISettingsTabFactory<C extends SettingsContainerBase<?>, T extends SettingsTab<C>> {
-		T create(C container, Position position, SettingsScreen screen);
-	}
-
-	private static <C extends SettingsContainerBase<?>> SettingsTab<C> instantiateContainer(String categoryName, C container, Position position, SettingsScreen screen) {
-		//noinspection unchecked
-		return (SettingsTab<C>) getSettingsTabFactory(categoryName).create(container, position, screen);
-	}
-
-	private static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
+	@Override
+	protected <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
 		//noinspection unchecked
 		return (ISettingsTabFactory<C, T>) SETTINGS_TAB_FACTORIES.get(name);
 	}

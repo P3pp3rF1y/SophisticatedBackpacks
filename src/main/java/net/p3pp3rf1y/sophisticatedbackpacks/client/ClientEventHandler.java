@@ -18,15 +18,12 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -45,16 +42,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModParticles;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackInsertMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.battery.BatteryUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.BackpackSoundHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RecipeHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
 
 import java.util.Collections;
 import java.util.Map;
@@ -72,19 +61,14 @@ public class ClientEventHandler {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(ClientEventHandler::loadComplete);
 		modBus.addListener(ClientEventHandler::clientSetup);
-		modBus.addListener(ClientEventHandler::stitchTextures);
 		modBus.addListener(ClientEventHandler::onModelRegistry);
 		modBus.addListener(ClientEventHandler::registerLayer);
 		modBus.addListener(ClientEventHandler::registerEntityRenderers);
 		modBus.addListener(ClientEventHandler::registerReloadListener);
-		modBus.addListener(ModParticles::registerFactories);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
-		eventBus.addListener(ClientEventHandler::onPlayerJoinServer);
 		eventBus.addListener(ClientEventHandler::onDrawScreen);
 		eventBus.addListener(EventPriority.HIGH, ClientEventHandler::onRightClick);
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
-		eventBus.addListener(BackpackSoundHandler::tick);
-		eventBus.addListener(BackpackSoundHandler::onWorldUnload);
 	}
 
 	private static void onDrawScreen(ScreenEvent.DrawScreenEvent.Post event) {
@@ -139,7 +123,7 @@ public class ClientEventHandler {
 			if (under != null && !held.isEmpty() && mc.player != null && under.mayPickup(mc.player)) {
 				ItemStack stack = under.getItem();
 				if (stack.getItem() instanceof BackpackItem && stack.getCount() == 1) {
-					PacketHandler.sendToServer(new BackpackInsertMessage(under.index));
+					SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackInsertMessage(under.index));
 					screen.mouseReleased(0, 0, -1);
 					event.setCanceled(true);
 				}
@@ -155,7 +139,7 @@ public class ClientEventHandler {
 	}
 
 	private static void onModelRegistry(ModelRegistryEvent event) {
-		ModelLoaderRegistry.registerLoader(RegistryHelper.getRL(BACKPACK_REG_NAME), BackpackDynamicModel.Loader.INSTANCE);
+		ModelLoaderRegistry.registerLoader(SophisticatedBackpacks.getRL(BACKPACK_REG_NAME), BackpackDynamicModel.Loader.INSTANCE);
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
@@ -195,20 +179,5 @@ public class ClientEventHandler {
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		});
-	}
-
-	public static void stitchTextures(TextureStitchEvent.Pre evt) {
-		if (evt.getAtlas().location() == InventoryMenu.BLOCK_ATLAS) {
-			evt.addSprite(BackpackContainer.EMPTY_UPGRADE_SLOT_BACKGROUND);
-			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_INPUT_SLOT_BACKGROUND);
-			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_OUTPUT_SLOT_BACKGROUND);
-			evt.addSprite(BatteryUpgradeContainer.EMPTY_BATTERY_INPUT_SLOT_BACKGROUND);
-			evt.addSprite(BatteryUpgradeContainer.EMPTY_BATTERY_OUTPUT_SLOT_BACKGROUND);
-		}
-	}
-
-	private static void onPlayerJoinServer(ClientPlayerNetworkEvent.LoggedInEvent evt) {
-		//noinspection ConstantConditions - by the time player is joining the world is not null
-		RecipeHelper.setWorld(Minecraft.getInstance().level);
 	}
 }

@@ -24,11 +24,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -318,7 +318,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		));
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, BackpackRenderInfo renderInfo) {
+	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(BACKPACK_ENTITY_TEXTURE));
 		Set<TankPosition> tankPositions = renderInfo.getTankRenderInfos().keySet();
 		boolean showLeftTank = tankPositions.contains(TankPosition.LEFT);

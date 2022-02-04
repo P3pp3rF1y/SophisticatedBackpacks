@@ -12,7 +12,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.crafting.ICraftingUIPart;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.ICraftingUIPart;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	@OnlyIn(Dist.CLIENT)
-	private BackpackScreen backpackScreen;
+	private StorageScreen<?> storageScreen;
 
 	private static final Method ADD_RENDERABLE_WIDGET = ObfuscationReflectionHelper.findMethod(Screen.class, "m_142416_", GuiEventListener.class);
 
@@ -35,7 +36,7 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	private void addButton(Button button) {
 		buttons.add(button);
 		try {
-			ADD_RENDERABLE_WIDGET.invoke(backpackScreen, button);
+			ADD_RENDERABLE_WIDGET.invoke(storageScreen, button);
 		}
 		catch (IllegalAccessException | InvocationTargetException e) {
 			SophisticatedBackpacks.LOGGER.error("Error calling addButton in Screen class", e);
@@ -49,8 +50,8 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 			return;
 		}
 
-		List<GuiEventListener> screenChildren = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "f_96540_");
-		List<AbstractWidget> screenRenderables = ObfuscationReflectionHelper.getPrivateValue(Screen.class, backpackScreen, "f_169369_");
+		List<GuiEventListener> screenChildren = ObfuscationReflectionHelper.getPrivateValue(Screen.class, storageScreen, "f_96540_");
+		List<AbstractWidget> screenRenderables = ObfuscationReflectionHelper.getPrivateValue(Screen.class, storageScreen, "f_169369_");
 		if (screenChildren == null || screenRenderables == null) {
 			return;
 		}
@@ -67,8 +68,8 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void setBackpackScreen(BackpackScreen screen) {
-		backpackScreen = screen;
+	public void setStorageScreen(StorageScreen<?> screen) {
+		storageScreen = screen;
 	}
 
 	@Override
@@ -77,10 +78,10 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 			return;
 		}
 		Slot firstSlot = slots.get(0);
-		CraftingTweaksProviderManager.getDefaultCraftingGrid(backpackScreen.getMenu()).ifPresent(craftingGrid -> {
-			addButton(CraftingTweaksClientAPI.createRotateButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 0)));
-			addButton(CraftingTweaksClientAPI.createBalanceButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 1)));
-			addButton(CraftingTweaksClientAPI.createClearButtonRelative(craftingGrid, backpackScreen, getButtonX(firstSlot), getButtonY(firstSlot, 2)));
+		CraftingTweaksProviderManager.getDefaultCraftingGrid(storageScreen.getMenu()).ifPresent(craftingGrid -> {
+			addButton(CraftingTweaksClientAPI.createRotateButtonRelative(craftingGrid, storageScreen, getButtonX(firstSlot), getButtonY(firstSlot, 0)));
+			addButton(CraftingTweaksClientAPI.createBalanceButtonRelative(craftingGrid, storageScreen, getButtonX(firstSlot), getButtonY(firstSlot, 1)));
+			addButton(CraftingTweaksClientAPI.createClearButtonRelative(craftingGrid, storageScreen, getButtonX(firstSlot), getButtonY(firstSlot, 2)));
 		});
 	}
 

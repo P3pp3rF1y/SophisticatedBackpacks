@@ -2,19 +2,19 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
 import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.UpgradeSettingsTab;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Position;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilterControl;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.ContentsFilteredUpgradeContainer;
-
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgrade;
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translUpgradeTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilterControl;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilterType;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
 
 public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> {
 	protected ContentsFilterControl filterLogicControl;
 
-	protected RestockUpgradeTab(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen, Component tabLabel, Component closedTooltip) {
+	protected RestockUpgradeTab(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreen<?> screen, Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 	}
 
@@ -24,18 +24,18 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 	}
 
 	public static class Basic extends RestockUpgradeTab {
-		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, translUpgrade("restock"), translUpgradeTooltip("restock"));
+		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreen<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+			super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("restock"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
-					Config.COMMON.restockUpgrade.slotsInRow.get()));
+					Config.COMMON.restockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 
 	public static class Advanced extends RestockUpgradeTab {
-		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, BackpackScreen screen) {
-			super(upgradeContainer, position, screen, translUpgrade("advanced_restock"), translUpgradeTooltip("advanced_restock"));
+		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreen<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+			super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("advanced_restock"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
-					Config.COMMON.advancedRestockUpgrade.slotsInRow.get()));
+					Config.COMMON.advancedRestockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 }

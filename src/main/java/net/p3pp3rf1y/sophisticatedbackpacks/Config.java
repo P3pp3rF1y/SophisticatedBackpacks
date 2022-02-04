@@ -7,8 +7,13 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SortButtonsPosition;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -21,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S1192") //don't complain about repeated config names if two upgrades happen to have the same setting
@@ -30,35 +34,16 @@ public class Config {
 
 	private Config() {}
 
-	public static final Client CLIENT;
-	public static final ForgeConfigSpec CLIENT_SPEC;
 	public static final Common COMMON;
 	public static final ForgeConfigSpec COMMON_SPEC;
 
 	static {
-		final Pair<Client, ForgeConfigSpec> clientSpec = new ForgeConfigSpec.Builder().configure(Client::new);
-		CLIENT_SPEC = clientSpec.getRight();
-		CLIENT = clientSpec.getLeft();
-
 		final Pair<Common, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Common::new);
 		COMMON_SPEC = commonSpec.getRight();
 		COMMON = commonSpec.getLeft();
 	}
 
-	public static class Client {
-		public final ForgeConfigSpec.EnumValue<SortButtonsPosition> sortButtonsPosition;
-		public final ForgeConfigSpec.BooleanValue playButtonSound;
-
-		Client(ForgeConfigSpec.Builder builder) {
-			builder.comment("Client Settings").push("client");
-			sortButtonsPosition = builder.comment("Positions where sort buttons can display to help with conflicts with controls from other mods").defineEnum("sortButtonsPosition", SortButtonsPosition.TITLE_LINE_RIGHT);
-			playButtonSound = builder.comment("Whether click sound should play when custom buttons are clicked in backpack gui").define("playButtonSound", true);
-			builder.pop();
-		}
-	}
-
 	public static class Common {
-		public final EnabledItems enabledItems;
 		public final DisallowedItems disallowedItems;
 		public final BackpackConfig leatherBackpack;
 		public final BackpackConfig ironBackpack;
@@ -100,15 +85,13 @@ public class Config {
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfigEvent.Reloading event) {
-			enabledItems.enabledMap.clear();
 			disallowedItems.setInitialized = false;
-			stackUpgrade.nonStackableItems = null;
+			stackUpgrade.clearNonStackableItems();
 		}
 
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
 
-			enabledItems = new EnabledItems(builder);
 			disallowedItems = new DisallowedItems(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
@@ -152,32 +135,6 @@ public class Config {
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 
 			builder.pop();
-		}
-
-		public static class XpPumpUpgradeConfig {
-			public final ForgeConfigSpec.IntValue maxXpPointsPerMending;
-			public final ForgeConfigSpec.BooleanValue mendingOn;
-
-			public XpPumpUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Xp Pump Upgrade" + SETTINGS).push("xpPumpUpgrade");
-				mendingOn = builder.comment("Whether xp pump can mend items with mending. Set false here to turn off the feature altogether.").define("mendingOn", true);
-				maxXpPointsPerMending = builder.comment("How many experience points at a maximum would be used to mend an item per operation (every 5 ticks and 1 xp point usually translates to 2 damage repaired).").defineInRange("maxXpPointsPerMending", 5, 1, 20);
-				builder.pop();
-			}
-		}
-
-		public static class PumpUpgradeConfig {
-			public final ForgeConfigSpec.IntValue maxInputOutput;
-			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
-			public final ForgeConfigSpec.IntValue filterSlots;
-
-			public PumpUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Pump Upgrade" + SETTINGS).push("pumpUpgrade");
-				filterSlots = builder.comment("Number of fluid filter slots").defineInRange("filterSlots", 4, 1, 20);
-				maxInputOutput = builder.comment("How much mB can be transfered in / out per operation. This is a base transfer rate that gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
-				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to max input/output value. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting input/output").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
-				builder.pop();
-			}
 		}
 
 		public static class EntityBackpackAdditionsConfig {
@@ -277,36 +234,6 @@ public class Config {
 			}
 		}
 
-		public static class TankUpgradeConfig {
-			public final ForgeConfigSpec.IntValue capacityPerSlotRow;
-			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
-			public final ForgeConfigSpec.IntValue autoFillDrainContainerCooldown;
-			public final ForgeConfigSpec.IntValue maxInputOutput;
-
-			protected TankUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
-				capacityPerSlotRow = builder.comment("Capacity in mB the tank upgrade will have per row of backpack slots").defineInRange("capacityPerSlotRow", 4000, 500, 20000);
-				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to tank capacity. Value lower than 1 makes stack multiplier affect the capacity less, higher makes it affect the capacity more. 0 turns off stack multiplier affecting tank capacity").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
-				autoFillDrainContainerCooldown = builder.comment("Cooldown between fill/drain actions done on fluid containers in tank slots. Only fills/drains one bucket worth to/from container after this cooldown and then waits again.").defineInRange("autoFillDrainContainerCooldown", 20, 1, 100);
-				maxInputOutput = builder.comment("How much mB can be transfered in / out per operation. This is a base transfer rate and same as max tank capacity gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
-				builder.pop();
-			}
-		}
-
-		public static class BatteryUpgradeConfig {
-			public final ForgeConfigSpec.IntValue energyPerSlotRow;
-			public final ForgeConfigSpec.DoubleValue stackMultiplierRatio;
-			public final ForgeConfigSpec.IntValue maxInputOutput;
-
-			protected BatteryUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Tank Upgrade" + SETTINGS).push("tankUpgrade");
-				energyPerSlotRow = builder.comment("Energy in FE the battery upgrade will have per row of backpack slots").defineInRange("energyPerSlotRow", 10000, 500, 50000);
-				stackMultiplierRatio = builder.comment("Ratio that gets applied (multiplies) to inventory stack multiplier before this is applied to max energy of the battery and max in/out. Value lower than 1 makes stack multiplier affect the max energy less, higher makes it affect the max energy more. 0 turns off stack multiplier affecting battery upgrade").defineInRange("stackMultiplierRatio", 1D, 0D, 5D);
-				maxInputOutput = builder.comment("How much FE can be transfered in / out per operation. This is a base transfer rate and same as max storage gets multiplied by number of rows in backpack and stack multiplier.").defineInRange("maxInputOutput", 20, 1, 1000);
-				builder.pop();
-			}
-		}
-
 		public static class InceptionUpgradeConfig {
 			public final ForgeConfigSpec.BooleanValue upgradesUseInventoriesOfBackpacksInBackpack;
 			public final ForgeConfigSpec.BooleanValue upgradesInContainedBackpacksAreFunctional;
@@ -318,35 +245,6 @@ public class Config {
 				upgradesInContainedBackpacksAreFunctional = builder.comment("Allows / Disallows upgrades to be functional even when they are in Backpacks in the inventory of Backpack with Inception Upgrade")
 						.define("upgradesInContainedBackpacksAreFunctional", true);
 				builder.pop();
-			}
-		}
-
-		public static class AutoCookingUpgradeConfig extends CookingUpgradeConfig {
-			public final ForgeConfigSpec.IntValue inputFilterSlots;
-			public final ForgeConfigSpec.IntValue inputFilterSlotsInRow;
-			public final ForgeConfigSpec.IntValue fuelFilterSlots;
-			public final ForgeConfigSpec.IntValue fuelFilterSlotsInRow;
-
-			public AutoCookingUpgradeConfig(ForgeConfigSpec.Builder builder, String upgradeName, String path) {
-				super(builder, upgradeName, path);
-				inputFilterSlots = builder.comment("Number of input filter slots").defineInRange("inputFilterSlots", 8, 1, 20);
-				inputFilterSlotsInRow = builder.comment("Number of input filter slots displayed in a row").defineInRange("inputFilterSlotsInRow", 4, 1, 6);
-				fuelFilterSlots = builder.comment("Number of fuel filter slots").defineInRange("fuelFilterSlots", 4, 1, 20);
-				fuelFilterSlotsInRow = builder.comment("Number of fuel filter slots displayed in a row").defineInRange("fuelFilterSlotsInRow", 4, 1, 6);
-				builder.pop();
-			}
-		}
-
-		public static class CookingUpgradeConfig {
-			public final ForgeConfigSpec.DoubleValue cookingSpeedMultiplier;
-			public final ForgeConfigSpec.DoubleValue fuelEfficiencyMultiplier;
-
-			protected CookingUpgradeConfig(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
-				builder.comment(upgradeName + SETTINGS).push(path);
-				cookingSpeedMultiplier = builder.comment("Smelting speed multiplier (1.0 equals speed at which vanilla furnace smelts items)")
-						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
-				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
-						.defineInRange("fuelEfficiencyMultiplier", 1.0D, 0.25D, 4.0D);
 			}
 		}
 
@@ -390,48 +288,6 @@ public class Config {
 			}
 		}
 
-		public static class EnabledItems {
-			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
-
-			EnabledItems(ForgeConfigSpec.Builder builder) {
-				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
-			}
-
-			public boolean isItemEnabled(Item item) {
-				return RegistryHelper.getRegistryName(item).map(rn -> isItemEnabled(rn.getPath())).orElse(false);
-			}
-
-			public boolean isItemEnabled(String itemRegistryName) {
-				if (!COMMON_SPEC.isLoaded()) {
-					return true;
-				}
-				if (enabledMap.isEmpty()) {
-					loadEnabledMap();
-				}
-				return enabledMap.computeIfAbsent(itemRegistryName, irn -> {
-					addEnabledItemToConfig(itemRegistryName);
-					return true;
-				});
-			}
-
-			private void addEnabledItemToConfig(String itemRegistryName) {
-				itemsEnableList.get().add(itemRegistryName + ":true");
-				COMMON_SPEC.save();
-			}
-
-			private void loadEnabledMap() {
-				for (String itemEnabled : itemsEnableList.get()) {
-					String[] data = itemEnabled.split(":");
-					if (data.length == 2) {
-						enabledMap.put(data[0], Boolean.valueOf(data[1]));
-					} else {
-						SophisticatedBackpacks.LOGGER.error("Wrong data for enabledItems - expected name:true/false when {} was provided", itemEnabled);
-					}
-				}
-			}
-		}
-
 		public static class DisallowedItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> disallowedItemsList;
 			private boolean setInitialized = false;
@@ -462,35 +318,6 @@ public class Config {
 				}
 			}
 		}
-
-		public static class StackUpgradeConfig {
-			private final ForgeConfigSpec.ConfigValue<List<String>> nonStackableItemsList;
-			@Nullable
-			private Set<Item> nonStackableItems = null;
-
-			public StackUpgradeConfig(ForgeConfigSpec.Builder builder) {
-				builder.comment("Stack Upgrade" + SETTINGS).push("stackUpgrade");
-				nonStackableItemsList = builder.comment("List of items that are not supposed to stack in backpack even when stack upgrade is inserted. Item registry names are expected here.").define("nonStackableItems", new ArrayList<>());
-				builder.pop();
-			}
-
-			public boolean canItemStack(Item item) {
-				if (!COMMON_SPEC.isLoaded()) {
-					return true;
-				}
-				if (nonStackableItems == null) {
-					nonStackableItems = new HashSet<>();
-					nonStackableItemsList.get().forEach(name -> {
-						ResourceLocation registryName = new ResourceLocation(name);
-						if (ForgeRegistries.ITEMS.containsKey(registryName)) {
-							nonStackableItems.add(ForgeRegistries.ITEMS.getValue(registryName));
-						} else {
-							SophisticatedBackpacks.LOGGER.error("Item {} is set to not be affected by stack upgrade in config, but it does not exist in item registry", name);
-						}
-					});
-				}
-				return !nonStackableItems.contains(item);
-			}
-		}
 	}
+
 }

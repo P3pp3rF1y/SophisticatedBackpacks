@@ -1,34 +1,34 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "restock_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        " P ",
-        "IBI",
-        "RCR"
-    ],
-    "key": {
-        "B": {
-            "item": "sophisticatedbackpacks:upgrade_base"
-        },
-        "C": {
-            "tag": "forge:chests/wooden"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        },
-        "P": {
-            "item": "minecraft:sticky_piston"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:restock_upgrade"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "restock_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    " P ",
+    "IBI",
+    "RCR"
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "C": {
+      "tag": "forge:chests/wooden"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "P": {
+      "item": "minecraft:sticky_piston"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:restock_upgrade"
+  }
 }

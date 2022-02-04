@@ -8,6 +8,8 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
+import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
 import java.util.Objects;
 import java.util.Optional;

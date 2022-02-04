@@ -1,31 +1,31 @@
 {
-    "type": "sophisticatedbackpacks:upgrade_next_tier",
-    "conditions": [
-        {
-            "itemRegistryName": "advanced_pickup_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        " D ",
-        "GPG",
-        "RRR"
-    ],
-    "key": {
-        "D": {
-            "tag": "forge:gems/diamond"
-        },
-        "G": {
-            "tag": "forge:ingots/gold"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        },
-        "P": {
-            "item": "sophisticatedbackpacks:pickup_upgrade"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+  "type": "sophisticatedcore:upgrade_next_tier",
+  "conditions": [
+    {
+      "itemRegistryName": "advanced_pickup_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    " D ",
+    "GPG",
+    "RRR"
+  ],
+  "key": {
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "G": {
+      "tag": "forge:ingots/gold"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "P": {
+      "item": "sophisticatedbackpacks:pickup_upgrade"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+  }
 }

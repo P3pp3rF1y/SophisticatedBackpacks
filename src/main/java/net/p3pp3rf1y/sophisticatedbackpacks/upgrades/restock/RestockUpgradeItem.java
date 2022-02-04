@@ -1,7 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeType;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeItemBase;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeType;
 
 import java.util.function.IntSupplier;
 
@@ -10,6 +11,7 @@ public class RestockUpgradeItem extends UpgradeItemBase<RestockUpgradeWrapper> {
 	private final IntSupplier filterSlotCount;
 
 	public RestockUpgradeItem(IntSupplier filterSlotCount) {
+		super(SophisticatedBackpacks.ITEM_GROUP);
 		this.filterSlotCount = filterSlotCount;
 	}
 

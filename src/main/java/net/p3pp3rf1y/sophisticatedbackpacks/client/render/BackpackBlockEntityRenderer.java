@@ -9,11 +9,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BACKPACK_LAYER;
 
@@ -31,7 +32,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
 		boolean showRightTank = state.getValue(BackpackBlock.RIGHT_TANK);
 		boolean showBattery = state.getValue(BackpackBlock.BATTERY);
-		BackpackRenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
+		RenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
 		poseStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
@@ -73,7 +74,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.popPose();
 	}
 
-	private void renderItemDisplay(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, BackpackRenderInfo renderInfo) {
+	private void renderItemDisplay(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo) {
 		BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = renderInfo.getItemDisplayRenderInfo();
 		poseStack.pushPose();
 		poseStack.translate(0, 0.6, 0.25);

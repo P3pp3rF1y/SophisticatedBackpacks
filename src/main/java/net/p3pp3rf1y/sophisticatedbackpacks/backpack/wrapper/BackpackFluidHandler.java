@@ -4,18 +4,18 @@ import net.minecraft.tags.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class BackpackFluidHandler implements IBackpackFluidHandler {
-	private final IBackpackWrapper backpackWrapper;
+public class BackpackFluidHandler implements IStorageFluidHandler {
+	private final IStorageWrapper backpackWrapper;
 
-	public BackpackFluidHandler(IBackpackWrapper backpackWrapper) {
+	public BackpackFluidHandler(IStorageWrapper backpackWrapper) {
 		this.backpackWrapper = backpackWrapper;
 	}
 
@@ -138,6 +138,6 @@ public class BackpackFluidHandler implements IBackpackFluidHandler {
 
 	@Override
 	public ItemStack getContainer() {
-		return backpackWrapper.getBackpack();
+		return backpackWrapper.getWrappedStorageStack();
 	}
 }

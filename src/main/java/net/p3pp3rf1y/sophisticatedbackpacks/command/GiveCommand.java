@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.Collection;
 import java.util.UUID;
