@@ -89,7 +89,7 @@ minecraft {
                     source sourceSets.main
                 }
             }
-            args '--mod', 'sophisticatedbackpacks', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'sophisticatedbackpacks,sophisticatedcore', '--flat', '--all', '--output', file('src/generated/resources/')
         }
     }
 }

@@ -1,17 +1,17 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.data;
+package net.p3pp3rf1y.sophisticatedcore.data;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.init.ModFluids;
 
 import javax.annotation.Nullable;
 
-public class SBPFluidTagsProvider extends FluidTagsProvider {
-	public SBPFluidTagsProvider(DataGenerator generatorIn,
+public class SCFluidTagsProvider extends FluidTagsProvider {
+	public SCFluidTagsProvider(DataGenerator generatorIn,
 			@Nullable ExistingFileHelper existingFileHelper) {
-		super(generatorIn, SophisticatedBackpacks.MOD_ID, existingFileHelper);
+		super(generatorIn, SophisticatedCore.MOD_ID, existingFileHelper);
 	}
 
 	@Override
