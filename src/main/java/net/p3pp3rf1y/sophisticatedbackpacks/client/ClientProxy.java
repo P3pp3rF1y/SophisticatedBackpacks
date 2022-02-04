@@ -144,8 +144,11 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public static void handleGuiMouseKeyPress(GuiScreenEvent.MouseClickedEvent.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputMappings.Type.MOUSE.getOrCreate(event.getButton())) && tryCallSort(event.getGui())) {
+		InputMappings.Input input = InputMappings.Type.MOUSE.getOrCreate(event.getButton());
+		if (SORT_KEYBIND.isActiveAndMatches(input) && tryCallSort(event.getGui())) {
 			event.setCanceled(true);
+		} else if (BACKPACK_OPEN_KEYBIND.isActiveAndMatches(input)) {
+			sendBackpackOpenOrCloseMessage();
 		}
 	}
 
