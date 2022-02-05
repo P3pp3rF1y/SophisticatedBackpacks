@@ -111,8 +111,8 @@ dependencies {
     //runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
     compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-    //runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    //runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
 
     //runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
     //runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
@@ -120,6 +120,7 @@ dependencies {
     //runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
     //runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
     //runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
+    runtimeOnly fg.deobf("curse.maven:immersiveengineering-231951:3587149")
 }
 
 test {

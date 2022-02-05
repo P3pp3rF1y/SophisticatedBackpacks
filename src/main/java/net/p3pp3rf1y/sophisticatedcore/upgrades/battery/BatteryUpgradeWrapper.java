@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades.battery;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -14,8 +15,11 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IStackableContentsUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrapper, BatteryUpgradeItem>
@@ -23,9 +27,13 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 	public static final int INPUT_SLOT = 0;
 	public static final int OUTPUT_SLOT = 1;
 	public static final String ENERGY_STORED_TAG = "energyStored";
+	private static final int CACHE_COOLDOWN = 40;
+
 	private Consumer<BatteryRenderInfo> updateTankRenderInfoCallback;
 	private final ItemStackHandler inventory;
 	private int energyStored;
+	private final Set<Direction> energyStorageDirections = new HashSet<>();
+	private long nextCacheTime = 0;
 
 	protected BatteryUpgradeWrapper(IStorageWrapper storageWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(storageWrapper, upgrade, upgradeSaveHandler);
@@ -151,10 +159,39 @@ public class BatteryUpgradeWrapper extends UpgradeWrapperBase<BatteryUpgradeWrap
 
 		if (energyStored > 0) {
 			inventory.getStackInSlot(OUTPUT_SLOT).getCapability(CapabilityEnergy.ENERGY).ifPresent(this::extractToStorage);
+
+			if (entity == null) {
+				transferToAttachedEnergyStorage(world, pos);
+			}
+		}
+	}
+
+	private void transferToAttachedEnergyStorage(Level world, BlockPos pos) {
+		if (nextCacheTime <= world.getGameTime()) {
+			nextCacheTime = world.getGameTime() + CACHE_COOLDOWN;
+			energyStorageDirections.clear();
+			for (Direction dir : Direction.values()) {
+				BlockPos offsetPos = pos.offset(dir.getNormal());
+				WorldHelper.getBlockEntity(world, offsetPos).ifPresent(be -> be.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite())
+						.ifPresent(energyStorage -> {
+							energyStorageDirections.add(dir);
+							extractToStorage(energyStorage);
+						}));
+			}
+		} else {
+			for (Direction dir : energyStorageDirections) {
+				BlockPos offsetPos = pos.offset(dir.getNormal());
+				WorldHelper.getBlockEntity(world, offsetPos).ifPresent(be -> be.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite())
+						.ifPresent(this::extractToStorage));
+			}
 		}
 	}
 
 	private void extractToStorage(IEnergyStorage energyStorage) {
+		if (!energyStorage.canReceive()) {
+			return;
+		}
+
 		int toExtract = innerExtractEnergy(getMaxInOut(), true);
 		if (toExtract > 0) {
 			toExtract = energyStorage.receiveEnergy(toExtract, true);
