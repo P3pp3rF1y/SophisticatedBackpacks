@@ -180,7 +180,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			energyStorage = wrappedStorage;
 		}
 
-		return Optional.ofNullable(energyStorage);
+		return energyStorage == null || energyStorage.getMaxEnergyStored() == 0 ? Optional.empty() : Optional.of(energyStorage);
 	}
 
 	@Override
