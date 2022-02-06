@@ -112,6 +112,7 @@ public class GuiHelper {
 
 	public static void blit(PoseStack matrixStack, int x, int y, TextureBlitData texData) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, texData.getTextureName());
 		GuiComponent.blit(matrixStack, x + texData.getXOffset(), y + texData.getYOffset(), texData.getU(), texData.getV(), texData.getWidth(), texData.getHeight(), texData.getTextureWidth(), texData.getTextureHeight());
 	}

@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.ChatFormatting;
@@ -246,10 +247,10 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		int x = leftX;
 		for (IUpgradeWrapper upgradeWrapper : upgrades) {
 			if (upgradeWrapper.canBeDisabled()) {
+				RenderSystem.disableDepthTest();
 				GuiHelper.blit(matrixStack, x, topY + 3, upgradeWrapper.isEnabled() ? UPGRADE_ON : UPGRADE_OFF);
 				x += 4;
 			}
-			itemRenderer.renderAndDecorateItem(upgradeWrapper.getUpgradeStack(), x, topY);
 			itemRenderer.renderAndDecorateItem(upgradeWrapper.getUpgradeStack(), x, topY);
 			x += DEFAULT_STACK_WIDTH;
 		}
