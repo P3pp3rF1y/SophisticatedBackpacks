@@ -8,7 +8,7 @@ import java.util.List;
 
 public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler {
 	protected final T inventoryHandler;
-	private final List<FilterLogic> inputFilters;
+	protected final List<FilterLogic> inputFilters;
 	private final List<FilterLogic> outputFilters;
 
 	public FilteredItemHandler(T inventoryHandler, List<FilterLogic> inputFilters, List<FilterLogic> outputFilters) {
@@ -77,7 +77,16 @@ public class FilteredItemHandler<T extends IItemHandler> implements IItemHandler
 
 		@Override
 		public ItemStack insertItem(ItemStack stack, boolean simulate) {
-			return inventoryHandler.insertItem(stack, simulate);
+			if (inputFilters.isEmpty()) {
+				return inventoryHandler.insertItem(stack, simulate);
+			}
+
+			for (FilterLogic filter : inputFilters) {
+				if (filter.matchesFilter(stack)) {
+					return inventoryHandler.insertItem(stack, simulate);
+				}
+			}
+			return stack;
 		}
 	}
 }
