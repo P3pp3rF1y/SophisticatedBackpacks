@@ -135,9 +135,9 @@ public class Config {
 			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			stackUpgrade = new StackUpgradeConfig(builder);
-			smeltingUpgrade = new CookingUpgradeConfig(builder, "Smelting Upgrade", "smeltingUpgrade");
-			smokingUpgrade = new CookingUpgradeConfig(builder, "Smoking Upgrade", "smokingUpgrade");
-			blastingUpgrade = new CookingUpgradeConfig(builder, "Blasting Upgrade", "blastingUpgrade");
+			smeltingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smelting Upgrade", "smeltingUpgrade");
+			smokingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smoking Upgrade", "smokingUpgrade");
+			blastingUpgrade = CookingUpgradeConfig.getInstance(builder, "Blasting Upgrade", "blastingUpgrade");
 			autoSmeltingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smelting Upgrade", "autoSmeltingUpgrade");
 			autoSmokingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smoking Upgrade", "autoSmokingUpgrade");
 			autoBlastingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Blasting Upgrade", "autoBlastingUpgrade");
@@ -357,6 +357,12 @@ public class Config {
 						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
 				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
 						.defineInRange("fuelEfficiencyMultiplier", 1.0D, 0.25D, 4.0D);
+			}
+
+			public static CookingUpgradeConfig getInstance(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
+				CookingUpgradeConfig instance = new CookingUpgradeConfig(builder, upgradeName, path);
+				builder.pop();
+				return instance;
 			}
 		}
 
