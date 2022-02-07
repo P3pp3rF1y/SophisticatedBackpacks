@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.util.LazyOptional;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
@@ -138,9 +139,17 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return PlayerInventoryProvider.get().getPlayerInventoryHandler(player, handlerName)
-					.map(h -> h.getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE))
-					.orElse(IBackpackWrapper.Noop.INSTANCE);
+			Optional<PlayerInventoryHandler> inventoryHandler = PlayerInventoryProvider.get().getPlayerInventoryHandler(player, handlerName);
+			if (inventoryHandler.isEmpty()) {
+				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find inventory handler for \"{}\"", handlerName);
+				return IBackpackWrapper.Noop.INSTANCE;
+			}
+			LazyOptional<IBackpackWrapper> backpackWrapper = inventoryHandler.get().getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+			if (!backpackWrapper.isPresent()) {
+				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find backpack at slot index {} in \"{}\" inventory handler", backpackSlotIndex, handlerName);
+				return IBackpackWrapper.Noop.INSTANCE;
+			}
+			return backpackWrapper.orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
