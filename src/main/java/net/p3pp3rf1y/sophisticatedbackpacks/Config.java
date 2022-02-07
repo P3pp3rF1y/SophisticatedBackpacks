@@ -97,6 +97,7 @@ public class Config {
 		public final StackUpgradeConfig stackUpgrade;
 		public final PumpUpgradeConfig pumpUpgrade;
 		public final XpPumpUpgradeConfig xpPumpUpgrade;
+		public final NerfsConfig nerfsConfig;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -135,9 +136,9 @@ public class Config {
 			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
 			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			stackUpgrade = new StackUpgradeConfig(builder);
-			smeltingUpgrade = new CookingUpgradeConfig(builder, "Smelting Upgrade", "smeltingUpgrade");
-			smokingUpgrade = new CookingUpgradeConfig(builder, "Smoking Upgrade", "smokingUpgrade");
-			blastingUpgrade = new CookingUpgradeConfig(builder, "Blasting Upgrade", "blastingUpgrade");
+			smeltingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smelting Upgrade", "smeltingUpgrade");
+			smokingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smoking Upgrade", "smokingUpgrade");
+			blastingUpgrade = CookingUpgradeConfig.getInstance(builder, "Blasting Upgrade", "blastingUpgrade");
 			autoSmeltingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smelting Upgrade", "autoSmeltingUpgrade");
 			autoSmokingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Smoking Upgrade", "autoSmokingUpgrade");
 			autoBlastingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Blasting Upgrade", "autoBlastingUpgrade");
@@ -148,10 +149,25 @@ public class Config {
 			pumpUpgrade = new PumpUpgradeConfig(builder);
 			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
+			nerfsConfig = new NerfsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 
 			builder.pop();
+		}
+
+		public static class NerfsConfig {
+			public final ForgeConfigSpec.BooleanValue tooManyBackpacksSlowness;
+			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
+			public final ForgeConfigSpec.DoubleValue slownessLevelsPerAdditionalBackpack;
+
+			public NerfsConfig(ForgeConfigSpec.Builder builder) {
+				builder.push("nerfs");
+				tooManyBackpacksSlowness = builder.comment("Determines if too many backpacks in player's inventory cause slowness to the player").define("tooManyBackpacksSlowness", false);
+				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness").defineInRange("maxNumberOfBackpacks", 3, 1, 27);
+				slownessLevelsPerAdditionalBackpack = builder.comment("Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)").defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
+				builder.pop();
+			}
 		}
 
 		public static class XpPumpUpgradeConfig {
@@ -189,6 +205,8 @@ public class Config {
 			public final ForgeConfigSpec.BooleanValue buffHealth;
 			public final ForgeConfigSpec.BooleanValue equipWithArmor;
 			public final ForgeConfigSpec.BooleanValue playJukebox;
+			public final ForgeConfigSpec.DoubleValue backpackDropChance;
+			public final ForgeConfigSpec.DoubleValue lootingChanceIncreasePerLevel;
 			public final ForgeConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
 			public final ForgeConfigSpec.ConfigValue<List<? extends String>> discBlockList;
 			@Nullable
@@ -209,6 +227,8 @@ public class Config {
 				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
 						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
+				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.085, 0, 1);
+				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack").defineInRange("lootingChanceIncreasePerLevel", 0.01, 0, 0.2);
 				builder.pop();
 			}
 
@@ -357,6 +377,12 @@ public class Config {
 						.defineInRange("smeltingSpeedMultiplier", 1.0D, 0.25D, 4.0D);
 				fuelEfficiencyMultiplier = builder.comment("Fuel efficiency multiplier (1.0 equals speed at which it's used in vanilla furnace)")
 						.defineInRange("fuelEfficiencyMultiplier", 1.0D, 0.25D, 4.0D);
+			}
+
+			public static CookingUpgradeConfig getInstance(ForgeConfigSpec.Builder builder, final String upgradeName, String path) {
+				CookingUpgradeConfig instance = new CookingUpgradeConfig(builder, upgradeName, path);
+				builder.pop();
+				return instance;
 			}
 		}
 

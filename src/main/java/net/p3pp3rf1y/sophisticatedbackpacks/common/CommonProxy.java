@@ -12,6 +12,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
@@ -21,6 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -31,6 +34,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
@@ -51,6 +56,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonProxy {
@@ -77,6 +83,30 @@ public class CommonProxy {
 		eventBus.addListener(this::onAddReloadListener);
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
+		eventBus.addListener(this::onWorldTick);
+	}
+
+	private static final int BACKPACK_COUNT_CHECK_COOLDOWN = 40;
+	private long nextBackpackCountCheck = 0;
+
+	private void onWorldTick(TickEvent.WorldTickEvent event) {
+		if (event.world.isClientSide || event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.world.getGameTime()) {
+			return;
+		}
+		nextBackpackCountCheck = event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN;
+
+		event.world.players().forEach(player -> {
+			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
+			SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, handlerName, slot) -> {
+				numberOfBackpacks.incrementAndGet();
+				return false;
+			});
+			int maxNumberOfBackpacks = Config.COMMON.nerfsConfig.maxNumberOfBackpacks.get();
+			if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
+				int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.COMMON.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+				player.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, BACKPACK_COUNT_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
+			}
+		});
 	}
 
 	public PlayerInventoryProvider getPlayerInventoryProvider() {

@@ -116,6 +116,8 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
     runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
     runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
+    runtimeOnly fg.deobf("curse.maven:create-328085:3536025")
+    runtimeOnly fg.deobf("curse.maven:flywheel-486392:3535459")
 }
 
 test {
