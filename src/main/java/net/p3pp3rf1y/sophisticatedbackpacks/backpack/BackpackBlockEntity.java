@@ -15,12 +15,11 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.NoopBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +27,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackBlockEntity extends BlockEntity {
-	private IBackpackWrapper backpackWrapper = NoopBackpackWrapper.INSTANCE;
+	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
 	private boolean updateBlockRender = true;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
@@ -36,8 +35,8 @@ public class BackpackBlockEntity extends BlockEntity {
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(NoopBackpackWrapper.INSTANCE);
-		backpackWrapper.setBackpackSaveHandler(() -> {
+		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE);
+		backpackWrapper.setSaveHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
@@ -116,7 +115,7 @@ public class BackpackBlockEntity extends BlockEntity {
 		BlockState state = getBlockState();
 		state = state.setValue(LEFT_TANK, false);
 		state = state.setValue(RIGHT_TANK, false);
-		BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+		RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 		for (TankPosition pos : renderInfo.getTankRenderInfos().keySet()) {
 			if (pos == TankPosition.LEFT) {
 				state = state.setValue(LEFT_TANK, true);

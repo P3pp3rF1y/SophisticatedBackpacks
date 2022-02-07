@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -13,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -23,22 +26,23 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModFluids;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModParticles;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncPlayerSettingsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
+import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonEventHandler {
@@ -46,28 +50,52 @@ public class CommonEventHandler {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
-		ModFluids.registerHandlers(modBus);
-		ModParticles.registerParticles(modBus);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(this::onItemPickup);
 		eventBus.addListener(this::onLivingSpecialSpawn);
 		eventBus.addListener(this::onLivingDrops);
 		eventBus.addListener(this::onEntityMobGriefing);
 		eventBus.addListener(this::onEntityLeaveWorld);
-		eventBus.addListener(ServerBackpackSoundHandler::tick);
+		eventBus.addListener(ServerStorageSoundHandler::tick);
 		eventBus.addListener(this::onBlockClick);
 		eventBus.addListener(this::onAttackEntity);
 		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
+		eventBus.addListener(this::onWorldTick);
+	}
+
+	private static final int BACKPACK_COUNT_CHECK_COOLDOWN = 40;
+	private long nextBackpackCountCheck = 0;
+
+	private void onWorldTick(TickEvent.WorldTickEvent event) {
+		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.world.getGameTime()) {
+			return;
+		}
+		nextBackpackCountCheck = event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN;
+
+		event.world.players().forEach(player -> {
+			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
+			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, slot) -> {
+				numberOfBackpacks.incrementAndGet();
+				return false;
+			});
+			int maxNumberOfBackpacks = Config.COMMON.nerfsConfig.maxNumberOfBackpacks.get();
+			if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
+				int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.COMMON.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+				player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BACKPACK_COUNT_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
+			}
+		});
 	}
 
 	private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-		PacketHandler.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(BackpackSettingsManager.getPlayerBackpackSettingsTag(event.getPlayer())));
+		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
+		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getPlayer(), playerTagName)));
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		PacketHandler.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(BackpackSettingsManager.getPlayerBackpackSettingsTag(event.getPlayer())));
+		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
+		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getPlayer(), playerTagName)));
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
@@ -138,13 +166,13 @@ public class CommonEventHandler {
 		Level world = player.getCommandSenderWorld();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
-					remainingStackSimulated.set(InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated.get(), wrapper, true));
+					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
 				}).orElse(false));
 		if (remainingStackSimulated.get().isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, player, remainingStack, wrapper, false).isEmpty()).orElse(false)
+					.map(wrapper -> InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack, false).isEmpty()).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
 				Random rand = itemEntity.level.random;

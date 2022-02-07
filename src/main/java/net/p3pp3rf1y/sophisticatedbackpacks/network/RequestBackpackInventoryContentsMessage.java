@@ -5,9 +5,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackUpgradeHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -42,15 +43,15 @@ public class RequestBackpackInventoryContentsMessage {
 		CompoundTag backpackContents = BackpackStorage.get().getOrCreateBackpackContents(msg.backpackUuid);
 
 		CompoundTag inventoryContents = new CompoundTag();
-		Tag inventoryNbt = backpackContents.get(BackpackInventoryHandler.INVENTORY_TAG);
+		Tag inventoryNbt = backpackContents.get(InventoryHandler.INVENTORY_TAG);
 		if (inventoryNbt != null) {
-			inventoryContents.put(BackpackInventoryHandler.INVENTORY_TAG, inventoryNbt);
+			inventoryContents.put(InventoryHandler.INVENTORY_TAG, inventoryNbt);
 		}
-		Tag upgradeNbt = backpackContents.get(BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG);
+		Tag upgradeNbt = backpackContents.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
 		if (upgradeNbt != null) {
-			inventoryContents.put(BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
+			inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
 		}
 
-		PacketHandler.sendToClient(player, new BackpackContentsMessage(msg.backpackUuid, inventoryContents));
+		SophisticatedBackpacks.PACKET_HANDLER.sendToClient(player, new BackpackContentsMessage(msg.backpackUuid, inventoryContents));
 	}
 }

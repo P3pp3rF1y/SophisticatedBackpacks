@@ -13,10 +13,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -109,7 +109,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 				container.setOpenTabId(openOrFirstCraftingContainer.getUpgradeContainerId());
 			}
 			TransferRecipeMessage message = new TransferRecipeMessage(matchingItemsResult.matchingItems, craftingSlotIndexes, inventorySlotIndexes, maxTransfer);
-			PacketHandler.sendToServer(message);
+			SophisticatedBackpacks.PACKET_HANDLER.sendToServer(message);
 		}
 
 		return null;

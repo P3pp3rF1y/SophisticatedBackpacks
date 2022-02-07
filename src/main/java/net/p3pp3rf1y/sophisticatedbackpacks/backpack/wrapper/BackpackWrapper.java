@@ -10,26 +10,33 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackFluidHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.SortBy;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.itemdisplay.ItemDisplaySettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.memory.MemorySettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCategory;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.stack.StackUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.tank.TankUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventorySorter;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemStackKey;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.LootHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
+import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryIOHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -59,9 +66,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private Runnable inventorySlotChangeHandler = () -> {};
 
 	@Nullable
-	private BackpackInventoryHandler handler = null;
+	private InventoryHandler handler = null;
 	@Nullable
-	private BackpackUpgradeHandler upgradeHandler = null;
+	private UpgradeHandler upgradeHandler = null;
 	@Nullable
 	private InventoryIOHandler inventoryIOHandler = null;
 	@Nullable
@@ -70,7 +77,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private BackpackSettingsHandler settingsHandler = null;
 	private boolean fluidHandlerInitialized = false;
 	@Nullable
-	private IBackpackFluidHandler fluidHandler = null;
+	private IStorageFluidHandler fluidHandler = null;
 	private boolean energyStorageInitialized = false;
 	@Nullable
 	private IEnergyStorage energyStorage = null;
@@ -83,7 +90,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setBackpackSaveHandler(Runnable saveHandler) {
+	public void setSaveHandler(Runnable saveHandler) {
 		backpackSaveHandler = saveHandler;
 		refreshInventoryForUpgradeProcessing();
 	}
@@ -102,7 +109,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public BackpackInventoryHandler getInventoryHandler() {
+	public InventoryHandler getInventoryHandler() {
 		if (handler == null) {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
 					this, getBackpackContentsNbt(), () -> {
@@ -153,9 +160,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public Optional<IBackpackFluidHandler> getFluidHandler() {
+	public Optional<IStorageFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
-			IBackpackFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
+			IStorageFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
 			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
@@ -180,15 +187,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 			energyStorage = wrappedStorage;
 		}
 
-		return Optional.ofNullable(energyStorage);
+		return energyStorage == null || energyStorage.getMaxEnergyStored() == 0 ? Optional.empty() : Optional.of(energyStorage);
 	}
 
 	@Override
-	public void copyDataTo(IBackpackWrapper otherBackpackWrapper) {
+	public void copyDataTo(IStorageWrapper otherStorageWrapper) {
 		getContentsUuid().ifPresent(originalUuid -> {
-			getInventoryHandler().copyStacksTo(otherBackpackWrapper.getInventoryHandler());
-			getUpgradeHandler().copyTo(otherBackpackWrapper.getUpgradeHandler());
-			getSettingsHandler().copyTo(otherBackpackWrapper.getSettingsHandler());
+			getInventoryHandler().copyStacksTo(otherStorageWrapper.getInventoryHandler());
+			getUpgradeHandler().copyTo(otherStorageWrapper.getUpgradeHandler());
+			getSettingsHandler().copyTo(otherStorageWrapper.getSettingsHandler());
 		});
 	}
 
@@ -198,17 +205,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 			if (getContentsUuid().isPresent()) {
 				settingsHandler = new BackpackSettingsHandler(this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
 			} else {
-				settingsHandler = NoopBackpackWrapper.INSTANCE.getSettingsHandler();
+				settingsHandler = Noop.INSTANCE.getSettingsHandler();
 			}
 		}
 		return settingsHandler;
 	}
 
 	@Override
-	public BackpackUpgradeHandler getUpgradeHandler() {
+	public UpgradeHandler getUpgradeHandler() {
 		if (upgradeHandler == null) {
 			if (getContentsUuid().isPresent()) {
-				upgradeHandler = new BackpackUpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
+				upgradeHandler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
 					if (handler != null) {
 						handler.clearListeners();
 						handler.setSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
@@ -221,9 +228,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 					fluidHandler = null;
 					energyStorageInitialized = false;
 					energyStorage = null;
-				});
+				}) {
+					@Override
+					public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
+						return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(stack.getItem().getRegistryName().getNamespace()) || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
+					}
+				};
 			} else {
-				upgradeHandler = NoopBackpackWrapper.INSTANCE.getUpgradeHandler();
+				upgradeHandler = NoopStorageWrapper.INSTANCE.getUpgradeHandler();
 			}
 		}
 		return upgradeHandler;
@@ -259,17 +272,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void clearDummyHandlers() {
-		if (upgradeHandler == NoopBackpackWrapper.INSTANCE.getUpgradeHandler()) {
+		if (upgradeHandler == NoopStorageWrapper.INSTANCE.getUpgradeHandler()) {
 			upgradeHandler = null;
 		}
-		if (settingsHandler == NoopBackpackWrapper.INSTANCE.getSettingsHandler()) {
+		if (settingsHandler == NoopStorageWrapper.INSTANCE.getSettingsHandler()) {
 			settingsHandler = null;
 		}
 	}
 
 	private void migrateBackpackContents(UUID newUuid) {
-		migrateNbtTag(newUuid, BackpackInventoryHandler.INVENTORY_TAG);
-		migrateNbtTag(newUuid, BackpackUpgradeHandler.UPGRADE_INVENTORY_TAG);
+		migrateNbtTag(newUuid, InventoryHandler.INVENTORY_TAG);
+		migrateNbtTag(newUuid, UpgradeHandler.UPGRADE_INVENTORY_TAG);
 	}
 
 	private void migrateNbtTag(UUID newUuid, String key) {
@@ -342,7 +355,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 		};
 	}
 
-	@Override
 	public ItemStack getBackpack() {
 		return backpack;
 	}
@@ -354,8 +366,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return clonedBackpack;
 	}
 
-	private void cloneSubbackpacks(IBackpackWrapper wrapperCloned) {
-		BackpackInventoryHandler inventoryHandler = wrapperCloned.getInventoryHandler();
+	private void cloneSubbackpacks(IStorageWrapper wrapperCloned) {
+		InventoryHandler inventoryHandler = wrapperCloned.getInventoryHandler();
 		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
 			if (!(stack.getItem() instanceof BackpackItem)) {
 				return;
@@ -409,8 +421,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setContentsUuid(UUID backpackUuid) {
-		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, backpackUuid);
+	public void setContentsUuid(UUID storageUuid) {
+		NBTHelper.setUniqueId(backpack, CONTENTS_UUID_TAG, storageUuid);
 	}
 
 	@Override
@@ -464,5 +476,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 		handler = null;
 		upgradeHandler = null;
 		refreshInventoryForUpgradeProcessing();
+	}
+
+	@Override
+	public ItemStack getWrappedStorageStack() {
+		return getBackpack();
 	}
 }

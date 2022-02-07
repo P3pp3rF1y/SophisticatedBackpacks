@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 
 import java.util.function.Function;
 import java.util.function.Predicate;

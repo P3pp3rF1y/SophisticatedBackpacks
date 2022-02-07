@@ -12,7 +12,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
 import java.util.Collection;
 import java.util.HashSet;

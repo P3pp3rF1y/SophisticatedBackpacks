@@ -30,12 +30,12 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.JukeboxUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RandHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WeightedElement;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -154,7 +154,7 @@ public class EntityBackpackAdditionHandler {
 		monster.setDropChance(EquipmentSlot.CHEST, 0);
 	}
 
-	private static void addJukeboxUpgradeAndRandomDisc(Monster monster, IBackpackWrapper w) {
+	private static void addJukeboxUpgradeAndRandomDisc(Monster monster, IStorageWrapper w) {
 		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.JUKEBOX_UPGRADE.get()));
 		Iterator<JukeboxUpgradeItem.Wrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
 		if (it.hasNext()) {
@@ -224,7 +224,7 @@ public class EntityBackpackAdditionHandler {
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 
-	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
+	private static void setLoot(Monster monster, IStorageWrapper backpackWrapper, int difficulty) {
 		MinecraftServer server = monster.level.getServer();
 		if (server == null) {
 			return;
@@ -245,7 +245,7 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
+	private static void addLoot(Monster monster, IStorageWrapper backpackWrapper, int difficulty) {
 		if (difficulty != 0) {
 			Config.COMMON.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
 				float lootPercentage = (float) difficulty / MAX_DIFFICULTY;
@@ -259,7 +259,7 @@ public class EntityBackpackAdditionHandler {
 			LivingEntity mob = event.getEntityLiving();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			if (event.getSource().getEntity() instanceof Player && !(event.getSource().getEntity() instanceof FakePlayer) &&
-					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * 0.01F, 0.0F) < 0.085F) {
+					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * Config.COMMON.entityBackpackAdditions.lootingChanceIncreasePerLevel.get(), 0.0F) < Config.COMMON.entityBackpackAdditions.backpackDropChance.get()) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);

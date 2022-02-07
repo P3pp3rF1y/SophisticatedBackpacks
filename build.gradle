@@ -46,7 +46,7 @@ archivesBaseName = 'sophisticatedbackpacks'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
-    mappings channel: 'official', version: "1.18"
+    mappings channel: 'parchment', version: "$parchment_version"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         all {
@@ -89,7 +89,7 @@ minecraft {
                     source sourceSets.main
                 }
             }
-            args '--mod', 'sophisticatedbackpacks', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'sophisticatedbackpacks,sophisticatedcore', '--flat', '--all', '--output', file('src/generated/resources/')
         }
     }
 }

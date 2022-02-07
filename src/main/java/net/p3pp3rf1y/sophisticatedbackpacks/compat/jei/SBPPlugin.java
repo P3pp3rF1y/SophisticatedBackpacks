@@ -19,11 +19,10 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IFilterSlot;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.IFilterSlot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +85,7 @@ public class SBPPlugin implements IModPlugin {
 
 							@Override
 							public void accept(I i) {
-								PacketHandler.sendToServer(new SetGhostSlotMessage(ghostStack, s.index));
+								SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new SetGhostSlotMessage(ghostStack, s.index));
 							}
 						});
 					}

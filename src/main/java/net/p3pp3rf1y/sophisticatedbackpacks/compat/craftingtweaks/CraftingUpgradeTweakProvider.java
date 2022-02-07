@@ -16,7 +16,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.ICraftingContainer;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
 
 import java.util.List;
 import java.util.Objects;

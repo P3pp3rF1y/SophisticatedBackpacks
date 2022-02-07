@@ -3,9 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,24 +16,24 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class SubBackpacksHandler {
-	private final Map<Integer, IBackpackWrapper> subBackpacks = new LinkedHashMap<>();
+	private final Map<Integer, IStorageWrapper> subBackpacks = new LinkedHashMap<>();
 
-	private final BackpackInventoryHandler inventoryHandler;
-	private final Set<Consumer<Collection<IBackpackWrapper>>> refreshListeners = new HashSet<>();
-	private final Set<Consumer<Collection<IBackpackWrapper>>> beforeRefreshListeners = new HashSet<>();
+	private final InventoryHandler inventoryHandler;
+	private final Set<Consumer<Collection<IStorageWrapper>>> refreshListeners = new HashSet<>();
+	private final Set<Consumer<Collection<IStorageWrapper>>> beforeRefreshListeners = new HashSet<>();
 
-	public SubBackpacksHandler(BackpackInventoryHandler inventoryHandler) {
+	public SubBackpacksHandler(InventoryHandler inventoryHandler) {
 		this.inventoryHandler = inventoryHandler;
 		this.inventoryHandler.addListener(this::onContentsChanged);
 
 		refreshSubBackpacks();
 	}
 
-	public void addRefreshListener(Consumer<Collection<IBackpackWrapper>> listener) {
+	public void addRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
 		refreshListeners.add(listener);
 	}
 
-	public Collection<IBackpackWrapper> getSubBackpacks() {
+	public Collection<IStorageWrapper> getSubBackpacks() {
 		return subBackpacks.values();
 	}
 
@@ -64,8 +65,8 @@ public class SubBackpacksHandler {
 		runRefreshListeners(refreshListeners);
 	}
 
-	private void runRefreshListeners(Set<Consumer<Collection<IBackpackWrapper>>> refreshListeners) {
-		for (Consumer<Collection<IBackpackWrapper>> refreshListener : refreshListeners) {
+	private void runRefreshListeners(Set<Consumer<Collection<IStorageWrapper>>> refreshListeners) {
+		for (Consumer<Collection<IStorageWrapper>> refreshListener : refreshListeners) {
 			refreshListener.accept(subBackpacks.values());
 		}
 	}
@@ -84,7 +85,7 @@ public class SubBackpacksHandler {
 		}
 	}
 
-	public void addBeforeRefreshListener(Consumer<Collection<IBackpackWrapper>> listener) {
+	public void addBeforeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
 		beforeRefreshListeners.add(listener);
 	}
 }

@@ -7,7 +7,7 @@
 modLoader="javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the minecraft version (without the 1.)
-loaderVersion = "[14,)" #mandatory
+loaderVersion = "[18,)" #mandatory
 
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="" #optional
@@ -46,13 +46,38 @@ displayName="Sophisticated Backpacks" #mandatory
 description='''
 Fancy and functional backpacks.
 '''
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+[[dependencies.sophisticatedbackpacks]]
+modId="forge" #mandatory
+mandatory=true #mandatory
+versionRange="[39.0.0,)" #mandatory
+# An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
+ordering="NONE"
+# Side this dependency is applied on - BOTH, CLIENT or SERVER
+side="BOTH"
+
+[[mods]] #mandatory
+
+# The modid of the mod
+modId="sophisticatedcore" #mandatory
+
+# The version number of the mod
+version="${file.jarVersion}" #mandatory
+
+# A display name for the mod
+displayName="Sophisticated Core" #mandatory
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+Base mod of Sophisticated mods.
+'''
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.xreliquary]]
-    modId="forge" #mandatory
-    mandatory=true #mandatory
-    versionRange="[34.0.0,)" #mandatory
-    # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
-    ordering="NONE"
-    # Side this dependency is applied on - BOTH, CLIENT or SERVER
-    side="BOTH"
+[[dependencies.sophisticatedcore]]
+modId="forge" #mandatory
+mandatory=true #mandatory
+versionRange="[39.0.0,)" #mandatory
+# An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
+ordering="NONE"
+# Side this dependency is applied on - BOTH, CLIENT or SERVER
+side="BOTH"

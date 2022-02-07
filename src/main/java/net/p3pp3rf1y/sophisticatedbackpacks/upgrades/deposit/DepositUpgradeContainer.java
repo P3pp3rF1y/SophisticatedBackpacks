@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 
 public class DepositUpgradeContainer extends UpgradeContainerBase<DepositUpgradeWrapper, DepositUpgradeContainer> {
 	private final DepositFilterLogicContainer filterLogicContainer;

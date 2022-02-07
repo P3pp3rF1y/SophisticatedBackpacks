@@ -1,34 +1,34 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "feeding_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        " C ",
-        "ABM",
-        " E "
-    ],
-    "key": {
-        "B": {
-            "item": "sophisticatedbackpacks:upgrade_base"
-        },
-        "C": {
-            "item": "minecraft:golden_carrot"
-        },
-        "A": {
-            "item": "minecraft:golden_apple"
-        },
-        "M": {
-            "item": "minecraft:glistering_melon_slice"
-        },
-        "E": {
-            "tag": "forge:ender_pearls"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:feeding_upgrade"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "feeding_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    " C ",
+    "ABM",
+    " E "
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "C": {
+      "item": "minecraft:golden_carrot"
+    },
+    "A": {
+      "item": "minecraft:golden_apple"
+    },
+    "M": {
+      "item": "minecraft:glistering_melon_slice"
+    },
+    "E": {
+      "tag": "forge:ender_pearls"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:feeding_upgrade"
+  }
 }

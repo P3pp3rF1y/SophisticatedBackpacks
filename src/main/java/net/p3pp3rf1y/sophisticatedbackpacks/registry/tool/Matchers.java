@@ -19,7 +19,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +87,7 @@ public class Matchers {
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("item_handler") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> WorldHelper.getTile(blockContext.getWorld(),
+				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(),
 						blockContext.getPos()).map(te -> te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()).orElse(false));
 			}
 		});

@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.ChatFormatting;
@@ -15,19 +16,19 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.Dimension;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.GuiHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TextureBlitData;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.UV;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.CountAbbreviator;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.CountAbbreviator;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		lastRequestTime = 0;
 	}
 
-	private static void initContents(LocalPlayer player, IBackpackWrapper wrapper) {
+	private static void initContents(LocalPlayer player, IStorageWrapper wrapper) {
 		UUID newUuid = wrapper.getContentsUuid().orElse(null);
 		if (backpackUuid == null && newUuid != null || backpackUuid != null && !backpackUuid.equals(newUuid)) {
 			lastRequestTime = 0;
@@ -66,14 +67,14 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		refreshContents(wrapper);
 	}
 
-	private static void requestContents(LocalPlayer player, IBackpackWrapper wrapper) {
+	private static void requestContents(LocalPlayer player, IStorageWrapper wrapper) {
 		if (lastRequestTime + REFRESH_INTERVAL < player.level.getGameTime()) {
 			lastRequestTime = player.level.getGameTime();
-			wrapper.getContentsUuid().ifPresent(uuid -> PacketHandler.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
+			wrapper.getContentsUuid().ifPresent(uuid -> SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new RequestBackpackInventoryContentsMessage(uuid)));
 		}
 	}
 
-	private static void refreshContents(IBackpackWrapper wrapper) {
+	private static void refreshContents(IStorageWrapper wrapper) {
 		if (shouldRefreshContents) {
 			shouldRefreshContents = false;
 			sortedContents.clear();
@@ -135,7 +136,7 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		return Minecraft.getInstance().font.width(component.getVisualOrderText());
 	}
 
-	private static void addMultiplierTooltip(IBackpackWrapper wrapper) {
+	private static void addMultiplierTooltip(IStorageWrapper wrapper) {
 		int multiplier = wrapper.getInventoryHandler().getStackSizeMultiplier();
 		if (multiplier > 1) {
 			tooltipLines.add(new TranslatableComponent(BackpackItem.BACKPACK_TOOLTIP + "stack_multiplier",
@@ -144,20 +145,20 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		}
 	}
 
-	private static void addEnergyTooltip(IBackpackWrapper wrapper) {
-		wrapper.getEnergyStorage().ifPresent(energyStorage -> tooltipLines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".energy",
+	private static void addEnergyTooltip(IStorageWrapper wrapper) {
+		wrapper.getEnergyStorage().ifPresent(energyStorage -> tooltipLines.add(new TranslatableComponent(SBPTranslationHelper.INSTANCE.translItemTooltip(BACKPACK_ITEM_NAME) + ".energy",
 				new TextComponent(CountAbbreviator.abbreviate(energyStorage.getEnergyStored())).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.RED)
 		));
 	}
 
-	private static void addFluidTooltip(IBackpackWrapper wrapper) {
+	private static void addFluidTooltip(IStorageWrapper wrapper) {
 		wrapper.getFluidHandler().ifPresent(fluidHandler -> {
 			for (int tank = 0; tank < fluidHandler.getTanks(); tank++) {
 				FluidStack fluid = fluidHandler.getFluidInTank(tank);
 				if (fluid.isEmpty()) {
-					tooltipLines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid_empty").withStyle(ChatFormatting.BLUE));
+					tooltipLines.add(new TranslatableComponent(SBPTranslationHelper.INSTANCE.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid_empty").withStyle(ChatFormatting.BLUE));
 				} else {
-					tooltipLines.add(new TranslatableComponent(TranslationHelper.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid",
+					tooltipLines.add(new TranslatableComponent(SBPTranslationHelper.INSTANCE.translItemTooltip(BACKPACK_ITEM_NAME) + ".fluid",
 							new TextComponent(CountAbbreviator.abbreviate(fluid.getAmount())).withStyle(ChatFormatting.WHITE),
 							new TranslatableComponent(fluid.getTranslationKey()).withStyle(ChatFormatting.BLUE)
 
@@ -209,11 +210,11 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 			}
 
 			initContents(player, wrapper);
-			renderComponent(font, leftX, topY, poseStack, itemRenderer, blitOffset, wrapper, minecraft);
+			renderComponent(font, leftX, topY, poseStack, itemRenderer, blitOffset, minecraft);
 		});
 	}
 
-	private void renderComponent(Font font, int leftX, int topY, PoseStack poseStack, ItemRenderer itemRenderer, int blitOffset, IBackpackWrapper wrapper, Minecraft minecraft) {
+	private void renderComponent(Font font, int leftX, int topY, PoseStack poseStack, ItemRenderer itemRenderer, int blitOffset, Minecraft minecraft) {
 		for (Component tooltipLine : tooltipLines) {
 			topY = renderTooltipLine(poseStack, leftX, topY, font, blitOffset, tooltipLine);
 		}
@@ -246,10 +247,10 @@ public class ClientBackpackContentsTooltip implements ClientTooltipComponent {
 		int x = leftX;
 		for (IUpgradeWrapper upgradeWrapper : upgrades) {
 			if (upgradeWrapper.canBeDisabled()) {
+				RenderSystem.disableDepthTest();
 				GuiHelper.blit(matrixStack, x, topY + 3, upgradeWrapper.isEnabled() ? UPGRADE_ON : UPGRADE_OFF);
 				x += 4;
 			}
-			itemRenderer.renderAndDecorateItem(upgradeWrapper.getUpgradeStack(), x, topY);
 			itemRenderer.renderAndDecorateItem(upgradeWrapper.getUpgradeStack(), x, topY);
 			x += DEFAULT_STACK_WIDTH;
 		}

@@ -2,11 +2,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogicContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicContainer;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 public class ToolSwapperUpgradeContainer extends UpgradeContainerBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> {
 	private static final String DATA_SHOULD_SWAP_WEAPON = "shouldSwapWeapon";

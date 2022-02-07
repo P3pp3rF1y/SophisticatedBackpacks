@@ -1,34 +1,34 @@
 {
-    "parent": "minecraft:recipes/root",
-    "rewards": {
-        "recipes": [
-            "sophisticatedbackpacks:diamond_backpack"
-        ]
-    },
-    "criteria": {
-        "has_gold_backpack": {
-            "trigger": "minecraft:inventory_changed",
-            "conditions": {
-                "items": [
-                    {
-                        "items": [
-                            "sophisticatedbackpacks:gold_backpack"
-                        ]
-                    }
-                ]
-            }
-        },
-        "has_the_recipe": {
-            "trigger": "minecraft:recipe_unlocked",
-            "conditions": {
-                "recipe": "sophisticatedbackpacks:diamond_backpack"
-            }
-        }
-    },
-    "requirements": [
-        [
-            "has_gold_backpack",
-            "has_the_recipe"
-        ]
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:diamond_backpack"
     ]
+  },
+  "criteria": {
+    "has_gold_backpack": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "sophisticatedbackpacks:gold_backpack"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:diamond_backpack"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_gold_backpack",
+      "has_the_recipe"
+    ]
+  ]
 }

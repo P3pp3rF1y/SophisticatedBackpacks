@@ -2,9 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.UpgradeContainerType;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpgradeWrapper, InceptionUpgradeContainer> {
 	private static final String DATA_INVENTORY_ORDER = "inventoryOrder";

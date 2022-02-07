@@ -49,12 +49,10 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.NetworkHooks;
-import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
@@ -62,12 +60,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.jukebox.ServerBackpackSoundHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.Config;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -91,7 +92,7 @@ public class BackpackItem extends ItemBase {
 	}
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, UnaryOperator<Properties> updateProperties) {
-		super(updateProperties.apply(new Properties().stacksTo(1)));
+		super(updateProperties.apply(new Properties().stacksTo(1)), SophisticatedBackpacks.ITEM_GROUP);
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
@@ -236,7 +237,7 @@ public class BackpackItem extends ItemBase {
 
 		if (world.setBlockAndUpdate(pos, placementState)) {
 			ItemStack backpack = blockItemUseContext.getItemInHand();
-			WorldHelper.getTile(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
+			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
 				te.setBackpack(getBackpackCopy(player, backpack));
 				te.refreshRenderState();
 			});
@@ -258,7 +259,7 @@ public class BackpackItem extends ItemBase {
 
 	private static void stopBackpackSounds(ItemStack backpack, Level world, BlockPos pos) {
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
-				ServerBackpackSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid))
+				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid))
 		);
 	}
 
@@ -293,7 +294,7 @@ public class BackpackItem extends ItemBase {
 	@Override
 	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
 		return new ICapabilityProvider() {
-			private IBackpackWrapper wrapper = null;
+			private IStorageWrapper wrapper = null;
 
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {

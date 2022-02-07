@@ -8,12 +8,12 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,7 +25,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 	private final FilterLogic filterLogic;
 
-	public RefillUpgradeWrapper(IBackpackWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
+	public RefillUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
 		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.refillUpgrade.filterSlots.get());
 		filterLogic.setAllowByDefault();
@@ -49,7 +49,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			if (missingCount == 0) {
 				return;
 			}
-			IItemHandler extractFromHandler = backpackWrapper.getInventoryForUpgradeProcessing();
+			IItemHandler extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
 			ItemStack toMove = filter.copy();
 			toMove.setCount(missingCount);
 			ItemStack extracted = InventoryHelper.extractFromInventory(toMove, extractFromHandler, true);

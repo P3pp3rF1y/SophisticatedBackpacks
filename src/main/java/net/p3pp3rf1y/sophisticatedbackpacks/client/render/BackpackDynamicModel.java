@@ -43,12 +43,12 @@ import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedBatteryUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IRenderedTankUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.TankPosition;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -368,7 +368,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			backpackModel.tankLeft = false;
 			backpackModel.battery = false;
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-				BackpackRenderInfo renderInfo = backpackWrapper.getRenderInfo();
+				RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
 				tankRenderInfos.forEach((pos, info) -> {
 					if (pos == TankPosition.LEFT) {
@@ -416,7 +416,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<Material, String>> textures) {
-			builder.put(modelPart, new BlockModel(RegistryHelper.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList()));
+			builder.put(modelPart, new BlockModel(SophisticatedBackpacks.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList()));
 		}
 	}
 

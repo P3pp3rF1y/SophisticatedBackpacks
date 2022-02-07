@@ -17,12 +17,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderData;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -103,7 +105,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 		});
 	}
 
-	private static void renderItemShown(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, BackpackRenderInfo renderInfo) {
+	private static void renderItemShown(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, RenderInfo renderInfo) {
 		BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = renderInfo.getItemDisplayRenderInfo();
 		if (!itemDisplayRenderInfo.getItem().isEmpty()) {
 			matrixStack.pushPose();
@@ -115,7 +117,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 		}
 	}
 
-	private static void renderUpgrades(LivingEntity livingEntity, BackpackRenderInfo renderInfo) {
+	private static void renderUpgrades(LivingEntity livingEntity, RenderInfo renderInfo) {
 		if (Minecraft.getInstance().isPaused() || livingEntity.level.random.nextInt(32) != 0) {
 			return;
 		}

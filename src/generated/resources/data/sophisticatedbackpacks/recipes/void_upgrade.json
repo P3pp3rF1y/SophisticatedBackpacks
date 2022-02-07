@@ -1,31 +1,31 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "conditions": [
-        {
-            "itemRegistryName": "void_upgrade",
-            "type": "sophisticatedbackpacks:item_enabled"
-        }
-    ],
-    "pattern": [
-        " E ",
-        "OBO",
-        "ROR"
-    ],
-    "key": {
-        "B": {
-            "item": "sophisticatedbackpacks:upgrade_base"
-        },
-        "E": {
-            "tag": "forge:ender_pearls"
-        },
-        "O": {
-            "tag": "forge:obsidian"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        }
-    },
-    "result": {
-        "item": "sophisticatedbackpacks:void_upgrade"
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "void_upgrade",
+      "type": "sophisticatedcore:item_enabled"
     }
+  ],
+  "pattern": [
+    " E ",
+    "OBO",
+    "ROR"
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "E": {
+      "tag": "forge:ender_pearls"
+    },
+    "O": {
+      "tag": "forge:obsidian"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:void_upgrade"
+  }
 }
