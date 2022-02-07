@@ -97,6 +97,7 @@ public class Config {
 		public final StackUpgradeConfig stackUpgrade;
 		public final PumpUpgradeConfig pumpUpgrade;
 		public final XpPumpUpgradeConfig xpPumpUpgrade;
+		public final NerfsConfig nerfsConfig;
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfig.Reloading event) {
@@ -148,10 +149,25 @@ public class Config {
 			pumpUpgrade = new PumpUpgradeConfig(builder);
 			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
+			nerfsConfig = new NerfsConfig(builder);
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 
 			builder.pop();
+		}
+
+		public static class NerfsConfig {
+			public final ForgeConfigSpec.BooleanValue tooManyBackpacksSlowness;
+			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
+			public final ForgeConfigSpec.DoubleValue slownessLevelsPerAdditionalBackpack;
+
+			public NerfsConfig(ForgeConfigSpec.Builder builder) {
+				builder.push("nerfs");
+				tooManyBackpacksSlowness = builder.comment("Determines if too many backpacks in player's inventory cause slowness to the player").define("tooManyBackpacksSlowness", false);
+				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness").defineInRange("maxNumberOfBackpacks", 3, 1, 27);
+				slownessLevelsPerAdditionalBackpack = builder.comment("Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)").defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
+				builder.pop();
+			}
 		}
 
 		public static class XpPumpUpgradeConfig {
