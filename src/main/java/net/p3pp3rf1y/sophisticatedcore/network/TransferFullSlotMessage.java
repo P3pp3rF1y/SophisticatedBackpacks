@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -32,7 +32,7 @@ public class TransferFullSlotMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer player, TransferFullSlotMessage msg) {
-		if (player == null || !(player.containerMenu instanceof StorageContainerMenu storageContainer)) {
+		if (player == null || !(player.containerMenu instanceof StorageContainerMenuBase storageContainer)) {
 			return;
 		}
 		Slot slot = storageContainer.getSlot(msg.slotId);

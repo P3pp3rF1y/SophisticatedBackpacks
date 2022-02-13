@@ -1,10 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+
+import java.util.UUID;
 
 public interface IBackpackWrapper extends IStorageWrapper {
 	@Override
@@ -13,6 +16,14 @@ public interface IBackpackWrapper extends IStorageWrapper {
 	ItemStack getBackpack();
 
 	ItemStack cloneBackpack();
+
+	void copyDataTo(IStorageWrapper otherStorageWrapper);
+
+	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
+
+	void setLoot(ResourceLocation lootTableName, float lootPercentage);
+
+	void setContentsUuid(UUID storageUuid);
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {
 		public static final Noop INSTANCE = new Noop();
@@ -33,6 +44,11 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		@Override
 		public ItemStack cloneBackpack() {
 			return backpack;
+		}
+
+		@Override
+		public void copyDataTo(IStorageWrapper otherStorageWrapper) {
+			//noop
 		}
 	}
 }

@@ -9,7 +9,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions;
@@ -43,7 +43,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	protected final int slotsInExtraRow;
 	protected final int fullSlotRows;
 	private final int totalSlotRows;
-	private final StorageScreen<?> screen;
+	private final StorageScreenBase<?> screen;
 	protected final C container;
 	private final List<Component> addTagTooltip = new ArrayList<>();
 	private final List<Component> removeTagTooltip = new ArrayList<>();
@@ -54,7 +54,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	private ToggleButton<Boolean> durabilityButton = null;
 	private int tagButtonsYOffset;
 
-	protected FilterLogicControlBase(StorageScreen<?> screen, C container, Position position, boolean buttonsVisible, int slotsPerRow, MatchButton... showMatchButtons) {
+	protected FilterLogicControlBase(StorageScreenBase<?> screen, C container, Position position, boolean buttonsVisible, int slotsPerRow, MatchButton... showMatchButtons) {
 		super(position, new Dimension(0, 0));
 		this.screen = screen;
 		this.container = container;
@@ -73,7 +73,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 					button -> {
 						PrimaryMatch next = container.getPrimaryMatch().next();
 						if (next == PrimaryMatch.TAGS) {
-							container.getFilterSlots().forEach(slot -> slot.x = StorageScreen.DISABLED_SLOT_X_POS);
+							container.getFilterSlots().forEach(slot -> slot.x = StorageScreenBase.DISABLED_SLOT_X_POS);
 							onTagsMatchSelected();
 						}
 						container.setPrimaryMatch(next);
@@ -262,7 +262,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			Slot slot = container.getTagSelectionSlot();
 			slot.x = x - screen.getGuiLeft() + 1;
 			slot.y = y - screen.getGuiTop() + tagButtonsYOffset + 1;
-			container.getFilterSlots().forEach(s -> s.x = StorageScreen.DISABLED_SLOT_X_POS);
+			container.getFilterSlots().forEach(s -> s.x = StorageScreenBase.DISABLED_SLOT_X_POS);
 		} else {
 			int upgradeSlotNumber = 0;
 			for (S slot : container.getFilterSlots()) {
@@ -270,7 +270,7 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 				slot.y = y - screen.getGuiTop() + slotsTopYOffset + 1 + (upgradeSlotNumber / slotsPerRow) * 18;
 				upgradeSlotNumber++;
 			}
-			container.getTagSelectionSlot().x = StorageScreen.DISABLED_SLOT_X_POS;
+			container.getTagSelectionSlot().x = StorageScreenBase.DISABLED_SLOT_X_POS;
 		}
 	}
 

@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades.filter;
 
 import net.minecraft.network.chat.Component;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
@@ -27,7 +27,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 
 	protected ContentsFilterControl filterLogicControl;
 
-	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen,
+	protected FilterUpgradeTab(FilterUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen,
 			Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 
@@ -41,7 +41,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 	}
 
 	public static class Basic extends FilterUpgradeTab {
-		public Basic(FilterUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+		public Basic(FilterUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("filter"), TranslationHelper.INSTANCE.translUpgradeTooltip("filter"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow, contentsFilterButton));
@@ -49,7 +49,7 @@ public abstract class FilterUpgradeTab extends UpgradeSettingsTab<FilterUpgradeC
 	}
 
 	public static class Advanced extends FilterUpgradeTab {
-		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+		public Advanced(FilterUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("advanced_filter"), TranslationHelper.INSTANCE.translUpgradeTooltip("advanced_filter"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow, contentsFilterButton));

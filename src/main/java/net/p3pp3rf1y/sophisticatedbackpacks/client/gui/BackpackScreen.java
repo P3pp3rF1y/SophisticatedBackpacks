@@ -10,9 +10,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 
-public class BackpackScreen extends StorageScreen<BackpackContainer> {
+public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, Inventory inv, Component title) {
 		return new BackpackScreen(screenContainer, inv, title);
 	}

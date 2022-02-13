@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
@@ -25,7 +25,7 @@ public class JukeboxUpgradeTab extends UpgradeSettingsTab<JukeboxUpgradeContaine
 	private static final ButtonDefinition STOP = new ButtonDefinition(Dimension.SQUARE_16, DEFAULT_BUTTON_BACKGROUND, DEFAULT_BUTTON_HOVERED_BACKGROUND, STOP_FOREGROUND,
 			new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeButton("stop")));
 
-	public JukeboxUpgradeTab(JukeboxUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen) {
+	public JukeboxUpgradeTab(JukeboxUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
 		super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("jukebox"), TranslationHelper.INSTANCE.translUpgradeTooltip("jukebox"));
 
 		addHideableChild(new Button(new Position(x + 3, y + 44), STOP, button -> {

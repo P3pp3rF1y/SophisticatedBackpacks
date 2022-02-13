@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades.compacting;
 
 import net.minecraft.network.chat.Component;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions;
@@ -30,7 +30,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	protected CompactingUpgradeTab(CompactingUpgradeContainer container, Position position,
-			StorageScreen<?> screen, Component tabLabel, Component closedTooltip) {
+			StorageScreenBase<?> screen, Component tabLabel, Component closedTooltip) {
 		super(container, position, screen, tabLabel, closedTooltip);
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), COMPACT_UNCRAFTABLE, button -> getContainer().setCompactNonUncraftable(!getContainer().shouldCompactNonUncraftable()),
 				getContainer()::shouldCompactNonUncraftable));
@@ -44,7 +44,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 	}
 
 	public static class Basic extends CompactingUpgradeTab {
-		public Basic(CompactingUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow) {
+		public Basic(CompactingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("compacting"), TranslationHelper.INSTANCE.translUpgradeTooltip("compacting"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow));
@@ -52,7 +52,7 @@ public abstract class CompactingUpgradeTab extends UpgradeSettingsTab<Compacting
 	}
 
 	public static class Advanced extends CompactingUpgradeTab {
-		public Advanced(CompactingUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow) {
+		public Advanced(CompactingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("advanced_compacting"), TranslationHelper.INSTANCE.translUpgradeTooltip("advanced_compacting"));
 			filterLogicControl = addHideableChild(new FilterLogicControl<>(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow, ALLOW_LIST, PRIMARY_MATCH));

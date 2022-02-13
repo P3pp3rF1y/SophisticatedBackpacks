@@ -146,8 +146,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "Spieler",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "Spielerlevel-Einstellungen",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "Auf alle Rucksäcke anwenden, sofern nicht überschrieben",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "Einstellungen dieses Rucksacks",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "Von Spieler geerbt oder für diesen Rucksack überschrieben",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Umschalt-Klick zuerst in geöffneten Tab",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Zuerst ins Inventar klicken",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "Umschaltklick vom Rucksack/Inventar versucht zuerst, den Stapel in einen offenen Tab zu legen und erst dann ins Inventar/Rucksack.",

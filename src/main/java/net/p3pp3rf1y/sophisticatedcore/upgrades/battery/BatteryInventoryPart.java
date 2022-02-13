@@ -7,7 +7,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeInventoryPartBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
@@ -31,11 +31,11 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 	private static final TextureBlitData CONNECTION_BOTTOM = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(47, 52), new Dimension(16, 4));
 	private final Position pos;
 	private final int height;
-	private final StorageScreen<?> screen;
+	private final StorageScreenBase<?> screen;
 	private static final int TOP_BAR_COLOR = 0xff1a1a;
 	private static final int BOTTOM_BAR_COLOR = 0xffff40;
 
-	public BatteryInventoryPart(int upgradeSlot, BatteryUpgradeContainer container, Position pos, int height, StorageScreen<?> screen) {
+	public BatteryInventoryPart(int upgradeSlot, BatteryUpgradeContainer container, Position pos, int height, StorageScreenBase<?> screen) {
 		super(upgradeSlot, container);
 		this.pos = pos;
 		this.height = height;
@@ -87,11 +87,11 @@ public class BatteryInventoryPart extends UpgradeInventoryPartBase<BatteryUpgrad
 
 	@Override
 	public void renderErrorOverlay(PoseStack matrixStack) {
-		screen.renderOverlay(matrixStack, StorageScreen.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
+		screen.renderOverlay(matrixStack, StorageScreenBase.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
 	}
 
 	@Override
-	public void renderTooltip(StorageScreen<?> screen, PoseStack poseStack, int mouseX, int mouseY) {
+	public void renderTooltip(StorageScreenBase<?> screen, PoseStack poseStack, int mouseX, int mouseY) {
 		int screenX = screen.getGuiLeft() + pos.x() + 10;
 		int screenY = screen.getGuiTop() + pos.y() + 1;
 		if (mouseX >= screenX && mouseX < screenX + 16 && mouseY >= screenY && mouseY < screenY + height - 2) {

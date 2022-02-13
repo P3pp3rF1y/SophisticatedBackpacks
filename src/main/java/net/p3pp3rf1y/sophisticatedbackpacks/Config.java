@@ -7,9 +7,11 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.FilteredUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.magnet.MagnetUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
@@ -265,34 +267,6 @@ public class Config {
 				upgradesInContainedBackpacksAreFunctional = builder.comment("Allows / Disallows upgrades to be functional even when they are in Backpacks in the inventory of Backpack with Inception Upgrade")
 						.define("upgradesInContainedBackpacksAreFunctional", true);
 				builder.pop();
-			}
-		}
-
-		public static class MagnetUpgradeConfig extends FilteredUpgradeConfigBase {
-			public final ForgeConfigSpec.IntValue magnetRange;
-
-			public MagnetUpgradeConfig(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow, int defaultMagnetRange) {
-				super(builder, name, path, defaultFilterSlots, defaultSlotsInRow);
-				magnetRange = builder.comment("Range around backpack in blocks at which magnet will pickup items").defineInRange("magnetRange", defaultMagnetRange, 1, 20);
-				builder.pop();
-			}
-		}
-
-		public static class FilteredUpgradeConfig extends FilteredUpgradeConfigBase {
-			public FilteredUpgradeConfig(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
-				super(builder, name, path, defaultFilterSlots, defaultSlotsInRow);
-				builder.pop();
-			}
-		}
-
-		public static class FilteredUpgradeConfigBase {
-			public final ForgeConfigSpec.IntValue filterSlots;
-			public final ForgeConfigSpec.IntValue slotsInRow;
-
-			protected FilteredUpgradeConfigBase(ForgeConfigSpec.Builder builder, String name, String path, int defaultFilterSlots, int defaultSlotsInRow) {
-				builder.comment(name + SETTINGS).push(path);
-				filterSlots = builder.comment("Number of " + name + "'s filter slots").defineInRange("filterSlots", defaultFilterSlots, 1, 20);
-				slotsInRow = builder.comment("Number of filter slots displayed in a row").defineInRange("slotsInRow", defaultSlotsInRow, 1, 6);
 			}
 		}
 

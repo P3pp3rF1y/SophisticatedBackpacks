@@ -146,8 +146,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "玩家设置",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "玩家全局设置",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "应用于玩家的所有背包，被单独覆写的背包除外",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "背包单独设置",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "不受到玩家全局设置影响",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Shift 单击优先放入升级选项栏",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Shift 单击优先放入背包物品栏",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "Shift 单击物品优先放入升级选项栏",

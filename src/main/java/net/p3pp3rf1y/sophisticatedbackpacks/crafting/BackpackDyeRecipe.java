@@ -106,8 +106,8 @@ public class BackpackDyeRecipe extends CustomRecipe {
 		}
 
 		coloredBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.ifPresent(coloredWrapper -> coloredWrapper.setColors(calculateColor(coloredWrapper.getClothColor(), BackpackWrapper.DEFAULT_CLOTH_COLOR, clothDyes),
-						calculateColor(coloredWrapper.getBorderColor(), BackpackWrapper.DEFAULT_BORDER_COLOR, trimDyes)
+				.ifPresent(coloredWrapper -> coloredWrapper.setColors(calculateColor(coloredWrapper.getMainColor(), BackpackWrapper.DEFAULT_CLOTH_COLOR, clothDyes),
+						calculateColor(coloredWrapper.getAccentColor(), BackpackWrapper.DEFAULT_BORDER_COLOR, trimDyes)
 				));
 	}
 

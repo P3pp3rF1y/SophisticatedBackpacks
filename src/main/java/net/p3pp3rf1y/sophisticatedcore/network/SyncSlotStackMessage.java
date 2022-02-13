@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainer;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 
 import java.util.function.Supplier;
 
@@ -42,7 +42,7 @@ public class SyncSlotStackMessage {
 
 	private static void handleMessage(SyncSlotStackMessage msg) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || !(player.containerMenu instanceof StorageContainerMenu || player.containerMenu instanceof SettingsContainer) || player.containerMenu.containerId != msg.windowId) {
+		if (player == null || !(player.containerMenu instanceof StorageContainerMenuBase || player.containerMenu instanceof SettingsContainer) || player.containerMenu.containerId != msg.windowId) {
 			return;
 		}
 		player.containerMenu.setItem(msg.slotNumber, msg.stateId, msg.stack);

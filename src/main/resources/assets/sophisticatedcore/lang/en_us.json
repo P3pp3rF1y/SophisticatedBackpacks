@@ -146,8 +146,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "Player",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "Player level settings",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "Apply to all backpacks unless overriden",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "This Backpack's settings",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "Inherited from player or overriden for this backpack",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Shift Click Into Open Tab First",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Shift Click Into Inventory First",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "Shift click from backpack/inventory will first try to put the stack in an open tab and only then into inventory/backpack.",

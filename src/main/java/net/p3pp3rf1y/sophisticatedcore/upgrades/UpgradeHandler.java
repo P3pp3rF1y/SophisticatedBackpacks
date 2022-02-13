@@ -89,6 +89,9 @@ public class UpgradeHandler extends ItemStackHandler {
 		wrappersInitialized = true;
 		slotWrappers.clear();
 		typeWrappers.clear();
+		if (wrapperAccessor != null) {
+			wrapperAccessor.clearCache();
+		}
 
 		InventoryHelper.iterate(this, (slot, upgrade) -> {
 			if (upgrade.isEmpty() || !(upgrade.getItem() instanceof IUpgradeItem<?>)) {

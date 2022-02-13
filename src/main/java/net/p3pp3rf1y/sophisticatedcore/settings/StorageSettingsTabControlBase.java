@@ -14,7 +14,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class StorageSettingsTabControl extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
+public abstract class StorageSettingsTabControlBase extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
 	private final List<SettingsTab<?>> settingsTabs = new ArrayList<>();
 
 	protected static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> void addFactory(
@@ -22,14 +22,14 @@ public abstract class StorageSettingsTabControl extends SettingsTabControl<Setti
 		builder.put(categoryName, factory);
 	}
 
-	protected StorageSettingsTabControl(SettingsScreen screen, Position position) {
+	protected StorageSettingsTabControlBase(SettingsScreen screen, Position position) {
 		super(position);
-		addChild(getNewReturnBackTab());
+		addChild(instantiateReturnBackTab());
 		screen.getMenu().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
 				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));
 	}
 
-	protected abstract Tab getNewReturnBackTab();
+	protected abstract Tab instantiateReturnBackTab();
 
 	public void renderSlotOverlays(PoseStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
 		List<Integer> colors = new ArrayList<>();

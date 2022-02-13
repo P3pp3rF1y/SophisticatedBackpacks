@@ -11,7 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.WidgetBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
@@ -34,13 +34,13 @@ public class StonecutterRecipeControl extends WidgetBase {
 	private static final int SPACING = 4;
 
 	private boolean clickedOnScroll;
-	private final StorageScreen<?> screen;
+	private final StorageScreenBase<?> screen;
 	private final StonecutterRecipeContainer container;
 	private boolean hasItemsInInputSlot;
 	private int recipeIndexOffset;
 	private float sliderProgress;
 
-	protected StonecutterRecipeControl(StorageScreen<?> screen, StonecutterRecipeContainer container, Position position) {
+	protected StonecutterRecipeControl(StorageScreenBase<?> screen, StonecutterRecipeContainer container, Position position) {
 		super(position, new Dimension(81, 108));
 		this.screen = screen;
 		this.container = container;

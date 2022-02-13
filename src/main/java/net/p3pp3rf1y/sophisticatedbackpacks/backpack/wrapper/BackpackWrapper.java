@@ -295,12 +295,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public int getClothColor() {
+	public int getMainColor() {
 		return NBTHelper.getInt(backpack, CLOTH_COLOR_TAG).orElse(DEFAULT_CLOTH_COLOR);
 	}
 
 	@Override
-	public int getBorderColor() {
+	public int getAccentColor() {
 		return NBTHelper.getInt(backpack, BORDER_COLOR_TAG).orElse(DEFAULT_BORDER_COLOR);
 	}
 
@@ -322,9 +322,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setColors(int clothColor, int borderColor) {
-		backpack.addTagElement(CLOTH_COLOR_TAG, IntTag.valueOf(clothColor));
-		backpack.addTagElement(BORDER_COLOR_TAG, IntTag.valueOf(borderColor));
+	public void setColors(int mainColor, int accentColor) {
+		backpack.addTagElement(CLOTH_COLOR_TAG, IntTag.valueOf(mainColor));
+		backpack.addTagElement(BORDER_COLOR_TAG, IntTag.valueOf(accentColor));
 		backpackSaveHandler.run();
 	}
 

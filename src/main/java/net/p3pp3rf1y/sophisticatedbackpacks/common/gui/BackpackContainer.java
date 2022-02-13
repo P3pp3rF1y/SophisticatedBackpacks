@@ -20,7 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
 
-public class BackpackContainer extends StorageContainerMenu<IBackpackWrapper> implements ISyncedContainer {
+public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements ISyncedContainer {
 
 	private final BackpackContext backpackContext;
 
@@ -41,7 +41,7 @@ public class BackpackContainer extends StorageContainerMenu<IBackpackWrapper> im
 		{
 			ItemStack backpack = storageWrapper.getBackpack();
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(),
-					storageWrapper.getClothColor(), storageWrapper.getBorderColor(), storageWrapper.getColumnsTaken());
+					storageWrapper.getMainColor(), storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 		});
 	}
 

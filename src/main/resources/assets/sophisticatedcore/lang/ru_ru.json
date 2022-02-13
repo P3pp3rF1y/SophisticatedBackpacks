@@ -146,8 +146,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "Игрок",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "Опции на стороне игрока",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "Применяются ко всем рюкзакам игрока до их отдельного переназначения",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "Опции на стороне рюкзака",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "Наследуются от игрока или отдельно переназначаются к данному рюкзаку",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Нажатие с SHIFT в приоритете для вкладок",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Нажатие с SHIFT в приоритете для инвентарей",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "Стак предметов при нажатии c SHIFT сперва перейдёт в открытую вкладку и только потом в инвентарь игрока или рюкзака",

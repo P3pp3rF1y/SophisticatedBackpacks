@@ -38,7 +38,7 @@ public class SBPPlugin implements IModPlugin {
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
 		IIngredientSubtypeInterpreter<ItemStack> backpackNbtInterpreter = (itemStack, context) -> itemStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(wrapper -> "{clothColor:" + wrapper.getClothColor() + ",borderColor:" + wrapper.getBorderColor() + "}")
+				.map(wrapper -> "{clothColor:" + wrapper.getMainColor() + ",borderColor:" + wrapper.getAccentColor() + "}")
 				.orElse(IIngredientSubtypeInterpreter.NONE);
 		registration.registerSubtypeInterpreter(ModItems.BACKPACK.get(), backpackNbtInterpreter);
 		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);

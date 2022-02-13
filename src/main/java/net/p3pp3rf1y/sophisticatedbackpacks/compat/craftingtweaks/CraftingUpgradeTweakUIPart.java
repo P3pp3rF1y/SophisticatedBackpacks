@@ -12,7 +12,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.ICraftingUIPart;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 	@OnlyIn(Dist.CLIENT)
-	private StorageScreen<?> storageScreen;
+	private StorageScreenBase<?> storageScreen;
 
 	private static final Method ADD_RENDERABLE_WIDGET = ObfuscationReflectionHelper.findMethod(Screen.class, "m_142416_", GuiEventListener.class);
 
@@ -68,7 +68,7 @@ public class CraftingUpgradeTweakUIPart implements ICraftingUIPart {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void setStorageScreen(StorageScreen<?> screen) {
+	public void setStorageScreen(StorageScreenBase<?> screen) {
 		storageScreen = screen;
 	}
 

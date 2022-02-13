@@ -58,7 +58,7 @@ public class NBTHelper {
 		return getTagValue(tag, key, CompoundTag::getCompound);
 	}
 
-	private static <T> Optional<T> getTagValue(CompoundTag tag, String key, BiFunction<CompoundTag, String, T> getValue) {
+	public static <T> Optional<T> getTagValue(CompoundTag tag, String key, BiFunction<CompoundTag, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();
 		}
@@ -180,6 +180,10 @@ public class NBTHelper {
 			return;
 		}
 		stack.getTag().remove(key);
+	}
+
+	public static Optional<String> getString(CompoundTag tag, String key) {
+		return getTagValue(tag, key, CompoundTag::getString);
 	}
 
 	public static Optional<String> getString(ItemStack stack, String key) {

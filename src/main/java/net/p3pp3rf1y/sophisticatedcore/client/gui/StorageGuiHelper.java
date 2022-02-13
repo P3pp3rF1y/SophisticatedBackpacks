@@ -22,10 +22,10 @@ public class StorageGuiHelper {
 		int remainingSlots = inventorySlots % slotsOnLine;
 		int slotsHeight = 18 * numberOfSlotRows;
 		int halfSlotHeight = slotsHeight / 2;
-		GuiComponent.blit(matrixStack, x, y, 0, 0, xSize, StorageScreen.SLOTS_Y_OFFSET + halfSlotHeight, 256, 256);
+		GuiComponent.blit(matrixStack, x, y, 0, 0, xSize, StorageScreenBase.SLOTS_Y_OFFSET + halfSlotHeight, 256, 256);
 		int playerInventoryHeight = 97;
-		GuiComponent.blit(matrixStack, x, y + StorageScreen.SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
+		GuiComponent.blit(matrixStack, x, y + StorageScreenBase.SLOTS_Y_OFFSET + halfSlotHeight, 0, (float) 256 - (playerInventoryHeight + halfSlotHeight), xSize, playerInventoryHeight + halfSlotHeight, 256, 256);
 
-		GuiHelper.renderSlotsBackground(matrixStack, x + StorageScreen.SLOTS_X_OFFSET, y + StorageScreen.SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
+		GuiHelper.renderSlotsBackground(matrixStack, x + StorageScreenBase.SLOTS_X_OFFSET, y + StorageScreenBase.SLOTS_Y_OFFSET, slotsOnLine, slotRows, remainingSlots);
 	}
 }

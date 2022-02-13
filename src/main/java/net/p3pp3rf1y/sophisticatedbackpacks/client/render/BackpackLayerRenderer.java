@@ -97,8 +97,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 		}
 
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
-			int clothColor = wrapper.getClothColor();
-			int borderColor = wrapper.getBorderColor();
+			int clothColor = wrapper.getMainColor();
+			int borderColor = wrapper.getAccentColor();
 			model.render(matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
 			renderUpgrades(livingEntity, wrapper.getRenderInfo());
 			renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo());

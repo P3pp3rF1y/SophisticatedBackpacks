@@ -23,11 +23,11 @@ public class UpgradeGuiManager {
 		UPGRADE_INVENTORY_PARTS.put(containerType, factory);
 	}
 
-	public static <C extends UpgradeContainerBase<?, ?>> UpgradeSettingsTab<C> getTab(C container, Position position, StorageScreen<?> screen) {
+	public static <C extends UpgradeContainerBase<?, ?>> UpgradeSettingsTab<C> getTab(C container, Position position, StorageScreenBase<?> screen) {
 		return getTabFactory(container).create(container, position, screen);
 	}
 
-	public static <C extends UpgradeContainerBase<?, ?>> Optional<UpgradeInventoryPartBase<C>> getInventoryPart(int upgradeSlot, C container, Position position, int height, StorageScreen<?> screen) {
+	public static <C extends UpgradeContainerBase<?, ?>> Optional<UpgradeInventoryPartBase<C>> getInventoryPart(int upgradeSlot, C container, Position position, int height, StorageScreenBase<?> screen) {
 		return getInventoryPartFactory(container).map(f -> f.create(upgradeSlot, container, position, height, screen));
 	}
 
@@ -56,10 +56,10 @@ public class UpgradeGuiManager {
 	}
 
 	public interface IUpgradeSettingsFactory<C extends UpgradeContainerBase<?, ?>, S extends UpgradeSettingsTab<C>> {
-		S create(C container, Position position, StorageScreen<?> screen);
+		S create(C container, Position position, StorageScreenBase<?> screen);
 	}
 
 	public interface IUpgradeInventoryPartFactory<C extends UpgradeContainerBase<?, ?>, I extends UpgradeInventoryPartBase<C>> {
-		I create(int upgradeSlot, C container, Position position, int height, StorageScreen<?> screen);
+		I create(int upgradeSlot, C container, Position position, int height, StorageScreenBase<?> screen);
 	}
 }
