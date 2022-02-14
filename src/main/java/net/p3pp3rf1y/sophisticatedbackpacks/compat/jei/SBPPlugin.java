@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaRecipeCategoryUid;
-import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
@@ -19,10 +18,12 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.IFilterSlot;
+import net.p3pp3rf1y.sophisticatedcore.compat.jei.CraftingContainerRecipeTransferHandlerBase;
+import net.p3pp3rf1y.sophisticatedcore.compat.jei.StorageGhostIngredientHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,44 +61,14 @@ public class SBPPlugin implements IModPlugin {
 			}
 		});
 
-		registration.addGuiContainerHandler(SettingsScreen.class, new IGuiContainerHandler<>() {
+		registration.addGuiContainerHandler(BackpackSettingsScreen.class, new IGuiContainerHandler<>() {
 			@Override
-			public List<Rect2i> getGuiExtraAreas(SettingsScreen gui) {
+			public List<Rect2i> getGuiExtraAreas(BackpackSettingsScreen gui) {
 				return new ArrayList<>(gui.getSettingsTabControl().getTabRectangles());
 			}
 		});
 
-		registration.addGhostIngredientHandler(BackpackScreen.class, new IGhostIngredientHandler<>() {
-			@Override
-			public <I> List<Target<I>> getTargets(BackpackScreen screen, I i, boolean b) {
-				List<Target<I>> targets = new ArrayList<>();
-				if (!(i instanceof ItemStack ghostStack)) {
-					return targets;
-				}
-				BackpackContainer container = screen.getMenu();
-				container.getOpenContainer().ifPresent(c -> c.getSlots().forEach(s -> {
-					if (s instanceof IFilterSlot && s.mayPlace(ghostStack)) {
-						targets.add(new Target<>() {
-							@Override
-							public Rect2i getArea() {
-								return new Rect2i(screen.getGuiLeft() + s.x, screen.getGuiTop() + s.y, 17, 17);
-							}
-
-							@Override
-							public void accept(I i) {
-								SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new SetGhostSlotMessage(ghostStack, s.index));
-							}
-						});
-					}
-				}));
-				return targets;
-			}
-
-			@Override
-			public void onComplete() {
-				//noop
-			}
-		});
+		registration.addGhostIngredientHandler(BackpackScreen.class, new StorageGhostIngredientHandler<>());
 	}
 
 	@Override
@@ -114,6 +85,12 @@ public class SBPPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandler(handlerHelper, stackHelper), VanillaRecipeCategoryUid.CRAFTING);
+		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<BackpackContainer>(handlerHelper, stackHelper) {
+			@Override
+			public Class<BackpackContainer> getContainerClass() {
+				return BackpackContainer.class;
+			}
+		}, VanillaRecipeCategoryUid.CRAFTING);
 	}
+
 }

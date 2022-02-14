@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
+package net.p3pp3rf1y.sophisticatedcore.compat.jei;
 
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IGuiIngredient;
@@ -13,9 +13,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 
 import javax.annotation.Nullable;
@@ -29,20 +29,13 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks.LOGGER;
-
-public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHandler<BackpackContainer, CraftingRecipe> {
+public abstract class CraftingContainerRecipeTransferHandlerBase<C extends StorageContainerMenuBase<?>> implements IRecipeTransferHandler<C, CraftingRecipe> {
 	private final IRecipeTransferHandlerHelper handlerHelper;
 	private final IStackHelper stackHelper;
 
-	public CraftingContainerRecipeTransferHandler(IRecipeTransferHandlerHelper handlerHelper, IStackHelper stackHelper) {
+	protected CraftingContainerRecipeTransferHandlerBase(IRecipeTransferHandlerHelper handlerHelper, IStackHelper stackHelper) {
 		this.handlerHelper = handlerHelper;
 		this.stackHelper = stackHelper;
-	}
-
-	@Override
-	public Class<BackpackContainer> getContainerClass() {
-		return BackpackContainer.class;
 	}
 
 	@Override
@@ -51,7 +44,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 	}
 
 	@Override
-	public IRecipeTransferError transferRecipe(BackpackContainer container, CraftingRecipe recipe, IRecipeLayout recipeLayout, Player player, boolean maxTransfer, boolean doTransfer) {
+	public IRecipeTransferError transferRecipe(C container, CraftingRecipe recipe, IRecipeLayout recipeLayout, Player player, boolean maxTransfer, boolean doTransfer) {
 		Optional<? extends UpgradeContainerBase<?, ?>> potentialCraftingContainer = container.getOpenOrFirstCraftingContainer();
 		if (potentialCraftingContainer.isEmpty()) {
 			return handlerHelper.createInternalError();
@@ -64,7 +57,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		int inputCount = getInputCount(itemStackGroup);
 
 		if (inputCount > craftingSlots.size()) {
-			LOGGER.error("Recipe Transfer helper {} does not work for container {}", BackpackContainer.class, container.getClass());
+			SophisticatedCore.LOGGER.error("Recipe Transfer helper {} does not work for container {}", CraftingContainerRecipeTransferHandlerBase.class, container.getClass());
 			return handlerHelper.createInternalError();
 		}
 
@@ -74,7 +67,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 			ItemStack stack = slot.getItem();
 			if (!stack.isEmpty()) {
 				if (!slot.mayPickup(player)) {
-					LOGGER.error("Recipe Transfer helper {} does not work for container {}. Player can't move item out of Crafting Slot number {}", BackpackContainer.class, container.getClass(), slot.index);
+					SophisticatedCore.LOGGER.error("Recipe Transfer helper {} does not work for container {}. Player can't move item out of Crafting Slot number {}", CraftingContainerRecipeTransferHandlerBase.class, container.getClass(), slot.index);
 					return handlerHelper.createInternalError();
 				}
 
@@ -109,7 +102,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 				container.setOpenTabId(openOrFirstCraftingContainer.getUpgradeContainerId());
 			}
 			TransferRecipeMessage message = new TransferRecipeMessage(matchingItemsResult.matchingItems, craftingSlotIndexes, inventorySlotIndexes, maxTransfer);
-			SophisticatedBackpacks.PACKET_HANDLER.sendToServer(message);
+			SophisticatedCore.PACKET_HANDLER.sendToServer(message);
 		}
 
 		return null;
@@ -147,7 +140,7 @@ public class CraftingContainerRecipeTransferHandler implements IRecipeTransferHa
 		return craftingSlots;
 	}
 
-	private Map<Integer, Slot> getInventorySlots(BackpackContainer container) {
+	private Map<Integer, Slot> getInventorySlots(StorageContainerMenuBase<?> container) {
 		Map<Integer, Slot> inventorySlots = new HashMap<>();
 		for (Slot slot : container.realInventorySlots) {
 			inventorySlots.put(slot.index, slot);

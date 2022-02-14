@@ -1,11 +1,11 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.init;
+package net.p3pp3rf1y.sophisticatedcore.init;
 
 import net.minecraftforge.fml.ModList;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.inventorysorter.InventorySorterCompat;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
+import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
+import net.p3pp3rf1y.sophisticatedcore.compat.craftingtweaks.CraftingTweaksCompat;
+import net.p3pp3rf1y.sophisticatedcore.compat.jei.JeiCompat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +18,8 @@ public class ModCompat {
 	private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
 
 	static {
-		compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
-		compatFactories.put(CompatModIds.INVENTORY_SORTER, () -> InventorySorterCompat::new);
-		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new);
+		compatFactories.put(CompatModIds.JEI, () -> JeiCompat::new);
+		compatFactories.put(CompatModIds.CRAFTING_TWEAKS, () -> CraftingTweaksCompat::new);
 	}
 
 	public static void initCompats() {
@@ -30,7 +29,7 @@ public class ModCompat {
 					entry.getValue().get().call().setup();
 				}
 				catch (Exception e) {
-					SophisticatedBackpacks.LOGGER.error("Error instantiating compatibility ", e);
+					SophisticatedCore.LOGGER.error("Error instantiating compatibility ", e);
 				}
 			}
 		}

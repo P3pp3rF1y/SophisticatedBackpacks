@@ -11,6 +11,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedcore.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
@@ -47,6 +48,7 @@ public class SophisticatedCore {
 
 	private static void setup(FMLCommonSetupEvent event) {
 		PACKET_HANDLER.init();
+		ModCompat.initCompats();
 	}
 
 	public static ResourceLocation getRL(String regName) {
