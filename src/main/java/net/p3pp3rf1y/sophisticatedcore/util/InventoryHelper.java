@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.util;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -364,5 +365,19 @@ public class InventoryHelper {
 			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
 			inventoryHandler.setStackInSlot(slot, ItemStack.EMPTY);
 		});
+	}
+
+	public static int getAnalogOutputSignal(IItemHandler handler) {
+		AtomicDouble totalFilled = new AtomicDouble(0);
+		AtomicBoolean isEmpty = new AtomicBoolean(true);
+		iterate(handler, (slot, stack) -> {
+			if (!stack.isEmpty()) {
+				int slotLimit = handler.getSlotLimit(slot);
+				totalFilled.addAndGet(stack.getCount() / (slotLimit / ((float) 64 / stack.getMaxStackSize())));
+				isEmpty.set(false);
+			}
+		});
+		double percentFilled = totalFilled.get() / handler.getSlots();
+		return Mth.floor(percentFilled * 14.0F) + (isEmpty.get() ? 0 : 1);
 	}
 }
