@@ -11,8 +11,8 @@ import java.util.Optional;
 public class WorldHelper {
 	private WorldHelper() {}
 
-	public static Optional<BlockEntity> getBlockEntity(@Nullable BlockGetter world, BlockPos pos) {
-		return getBlockEntity(world, pos, BlockEntity.class);
+	public static Optional<BlockEntity> getBlockEntity(@Nullable BlockGetter level, BlockPos pos) {
+		return getBlockEntity(level, pos, BlockEntity.class);
 	}
 
 	public static <T> Optional<T> getBlockEntity(@Nullable BlockGetter world, BlockPos pos, Class<T> teClass) {
