@@ -2,7 +2,7 @@
   "type": "sophisticatedbackpacks:backpack_upgrade",
   "conditions": [
     {
-      "itemRegistryName": "gold_backpack",
+      "itemRegistryName": "sophisticatedbackpacks:gold_backpack",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

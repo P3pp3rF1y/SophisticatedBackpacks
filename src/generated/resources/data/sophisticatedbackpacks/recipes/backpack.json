@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "backpack",
+      "itemRegistryName": "sophisticatedbackpacks:backpack",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

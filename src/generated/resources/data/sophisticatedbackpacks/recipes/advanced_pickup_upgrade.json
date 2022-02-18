@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "advanced_pickup_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_pickup_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

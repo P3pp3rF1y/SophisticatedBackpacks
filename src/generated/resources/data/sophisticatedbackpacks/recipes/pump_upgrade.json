@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "pump_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:pump_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

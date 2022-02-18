@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "feeding_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:feeding_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

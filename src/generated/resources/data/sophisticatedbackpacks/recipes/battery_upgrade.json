@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "battery_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:battery_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

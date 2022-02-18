@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "tool_swapper_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:tool_swapper_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],
