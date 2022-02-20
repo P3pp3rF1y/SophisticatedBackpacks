@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades;
 
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
@@ -264,6 +265,15 @@ public class UpgradeHandler extends ItemStackHandler {
 			}
 			currentTankPos = TankPosition.RIGHT;
 		}
+	}
+
+	public void increaseSize(int diff) {
+		NonNullList<ItemStack> previousStacks = stacks;
+		stacks = NonNullList.withSize(previousStacks.size() + diff, ItemStack.EMPTY);
+		for (int slot = 0; slot < previousStacks.size(); slot++) {
+			stacks.set(slot, previousStacks.get(slot));
+		}
+		saveInventory();
 	}
 
 	private static class Accessor implements IUpgradeWrapperAccessor {
