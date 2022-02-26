@@ -10,9 +10,11 @@ import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
@@ -34,29 +36,40 @@ public class ShapeBasedRecipeBuilder {
 	private final Map<Character, Ingredient> keyIngredients = Maps.newLinkedHashMap();
 	private final RecipeSerializer<?> serializer;
 	private final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
+	@Nullable
+	private final CompoundTag nbt;
 
-	public ShapeBasedRecipeBuilder(ItemLike itemResult, RecipeSerializer<?> serializer) {
+	public ShapeBasedRecipeBuilder(ItemLike itemResult, @Nullable CompoundTag nbt, RecipeSerializer<?> serializer) {
 		this.itemResult = itemResult.asItem();
 		this.serializer = serializer;
+		this.nbt = nbt;
 	}
 
-	public static ShapeBasedRecipeBuilder shapedRecipe(ItemLike itemResult) {
-		return shapedRecipe(itemResult, RecipeSerializer.SHAPED_RECIPE);
+	public static ShapeBasedRecipeBuilder shaped(ItemLike itemResult) {
+		return shaped(itemResult, RecipeSerializer.SHAPED_RECIPE);
 	}
 
-	public static ShapeBasedRecipeBuilder shapedRecipe(ItemLike itemResult, RecipeSerializer<?> serializer) {
-		return new ShapeBasedRecipeBuilder(itemResult, serializer);
+	public static ShapeBasedRecipeBuilder shaped(ItemLike itemResult, RecipeSerializer<?> serializer) {
+		return shaped(itemResult, null, serializer);
 	}
 
-	public ShapeBasedRecipeBuilder key(Character symbol, Tag<Item> tagIn) {
-		return key(symbol, Ingredient.of(tagIn));
+	public static ShapeBasedRecipeBuilder shaped(ItemLike itemResult, @Nullable CompoundTag nbt, RecipeSerializer<?> serializer) {
+		return new ShapeBasedRecipeBuilder(itemResult, nbt, serializer);
 	}
 
-	public ShapeBasedRecipeBuilder key(Character symbol, ItemLike itemIn) {
-		return key(symbol, Ingredient.of(itemIn));
+	public static ShapeBasedRecipeBuilder shaped(ItemStack stack) {
+		return shaped(stack.getItem(), stack.getTag(), RecipeSerializer.SHAPED_RECIPE);
 	}
 
-	public ShapeBasedRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
+	public ShapeBasedRecipeBuilder define(Character symbol, Tag<Item> tagIn) {
+		return define(symbol, Ingredient.of(tagIn));
+	}
+
+	public ShapeBasedRecipeBuilder define(Character symbol, ItemLike itemIn) {
+		return define(symbol, Ingredient.of(itemIn));
+	}
+
+	public ShapeBasedRecipeBuilder define(Character symbol, Ingredient ingredientIn) {
 		if (keyIngredients.containsKey(symbol)) {
 			throw new IllegalArgumentException("Symbol '" + symbol + "' is already defined!");
 		} else if (symbol == ' ') {
@@ -67,7 +80,7 @@ public class ShapeBasedRecipeBuilder {
 		}
 	}
 
-	public ShapeBasedRecipeBuilder patternLine(String patternIn) {
+	public ShapeBasedRecipeBuilder pattern(String patternIn) {
 		if (!pattern.isEmpty() && patternIn.length() != pattern.get(0).length()) {
 			throw new IllegalArgumentException("Pattern must be the same width on every line!");
 		} else {
@@ -76,26 +89,26 @@ public class ShapeBasedRecipeBuilder {
 		}
 	}
 
-	public ShapeBasedRecipeBuilder addCriterion(String name, CriterionTriggerInstance criterion) {
+	public ShapeBasedRecipeBuilder unlockedBy(String name, CriterionTriggerInstance criterion) {
 		advancementBuilder.addCriterion(name, criterion);
 		return this;
 	}
 
-	public void build(Consumer<FinishedRecipe> consumerIn) {
-		build(consumerIn, RegistryHelper.getItemKey(itemResult));
+	public void save(Consumer<FinishedRecipe> consumerIn) {
+		save(consumerIn, RegistryHelper.getItemKey(itemResult));
 	}
 
-	public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
-		validate(id);
+	public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+		ensureValid(id);
 		advancementBuilder.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(RequirementsStrategy.OR);
-		consumerIn.accept(new Result(id, conditions, itemResult, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + getGroup() + "/" + id.getPath()), serializer));
+		consumerIn.accept(new Result(id, conditions, itemResult, nbt, pattern, keyIngredients, advancementBuilder, new ResourceLocation(id.getNamespace(), "recipes/" + getGroup() + "/" + id.getPath()), serializer));
 	}
 
 	private String getGroup() {
 		return itemResult.getItemCategory() == null ? "" : itemResult.getItemCategory().getRecipeFolderName();
 	}
 
-	private void validate(ResourceLocation id) {
+	private void ensureValid(ResourceLocation id) {
 		if (pattern.isEmpty()) {
 			throw new IllegalStateException("No pattern is defined for shaped recipe " + id + "!");
 		}
@@ -125,17 +138,21 @@ public class ShapeBasedRecipeBuilder {
 		private final ResourceLocation id;
 		private final List<ICondition> conditions;
 		private final Item itemResult;
+		@Nullable
+		private final CompoundTag nbt;
 		private final List<String> pattern;
 		private final Map<Character, Ingredient> key;
 		private final ResourceLocation advancementId;
 		private final RecipeSerializer<?> serializer;
 		private final Advancement.Builder advancementBuilder;
 
-		@SuppressWarnings("java:S107") //the only way of reducing number of parameters here means adding pretty much unnecessary objec parameter
-		public Result(ResourceLocation id, List<ICondition> conditions, Item itemResult, List<String> pattern, Map<Character, Ingredient> keyIngredients, Advancement.Builder advancementBuilder, ResourceLocation advancementId, RecipeSerializer<?> serializer) {
+		@SuppressWarnings("java:S107") //the only way of reducing number of parameters here means adding pretty much unnecessary object parameter
+		public Result(ResourceLocation id, List<ICondition> conditions, Item itemResult, @Nullable
+				CompoundTag nbt, List<String> pattern, Map<Character, Ingredient> keyIngredients, Advancement.Builder advancementBuilder, ResourceLocation advancementId, RecipeSerializer<?> serializer) {
 			this.id = id;
 			this.conditions = conditions;
 			this.itemResult = itemResult;
+			this.nbt = nbt;
 			this.pattern = pattern;
 			key = keyIngredients;
 			this.advancementId = advancementId;
@@ -165,6 +182,9 @@ public class ShapeBasedRecipeBuilder {
 			json.add("key", jsonobject);
 			JsonObject jsonobject1 = new JsonObject();
 			jsonobject1.addProperty("item", RegistryHelper.getItemKey(itemResult).toString());
+			if (nbt != null) {
+				jsonobject1.addProperty("nbt", nbt.toString());
+			}
 
 			json.add("result", jsonobject1);
 		}

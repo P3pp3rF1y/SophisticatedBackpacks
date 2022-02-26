@@ -43,8 +43,8 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		builder.addGrid(getCraftingGridStart(storageContainer), getCraftingGridSize(storageContainer))
 				.clearHandler((craftingGrid, player, menu, forced) -> clearGrid(player, menu, forced))
 				.rotateHandler((craftingGrid, player, menu, reverse) -> rotateGrid(menu, reverse))
-				.balanceHandler(new BackpackCraftingGridBalanceHandler())
-				.transferHandler(new BackpackCraftingGridTransferHandler())
+				.balanceHandler(new StorageCraftingGridBalanceHandler())
+				.transferHandler(new StorageCraftingGridTransferHandler())
 				.hideAllTweakButtons();
 	}
 
@@ -181,7 +181,7 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		return getOpenCraftingContainer(container).isPresent() ? 9 : 0;
 	}
 
-	private static class BackpackCraftingGridBalanceHandler implements net.blay09.mods.craftingtweaks.api.GridBalanceHandler<AbstractContainerMenu> {
+	private static class StorageCraftingGridBalanceHandler implements net.blay09.mods.craftingtweaks.api.GridBalanceHandler<AbstractContainerMenu> {
 		@Override
 		public void balanceGrid(CraftingGrid grid, Player player, AbstractContainerMenu menu) {
 			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
@@ -277,7 +277,7 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		}
 	}
 
-	private static class BackpackCraftingGridTransferHandler implements GridTransferHandler<AbstractContainerMenu> {
+	private static class StorageCraftingGridTransferHandler implements GridTransferHandler<AbstractContainerMenu> {
 		@Override
 		public ItemStack putIntoGrid(CraftingGrid craftingGrid, Player player, AbstractContainerMenu menu, int slotId, ItemStack itemStack) {
 			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {

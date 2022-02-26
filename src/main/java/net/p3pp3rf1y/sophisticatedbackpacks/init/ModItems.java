@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeTagHandler;
 import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
@@ -49,7 +48,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainer
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.UpgradeClearRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
@@ -76,7 +74,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
-import net.p3pp3rf1y.sophisticatedcore.crafting.ItemEnabledCondition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryInventoryPart;
@@ -392,12 +389,9 @@ public class ModItems {
 	}
 
 	public static void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> evt) {
-		CraftingHelper.register(ItemEnabledCondition.Serializer.INSTANCE);
-
 		evt.getRegistry().register(BackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_upgrade"));
 		evt.getRegistry().register(SmithingBackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "smithing_backpack_upgrade"));
 		evt.getRegistry().register(BackpackDyeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_dye"));
-		evt.getRegistry().register(UpgradeClearRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "upgrade_clear"));
 	}
 
 	public static void registerDispenseBehavior() {
