@@ -16,12 +16,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
@@ -64,7 +64,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			CompoundTag settingsContents = new CompoundTag();
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
-				settingsContents.put(SettingsHandler.SETTINGS_TAG, settingsNbt);
+				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
 				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
 		});

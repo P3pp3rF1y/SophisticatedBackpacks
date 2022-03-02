@@ -16,7 +16,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 	private final Minecraft minecraft = Minecraft.getInstance();
@@ -41,7 +41,7 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBufferDirect(buffer, rendertype, true, stack.hasFoil());
 		itemRenderer.renderModelLists(model, stack, combinedLight, combinedOverlay, matrixStack, ivertexbuilder);
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-			BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = backpackWrapper.getRenderInfo().getItemDisplayRenderInfo();
+			RenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = backpackWrapper.getRenderInfo().getItemDisplayRenderInfo();
 			ItemStack displayItem = itemDisplayRenderInfo.getItem();
 			if (!displayItem.isEmpty()) {
 				matrixStack.translate(0.5, 0.6, 0.25);

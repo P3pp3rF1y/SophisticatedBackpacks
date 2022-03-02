@@ -36,7 +36,6 @@ import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -230,7 +229,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 					energyStorage = null;
 				}) {
 					@Override
-					public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+					public boolean isItemValid(int slot, ItemStack stack) {
 						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
 						return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(stack.getItem().getRegistryName().getNamespace()) || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
 					}

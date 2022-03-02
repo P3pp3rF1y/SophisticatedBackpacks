@@ -6,6 +6,7 @@ import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 
 public class BackpackSettingsHandler extends SettingsHandler {
 	public static final String SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG = "sophisticatedBackpackSettings";
+	public static final String SETTINGS_TAG = "settings";
 
 	public BackpackSettingsHandler(IStorageWrapper backpackWrapper, CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
 		super(backpackContentsNbt, markBackpackContentsDirty, SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG, backpackWrapper::getInventoryHandler, backpackWrapper::getRenderInfo);
@@ -18,8 +19,14 @@ public class BackpackSettingsHandler extends SettingsHandler {
 		}
 	}
 
-	public void reloadFrom(CompoundTag backpackContentsNbt) {
-		CompoundTag settingsNbt = backpackContentsNbt.getCompound(SETTINGS_TAG);
-		getSettingsCategories().forEach((categoryName, category) -> category.reloadFrom(settingsNbt.getCompound(categoryName)));
+	@Override
+	protected CompoundTag getSettingsNbtFromContentsNbt(CompoundTag contentsNbt)  {
+		return contentsNbt.getCompound(SETTINGS_TAG);
+	}
+
+	@Override
+	protected void saveCategoryNbt(CompoundTag settingsNbt, String categoryName, CompoundTag tag) {
+		settingsNbt.put(categoryName, tag);
+		contentsNbt.put(SETTINGS_TAG, settingsNbt);
 	}
 }

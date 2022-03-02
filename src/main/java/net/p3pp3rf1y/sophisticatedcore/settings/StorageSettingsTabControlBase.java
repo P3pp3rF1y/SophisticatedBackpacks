@@ -16,6 +16,7 @@ import java.util.List;
 
 public abstract class StorageSettingsTabControlBase extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
 	private final List<SettingsTab<?>> settingsTabs = new ArrayList<>();
+	protected final SettingsScreen screen;
 
 	protected static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> void addFactory(
 			ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder, String categoryName, ISettingsTabFactory<C, T> factory) {
@@ -24,6 +25,7 @@ public abstract class StorageSettingsTabControlBase extends SettingsTabControl<S
 
 	protected StorageSettingsTabControlBase(SettingsScreen screen, Position position) {
 		super(position);
+		this.screen = screen;
 		addChild(instantiateReturnBackTab());
 		screen.getMenu().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
 				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));

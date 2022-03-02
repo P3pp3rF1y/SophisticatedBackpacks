@@ -40,7 +40,17 @@ public class NoopStorageWrapper implements IStorageWrapper {
 			return Optional.empty();
 		}
 	};
-	private final SettingsHandler settingsHandler = new SettingsHandler(new CompoundTag(), () -> {}, "", () -> inventoryHandler, () -> renderInfo);
+	private final SettingsHandler settingsHandler = new SettingsHandler(new CompoundTag(), () -> {}, "", () -> inventoryHandler, () -> renderInfo) {
+		@Override
+		protected CompoundTag getSettingsNbtFromContentsNbt(CompoundTag contentsNbt) {
+			return contentsNbt;
+		}
+
+		@Override
+		protected void saveCategoryNbt(CompoundTag settingsNbt, String categoryName, CompoundTag tag) {
+			//noop
+		}
+	};
 
 	protected NoopStorageWrapper() {}
 
