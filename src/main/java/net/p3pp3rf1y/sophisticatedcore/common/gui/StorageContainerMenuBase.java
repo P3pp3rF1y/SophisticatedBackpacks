@@ -400,7 +400,7 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 		}
 		ItemStack slotStack = slot.getItem();
 		if (slotStack.isEmpty() || (slot.mayPickup(player) && slotStack.getItem() != cursorStack.getItem() && cursorStack.getCount() <= slot.getMaxStackSize(cursorStack) && slotStack.getCount() <= slotStack.getMaxStackSize())) {
-			return processOverflowIfSlotWithSameItemFound(slotId, cursorStack, updateCursorStack, slotStack);
+			return processOverflowIfSlotWithSameItemFound(slotId, cursorStack, updateCursorStack);
 		} else if (slotStack.getItem() == cursorStack.getItem()) {
 			return processOverflowForAnythingOverSlotMaxSize(cursorStack, updateCursorStack, slot, slotStack);
 		}
@@ -427,15 +427,19 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 		return false;
 	}
 
-	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, ItemStack slotStack) {
-		for (int slotIndex = 0; slotIndex < getNumberOfStorageInventorySlots(); slotIndex++) {
-			if (slotIndex != slotId && ItemStack.isSameItemSameTags(getSlot(slotIndex).getItem(), cursorStack)) {
-				ItemStack result = processOverflowLogic(cursorStack);
-				if (result.getCount() < cursorStack.getCount()) {
-					updateCursorStack.accept(result);
-					return slotStack.isEmpty();
+	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack) {
+		for (IOverflowResponseUpgrade overflowUpgrade : storageWrapper.getUpgradeHandler().getWrappersThatImplement(IOverflowResponseUpgrade.class)) {
+			if (overflowUpgrade.stackMatchesFilter(cursorStack) && overflowUpgrade.worksInGui()) {
+				for (int slotIndex = 0; slotIndex < getNumberOfStorageInventorySlots(); slotIndex++) {
+					if (slotIndex != slotId && overflowUpgrade.stackMatchesFilter(getSlot(slotIndex).getItem())) {
+						ItemStack result = cursorStack;
+						result = overflowUpgrade.onOverflow(result);
+						updateCursorStack.accept(result);
+						if (result.isEmpty()) {
+							return true;
+						}
+					}
 				}
-				return false;
 			}
 		}
 		return false;
@@ -1215,7 +1219,12 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 				if (itemstack1.isEmpty() && destSlot.mayPlace(sourceStack) && !(destSlot instanceof IFilterSlot)) {
 					boolean errorMerging = false;
 					if (toTransfer > destSlot.getMaxStackSize()) {
-						destSlot.set(sourceStack.split(destSlot.getMaxStackSize()));
+						if (runOverflowLogic && processOverflowIfSlotWithSameItemFound(i, sourceStack, s -> {})) {
+							sourceStack.shrink(sourceStack.getCount());
+							mergedSomething = true;
+						} else {
+							destSlot.set(sourceStack.split(destSlot.getMaxStackSize()));
+						}
 					} else {
 						if (isUpgradeSlot(i)) {
 							StorageUpgradeSlot upgradeSlot = (StorageUpgradeSlot) getSlot(i);
@@ -1228,7 +1237,12 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 								errorMerging = true;
 							}
 						} else {
-							destSlot.set(sourceStack.split(toTransfer));
+							if (runOverflowLogic && processOverflowIfSlotWithSameItemFound(i, sourceStack, s -> {})) {
+								sourceStack.shrink(sourceStack.getCount());
+								mergedSomething = true;
+							} else {
+								destSlot.set(sourceStack.split(toTransfer));
+							}
 						}
 					}
 					if (!errorMerging) {

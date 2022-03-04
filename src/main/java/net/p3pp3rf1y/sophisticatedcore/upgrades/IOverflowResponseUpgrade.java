@@ -6,4 +6,6 @@ public interface IOverflowResponseUpgrade {
 	boolean worksInGui();
 
 	ItemStack onOverflow(ItemStack stack);
+
+	boolean stackMatchesFilter(ItemStack stack);
 }
