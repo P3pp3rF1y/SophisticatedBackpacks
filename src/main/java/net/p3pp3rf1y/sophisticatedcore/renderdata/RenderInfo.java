@@ -37,14 +37,14 @@ public abstract class RenderInfo {
 	}
 
 	private ItemDisplayRenderInfo itemDisplayRenderInfo = new ItemDisplayRenderInfo();
-	private final Supplier<Runnable> getSaveHandler;
+	private final Supplier<Consumer<RenderInfo>> getSaveHandler;
 	private final Map<UpgradeRenderDataType<?>, IUpgradeRenderData> upgradeData = new HashMap<>();
 
 	private final Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = new LinkedHashMap<>();
 	@Nullable
 	private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
-	protected RenderInfo(Supplier<Runnable> getSaveHandler) {
+	protected RenderInfo(Supplier<Consumer<RenderInfo>> getSaveHandler) {
 		this.getSaveHandler = getSaveHandler;
 	}
 
@@ -83,7 +83,7 @@ public abstract class RenderInfo {
 	}
 
 	protected void save() {
-		getSaveHandler.get().run();
+		getSaveHandler.get().accept(this);
 	}
 
 	protected abstract void serializeRenderInfo(CompoundTag renderInfo);
