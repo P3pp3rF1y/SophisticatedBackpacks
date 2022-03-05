@@ -28,7 +28,7 @@ public class NoopStorageWrapper implements IStorageWrapper {
 			return true;
 		}
 	};
-	private final RenderInfo renderInfo = new RenderInfo(() -> ri -> {}) {
+	private final RenderInfo renderInfo = new RenderInfo(() -> () -> {}) {
 
 		@Override
 		protected void serializeRenderInfo(CompoundTag renderInfo) {

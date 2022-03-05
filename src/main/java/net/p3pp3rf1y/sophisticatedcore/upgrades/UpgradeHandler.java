@@ -225,7 +225,7 @@ public class UpgradeHandler extends ItemStackHandler {
 	private void initRenderInfoCallbacks(boolean forceUpdateRenderInfo) {
 		RenderInfo renderInfo = storageWrapper.getRenderInfo();
 		if (forceUpdateRenderInfo) {
-			renderInfo.resetUpgradeInfo();
+			renderInfo.resetUpgradeInfo(true);
 		}
 
 		initTankRenderInfoCallbacks(forceUpdateRenderInfo, renderInfo);

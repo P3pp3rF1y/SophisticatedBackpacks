@@ -13,7 +13,7 @@ public class BackpackRenderInfo extends RenderInfo {
 	private final ItemStack backpack;
 
 	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getSaveHandler) {
-		super(() -> ri -> getSaveHandler.get().run());
+		super(getSaveHandler);
 		this.backpack = backpack;
 		deserialize();
 	}
