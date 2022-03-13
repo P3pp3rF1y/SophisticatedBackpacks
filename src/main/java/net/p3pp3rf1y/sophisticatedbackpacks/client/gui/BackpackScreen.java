@@ -527,16 +527,31 @@ public class BackpackScreen extends ContainerScreen<BackpackContainer> {
 			}
 		}
 
+		handleQuickMoveAll(mouseX, mouseY, button);
+
+		return super.mouseReleased(mouseX, mouseY, button);
+	}
+
+	private void handleQuickMoveAll(double mouseX, double mouseY, int button) {
 		Slot slot = findSlot(mouseX, mouseY);
-		if (doubleclick && slot != null && button == 0 && menu.canTakeItemForPickAll(ItemStack.EMPTY, slot) && hasShiftDown() && !lastQuickMoved.isEmpty()) {
+		if (doubleclick && !minecraft.player.inventory.getCarried().isEmpty() && slot != null && button == 0 && menu.canTakeItemForPickAll(ItemStack.EMPTY, slot) && hasShiftDown() && !lastQuickMoved.isEmpty()) {
 			for (Slot slot2 : menu.realInventorySlots) {
-				if (slot2 != null && slot2.mayPickup(minecraft.player) && slot2.hasItem() && slot2.isSameInventory(slot) && Container.canItemQuickReplace(slot2, lastQuickMoved, true)) {
+				tryQuickMoveSlot(button, slot, slot2);
+			}
+		}
+	}
+
+	private void tryQuickMoveSlot(int button, Slot slot, Slot slot2) {
+		if (slot2.mayPickup(minecraft.player) && slot2.hasItem() && slot2.isSameInventory(slot)) {
+			ItemStack slotItem = slot2.getItem();
+			if (slotItem.sameItem(lastQuickMoved) && ItemStack.tagMatches(lastQuickMoved, slotItem)) {
+				if (slotItem.getCount() > slotItem.getMaxStackSize()) {
+					PacketHandler.sendToServer(new TransferFullSlotMessage(slot2.index));
+				} else {
 					slotClicked(slot2, slot2.index, button, ClickType.QUICK_MOVE);
 				}
 			}
 		}
-
-		return super.mouseReleased(mouseX, mouseY, button);
 	}
 
 	@Override
