@@ -32,7 +32,7 @@ public class TransferFullSlotMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer player, TransferFullSlotMessage msg) {
-		if (player == null || !(player.containerMenu instanceof StorageContainerMenuBase storageContainer)) {
+		if (player == null || !(player.containerMenu instanceof StorageContainerMenuBase<?> storageContainer)) {
 			return;
 		}
 		Slot slot = storageContainer.getSlot(msg.slotId);

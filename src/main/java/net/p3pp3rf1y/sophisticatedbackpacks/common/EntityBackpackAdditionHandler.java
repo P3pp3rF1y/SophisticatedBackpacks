@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -278,7 +279,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBackpackUuid(Monster entity) {
-		if (!entity.isDeadOrDying() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (entity.level.isClientSide() || (entity.getRemovalReason() != Entity.RemovalReason.KILLED && entity.getRemovalReason() != Entity.RemovalReason.DISCARDED) || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 
