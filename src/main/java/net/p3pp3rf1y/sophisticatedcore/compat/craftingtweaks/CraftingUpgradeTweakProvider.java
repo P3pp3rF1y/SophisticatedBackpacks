@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
+package net.p3pp3rf1y.sophisticatedcore.compat.craftingtweaks;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultiset;
@@ -14,9 +14,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,38 +27,38 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 
 	@Override
 	public String getModId() {
-		return SophisticatedBackpacks.MOD_ID;
+		return SophisticatedCore.MOD_ID;
 	}
 
 	@Override
 	public boolean handles(AbstractContainerMenu abstractContainerMenu) {
-		return abstractContainerMenu instanceof BackpackContainer;
+		return abstractContainerMenu instanceof StorageContainerMenuBase<?>;
 	}
 
 	@Override
 	public void buildCraftingGrids(CraftingGridBuilder builder, AbstractContainerMenu containerMenu) {
-		if (!(containerMenu instanceof BackpackContainer backpackContainer)) {
+		if (!(containerMenu instanceof StorageContainerMenuBase<?> storageContainer)) {
 			return;
 		}
-		builder.addGrid(getCraftingGridStart(backpackContainer), getCraftingGridSize(backpackContainer))
+		builder.addGrid(getCraftingGridStart(storageContainer), getCraftingGridSize(storageContainer))
 				.clearHandler((craftingGrid, player, menu, forced) -> clearGrid(player, menu, forced))
 				.rotateHandler((craftingGrid, player, menu, reverse) -> rotateGrid(menu, reverse))
-				.balanceHandler(new BackpackCraftingGridBalanceHandler())
-				.transferHandler(new BackpackCraftingGridTransferHandler())
+				.balanceHandler(new StorageCraftingGridBalanceHandler())
+				.transferHandler(new StorageCraftingGridTransferHandler())
 				.hideAllTweakButtons();
 	}
 
 	public void clearGrid(Player player, AbstractContainerMenu menu, boolean forced) {
-		if (!(menu instanceof BackpackContainer backpackContainer)) {
+		if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 			return;
 		}
 
-		getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
-			int start = getCraftingGridStart(backpackContainer);
-			int size = getCraftingGridSize(backpackContainer);
+		getCraftMatrix(storageContainer).ifPresent(craftMatrix -> {
+			int start = getCraftingGridStart(storageContainer);
+			int size = getCraftingGridSize(storageContainer);
 
 			for (int i = start; i < start + size; ++i) {
-				int slotIndex = (backpackContainer.getSlot(i)).getContainerSlot();
+				int slotIndex = (storageContainer.getSlot(i)).getContainerSlot();
 				ItemStack itemStack = craftMatrix.getItem(slotIndex);
 				if (!itemStack.isEmpty()) {
 					ItemStack returnStack = itemStack.copy();
@@ -71,7 +71,7 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 				}
 			}
 
-			backpackContainer.broadcastChanges();
+			storageContainer.broadcastChanges();
 		});
 	}
 
@@ -128,18 +128,18 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 	}
 
 	private void rotateGrid(AbstractContainerMenu containerMenu, boolean counterClockwise) {
-		if (!(containerMenu instanceof BackpackContainer backpackContainer)) {
+		if (!(containerMenu instanceof StorageContainerMenuBase<?> storageContainer)) {
 			return;
 		}
-		getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
-			int start = getCraftingGridStart(backpackContainer);
-			int size = getCraftingGridSize(backpackContainer);
+		getCraftMatrix(storageContainer).ifPresent(craftMatrix -> {
+			int start = getCraftingGridStart(storageContainer);
+			int size = getCraftingGridSize(storageContainer);
 			Container matrixClone = new SimpleContainer(size);
 
 			int i;
 			int slotIndex;
 			for (i = 0; i < size; ++i) {
-				slotIndex = backpackContainer.getSlot(start + i).getContainerSlot();
+				slotIndex = storageContainer.getSlot(start + i).getContainerSlot();
 				matrixClone.setItem(i, craftMatrix.getItem(slotIndex));
 			}
 
@@ -150,11 +150,11 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 				}
 			}
 
-			backpackContainer.broadcastChanges();
+			storageContainer.broadcastChanges();
 		});
 	}
 
-	private static Optional<Container> getCraftMatrix(BackpackContainer container) {
+	private static Optional<Container> getCraftMatrix(StorageContainerMenuBase<?> container) {
 		return getOpenCraftingContainer(container).map(ICraftingContainer::getCraftMatrix);
 	}
 
@@ -163,11 +163,11 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		return true;
 	}
 
-	private static Optional<ICraftingContainer> getOpenCraftingContainer(BackpackContainer container) {
+	private static Optional<ICraftingContainer> getOpenCraftingContainer(StorageContainerMenuBase<?> container) {
 		return container.getOpenContainer().flatMap(c -> (c instanceof ICraftingContainer craftingContainer) ? Optional.of(craftingContainer) : Optional.empty());
 	}
 
-	private static int getCraftingGridStart(BackpackContainer container) {
+	private static int getCraftingGridStart(StorageContainerMenuBase<?> container) {
 		return getOpenCraftingContainer(container).map(cc -> {
 			List<Slot> recipeSlots = cc.getRecipeSlots();
 			if (!recipeSlots.isEmpty()) {
@@ -177,21 +177,21 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		}).orElse(0);
 	}
 
-	private static int getCraftingGridSize(BackpackContainer container) {
+	private static int getCraftingGridSize(StorageContainerMenuBase<?> container) {
 		return getOpenCraftingContainer(container).isPresent() ? 9 : 0;
 	}
 
-	private static class BackpackCraftingGridBalanceHandler implements net.blay09.mods.craftingtweaks.api.GridBalanceHandler<AbstractContainerMenu> {
+	private static class StorageCraftingGridBalanceHandler implements net.blay09.mods.craftingtweaks.api.GridBalanceHandler<AbstractContainerMenu> {
 		@Override
 		public void balanceGrid(CraftingGrid grid, Player player, AbstractContainerMenu menu) {
-			if (!(menu instanceof BackpackContainer backpackContainer)) {
+			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 				return;
 			}
-			getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+			getCraftMatrix(storageContainer).ifPresent(craftMatrix -> {
 				ArrayListMultimap<String, ItemStack> itemMap = ArrayListMultimap.create();
 				Multiset<String> itemCount = HashMultiset.create();
-				int start = getCraftingGridStart(backpackContainer);
-				int size = getCraftingGridSize(backpackContainer);
+				int start = getCraftingGridStart(storageContainer);
+				int size = getCraftingGridSize(storageContainer);
 				for (int i = start; i < start + size; i++) {
 					int slotIndex = menu.getSlot(i).getContainerSlot();
 					ItemStack itemStack = craftMatrix.getItem(slotIndex);
@@ -232,15 +232,15 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 
 		@Override
 		public void spreadGrid(CraftingGrid grid, Player player, AbstractContainerMenu menu) {
-			if (!(menu instanceof BackpackContainer backpackContainer)) {
+			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 				return;
 			}
-			getCraftMatrix(backpackContainer).ifPresent(craftMatrix -> {
+			getCraftMatrix(storageContainer).ifPresent(craftMatrix -> {
 				while (true) {
 					ItemStack biggestSlotStack = null;
 					int biggestSlotSize = 1;
-					int start = getCraftingGridStart(backpackContainer);
-					int size = getCraftingGridSize(backpackContainer);
+					int start = getCraftingGridStart(storageContainer);
+					int size = getCraftingGridSize(storageContainer);
 					for (int i = start; i < start + size; i++) {
 						int slotIndex = menu.getSlot(i).getContainerSlot();
 						ItemStack itemStack = craftMatrix.getItem(slotIndex);
@@ -277,13 +277,13 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 		}
 	}
 
-	private static class BackpackCraftingGridTransferHandler implements GridTransferHandler<AbstractContainerMenu> {
+	private static class StorageCraftingGridTransferHandler implements GridTransferHandler<AbstractContainerMenu> {
 		@Override
 		public ItemStack putIntoGrid(CraftingGrid craftingGrid, Player player, AbstractContainerMenu menu, int slotId, ItemStack itemStack) {
-			if (!(menu instanceof BackpackContainer backpackContainer)) {
+			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 				return itemStack;
 			}
-			return getCraftMatrix(backpackContainer).map(craftMatrix -> {
+			return getCraftMatrix(storageContainer).map(craftMatrix -> {
 				ItemStack craftStack = craftMatrix.getItem(slotId);
 				if (!craftStack.isEmpty()) {
 					if (craftStack.sameItem(itemStack) && ItemStack.tagMatches(craftStack, itemStack)) {
@@ -307,12 +307,12 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 
 		@Override
 		public boolean transferIntoGrid(CraftingGrid craftingGrid, Player player, AbstractContainerMenu menu, Slot fromSlot) {
-			if (!(menu instanceof BackpackContainer backpackContainer)) {
+			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 				return false;
 			}
-			return getCraftMatrix(backpackContainer).map(craftMatrix -> {
-				int start = getCraftingGridStart(backpackContainer);
-				int size = getCraftingGridSize(backpackContainer);
+			return getCraftMatrix(storageContainer).map(craftMatrix -> {
+				int start = getCraftingGridStart(storageContainer);
+				int size = getCraftingGridSize(storageContainer);
 				ItemStack itemStack = fromSlot.getItem();
 				if (itemStack.isEmpty()) {
 					return false;
@@ -351,10 +351,10 @@ public class CraftingUpgradeTweakProvider implements CraftingGridProvider {
 
 		@Override
 		public boolean canTransferFrom(Player player, AbstractContainerMenu menu, Slot sourceSlot, CraftingGrid craftingGrid) {
-			if (!(menu instanceof BackpackContainer backpackContainer)) {
+			if (!(menu instanceof StorageContainerMenuBase<?> storageContainer)) {
 				return false;
 			}
-			return sourceSlot.mayPickup(player) && sourceSlot.index < backpackContainer.realInventorySlots.size();
+			return sourceSlot.mayPickup(player) && sourceSlot.index < storageContainer.realInventorySlots.size();
 		}
 	}
 }

@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "advanced_deposit_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_deposit_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

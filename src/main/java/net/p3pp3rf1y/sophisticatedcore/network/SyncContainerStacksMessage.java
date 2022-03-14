@@ -6,7 +6,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -58,7 +58,7 @@ public class SyncContainerStacksMessage {
 
 	private static void handleMessage(SyncContainerStacksMessage msg) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || !(player.containerMenu instanceof StorageContainerMenu) || player.containerMenu.containerId != msg.windowId) {
+		if (player == null || !(player.containerMenu instanceof StorageContainerMenuBase) || player.containerMenu.containerId != msg.windowId) {
 			return;
 		}
 		player.containerMenu.initializeContents(msg.stateId, msg.itemStacks, msg.carriedStack);

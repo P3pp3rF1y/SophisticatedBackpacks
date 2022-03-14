@@ -6,6 +6,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.Tab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsTab;
+import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControlBase;
 import net.p3pp3rf1y.sophisticatedcore.settings.globaloverridable.GlobalOverridableSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsTab;
@@ -16,7 +17,7 @@ import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsTab;
 
 import java.util.Map;
 
-public class BackpackSettingsTabControl extends net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControl {
+public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 	private static final Map<String, ISettingsTabFactory<?, ?>> SETTINGS_TAB_FACTORIES;
 
 	static {
@@ -33,7 +34,7 @@ public class BackpackSettingsTabControl extends net.p3pp3rf1y.sophisticatedcore.
 	}
 
 	@Override
-	protected Tab getNewReturnBackTab() {
+	protected Tab instantiateReturnBackTab() {
 		return new BackToBackpackTab(new Position(x, getTopY()));
 	}
 

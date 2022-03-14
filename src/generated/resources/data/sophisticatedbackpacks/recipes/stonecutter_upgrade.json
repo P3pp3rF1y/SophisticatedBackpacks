@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "stonecutter_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:stonecutter_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

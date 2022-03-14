@@ -17,9 +17,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class SettingsHandler {
-	public static final String SETTINGS_TAG = "settings";
-	protected final CompoundTag contentsNbt;
+public abstract class SettingsHandler {
+	protected CompoundTag contentsNbt;
 	protected final Runnable markContentsDirty;
 	protected final Map<String, ISettingsCategory> settingsCategories = new LinkedHashMap<>();
 	private final Map<Class<?>, List<?>> interfaceCategories = new HashMap<>();
@@ -28,8 +27,10 @@ public class SettingsHandler {
 	public SettingsHandler(CompoundTag contentsNbt, Runnable markContentsDirty, String playerSettingsTagName, Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderInfo> renderInfoSupplier) {
 		this.contentsNbt = contentsNbt;
 		this.markContentsDirty = markContentsDirty;
-		addSettingsCategories(inventoryHandlerSupplier, renderInfoSupplier, contentsNbt.getCompound(SETTINGS_TAG), playerSettingsTagName);
+		addSettingsCategories(inventoryHandlerSupplier, renderInfoSupplier, getSettingsNbtFromContentsNbt(contentsNbt), playerSettingsTagName);
 	}
+
+	protected abstract CompoundTag getSettingsNbtFromContentsNbt(CompoundTag contentsNbt);
 
 	private void addSettingsCategories(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderInfo> renderInfoSupplier, CompoundTag settingsNbt, String playerSettingsTagName) {
 		addSettingsCategory(settingsNbt, GlobalOverridableSettingsCategory.NAME, markContentsDirty, (categoryNbt, saveNbt) -> new GlobalOverridableSettingsCategory(categoryNbt, saveNbt, playerSettingsTagName));
@@ -40,13 +41,14 @@ public class SettingsHandler {
 
 	private void addSettingsCategory(CompoundTag settingsNbt, String categoryName, Runnable markContentsDirty, BiFunction<CompoundTag, Consumer<CompoundTag>, ISettingsCategory> instantiateCategory) {
 		ISettingsCategory category = instantiateCategory.apply(settingsNbt.getCompound(categoryName), tag -> {
-			settingsNbt.put(categoryName, tag);
-			contentsNbt.put(SETTINGS_TAG, settingsNbt);
+			saveCategoryNbt(settingsNbt, categoryName, tag);
 			markContentsDirty.run();
 		});
 		settingsCategories.put(categoryName, category);
 		typeCategories.put(category.getClass(), category);
 	}
+
+	protected abstract void saveCategoryNbt(CompoundTag settingsNbt, String categoryName, CompoundTag tag);
 
 	public Map<String, ISettingsCategory> getSettingsCategories() {
 		return settingsCategories;
@@ -74,6 +76,11 @@ public class SettingsHandler {
 	}
 
 	public CompoundTag getNbt() {
-		return contentsNbt.getCompound(SETTINGS_TAG);
+		return getSettingsNbtFromContentsNbt(contentsNbt);
+	}
+
+	public void reloadFrom(CompoundTag contentsNbt) {
+		CompoundTag settingsNbt = getSettingsNbtFromContentsNbt(contentsNbt);
+		getSettingsCategories().forEach((categoryName, category) -> category.reloadFrom(settingsNbt.getCompound(categoryName)));
 	}
 }

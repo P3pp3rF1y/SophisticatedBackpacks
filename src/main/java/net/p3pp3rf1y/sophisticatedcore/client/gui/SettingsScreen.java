@@ -13,13 +13,13 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageBackgroundProperties;
-import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControl;
+import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControlBase;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
 public abstract class SettingsScreen extends AbstractContainerScreen<SettingsContainer<?>> {
-	private StorageSettingsTabControl settingsTabControl;
+	private StorageSettingsTabControlBase settingsTabControl;
 
 	public SettingsScreen(SettingsContainer screenContainer, Inventory inv, Component titleIn) {
 		super(screenContainer, inv, titleIn);
@@ -37,7 +37,7 @@ public abstract class SettingsScreen extends AbstractContainerScreen<SettingsCon
 		addWidget(settingsTabControl);
 	}
 
-	protected abstract StorageSettingsTabControl initializeTabControl();
+	protected abstract StorageSettingsTabControlBase initializeTabControl();
 
 	@Override
 	protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
@@ -170,7 +170,7 @@ public abstract class SettingsScreen extends AbstractContainerScreen<SettingsCon
 
 	protected abstract void sendStorageInventoryScreenOpenMessage();
 
-	public StorageSettingsTabControl getSettingsTabControl() {
+	public StorageSettingsTabControlBase getSettingsTabControl() {
 		return settingsTabControl;
 	}
 }

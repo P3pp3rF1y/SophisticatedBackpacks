@@ -40,7 +40,17 @@ public class NoopStorageWrapper implements IStorageWrapper {
 			return Optional.empty();
 		}
 	};
-	private final SettingsHandler settingsHandler = new SettingsHandler(new CompoundTag(), () -> {}, "", () -> inventoryHandler, () -> renderInfo);
+	private final SettingsHandler settingsHandler = new SettingsHandler(new CompoundTag(), () -> {}, "", () -> inventoryHandler, () -> renderInfo) {
+		@Override
+		protected CompoundTag getSettingsNbtFromContentsNbt(CompoundTag contentsNbt) {
+			return contentsNbt;
+		}
+
+		@Override
+		protected void saveCategoryNbt(CompoundTag settingsNbt, String categoryName, CompoundTag tag) {
+			//noop
+		}
+	};
 
 	protected NoopStorageWrapper() {}
 
@@ -65,11 +75,6 @@ public class NoopStorageWrapper implements IStorageWrapper {
 	}
 
 	@Override
-	public void copyDataTo(IStorageWrapper otherStorageWrapper) {
-		//noop
-	}
-
-	@Override
 	public SettingsHandler getSettingsHandler() {
 		return settingsHandler;
 	}
@@ -85,12 +90,12 @@ public class NoopStorageWrapper implements IStorageWrapper {
 	}
 
 	@Override
-	public int getClothColor() {
+	public int getMainColor() {
 		return -1;
 	}
 
 	@Override
-	public int getBorderColor() {
+	public int getAccentColor() {
 		return -1;
 	}
 
@@ -110,7 +115,7 @@ public class NoopStorageWrapper implements IStorageWrapper {
 	}
 
 	@Override
-	public void setColors(int clothColor, int borderColor) {
+	public void setColors(int mainColor, int accentColor) {
 		//noop
 	}
 
@@ -149,12 +154,10 @@ public class NoopStorageWrapper implements IStorageWrapper {
 		//noop
 	}
 
-	@Override
 	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
 		//noop
 	}
 
-	@Override
 	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
 		//noop
 	}
@@ -164,7 +167,6 @@ public class NoopStorageWrapper implements IStorageWrapper {
 		//noop
 	}
 
-	@Override
 	public void setContentsUuid(UUID storageUuid) {
 		//noop
 	}

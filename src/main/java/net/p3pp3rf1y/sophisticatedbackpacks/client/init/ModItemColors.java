@@ -19,9 +19,9 @@ public class ModItemColors {
 			}
 			return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(backpackWrapper -> {
 				if (layer == 0) {
-					return backpackWrapper.getClothColor();
+					return backpackWrapper.getMainColor();
 				} else if (layer == 1) {
-					return backpackWrapper.getBorderColor();
+					return backpackWrapper.getAccentColor();
 				}
 				return -1;
 			}).orElse(-1);

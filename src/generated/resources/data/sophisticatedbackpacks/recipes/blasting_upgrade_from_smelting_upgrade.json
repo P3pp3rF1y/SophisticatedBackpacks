@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "blasting_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:blasting_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

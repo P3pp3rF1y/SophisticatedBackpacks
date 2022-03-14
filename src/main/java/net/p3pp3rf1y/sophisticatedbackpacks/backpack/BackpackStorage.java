@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,7 +120,7 @@ public class BackpackStorage extends SavedData {
 				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 				currentContents.put(key, contents.get(key));
 
-				if (key.equals(SettingsHandler.SETTINGS_TAG)) {
+				if (key.equals(BackpackSettingsHandler.SETTINGS_TAG)) {
 					updatedBackpackSettingsFlags.add(backpackUuid);
 				}
 			}

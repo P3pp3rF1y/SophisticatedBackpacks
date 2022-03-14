@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedcore.inventory;
 
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -303,5 +304,15 @@ public abstract class InventoryHandler extends ItemStackHandler implements IItem
 	public ItemStack insertItem(ItemStack stack, boolean simulate) {
 		initSlotTracker();
 		return slotTracker.insertItemIntoHandler(this, this::insertItemInternal, this::triggerOverflowUpgrades, stack, simulate);
+	}
+
+	public void increaseSize(int diff) {
+		NonNullList<ItemStack> previousStacks = stacks;
+		stacks = NonNullList.withSize(previousStacks.size() + diff, ItemStack.EMPTY);
+		for (int slot = 0; slot < previousStacks.size(); slot++) {
+			stacks.set(slot, previousStacks.get(slot));
+		}
+		initStackNbts();
+		saveInventory();
 	}
 }

@@ -146,8 +146,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "Jogador",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "Configuração de todas as Mochilas",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "Aplica estas configurações a todas as mochilas do jogador presentes no mundo",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "Configuração desta Mochila",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "Aplica estas configurações somente a esta mochila",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Mover para aba",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Mover para inventário",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "Clicar com o mouse + shift em um item no inventário ou mochila, faz com que ele vá para a aba de acessório aberto e só depois vá para o inventário ou mochila.",

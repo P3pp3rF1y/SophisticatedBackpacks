@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.common.gui;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -177,6 +178,10 @@ public abstract class SettingsContainer<S extends IStorageWrapper> extends Abstr
 
 	public Player getPlayer() {
 		return player;
+	}
+
+	public BlockPos getBlockPosition() {
+		return BlockPos.ZERO;
 	}
 
 	private static class ViewOnlyStorageInventorySlot extends SlotItemHandler {

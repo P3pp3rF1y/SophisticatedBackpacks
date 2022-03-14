@@ -18,5 +18,5 @@ public abstract class UpgradeInventoryPartBase<C extends UpgradeContainerBase<?,
 
 	public abstract void renderErrorOverlay(PoseStack matrixStack);
 
-	public abstract void renderTooltip(StorageScreen<?> screen, PoseStack matrixStack, int mouseX, int mouseY);
+	public abstract void renderTooltip(StorageScreenBase<?> screen, PoseStack matrixStack, int mouseX, int mouseY);
 }

@@ -7,10 +7,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainer;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
@@ -60,7 +60,7 @@ public class BackpackSettingsContainer extends SettingsContainer<IBackpackWrappe
 			CompoundTag settingsContents = new CompoundTag();
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
-				settingsContents.put(SettingsHandler.SETTINGS_TAG, settingsNbt);
+				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
 				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
 		});

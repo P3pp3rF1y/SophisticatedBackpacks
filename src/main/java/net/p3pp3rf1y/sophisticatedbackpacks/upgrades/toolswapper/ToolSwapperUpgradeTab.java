@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions;
@@ -39,7 +39,7 @@ public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgrade
 
 	protected final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
-	public ToolSwapperUpgradeTab(ToolSwapperUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen) {
+	public ToolSwapperUpgradeTab(ToolSwapperUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
 		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("advanced_tool_swapper"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_tool_swapper"));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), SWAP_WEAPON, button -> getContainer().setSwapWeapon(!getContainer().shouldSwapWeapon()),
 				getContainer()::shouldSwapWeapon));

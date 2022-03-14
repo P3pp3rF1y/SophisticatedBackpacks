@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
+package net.p3pp3rf1y.sophisticatedcore.crafting;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;

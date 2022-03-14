@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "jukebox_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:jukebox_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

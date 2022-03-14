@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "tank_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:tank_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

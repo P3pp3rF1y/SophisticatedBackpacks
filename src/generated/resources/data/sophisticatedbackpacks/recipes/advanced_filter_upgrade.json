@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "advanced_filter_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_filter_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

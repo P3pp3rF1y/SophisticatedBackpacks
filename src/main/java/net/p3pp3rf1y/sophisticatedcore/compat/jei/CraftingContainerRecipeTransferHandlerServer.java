@@ -1,10 +1,10 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
+package net.p3pp3rf1y.sophisticatedcore.compat.jei;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	 * Called server-side to actually put the items in place.
 	 */
 	public static void setItems(Player player, Map<Integer, Integer> slotIdMap, List<Integer> craftingSlots, List<Integer> inventorySlots, boolean maxTransfer) {
-		if (!(player.containerMenu instanceof BackpackContainer container)) {
+		if (!(player.containerMenu instanceof StorageContainerMenuBase<?> container)) {
 			return;
 		}
 
@@ -52,7 +52,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		container.broadcastChanges();
 	}
 
-	private static void putIntoInventory(Player player, List<Integer> inventorySlots, BackpackContainer container, List<ItemStack> clearedCraftingItems) {
+	private static void putIntoInventory(Player player, List<Integer> inventorySlots, StorageContainerMenuBase<?> container, List<ItemStack> clearedCraftingItems) {
 		for (ItemStack oldCraftingItem : clearedCraftingItems) {
 			int added = addStack(container, inventorySlots, oldCraftingItem);
 			if (added < oldCraftingItem.getCount() && !player.getInventory().add(oldCraftingItem)) {
@@ -107,7 +107,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 
 	private static Map<Integer, ItemStack> removeItemsFromInventory(
 			Player player,
-			BackpackContainer container,
+			StorageContainerMenuBase<?> container,
 			Map<Integer, ItemStack> required,
 			List<Integer> craftingSlots,
 			List<Integer> inventorySlots,
@@ -194,7 +194,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	}
 
 	@Nullable
-	private static Slot getSlotWithStack(BackpackContainer container, ItemStack stack, List<Integer> craftingSlots, List<Integer> inventorySlots) {
+	private static Slot getSlotWithStack(StorageContainerMenuBase<?> container, ItemStack stack, List<Integer> craftingSlots, List<Integer> inventorySlots) {
 		Slot slot = getSlotWithStack(container, craftingSlots, stack);
 		if (slot == null) {
 			slot = getSlotWithStack(container, inventorySlots, stack);
@@ -203,7 +203,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		return slot;
 	}
 
-	private static int addStack(BackpackContainer container, Collection<Integer> slotIndexes, ItemStack stack) {
+	private static int addStack(StorageContainerMenuBase<?> container, Collection<Integer> slotIndexes, ItemStack stack) {
 		int added = 0;
 		// Add to existing stacks first
 		for (final Integer slotIndex : slotIndexes) {
@@ -265,7 +265,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 	 * @return the slot that contains the itemStack. returns null if no slot contains the itemStack.
 	 */
 	@Nullable
-	private static Slot getSlotWithStack(BackpackContainer container, Iterable<Integer> slotNumbers, ItemStack itemStack) {
+	private static Slot getSlotWithStack(StorageContainerMenuBase<?> container, Iterable<Integer> slotNumbers, ItemStack itemStack) {
 		for (Integer slotNumber : slotNumbers) {
 			if (slotNumber >= 0 && slotNumber < getTotalSlotsSize(container)) {
 				Slot slot = container.getSlot(slotNumber);
@@ -278,7 +278,7 @@ public class CraftingContainerRecipeTransferHandlerServer {
 		return null;
 	}
 
-	private static int getTotalSlotsSize(BackpackContainer container) {
+	private static int getTotalSlotsSize(StorageContainerMenuBase<?> container) {
 		return container.upgradeSlots.size() + container.realInventorySlots.size();
 	}
 }

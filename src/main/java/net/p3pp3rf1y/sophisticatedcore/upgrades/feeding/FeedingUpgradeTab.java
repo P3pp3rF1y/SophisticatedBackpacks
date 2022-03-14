@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades.feeding;
 
 import net.minecraft.network.chat.Component;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
@@ -35,7 +35,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 
 	protected FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
-	protected FeedingUpgradeTab(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, Component tabLabel, Component closedTooltip) {
+	protected FeedingUpgradeTab(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 	}
 
@@ -45,7 +45,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 	}
 
 	public static class Basic extends FeedingUpgradeTab {
-		public Basic(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow) {
+		public Basic(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("feeding"), TranslationHelper.INSTANCE.translUpgradeTooltip("feeding"));
 			filterLogicControl = addHideableChild(new FilterLogicControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					slotsPerRow));
@@ -53,7 +53,7 @@ public class FeedingUpgradeTab extends UpgradeSettingsTab<FeedingUpgradeContaine
 	}
 
 	public static class Advanced extends FeedingUpgradeTab {
-		public Advanced(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow) {
+		public Advanced(FeedingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("advanced_feeding"), TranslationHelper.INSTANCE.translUpgradeTooltip("advanced_feeding"));
 			addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), HUNGER_LEVEL,
 					button -> getContainer().setFeedAtHungerLevel(getContainer().getFeedAtHungerLevel().next()),

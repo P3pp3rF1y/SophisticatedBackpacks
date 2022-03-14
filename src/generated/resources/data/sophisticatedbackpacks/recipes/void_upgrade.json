@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "void_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:void_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

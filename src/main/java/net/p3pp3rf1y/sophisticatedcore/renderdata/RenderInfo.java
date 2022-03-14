@@ -44,6 +44,8 @@ public abstract class RenderInfo {
 	@Nullable
 	private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
+	private Consumer<RenderInfo> changeListener = ri -> {};
+
 	protected RenderInfo(Supplier<Runnable> getSaveHandler) {
 		this.getSaveHandler = getSaveHandler;
 	}
@@ -82,8 +84,20 @@ public abstract class RenderInfo {
 		save();
 	}
 
-	protected void save() {
+	public void setChangeListener(Consumer<RenderInfo> changeListener) {
+		this.changeListener = changeListener;
+	}
+
+	protected void save(boolean triggerChangeListener) {
 		getSaveHandler.get().run();
+
+		if (triggerChangeListener) {
+			changeListener.accept(this);
+		}
+	}
+
+	protected void save() {
+		save(false);
 	}
 
 	protected abstract void serializeRenderInfo(CompoundTag renderInfo);
@@ -95,6 +109,7 @@ public abstract class RenderInfo {
 			deserializeTanks(renderInfoTag);
 			deserializeBattery(renderInfoTag);
 		});
+		changeListener.accept(this);
 	}
 
 	private void deserializeItemDisplay(CompoundTag renderInfoTag) {
@@ -128,19 +143,19 @@ public abstract class RenderInfo {
 	}
 
 	public void deserializeFrom(CompoundTag renderInfoNbt) {
-		resetUpgradeInfo();
+		resetUpgradeInfo(false);
 		serializeRenderInfo(renderInfoNbt);
 		deserialize();
 	}
 
-	public void resetUpgradeInfo() {
+	public void resetUpgradeInfo(boolean triggerChangeListener) {
 		tankRenderInfos.clear();
 		batteryRenderInfo = null;
 		getRenderInfoTag().ifPresent(renderInfoTag -> {
 			renderInfoTag.remove(TANKS_TAG);
 			renderInfoTag.remove(BATTERY_TAG);
 		});
-		save();
+		save(triggerChangeListener);
 	}
 
 	public void setTankRenderInfo(TankPosition tankPosition, IRenderedTankUpgrade.TankRenderInfo tankRenderInfo) {

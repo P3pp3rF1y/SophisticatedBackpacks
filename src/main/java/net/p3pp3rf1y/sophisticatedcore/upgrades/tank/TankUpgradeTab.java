@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedcore.upgrades.tank;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.Slot;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
@@ -13,7 +13,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import java.util.List;
 
 public class TankUpgradeTab extends UpgradeSettingsTab<TankUpgradeContainer> {
-	public TankUpgradeTab(TankUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen) {
+	public TankUpgradeTab(TankUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
 		super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("tank"), TranslationHelper.INSTANCE.translUpgradeTooltip("tank"));
 		openTabDimension = new Dimension(48, 48);
 	}

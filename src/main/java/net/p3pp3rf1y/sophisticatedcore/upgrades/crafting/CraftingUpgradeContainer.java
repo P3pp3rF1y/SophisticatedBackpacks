@@ -15,7 +15,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -49,6 +49,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		craftingResultSlot = new ResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
 			@Override
 			public void onTake(Player thePlayer, ItemStack stack) {
+				ItemStack remainingStack = getItem();
 				checkTakeAchievements(stack);
 				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
 				NonNullList<ItemStack> nonnulllist;
@@ -76,10 +77,14 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 							player.drop(itemstack1, false);
 						}
 					}
-					if (thePlayer.containerMenu instanceof StorageContainerMenu<?> storageContainerMenu) {
+					if (thePlayer.containerMenu instanceof StorageContainerMenuBase<?> storageContainerMenu) {
 						Slot slot = slots.get(i);
 						storageContainerMenu.setSlotStackToUpdate(slot.index, slot.getItem());
 					}
+				}
+
+				if (!remainingStack.isEmpty()) {
+					player.drop(remainingStack, false);
 				}
 			}
 		};
@@ -117,7 +122,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 			}
 
 			craftingResultSlot.set(itemstack);
-			if (serverplayerentity.containerMenu instanceof StorageContainerMenu<?> storageContainerMenu) {
+			if (serverplayerentity.containerMenu instanceof StorageContainerMenuBase<?> storageContainerMenu) {
 				storageContainerMenu.setSlotStackToUpdate(craftingResultSlot.index, itemstack);
 			}
 		}

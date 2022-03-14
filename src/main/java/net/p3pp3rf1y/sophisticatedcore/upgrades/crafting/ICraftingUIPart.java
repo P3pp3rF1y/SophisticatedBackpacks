@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedcore.upgrades.crafting;
 import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface ICraftingUIPart {
 
 	int getWidth();
 
-	void setStorageScreen(StorageScreen<?> screen);
+	void setStorageScreen(StorageScreenBase<?> screen);
 
 	ICraftingUIPart NOOP = new ICraftingUIPart() {
 		@Override
@@ -34,7 +34,7 @@ public interface ICraftingUIPart {
 		}
 
 		@Override
-		public void setStorageScreen(StorageScreen<?> screen) {
+		public void setStorageScreen(StorageScreenBase<?> screen) {
 			//noop
 		}
 	};

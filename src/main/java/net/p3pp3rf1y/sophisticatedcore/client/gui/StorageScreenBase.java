@@ -38,7 +38,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageBackgroundProperties;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageInventorySlot;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.network.TransferFullSlotMessage;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper.GUI_CONTROLS;
 
-public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends AbstractContainerScreen<S> {
+public abstract class StorageScreenBase<S extends StorageContainerMenuBase<?>> extends AbstractContainerScreen<S> {
 	public static final int ERROR_BACKGROUND_COLOR = 0xF0100010;
 	public static final int ERROR_BORDER_COLOR = ColorHelper.getColor(DyeColor.RED.getTextureDiffuseColors()) | 0xFF000000;
 	private static final int DISABLED_SLOT_COLOR = -1072689136;
@@ -92,7 +92,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 		craftingUIPart = part;
 	}
 
-	protected StorageScreen(S pMenu, Inventory pPlayerInventory, Component pTitle) {
+	protected StorageScreenBase(S pMenu, Inventory pPlayerInventory, Component pTitle) {
 		super(pMenu, pPlayerInventory, pTitle);
 		imageHeight = 114 + getMenu().getNumberOfRows() * 18;
 		imageWidth = getMenu().getStorageBackgroundProperties().getSlotsOnLine() * 18 + 14;
@@ -288,7 +288,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 				return;
 			}
 
-			if (StorageContainerMenu.canItemQuickReplace(slot, itemstack1) && menu.canDragTo(slot)) {
+			if (StorageContainerMenuBase.canItemQuickReplace(slot, itemstack1) && menu.canDragTo(slot)) {
 				itemstack = itemstack1.copy();
 				flag = true;
 				AbstractContainerMenu.getQuickCraftSlotCount(quickCraftSlots, quickCraftingType, itemstack, slot.getItem().isEmpty() ? 0 : slot.getItem().getCount());
@@ -490,16 +490,31 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 			}
 		}
 
+		handleQuickMoveAll(mouseX, mouseY, button);
+
+		return super.mouseReleased(mouseX, mouseY, button);
+	}
+
+	private void handleQuickMoveAll(double mouseX, double mouseY, int button) {
 		Slot slot = findSlot(mouseX, mouseY);
-		if (doubleclick && slot != null && button == 0 && menu.canTakeItemForPickAll(ItemStack.EMPTY, slot) && hasShiftDown() && !lastQuickMoved.isEmpty()) {
+		if (doubleclick && !getMenu().getCarried().isEmpty() && slot != null && button == 0 && menu.canTakeItemForPickAll(ItemStack.EMPTY, slot) && hasShiftDown() && !lastQuickMoved.isEmpty()) {
 			for (Slot slot2 : menu.realInventorySlots) {
-				if (slot2 != null && slot2.mayPickup(minecraft.player) && slot2.hasItem() && slot2.isSameInventory(slot) && AbstractContainerMenu.canItemQuickReplace(slot2, lastQuickMoved, true)) {
+				tryQuickMoveSlot(button, slot, slot2);
+			}
+		}
+	}
+
+	private void tryQuickMoveSlot(int button, Slot slot, Slot slot2) {
+		if (slot2.mayPickup(minecraft.player) && slot2.hasItem() && slot2.isSameInventory(slot)) {
+			ItemStack slotItem = slot2.getItem();
+			if (ItemStack.isSameItemSameTags(lastQuickMoved, slotItem)) {
+				if (slotItem.getCount() > slotItem.getMaxStackSize()) {
+					SophisticatedCore.PACKET_HANDLER.sendToServer(new TransferFullSlotMessage(slot2.index));
+				} else {
 					slotClicked(slot2, slot2.index, button, ClickType.QUICK_MOVE);
 				}
 			}
 		}
-
-		return super.mouseReleased(mouseX, mouseY, button);
 	}
 
 	@Override
@@ -512,7 +527,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 	}
 
 	private void handleInventoryMouseClick(int slotNumber, int mouseButton, ClickType type) {
-		StorageContainerMenu<?> menu = getMenu();
+		StorageContainerMenuBase<?> menu = getMenu();
 		List<ItemStack> realInventoryItems = new ArrayList<>(menu.realInventorySlots.size());
 		menu.realInventorySlots.forEach(slot -> realInventoryItems.add(slot.getItem().copy()));
 		List<ItemStack> upgradeItems = new ArrayList<>(menu.upgradeSlots.size());
@@ -521,7 +536,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 		menu.clicked(slotNumber, mouseButton, type, minecraft.player);
 		Int2ObjectMap<ItemStack> changedSlotIndexes = new Int2ObjectOpenHashMap<>();
 
-		int inventorySlotsToCheck = Math.min(realInventoryItems.size() - StorageContainerMenu.NUMBER_OF_PLAYER_SLOTS, menu.getInventorySlotsSize() - StorageContainerMenu.NUMBER_OF_PLAYER_SLOTS);
+		int inventorySlotsToCheck = Math.min(realInventoryItems.size() - StorageContainerMenuBase.NUMBER_OF_PLAYER_SLOTS, menu.getInventorySlotsSize() - StorageContainerMenuBase.NUMBER_OF_PLAYER_SLOTS);
 
 		for (int i = 0; i < inventorySlotsToCheck; i++) {
 			ItemStack itemstack = realInventoryItems.get(i);
@@ -531,9 +546,9 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 			}
 		}
 
-		for (int i = 0; i < StorageContainerMenu.NUMBER_OF_PLAYER_SLOTS; i++) {
-			ItemStack itemstack = realInventoryItems.get(realInventoryItems.size() - StorageContainerMenu.NUMBER_OF_PLAYER_SLOTS + i);
-			int slotIndex = menu.getInventorySlotsSize() - StorageContainerMenu.NUMBER_OF_PLAYER_SLOTS + i;
+		for (int i = 0; i < StorageContainerMenuBase.NUMBER_OF_PLAYER_SLOTS; i++) {
+			ItemStack itemstack = realInventoryItems.get(realInventoryItems.size() - StorageContainerMenuBase.NUMBER_OF_PLAYER_SLOTS + i);
+			int slotIndex = menu.getInventorySlotsSize() - StorageContainerMenuBase.NUMBER_OF_PLAYER_SLOTS + i;
 			ItemStack slotStack = menu.getSlot(slotIndex).getItem();
 			if (!ItemStack.matches(itemstack, slotStack)) {
 				changedSlotIndexes.put(slotIndex, slotStack.copy());
@@ -585,7 +600,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 		ItemStack itemstack = getMenu().getCarried();
 		if (isQuickCrafting && slot != null && !itemstack.isEmpty()
 				&& (itemstack.getCount() > quickCraftSlots.size() || quickCraftingType == 2)
-				&& StorageContainerMenu.canItemQuickReplace(slot, itemstack) && slot.mayPlace(itemstack)
+				&& StorageContainerMenuBase.canItemQuickReplace(slot, itemstack) && slot.mayPlace(itemstack)
 				&& menu.canDragTo(slot)) {
 			quickCraftSlots.add(slot);
 			recalculateQuickCraftRemaining();
@@ -704,7 +719,7 @@ public abstract class StorageScreen<S extends StorageContainerMenu<?>> extends A
 		Matrix4f matrix4f = matrixStack.last().pose();
 		float leftX = (float) -tooltipWidth / 2;
 
-		GuiHelper.renderTooltipBackground(matrix4f, tooltipWidth, (int) leftX, 0, tooltipHeight, StorageScreen.ERROR_BACKGROUND_COLOR, StorageScreen.ERROR_BORDER_COLOR, StorageScreen.ERROR_BORDER_COLOR);
+		GuiHelper.renderTooltipBackground(matrix4f, tooltipWidth, (int) leftX, 0, tooltipHeight, StorageScreenBase.ERROR_BACKGROUND_COLOR, StorageScreenBase.ERROR_BORDER_COLOR, StorageScreenBase.ERROR_BORDER_COLOR);
 		MultiBufferSource.BufferSource renderTypeBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 		matrixStack.translate(0.0D, 0.0D, 400.0D);
 		GuiHelper.writeTooltipLines(wrappedTextLines, fontrenderer, leftX, 0, matrix4f, renderTypeBuffer, ERROR_TEXT_COLOR);

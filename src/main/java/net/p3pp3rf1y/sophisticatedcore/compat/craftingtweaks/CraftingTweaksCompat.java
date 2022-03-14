@@ -1,9 +1,11 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.craftingtweaks;
+package net.p3pp3rf1y.sophisticatedcore.compat.craftingtweaks;
 
 import net.blay09.mods.craftingtweaks.api.CraftingTweaksAPI;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.ICompat;
+import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
+import net.p3pp3rf1y.sophisticatedcore.compat.craftingtweaks.CraftingUpgradeTweakProvider;
+import net.p3pp3rf1y.sophisticatedcore.compat.craftingtweaks.CraftingUpgradeTweakUIPart;
 
 public class CraftingTweaksCompat implements ICompat {
 	@Override

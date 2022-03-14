@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedcore;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -13,8 +14,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.CommonEventHandler;
+import net.p3pp3rf1y.sophisticatedcore.crafting.ItemEnabledCondition;
+import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeClearRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedcore.data.DataGenerators;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,11 +46,14 @@ public class SophisticatedCore {
 	}
 
 	private void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> evt) {
+		CraftingHelper.register(ItemEnabledCondition.Serializer.INSTANCE);
 		evt.getRegistry().register(UpgradeNextTierRecipe.SERIALIZER.setRegistryName(MOD_ID, "upgrade_next_tier"));
+		evt.getRegistry().register(UpgradeClearRecipe.SERIALIZER.setRegistryName(SophisticatedCore.MOD_ID, "upgrade_clear"));
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
 		PACKET_HANDLER.init();
+		ModCompat.initCompats();
 	}
 
 	public static ResourceLocation getRL(String regName) {

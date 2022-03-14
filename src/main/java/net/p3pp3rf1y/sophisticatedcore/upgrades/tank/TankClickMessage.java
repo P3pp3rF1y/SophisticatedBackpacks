@@ -9,7 +9,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 
 import javax.annotation.Nullable;
@@ -37,11 +37,11 @@ public class TankClickMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer sender, TankClickMessage msg) {
-		if (sender == null || !(sender.containerMenu instanceof StorageContainerMenu)) {
+		if (sender == null || !(sender.containerMenu instanceof StorageContainerMenuBase)) {
 			return;
 		}
 		AbstractContainerMenu containerMenu = sender.containerMenu;
-		UpgradeContainerBase<?, ?> upgradeContainer = ((StorageContainerMenu<?>) containerMenu).getUpgradeContainers().get(msg.upgradeSlot);
+		UpgradeContainerBase<?, ?> upgradeContainer = ((StorageContainerMenuBase<?>) containerMenu).getUpgradeContainers().get(msg.upgradeSlot);
 		if (!(upgradeContainer instanceof TankUpgradeContainer tankContainer)) {
 			return;
 		}

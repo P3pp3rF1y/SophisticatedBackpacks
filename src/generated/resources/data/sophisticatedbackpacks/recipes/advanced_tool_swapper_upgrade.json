@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "advanced_tool_swapper_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_tool_swapper_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

@@ -127,8 +127,6 @@
     "gui.sophisticatedcore.settings.buttons.context_player": "플레이어",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip": "플레이어 설정",
     "gui.sophisticatedcore.settings.buttons.context_player.tooltip_detail": "재정의되지 않는 한 모든 배낭에 적용합니다",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip": "이 배낭의 설정",
-    "gui.sophisticatedcore.settings.buttons.context_backpack.tooltip_detail": "이 배낭을 재정의합니다",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on": "Shift 클릭이 열린 창 우선",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.off": "Shift 클릭이 인벤토리 우선",
     "gui.sophisticatedcore.settings.buttons.shift_click_open_tab.on.tooltip": "인벤토리/배낭에서 Shift 클릭을 하면 먼저 아이템을 열린 창에 넣은 다음 인벤토리/배낭에 넣습니다",

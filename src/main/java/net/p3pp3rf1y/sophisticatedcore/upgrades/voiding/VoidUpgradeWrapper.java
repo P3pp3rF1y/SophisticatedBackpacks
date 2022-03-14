@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IInsertResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IOverflowResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IPickupResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.PrimaryMatch;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
@@ -46,6 +47,18 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 
 	@Override
 	public ItemStack onBeforeInsert(IItemHandlerSimpleInserter inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+		if (shouldVoidOverflow && inventoryHandler.getStackInSlot(slot).isEmpty() && (!filterLogic.shouldMatchNbt() || !filterLogic.shouldMatchDurability() || filterLogic.getPrimaryMatch() != PrimaryMatch.ITEM) && filterLogic.matchesFilter(stack)) {
+			for (int s = 0; s < inventoryHandler.getSlots(); s++) {
+				if (s == slot) {
+					continue;
+				}
+				if (filterLogic.matchesFilter(inventoryHandler.getStackInSlot(s))) {
+					return ItemStack.EMPTY;
+				}
+			}
+			return stack;
+		}
+
 		return !shouldVoidOverflow && filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
 	}
 
@@ -112,5 +125,10 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	@Override
 	public ItemStack onOverflow(ItemStack stack) {
 		return filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
+	}
+
+	@Override
+	public boolean stackMatchesFilter(ItemStack stack) {
+		return filterLogic.matchesFilter(stack);
 	}
 }

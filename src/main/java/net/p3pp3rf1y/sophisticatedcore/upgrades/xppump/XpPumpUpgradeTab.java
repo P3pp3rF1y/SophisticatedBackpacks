@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.DyeColor;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
@@ -57,7 +57,7 @@ public class XpPumpUpgradeTab extends UpgradeSettingsTab<XpPumpUpgradeContainer>
 	private final Button takeButton;
 	private final Button storeButton;
 
-	public XpPumpUpgradeTab(XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, boolean isMendingTurnedOn) {
+	public XpPumpUpgradeTab(XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, boolean isMendingTurnedOn) {
 		super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("xp_pump"), TranslationHelper.INSTANCE.translUpgradeTooltip("xp_pump"));
 		int currentYOffset = 24;
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + currentYOffset), DIRECTION,

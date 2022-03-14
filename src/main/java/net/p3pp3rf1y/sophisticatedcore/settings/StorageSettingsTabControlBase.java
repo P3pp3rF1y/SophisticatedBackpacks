@@ -14,22 +14,24 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class StorageSettingsTabControl extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
+public abstract class StorageSettingsTabControlBase extends SettingsTabControl<SettingsScreen, SettingsTab<?>> {
 	private final List<SettingsTab<?>> settingsTabs = new ArrayList<>();
+	protected final SettingsScreen screen;
 
 	protected static <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> void addFactory(
 			ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder, String categoryName, ISettingsTabFactory<C, T> factory) {
 		builder.put(categoryName, factory);
 	}
 
-	protected StorageSettingsTabControl(SettingsScreen screen, Position position) {
+	protected StorageSettingsTabControlBase(SettingsScreen screen, Position position) {
 		super(position);
-		addChild(getNewReturnBackTab());
+		this.screen = screen;
+		addChild(instantiateReturnBackTab());
 		screen.getMenu().forEachSettingsContainer((categoryName, settingsContainer) -> settingsTabs.add(addSettingsTab(() -> {}, () -> {},
 				instantiateContainer(categoryName, settingsContainer, new Position(x, getTopY()), screen))));
 	}
 
-	protected abstract Tab getNewReturnBackTab();
+	protected abstract Tab instantiateReturnBackTab();
 
 	public void renderSlotOverlays(PoseStack matrixStack, Slot slot, ISlotOverlayRenderer overlayRenderer) {
 		List<Integer> colors = new ArrayList<>();

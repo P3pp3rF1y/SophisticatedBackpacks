@@ -96,20 +96,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
-		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(t -> {
-			IItemHandlerModifiable handler = t.getBackpackWrapper().getInventoryForInputOutput();
-			AtomicDouble totalFilled = new AtomicDouble(0);
-			AtomicBoolean isEmpty = new AtomicBoolean(true);
-			InventoryHelper.iterate(handler, (slot, stack) -> {
-				if (!stack.isEmpty()) {
-					int slotLimit = handler.getSlotLimit(slot);
-					totalFilled.addAndGet(stack.getCount() / (slotLimit / ((float) 64 / stack.getMaxStackSize())));
-					isEmpty.set(false);
-				}
-			});
-			double percentFilled = totalFilled.get() / handler.getSlots();
-			return Mth.floor(percentFilled * 14.0F) + (isEmpty.get() ? 0 : 1);
-		}).orElse(0);
+		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(t -> InventoryHelper.getAnalogOutputSignal(t.getBackpackWrapper().getInventoryForInputOutput())).orElse(0);
 	}
 
 	@Override

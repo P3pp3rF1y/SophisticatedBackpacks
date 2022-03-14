@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,6 +32,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
@@ -224,7 +226,7 @@ public class EntityBackpackAdditionHandler {
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 
-	private static void setLoot(Monster monster, IStorageWrapper backpackWrapper, int difficulty) {
+	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
 		MinecraftServer server = monster.level.getServer();
 		if (server == null) {
 			return;
@@ -245,7 +247,7 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static void addLoot(Monster monster, IStorageWrapper backpackWrapper, int difficulty) {
+	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
 		if (difficulty != 0) {
 			Config.COMMON.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
 				float lootPercentage = (float) difficulty / MAX_DIFFICULTY;
@@ -277,7 +279,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBackpackUuid(Monster entity) {
-		if (!entity.isDeadOrDying() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (entity.level.isClientSide() || (entity.getRemovalReason() != Entity.RemovalReason.KILLED && entity.getRemovalReason() != Entity.RemovalReason.DISCARDED) || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 
@@ -305,12 +307,10 @@ public class EntityBackpackAdditionHandler {
 				}));
 	}
 
-	private static class BackpackAddition {
-		private final Item backpackItem;
-		private final int minDifficulty;
-
-		private final List<WeightedElement<Item>> helmetChances;
-
+	private record BackpackAddition(Item backpackItem, int minDifficulty,
+									List<WeightedElement<Item>> helmetChances,
+									List<WeightedElement<Item>> leggingsChances,
+									List<WeightedElement<Item>> bootsChances) {
 		public List<WeightedElement<Item>> getHelmetChances() {
 			return helmetChances;
 		}
@@ -321,17 +321,6 @@ public class EntityBackpackAdditionHandler {
 
 		public List<WeightedElement<Item>> getBootsChances() {
 			return bootsChances;
-		}
-
-		private final List<WeightedElement<Item>> leggingsChances;
-		private final List<WeightedElement<Item>> bootsChances;
-
-		private BackpackAddition(Item backpackItem, int minDifficulty, List<WeightedElement<Item>> helmetChances, List<WeightedElement<Item>> leggingsChances, List<WeightedElement<Item>> bootsChances) {
-			this.backpackItem = backpackItem;
-			this.minDifficulty = minDifficulty;
-			this.helmetChances = helmetChances;
-			this.leggingsChances = leggingsChances;
-			this.bootsChances = bootsChances;
 		}
 
 		public Item getBackpackItem() {

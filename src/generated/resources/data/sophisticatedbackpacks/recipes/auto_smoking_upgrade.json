@@ -2,7 +2,7 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "auto_smoking_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:auto_smoking_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],

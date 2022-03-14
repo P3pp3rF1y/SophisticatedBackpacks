@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 
@@ -58,7 +59,7 @@ public class NBTHelper {
 		return getTagValue(tag, key, CompoundTag::getCompound);
 	}
 
-	private static <T> Optional<T> getTagValue(CompoundTag tag, String key, BiFunction<CompoundTag, String, T> getValue) {
+	public static <T> Optional<T> getTagValue(CompoundTag tag, String key, BiFunction<CompoundTag, String, T> getValue) {
 		if (!tag.contains(key)) {
 			return Optional.empty();
 		}
@@ -180,6 +181,14 @@ public class NBTHelper {
 			return;
 		}
 		stack.getTag().remove(key);
+	}
+
+	public static Optional<Component> getComponent(CompoundTag tag, String key) {
+		return getTagValue(tag, key, (t, k) -> Component.Serializer.fromJson(t.getString(k)));
+	}
+
+	public static Optional<String> getString(CompoundTag tag, String key) {
+		return getTagValue(tag, key, CompoundTag::getString);
 	}
 
 	public static Optional<String> getString(ItemStack stack, String key) {

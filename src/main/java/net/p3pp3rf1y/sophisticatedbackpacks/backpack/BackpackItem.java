@@ -49,6 +49,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
@@ -56,13 +57,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -114,7 +113,7 @@ public class BackpackItem extends ItemBase {
 	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
 		super.fillItemCategory(group, items);
 
-		if (!allowdedIn(group) || this != ModItems.BACKPACK.get() || !Config.COMMON.enabledItems.isItemEnabled(this)) {
+		if (!allowdedIn(group) || this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
@@ -124,10 +123,10 @@ public class BackpackItem extends ItemBase {
 			items.add(stack);
 		}
 
-		int clothColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(
+		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(
 				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
 		));
-		int trimColor = BackpackDyeRecipe.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, List.of(
+		int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, List.of(
 				DyeColor.BLUE, DyeColor.BLACK
 		));
 
@@ -303,7 +302,7 @@ public class BackpackItem extends ItemBase {
 					return LazyOptional.of(() -> wrapper).cast();
 				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
-				} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY) {
+				} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY && Boolean.TRUE.equals(Config.COMMON.itemFluidHandlerEnabled.get())) {
 					return wrapper.getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
 				} else if (cap == CapabilityEnergy.ENERGY) {
 					return wrapper.getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);

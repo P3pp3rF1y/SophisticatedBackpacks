@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedcore.upgrades.magnet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
@@ -33,7 +33,7 @@ public class MagnetUpgradeTab extends UpgradeSettingsTab<MagnetUpgradeContainer>
 
 	protected ContentsFilterControl filterLogicControl;
 
-	protected MagnetUpgradeTab(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, Component tabLabel, Component closedTooltip) {
+	protected MagnetUpgradeTab(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), PICKUP_ITEMS,
@@ -50,7 +50,7 @@ public class MagnetUpgradeTab extends UpgradeSettingsTab<MagnetUpgradeContainer>
 	}
 
 	public static class Basic extends MagnetUpgradeTab {
-		public Basic(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+		public Basic(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("magnet"), TranslationHelper.INSTANCE.translUpgradeTooltip("magnet"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow, contentsFilterButton));
@@ -59,7 +59,7 @@ public class MagnetUpgradeTab extends UpgradeSettingsTab<MagnetUpgradeContainer>
 	}
 
 	public static class Advanced extends MagnetUpgradeTab {
-		public Advanced(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+		public Advanced(MagnetUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsPerRow, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, TranslationHelper.INSTANCE.translUpgrade("advanced_magnet"), TranslationHelper.INSTANCE.translUpgradeTooltip("advanced_magnet"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(),
 					slotsPerRow, contentsFilterButton));

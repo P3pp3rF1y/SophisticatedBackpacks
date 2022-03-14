@@ -12,7 +12,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeInventoryPartBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
@@ -31,9 +31,9 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 	private static final TextureBlitData OVERLAY = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(47, 30), new Dimension(16, 18));
 	private final Position pos;
 	private final int height;
-	private final StorageScreen<?> screen;
+	private final StorageScreenBase<?> screen;
 
-	public TankInventoryPart(int upgradeSlot, TankUpgradeContainer container, Position pos, int height, StorageScreen<?> screen) {
+	public TankInventoryPart(int upgradeSlot, TankUpgradeContainer container, Position pos, int height, StorageScreenBase<?> screen) {
 		super(upgradeSlot, container);
 		this.pos = pos;
 		this.height = height;
@@ -71,7 +71,7 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 		}
 
 		ItemStack cursorStack = screen.getMenu().getCarried();
-		if (!cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
+		if (cursorStack.getCount() > 1 || !cursorStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
 			return false;
 		}
 
@@ -82,11 +82,11 @@ public class TankInventoryPart extends UpgradeInventoryPartBase<TankUpgradeConta
 
 	@Override
 	public void renderErrorOverlay(PoseStack matrixStack) {
-		screen.renderOverlay(matrixStack, StorageScreen.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
+		screen.renderOverlay(matrixStack, StorageScreenBase.ERROR_SLOT_COLOR, getTankLeft() + 1, pos.y() + 1, 16, height - 2);
 	}
 
 	@Override
-	public void renderTooltip(StorageScreen<?> screen, PoseStack poseStack, int mouseX, int mouseY) {
+	public void renderTooltip(StorageScreenBase<?> screen, PoseStack poseStack, int mouseX, int mouseY) {
 		FluidStack contents = container.getContents();
 		int capacity = container.getTankCapacity();
 		if (contents.isEmpty()) {

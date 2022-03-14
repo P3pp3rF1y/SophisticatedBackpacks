@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedcore;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -59,17 +60,17 @@ public class Config {
 
 		public static class EnabledItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> itemsEnableList;
-			private final Map<String, Boolean> enabledMap = new ConcurrentHashMap<>();
+			private final Map<ResourceLocation, Boolean> enabledMap = new ConcurrentHashMap<>();
 
 			EnabledItems(ForgeConfigSpec.Builder builder) {
 				itemsEnableList = builder.comment("Disable / enable any items here (disables their recipes)").define("enabledItems", new ArrayList<>());
 			}
 
 			public boolean isItemEnabled(Item item) {
-				return RegistryHelper.getRegistryName(item).map(rn -> isItemEnabled(rn.getPath())).orElse(false);
+				return RegistryHelper.getRegistryName(item).map(this::isItemEnabled).orElse(false);
 			}
 
-			public boolean isItemEnabled(String itemRegistryName) {
+			public boolean isItemEnabled(ResourceLocation itemRegistryName) {
 				if (!COMMON_SPEC.isLoaded()) {
 					return true;
 				}
@@ -82,18 +83,18 @@ public class Config {
 				});
 			}
 
-			private void addEnabledItemToConfig(String itemRegistryName) {
-				itemsEnableList.get().add(itemRegistryName + ":true");
+			private void addEnabledItemToConfig(ResourceLocation itemRegistryName) {
+				itemsEnableList.get().add(itemRegistryName + "|true");
 				COMMON_SPEC.save();
 			}
 
 			private void loadEnabledMap() {
 				for (String itemEnabled : itemsEnableList.get()) {
-					String[] data = itemEnabled.split(":");
+					String[] data = itemEnabled.split("\\|");
 					if (data.length == 2) {
-						enabledMap.put(data[0], Boolean.valueOf(data[1]));
+						enabledMap.put(new ResourceLocation(data[0]), Boolean.valueOf(data[1]));
 					} else {
-						SophisticatedCore.LOGGER.error("Wrong data for enabledItems - expected name:true/false when {} was provided", itemEnabled);
+						SophisticatedCore.LOGGER.error("Wrong data for enabledItems - expected registry name|true/false when {} was provided", itemEnabled);
 					}
 				}
 			}

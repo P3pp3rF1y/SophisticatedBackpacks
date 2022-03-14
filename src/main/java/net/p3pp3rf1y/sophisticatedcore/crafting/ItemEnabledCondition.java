@@ -11,14 +11,14 @@ import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 
 public class ItemEnabledCondition implements ICondition {
 	private static final ResourceLocation NAME = SophisticatedCore.getRL("item_enabled");
-	private final String itemRegistryName;
+	private final ResourceLocation itemRegistryName;
 
 	public ItemEnabledCondition(Item item) {
 		//noinspection ConstantConditions - only called after actually registered
-		this(item.getRegistryName().getPath());
+		this(item.getRegistryName());
 	}
 
-	public ItemEnabledCondition(String itemRegistryName) {
+	public ItemEnabledCondition(ResourceLocation itemRegistryName) {
 		this.itemRegistryName = itemRegistryName;
 	}
 
@@ -37,12 +37,12 @@ public class ItemEnabledCondition implements ICondition {
 
 		@Override
 		public void write(JsonObject json, ItemEnabledCondition value) {
-			json.addProperty("itemRegistryName", value.itemRegistryName);
+			json.addProperty("itemRegistryName", value.itemRegistryName.toString());
 		}
 
 		@Override
 		public ItemEnabledCondition read(JsonObject json) {
-			return new ItemEnabledCondition(GsonHelper.getAsString(json, "itemRegistryName"));
+			return new ItemEnabledCondition(new ResourceLocation(GsonHelper.getAsString(json, "itemRegistryName")));
 		}
 
 		@Override

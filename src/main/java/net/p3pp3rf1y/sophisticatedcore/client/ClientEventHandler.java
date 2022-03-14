@@ -7,7 +7,7 @@ import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.init.ModParticles;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.StorageSoundHandler;
@@ -29,7 +29,7 @@ public class ClientEventHandler {
 
 	public static void stitchTextures(TextureStitchEvent.Pre evt) {
 		if (evt.getAtlas().location() == InventoryMenu.BLOCK_ATLAS) {
-			evt.addSprite(StorageContainerMenu.EMPTY_UPGRADE_SLOT_BACKGROUND);
+			evt.addSprite(StorageContainerMenuBase.EMPTY_UPGRADE_SLOT_BACKGROUND);
 			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_INPUT_SLOT_BACKGROUND);
 			evt.addSprite(TankUpgradeContainer.EMPTY_TANK_OUTPUT_SLOT_BACKGROUND);
 			evt.addSprite(BatteryUpgradeContainer.EMPTY_BATTERY_INPUT_SLOT_BACKGROUND);

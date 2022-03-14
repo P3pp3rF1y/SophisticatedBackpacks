@@ -8,15 +8,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainer;
-import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControl;
+import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControlBase;
 
 public class BackpackSettingsScreen extends SettingsScreen {
-	public BackpackSettingsScreen(SettingsContainer screenContainer, Inventory inv, Component titleIn) {
+	public BackpackSettingsScreen(SettingsContainer<?> screenContainer, Inventory inv, Component titleIn) {
 		super(screenContainer, inv, titleIn);
 	}
 
 	@Override
-	protected StorageSettingsTabControl initializeTabControl() {
+	protected StorageSettingsTabControlBase initializeTabControl() {
 		return new BackpackSettingsTabControl(this, new Position(leftPos + imageWidth, topPos + 4));
 	}
 

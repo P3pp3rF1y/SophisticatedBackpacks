@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
@@ -26,7 +26,7 @@ public class InceptionUpgradeTab extends UpgradeSettingsTab<InceptionUpgradeCont
 							SBPTranslationHelper.INSTANCE.getTranslatedLines(SBPTranslationHelper.INSTANCE.translUpgradeButton("inventory_order_incepted_first"), null))
 			));
 
-	public InceptionUpgradeTab(InceptionUpgradeContainer upgradeContainer, Position position, StorageScreen<?> screen) {
+	public InceptionUpgradeTab(InceptionUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
 		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("inception"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("inception"));
 		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), INVENTORY_ORDER, button -> getContainer().setInventoryOrder(getContainer().getInventoryOrder().next()),
 				() -> getContainer().getInventoryOrder()));

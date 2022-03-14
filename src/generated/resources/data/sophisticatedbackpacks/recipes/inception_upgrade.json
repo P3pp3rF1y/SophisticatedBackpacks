@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "inception_upgrade",
+      "itemRegistryName": "sophisticatedbackpacks:inception_upgrade",
       "type": "sophisticatedcore:item_enabled"
     }
   ],
