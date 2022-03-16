@@ -10,16 +10,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class BackpackUUIDArgumentType extends UuidArgument {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (context.getSource() instanceof CommandSourceStack) {
-			return SharedSuggestionProvider.suggest(BackpackAccessLogger.getBackpackUuids().stream().map(UUID::toString).collect(Collectors.toList()), builder);
-		} else if (context.getSource() instanceof SharedSuggestionProvider isuggestionprovider) {
-			//noinspection unchecked
-			return isuggestionprovider.customSuggestion((CommandContext<SharedSuggestionProvider>) context, builder);
+			return SharedSuggestionProvider.suggest(BackpackAccessLogger.getBackpackUuids().stream().map(UUID::toString).toList(), builder);
+		} else if (context.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
+			return sharedSuggestionProvider.customSuggestion(context);
 		}
 		return Suggestions.empty();
 	}

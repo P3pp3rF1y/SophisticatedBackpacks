@@ -12,7 +12,7 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -55,7 +55,7 @@ public class ShapelessBasedRecipeBuilder implements RecipeBuilder {
 		return new ShapelessBasedRecipeBuilder(stack.getItem(), 1, stack.getTag());
 	}
 
-	public ShapelessBasedRecipeBuilder requires(Tag<Item> tag) {
+	public ShapelessBasedRecipeBuilder requires(TagKey<Item> tag) {
 		return requires(Ingredient.of(tag));
 	}
 

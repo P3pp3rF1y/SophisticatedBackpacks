@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
@@ -23,7 +25,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 import java.util.function.Consumer;
 
 public class SBPRecipeProvider extends RecipeProvider {
-	private static final String HAS_UPGRADE_BASE_CRITERION = "has_upgrade_base";
+	private static final String HAS_UPGRADE_BASE = "has_upgrade_base";
+	private static final String HAS_SMELTING_UPGRADE = "has_smelting_upgrade";
 
 	public SBPRecipeProvider(DataGenerator generatorIn) {
 		super(generatorIn);
@@ -38,7 +41,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('L', Tags.Items.LEATHER)
 				.define('C', Tags.Items.CHESTS_WOODEN)
 				.define('S', Tags.Items.STRING)
-				.unlockedBy("has_leather", has(Tags.Items.LEATHER))
+				.unlockedBy("has_leather", hasLeather())
 				.save(consumer);
 
 		SpecialRecipeBuilder.special(BackpackDyeRecipe.SERIALIZER).save(consumer, SophisticatedBackpacks.getRegistryName("backpack_dye"));
@@ -78,7 +81,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('S', Tags.Items.STRING)
 				.define('P', Blocks.STICKY_PISTON)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.UPGRADE_BASE.get())
@@ -88,7 +91,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('L', Tags.Items.LEATHER)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('S', Tags.Items.STRING)
-				.unlockedBy("has_leather", has(Tags.Items.LEATHER))
+				.unlockedBy("has_leather", hasLeather())
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_PICKUP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -109,7 +112,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('B', ModItems.UPGRADE_BASE.get())
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('S', Tags.Items.STRING)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_FILTER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -165,7 +168,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('A', Items.GOLDEN_APPLE)
 				.define('M', Items.GLISTERING_MELON_SLICE)
 				.define('E', Tags.Items.ENDER_PEARLS)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.COMPACTING_UPGRADE.get())
@@ -176,7 +179,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('P', Items.PISTON)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_COMPACTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -198,7 +201,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('E', Tags.Items.ENDER_PEARLS)
 				.define('O', Tags.Items.OBSIDIAN)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_VOID_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -221,7 +224,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('P', Items.STICKY_PISTON)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_RESTOCK_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -244,7 +247,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('P', Items.PISTON)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_DEPOSIT_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -267,7 +270,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('E', Tags.Items.ENDER_PEARLS)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.INCEPTION_UPGRADE.get())
@@ -278,7 +281,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('S', Tags.Items.NETHER_STARS)
 				.define('D', Tags.Items.GEMS_DIAMOND)
 				.define('E', Items.ENDER_EYE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.EVERLASTING_UPGRADE.get())
@@ -288,7 +291,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('B', ModItems.UPGRADE_BASE.get())
 				.define('S', Tags.Items.NETHER_STARS)
 				.define('C', Items.END_CRYSTAL)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.SMELTING_UPGRADE.get())
@@ -299,7 +302,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('F', Items.FURNACE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.AUTO_SMELTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -311,7 +314,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('H', Items.HOPPER)
 				.define('S', ModItems.SMELTING_UPGRADE.get())
-				.unlockedBy("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
+				.unlockedBy(HAS_SMELTING_UPGRADE, has(ModItems.SMELTING_UPGRADE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.CRAFTING_UPGRADE.get())
@@ -322,7 +325,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('C', Tags.Items.CHESTS)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('T', Items.CRAFTING_TABLE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STONECUTTER_UPGRADE.get())
@@ -333,7 +336,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('S', Items.STONECUTTER)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_1.get())
@@ -342,7 +345,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("III")
 				.define('B', ModItems.UPGRADE_BASE.get())
 				.define('I', Tags.Items.STORAGE_BLOCKS_IRON)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_2.get())
@@ -351,7 +354,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("GGG")
 				.define('S', ModItems.STACK_UPGRADE_TIER_1.get())
 				.define('G', Tags.Items.STORAGE_BLOCKS_GOLD)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_1.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_1.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_3.get())
@@ -360,7 +363,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("DDD")
 				.define('S', ModItems.STACK_UPGRADE_TIER_2.get())
 				.define('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_2.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_2.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_4.get())
@@ -369,7 +372,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("NNN")
 				.define('S', ModItems.STACK_UPGRADE_TIER_3.get())
 				.define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.STACK_UPGRADE_TIER_3.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_3.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.JUKEBOX_UPGRADE.get())
@@ -380,7 +383,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('J', Items.JUKEBOX)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.TOOL_SWAPPER_UPGRADE.get())
@@ -394,7 +397,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('W', Items.WOODEN_SWORD)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('R', Tags.Items.DUSTS_REDSTONE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_TOOL_SWAPPER_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -414,7 +417,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("GGG")
 				.define('G', Tags.Items.GLASS)
 				.define('B', ModItems.UPGRADE_BASE.get())
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_FEEDING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -435,7 +438,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.STORAGE_BLOCKS_REDSTONE)
 				.define('G', Tags.Items.INGOTS_GOLD)
 				.define('B', ModItems.UPGRADE_BASE.get())
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.PUMP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -447,7 +450,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('P', Items.PISTON)
 				.define('S', Items.STICKY_PISTON)
 				.define('B', ModItems.UPGRADE_BASE.get())
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_PUMP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -481,7 +484,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('S', Items.SMOKER)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.SMOKING_UPGRADE.get())
@@ -490,7 +493,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern(" L ")
 				.define('S', ModItems.SMELTING_UPGRADE.get())
 				.define('L', ItemTags.LOGS)
-				.unlockedBy("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
+				.unlockedBy(HAS_SMELTING_UPGRADE, has(ModItems.SMELTING_UPGRADE.get()))
 				.save(consumer, SophisticatedBackpacks.getRL("smoking_upgrade_from_smelting_upgrade"));
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.AUTO_SMOKING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -522,7 +525,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('F', Items.BLAST_FURNACE)
-				.unlockedBy(HAS_UPGRADE_BASE_CRITERION, has(ModItems.UPGRADE_BASE.get()))
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.BLASTING_UPGRADE.get())
@@ -532,7 +535,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('S', ModItems.SMELTING_UPGRADE.get())
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('T', Items.SMOOTH_STONE)
-				.unlockedBy("has_smelting_upgrade", has(ModItems.SMELTING_UPGRADE.get()))
+				.unlockedBy(HAS_SMELTING_UPGRADE, has(ModItems.SMELTING_UPGRADE.get()))
 				.save(consumer, SophisticatedBackpacks.getRL("blasting_upgrade_from_smelting_upgrade"));
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.AUTO_BLASTING_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
@@ -561,5 +564,9 @@ public class SBPRecipeProvider extends RecipeProvider {
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
 				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
+	}
+
+	private static InventoryChangeTrigger.TriggerInstance hasLeather() {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(Tags.Items.LEATHER).build());
 	}
 }

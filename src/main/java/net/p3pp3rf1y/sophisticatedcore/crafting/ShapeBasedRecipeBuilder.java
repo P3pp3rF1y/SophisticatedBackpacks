@@ -12,7 +12,7 @@ import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -61,7 +61,7 @@ public class ShapeBasedRecipeBuilder {
 		return shaped(stack.getItem(), stack.getTag(), RecipeSerializer.SHAPED_RECIPE);
 	}
 
-	public ShapeBasedRecipeBuilder define(Character symbol, Tag<Item> tagIn) {
+	public ShapeBasedRecipeBuilder define(Character symbol, TagKey<Item> tagIn) {
 		return define(symbol, Ingredient.of(tagIn));
 	}
 

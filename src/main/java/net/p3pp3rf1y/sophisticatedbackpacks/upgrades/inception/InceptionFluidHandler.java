@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -127,7 +127,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	}
 
 	@Override
-	public FluidStack drain(Tag<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+	public FluidStack drain(TagKey<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
 		FluidStack drainedStack = FluidStack.EMPTY;
 		FluidStack stackToDrain = FluidStack.EMPTY;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {

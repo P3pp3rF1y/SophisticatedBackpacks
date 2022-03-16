@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class BackpackPlayerArgumentType implements ArgumentType<String> {
 	@Override
@@ -25,10 +24,9 @@ public class BackpackPlayerArgumentType implements ArgumentType<String> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (context.getSource() instanceof CommandSourceStack) {
-			return SharedSuggestionProvider.suggest(BackpackAccessLogger.getPlayerNames().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList()), builder);
-		} else if (context.getSource() instanceof SharedSuggestionProvider isuggestionprovider) {
-			//noinspection unchecked
-			return isuggestionprovider.customSuggestion((CommandContext<SharedSuggestionProvider>) context, builder);
+			return SharedSuggestionProvider.suggest(BackpackAccessLogger.getPlayerNames().stream().sorted(Comparator.naturalOrder()).toList(), builder);
+		} else if (context.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
+			return sharedSuggestionProvider.customSuggestion(context);
 		}
 		return Suggestions.empty();
 	}
