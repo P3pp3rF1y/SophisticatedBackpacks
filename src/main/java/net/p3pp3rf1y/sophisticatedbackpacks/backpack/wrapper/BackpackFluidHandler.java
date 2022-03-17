@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -71,7 +71,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 	}
 
 	@Override
-	public FluidStack drain(Tag<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+	public FluidStack drain(TagKey<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
 		FluidStack drained = FluidStack.EMPTY;
 		int toDrain = maxDrain;
 		for (TankUpgradeWrapper tank : getAllTanks()) {

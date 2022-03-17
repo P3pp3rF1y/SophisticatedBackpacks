@@ -1,16 +1,20 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades;
 
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.IFilterSlot;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.IServerUpdater;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +41,7 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 
 	private int selectedTagToRemove = 0;
 
-	private final Set<ResourceLocation> tagsToAdd = new TreeSet<>();
+	private final Set<TagKey<Item>> tagsToAdd = new TreeSet<>(Comparator.comparing(TagKey::location));
 
 	public FilterLogicContainerBase(IServerUpdater serverUpdater, Supplier<T> filterLogic, Consumer<Slot> addSlot) {
 		this.serverUpdater = serverUpdater;
@@ -63,40 +67,40 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 		return filterSlots;
 	}
 
-	public Set<ResourceLocation> getTagNames() {
-		return filterLogic.get().getTagNames();
+	public Set<TagKey<Item>> getTagNames() {
+		return filterLogic.get().getTagKeys();
 	}
 
-	public Set<ResourceLocation> getTagsToAdd() {
+	public Set<TagKey<Item>> getTagsToAdd() {
 		return tagsToAdd;
 	}
 
 	public void addSelectedTag() {
 		getTagAtIndex(tagsToAdd, selectedTagToAdd).ifPresent(tagName -> {
 			addTagName(tagName);
-			serverUpdater.sendDataToServer(() -> NBTHelper.putString(new CompoundTag(), DATA_ADD_TAG_NAME, tagName.toString()));
+			serverUpdater.sendDataToServer(() -> NBTHelper.putString(new CompoundTag(), DATA_ADD_TAG_NAME, tagName.location().toString()));
 			selectedTagToRemove = 0;
 			tagsToAdd.remove(tagName);
 			selectedTagToAdd = Math.max(0, selectedTagToAdd - 1);
 		});
 	}
 
-	private void addTagName(ResourceLocation tagName) {
-		filterLogic.get().addTagName(tagName);
+	private void addTagName(TagKey<Item> tagName) {
+		filterLogic.get().addTag(tagName);
 	}
 
 	public void removeSelectedTag() {
 		getTagAtIndex(getTagNames(), selectedTagToRemove).ifPresent(tagName -> {
 			removeSelectedTag(tagName);
-			serverUpdater.sendDataToServer(() -> NBTHelper.putString(new CompoundTag(), DATA_REMOVE_TAG_NAME, tagName.toString()));
-			if (tagSelectionSlot.getItem().getItem().getTags().contains(tagName)) {
+			serverUpdater.sendDataToServer(() -> NBTHelper.putString(new CompoundTag(), DATA_REMOVE_TAG_NAME, tagName.location().toString()));
+			if (tagSelectionSlot.getItem().is(tagName)) {
 				tagsToAdd.add(tagName);
 			}
 			selectedTagToRemove = Math.max(0, selectedTagToRemove - 1);
 		});
 	}
 
-	private void removeSelectedTag(ResourceLocation tagName) {
+	private void removeSelectedTag(TagKey<Item> tagName) {
 		filterLogic.get().removeTagName(tagName);
 	}
 
@@ -124,9 +128,9 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 		selectedTagToAdd = getPreviousIndex(tagsToAdd.size(), selectedTagToAdd);
 	}
 
-	private Optional<ResourceLocation> getTagAtIndex(Set<ResourceLocation> col, int index) {
+	private Optional<TagKey<Item>> getTagAtIndex(Set<TagKey<Item>> col, int index) {
 		int curIndex = 0;
-		for (ResourceLocation tagName : col) {
+		for (TagKey<Item> tagName : col) {
 			if (curIndex == index) {
 				return Optional.of(tagName);
 			}
@@ -200,11 +204,11 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 					return true;
 				}
 				case DATA_ADD_TAG_NAME -> {
-					addTagName(new ResourceLocation(data.getString(DATA_ADD_TAG_NAME)));
+					addTagName(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(data.getString(DATA_ADD_TAG_NAME))));
 					return true;
 				}
 				case DATA_REMOVE_TAG_NAME -> {
-					removeSelectedTag(new ResourceLocation(data.getString(DATA_REMOVE_TAG_NAME)));
+					removeSelectedTag(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(data.getString(DATA_REMOVE_TAG_NAME))));
 					return true;
 				}
 				case DATA_MATCH_ANY_TAG -> {
@@ -233,7 +237,7 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 
 		@Override
 		public boolean mayPlace(ItemStack stack) {
-			return stack.isEmpty() || !stack.getItem().getTags().isEmpty();
+			return stack.isEmpty() || stack.getTags().findAny().isPresent();
 		}
 
 		@Override
@@ -266,7 +270,7 @@ public class FilterLogicContainerBase<T extends FilterLogicBase, S extends Slot>
 		public void set(ItemStack stack) {
 			this.stack = stack;
 			tagsToAdd.clear();
-			tagsToAdd.addAll(stack.getItem().getTags());
+			tagsToAdd.addAll(stack.getTags().toList());
 			getTagNames().forEach(tagsToAdd::remove);
 			selectedTagToAdd = 0;
 			onUpdate.run();

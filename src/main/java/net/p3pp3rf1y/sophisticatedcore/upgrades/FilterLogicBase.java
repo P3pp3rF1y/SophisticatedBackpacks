@@ -1,14 +1,18 @@
 package net.p3pp3rf1y.sophisticatedcore.upgrades;
 
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,7 +24,7 @@ public class FilterLogicBase {
 	protected final String parentTagKey;
 	private boolean allowListDefault = false;
 	@Nullable
-	protected Set<ResourceLocation> tagNames = null;
+	protected Set<TagKey<Item>> tagKeys = null;
 
 	public FilterLogicBase(ItemStack upgrade, Consumer<ItemStack> saveHandler, String parentTagKey) {
 		this.upgrade = upgrade;
@@ -58,39 +62,40 @@ public class FilterLogicBase {
 		return !shouldMatchNbt() || ItemStackHelper.areItemStackTagsEqualIgnoreDurability(stack, filter);
 	}
 
-	public Set<ResourceLocation> getTagNames() {
-		if (tagNames == null) {
+	public Set<TagKey<Item>> getTagKeys() {
+		if (tagKeys == null) {
 			initTags();
 		}
-		return Collections.unmodifiableSet(tagNames);
+		return Collections.unmodifiableSet(tagKeys);
 	}
 
-	public void addTagName(ResourceLocation tagName) {
-		if (tagNames == null) {
+	public void addTag(TagKey<Item> tagName) {
+		if (tagKeys == null) {
 			initTags();
 		}
-		tagNames.add(tagName);
+		tagKeys.add(tagName);
 		serializeTags();
 	}
 
 	private void serializeTags() {
-		if (tagNames == null) {
+		if (tagKeys == null) {
 			return;
 		}
-		NBTHelper.setList(upgrade, parentTagKey, "tags", tagNames, t -> StringTag.valueOf(t.toString()));
+		NBTHelper.setList(upgrade, parentTagKey, "tags", tagKeys, t -> StringTag.valueOf(t.location().toString()));
 	}
 
-	public void removeTagName(ResourceLocation tagName) {
-		if (tagNames == null) {
+	public void removeTagName(TagKey<Item> tagName) {
+		if (tagKeys == null) {
 			initTags();
 		}
-		tagNames.remove(tagName);
+		tagKeys.remove(tagName);
 		serializeTags();
 	}
 
 	protected void initTags() {
-		tagNames = NBTHelper.getCollection(upgrade, parentTagKey, "tags", Tag.TAG_STRING,
-				elementNbt -> Optional.of(new ResourceLocation(elementNbt.getAsString())), TreeSet::new).orElse(new TreeSet<>());
+		tagKeys = NBTHelper.getCollection(upgrade, parentTagKey, "tags", Tag.TAG_STRING,
+						elementNbt -> Optional.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(elementNbt.getAsString()))), () -> new TreeSet<>(Comparator.comparing(TagKey::location)))
+				.orElse(new TreeSet<>(Comparator.comparing(TagKey::location)));
 	}
 
 	public void setAllowList(boolean isAllowList) {

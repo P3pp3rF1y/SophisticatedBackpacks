@@ -391,6 +391,11 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 		super.clicked(slotId, dragType, clickType, player);
 	}
 
+	@Override
+	public boolean isValidSlotIndex(int slotIndex) {
+		return slotIndex == -1 || slotIndex == -999 || slotIndex < getTotalSlotsNumber();
+	}
+
 	private boolean handleOverflow(int slotId, ClickType clickType, int dragType, Player player) {
 		ItemStack cursorStack = clickType == ClickType.SWAP ? player.getInventory().getItem(dragType) : getCarried();
 		Consumer<ItemStack> updateCursorStack = clickType == ClickType.SWAP ? s -> player.getInventory().setItem(dragType, s) : this::setCarried;

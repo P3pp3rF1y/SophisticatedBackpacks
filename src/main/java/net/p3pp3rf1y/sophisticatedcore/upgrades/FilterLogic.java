@@ -3,7 +3,8 @@ package net.p3pp3rf1y.sophisticatedcore.upgrades;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.FilterItemStackHandler;
@@ -13,6 +14,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class
 FilterLogic extends FilterLogicBase {
@@ -100,16 +103,17 @@ FilterLogic extends FilterLogicBase {
 
 	private boolean isTagMatch(ItemStack stack) {
 		if (shouldMatchAnyTag()) {
-			return anyTagMatches(stack.getItem().getTags());
+			return anyTagMatches(stack.getTags());
 		}
-		return allTagsMatch(stack.getItem().getTags());
+		return allTagsMatch(stack.getTags());
 	}
 
-	private boolean allTagsMatch(Set<ResourceLocation> tags) {
-		if (tagNames == null) {
+	private boolean allTagsMatch(Stream<TagKey<Item>> tagsStream) {
+		if (tagKeys == null) {
 			initTags();
 		}
-		for (ResourceLocation tagName : tagNames) {
+		Set<TagKey<Item>> tags = tagsStream.collect(Collectors.toSet());
+		for (TagKey<Item> tagName : tagKeys) {
 			if (!tags.contains(tagName)) {
 				return false;
 			}
@@ -117,15 +121,10 @@ FilterLogic extends FilterLogicBase {
 		return true;
 	}
 
-	private boolean anyTagMatches(Set<ResourceLocation> tags) {
-		if (tagNames == null) {
+	private boolean anyTagMatches(Stream<TagKey<Item>> tags) {
+		if (tagKeys == null) {
 			initTags();
 		}
-		for (ResourceLocation tag : tags) {
-			if (tagNames.contains(tag)) {
-				return true;
-			}
-		}
-		return false;
+		return tags.anyMatch(t -> tagKeys.contains(t));
 	}
 }

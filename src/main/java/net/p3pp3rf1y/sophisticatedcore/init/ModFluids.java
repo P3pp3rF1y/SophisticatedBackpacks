@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedcore.init;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.ForgeTagHandler;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
@@ -18,7 +18,7 @@ public class ModFluids {
 
 	public static final ResourceLocation EXPERIENCE_TAG_NAME = new ResourceLocation("forge:experience");
 
-	public static final Tags.IOptionalNamedTag<Fluid> EXPERIENCE_TAG = ForgeTagHandler.createOptionalTag(ForgeRegistries.FLUIDS, EXPERIENCE_TAG_NAME);
+	public static final TagKey<Fluid> EXPERIENCE_TAG = TagKey.create(Registry.FLUID_REGISTRY, EXPERIENCE_TAG_NAME);
 
 	private static final ResourceLocation XP_STILL_TEXTURE = new ResourceLocation(SophisticatedCore.MOD_ID, "fluids/xp_still");
 	private static final ResourceLocation XP_FLOWING_TEXTURE = new ResourceLocation(SophisticatedCore.MOD_ID, "fluids/xp_flowing");

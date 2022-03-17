@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedcore.util;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class InventorySorter {
 	private InventorySorter() {}
@@ -26,32 +27,34 @@ public class InventorySorter {
 	public static final Comparator<Map.Entry<ItemStackKey, Integer>> BY_TAGS = new Comparator<>() {
 		@Override
 		public int compare(Map.Entry<ItemStackKey, Integer> first, Map.Entry<ItemStackKey, Integer> second) {
-			Item firstItem = first.getKey().getStack().getItem();
-			Item secondItem = second.getKey().getStack().getItem();
+			ItemStack firstStack = first.getKey().getStack();
+			Item firstItem = firstStack.getItem();
+			ItemStack secondStack = second.getKey().getStack();
+			Item secondItem = secondStack.getItem();
 			if (firstItem == secondItem) {
 				return 0;
 			}
-			int ret = compareTags(firstItem.getTags(), secondItem.getTags());
+			int ret = compareTags(firstStack.getTags().collect(Collectors.toSet()), secondStack.getTags().collect(Collectors.toSet()));
 			return ret != 0 ? ret : getRegistryName(first.getKey()).compareTo(getRegistryName(second.getKey()));
 		}
 
-		private int compareTags(Set<ResourceLocation> firstTags, Set<ResourceLocation> secondTags) {
+		private int compareTags(Set<TagKey<Item>> firstTags, Set<TagKey<Item>> secondTags) {
 			int ret = Integer.compare(secondTags.size(), firstTags.size());
 			if (ret != 0) {
 				return ret;
 			}
 
 			if (firstTags.size() == 1) {
-				return firstTags.iterator().next().compareTo(secondTags.iterator().next());
+				return firstTags.iterator().next().location().compareTo(secondTags.iterator().next().location());
 			}
 
-			ArrayList<ResourceLocation> firstTagsSorted = new ArrayList<>(firstTags);
-			ArrayList<ResourceLocation> secondTagsSorted = new ArrayList<>(secondTags);
-			firstTagsSorted.sort(Comparator.naturalOrder());
-			secondTagsSorted.sort(Comparator.naturalOrder());
+			ArrayList<TagKey<Item>> firstTagsSorted = new ArrayList<>(firstTags);
+			ArrayList<TagKey<Item>> secondTagsSorted = new ArrayList<>(secondTags);
+			firstTagsSorted.sort(Comparator.comparing(TagKey::location));
+			secondTagsSorted.sort(Comparator.comparing(TagKey::location));
 
 			for (int i = 0; i < firstTagsSorted.size(); i++) {
-				ret = firstTagsSorted.get(i).compareTo(secondTagsSorted.get(i));
+				ret = firstTagsSorted.get(i).location().compareTo(secondTagsSorted.get(i).location());
 				if (ret != 0) {
 					return ret;
 				}

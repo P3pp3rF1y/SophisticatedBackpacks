@@ -7,8 +7,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.Button;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
@@ -181,32 +182,32 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	private void updateTagListTooltip() {
 		tagListTooltip.clear();
 		tagListTooltip.add(new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeKey("tag_list.title")).withStyle());
-		Set<ResourceLocation> tagNames = container.getTagNames();
+		Set<TagKey<Item>> tagNames = container.getTagNames();
 		if (tagNames.isEmpty()) {
 			tagListTooltip.add(new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeKey("tag_list.empty")).withStyle(ChatFormatting.DARK_GRAY));
 			return;
 		}
 
-		for (ResourceLocation tagName : tagNames) {
-			tagListTooltip.add(new TextComponent("> " + tagName.toString()).withStyle(ChatFormatting.GRAY));
+		for (TagKey<Item> tagName : tagNames) {
+			tagListTooltip.add(new TextComponent("> " + tagName.location()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
 	private void updateRemoveTooltip() {
 		removeTagTooltip.clear();
 		removeTagTooltip.add(new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeButton("remove_tag")));
-		Set<ResourceLocation> tagNames = container.getTagNames();
+		Set<TagKey<Item>> tagNames = container.getTagNames();
 		if (tagNames.isEmpty()) {
 			removeTagTooltip.add(new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeButton("remove_tag.empty")).withStyle(ChatFormatting.RED));
 			return;
 		}
 
 		int curIndex = 0;
-		for (ResourceLocation tagName : tagNames) {
+		for (TagKey<Item> tagName : tagNames) {
 			if (curIndex == container.getSelectedTagToRemove()) {
-				removeTagTooltip.add(new TextComponent("-> " + tagName.toString()).withStyle(ChatFormatting.RED));
+				removeTagTooltip.add(new TextComponent("-> " + tagName.location()).withStyle(ChatFormatting.RED));
 			} else {
-				removeTagTooltip.add(new TextComponent("> " + tagName.toString()).withStyle(ChatFormatting.GRAY));
+				removeTagTooltip.add(new TextComponent("> " + tagName.location()).withStyle(ChatFormatting.GRAY));
 			}
 			curIndex++;
 		}
@@ -220,13 +221,13 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 			addTagTooltip.add(new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeButton("add_tag.no_item")).withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY));
 			return;
 		}
-		Set<ResourceLocation> tagsToAdd = container.getTagsToAdd();
+		Set<TagKey<Item>> tagsToAdd = container.getTagsToAdd();
 		int curIndex = 0;
-		for (ResourceLocation tagName : tagsToAdd) {
+		for (TagKey<Item> tagName : tagsToAdd) {
 			if (curIndex == container.getSelectedTagToAdd()) {
-				addTagTooltip.add(new TextComponent("-> " + tagName.toString()).withStyle(ChatFormatting.GREEN));
+				addTagTooltip.add(new TextComponent("-> " + tagName.location()).withStyle(ChatFormatting.GREEN));
 			} else {
-				addTagTooltip.add(new TextComponent("> " + tagName.toString()).withStyle(ChatFormatting.GRAY));
+				addTagTooltip.add(new TextComponent("> " + tagName.location()).withStyle(ChatFormatting.GRAY));
 			}
 			curIndex++;
 		}
@@ -285,14 +286,14 @@ public abstract class FilterLogicControlBase<F extends FilterLogicBase, S extend
 	private void renderTagNames(PoseStack matrixStack) {
 		int count = 0;
 		int prefixWidth = font.width("...");
-		Set<ResourceLocation> tagNames = container.getTagNames();
+		Set<TagKey<Item>> tagNames = container.getTagNames();
 		int maxTagNameLines = getTagListHeight() / 10;
-		for (ResourceLocation tagName : tagNames) {
+		for (TagKey<Item> tagName : tagNames) {
 			if (tagNames.size() > maxTagNameLines && count == maxTagNameLines - 1) {
 				font.draw(matrixStack, new TranslatableComponent(TranslationHelper.INSTANCE.translUpgradeKey("tag_list.tag_overflow"), String.valueOf(tagNames.size() - (maxTagNameLines - 1))), (float) x + 2, (float) y + 23 + count * 10, MORE_TAGS_FONT_COLOR);
 				break;
 			}
-			String name = tagName.toString();
+			String name = tagName.location().toString();
 			String shortened = name;
 			if (font.width(name) > MAX_TAG_NAME_WIDTH) {
 				shortened = font.plainSubstrByWidth(name, MAX_TAG_NAME_WIDTH - prefixWidth, true);

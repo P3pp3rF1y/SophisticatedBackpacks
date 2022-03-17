@@ -60,7 +60,7 @@ public class SophisticatedBackpacks {
 		modBus.addListener(Config.COMMON::onConfigReload);
 		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
-		ModLoot.init();
+		ModLoot.init(modBus);
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(SophisticatedBackpacks::serverStarted);

@@ -13,23 +13,21 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class DyeRecipesMaker {
 	private DyeRecipesMaker() {}
 
-	public static Collection<CraftingRecipe> getRecipes() {
-		Set<CraftingRecipe> recipes = new HashSet<>();
+	public static List<CraftingRecipe> getRecipes() {
+		List<CraftingRecipe> recipes = new ArrayList<>();
 		addSingleColorRecipes(recipes);
 		addMultipleColorsRecipe(recipes);
 
 		return recipes;
 	}
 
-	private static void addMultipleColorsRecipe(Set<CraftingRecipe> recipes) {
+	private static void addMultipleColorsRecipe(List<CraftingRecipe> recipes) {
 		NonNullList<Ingredient> ingredients = NonNullList.create();
 		ingredients.add(Ingredient.of(DyeColor.YELLOW.getTag()));
 		ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));
@@ -52,7 +50,7 @@ public class DyeRecipesMaker {
 		recipes.add(new ShapedRecipe(id, "", 3, 1, ingredients, backpackOutput));
 	}
 
-	private static void addSingleColorRecipes(Set<CraftingRecipe> recipes) {
+	private static void addSingleColorRecipes(List<CraftingRecipe> recipes) {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
