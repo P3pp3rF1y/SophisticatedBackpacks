@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.IFilteredUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.PrimaryMatch;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.NBTHelper;
@@ -39,6 +40,9 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	@Override
 	public ItemStack pickup(World world, ItemStack stack, boolean simulate) {
 		if (filterLogic.matchesFilter(stack)) {
+			if (shouldVoidOverflow && !simulate) {
+				backpackWrapper.getInventoryForUpgradeProcessing().insertItem(stack, false);
+			}
 			return ItemStack.EMPTY;
 		}
 		return stack;
@@ -46,6 +50,18 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 
 	@Override
 	public ItemStack onBeforeInsert(IItemHandlerSimpleInserter inventoryHandler, int slot, ItemStack stack, boolean simulate) {
+		if (shouldVoidOverflow && inventoryHandler.getStackInSlot(slot).isEmpty() && (!filterLogic.shouldMatchNbt() || !filterLogic.shouldMatchDurability() || filterLogic.getPrimaryMatch() != PrimaryMatch.ITEM) && filterLogic.matchesFilter(stack)) {
+			for (int s = 0; s < inventoryHandler.getSlots(); s++) {
+				if (s == slot) {
+					continue;
+				}
+				if (stackMatchesFilterStack(inventoryHandler.getStackInSlot(s), stack)) {
+					return ItemStack.EMPTY;
+				}
+			}
+			return stack;
+		}
+
 		return !shouldVoidOverflow && filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
 	}
 
@@ -112,5 +128,10 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	@Override
 	public ItemStack onOverflow(ItemStack stack) {
 		return filterLogic.matchesFilter(stack) ? ItemStack.EMPTY : stack;
+	}
+
+	@Override
+	public boolean stackMatchesFilter(ItemStack stack) {
+		return filterLogic.matchesFilter(stack);
 	}
 }
