@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -51,6 +52,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -420,5 +422,18 @@ public class GuiHelper {
 						component -> Stream.of(ClientTooltipComponent.create(component))
 				))
 				.toList();
+	}
+
+	public static Optional<Rect2i> getPositiveRectangle(int x, int y, int width, int height) {
+		if (x + width <= 0 || y + height <= 0) {
+			return Optional.empty();
+		}
+
+		int positiveX = Math.max(0, x);
+		int positiveY = Math.max(0, y);
+		int positiveWidth = width + Math.min(0, x);
+		int positiveHeight = height + Math.min(0, y);
+
+		return Optional.of(new Rect2i(positiveX, positiveY, positiveWidth, positiveHeight));
 	}
 }
