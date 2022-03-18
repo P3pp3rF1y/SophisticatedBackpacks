@@ -434,16 +434,22 @@ public abstract class StorageContainerMenuBase<S extends IStorageWrapper> extend
 
 	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack) {
 		for (IOverflowResponseUpgrade overflowUpgrade : storageWrapper.getUpgradeHandler().getWrappersThatImplement(IOverflowResponseUpgrade.class)) {
-			if (overflowUpgrade.stackMatchesFilter(cursorStack) && overflowUpgrade.worksInGui()) {
-				for (int slotIndex = 0; slotIndex < getNumberOfStorageInventorySlots(); slotIndex++) {
-					if (slotIndex != slotId && overflowUpgrade.stackMatchesFilter(getSlot(slotIndex).getItem())) {
-						ItemStack result = cursorStack;
-						result = overflowUpgrade.onOverflow(result);
-						updateCursorStack.accept(result);
-						if (result.isEmpty()) {
-							return true;
-						}
-					}
+			if (overflowUpgrade.stackMatchesFilter(cursorStack) && overflowUpgrade.worksInGui() 
+					&& findSlotWithMatchingStack(slotId, cursorStack, updateCursorStack, overflowUpgrade)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean findSlotWithMatchingStack(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, IOverflowResponseUpgrade overflowUpgrade) {
+		for (int slotIndex = 0; slotIndex < getNumberOfStorageInventorySlots(); slotIndex++) {
+			if (slotIndex != slotId && overflowUpgrade.stackMatchesFilterStack(getSlot(slotIndex).getItem(), cursorStack)) {
+				ItemStack result = cursorStack;
+				result = overflowUpgrade.onOverflow(result);
+				updateCursorStack.accept(result);
+				if (result.isEmpty()) {
+					return true;
 				}
 			}
 		}
