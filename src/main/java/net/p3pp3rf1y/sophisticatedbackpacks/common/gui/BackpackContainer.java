@@ -535,7 +535,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		}
 		ItemStack slotStack = slot.getItem();
 		if (slotStack.isEmpty() || (slot.mayPickup(player) && slotStack.getItem() != cursorStack.getItem() && cursorStack.getCount() <= slot.getMaxStackSize(cursorStack) && slotStack.getCount() <= slotStack.getMaxStackSize())) {
-			return processOverflowIfSlotWithSameItemFound(slotId, cursorStack, updateCursorStack, slotStack);
+			return processOverflowIfSlotWithSameItemFound(slotId, cursorStack, updateCursorStack);
 		} else if (slotStack.getItem() == cursorStack.getItem()) {
 			return processOverflowForAnythingOverSlotMaxSize(cursorStack, updateCursorStack, slot, slotStack);
 		}
@@ -562,15 +562,25 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return false;
 	}
 
-	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, ItemStack slotStack) {
+	private boolean processOverflowIfSlotWithSameItemFound(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack) {
+		for (IOverflowResponseUpgrade overflowUpgrade : backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IOverflowResponseUpgrade.class)) {
+			if (overflowUpgrade.stackMatchesFilter(cursorStack) && overflowUpgrade.worksInGui()
+					&& findSlotWithMatchingStack(slotId, cursorStack, updateCursorStack, overflowUpgrade)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean findSlotWithMatchingStack(int slotId, ItemStack cursorStack, Consumer<ItemStack> updateCursorStack, IOverflowResponseUpgrade overflowUpgrade) {
 		for (int slotIndex = 0; slotIndex < getNumberOfSlots(); slotIndex++) {
-			if (slotIndex != slotId && consideredTheSameItem(getSlot(slotIndex).getItem(), cursorStack)) {
-				ItemStack result = processOverflowLogic(cursorStack);
-				if (result.getCount() < cursorStack.getCount()) {
-					updateCursorStack.accept(result);
-					return slotStack.isEmpty();
+			if (slotIndex != slotId && overflowUpgrade.stackMatchesFilterStack(getSlot(slotIndex).getItem(), cursorStack)) {
+				ItemStack result = cursorStack;
+				result = overflowUpgrade.onOverflow(result);
+				updateCursorStack.accept(result);
+				if (result.isEmpty()) {
+					return true;
 				}
-				return false;
 			}
 		}
 		return false;
