@@ -40,6 +40,9 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 	@Override
 	public ItemStack pickup(Level world, ItemStack stack, boolean simulate) {
 		if (filterLogic.matchesFilter(stack)) {
+			if (shouldVoidOverflow && !simulate) {
+				storageWrapper.getInventoryForUpgradeProcessing().insertItem(stack, false);
+			}
 			return ItemStack.EMPTY;
 		}
 		return stack;
@@ -52,7 +55,7 @@ public class VoidUpgradeWrapper extends UpgradeWrapperBase<VoidUpgradeWrapper, V
 				if (s == slot) {
 					continue;
 				}
-				if (filterLogic.matchesFilter(inventoryHandler.getStackInSlot(s))) {
+				if (stackMatchesFilterStack(inventoryHandler.getStackInSlot(s), stack)) {
 					return ItemStack.EMPTY;
 				}
 			}
