@@ -209,8 +209,10 @@ public abstract class StorageScreenBase<S extends StorageContainerMenuBase<?>> e
 	}
 
 	public Optional<Rect2i> getSortButtonsRectangle() {
-		return sortButton == null || sortByButton == null ? Optional.empty() : Optional.of(new Rect2i(sortButton.getX(), sortButton.getY(),
-				sortByButton.getX() + sortByButton.getWidth() - sortButton.getX(), sortByButton.getY() + sortByButton.getHeight() - sortButton.getY()));
+		if (sortButton == null || sortByButton == null) {
+			return Optional.empty();
+		}
+		return GuiHelper.getPositiveRectangle(sortButton.getX(), sortButton.getY(), sortByButton.getX() + sortByButton.getWidth() - sortButton.getX(), sortByButton.getY() + sortByButton.getHeight() - sortButton.getY());
 	}
 
 	@Override
@@ -624,7 +626,7 @@ public abstract class StorageScreenBase<S extends StorageContainerMenuBase<?>> e
 	}
 
 	public Optional<Rect2i> getUpgradeSlotsRectangle() {
-		return numberOfUpgradeSlots == 0 ? Optional.empty() : Optional.of(new Rect2i(leftPos - UPGRADE_INVENTORY_OFFSET, topPos + getUpgradeTop(), 32, getUpgradeHeight()));
+		return numberOfUpgradeSlots == 0 ? Optional.empty() : GuiHelper.getPositiveRectangle(leftPos - UPGRADE_INVENTORY_OFFSET, topPos + getUpgradeTop(), 32, getUpgradeHeight());
 	}
 
 	private void renderStackCount(String count, int x, int y) {

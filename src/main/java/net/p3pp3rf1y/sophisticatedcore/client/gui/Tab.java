@@ -83,8 +83,8 @@ public abstract class Tab extends CompositeWidgetBase<WidgetBase> {
 		this.height = height;
 	}
 
-	public Rect2i getRectangle() {
-		return new Rect2i(x, y, width, height);
+	public Optional<Rect2i> getRectangle() {
+		return GuiHelper.getPositiveRectangle(x, y, width, height);
 	}
 
 	@Override
