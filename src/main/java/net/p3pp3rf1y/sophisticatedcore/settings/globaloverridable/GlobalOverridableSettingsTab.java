@@ -5,13 +5,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ImageButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ToggleButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsTab;
@@ -20,12 +18,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
 
 import static net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition;
 import static net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper.getButtonStateData;
 
 public class GlobalOverridableSettingsTab extends SettingsTab<GlobalOverridableSettingsContainer> {
-	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(64, 48), Dimension.SQUARE_16);
 	private static final ButtonDefinition.Toggle<Boolean> SHIFT_CLICK_INTO_OPEN_TAB = createToggleButtonDefinition(
 			Map.of(
 					true, getButtonStateData(new UV(80, 32), Dimension.SQUARE_16, new Position(1, 1),
@@ -57,10 +56,10 @@ public class GlobalOverridableSettingsTab extends SettingsTab<GlobalOverridableS
 			new TranslatableComponent(TranslationHelper.INSTANCE.translSettingsButton("context_player.tooltip_detail")).withStyle(ChatFormatting.GRAY)
 	);
 
-	public GlobalOverridableSettingsTab(GlobalOverridableSettingsContainer container, Position position, SettingsScreen screen, List<Component> storageContextTooltip, Component storageContextTitle, String tabLabelTranslKey, String tabTooltipTranslKey) {
+	public GlobalOverridableSettingsTab(GlobalOverridableSettingsContainer container, Position position, SettingsScreen screen, List<Component> storageContextTooltip, Component storageContextTitle, String tabLabelTranslKey, String tabTooltipTranslKey, Function<IntConsumer, ButtonBase> getTabButton) {
 		super(container, position, screen, new TranslatableComponent(tabLabelTranslKey),
 				List.of(new TranslatableComponent(tabTooltipTranslKey)), Collections.emptyList(),
-				onTabIconClicked -> new ImageButton(new Position(position.x() + 1, position.y() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
+				getTabButton);
 		addHideableChild(new ContextButton(new Position(x + 3, y + 24), button -> container.toggleContext(),
 				() -> container.getContext() == Context.PLAYER ? new TranslatableComponent(TranslationHelper.INSTANCE.translSettingsButton("context_player")) : storageContextTitle,
 				() -> container.getContext() == Context.PLAYER ? PLAYER_CONTEXT_TOOLTIP : storageContextTooltip));

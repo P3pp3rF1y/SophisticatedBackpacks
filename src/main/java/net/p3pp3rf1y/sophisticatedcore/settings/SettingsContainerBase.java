@@ -22,7 +22,7 @@ public abstract class SettingsContainerBase<C extends ISettingsCategory> {
 		return category;
 	}
 
-	protected SettingsContainer<?> getSettingsContainer() {
+	public SettingsContainer<?> getSettingsContainer() {
 		return settingsContainer;
 	}
 

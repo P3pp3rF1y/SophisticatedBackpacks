@@ -48,13 +48,14 @@ public abstract class SettingsContainer<S extends IStorageWrapper> extends Abstr
 	}
 
 	protected final Player player;
+
 	protected final S storageWrapper;
+
 	private final StorageBackgroundProperties storageBackgroundProperties;
 	private final List<Slot> storageInventorySlots = new ArrayList<>();
 	public final NonNullList<ItemStack> ghostItemStacks = NonNullList.create();
 	private final Map<String, SettingsContainerBase<?>> settingsContainers = new LinkedHashMap<>();
 	public final List<Slot> ghostSlots = new ArrayList<>();
-
 	protected SettingsContainer(MenuType<?> menuType, int windowId, Player player, S storageWrapper) {
 		super(menuType, windowId);
 		this.player = player;
@@ -63,6 +64,10 @@ public abstract class SettingsContainer<S extends IStorageWrapper> extends Abstr
 
 		addStorageInventorySlots();
 		addSettingsContainers();
+	}
+
+	public S getStorageWrapper() {
+		return storageWrapper;
 	}
 
 	private void addSettingsContainers() {

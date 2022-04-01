@@ -97,6 +97,7 @@ public class GuiHelper {
 
 	public static void renderItemInGUI(PoseStack matrixStack, Minecraft minecraft, ItemStack stack, int xPosition, int yPosition, boolean renderOverlay,
 			@Nullable String countText) {
+		RenderSystem.enableDepthTest();
 		ItemRenderer itemRenderer = minecraft.getItemRenderer();
 		float originalZLevel = itemRenderer.blitOffset;
 		itemRenderer.blitOffset += getZOffset(matrixStack);
