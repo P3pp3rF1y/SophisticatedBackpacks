@@ -144,6 +144,7 @@ public abstract class RenderInfo {
 
 	public void deserializeFrom(CompoundTag renderInfoNbt) {
 		resetUpgradeInfo(false);
+		upgradeData.clear();
 		serializeRenderInfo(renderInfoNbt);
 		deserialize();
 	}
