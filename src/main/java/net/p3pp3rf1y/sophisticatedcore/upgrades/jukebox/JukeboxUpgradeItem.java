@@ -91,9 +91,13 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 			if (isPlaying) {
 				storageWrapper.getRenderInfo().setUpgradeRenderData(JukeboxUpgradeRenderData.TYPE, new JukeboxUpgradeRenderData(true));
 			} else {
-				storageWrapper.getRenderInfo().removeUpgradeRenderData(JukeboxUpgradeRenderData.TYPE);
+				removeRenderData();
 			}
 			save();
+		}
+
+		private void removeRenderData() {
+			storageWrapper.getRenderInfo().removeUpgradeRenderData(JukeboxUpgradeRenderData.TYPE);
 		}
 
 		public void stop(LivingEntity entity) {
@@ -122,6 +126,11 @@ public class JukeboxUpgradeItem extends UpgradeItemBase<JukeboxUpgradeItem.Wrapp
 
 		public boolean isPlaying() {
 			return isPlaying;
+		}
+
+		@Override
+		public void onBeforeRemoved() {
+			removeRenderData();
 		}
 	}
 }
