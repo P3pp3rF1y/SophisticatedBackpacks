@@ -361,8 +361,12 @@ public class InventoryHelper {
 	}
 
 	public static void dropItems(ItemStackHandler inventoryHandler, Level level, BlockPos pos) {
+		dropItems(inventoryHandler, level, pos.getX(), pos.getY(), pos.getZ());
+	}
+
+	public static void dropItems(ItemStackHandler inventoryHandler, Level level, double x, double y, double z) {
 		iterate(inventoryHandler, (slot, stack) -> {
-			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+			Containers.dropItemStack(level, x, y, z, stack);
 			inventoryHandler.setStackInSlot(slot, ItemStack.EMPTY);
 		});
 	}
