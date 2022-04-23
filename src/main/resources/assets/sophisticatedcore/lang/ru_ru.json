@@ -1,4 +1,13 @@
 {
+    "item.sophisticatedcore.storage.tooltip.stack_multiplier": "Множитель стака: %s",
+    "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
+    "item.sophisticatedcore.storage.tooltip.fluid": "%s mB %s",
+    "item.sophisticatedcore.storage.tooltip.fluid_empty": "Бак пуст",
+    "item.sophisticatedcore.storage.tooltip.upgrades": "Улучшения",
+    "item.sophisticatedcore.storage.tooltip.inventory": "Инвентарь",
+    "item.sophisticatedcore.storage.tooltip.empty": "Не содержит предметы или улучшения",
+    "item.sophisticatedcore.storage.tooltip.press_for_contents": "Нажмите <%s> для просмотра содержимого",
+    "item.sophisticatedcore.storage.tooltip.shift": "Левый SHIFT",
     "gui.sophisticatedcore.settings.no_sort": "Игнор. сорт.",
     "gui.sophisticatedcore.settings.no_sort.tooltip": "Настройки игнорирования сортировки",
     "gui.sophisticatedcore.settings.no_sort.tooltip_detail": "Позволяют рюкзаку игнорировать определённые слоты инвентаря при сортировке.\nОткройте вкладку для дальнейшей настройки",

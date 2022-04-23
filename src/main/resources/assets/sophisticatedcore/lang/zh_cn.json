@@ -1,4 +1,13 @@
 {
+    "item.sophisticatedcore.storage.tooltip.stack_multiplier": "堆叠倍数 %s",
+    "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
+    "item.sophisticatedcore.storage.tooltip.fluid": "%s mB %s",
+    "item.sophisticatedcore.storage.tooltip.fluid_empty": "空罐",
+    "item.sophisticatedcore.storage.tooltip.upgrades": "升级",
+    "item.sophisticatedcore.storage.tooltip.inventory": "物品",
+    "item.sophisticatedcore.storage.tooltip.empty": "未加装升级或物品存储",
+    "item.sophisticatedcore.storage.tooltip.press_for_contents": "按 <%s> 查看物品栏",
+    "item.sophisticatedcore.storage.tooltip.shift": "左 Shift",
     "gui.sophisticatedcore.settings.no_sort": "一键整理",
     "gui.sophisticatedcore.settings.no_sort.tooltip": "一键整理设置",
     "gui.sophisticatedcore.settings.no_sort.tooltip_detail": "选择忽略整理的槽位\n打开选项栏以修改此设置",

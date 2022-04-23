@@ -1,4 +1,13 @@
 {
+    "item.sophisticatedcore.storage.tooltip.stack_multiplier": "Multiplicador de Pilha: %s",
+    "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
+    "item.sophisticatedcore.storage.tooltip.fluid": "%s mB %s",
+    "item.sophisticatedcore.storage.tooltip.fluid_empty": "Tanque Vazio",
+    "item.sophisticatedcore.storage.tooltip.upgrades": "Acessórios",
+    "item.sophisticatedcore.storage.tooltip.inventory": "Inventário",
+    "item.sophisticatedcore.storage.tooltip.empty": "Sem Acessórios ou Conteúdo no Inventário para mostrar",
+    "item.sophisticatedcore.storage.tooltip.press_for_contents": "Pressione <%s> para Ver o Conteúdo",
+    "item.sophisticatedcore.storage.tooltip.shift": "Shift Esquerdo",
     "gui.sophisticatedcore.settings.no_sort": "Sem Classificação",
     "gui.sophisticatedcore.settings.no_sort.tooltip": "Exceção de classificação de espaços",
     "gui.sophisticatedcore.settings.no_sort.tooltip_detail": "Permite selecionar espaços que serão ignorados pela classificação\nAbra a guia para modificar as configurações dos espaços",

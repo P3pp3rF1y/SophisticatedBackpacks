@@ -63,6 +63,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
@@ -81,7 +82,6 @@ import java.util.function.UnaryOperator;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase {
-	public static final String BACKPACK_TOOLTIP = "item.sophisticatedbackpacks.backpack.tooltip.";
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -144,8 +144,8 @@ public class BackpackItem extends ItemBase {
 		}
 		if (!Screen.hasShiftDown()) {
 			tooltip.add(new TranslatableComponent(
-					BACKPACK_TOOLTIP + "press_for_contents",
-					new TranslatableComponent(BACKPACK_TOOLTIP + "shift").withStyle(ChatFormatting.AQUA)
+					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
+					new TranslatableComponent(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
 			).withStyle(ChatFormatting.GRAY));
 		}
 	}

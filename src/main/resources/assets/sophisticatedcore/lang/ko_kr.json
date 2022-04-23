@@ -1,4 +1,13 @@
 {
+    "item.sophisticatedcore.storage.tooltip.stack_multiplier": "쌓을 수 있는 아이템 최대 개수: §fx%s",
+    "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
+    "item.sophisticatedcore.storage.tooltip.fluid": "%s 밀리버킷만큼의 %s",
+    "item.sophisticatedcore.storage.tooltip.fluid_empty": "탱크가 비어있음",
+    "item.sophisticatedcore.storage.tooltip.upgrades": "강화",
+    "item.sophisticatedcore.storage.tooltip.inventory": "인벤토리",
+    "item.sophisticatedcore.storage.tooltip.empty": "배낭에 아이템이나 강화가 없습니다",
+    "item.sophisticatedcore.storage.tooltip.press_for_contents": "<%s>을(를) 누르면 배낭을 확인할 수 있습니다",
+    "item.sophisticatedcore.storage.tooltip.shift": "왼쪽 Shift",
     "gui.sophisticatedcore.settings.no_sort": "미정렬",
     "gui.sophisticatedcore.settings.no_sort.tooltip": "미정렬 슬롯 설정",
     "gui.sophisticatedcore.settings.no_sort.tooltip_detail": "정렬하지 않을 슬롯을 선택할 수 있습니다\n창을 열어 슬롯을 수정할 수 있습니다",

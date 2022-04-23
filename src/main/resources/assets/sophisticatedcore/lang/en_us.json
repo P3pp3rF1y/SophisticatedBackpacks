@@ -1,4 +1,13 @@
 {
+    "item.sophisticatedcore.storage.tooltip.stack_multiplier": "Stack Size Multiplier: %s",
+    "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
+    "item.sophisticatedcore.storage.tooltip.fluid": "%s mB %s",
+    "item.sophisticatedcore.storage.tooltip.fluid_empty": "Empty tank",
+    "item.sophisticatedcore.storage.tooltip.upgrades": "Upgrades",
+    "item.sophisticatedcore.storage.tooltip.inventory": "Inventory",
+    "item.sophisticatedcore.storage.tooltip.empty": "No Upgrades or Inventory Contents",
+    "item.sophisticatedcore.storage.tooltip.press_for_contents": "Press <%s> to View Contents",
+    "item.sophisticatedcore.storage.tooltip.shift": "Left Shift",
     "gui.sophisticatedcore.settings.no_sort": "No Sort",
     "gui.sophisticatedcore.settings.no_sort.tooltip": "No Sort Slot Settings",
     "gui.sophisticatedcore.settings.no_sort.tooltip_detail": "Allows selecting slots that are ignored by sorting\nOpen tab to modify slot settings",
