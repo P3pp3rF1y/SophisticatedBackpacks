@@ -150,7 +150,6 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "背包单独设置",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "不受到玩家全局设置影响",
     "gui.sophisticatedbackpacks.tooltip.stack_count": "数量: %s",
-    "gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack": "右击添加",
     "gui.sophisticatedbackpacks.settings.backpack": "背包",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "背包设置",
     "gui.sophisticatedbackpacks.error.add.inception_sub_backpack": "嵌套升级只能在主背包中加装",

@@ -150,7 +150,6 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "Опции на стороне рюкзака",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "Наследуются от игрока или отдельно переназначаются к данному рюкзаку",
     "gui.sophisticatedbackpacks.tooltip.stack_count": "Кол-во: %s",
-    "gui.sophisticatedbackpacks.tooltip.right_click_to_add_to_backpack": "ПКМ для добавления",
     "gui.sophisticatedbackpacks.settings.backpack": "Рюкзак",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "Опции рюкзака",
     "gui.sophisticatedbackpacks.error.add.inception_sub_backpack": "Улучшение «Внедрение» возможно установить только в рюкзак верхнего уровня",

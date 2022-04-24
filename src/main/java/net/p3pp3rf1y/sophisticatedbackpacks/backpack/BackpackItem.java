@@ -62,6 +62,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBack
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -70,6 +71,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +83,7 @@ import java.util.function.UnaryOperator;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
-public class BackpackItem extends ItemBase {
+public class BackpackItem extends ItemBase implements IStashStorageItem {
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -295,6 +297,7 @@ public class BackpackItem extends ItemBase {
 		return new ICapabilityProvider() {
 			private IStorageWrapper wrapper = null;
 
+			@Nonnull
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 				initWrapper();
@@ -354,13 +357,22 @@ public class BackpackItem extends ItemBase {
 		return stack.getItem() == ModItems.GOLD_BACKPACK.get();
 	}
 
-	public static class BackpackContentsTooltip implements TooltipComponent {
-		private final ItemStack backpack;
+	@Override
+	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
+		return Optional.of(new BackpackItem.BackpackContentsTooltip(stack));
+	}
 
-		public BackpackContentsTooltip(ItemStack backpack) {
-			this.backpack = backpack;
-		}
+	@Override
+	public ItemStack stash(ItemStack storageStack, ItemStack stack) {
+		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, false)).orElse(stack);
+	}
 
+	@Override
+	public boolean isItemStashable(ItemStack storageStack, ItemStack stack) {
+		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().isItemValid(0, stack)).orElse(false);
+	}
+
+	public record BackpackContentsTooltip(ItemStack backpack) implements TooltipComponent {
 		public ItemStack getBackpack() {
 			return backpack;
 		}

@@ -1,4 +1,5 @@
 {
+    "item.sophisticatedcore.storage.tooltip.right_click_to_add_to_storage": "마우스 오른쪽 클릭해 추가",
     "item.sophisticatedcore.storage.tooltip.stack_multiplier": "쌓을 수 있는 아이템 최대 개수: §fx%s",
     "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
     "item.sophisticatedcore.storage.tooltip.fluid": "%s 밀리버킷만큼의 %s",

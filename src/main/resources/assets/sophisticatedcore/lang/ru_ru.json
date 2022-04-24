@@ -1,4 +1,5 @@
 {
+    "item.sophisticatedcore.storage.tooltip.right_click_to_add_to_storage": "ПКМ для добавления",
     "item.sophisticatedcore.storage.tooltip.stack_multiplier": "Множитель стака: %s",
     "item.sophisticatedcore.storage.tooltip.energy": "%s FE",
     "item.sophisticatedcore.storage.tooltip.fluid": "%s mB %s",
