@@ -56,27 +56,11 @@ ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
 side="BOTH"
 
-[[mods]] #mandatory
-
-# The modid of the mod
-modId="sophisticatedcore" #mandatory
-
-# The version number of the mod
-version="${file.jarVersion}" #mandatory
-
-# A display name for the mod
-displayName="Sophisticated Core" #mandatory
-
-# The description text for the mod (multi line!) (#mandatory)
-description='''
-Base mod of Sophisticated mods.
-'''
-
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.sophisticatedcore]]
-modId="forge" #mandatory
+[[dependencies.sophisticatedbackpacks]]
+modId="sophisticatedcore" #mandatory
 mandatory=true #mandatory
-versionRange="[39.0.0,)" #mandatory
+versionRange="[0.0.1,)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
