@@ -6,7 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltip;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -44,6 +44,6 @@ public class BackpackContentsMessage {
 		}
 
 		BackpackStorage.get().setBackpackContents(msg.backpackUuid, msg.backpackContents);
-		ClientBackpackContentsTooltip.refreshContents();
+		ClientStorageContentsTooltip.refreshContents();
 	}
 }

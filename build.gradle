@@ -22,6 +22,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 
 repositories {
     mavenCentral()
@@ -29,7 +30,7 @@ repositories {
     maven { url "https://maven.theillusivec4.top/" }
     maven { url "https://maven.tterrag.com/" }
     maven { url = "https://modmaven.dev/" }
-    maven { url "https://minecraft.curseforge.com/api/maven/"}
+    maven { url "https://minecraft.curseforge.com/api/maven/" }
     maven {
         url "https://www.cursemaven.com"
         content {
@@ -50,7 +51,6 @@ minecraft {
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         all {
-            //TODO remove this once PR https://github.com/MinecraftForge/MinecraftForge/pull/8064 gets merged
             property 'ignoreList', "bootstraplauncher,securejarhandler,asm-commons,asm-util,asm-analysis,asm-tree,asm,client-extra,fmlcore,javafmllanguage,mclanguage,forge-${project.minecraft_version}-${project.forge_version},${project.minecraft_version}-forge-${project.forge_version}"
         }
         client {
@@ -84,12 +84,13 @@ minecraft {
             property "mixin.env.disableRefMap", "true"
             //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             workingDirectory project.file('run')
+            args '--mod', 'sophisticatedbackpacks', '--flat', '--all', '--output', file('src/generated/resources/')
+
             mods {
                 sophisticatedbackpacks {
                     source sourceSets.main
                 }
             }
-            args '--mod', 'sophisticatedbackpacks,sophisticatedcore', '--flat', '--all', '--output', file('src/generated/resources/')
         }
     }
 }
@@ -101,29 +102,30 @@ sourceSets.main.resources {
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
-//    compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}:api")
-//    runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    compileOnly fg.deobf("curse.maven:jei-238222:3696757")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3696757")
+    if (findProject(':SophisticatedCore') != null) {
+        implementation project(':SophisticatedCore')
+    } else {
+        compileOnly fg.deobf("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}")
+        runtimeOnly fg.deobf("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}")
+    }
+
+    compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
     compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-//    compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-//    compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    //runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    //runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
 
     compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-    //runtimeOnly fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.115")
-    //runtimeOnly fg.deobf("slimeknights.tconstruct:TConstruct:1.16.5-3.1.0.242")
-    //runtimeOnly fg.deobf("curse.maven:mgui-351914:3291267")
-    //runtimeOnly fg.deobf("curse.maven:tetra-289712:3371803")
-    //runtimeOnly fg.deobf("curse.maven:invtweaks-383070:3102237")
-    //runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
 }
 
 test {
@@ -177,8 +179,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
-                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
