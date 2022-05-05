@@ -5,7 +5,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.botania.BotaniaCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
-import net.p3pp3rf1y.sophisticatedcore.compat.inventorysorter.InventorySorterCompat;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 
 import java.util.HashMap;
