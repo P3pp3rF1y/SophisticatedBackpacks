@@ -141,7 +141,6 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack": "배낭",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "이 배낭의 설정",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "이 배낭을 재정의합니다",
-    "gui.sophisticatedbackpacks.tooltip.stack_count": "개수: %s",
     "gui.sophisticatedbackpacks.settings.backpack": "배낭",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "배낭 설정",
     "gui.sophisticatedbackpacks.error.add.inception_sub_backpack": "보관 강화는 최상위 배낭에만 배치할 수 있습니다",

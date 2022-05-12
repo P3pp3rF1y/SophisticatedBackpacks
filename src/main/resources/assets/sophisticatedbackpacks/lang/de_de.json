@@ -149,7 +149,6 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack": "Rucksack",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "Einstellungen dieses Rucksacks",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "Von Spieler geerbt oder für diesen Rucksack überschrieben",
-    "gui.sophisticatedbackpacks.tooltip.stack_count": "Anzahl: %s",
     "gui.sophisticatedbackpacks.settings.backpack": "Rucksack",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "Rucksackeinstellungen",
     "gui.sophisticatedbackpacks.error.add.inception_sub_backpack": "Inception-Upgrade kann nur im Rucksack der obersten Ebene platziert werden",
