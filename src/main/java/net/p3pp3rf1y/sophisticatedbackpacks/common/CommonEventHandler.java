@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -14,6 +16,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
@@ -26,13 +30,18 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
@@ -63,10 +72,33 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
 		eventBus.addListener(this::onWorldTick);
+		eventBus.addListener(this::interactWithEntity);
 	}
 
 	private static final int BACKPACK_COUNT_CHECK_COOLDOWN = 40;
 	private long nextBackpackCountCheck = 0;
+
+	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
+		if (!(event.getTarget() instanceof Player targetPlayer)) {
+			return;
+		}
+
+		Player sourcePlayer = event.getPlayer();
+		Vec3 targetPlayerViewVector = Vec3.directionFromRotation(new Vec2(targetPlayer.getXRot(), targetPlayer.yBodyRot));
+
+		Vec3 hitVector = event.getLocalPos();
+		Vec3 vec31 = sourcePlayer.position().vectorTo(targetPlayer.position()).normalize();
+		vec31 = new Vec3(vec31.x, 0.0D, vec31.z);
+		boolean isPointingAtBody = hitVector.y >= 0.9D && hitVector.y < 1.6D;
+		boolean isPointingAtBack = vec31.dot(targetPlayerViewVector) > 0.0D;
+		if (!isPointingAtBody || !isPointingAtBack) {
+			return;
+		}
+		if (targetPlayer.level.isClientSide) {
+			event.setCancellationResult(InteractionResult.SUCCESS);
+			SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
+		}
+	}
 
 	private void onWorldTick(TickEvent.WorldTickEvent event) {
 		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.world.getGameTime()) {

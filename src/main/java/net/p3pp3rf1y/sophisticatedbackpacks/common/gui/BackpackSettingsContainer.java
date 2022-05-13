@@ -25,7 +25,7 @@ public class BackpackSettingsContainer extends SettingsContainer<IBackpackWrappe
 	}
 
 	public static BackpackSettingsContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-		return new BackpackSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
+		return new BackpackSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.level));
 	}
 
 	@Override
