@@ -12,13 +12,15 @@ public class PlayerInventoryHandler {
 	private final IStackInSlotModifier setStackInSlot;
 	private final boolean visibleInGui;
 	private final boolean ownRenderer;
+	private final boolean accessibleByAnotherPlayer;
 
-	public PlayerInventoryHandler(Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean ownRenderer) {
+	public PlayerInventoryHandler(Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		this.getSlotCount = getSlotCount;
 		this.getStackInSlot = getStackInSlot;
 		this.setStackInSlot = setStackInSlot;
 		this.visibleInGui = visibleInGui;
 		this.ownRenderer = ownRenderer;
+		this.accessibleByAnotherPlayer = accessibleByAnotherPlayer;
 	}
 
 	public int getSlotCount(Player player) {
@@ -39,6 +41,10 @@ public class PlayerInventoryHandler {
 
 	public boolean hasItsOwnRenderer() {
 		return ownRenderer;
+	}
+
+	public boolean isAccessibleByAnotherPlayer() {
+		return accessibleByAnotherPlayer;
 	}
 
 	public interface IStackInSlotModifier {

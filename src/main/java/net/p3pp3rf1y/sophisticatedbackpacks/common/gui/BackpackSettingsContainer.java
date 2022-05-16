@@ -10,11 +10,17 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
 public class BackpackSettingsContainer extends SettingsContainer<IBackpackWrapper> implements IContextAwareContainer {
+	static {
+		SettingsContainer.addFactory(BackpackMainSettingsCategory.NAME, BackpackMainSettingsContainer::new);
+	}
+
 	private final BackpackContext backpackContext;
 	private CompoundTag lastSettingsNbt = null;
 
@@ -25,7 +31,7 @@ public class BackpackSettingsContainer extends SettingsContainer<IBackpackWrappe
 	}
 
 	public static BackpackSettingsContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-		return new BackpackSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer));
+		return new BackpackSettingsContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.level));
 	}
 
 	@Override

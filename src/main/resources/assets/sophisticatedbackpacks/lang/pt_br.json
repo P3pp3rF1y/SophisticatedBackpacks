@@ -149,7 +149,6 @@
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack": "Mochila",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip": "Configuração desta Mochila",
     "gui.sophisticatedbackpacks.settings.buttons.context_backpack.tooltip_detail": "Aplica estas configurações somente a esta mochila",
-    "gui.sophisticatedbackpacks.tooltip.stack_count": "Contagem: %s",
     "gui.sophisticatedbackpacks.settings.backpack": "Mochila",
     "gui.sophisticatedbackpacks.settings.backpack.tooltip": "Configurações da Mochila",
     "gui.sophisticatedbackpacks.error.add.inception_sub_backpack": "O acessório de Mochila Espaçosa só pode ser equipado em uma mochila de nível superior",

@@ -40,12 +40,11 @@ public class PlayerInventoryProvider {
 
 	private PlayerInventoryProvider() {
 		addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.getInventory().items.size(),
-				(player, slot) -> player.getInventory().items.get(slot), (player, slot, stack) -> player.getInventory().items.set(slot, stack), true, false, false);
+				(player, slot) -> player.getInventory().items.get(slot), (player, slot, stack) -> player.getInventory().items.set(slot, stack), true, false, false, false);
 		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.getInventory().offhand.size(),
-				(player, slot) -> player.getInventory().offhand.get(slot), (player, slot, stack) -> player.getInventory().offhand.set(slot, stack), false, false, false);
+				(player, slot) -> player.getInventory().offhand.get(slot), (player, slot, stack) -> player.getInventory().offhand.set(slot, stack), false, false, false, false);
 		addPlayerInventoryHandler(ARMOR_INVENTORY, player -> 1,
-				(player, slot) -> player.getInventory().armor.get(EquipmentSlot.CHEST.getIndex()), (player, slot, stack) -> player.getInventory().armor.set(EquipmentSlot.CHEST.getIndex(), stack), false, true, false);
-
+				(player, slot) -> player.getInventory().armor.get(EquipmentSlot.CHEST.getIndex()), (player, slot, stack) -> player.getInventory().armor.set(EquipmentSlot.CHEST.getIndex(), stack), false, true, false, true);
 	}
 
 	public void setPlayerInventoryHandlerInitCallback(Consumer<Player> callback) {
@@ -55,10 +54,10 @@ public class PlayerInventoryProvider {
 		playerInventoryHandlersInitialized = false;
 	}
 
-	public void addPlayerInventoryHandler(String name, Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
+	public void addPlayerInventoryHandler(String name, Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
-		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui, ownRenderer));
+		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui, ownRenderer, accessibleByAnotherPlayer));
 		playerInventoryHandlers.putAll(temp);
 
 		if (rendered) {
@@ -100,8 +99,16 @@ public class PlayerInventoryProvider {
 	}
 
 	public void runOnBackpacks(Player player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
+		runOnBackpacks(player, backpackInventorySlotConsumer, false);
+	}
+
+	public void runOnBackpacks(Player player, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
 		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers(player).entrySet()) {
 			PlayerInventoryHandler invHandler = entry.getValue();
+			if (onlyAccessibleByAnotherPlayer && !invHandler.isAccessibleByAnotherPlayer()) {
+				continue;
+			}
+
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
 				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), slot)) {

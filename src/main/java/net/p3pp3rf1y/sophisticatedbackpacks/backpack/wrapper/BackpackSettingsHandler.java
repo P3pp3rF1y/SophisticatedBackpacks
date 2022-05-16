@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundTag;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 
@@ -9,7 +10,7 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	public static final String SETTINGS_TAG = "settings";
 
 	public BackpackSettingsHandler(IStorageWrapper backpackWrapper, CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
-		super(backpackContentsNbt, markBackpackContentsDirty, SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG, backpackWrapper::getInventoryHandler, backpackWrapper::getRenderInfo);
+		super(backpackContentsNbt, markBackpackContentsDirty, backpackWrapper::getInventoryHandler, backpackWrapper::getRenderInfo);
 	}
 
 	public void copyTo(SettingsHandler settingsHandler) {
@@ -28,5 +29,15 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	protected void saveCategoryNbt(CompoundTag settingsNbt, String categoryName, CompoundTag tag) {
 		settingsNbt.put(categoryName, tag);
 		contentsNbt.put(SETTINGS_TAG, settingsNbt);
+	}
+
+	@Override
+	protected void addGlobalSettingsCategory(CompoundTag settingsNbt) {
+		addSettingsCategory(settingsNbt, BackpackMainSettingsCategory.NAME, markContentsDirty, (categoryNbt, saveNbt) -> new BackpackMainSettingsCategory(categoryNbt, saveNbt, SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG));
+	}
+
+	@Override
+	public BackpackMainSettingsCategory getGlobalSettingsCategory() {
+		return getTypeCategory(BackpackMainSettingsCategory.class);
 	}
 }
