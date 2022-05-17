@@ -12,6 +12,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
@@ -20,9 +21,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
-import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotTypeMessage;
@@ -47,8 +48,14 @@ public class CuriosCompat implements ICompat {
 			CuriosRendererRegistry.register(ModItems.NETHERITE_BACKPACK.get(), BackpackCurioRenderer::new);
 		});
 
-		MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, this::onAttachCapabilities);
+		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addGenericListener(ItemStack.class, this::onAttachCapabilities);
+		eventBus.addListener(this::onTagsUpdated);
 
+		addPlayerInventoryHandlers();
+	}
+
+	private void addPlayerInventoryHandlers() {
 		PlayerInventoryProvider.get().setPlayerInventoryHandlerInitCallback(player -> CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
 			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
 			for (String identifier : handler.getCurios().keySet()) {
@@ -93,6 +100,11 @@ public class CuriosCompat implements ICompat {
 				}
 			});
 		}
+	}
+
+	public void onTagsUpdated(TagsUpdatedEvent event) {
+		PlayerInventoryProvider.get().removePlayerInventoryHandlersStartingWith(CompatModIds.CURIOS + "_");
+		addPlayerInventoryHandlers();
 	}
 
 	@Override
