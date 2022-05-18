@@ -16,6 +16,7 @@ import net.minecraftforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
@@ -34,7 +35,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 
 	@Override
 	protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
-		ShapeBasedRecipeBuilder.shaped(ModItems.BACKPACK.get())
+		ShapeBasedRecipeBuilder.shaped(ModItems.BACKPACK.get(), BasicBackpackRecipe.SERIALIZER)
 				.pattern("SLS")
 				.pattern("SCS")
 				.pattern("LLL")
