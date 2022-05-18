@@ -425,6 +425,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public void removeContentsUuid() {
+		getContentsUuid().ifPresent(BackpackStorage.get()::removeBackpackContents);
+		NBTHelper.removeTag(backpack, CONTENTS_UUID_TAG);
+	}
+
+	@Override
 	public BackpackRenderInfo getRenderInfo() {
 		return renderInfo;
 	}

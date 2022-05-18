@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "sophisticatedbackpacks:basic_backpack",
   "conditions": [
     {
       "itemRegistryName": "sophisticatedbackpacks:backpack",

@@ -25,6 +25,10 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	void setContentsUuid(UUID storageUuid);
 
+	default void removeContentsUuid() {
+		//noop by default
+	}
+
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {
 		public static final Noop INSTANCE = new Noop();
 

@@ -3,8 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.util;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.ArrayList;
@@ -31,10 +30,10 @@ public class PlayerInventoryProvider {
 	private static final PlayerInventoryProvider clientProvider = new PlayerInventoryProvider();
 
 	public static PlayerInventoryProvider get() {
-		if (FMLEnvironment.dist == Dist.CLIENT) {
-			return clientProvider;
-		} else {
+		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			return serverProvider;
+		} else {
+			return clientProvider;
 		}
 	}
 
@@ -53,6 +52,11 @@ public class PlayerInventoryProvider {
 		// to register its callback which causes the callback not to be called if initialized wasn't set to false here
 		playerInventoryHandlersInitialized = false;
 	}
+
+	public void removePlayerInventoryHandlersStartingWith(String prefix) {
+		playerInventoryHandlers.entrySet().removeIf(e -> e.getKey().startsWith(prefix));
+	}
+
 
 	public void addPlayerInventoryHandler(String name, Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
