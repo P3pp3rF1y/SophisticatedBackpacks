@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
@@ -40,11 +41,11 @@ public class SBPPlugin implements IModPlugin {
 		IIngredientSubtypeInterpreter<ItemStack> backpackNbtInterpreter = (itemStack, context) -> itemStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> "{clothColor:" + wrapper.getMainColor() + ",borderColor:" + wrapper.getAccentColor() + "}")
 				.orElse(IIngredientSubtypeInterpreter.NONE);
-		registration.registerSubtypeInterpreter(ModItems.BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.DIAMOND_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(ModItems.NETHERITE_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.DIAMOND_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.NETHERITE_BACKPACK.get(), backpackNbtInterpreter);
 	}
 
 	@Override
