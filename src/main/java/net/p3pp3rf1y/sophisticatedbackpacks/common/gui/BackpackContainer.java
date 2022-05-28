@@ -71,8 +71,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	@Override
-	protected StorageUpgradeSlot instantiateUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
-		return new BackpackUpgradeSlot(upgradeHandler, slotIndex, yPosition);
+	protected StorageUpgradeSlot instantiateUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex) {
+		return new BackpackUpgradeSlot(upgradeHandler, slotIndex);
 	}
 
 	@Override
@@ -105,8 +105,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
-		public BackpackUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex, int yPosition) {
-			super(upgradeHandler, slotIndex, yPosition);
+		public BackpackUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex) {
+			super(upgradeHandler, slotIndex);
 		}
 
 		@Override

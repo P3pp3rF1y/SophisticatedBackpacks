@@ -56,8 +56,8 @@ public class PlayerInventoryProvider {
 
 	public void removePlayerInventoryHandlersStartingWith(String prefix) {
 		playerInventoryHandlers.entrySet().removeIf(e -> e.getKey().startsWith(prefix));
+		renderedHandlers.removeIf(e -> e.startsWith(prefix));
 	}
-
 
 	public void addPlayerInventoryHandler(String name, Function<Player, Integer> getSlotCount, BiFunction<Player, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
@@ -77,6 +77,9 @@ public class PlayerInventoryProvider {
 		initialize(player);
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
+			if (invHandler == null) {
+				return Optional.empty();
+			}
 			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
 				if (slotStack.getItem() instanceof BackpackItem) {
