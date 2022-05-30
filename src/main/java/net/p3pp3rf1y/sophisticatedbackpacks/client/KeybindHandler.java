@@ -190,7 +190,7 @@ public class KeybindHandler {
 			Slot slot = backpackScreen.getSlotUnderMouse();
 			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
 				if (slot.getItem().getCount() == 1) {
-					SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackOpenMessage(slot.index, true));
+					SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackOpenMessage(slot.index));
 				}
 			} else {
 				SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackCloseMessage());
@@ -199,7 +199,7 @@ public class KeybindHandler {
 			Slot slot = inventoryScreen.getSlotUnderMouse();
 
 			if (slot != null && isSupportedPlayerInventorySlot(slot.index) && slot.getItem().getItem() instanceof BackpackItem) {
-				SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackOpenMessage(slot.getSlotIndex(), false));
+				SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackOpenMessage(slot.getSlotIndex()));
 			}
 		}
 	}

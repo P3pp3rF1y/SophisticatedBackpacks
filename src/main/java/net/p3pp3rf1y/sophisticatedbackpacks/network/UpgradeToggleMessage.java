@@ -38,7 +38,7 @@ public class UpgradeToggleMessage {
 			return;
 		}
 
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, slot) -> {
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> {
 				Map<Integer, IUpgradeWrapper> slotWrappers = w.getUpgradeHandler().getSlotWrappers();
 				if (slotWrappers.containsKey(msg.upgradeSlot)) {

@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,7 +11,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
@@ -31,9 +29,10 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class CuriosCompat implements ICompat {
@@ -50,39 +49,33 @@ public class CuriosCompat implements ICompat {
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addGenericListener(ItemStack.class, this::onAttachCapabilities);
-		eventBus.addListener(this::onTagsUpdated);
 
 		addPlayerInventoryHandlers();
 	}
 
 	private void addPlayerInventoryHandlers() {
-		PlayerInventoryProvider.get().setPlayerInventoryHandlerInitCallback(player -> CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(handler -> {
-			Set<String> backpackCurioTags = CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get());
-			for (String identifier : handler.getCurios().keySet()) {
-				if (identifier.equals(SlotTypePreset.CURIO.getIdentifier()) || backpackCurioTags.contains(identifier)) {
-					addSlotProvider(identifier);
-				}
-			}
-		}));
+		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS, this::getCurioTags,
+				(player, identifier) -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
+				(player, identifier, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
+				false, true, true, true);
 	}
 
-	private void addSlotProvider(String identifier) {
-		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS + "_" + identifier,
-				player -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
-				(player, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				(player, slot, stack) -> runOnBackStackHandler(player, identifier, sh -> sh.getStacks().setStackInSlot(slot, stack)),
-				false, true, true, true
-		);
+	private Set<String> backpackCurioIdentifiers = new HashSet<>();
+	private long lastTagsRefresh = -1;
+	private static final int TAGS_REFRESH_COOLDOWN = 100;
+
+	private Set<String> getCurioTags(long gameTime) {
+		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
+			lastTagsRefresh = gameTime;
+			backpackCurioIdentifiers = new HashSet<>(CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get()));
+			backpackCurioIdentifiers.add(SlotTypePreset.CURIO.getIdentifier());
+		}
+		return backpackCurioIdentifiers;
 	}
 
 	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
 		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity)
 				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
-	}
-
-	private void runOnBackStackHandler(Player player, String identifier, Consumer<ICurioStacksHandler> runOnHandler) {
-		CuriosApi.getCuriosHelper().getCuriosHandler(player)
-				.ifPresent(h -> h.getStacksHandler(identifier).ifPresent(runOnHandler));
 	}
 
 	private void sendImc(InterModEnqueueEvent evt) {
@@ -95,16 +88,12 @@ public class CuriosCompat implements ICompat {
 		if (item.getRegistryName() != null && item.getRegistryName().getNamespace().equals(SophisticatedBackpacks.MOD_ID) && item instanceof BackpackItem) {
 			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, item.getRegistryName().getPath() + "_curios"), new ICapabilityProvider() {
 				@Override
+				@Nonnull
 				public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(() -> () -> stack));
 				}
 			});
 		}
-	}
-
-	public void onTagsUpdated(TagsUpdatedEvent event) {
-		PlayerInventoryProvider.get().removePlayerInventoryHandlersStartingWith(CompatModIds.CURIOS + "_");
-		addPlayerInventoryHandlers();
 	}
 
 	@Override
