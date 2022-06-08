@@ -18,7 +18,7 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.common.Tags;
@@ -45,7 +45,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -62,6 +61,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	@Nullable
 	private ResourceLocation toolCacheFor = null;
 	private final Queue<ItemStack> toolCache = new LinkedList<>();
+
+	private Block lastMinedBlock = Blocks.AIR;
 
 	protected ToolSwapperUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
@@ -83,30 +84,37 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		BlockState state = player.level.getBlockState(pos);
 		Block block = state.getBlock();
 
+		double mainToolSpeed = 0;
 		if (isGoodAtBreakingBlock(state, mainHandItem)) {
-			return true;
+			if (lastMinedBlock == block) {
+				return true;
+			}
+			mainToolSpeed = mainHandItem.getDestroySpeed(state);
 		}
 
-		return tryToSwapTool(player, state, block, mainHandItem);
+		lastMinedBlock = block;
+
+		return tryToSwapTool(player, state, mainToolSpeed, mainHandItem);
 	}
 
-	private boolean tryToSwapTool(Player player, BlockState state, Block block, ItemStack mainHandItem) {
+	private boolean tryToSwapTool(Player player, BlockState state, double mainHandItemSpeed, ItemStack mainHandItem) {
 		AtomicReference<ItemStack> selectedTool = new AtomicReference<>(ItemStack.EMPTY);
 		AtomicInteger selectedSlot = new AtomicInteger(-1);
-		AtomicBoolean finished = new AtomicBoolean(false);
+		AtomicDouble bestSpeed = new AtomicDouble(mainHandItemSpeed);
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryHandler();
 		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
 			if (stack.isEmpty()) {
 				return;
 			}
 			if (isAllowedAndGoodAtBreakingBlock(state, stack)) {
-				selectedSlot.set(slot);
-				selectedTool.set(stack);
-				if (!(block instanceof LeavesBlock) || !stack.canPerformAction(ToolActions.HOE_DIG)) {
-					finished.set(true);
+				float destroySpeed = stack.getDestroySpeed(state);
+				if (bestSpeed.get() < destroySpeed) {
+					bestSpeed.set(destroySpeed);
+					selectedSlot.set(slot);
+					selectedTool.set(stack);
 				}
 			}
-		}, finished::get);
+		});
 		ItemStack tool = selectedTool.get();
 		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItem, tool, selectedSlot.get())) {
 			player.setItemInHand(InteractionHand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
