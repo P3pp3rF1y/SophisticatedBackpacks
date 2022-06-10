@@ -15,7 +15,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategor
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategory;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -47,10 +46,10 @@ public class AnotherPlayerBackpackOpenMessage {
 		}
 
 		if (player.level.getEntity(msg.anotherPlayerId) instanceof Player anotherPlayer) {
-			PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, slot) -> {
-				if (canAnotherPlayerOpenBackpack(player, anotherPlayer, backpack)) {
+			PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
+				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 
-					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, slot, anotherPlayer);
+					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
 					NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 							backpackContext::toBuffer);
 				} else {
@@ -61,7 +60,7 @@ public class AnotherPlayerBackpackOpenMessage {
 		}
 	}
 
-	private static boolean canAnotherPlayerOpenBackpack(@NotNull ServerPlayer player, Player anotherPlayer, ItemStack backpack) {
+	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {
 		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
 			MainSettingsCategory category = wrapper.getSettingsHandler().getGlobalSettingsCategory();
 			return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category, BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);

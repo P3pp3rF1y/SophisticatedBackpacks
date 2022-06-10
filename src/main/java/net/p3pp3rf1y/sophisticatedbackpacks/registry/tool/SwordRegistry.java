@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -27,6 +28,11 @@ public class SwordRegistry {
 
 	public static boolean isSword(ItemStack stack) {
 		if (SWORD_ITEMS.contains(stack.getItem())) {
+			return true;
+		}
+
+		if (stack.getItem() instanceof SwordItem) {
+			SWORD_ITEMS.add(stack.getItem());
 			return true;
 		}
 

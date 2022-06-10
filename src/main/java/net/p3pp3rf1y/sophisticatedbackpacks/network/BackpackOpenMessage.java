@@ -18,24 +18,26 @@ public class BackpackOpenMessage {
 	private static final int CHEST_SLOT = 38;
 	private static final int OFFHAND_SLOT = 40;
 	private final int slotIndex;
-	private final boolean isSubBackpack;
-
+	private final String identifier;
 	public BackpackOpenMessage() {
-		this(-1, false);
+		this(-1);
 	}
 
-	public BackpackOpenMessage(int backpackSlot, boolean isSubBackpack) {
+	public BackpackOpenMessage(int backpackSlot) {
+		this(backpackSlot, "");
+	}
+	public BackpackOpenMessage(int backpackSlot, String identifier) {
 		slotIndex = backpackSlot;
-		this.isSubBackpack = isSubBackpack;
+		this.identifier = identifier;
 	}
 
 	public static void encode(BackpackOpenMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.slotIndex);
-		packetBuffer.writeBoolean(msg.isSubBackpack);
+		packetBuffer.writeUtf(msg.identifier);
 	}
 
 	public static BackpackOpenMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readBoolean());
+		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readUtf());
 	}
 
 	static void onMessage(BackpackOpenMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -69,7 +71,7 @@ public class BackpackOpenMessage {
 				slotIndex = 0;
 			}
 
-			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryProvider, slotIndex, true);
+			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryProvider, msg.identifier, slotIndex, true);
 			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);
@@ -77,8 +79,8 @@ public class BackpackOpenMessage {
 	}
 
 	private static void findAndOpenFirstBackpack(ServerPlayer player) {
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, slot) -> {
-			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, slot);
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
+			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
 			NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 					backpackContext::toBuffer);
 			return true;

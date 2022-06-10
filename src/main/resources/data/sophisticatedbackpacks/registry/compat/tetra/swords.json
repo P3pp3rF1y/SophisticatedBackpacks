@@ -1,9 +1,6 @@
 {
     "mod": "tetra",
     "swords": [
-        {
-            "type": "tool",
-            "tool": "cut"
-        }
+        "tetra:modular_sword"
     ]
 }
