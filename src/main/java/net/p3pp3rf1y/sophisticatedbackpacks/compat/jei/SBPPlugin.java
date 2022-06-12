@@ -16,12 +16,16 @@ import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.compat.jei.CorePlugin;
 import net.p3pp3rf1y.sophisticatedcore.compat.jei.CraftingContainerRecipeTransferHandlerBase;
 import net.p3pp3rf1y.sophisticatedcore.compat.jei.StorageGhostIngredientHandler;
 
@@ -74,6 +78,12 @@ public class SBPPlugin implements IModPlugin {
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
 		registration.addRecipes(RecipeTypes.CRAFTING, DyeRecipesMaker.getRecipes());
+		registration.addRecipes(RecipeTypes.CRAFTING, BackpackUpgradeRecipe.REGISTERED_RECIPES.values().stream().map(CorePlugin::copyShapedRecipe).toList());
+		registration.addRecipes(RecipeTypes.SMITHING, SmithingBackpackUpgradeRecipe.REGISTERED_RECIPES.values().stream().map(this::copyUpgradeRecipe).toList());
+	}
+
+	private UpgradeRecipe copyUpgradeRecipe(UpgradeRecipe recipe) {
+		return new UpgradeRecipe(recipe.getId(), recipe.base, recipe.addition, recipe.getResultItem());
 	}
 
 	@Override

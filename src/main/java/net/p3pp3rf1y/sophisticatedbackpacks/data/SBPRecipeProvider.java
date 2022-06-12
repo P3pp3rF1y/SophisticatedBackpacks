@@ -466,7 +466,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_pump_upgrade", has(ModItems.PUMP_UPGRADE.get()))
 				.save(consumer);
 
-		ShapeBasedRecipeBuilder.shaped(ModItems.XP_PUMP_UPGRADE.get(), UpgradeNextTierRecipe.SERIALIZER)
+		ShapeBasedRecipeBuilder.shaped(ModItems.XP_PUMP_UPGRADE.get())
 				.pattern("RER")
 				.pattern("CPC")
 				.pattern("RER")
