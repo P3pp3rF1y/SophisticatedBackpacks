@@ -117,14 +117,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	@Override
-	public void detectSettingsChangeAndReload() {
-		storageWrapper.getContentsUuid().ifPresent(uuid -> {
+	public boolean detectSettingsChangeAndReload() {
+		return storageWrapper.getContentsUuid().map(uuid -> {
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
 				storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid));
 				refreshInventorySlotsIfNeeded();
+				return true;
 			}
-		});
+			return false;
+		}).orElse(false);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -11,17 +12,26 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWrapperRecipe<UpgradeRecipe> {
 	public static final Serializer SERIALIZER = new Serializer();
+	public static final Map<ResourceLocation, UpgradeRecipe> REGISTERED_RECIPES = new LinkedHashMap<>();
 	private final UpgradeRecipe compose;
 
 	public SmithingBackpackUpgradeRecipe(UpgradeRecipe compose) {
 		super(compose.getId(), Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44518_")),
 				Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44519_")), compose.getResultItem());
 		this.compose = compose;
+		REGISTERED_RECIPES.put(compose.getId(), this);
+	}
+
+	@Override
+	public boolean isSpecial() {
+		return true;
 	}
 
 	@Override

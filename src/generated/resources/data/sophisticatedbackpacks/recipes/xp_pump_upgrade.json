@@ -1,5 +1,5 @@
 {
-  "type": "sophisticatedcore:upgrade_next_tier",
+  "type": "minecraft:crafting_shaped",
   "conditions": [
     {
       "itemRegistryName": "sophisticatedbackpacks:xp_pump_upgrade",
