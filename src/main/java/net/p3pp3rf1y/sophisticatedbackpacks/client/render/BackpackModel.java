@@ -22,7 +22,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
@@ -402,11 +405,12 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 			return;
 		}
 
-		ResourceLocation texture = fluid.getAttributes().getStillTexture(new FluidStack(fluid, 5000));
+		IFluidTypeRenderProperties renderProperties = RenderProperties.get(fluid);
+		ResourceLocation texture = renderProperties.getStillTexture(new FluidStack(fluid, 5000));
 		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
 		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
-		int color = fluid.getAttributes().getColor();
+		int color = renderProperties.getColorTint();
 		float red = (color >> 16 & 255) / 255.0F;
 		float green = (color >> 8 & 255) / 255.0F;
 		float blue = (color & 255) / 255.0F;
@@ -433,7 +437,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		});
 	}
 
-	private static record FluidBarCacheKey(int u, int v, int fill) {
+	private record FluidBarCacheKey(int u, int v, int fill) {
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {return true;}
@@ -458,7 +462,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 
 	private static String getTierPartName(Item backpackItem, String partNamePrefix) {
 		//noinspection ConstantConditions - by this point backpack items are registered
-		return partNamePrefix + backpackItem.getRegistryName().getPath();
+		return partNamePrefix + ForgeRegistries.ITEMS.getKey(backpackItem).getPath();
 	}
 
 	private static void addLeftPouchesClips(PartDefinition partDefinition, Item backpackItem, int yTextureOffset) {

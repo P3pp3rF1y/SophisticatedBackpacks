@@ -31,12 +31,15 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.client.IFluidTypeRenderProperties;
+import net.minecraftforge.client.RenderProperties;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -58,7 +61,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -160,7 +162,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		@Nonnull
 		@Override
-		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand, @Nonnull IModelData extraData) {
+		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull RandomSource rand, @Nonnull IModelData extraData) {
 			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData));
 			if (state == null) {
 				addLeftSide(state, side, rand, extraData, ret, tankLeft);
@@ -175,7 +177,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			return ret;
 		}
 
-		private void addFront(@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean battery) {
+		private void addFront(
+				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean battery) {
 			if (battery) {
 				if (batteryRenderInfo != null) {
 					addCharge(ret, batteryRenderInfo.getChargeRatio());
@@ -202,7 +205,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addRightSide(
-				@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean tankRight) {
+				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean tankRight) {
 			if (tankRight) {
 				if (rightTankRenderInfo != null) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
@@ -214,7 +217,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		private void addLeftSide(
-				@Nullable BlockState state, @Nullable Direction side, Random rand, IModelData extraData, List<BakedQuad> ret, boolean tankLeft) {
+				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean tankLeft) {
 			if (tankLeft) {
 				if (leftTankRenderInfo != null) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d));
@@ -234,8 +237,9 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			double yMax = yMin + (ratio * 6) / 16d;
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
-			ResourceLocation texture = fluid.getAttributes().getStillTexture();
-			int color = fluid.getAttributes().getColor();
+			IFluidTypeRenderProperties renderProperties = RenderProperties.get(fluid);
+			ResourceLocation texture = renderProperties.getStillTexture();
+			int color = renderProperties.getColorTint();
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
@@ -318,7 +322,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		private void putVertex(BakedQuadBuilder builder, Vector3f normal,
 				float x, float y, float z, float u, float v, TextureAtlasSprite sprite, float[] col) {
-			ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements().asList();
+			ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements();
 			for (int e = 0; e < elements.size(); e++) {
 				switch (elements.get(e).getUsage()) {
 					case POSITION:

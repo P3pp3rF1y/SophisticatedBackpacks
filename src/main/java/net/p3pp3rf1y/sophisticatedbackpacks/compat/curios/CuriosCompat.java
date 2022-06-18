@@ -16,6 +16,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
@@ -85,10 +86,11 @@ public class CuriosCompat implements ICompat {
 	public void onAttachCapabilities(AttachCapabilitiesEvent<ItemStack> evt) {
 		ItemStack stack = evt.getObject();
 		Item item = stack.getItem();
-		if (item.getRegistryName() != null && item.getRegistryName().getNamespace().equals(SophisticatedBackpacks.MOD_ID) && item instanceof BackpackItem) {
-			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, item.getRegistryName().getPath() + "_curios"), new ICapabilityProvider() {
-				@Override
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(item);
+		if (registryName != null && registryName.getNamespace().equals(SophisticatedBackpacks.MOD_ID) && item instanceof BackpackItem) {
+			evt.addCapability(new ResourceLocation(SophisticatedBackpacks.MOD_ID, registryName.getPath() + "_curios"), new ICapabilityProvider() {
 				@Nonnull
+				@Override
 				public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 					return CuriosCapability.ITEM.orEmpty(cap, LazyOptional.of(() -> () -> stack));
 				}

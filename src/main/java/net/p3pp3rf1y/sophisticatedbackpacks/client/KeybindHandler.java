@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
@@ -148,7 +148,7 @@ public class KeybindHandler {
 			return;
 		}
 		if (player.getMainHandItem().getItem() instanceof BackpackItem) {
-			player.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"), true);
+			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"), true);
 			return;
 		}
 		HitResult rayTrace = mc.hitResult;

@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.botania.BotaniaCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 
@@ -19,7 +18,7 @@ public class ModCompat {
 
 	static {
 		compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
-		compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new);
+		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new); //TODO readd Botania compat
 	}
 
 	public static void initCompats() {

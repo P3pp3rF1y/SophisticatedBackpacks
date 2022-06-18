@@ -232,7 +232,7 @@ public class Config {
 			}
 
 			private List<String> getDefaultEntityLootTableList() {
-				return getDefaultEntityLootMapping().entrySet().stream().map(e -> e.getKey().getRegistryName() + "|" + e.getValue()).collect(Collectors.toList());
+				return getDefaultEntityLootMapping().entrySet().stream().map(e -> ForgeRegistries.ENTITIES.getKey(e.getKey()) + "|" + e.getValue()).collect(Collectors.toList());
 			}
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {

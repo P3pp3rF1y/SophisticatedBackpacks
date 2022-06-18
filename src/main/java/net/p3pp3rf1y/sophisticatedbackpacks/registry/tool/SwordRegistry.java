@@ -36,7 +36,7 @@ public class SwordRegistry {
 			return true;
 		}
 
-		ResourceLocation registryName = stack.getItem().getRegistryName();
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(stack.getItem());
 		if (registryName == null) {
 			return false;
 		}

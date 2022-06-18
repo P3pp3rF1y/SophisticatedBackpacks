@@ -1,10 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -25,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SBPLootInjectProvider implements DataProvider {
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private final DataGenerator generator;
 
 	SBPLootInjectProvider(DataGenerator generator) {
@@ -33,7 +30,7 @@ public class SBPLootInjectProvider implements DataProvider {
 	}
 
 	@Override
-	public void run(HashCache cache) throws IOException {
+	public void run(CachedOutput cache) throws IOException {
 		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
 		tables.put(BuiltInLootTables.SIMPLE_DUNGEON, getLootTable(92,
@@ -73,7 +70,7 @@ public class SBPLootInjectProvider implements DataProvider {
 
 		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
 			Path path = getPath(generator.getOutputFolder(), e.getKey());
-			DataProvider.save(GSON, cache, LootTables.serialize(e.getValue().setParamSet(LootContextParamSets.CHEST).build()), path);
+			DataProvider.saveStable(cache, LootTables.serialize(e.getValue().setParamSet(LootContextParamSets.CHEST).build()), path);
 		}
 	}
 

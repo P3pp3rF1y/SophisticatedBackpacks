@@ -4,8 +4,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,7 +37,7 @@ public class GiveCommand {
 			Item item = ForgeRegistries.ITEMS.getValue(alr.getBackpackItemRegistryName());
 			ItemStack backpack = new ItemStack(item);
 			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
-				backpack.setHoverName(new TextComponent(alr.getBackpackName()));
+				backpack.setHoverName(Component.literal(alr.getBackpackName()));
 			}
 			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
@@ -49,9 +48,9 @@ public class GiveCommand {
 			players.forEach(p -> giveBackpackToPlayer(backpack, p));
 
 			if (players.size() == 1) {
-				source.sendSuccess(new TranslatableComponent("commands.sophisticatedbackpacks.give.success", players.iterator().next().getDisplayName()), true);
+				source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.give.success", players.iterator().next().getDisplayName()), true);
 			} else {
-				source.sendSuccess(new TranslatableComponent("commands.sophisticatedbackpacks.give.success", players.size()), true);
+				source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.give.success", players.size()), true);
 			}
 		});
 		return 0;

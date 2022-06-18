@@ -5,11 +5,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.AccessLogRecord;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 
@@ -34,27 +33,27 @@ public class ListCommand {
 	private static int printBackpackList(List<AccessLogRecord> allLogs, CommandSourceStack source) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
 		allLogs.sort(Comparator.comparing(AccessLogRecord::getAccessTime).reversed());
-		source.sendSuccess(new TranslatableComponent("commands.sophisticatedbackpacks.list.header"), false);
+		source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.list.header"), false);
 		allLogs.forEach(alr -> {
-			MutableComponent message = new TextComponent("");
-			message.append(new TextComponent(alr.getBackpackName())
+			MutableComponent message = Component.literal("");
+			message.append(Component.literal(alr.getBackpackName())
 					.withStyle(s ->
 							s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks give @p " + alr.getBackpackUuid()))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.getBackpackUuid())))
+									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.getBackpackUuid())))
 					)
 			);
-			message.append(new TextComponent(", "));
-			TranslatableComponent clothColor = new TranslatableComponent("commands.sophisticatedbackpacks.list.cloth_color");
+			message.append(Component.literal(", "));
+			MutableComponent clothColor = Component.translatable("commands.sophisticatedbackpacks.list.cloth_color");
 			clothColor.withStyle(clothColor.getStyle().withColor(TextColor.fromRgb(alr.getClothColor())));
 			message.append(clothColor);
-			message.append(new TextComponent(" "));
-			TranslatableComponent trimColor = new TranslatableComponent("commands.sophisticatedbackpacks.list.trim_color");
+			message.append(Component.literal(" "));
+			MutableComponent trimColor = Component.translatable("commands.sophisticatedbackpacks.list.trim_color");
 			trimColor.withStyle(trimColor.getStyle().withColor(TextColor.fromRgb(alr.getTrimColor())));
 			message.append(trimColor);
-			message.append(new TextComponent(", "));
-			message.append(new TextComponent(alr.getPlayerName()));
-			message.append(new TextComponent(", "));
-			message.append(new TextComponent(dateFormat.format(new Date(alr.getAccessTime()))));
+			message.append(Component.literal(", "));
+			message.append(Component.literal(alr.getPlayerName()));
+			message.append(Component.literal(", "));
+			message.append(Component.literal(dateFormat.format(new Date(alr.getAccessTime()))));
 			source.sendSuccess(message, false);
 		});
 		return 0;

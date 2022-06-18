@@ -7,6 +7,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
@@ -15,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecipe<ShapedRecipe> {
-	public static final Serializer SERIALIZER = new Serializer();
 	public static final Map<ResourceLocation, ShapedRecipe> REGISTERED_RECIPES = new LinkedHashMap<>();
 	private final ShapedRecipe compose;
 
@@ -60,7 +60,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return SERIALIZER;
+		return ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get();
 	}
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BackpackUpgradeRecipe> {

@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class BackpackAccessLogger {
 			return;
 		}
 		//noinspection ConstantConditions - at this point the registry name of item exists for sure otherwise the player wouldn't be able to open the backpack
-		BackpackStorage.get().putAccessLog(new AccessLogRecord(backpackItem.getRegistryName(), backpackUuid, player.getDisplayName().getString(), backpackName, clothColor, trimColor, Util.getEpochMillis(), columnsTaken));
+		BackpackStorage.get().putAccessLog(new AccessLogRecord(ForgeRegistries.ITEMS.getKey(backpackItem), backpackUuid, player.getDisplayName().getString(), backpackName, clothColor, trimColor, Util.getEpochMillis(), columnsTaken));
 	}
 
 	public static Set<String> getPlayerNames() {

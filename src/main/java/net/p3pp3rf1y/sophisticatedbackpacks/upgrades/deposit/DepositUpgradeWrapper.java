@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -42,6 +42,6 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 		int stacksDeposited = stacksAdded.get();
 		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
-		player.displayClientMessage(new TranslatableComponent(translKey, stacksDeposited), true);
+		player.displayClientMessage(Component.translatable(translKey, stacksDeposited), true);
 	}
 }

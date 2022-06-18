@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +53,7 @@ public class AnotherPlayerBackpackOpenMessage {
 					NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 							backpackContext::toBuffer);
 				} else {
-					player.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
+					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
 				}
 				return true;
 			}, true);

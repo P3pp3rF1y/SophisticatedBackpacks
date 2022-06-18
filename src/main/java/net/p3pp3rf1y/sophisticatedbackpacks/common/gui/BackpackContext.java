@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -249,7 +248,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return new TextComponent("... > " + super.getDisplayName(player).getString());
+			return Component.literal("... > " + super.getDisplayName(player).getString());
 		}
 
 		@Override
@@ -374,7 +373,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return new TextComponent("... > " + super.getDisplayName(player).getString());
+			return Component.literal("... > " + super.getDisplayName(player).getString());
 		}
 
 		@Override
@@ -477,7 +476,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return new TextComponent("... > " + super.getDisplayName(player).getString());
+			return Component.literal("... > " + super.getDisplayName(player).getString());
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer, Level level) {

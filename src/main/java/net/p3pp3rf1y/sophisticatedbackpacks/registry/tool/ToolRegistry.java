@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
@@ -40,8 +40,8 @@ public class ToolRegistry {
 
 	private static final Set<String> modsWithMapping = new HashSet<>();
 
-	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(BlockContext::getBlock);
-	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(Entity::getType);
+	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.BLOCKS, BlockContext::getBlock);
+	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.ENTITIES, Entity::getType);
 
 	public static boolean isToolForBlock(ItemStack stack, Block block, Level world, BlockState blockState, BlockPos pos) {
 		return BLOCK_TOOL_MAPPING.isToolFor(stack, block, () -> new BlockContext(world, blockState, block, pos));
@@ -51,16 +51,18 @@ public class ToolRegistry {
 		return ENTITY_TOOL_MAPPING.isToolFor(stack, entity.getType(), () -> entity);
 	}
 
-	private abstract static class ToolsLoaderBase<T extends ForgeRegistryEntry<?>, C> implements IRegistryDataLoader {
+	private abstract static class ToolsLoaderBase<V, C> implements IRegistryDataLoader {
 		private final List<IMatcherFactory<C>> objectMatcherFactories;
-		private final ToolMapping<T, C> toolMapping;
-		private final Function<ResourceLocation, Optional<T>> getObjectFromRegistry;
+		private final ToolMapping<V, C> toolMapping;
+		private final IForgeRegistry<V> registry;
+		private final Function<ResourceLocation, Optional<V>> getObjectFromRegistry;
 		private final String name;
 		private final String objectJsonArrayName;
 
-		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<T, C> toolMapping, Function<ResourceLocation, Optional<T>> getObjectFromRegistry, String name, String objectJsonArrayName) {
+		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, IForgeRegistry<V> registry, Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
 			this.objectMatcherFactories = objectMatcherFactories;
 			this.toolMapping = toolMapping;
+			this.registry = registry;
 			this.getObjectFromRegistry = getObjectFromRegistry;
 			this.name = name;
 			this.objectJsonArrayName = objectJsonArrayName;
@@ -82,7 +84,7 @@ public class ToolRegistry {
 				JsonObject entry = jsonElement.getAsJsonObject();
 				parseEntry(entry);
 			}
-			toolMapping.getObjectTools().keySet().forEach(object -> RegistryHelper.getRegistryName(object).ifPresent(rn -> modsWithMapping.add(rn.getNamespace())));
+			toolMapping.getObjectTools().keySet().forEach(object -> RegistryHelper.getRegistryName(registry, object).ifPresent(rn -> modsWithMapping.add(rn.getNamespace())));
 		}
 
 		@Override
@@ -128,7 +130,7 @@ public class ToolRegistry {
 
 		private void parseObjectEntry(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, String objectName) {
 			ResourceLocation registryName = new ResourceLocation(objectName);
-			Optional<T> objectOptional = getObjectFromRegistry.apply(registryName);
+			Optional<V> objectOptional = getObjectFromRegistry.apply(registryName);
 			if (objectOptional.isPresent()) {
 				toolMapping.addObjectTools(tools, objectOptional.get());
 			} else {
@@ -199,13 +201,13 @@ public class ToolRegistry {
 
 	public static class BlockToolsLoader extends ToolsLoaderBase<Block, BlockContext> {
 		public BlockToolsLoader() {
-			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
+			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, ForgeRegistries.BLOCKS, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
 		}
 	}
 
 	public static class EntityToolsLoader extends ToolsLoaderBase<EntityType<?>, Entity> {
 		public EntityToolsLoader() {
-			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, rn -> Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(rn)), "entity_tools", "entities");
+			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITIES, rn -> Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(rn)), "entity_tools", "entities");
 		}
 	}
 
@@ -213,16 +215,18 @@ public class ToolRegistry {
 		modsWithMapping.add(modId);
 	}
 
-	private static class ToolMapping<T extends ForgeRegistryEntry<?>, C> {
-		private final Function<C, T> getObjectFromContext;
-		private final Map<T, Set<Item>> notToolCache = new HashMap<>();
+	private static class ToolMapping<V, C> {
+		private final IForgeRegistry<V> registry;
+		private final Function<C, V> getObjectFromContext;
+		private final Map<V, Set<Item>> notToolCache = new HashMap<>();
 
-		private final Map<T, Set<Item>> objectTools = new HashMap<>();
-		private final Map<T, Set<Predicate<ItemStack>>> objectToolPredicates = new HashMap<>();
+		private final Map<V, Set<Item>> objectTools = new HashMap<>();
+		private final Map<V, Set<Predicate<ItemStack>>> objectToolPredicates = new HashMap<>();
 		private final Map<Predicate<C>, Set<Item>> objectPredicateTools = new HashMap<>();
 		private final Map<Predicate<C>, Set<Predicate<ItemStack>>> objectPredicateToolPredicates = new HashMap<>();
 
-		public ToolMapping(Function<C, T> getObjectFromContext) {
+		public ToolMapping(IForgeRegistry<V> registry, Function<C, V> getObjectFromContext) {
+			this.registry = registry;
 			this.getObjectFromContext = getObjectFromContext;
 		}
 
@@ -231,7 +235,7 @@ public class ToolRegistry {
 			tools.getB().forEach(tp -> objectPredicateToolPredicates.computeIfAbsent(predicate, p -> new HashSet<>()).add(tp));
 		}
 
-		private void addObjectTools(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, T object) {
+		private void addObjectTools(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, V object) {
 			tools.getA().forEach(t -> objectTools.computeIfAbsent(object, b -> new HashSet<>()).add(t));
 			tools.getB().forEach(tp -> objectToolPredicates.computeIfAbsent(object, b -> new HashSet<>()).add(tp));
 		}
@@ -244,7 +248,7 @@ public class ToolRegistry {
 			objectPredicateToolPredicates.clear();
 		}
 
-		public boolean isToolFor(ItemStack stack, T object, Supplier<C> getContext) {
+		public boolean isToolFor(ItemStack stack, V object, Supplier<C> getContext) {
 			Item item = stack.getItem();
 			if (objectTools.containsKey(object) && objectTools.get(object).contains(item)) {
 				return true;
@@ -275,7 +279,7 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchNoMappingMod(ItemStack stack, T object) {
+		private boolean tryToMatchNoMappingMod(ItemStack stack, V object) {
 			if (isNoMappingModAndNonStackableItemFromSameMod(stack, object)) {
 				addObjectToolMapping(object, stack.getItem());
 				return true;
@@ -283,10 +287,10 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean isNoMappingModAndNonStackableItemFromSameMod(ItemStack stack, T object) {
-			return RegistryHelper.getRegistryName(object).map(rn ->
+		private boolean isNoMappingModAndNonStackableItemFromSameMod(ItemStack stack, V object) {
+			return RegistryHelper.getRegistryName(registry, object).map(rn ->
 					!rn.getNamespace().equals("minecraft")
-							&& !modsWithMapping.contains(rn.getNamespace()) && RegistryHelper.getRegistryName(stack.getItem()).map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false)
+							&& !modsWithMapping.contains(rn.getNamespace()) && RegistryHelper.getRegistryName(ForgeRegistries.ITEMS, stack.getItem()).map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false)
 			).orElse(false) && stack.getMaxStackSize() == 1;
 		}
 
@@ -302,7 +306,7 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchAgainstObjectToolPredicates(ItemStack stack, T object) {
+		private boolean tryToMatchAgainstObjectToolPredicates(ItemStack stack, V object) {
 			if (objectToolPredicates.containsKey(object)) {
 				Set<Predicate<ItemStack>> toolPredicates = objectToolPredicates.get(object);
 				return tryToMatchTools(stack, object, toolPredicates);
@@ -320,7 +324,7 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private boolean tryToMatchTools(ItemStack stack, T object, Set<Predicate<ItemStack>> toolPredicates) {
+		private boolean tryToMatchTools(ItemStack stack, V object, Set<Predicate<ItemStack>> toolPredicates) {
 			for (Predicate<ItemStack> itemPredicate : toolPredicates) {
 				if (itemPredicate.test(stack)) {
 					objectTools.computeIfAbsent(object, b -> new HashSet<>()).add(stack.getItem());
@@ -330,16 +334,16 @@ public class ToolRegistry {
 			return false;
 		}
 
-		private void addObjectToolMapping(T block, Item item) {
+		private void addObjectToolMapping(V block, Item item) {
 			objectTools.computeIfAbsent(block, b -> new HashSet<>()).add(item);
 		}
 
-		public Map<T, Set<Item>> getObjectTools() {
+		public Map<V, Set<Item>> getObjectTools() {
 			return objectTools;
 		}
 
 		public void addModPredicateTools(String modId, Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools) {
-			addObjectPredicateTools(tools, new ModMatcher<>(modId, getObjectFromContext));
+			addObjectPredicateTools(tools, new ModMatcher<>(registry, modId, getObjectFromContext));
 		}
 	}
 }

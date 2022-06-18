@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 import com.google.common.primitives.Ints;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -28,6 +29,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -45,7 +47,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 public class EntityBackpackAdditionHandler {
@@ -99,7 +100,7 @@ public class EntityBackpackAdditionHandler {
 	);
 
 	static void addBackpack(Monster monster) {
-		Random rnd = monster.level.random;
+		RandomSource rnd = monster.level.random;
 		if (!Config.COMMON.entityBackpackAdditions.canWearBackpack(monster.getType())
 				|| rnd.nextInt((int) (1 / Config.COMMON.entityBackpackAdditions.chance.get())) != 0) {
 			return;
@@ -125,7 +126,7 @@ public class EntityBackpackAdditionHandler {
 		});
 	}
 
-	private static void equipArmorPiece(Monster monster, Random rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot) {
+	private static void equipArmorPiece(Monster monster, RandomSource rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot) {
 		RandHelper.getRandomWeightedElement(rnd, armorChances).ifPresent(armorPiece -> {
 			if (armorPiece != Items.AIR) {
 				ItemStack armorStack = new ItemStack(armorPiece);
@@ -178,7 +179,7 @@ public class EntityBackpackAdditionHandler {
 				musicDiscs = new ArrayList<>();
 				records.forEach((sound, musicDisc) -> {
 					//noinspection ConstantConditions - by this point the disc has registry name
-					if (!blockedDiscs.contains(musicDisc.getRegistryName().toString())) {
+					if (!blockedDiscs.contains(ForgeRegistries.ITEMS.getKey(musicDisc).toString())) {
 						musicDiscs.add(musicDisc);
 					}
 				});

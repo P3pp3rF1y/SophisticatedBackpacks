@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -66,11 +66,11 @@ public class EntityToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
+			sender.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
 		}
 	}
 }

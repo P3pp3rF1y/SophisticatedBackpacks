@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
@@ -41,6 +41,6 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 
 		int stacksRestocked = stacksAdded.get();
 		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";
-		player.displayClientMessage(new TranslatableComponent(translKey, stacksRestocked), true);
+		player.displayClientMessage(Component.translatable(translKey, stacksRestocked), true);
 	}
 }

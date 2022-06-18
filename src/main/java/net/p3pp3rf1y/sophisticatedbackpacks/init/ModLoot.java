@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootTableReference;
@@ -10,8 +9,8 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.RegisterEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.CopyBackpackDataFunction;
@@ -25,11 +24,14 @@ public class ModLoot {
 	private static final List<String> CHEST_TABLES = List.of("abandoned_mineshaft", "bastion_treasure", "desert_pyramid", "end_city_treasure", "nether_bridge", "shipwreck_treasure", "simple_dungeon", "woodland_mansion");
 
 	public static void init(IEventBus modBus) {
-		modBus.addGenericListener(Block.class, ModLoot::registerLootFunction);
+		modBus.addListener(ModLoot::registerLootFunction);
 		MinecraftForge.EVENT_BUS.addListener(ModLoot::lootLoad);
 	}
 
-	private static void registerLootFunction(RegistryEvent<Block> event) {
+	private static void registerLootFunction(RegisterEvent event) {
+		if (!event.getRegistryKey().equals(Registry.LOOT_FUNCTION_REGISTRY)) {
+			return;
+		}
 		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(SophisticatedBackpacks.MOD_ID, "copy_backpack_data"), COPY_BACKPACK_DATA);
 	}
 

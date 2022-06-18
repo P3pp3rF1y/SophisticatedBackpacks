@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -15,15 +16,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IForgeShearable;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
@@ -292,7 +297,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		return tryToSwapTool(player, stack -> itemWorksOnEntity(stack, entity), entity.getType().getRegistryName());
+		return tryToSwapTool(player, stack -> itemWorksOnEntity(stack, entity), ForgeRegistries.ENTITIES.getKey(entity.getType()));
 	}
 
 	private boolean itemWorksOnEntity(ItemStack stack, Entity entity) {
@@ -308,7 +313,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		return tryToSwapTool(player, stack -> itemWorksOnBlock(world, pos, blockState, player, stack), blockState.getBlock().getRegistryName());
+		return tryToSwapTool(player, stack -> itemWorksOnBlock(world, pos, blockState, player, stack), ForgeRegistries.BLOCKS.getKey(blockState.getBlock()));
 	}
 
 	private boolean tryToSwapTool(Player player, Predicate<ItemStack> isToolValid, @Nullable ResourceLocation targetRegistryName) {
@@ -384,18 +389,19 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private static final Set<ToolAction> BLOCK_MODIFICATION_ACTIONS = Set.of(AXE_STRIP, AXE_SCRAPE, AXE_WAX_OFF, SHOVEL_FLATTEN, SHEARS_CARVE, SHEARS_HARVEST);
 
-	private boolean itemWorksOnBlock(Level world, BlockPos pos, BlockState blockState, Player player, ItemStack stack) {
+	private boolean itemWorksOnBlock(Level level, BlockPos pos, BlockState blockState, Player player, ItemStack stack) {
 		for (ToolAction action : BLOCK_MODIFICATION_ACTIONS) {
-			if (stack.canPerformAction(action) && blockState.getToolModifiedState(world, pos, player, stack, action) != null) {
+			if (stack.canPerformAction(action) && blockState.getToolModifiedState(
+							new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)), action, true) != null) {
 				return true;
 			}
 		}
 		Block block = blockState.getBlock();
-		if (isShearInteractionBlock(world, pos, stack, block) && isShearsItem(stack)) {
+		if (isShearInteractionBlock(level, pos, stack, block) && isShearsItem(stack)) {
 			return true;
 		}
 
-		return ToolRegistry.isToolForBlock(stack, block, world, blockState, pos);
+		return ToolRegistry.isToolForBlock(stack, block, level, blockState, pos);
 	}
 
 	private boolean isShearsItem(ItemStack stack) {

@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -95,7 +95,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			return;
 		}
 		NetworkHooks.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackSettingsContainer(w, pl, backpackContext),
-				new TranslatableComponent(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), backpackContext::toBuffer);
+				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), backpackContext::toBuffer);
 	}
 
 	@Override

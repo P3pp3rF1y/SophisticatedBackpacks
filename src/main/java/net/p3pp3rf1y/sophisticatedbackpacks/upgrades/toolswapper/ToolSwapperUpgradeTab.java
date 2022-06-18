@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
@@ -22,19 +22,19 @@ public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgrade
 	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(
 			Map.of(
 					false, GuiHelper.getButtonStateData(new UV(48, 64), Dimension.SQUARE_16, new Position(1, 1),
-							new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon")), new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon.detail")).withStyle(ChatFormatting.GRAY)),
+							Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon")), Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon.detail")).withStyle(ChatFormatting.GRAY)),
 					true, GuiHelper.getButtonStateData(new UV(32, 64), Dimension.SQUARE_16, new Position(1, 1),
-							new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon")), new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon.detail")).withStyle(ChatFormatting.GRAY))
+							Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon")), Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon.detail")).withStyle(ChatFormatting.GRAY))
 			));
 
 	public static final ButtonDefinition.Toggle<ToolSwapMode> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(
 			Map.of(
 					ToolSwapMode.NO_SWAP, GuiHelper.getButtonStateData(new UV(96, 64), Dimension.SQUARE_16, new Position(1, 1),
-							new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools")), new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools.detail")).withStyle(ChatFormatting.GRAY)),
+							Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools")), Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools.detail")).withStyle(ChatFormatting.GRAY)),
 					ToolSwapMode.ONLY_TOOLS, GuiHelper.getButtonStateData(new UV(80, 64), Dimension.SQUARE_16, new Position(1, 1),
-							new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools")), new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools.detail")).withStyle(ChatFormatting.GRAY)),
+							Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools")), Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools.detail")).withStyle(ChatFormatting.GRAY)),
 					ToolSwapMode.ANY, GuiHelper.getButtonStateData(new UV(64, 64), Dimension.SQUARE_16, new Position(1, 1),
-							new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_tools")), new TranslatableComponent(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_tools.detail")).withStyle(ChatFormatting.GRAY))
+							Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_tools")), Component.translatable(SBPTranslationHelper.INSTANCE.translUpgradeButton("swap_tools.detail")).withStyle(ChatFormatting.GRAY))
 			));
 
 	protected final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;

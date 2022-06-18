@@ -8,7 +8,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -61,10 +60,10 @@ public class SophisticatedBackpacks {
 		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
 		ModLoot.init(modBus);
+		SBPCommand.init(modBus);
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(SophisticatedBackpacks::serverStarted);
-		eventBus.addListener(SophisticatedBackpacks::registerCommands);
 		eventBus.addListener(this::onAddReloadListener);
 	}
 
@@ -73,7 +72,6 @@ public class SophisticatedBackpacks {
 		ModCompat.initCompats();
 		ModItems.registerDispenseBehavior();
 		ModItems.registerCauldronInteractions();
-		SBPCommand.registerArgumentTypes();
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
@@ -86,10 +84,6 @@ public class SophisticatedBackpacks {
 		if (world != null) {
 			RecipeHelper.setWorld(world);
 		}
-	}
-
-	private static void registerCommands(RegisterCommandsEvent event) {
-		SBPCommand.register(event.getDispatcher());
 	}
 
 	private void onAddReloadListener(AddReloadListenerEvent event) {

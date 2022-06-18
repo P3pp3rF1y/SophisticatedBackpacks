@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 
 public class RemoveNonPlayerCommand {
@@ -19,7 +19,7 @@ public class RemoveNonPlayerCommand {
 
 	private static int removeNonPlayerBackpacks(CommandSourceStack source, boolean onlyWithEmptyInventory) {
 		int numberRemoved = BackpackStorage.get().removeNonPlayerBackpackContents(onlyWithEmptyInventory);
-		source.sendSuccess(new TranslatableComponent("commands.sophisticatedbackpacks.remove_non_player.success", numberRemoved), false);
+		source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.remove_non_player.success", numberRemoved), false);
 		return 0;
 	}
 }

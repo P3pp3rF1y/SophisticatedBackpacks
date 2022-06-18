@@ -68,7 +68,7 @@ public class Matchers {
 					return Optional.empty();
 				}
 
-				return Optional.of(new ModMatcher<>(modId, BlockContext::getBlock));
+				return Optional.of(new ModMatcher<>(ForgeRegistries.BLOCKS, modId, BlockContext::getBlock));
 			}
 		});
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("all") {

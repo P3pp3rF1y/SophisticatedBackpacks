@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -57,11 +57,11 @@ public class BlockToolSwapMessage {
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			sender.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
 			return;
 		}
 		if (!result.get()) {
-			sender.displayClientMessage(new TranslatableComponent("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
+			sender.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_found_for_block"), true);
 		}
 	}
 }

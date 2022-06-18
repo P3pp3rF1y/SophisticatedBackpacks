@@ -9,6 +9,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
@@ -18,7 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWrapperRecipe<UpgradeRecipe> {
-	public static final Serializer SERIALIZER = new Serializer();
 	public static final Map<ResourceLocation, UpgradeRecipe> REGISTERED_RECIPES = new LinkedHashMap<>();
 	private final UpgradeRecipe compose;
 
@@ -61,8 +61,8 @@ public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWra
 	}
 
 	@Override
-	public Serializer getSerializer() {
-		return SERIALIZER;
+	public RecipeSerializer<?> getSerializer() {
+		return ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER.get();
 	}
 
 	@Override

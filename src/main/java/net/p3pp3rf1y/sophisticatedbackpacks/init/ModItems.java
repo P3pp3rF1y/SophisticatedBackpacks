@@ -20,19 +20,22 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -252,12 +255,25 @@ public class ModItems {
 					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
 	);
 
+	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, SophisticatedBackpacks.MOD_ID);
+
+	public static final RegistryObject<SimpleRecipeSerializer<?>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye", () -> new SimpleRecipeSerializer<>(BackpackDyeRecipe::new));
+	public static final RegistryObject<RecipeSerializer<?>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
+	public static final RegistryObject<RecipeSerializer<?>> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
+	public static final RegistryObject<RecipeSerializer<?>> BASIC_BACKPACK_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("basic_backpack", BasicBackpackRecipe.Serializer::new);
+
 	public static void registerHandlers(IEventBus modBus) {
 		ITEMS.register(modBus);
 		CONTAINERS.register(modBus);
 		ENTITIES.register(modBus);
-		modBus.addGenericListener(MenuType.class, ModItems::registerContainers);
-		modBus.addGenericListener(RecipeSerializer.class, ModItems::registerRecipeSerializers);
+		RECIPE_SERIALIZERS.register(modBus);
+		modBus.addListener(ModItems::registerContainers);
+		MinecraftForge.EVENT_BUS.addListener(ModItems::onResourceReload);
+	}
+
+	private static void onResourceReload(AddReloadListenerEvent event) {
+		BackpackUpgradeRecipe.REGISTERED_RECIPES.clear();
+		SmithingBackpackUpgradeRecipe.REGISTERED_RECIPES.clear();
 	}
 
 	private static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
@@ -292,7 +308,11 @@ public class ModItems {
 	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
 	private static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(XpPumpUpgradeContainer::new);
 
-	public static void registerContainers(RegistryEvent.Register<MenuType<?>> evt) {
+	public static void registerContainers(RegisterEvent event) {
+		if (!event.getRegistryKey().equals(ForgeRegistries.Keys.CONTAINER_TYPES)) {
+			return;
+		}
+
 		UpgradeContainerRegistry.register(PICKUP_UPGRADE.getId(), PICKUP_BASIC_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_PICKUP_UPGRADE.getId(), PICKUP_ADVANCED_TYPE);
 		UpgradeContainerRegistry.register(FILTER_UPGRADE.getId(), FilterUpgradeContainer.BASIC_TYPE);
@@ -387,13 +407,6 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(XP_PUMP_TYPE, (XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->
 					new XpPumpUpgradeTab(upgradeContainer, position, screen, Config.COMMON.xpPumpUpgrade.mendingOn.get()));
 		});
-	}
-
-	public static void registerRecipeSerializers(RegistryEvent.Register<RecipeSerializer<?>> evt) {
-		evt.getRegistry().register(BackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_upgrade"));
-		evt.getRegistry().register(SmithingBackpackUpgradeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "smithing_backpack_upgrade"));
-		evt.getRegistry().register(BackpackDyeRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "backpack_dye"));
-		evt.getRegistry().register(BasicBackpackRecipe.SERIALIZER.setRegistryName(SophisticatedBackpacks.MOD_ID, "basic_backpack"));
 	}
 
 	public static void registerDispenseBehavior() {
