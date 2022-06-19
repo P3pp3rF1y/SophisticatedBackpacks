@@ -26,8 +26,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -258,6 +260,12 @@ public class ModItems {
 		ENTITIES.register(modBus);
 		modBus.addGenericListener(MenuType.class, ModItems::registerContainers);
 		modBus.addGenericListener(RecipeSerializer.class, ModItems::registerRecipeSerializers);
+		MinecraftForge.EVENT_BUS.addListener(ModItems::onResourceReload);
+	}
+
+	private static void onResourceReload(AddReloadListenerEvent event) {
+		BackpackUpgradeRecipe.REGISTERED_RECIPES.clear();
+		SmithingBackpackUpgradeRecipe.REGISTERED_RECIPES.clear();
 	}
 
 	private static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
