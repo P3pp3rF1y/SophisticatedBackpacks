@@ -341,6 +341,11 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		return numberOfUpgradeSlots.getAsInt();
 	}
 
+	@Override
+	public boolean onDroppedByPlayer(ItemStack item, Player player) {
+		return !(player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.getVisibleStorageItem().map(visibleStorageItem -> visibleStorageItem == item).orElse(false));
+	}
+
 	@Nullable
 	@Override
 	public EquipmentSlot getEquipmentSlot(ItemStack stack) {
