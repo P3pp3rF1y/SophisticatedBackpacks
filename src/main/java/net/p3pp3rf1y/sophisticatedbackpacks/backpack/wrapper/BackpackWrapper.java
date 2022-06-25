@@ -458,6 +458,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		backpack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
 		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
+		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
 		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
 		LootHelper.fillWithLoot(world.random, loot, getInventoryHandler());
 	}
