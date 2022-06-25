@@ -261,8 +261,9 @@ public class EntityBackpackAdditionHandler {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			LivingEntity mob = event.getEntityLiving();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
-			if (event.getSource().getEntity() instanceof Player && !(event.getSource().getEntity() instanceof FakePlayer) &&
-					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * Config.COMMON.entityBackpackAdditions.lootingChanceIncreasePerLevel.get(), 0.0F) < Config.COMMON.entityBackpackAdditions.backpackDropChance.get()) {
+			Config.Common.EntityBackpackAdditionsConfig additionsConfig = Config.COMMON.entityBackpackAdditions;
+			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
+					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
