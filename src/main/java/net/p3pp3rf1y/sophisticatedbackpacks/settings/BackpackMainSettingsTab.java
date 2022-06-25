@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinition;
@@ -44,7 +45,8 @@ public class BackpackMainSettingsTab extends MainSettingsTab<BackpackMainSetting
 	public BackpackMainSettingsTab(BackpackMainSettingsContainer container, Position position, SettingsScreen screen) {
 		super(container, position, screen, BACKPACK_CONTEXT_TOOLTIP, Component.translatable(SBPTranslationHelper.INSTANCE.translSettingsButton("context_backpack")),
 				SBPTranslationHelper.INSTANCE.translSettings("backpack"), SBPTranslationHelper.INSTANCE.translSettingsTooltip("backpack"), onTabIconClicked -> new ImageButton(new Position(position.x() + 1, position.y() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
-
-		addHideableChild(new ToggleButton<>(new Position(x + 39, y + 46), ANOTHER_PLAYER_CAN_OPEN, button -> container.toggleAnotherPlayerCanOpen(), container::canAnotherPlayerOpen));
+		if (Boolean.TRUE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
+			addHideableChild(new ToggleButton<>(new Position(x + 39, y + 46), ANOTHER_PLAYER_CAN_OPEN, button -> container.toggleAnotherPlayerCanOpen(), container::canAnotherPlayerOpen));
+		}
 	}
 }
