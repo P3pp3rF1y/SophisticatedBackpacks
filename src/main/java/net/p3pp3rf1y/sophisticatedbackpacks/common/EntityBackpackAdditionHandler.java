@@ -6,11 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,11 +14,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -39,14 +31,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class EntityBackpackAdditionHandler {
 	private static final int MAX_DIFFICULTY = 3;
@@ -260,8 +245,9 @@ public class EntityBackpackAdditionHandler {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			LivingEntity mob = event.getEntityLiving();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
-			if (event.getSource().getEntity() instanceof Player && !(event.getSource().getEntity() instanceof FakePlayer) &&
-					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * Config.COMMON.entityBackpackAdditions.lootingChanceIncreasePerLevel.get(), 0.0F) < Config.COMMON.entityBackpackAdditions.backpackDropChance.get()) {
+			Config.Common.EntityBackpackAdditionsConfig additionsConfig = Config.COMMON.entityBackpackAdditions;
+			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
+					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
