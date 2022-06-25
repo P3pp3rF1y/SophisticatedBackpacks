@@ -75,7 +75,7 @@ public class CommonEventHandler {
 	private long nextBackpackCountCheck = 0;
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-		if (!(event.getTarget() instanceof Player targetPlayer)) {
+		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
 
