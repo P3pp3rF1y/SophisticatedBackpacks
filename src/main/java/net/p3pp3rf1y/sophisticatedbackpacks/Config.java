@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S1192") //don't complain about repeated config names if two upgrades happen to have the same setting
 public class Config {
-	private static final String SETTINGS = " Settings";
 
 	private Config() {}
 
@@ -79,6 +78,7 @@ public class Config {
 		public final EntityBackpackAdditionsConfig entityBackpackAdditions;
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
 		public final ForgeConfigSpec.BooleanValue itemFluidHandlerEnabled;
+		public final ForgeConfigSpec.BooleanValue allowOpeningOtherPlayerBackpacks;
 		public final FilteredUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
@@ -139,6 +139,7 @@ public class Config {
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 			itemFluidHandlerEnabled = builder.comment("Turns on/off item fluid handler of backpack in its item form. There are some dupe bugs caused by default fluid handling implementation that manifest when backpack is drained / filled in its item form in another mod's tank and the only way to prevent them is disallowing drain/fill in item form altogether").define("itemFluidHandlerEnabled", true);
+			allowOpeningOtherPlayerBackpacks = builder.comment("Determines whether player can right click on backpack that another player is wearing to open it. If off will turn off that capability for everyone and remove related settings from backpack.").define("allowOpeningOtherPlayerBackpacks", true);
 
 			builder.pop();
 		}
@@ -166,7 +167,6 @@ public class Config {
 			public final ForgeConfigSpec.BooleanValue buffHealth;
 			public final ForgeConfigSpec.BooleanValue equipWithArmor;
 			public final ForgeConfigSpec.BooleanValue playJukebox;
-
 			public final ForgeConfigSpec.BooleanValue dropToFakePlayers;
 			public final ForgeConfigSpec.DoubleValue backpackDropChance;
 			public final ForgeConfigSpec.DoubleValue lootingChanceIncreasePerLevel;
