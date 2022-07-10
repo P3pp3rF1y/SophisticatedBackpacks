@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -49,11 +49,13 @@ public class SophisticatedBackpacks {
 	public SophisticatedBackpacks() {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
 		commonEventHandler.registerHandlers();
+		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers();
+			modBus.addListener(KeybindHandler::registerKeyMappings);
+			modBus.addListener(SophisticatedBackpacks::registerTooltipComponent);
 		}
 
-		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
 		modBus.addListener(Config.COMMON::onConfigReload);
@@ -76,7 +78,10 @@ public class SophisticatedBackpacks {
 
 	private static void clientSetup(FMLClientSetupEvent event) {
 		KeybindHandler.register(event);
-		MinecraftForgeClient.registerTooltipComponentFactory(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
+	}
+
+	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
+		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
 	}
 
 	private static void serverStarted(ServerStartedEvent event) {
