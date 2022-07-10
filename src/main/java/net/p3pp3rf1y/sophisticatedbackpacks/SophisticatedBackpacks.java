@@ -1,15 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -31,7 +28,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
-import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,7 +59,6 @@ public class SophisticatedBackpacks {
 		ModLoot.init(modBus);
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
-		eventBus.addListener(SophisticatedBackpacks::serverStarted);
 		eventBus.addListener(SophisticatedBackpacks::registerCommands);
 		eventBus.addListener(this::onAddReloadListener);
 	}
@@ -79,13 +74,6 @@ public class SophisticatedBackpacks {
 	private static void clientSetup(FMLClientSetupEvent event) {
 		KeybindHandler.register(event);
 		MinecraftForgeClient.registerTooltipComponentFactory(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
-	}
-
-	private static void serverStarted(ServerStartedEvent event) {
-		ServerLevel world = event.getServer().getLevel(Level.OVERWORLD);
-		if (world != null) {
-			RecipeHelper.setWorld(world);
-		}
 	}
 
 	private static void registerCommands(RegisterCommandsEvent event) {
