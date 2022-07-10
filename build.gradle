@@ -109,9 +109,9 @@ dependencies {
     }
 
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
+    //runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+    //runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
 //    compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
 //    runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
 //    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")

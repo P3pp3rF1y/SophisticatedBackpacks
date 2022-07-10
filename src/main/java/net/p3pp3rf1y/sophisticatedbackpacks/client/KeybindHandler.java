@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
@@ -85,23 +85,23 @@ public class KeybindHandler {
 		eventBus.addListener(KeybindHandler::handleKeyInputEvent);
 		eventBus.addListener(EventPriority.HIGH, KeybindHandler::handleGuiMouseKeyPress);
 		eventBus.addListener(EventPriority.HIGH, KeybindHandler::handleGuiKeyPress);
-
-		event.enqueueWork(() -> {
-			ClientRegistry.registerKeyBinding(BACKPACK_OPEN_KEYBIND);
-			ClientRegistry.registerKeyBinding(INVENTORY_INTERACTION_KEYBIND);
-			ClientRegistry.registerKeyBinding(TOOL_SWAP_KEYBIND);
-			ClientRegistry.registerKeyBinding(SORT_KEYBIND);
-			UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> ClientRegistry.registerKeyBinding(keybind));
-		});
 	}
 
-	public static void handleGuiKeyPress(ScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+	public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+		event.register(BACKPACK_OPEN_KEYBIND);
+		event.register(INVENTORY_INTERACTION_KEYBIND);
+		event.register(TOOL_SWAP_KEYBIND);
+		event.register(SORT_KEYBIND);
+		UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> event.register(keybind));
+	}
+
+	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.getKey(event.getKeyCode(), event.getScanCode())) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);
 		}
 	}
 
-	public static void handleGuiMouseKeyPress(ScreenEvent.MouseClickedEvent.Pre event) {
+	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 		if (SORT_KEYBIND.isActiveAndMatches(input) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);

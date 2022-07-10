@@ -1,12 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
@@ -16,6 +14,7 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -29,7 +28,6 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,20 +36,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.IFluidTypeRenderProperties;
-import net.minecraftforge.client.RenderProperties;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.geometry.IModelGeometry;
-import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
+import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,7 +65,7 @@ import java.util.function.Function;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
-public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel> {
+public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicModel> {
 	private final Map<ModelPart, UnbakedModel> modelParts;
 
 	public BackpackDynamicModel(Map<ModelPart, UnbakedModel> modelParts) {
@@ -74,7 +73,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 	}
 
 	@Override
-	public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+	public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
 		ImmutableMap.Builder<ModelPart, BakedModel> builder = ImmutableMap.builder();
 		modelParts.forEach((part, model) -> {
 			BakedModel bakedModel = model.bake(bakery, spriteGetter, modelTransform, modelLocation);
@@ -86,13 +85,18 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 	}
 
 	@Override
-	public Collection<Material> getTextures(IModelConfiguration owner, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+	public Collection<Material> getMaterials(IGeometryBakingContext context, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
 		ImmutableSet.Builder<Material> builder = ImmutableSet.builder();
 		modelParts.forEach((part, model) -> builder.addAll(model.getMaterials(modelGetter, missingTextureErrors)));
 		return builder.build();
 	}
 
 	private static final class BackpackBakedModel implements IDynamicBakedModel {
+		@Override
+		public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
+			return ChunkRenderTypeSet.of(RenderType.cutout());
+		}
+
 		private static final Map<ItemTransforms.TransformType, Transformation> TRANSFORMS;
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
@@ -162,30 +166,31 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		@Nonnull
 		@Override
-		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull RandomSource rand, @Nonnull IModelData extraData) {
-			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData));
+		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData,
+				@Nullable RenderType renderType) {
+			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData, renderType));
 			if (state == null) {
-				addLeftSide(state, side, rand, extraData, ret, tankLeft);
-				addRightSide(state, side, rand, extraData, ret, tankRight);
-				addFront(state, side, rand, extraData, ret, battery);
+				addLeftSide(state, side, rand, extraData, ret, tankLeft, renderType);
+				addRightSide(state, side, rand, extraData, ret, tankRight, renderType);
+				addFront(state, side, rand, extraData, ret, battery, renderType);
 			} else {
-				addLeftSide(state, side, rand, extraData, ret, state.getValue(LEFT_TANK));
-				addRightSide(state, side, rand, extraData, ret, state.getValue(RIGHT_TANK));
-				addFront(state, side, rand, extraData, ret, state.getValue(BATTERY));
+				addLeftSide(state, side, rand, extraData, ret, state.getValue(LEFT_TANK), renderType);
+				addRightSide(state, side, rand, extraData, ret, state.getValue(RIGHT_TANK), renderType);
+				addFront(state, side, rand, extraData, ret, state.getValue(BATTERY), renderType);
 			}
 
 			return ret;
 		}
 
-		private void addFront(
-				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean battery) {
+		private void addFront(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
+				boolean battery, @Nullable RenderType renderType) {
 			if (battery) {
 				if (batteryRenderInfo != null) {
 					addCharge(ret, batteryRenderInfo.getChargeRatio());
 				}
-				ret.addAll(models.get(ModelPart.BATTERY).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.BATTERY).getQuads(state, side, rand, extraData, renderType));
 			} else {
-				ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.FRONT_POUCH).getQuads(state, side, rand, extraData, renderType));
 			}
 		}
 
@@ -204,27 +209,27 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			ret.add(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
 		}
 
-		private void addRightSide(
-				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean tankRight) {
+		private void addRightSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
+				boolean tankRight, @Nullable RenderType renderType) {
 			if (tankRight) {
 				if (rightTankRenderInfo != null) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
 				}
-				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand, extraData, renderType));
 			} else {
-				ret.addAll(models.get(ModelPart.RIGHT_POUCH).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.RIGHT_POUCH).getQuads(state, side, rand, extraData, renderType));
 			}
 		}
 
-		private void addLeftSide(
-				@Nullable BlockState state, @Nullable Direction side, RandomSource rand, IModelData extraData, List<BakedQuad> ret, boolean tankLeft) {
+		private void addLeftSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
+				boolean tankLeft, @Nullable RenderType renderType) {
 			if (tankLeft) {
 				if (leftTankRenderInfo != null) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d));
 				}
-				ret.addAll(models.get(ModelPart.LEFT_TANK).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.LEFT_TANK).getQuads(state, side, rand, extraData, renderType));
 			} else {
-				ret.addAll(models.get(ModelPart.LEFT_POUCH).getQuads(state, side, rand, extraData));
+				ret.addAll(models.get(ModelPart.LEFT_POUCH).getQuads(state, side, rand, extraData, renderType));
 			}
 		}
 
@@ -237,9 +242,9 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			double yMax = yMin + (ratio * 6) / 16d;
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
-			IFluidTypeRenderProperties renderProperties = RenderProperties.get(fluid);
+			IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
 			ResourceLocation texture = renderProperties.getStillTexture();
-			int color = renderProperties.getColorTint();
+			int color = renderProperties.getTintColor();
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
@@ -295,59 +300,30 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 
 		@Override
-		public BakedModel handlePerspective(ItemTransforms.TransformType cameraTransformType, PoseStack matrixStack) {
-			if (cameraTransformType == ItemTransforms.TransformType.NONE) {
+		public BakedModel applyTransform(ItemTransforms.TransformType transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
+			if (transformType == ItemTransforms.TransformType.NONE) {
 				return this;
 			}
 
-			Transformation tr = TRANSFORMS.get(cameraTransformType);
+			Transformation tr = TRANSFORMS.get(transformType);
 
 			if (!tr.isIdentity()) {
-				tr.push(matrixStack);
+				tr.push(poseStack);
 			}
 			return this;
 		}
 
 		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
-			BakedQuadBuilder builder = new BakedQuadBuilder(sprite);
+			var bakedQuad = new BakedQuad[1];
+			QuadBakingVertexConsumer quadBaker = new QuadBakingVertexConsumer(q -> bakedQuad[0] = q);
+			quadBaker.setSprite(sprite);
 			Vec3i dirVec = face.getNormal();
-			Vector3f normal = new Vector3f(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			putVertex(builder, normal, vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z(), u1, v1, sprite, colors);
-			putVertex(builder, normal, vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z(), u1, v2, sprite, colors);
-			putVertex(builder, normal, vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z(), u2, v2, sprite, colors);
-			putVertex(builder, normal, vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z(), u2, v1, sprite, colors);
-			builder.setQuadOrientation(face);
-			return builder.build();
-		}
-
-		private void putVertex(BakedQuadBuilder builder, Vector3f normal,
-				float x, float y, float z, float u, float v, TextureAtlasSprite sprite, float[] col) {
-			ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements();
-			for (int e = 0; e < elements.size(); e++) {
-				switch (elements.get(e).getUsage()) {
-					case POSITION:
-						builder.put(e, x, y, z);
-						break;
-					case COLOR:
-						builder.put(e, col[1], col[2], col[3], col[0]);
-						break;
-					case UV:
-						if (elements.get(e).getIndex() == 0) {
-							float iu = sprite.getU(u);
-							float iv = sprite.getV(v);
-							builder.put(e, iu, iv);
-						} else {
-							builder.put(e);
-						}
-						break;
-					case NORMAL:
-						builder.put(e, normal.x(), normal.y(), normal.z());
-						break;
-					default:
-						builder.put(e);
-						break;
-				}
-			}
+			quadBaker.setDirection(face);
+			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z()).uv(u1, v1).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
+			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z()).uv(u1, v2).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
+			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z()).uv(u2, v2).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
+			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z()).uv(u2, v1).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
+			return bakedQuad[0];
 		}
 
 		private void rotate(Vector3f posIn, Matrix4f transformIn) {
@@ -393,16 +369,11 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 		}
 	}
 
-	public static final class Loader implements IModelLoader<BackpackDynamicModel> {
+	public static final class Loader implements IGeometryLoader<BackpackDynamicModel> {
 		public static final Loader INSTANCE = new Loader();
 
 		@Override
-		public void onResourceManagerReload(ResourceManager resourceManager) {
-			//noop
-		}
-
-		@Override
-		public BackpackDynamicModel read(JsonDeserializationContext deserializationContext, JsonObject modelContents) {
+		public BackpackDynamicModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
 			ImmutableMap.Builder<ModelPart, UnbakedModel> builder = ImmutableMap.builder();
 
 			ImmutableMap.Builder<String, Either<Material, String>> texturesBuilder = ImmutableMap.builder();
