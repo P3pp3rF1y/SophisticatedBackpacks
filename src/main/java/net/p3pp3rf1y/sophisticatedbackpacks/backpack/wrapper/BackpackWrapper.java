@@ -20,7 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
-import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryIOHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
@@ -100,7 +100,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerSimpleInserter getInventoryForUpgradeProcessing() {
+	public ITrackedContentsItemHandler getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
 			inventoryModificationHandler = new InventoryModificationHandler(this);
 		}
@@ -151,7 +151,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerSimpleInserter getInventoryForInputOutput() {
+	public ITrackedContentsItemHandler getInventoryForInputOutput() {
 		if (inventoryIOHandler == null) {
 			inventoryIOHandler = new InventoryIOHandler(this);
 		}
