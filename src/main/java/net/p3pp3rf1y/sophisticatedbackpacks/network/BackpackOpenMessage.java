@@ -19,6 +19,7 @@ public class BackpackOpenMessage {
 	private static final int OFFHAND_SLOT = 40;
 	private final int slotIndex;
 	private final String identifier;
+
 	public BackpackOpenMessage() {
 		this(-1);
 	}
@@ -26,6 +27,7 @@ public class BackpackOpenMessage {
 	public BackpackOpenMessage(int backpackSlot) {
 		this(backpackSlot, "");
 	}
+
 	public BackpackOpenMessage(int backpackSlot, String identifier) {
 		slotIndex = backpackSlot;
 		this.identifier = identifier;
@@ -81,14 +83,14 @@ public class BackpackOpenMessage {
 	private static void findAndOpenFirstBackpack(ServerPlayer player) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
-			NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
+			NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 					backpackContext::toBuffer);
 			return true;
 		});
 	}
 
 	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
-		NetworkHooks.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
+		NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
 				backpackContext::toBuffer);
 	}
 }

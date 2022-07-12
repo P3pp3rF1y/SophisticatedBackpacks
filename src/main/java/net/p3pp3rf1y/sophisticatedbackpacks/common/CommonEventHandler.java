@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
@@ -79,7 +79,7 @@ public class CommonEventHandler {
 			return;
 		}
 
-		Player sourcePlayer = event.getPlayer();
+		Player sourcePlayer = event.getEntity();
 		Vec3 targetPlayerViewVector = Vec3.directionFromRotation(new Vec2(targetPlayer.getXRot(), targetPlayer.yBodyRot));
 
 		Vec3 hitVector = event.getLocalPos();
@@ -96,13 +96,13 @@ public class CommonEventHandler {
 		}
 	}
 
-	private void onWorldTick(TickEvent.WorldTickEvent event) {
-		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.world.getGameTime()) {
+	private void onWorldTick(TickEvent.LevelTickEvent event) {
+		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.level.getGameTime()) {
 			return;
 		}
-		nextBackpackCountCheck = event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN;
+		nextBackpackCountCheck = event.level.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN;
 
-		event.world.players().forEach(player -> {
+		event.level.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, identifier, slot) -> {
 				numberOfBackpacks.incrementAndGet();
@@ -118,19 +118,19 @@ public class CommonEventHandler {
 
 	private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
 		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getPlayer(), playerTagName)));
+		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getEntity(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getEntity(), playerTagName)));
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getPlayer(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getPlayer(), playerTagName)));
+		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getEntity(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getEntity(), playerTagName)));
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
-		if (event.getWorld().isClientSide) {
+		if (event.getLevel().isClientSide) {
 			return;
 		}
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		BlockPos pos = event.getPos();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
@@ -144,7 +144,7 @@ public class CommonEventHandler {
 	}
 
 	private void onAttackEntity(AttackEntityEvent event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		if (player.level.isClientSide) {
 			return;
 		}
@@ -176,7 +176,7 @@ public class CommonEventHandler {
 		}
 	}
 
-	private void onEntityLeaveWorld(EntityLeaveWorldEvent event) {
+	private void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
 		if (!(event.getEntity() instanceof Monster)) {
 			return;
 		}
@@ -190,7 +190,7 @@ public class CommonEventHandler {
 		}
 
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		Level world = player.getCommandSenderWorld();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {

@@ -41,7 +41,7 @@ public class ToolRegistry {
 	private static final Set<String> modsWithMapping = new HashSet<>();
 
 	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.BLOCKS, BlockContext::getBlock);
-	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.ENTITIES, Entity::getType);
+	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.ENTITY_TYPES, Entity::getType);
 
 	public static boolean isToolForBlock(ItemStack stack, Block block, Level world, BlockState blockState, BlockPos pos) {
 		return BLOCK_TOOL_MAPPING.isToolFor(stack, block, () -> new BlockContext(world, blockState, block, pos));
@@ -207,7 +207,7 @@ public class ToolRegistry {
 
 	public static class EntityToolsLoader extends ToolsLoaderBase<EntityType<?>, Entity> {
 		public EntityToolsLoader() {
-			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITIES, rn -> Optional.ofNullable(ForgeRegistries.ENTITIES.getValue(rn)), "entity_tools", "entities");
+			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITY_TYPES, rn -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getValue(rn)), "entity_tools", "entities");
 		}
 	}
 

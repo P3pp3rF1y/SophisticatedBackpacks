@@ -259,7 +259,7 @@ public class EntityBackpackAdditionHandler {
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
-			LivingEntity mob = event.getEntityLiving();
+			LivingEntity mob = event.getEntity();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			Config.Common.EntityBackpackAdditionsConfig additionsConfig = Config.COMMON.entityBackpackAdditions;
 			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
@@ -294,8 +294,8 @@ public class EntityBackpackAdditionHandler {
 				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
 	}
 
-	public static void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
-		LivingEntity entity = event.getEntityLiving();
+	public static void onLivingUpdate(LivingEvent.LivingTickEvent event) {
+		LivingEntity entity = event.getEntity();
 		if (!entity.getTags().contains(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
 			return;
 		}

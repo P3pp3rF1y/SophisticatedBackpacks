@@ -150,8 +150,8 @@ public class ModItems {
 	private ModItems() {}
 
 	private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SophisticatedBackpacks.MOD_ID);
-	private static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, SophisticatedBackpacks.MOD_ID);
-	private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SophisticatedBackpacks.MOD_ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
 			() -> new BackpackItem(Config.COMMON.leatherBackpack.inventorySlotCount::get, Config.COMMON.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
@@ -244,13 +244,13 @@ public class ModItems {
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16), SophisticatedBackpacks.ITEM_GROUP));
 
-	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = CONTAINERS.register("backpack",
+	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = MENU_TYPES.register("backpack",
 			() -> IForgeMenuType.create(BackpackContainer::fromBuffer));
 
-	public static final RegistryObject<MenuType<BackpackSettingsContainer>> SETTINGS_CONTAINER_TYPE = CONTAINERS.register("settings",
+	public static final RegistryObject<MenuType<BackpackSettingsContainer>> SETTINGS_CONTAINER_TYPE = MENU_TYPES.register("settings",
 			() -> IForgeMenuType.create(BackpackSettingsContainer::fromBuffer));
 
-	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITIES.register(
+	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITY_TYPES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
 					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
 	);
@@ -264,8 +264,8 @@ public class ModItems {
 
 	public static void registerHandlers(IEventBus modBus) {
 		ITEMS.register(modBus);
-		CONTAINERS.register(modBus);
-		ENTITIES.register(modBus);
+		MENU_TYPES.register(modBus);
+		ENTITY_TYPES.register(modBus);
 		RECIPE_SERIALIZERS.register(modBus);
 		modBus.addListener(ModItems::registerContainers);
 		MinecraftForge.EVENT_BUS.addListener(ModItems::onResourceReload);
@@ -309,7 +309,7 @@ public class ModItems {
 	private static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(XpPumpUpgradeContainer::new);
 
 	public static void registerContainers(RegisterEvent event) {
-		if (!event.getRegistryKey().equals(ForgeRegistries.Keys.CONTAINER_TYPES)) {
+		if (!event.getRegistryKey().equals(ForgeRegistries.Keys.MENU_TYPES)) {
 			return;
 		}
 
