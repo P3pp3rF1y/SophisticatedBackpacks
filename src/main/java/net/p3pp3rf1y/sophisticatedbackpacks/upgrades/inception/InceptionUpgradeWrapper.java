@@ -8,7 +8,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapperAccessor;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
@@ -41,7 +41,7 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	@Override
-	public IItemHandlerSimpleInserter wrapInventory(IItemHandlerSimpleInserter inventory) {
+	public ITrackedContentsItemHandler wrapInventory(ITrackedContentsItemHandler inventory) {
 		if (Boolean.TRUE.equals(Config.COMMON.inceptionUpgrade.upgradesUseInventoriesOfBackpacksInBackpack.get())) {
 			initSubBackpacksHandler();
 			return new InceptionInventoryHandler(inventory, getInventoryOrder(), subBackpacksHandler);
