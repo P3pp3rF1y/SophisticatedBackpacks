@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -17,7 +17,7 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltip 
 	private final ItemStack backpack;
 
 	@SuppressWarnings("unused") //parameter needs to be there so that addListener logic would know which event this method listens to
-	public static void onWorldLoad(WorldEvent.Load event) {
+	public static void onWorldLoad(LevelEvent.Load event) {
 		refreshContents();
 		lastRequestTime = 0;
 	}

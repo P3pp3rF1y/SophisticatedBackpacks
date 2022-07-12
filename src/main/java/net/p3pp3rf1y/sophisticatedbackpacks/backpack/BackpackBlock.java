@@ -174,7 +174,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
-		NetworkHooks.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
+		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
 				getBackpackDisplayName(world, pos)), backpackContext::toBuffer);
 		return InteractionResult.SUCCESS;
 	}
@@ -203,7 +203,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	public static void playerInteract(PlayerInteractEvent.RightClickBlock event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		Level world = player.level;
 		BlockPos pos = event.getPos();
 
@@ -229,7 +229,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private static boolean didntInteractWithBackpack(PlayerInteractEvent.RightClickBlock event) {
-		return !(event.getWorld().getBlockState(event.getPos()).getBlock() instanceof BackpackBlock);
+		return !(event.getLevel().getBlockState(event.getPos()).getBlock() instanceof BackpackBlock);
 	}
 
 	private static boolean hasEmptyMainHandAndSomethingInOffhand(Player player) {
