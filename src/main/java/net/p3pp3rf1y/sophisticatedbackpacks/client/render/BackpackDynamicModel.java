@@ -8,8 +8,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
@@ -18,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -97,50 +96,52 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			return ChunkRenderTypeSet.of(RenderType.cutout());
 		}
 
-		private static final Map<ItemTransforms.TransformType, Transformation> TRANSFORMS;
+		private static final Map<ItemTransforms.TransformType, ItemTransform> TRANSFORMS;
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
+		public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
+
 		static {
-			ImmutableMap.Builder<ItemTransforms.TransformType, Transformation> builder = ImmutableMap.builder();
-			builder.put(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, new Transformation(
+			ImmutableMap.Builder<ItemTransforms.TransformType, ItemTransform> builder = ImmutableMap.builder();
+			builder.put(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, new ItemTransform(
+					new Vector3f(85, -90, 0),
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
-					new Quaternion(85, -90, 0, true),
-					new Vector3f(0.75f, 0.75f, 0.75f), null
+					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, new Transformation(
+			builder.put(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, new ItemTransform(
+					new Vector3f(85, -90, 0),
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
-					new Quaternion(85, -90, 0, true),
-					new Vector3f(0.75f, 0.75f, 0.75f), null
+					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, new Transformation(
+			builder.put(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, new ItemTransform(
 					new Vector3f(0, 0, 0),
-					new Quaternion(0, 0, 0, true),
-					new Vector3f(0.5f, 0.5f, 0.5f), null
-			));
-			builder.put(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, new Transformation(
 					new Vector3f(0, 0, 0),
-					new Quaternion(0, 0, 0, true),
-					new Vector3f(0.5f, 0.5f, 0.5f), null
+					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.HEAD, new Transformation(
+			builder.put(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, new ItemTransform(
+					new Vector3f(0, 0, 0),
+					new Vector3f(0, 0, 0),
+					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
+			));
+			builder.put(ItemTransforms.TransformType.HEAD, new ItemTransform(
+					new Vector3f(0, 0, 0),
 					new Vector3f(0, 14.25f / 16f, 0),
-					new Quaternion(0, 0, 0, true),
-					new Vector3f(1, 1, 1), null
+					new Vector3f(1, 1, 1), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.GUI, new Transformation(
+			builder.put(ItemTransforms.TransformType.GUI, new ItemTransform(
+					new Vector3f(30, 225, 0),
 					new Vector3f(0, 1.25f / 16f, 0),
-					new Quaternion(30, 225, 0, true),
-					new Vector3f(0.9f, 0.9f, 0.9f), null
+					new Vector3f(0.9f, 0.9f, 0.9f), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.GROUND, new Transformation(
+			builder.put(ItemTransforms.TransformType.GROUND, new ItemTransform(
+					new Vector3f(0, 0, 0),
 					new Vector3f(0, 3 / 16f, 0),
-					new Quaternion(0, 0, 0, true),
-					new Vector3f(0.5f, 0.5f, 0.5f), null
+					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
 			));
-			builder.put(ItemTransforms.TransformType.FIXED, new Transformation(
+			builder.put(ItemTransforms.TransformType.FIXED, new ItemTransform(
+					new Vector3f(0, 0, 0),
 					new Vector3f(0, 0, -2.25f / 16f),
-					new Quaternion(0, 0, 0, true),
-					new Vector3f(0.75f, 0.75f, 0.75f), null
+					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
 			));
 			TRANSFORMS = builder.build();
 		}
@@ -305,11 +306,8 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				return this;
 			}
 
-			Transformation tr = TRANSFORMS.get(transformType);
+			TRANSFORMS.get(transformType).apply(applyLeftHandTransform, poseStack);
 
-			if (!tr.isIdentity()) {
-				tr.push(poseStack);
-			}
 			return this;
 		}
 
@@ -319,10 +317,18 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			quadBaker.setSprite(sprite);
 			Vec3i dirVec = face.getNormal();
 			quadBaker.setDirection(face);
-			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z()).uv(u1, v1).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
-			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z()).uv(u1, v2).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
-			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z()).uv(u2, v2).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
-			quadBaker.normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).vertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z()).uv(u2, v1).color(colors[0], colors[1], colors[2], colors[3]).endVertex();
+			quadBaker.setTintIndex(-1);
+
+			u1 = sprite.getU0() + u1 / 4f * sprite.uvShrinkRatio();
+			u2 = sprite.getU0() + u2 / 4f * sprite.uvShrinkRatio();
+
+			v1 = sprite.getV0() + v1 / 4f * sprite.uvShrinkRatio();
+			v2 = sprite.getV0() + v2 / 4f * sprite.uvShrinkRatio();
+
+			quadBaker.vertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z()).color(colors[1], colors[2], colors[3], colors[0]).uv(u1, v1).normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).endVertex();
+			quadBaker.vertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z()).color(colors[1], colors[2], colors[3], colors[0]).uv(u1, v2).normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).endVertex();
+			quadBaker.vertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z()).color(colors[1], colors[2], colors[3], colors[0]).uv(u2, v2).normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).endVertex();
+			quadBaker.vertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z()).color(colors[1], colors[2], colors[3], colors[0]).uv(u2, v1).normal(dirVec.getX(), dirVec.getY(), dirVec.getZ()).endVertex();
 			return bakedQuad[0];
 		}
 
