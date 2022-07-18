@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
@@ -82,6 +83,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private IEnergyStorage energyStorage = null;
 
 	private final BackpackRenderInfo renderInfo;
+
+	private Consumer<Integer> onSlotsChange = diff -> {};
+
+	private Runnable onInventoryHandlerRefresh = () -> {};
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -436,8 +441,24 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setColumnsTaken(int columnsTaken) {
+	public void setColumnsTaken(int columnsTaken, boolean hasChanged) {
+		int originalColumnsTaken = getColumnsTaken();
 		NBTHelper.setInteger(backpack, COLUMNS_TAKEN_TAG, columnsTaken);
+		if (hasChanged) {
+			int diff = (columnsTaken - originalColumnsTaken) * getNumberOfSlotRows();
+			onSlotsChange.accept(diff);
+		}
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void registerOnSlotsChangeListener(Consumer<Integer> onSlotsChange) {
+		this.onSlotsChange = onSlotsChange;
+	}
+
+	@Override
+	public void unregisterOnSlotsChangeListener() {
+		onSlotsChange = diff -> {};
 	}
 
 	@Override
@@ -482,6 +503,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 		handler = null;
 		upgradeHandler = null;
 		refreshInventoryForUpgradeProcessing();
+		onInventoryHandlerRefresh.run();
+	}
+
+	@Override
+	public void setOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+		this.onInventoryHandlerRefresh = onInventoryHandlerRefresh;
 	}
 
 	@Override
