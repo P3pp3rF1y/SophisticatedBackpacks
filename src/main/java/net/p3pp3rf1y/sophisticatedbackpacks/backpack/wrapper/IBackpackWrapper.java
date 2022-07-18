@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public interface IBackpackWrapper extends IStorageWrapper {
 	@Override
@@ -27,6 +28,18 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	default void removeContentsUuid() {
 		//noop by default
+	}
+
+	default void registerOnSlotsChangeListener(Consumer<Integer> onSlotsChange) {
+		//noop
+	}
+
+	default void unregisterOnSlotsChangeListener() {
+		//noop
+	}
+
+	default void setOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+		//noop
 	}
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {

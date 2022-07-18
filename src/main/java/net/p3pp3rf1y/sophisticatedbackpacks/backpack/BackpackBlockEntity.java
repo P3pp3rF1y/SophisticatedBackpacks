@@ -16,17 +16,25 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
+import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-public class BackpackBlockEntity extends BlockEntity {
+public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
+	@Nullable
+	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
 	private boolean updateBlockRender = true;
 
@@ -45,10 +53,17 @@ public class BackpackBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag nbt) {
-		super.load(nbt);
-		setBackpackFromNbt(nbt);
+	public void load(CompoundTag tag) {
+		super.load(tag);
+		setBackpackFromNbt(tag);
+		loadControllerPos(tag);
 		WorldHelper.notifyBlockUpdate(this);
+	}
+
+	@Override
+	public void onLoad() {
+		super.onLoad();
+		registerWithControllerOnLoad();
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
@@ -59,6 +74,7 @@ public class BackpackBlockEntity extends BlockEntity {
 	protected void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
 		writeBackpack(tag);
+		saveControllerPos(tag);
 	}
 
 	private void writeBackpack(CompoundTag ret) {
@@ -99,6 +115,7 @@ public class BackpackBlockEntity extends BlockEntity {
 		return backpackWrapper;
 	}
 
+	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
@@ -124,8 +141,9 @@ public class BackpackBlockEntity extends BlockEntity {
 			}
 		}
 		state = state.setValue(BATTERY, renderInfo.getBatteryRenderInfo().isPresent());
-		level.setBlockAndUpdate(worldPosition, state);
-		level.updateNeighborsAt(worldPosition, state.getBlock());
+		Level l = Objects.requireNonNull(level);
+		l.setBlockAndUpdate(worldPosition, state);
+		l.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
@@ -134,5 +152,59 @@ public class BackpackBlockEntity extends BlockEntity {
 			return;
 		}
 		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
+	}
+
+	@Override
+	public IStorageWrapper getStorageWrapper() {
+		return backpackWrapper;
+	}
+
+	@Override
+	public void setControllerPos(BlockPos controllerPos) {
+		this.controllerPos = controllerPos;
+		setChanged();
+	}
+
+	@Override
+	public Optional<BlockPos> getControllerPos() {
+		return Optional.ofNullable(controllerPos);
+	}
+
+	@Override
+	public void removeControllerPos() {
+		controllerPos = null;
+	}
+
+	@Override
+	public BlockPos getStorageBlockPos() {
+		return getBlockPos();
+	}
+
+	@Override
+	public Level getStorageBlockLevel() {
+		return Objects.requireNonNull(getLevel());
+	}
+
+	@Override
+	public boolean canBeConnected() {
+		return true;
+	}
+
+	@Override
+	public boolean canConnectStorages() {
+		return false;
+	}
+
+	@Override
+	public void unregisterController() {
+		IControllableStorage.super.unregisterController();
+		backpackWrapper.unregisterOnSlotsChangeListener();
+	}
+
+	@Override
+	public void registerController(ControllerBlockEntityBase controllerBlockEntity) {
+		IControllableStorage.super.registerController(controllerBlockEntity);
+		backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
+		backpackWrapper.setOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
 	}
 }

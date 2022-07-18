@@ -48,7 +48,7 @@ public class SyncClientInfoMessage {
 		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
-			backpackWrapper.setColumnsTaken(msg.columnsTaken);
+			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		});
 	}
 }
