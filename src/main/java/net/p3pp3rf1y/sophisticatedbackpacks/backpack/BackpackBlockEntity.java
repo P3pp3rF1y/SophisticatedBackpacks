@@ -199,12 +199,13 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void unregisterController() {
 		IControllableStorage.super.unregisterController();
 		backpackWrapper.unregisterOnSlotsChangeListener();
+		backpackWrapper.unregisterOnInventoryHandlerRefreshListener();
 	}
 
 	@Override
 	public void registerController(ControllerBlockEntityBase controllerBlockEntity) {
 		IControllableStorage.super.registerController(controllerBlockEntity);
 		backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
-		backpackWrapper.setOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+		backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
 	}
 }

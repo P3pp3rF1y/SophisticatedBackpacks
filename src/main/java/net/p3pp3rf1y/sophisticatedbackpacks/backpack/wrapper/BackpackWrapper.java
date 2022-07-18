@@ -507,8 +507,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+	public void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
 		this.onInventoryHandlerRefresh = onInventoryHandlerRefresh;
+	}
+
+	@Override
+	public void unregisterOnInventoryHandlerRefreshListener() {
+		onInventoryHandlerRefresh = () -> {};
 	}
 
 	@Override

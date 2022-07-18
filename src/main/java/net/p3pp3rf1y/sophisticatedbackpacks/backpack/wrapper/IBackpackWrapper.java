@@ -38,7 +38,11 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		//noop
 	}
 
-	default void setOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+	default void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+		//noop
+	}
+
+	default void unregisterOnInventoryHandlerRefreshListener() {
 		//noop
 	}
 
