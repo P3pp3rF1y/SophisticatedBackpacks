@@ -239,6 +239,8 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
 				te.setBackpack(getBackpackCopy(player, backpack));
 				te.refreshRenderState();
+
+				te.tryToAddToController();
 			});
 
 			if (!world.isClientSide) {
