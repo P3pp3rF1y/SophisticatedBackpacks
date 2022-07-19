@@ -13,20 +13,20 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWrapperRecipe<UpgradeRecipe> {
-	public static final Map<ResourceLocation, UpgradeRecipe> REGISTERED_RECIPES = new LinkedHashMap<>();
+	public static final Set<ResourceLocation> REGISTERED_RECIPES = new LinkedHashSet<>();
 	private final UpgradeRecipe compose;
 
 	public SmithingBackpackUpgradeRecipe(UpgradeRecipe compose) {
 		super(compose.getId(), Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44518_")),
 				Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44519_")), compose.getResultItem());
 		this.compose = compose;
-		REGISTERED_RECIPES.put(compose.getId(), this);
+		REGISTERED_RECIPES.add(compose.getId());
 	}
 
 	@Override
