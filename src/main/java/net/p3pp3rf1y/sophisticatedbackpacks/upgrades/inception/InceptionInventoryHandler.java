@@ -4,18 +4,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
-public class InceptionInventoryHandler implements IItemHandlerSimpleInserter {
+public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	private IItemHandlerModifiable combinedInventories;
-	private final IItemHandlerSimpleInserter wrappedInventoryHandler;
+	private final ITrackedContentsItemHandler wrappedInventoryHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
-	private List<IItemHandlerSimpleInserter> handlers;
+	private List<ITrackedContentsItemHandler> handlers;
 
-	public InceptionInventoryHandler(IItemHandlerSimpleInserter wrappedInventoryHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionInventoryHandler(ITrackedContentsItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
@@ -46,16 +52,19 @@ public class InceptionInventoryHandler implements IItemHandlerSimpleInserter {
 		return combinedInventories.getSlots();
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		return combinedInventories.getStackInSlot(slot);
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		return combinedInventories.insertItem(slot, stack, simulate);
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		return combinedInventories.extractItem(slot, amount, simulate);
@@ -82,5 +91,27 @@ public class InceptionInventoryHandler implements IItemHandlerSimpleInserter {
 		}
 
 		return remainingStack;
+	}
+
+	@Override
+	public Set<ItemStackKey> getTrackedStacks() {
+		Set<ItemStackKey> ret = new HashSet<>();
+		handlers.forEach(h -> ret.addAll(h.getTrackedStacks()));
+		return ret;
+	}
+
+	@Override
+	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot, Runnable onRemoveLastEmptySlot) {
+		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
+	}
+
+	@Override
+	public void unregisterStackKeyListeners() {
+		handlers.forEach(ITrackedContentsItemHandler::unregisterStackKeyListeners);
+	}
+
+	@Override
+	public boolean hasEmptySlots() {
+		return handlers.stream().anyMatch(ITrackedContentsItemHandler::hasEmptySlots);
 	}
 }

@@ -20,7 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
-import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryIOHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
@@ -83,6 +84,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private final BackpackRenderInfo renderInfo;
 
+	private Consumer<Integer> onSlotsChange = diff -> {};
+
+	private Runnable onInventoryHandlerRefresh = () -> {};
+
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
@@ -100,7 +105,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerSimpleInserter getInventoryForUpgradeProcessing() {
+	public ITrackedContentsItemHandler getInventoryForUpgradeProcessing() {
 		if (inventoryModificationHandler == null) {
 			inventoryModificationHandler = new InventoryModificationHandler(this);
 		}
@@ -151,7 +156,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public IItemHandlerSimpleInserter getInventoryForInputOutput() {
+	public ITrackedContentsItemHandler getInventoryForInputOutput() {
 		if (inventoryIOHandler == null) {
 			inventoryIOHandler = new InventoryIOHandler(this);
 		}
@@ -436,8 +441,24 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setColumnsTaken(int columnsTaken) {
+	public void setColumnsTaken(int columnsTaken, boolean hasChanged) {
+		int originalColumnsTaken = getColumnsTaken();
 		NBTHelper.setInteger(backpack, COLUMNS_TAKEN_TAG, columnsTaken);
+		if (hasChanged) {
+			int diff = (columnsTaken - originalColumnsTaken) * getNumberOfSlotRows();
+			onSlotsChange.accept(diff);
+		}
+		backpackSaveHandler.run();
+	}
+
+	@Override
+	public void registerOnSlotsChangeListener(Consumer<Integer> onSlotsChange) {
+		this.onSlotsChange = onSlotsChange;
+	}
+
+	@Override
+	public void unregisterOnSlotsChangeListener() {
+		onSlotsChange = diff -> {};
 	}
 
 	@Override
@@ -482,6 +503,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 		handler = null;
 		upgradeHandler = null;
 		refreshInventoryForUpgradeProcessing();
+		onInventoryHandlerRefresh.run();
+	}
+
+	@Override
+	public void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
+		this.onInventoryHandlerRefresh = onInventoryHandlerRefresh;
+	}
+
+	@Override
+	public void unregisterOnInventoryHandlerRefreshListener() {
+		onInventoryHandlerRefresh = () -> {};
 	}
 
 	@Override
