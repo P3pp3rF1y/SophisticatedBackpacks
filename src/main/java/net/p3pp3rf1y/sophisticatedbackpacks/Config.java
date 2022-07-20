@@ -15,6 +15,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.magnet.MagnetUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -66,8 +67,8 @@ public class Config {
 		public final FilteredUpgradeConfig refillUpgrade;
 		public final FilteredUpgradeConfig restockUpgrade;
 		public final FilteredUpgradeConfig advancedRestockUpgrade;
-		public final FilteredUpgradeConfig voidUpgrade;
-		public final FilteredUpgradeConfig advancedVoidUpgrade;
+		public final VoidUpgradeConfig voidUpgrade;
+		public final VoidUpgradeConfig advancedVoidUpgrade;
 		public final CookingUpgradeConfig smeltingUpgrade;
 		public final CookingUpgradeConfig smokingUpgrade;
 		public final CookingUpgradeConfig blastingUpgrade;
@@ -119,8 +120,8 @@ public class Config {
 			refillUpgrade = new FilteredUpgradeConfig(builder, "Refill Upgrade", "refillUpgrade", 6, 3);
 			restockUpgrade = new FilteredUpgradeConfig(builder, "Restock Upgrade", "restockUpgrade", 9, 3);
 			advancedRestockUpgrade = new FilteredUpgradeConfig(builder, "Advanced Restock Upgrade", "advancedRestockUpgrade", 16, 4);
-			voidUpgrade = new FilteredUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
-			advancedVoidUpgrade = new FilteredUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
+			voidUpgrade = new VoidUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
+			advancedVoidUpgrade = new VoidUpgradeConfig(builder, "Advanced Void Upgrade", "advancedVoidUpgrade", 16, 4);
 			stackUpgrade = new StackUpgradeConfig(builder);
 			smeltingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smelting Upgrade", "smeltingUpgrade");
 			smokingUpgrade = CookingUpgradeConfig.getInstance(builder, "Smoking Upgrade", "smokingUpgrade");

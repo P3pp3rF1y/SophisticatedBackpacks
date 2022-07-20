@@ -188,9 +188,9 @@ public class ModItems {
 	public static final RegistryObject<CompactingUpgradeItem> ADVANCED_COMPACTING_UPGRADE = ITEMS.register("advanced_compacting_upgrade",
 			() -> new CompactingUpgradeItem(true, Config.COMMON.advancedCompactingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<VoidUpgradeItem> VOID_UPGRADE = ITEMS.register("void_upgrade",
-			() -> new VoidUpgradeItem(Config.COMMON.voidUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new VoidUpgradeItem(Config.COMMON.voidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<VoidUpgradeItem> ADVANCED_VOID_UPGRADE = ITEMS.register("advanced_void_upgrade",
-			() -> new VoidUpgradeItem(Config.COMMON.advancedVoidUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new VoidUpgradeItem(Config.COMMON.advancedVoidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<RestockUpgradeItem> RESTOCK_UPGRADE = ITEMS.register("restock_upgrade",
 			() -> new RestockUpgradeItem(Config.COMMON.restockUpgrade.filterSlots::get));
 	public static final RegistryObject<RestockUpgradeItem> ADVANCED_RESTOCK_UPGRADE = ITEMS.register("advanced_restock_upgrade",
