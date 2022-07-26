@@ -12,7 +12,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -99,9 +98,9 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	@Override
-	protected boolean isNotCorrectStorageItem(ItemStack supposedToBeStorageItemStack) {
-		return supposedToBeStorageItemStack.isEmpty() || !(supposedToBeStorageItemStack.getItem() instanceof BackpackItem) || supposedToBeStorageItemStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(w -> w != (isFirstLevelStorage() ? storageWrapper : parentStorageWrapper)).orElse(true);
+	protected boolean storageItemHasChanged() {
+		IBackpackWrapper wrapper = backpackContext.getBackpackWrapper(player);
+		return wrapper != (isFirstLevelStorage() ? storageWrapper : parentStorageWrapper);
 	}
 
 	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
