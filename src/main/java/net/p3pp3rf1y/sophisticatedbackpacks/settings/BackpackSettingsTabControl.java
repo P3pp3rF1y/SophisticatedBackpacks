@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import com.google.common.collect.ImmutableMap;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.Tab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
@@ -41,5 +42,13 @@ public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 	protected <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
 		//noinspection unchecked
 		return (ISettingsTabFactory<C, T>) SETTINGS_TAB_FACTORIES.get(name);
+	}
+
+	@Override
+	protected boolean isSettingsCategoryDisabled(String categoryName) {
+		if (categoryName.equals(ItemDisplaySettingsCategory.NAME)) {
+			return Boolean.TRUE.equals(Config.COMMON.itemDisplayDisabled.get());
+		}
+		return super.isSettingsCategoryDisabled(categoryName);
 	}
 }
