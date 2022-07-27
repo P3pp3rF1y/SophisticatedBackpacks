@@ -38,6 +38,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
 	private boolean updateBlockRender = true;
 
+	private boolean chunkBeingUnloaded = false;
+
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
 	}
@@ -57,6 +59,12 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		super.load(tag);
 		setBackpackFromNbt(tag);
 		loadControllerPos(tag);
+
+		if (level != null && !level.isClientSide()) {
+			removeControllerPos();
+			tryToAddToController();
+		}
+
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
@@ -207,5 +215,19 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		IControllableStorage.super.registerController(controllerBlockEntity);
 		backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
 		backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+	}
+
+	@Override
+	public void onChunkUnloaded() {
+		super.onChunkUnloaded();
+		chunkBeingUnloaded = true;
+	}
+
+	@Override
+	public void setRemoved() {
+		if (!chunkBeingUnloaded && level != null) {
+			removeFromController();
+		}
+		super.setRemoved();
 	}
 }

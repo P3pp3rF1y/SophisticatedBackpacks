@@ -6,25 +6,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BACKPACK_LAYER;
-
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
-	private final BackpackModel model;
-
-	public BackpackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
-		model = new BackpackModel(context.bakeLayer(BACKPACK_LAYER));
-	}
-
 	@Override
 	public void render(BackpackBlockEntity tileEntityIn, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
 		BlockState state = tileEntityIn.getBlockState();
@@ -32,7 +24,8 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
 		boolean showRightTank = state.getValue(BackpackBlock.RIGHT_TANK);
 		boolean showBattery = state.getValue(BackpackBlock.BATTERY);
-		RenderInfo renderInfo = tileEntityIn.getBackpackWrapper().getRenderInfo();
+		IBackpackWrapper backpackWrapper = tileEntityIn.getBackpackWrapper();
+		RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
 		poseStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
@@ -40,6 +33,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
 		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
+		BackpackModel model = BackpackModelManager.getBackpackModel(backpackWrapper.getBackpack().getItem());
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
 			if (tankRenderInfo != null) {
