@@ -99,8 +99,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected boolean storageItemHasChanged() {
-		IBackpackWrapper wrapper = backpackContext.getBackpackWrapper(player);
-		return wrapper != (isFirstLevelStorage() ? storageWrapper : parentStorageWrapper);
+		return backpackContext.getBackpackWrapper(player) != storageWrapper;
 	}
 
 	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
