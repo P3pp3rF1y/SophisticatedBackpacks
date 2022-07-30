@@ -324,15 +324,27 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (worldIn.isClientSide || !(entityIn instanceof Player player)) {
+	public void onArmorTick(ItemStack stack, Level level, Player player) {
+		if (level.isClientSide || !Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
 						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
 		);
-		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
+		super.onArmorTick(stack, level, player);
+	}
+
+	@Override
+	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
+		if (level.isClientSide || !(entityIn instanceof Player player) || (Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
+			return;
+		}
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
+				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
+		);
+		super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
 	}
 
 	public int getNumberOfSlots() {
