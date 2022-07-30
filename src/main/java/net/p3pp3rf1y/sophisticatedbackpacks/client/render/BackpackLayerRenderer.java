@@ -35,23 +35,22 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends HumanoidMod
 			PlayerInventoryProvider.get().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 				matrixStack.pushPose();
 				ItemStack backpack = backpackRenderInfo.getBackpack();
-				BackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
+				IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
 				EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
-				boolean wearsArmor = !backpackRenderInfo.isArmorSlot() && !player.getInventory().armor.get(equipmentSlot.getIndex()).isEmpty();
-				renderBackpack(player, matrixStack, buffer, packedLight, backpack, wearsArmor, model);
+				boolean wearsArmor = (equipmentSlot != EquipmentSlot.CHEST || !backpackRenderInfo.isArmorSlot()) && !player.getInventory().armor.get(equipmentSlot.getIndex()).isEmpty();
+				renderBackpack(getParentModel(), player, matrixStack, buffer, packedLight, backpack, wearsArmor, model);
 				matrixStack.popPose();
 			});
 		} else {
 			ItemStack chestStack = entity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
-				renderBackpack(entity, matrixStack, buffer, packedLight, chestStack, false, BackpackModelManager.getBackpackModel(chestStack.getItem()));
+				renderBackpack(getParentModel(),entity, matrixStack, buffer, packedLight, chestStack, false, BackpackModelManager.getBackpackModel(chestStack.getItem()));
 			}
 		}
 	}
 
-	public static void renderBackpack(LivingEntity livingEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, BackpackModel model) {
-		model.translateRotateAndScale(livingEntity, matrixStack, wearsArmor);
-
+	public static <T extends LivingEntity, M extends HumanoidModel<T>> void renderBackpack(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, IBackpackModel model) {
+		model.translateRotateAndScale(parentModel, livingEntity, matrixStack, wearsArmor);
 
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 			int clothColor = wrapper.getMainColor();

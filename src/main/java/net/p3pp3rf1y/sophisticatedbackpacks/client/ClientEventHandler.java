@@ -19,7 +19,6 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -43,21 +42,15 @@ public class ClientEventHandler {
 
 	public static void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-		modBus.addListener(ClientEventHandler::loadComplete);
 		modBus.addListener(ClientEventHandler::clientSetup);
 		modBus.addListener(ClientEventHandler::onModelRegistry);
 		modBus.addListener(ClientEventHandler::registerLayer);
 		modBus.addListener(ClientEventHandler::registerEntityRenderers);
 		modBus.addListener(ClientEventHandler::registerReloadListener);
+		modBus.addListener(ModItemColors::registerItemColorHandlers);
+		modBus.addListener(ModBlockColors::registerBlockColorHandlers);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
-	}
-
-	private static void loadComplete(FMLLoadCompleteEvent event) {
-		event.enqueueWork(() -> {
-			ModItemColors.init();
-			ModBlockColors.init();
-		});
 	}
 
 	private static void onModelRegistry(ModelRegistryEvent event) {

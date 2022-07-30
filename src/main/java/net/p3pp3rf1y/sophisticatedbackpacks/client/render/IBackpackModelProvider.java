@@ -8,5 +8,5 @@ public interface IBackpackModelProvider {
 
 	void initModels(BlockEntityRendererProvider.Context context);
 
-	BackpackModel getBackpackModel(Item backpackItem);
+	IBackpackModel getBackpackModel(Item backpackItem);
 }

@@ -9,7 +9,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler.BAC
 
 public class BackpackModelManager {
 	private static IBackpackModelProvider backpackModelProvider = new IBackpackModelProvider() {
-		private static BackpackModel model;
+		private static IBackpackModel model;
 
 		@Override
 		public void initModels() {
@@ -27,7 +27,7 @@ public class BackpackModelManager {
 		}
 
 		@Override
-		public BackpackModel getBackpackModel(Item backpackItem) {
+		public IBackpackModel getBackpackModel(Item backpackItem) {
 			return model;
 		}
 	};
@@ -41,7 +41,7 @@ public class BackpackModelManager {
 		backpackModelProvider.initModels();
 	}
 
-	public static BackpackModel getBackpackModel(Item backpackItem) {
+	public static IBackpackModel getBackpackModel(Item backpackItem) {
 		return backpackModelProvider.getBackpackModel(backpackItem);
 	}
 }

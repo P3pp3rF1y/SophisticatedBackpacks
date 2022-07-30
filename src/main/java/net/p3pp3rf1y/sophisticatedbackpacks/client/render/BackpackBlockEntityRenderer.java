@@ -33,7 +33,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
 		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
-		BackpackModel model = BackpackModelManager.getBackpackModel(backpackWrapper.getBackpack().getItem());
+		IBackpackModel model = BackpackModelManager.getBackpackModel(backpackWrapper.getBackpack().getItem());
 		if (showLeftTank) {
 			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
 			if (tankRenderInfo != null) {
