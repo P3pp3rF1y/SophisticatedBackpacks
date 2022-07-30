@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColors;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
@@ -11,10 +10,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
 public class ModBlockColors {
 	private ModBlockColors() {}
 
-	public static void init() {
-		BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-
-		blockColors.register((state, blockDisplayReader, pos, tintIndex) -> {
+	public static void registerBlockColorHandlers(ColorHandlerEvent.Block event) {
+		event.getBlockColors().register((state, blockDisplayReader, pos, tintIndex) -> {
 			if (tintIndex < 0 || tintIndex > 1 || pos == null) {
 				return -1;
 			}
