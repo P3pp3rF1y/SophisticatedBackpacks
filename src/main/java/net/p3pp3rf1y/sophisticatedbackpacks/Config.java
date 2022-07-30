@@ -151,12 +151,13 @@ public class Config {
 			public final ForgeConfigSpec.BooleanValue tooManyBackpacksSlowness;
 			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
 			public final ForgeConfigSpec.DoubleValue slownessLevelsPerAdditionalBackpack;
-
+			public final ForgeConfigSpec.BooleanValue onlyWornBackpackTriggersUpgrades;
 			public NerfsConfig(ForgeConfigSpec.Builder builder) {
 				builder.push("nerfs");
 				tooManyBackpacksSlowness = builder.comment("Determines if too many backpacks in player's inventory cause slowness to the player").define("tooManyBackpacksSlowness", false);
 				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness").defineInRange("maxNumberOfBackpacks", 3, 1, 27);
 				slownessLevelsPerAdditionalBackpack = builder.comment("Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)").defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
+				onlyWornBackpackTriggersUpgrades = builder.comment("Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.").define("onlyWornBackpackTriggersUpgrades", false);
 				builder.pop();
 			}
 		}

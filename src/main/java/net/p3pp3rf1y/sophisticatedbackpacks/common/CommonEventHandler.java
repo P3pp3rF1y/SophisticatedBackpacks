@@ -196,11 +196,12 @@ public class CommonEventHandler {
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
-				}).orElse(false));
+				}).orElse(false), Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get());
 		if (remainingStackSimulated.get().isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.map(wrapper -> InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack, false).isEmpty()).orElse(false)
+					, Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 			);
 			if (!itemEntity.isSilent()) {
 				RandomSource rand = itemEntity.level.random;
