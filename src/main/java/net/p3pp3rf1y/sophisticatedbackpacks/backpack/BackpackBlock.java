@@ -135,7 +135,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@SuppressWarnings("deprecation")
 	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-		return BackpackShapes.getShape(state.getValue(FACING), state.getValue(LEFT_TANK), state.getValue(RIGHT_TANK), state.getValue(BATTERY));
+		return BackpackShapes.getShape(this, state.getValue(FACING), state.getValue(LEFT_TANK), state.getValue(RIGHT_TANK), state.getValue(BATTERY));
 	}
 
 	@Nullable

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -46,7 +47,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public class BackpackModel extends AgeableListModel<LivingEntity> {
+public class BackpackModel extends AgeableListModel<LivingEntity> implements IBackpackModel {
 	private static final Map<EntityType<?>, Vec3> entityTranslations;
 
 	static {
@@ -56,9 +57,9 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 
 	private static final ResourceLocation BACKPACK_ENTITY_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
 	private static final ResourceLocation TANK_GLASS_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/tank_glass.png");
-	private static final float CHILD_Y_OFFSET = 0.3F;
-	private static final float CHILD_Z_OFFSET = 0.1F;
-	private static final float CHILD_SCALE = 0.55F;
+	public static final float CHILD_Y_OFFSET = 0.3F;
+	public static final float CHILD_Z_OFFSET = 0.1F;
+	public static final float CHILD_SCALE = 0.55F;
 
 	private static final String CLOTH_PART = "cloth";
 	private static final String RIGHT_POUCHES_BORDER_PART = "rightPouchesBorder";
@@ -335,6 +336,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		));
 	}
 
+	@Override
 	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(BACKPACK_ENTITY_TEXTURE));
 		Set<TankPosition> tankPositions = renderInfo.getTankRenderInfos().keySet();
@@ -405,6 +407,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		poseStack.popPose();
 	}
 
+	@Override
 	public void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio) {
 		ModelPart charge = batteryCharges.get((int) (chargeRatio * 4));
 		if (charge == null) {
@@ -414,6 +417,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		charge.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
 	}
 
+	@Override
 	public void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, Fluid fluid, float fill, boolean left) {
 		if (Mth.equal(fill, 0.0f)) {
 			return;
@@ -451,11 +455,13 @@ public class BackpackModel extends AgeableListModel<LivingEntity> {
 		});
 	}
 
+	@Override
 	public EquipmentSlot getRenderEquipmentSlot() {
 		return EquipmentSlot.CHEST;
 	}
 
-	public void translateRotateAndScale(LivingEntity livingEntity, PoseStack matrixStack, boolean wearsArmor) {
+	@Override
+	public <L extends LivingEntity, M extends HumanoidModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, boolean wearsArmor) {
 		if (livingEntity.isCrouching()) {
 			matrixStack.translate(0D, 0.2D, 0D);
 			matrixStack.mulPose(Vector3f.XP.rotationDegrees(90F / (float) Math.PI));
