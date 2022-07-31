@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
@@ -41,7 +42,7 @@ public class AnotherPlayerBackpackOpenMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer player, AnotherPlayerBackpackOpenMessage msg) {
-		if (player == null) {
+		if (player == null || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
 
