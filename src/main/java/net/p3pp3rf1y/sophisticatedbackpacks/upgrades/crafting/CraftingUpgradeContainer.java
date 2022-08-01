@@ -148,14 +148,6 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 	}
 
 	@Override
-	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
-		ItemStack remainder = slot.onTake(player, slotStack);
-		if (!remainder.isEmpty()) {
-			player.drop(remainder, false);
-		}
-	}
-
-	@Override
 	public List<Slot> getRecipeSlots() {
 		return slots.subList(0, 9);
 	}
