@@ -49,6 +49,7 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 		craftingResultSlot = new CraftingResultSlot(player, craftMatrix, craftResult, slot, -100, -100) {
 			@Override
 			public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack) {
+				ItemStack remainingStack = getItem();
 				checkTakeAchievements(stack);
 				net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
 				NonNullList<ItemStack> nonnulllist;
@@ -80,6 +81,10 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 						Slot slot = slots.get(i);
 						((BackpackContainer) thePlayer.containerMenu).setSlotStackToUpdate(slot.index, slot.getItem());
 					}
+				}
+
+				if (!remainingStack.isEmpty()) {
+					player.drop(remainingStack, false);
 				}
 
 				return stack;
@@ -140,14 +145,6 @@ public class CraftingUpgradeContainer extends UpgradeContainerBase<CraftingUpgra
 			return slotStack;
 		}
 		return super.getSlotStackToTransfer(slot);
-	}
-
-	@Override
-	public void onTakeFromSlot(Slot slot, PlayerEntity player, ItemStack slotStack) {
-		ItemStack remainder = slot.onTake(player, slotStack);
-		if (!remainder.isEmpty()) {
-			player.drop(remainder, false);
-		}
 	}
 
 	@Override
