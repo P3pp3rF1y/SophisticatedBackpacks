@@ -1,0 +1,18 @@
+{
+	"mod": "farmersdelight",
+    "entity_tools": [
+        {
+            "entities": [
+                {
+                    "type": "animal"
+                }
+            ],
+			"tools": [
+                {
+                    "type": "tag",
+                    "tag": "forge:tools/knives"
+                }
+            ]
+        }
+    ]
+}
