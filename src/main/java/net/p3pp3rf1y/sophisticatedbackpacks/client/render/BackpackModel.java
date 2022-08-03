@@ -335,7 +335,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
+	public <L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(BACKPACK_ENTITY_TEXTURE));
 		Set<TankPosition> tankPositions = renderInfo.getTankRenderInfos().keySet();
 		boolean showLeftTank = tankPositions.contains(TankPosition.LEFT);
