@@ -10,7 +10,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public interface IBackpackModel {
-	void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
+	<L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
 
 	void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio);
 

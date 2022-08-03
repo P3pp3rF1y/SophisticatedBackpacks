@@ -55,7 +55,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
 			int clothColor = wrapper.getMainColor();
 			int borderColor = wrapper.getAccentColor();
-			model.render(matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
+			model.render(parentModel, livingEntity, matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
 			renderUpgrades(livingEntity, wrapper.getRenderInfo());
 			renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo());
 		});
