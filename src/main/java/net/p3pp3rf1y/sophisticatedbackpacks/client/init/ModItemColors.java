@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.item.ItemColors;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
@@ -10,10 +9,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
 public class ModItemColors {
 	private ModItemColors() {}
 
-	public static void init() {
-		ItemColors itemColors = Minecraft.getInstance().getItemColors();
-
-		itemColors.register((backpack, layer) -> {
+	public static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
+		event.register((backpack, layer) -> {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
 				return -1;
 			}

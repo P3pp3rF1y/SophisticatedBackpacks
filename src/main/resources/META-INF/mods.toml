@@ -50,7 +50,7 @@ Fancy and functional backpacks.
 [[dependencies.sophisticatedbackpacks]]
 modId="forge" #mandatory
 mandatory=true #mandatory
-versionRange="[41.0.96,)" #mandatory
+versionRange="[43.0.0,)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -60,7 +60,7 @@ side="BOTH"
 [[dependencies.sophisticatedbackpacks]]
 modId="sophisticatedcore" #mandatory
 mandatory=true #mandatory
-versionRange="[1.19-0.4.8,)" #mandatory
+versionRange="[1.19.2-0.4.12,)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
