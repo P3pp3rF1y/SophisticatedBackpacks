@@ -194,11 +194,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	@Override
-	public boolean canBeConnected() {
-		return true;
-	}
-
-	@Override
 	public boolean canConnectStorages() {
 		return false;
 	}
