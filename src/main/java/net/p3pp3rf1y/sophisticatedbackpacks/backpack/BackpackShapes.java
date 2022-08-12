@@ -5,6 +5,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.p3pp3rf1y.sophisticatedcore.util.RotatedShapes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,12 @@ public class BackpackShapes {
 			shapes.add(rightTank ? RIGHT_TANK : RIGHT_POUCHES);
 			shapes.add(battery ? BATTERY : FRONT_POUCH);
 			return or(shapes.stream().map(r -> r.getRotatedShape(dir)));
+		}
+
+		private static VoxelShape or(Stream<VoxelShape> shapes) {
+			return shapes.reduce((v1, v2) -> Shapes.joinUnoptimized(v1, v2, BooleanOp.OR))
+					.map(VoxelShape::optimize)
+					.orElse(Shapes.empty());
 		}
 
 		private static int getKey(Direction dir, boolean leftTank, boolean rightTank, boolean battery) {
@@ -142,39 +149,6 @@ public class BackpackShapes {
 
 	public static VoxelShape getShape(Block backpackBlock, Direction dir, boolean leftTank, boolean rightTank, boolean battery) {
 		return shapeProvider.getShape(backpackBlock, dir, leftTank, rightTank, battery);
-	}
-
-
-	public static class RotatedShapes {
-		private final VoxelShape[] rotatedShapes = new VoxelShape[4];
-
-		public RotatedShapes(VoxelShape... shapes) {
-			rotatedShapes[0] = or(Stream.of(shapes));
-		}
-
-		public VoxelShape getRotatedShape(Direction to) {
-			int index = (to.get2DDataValue() + 4) % 4;
-			if (rotatedShapes[index] == null) {
-				for (int i = 1; i <= index; ++i) {
-					if (rotatedShapes[i] == null) {
-						rotatedShapes[i] = rotateShapeOnce(rotatedShapes[i - 1]);
-					}
-				}
-			}
-			return rotatedShapes[index];
-		}
-
-		private static VoxelShape rotateShapeOnce(VoxelShape shape) {
-			List<VoxelShape> shapes = new ArrayList<>();
-			shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> shapes.add(Shapes.box(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX)));
-			return or(shapes.stream());
-		}
-	}
-
-	public static VoxelShape or(Stream<VoxelShape> shapes) {
-		return shapes.reduce((v1, v2) -> Shapes.joinUnoptimized(v1, v2, BooleanOp.OR))
-				.map(VoxelShape::optimize)
-				.orElse(Shapes.empty());
 	}
 
 	public interface IShapeProvider {
