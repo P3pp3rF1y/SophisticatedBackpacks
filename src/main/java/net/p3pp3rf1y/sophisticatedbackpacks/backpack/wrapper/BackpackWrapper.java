@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
@@ -85,7 +85,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private final BackpackRenderInfo renderInfo;
 
-	private Consumer<Integer> onSlotsChange = diff -> {};
+	private IntConsumer onSlotsChange = diff -> {};
 
 	private Runnable onInventoryHandlerRefresh = () -> {};
 
@@ -433,6 +433,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void removeContentsUuid() {
 		getContentsUuid().ifPresent(BackpackStorage.get()::removeBackpackContents);
+		removeContentsUUIDTag();
+	}
+
+	@Override
+	public void removeContentsUUIDTag() {
 		NBTHelper.removeTag(backpack, CONTENTS_UUID_TAG);
 	}
 
@@ -453,7 +458,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void registerOnSlotsChangeListener(Consumer<Integer> onSlotsChange) {
+	public void registerOnSlotsChangeListener(IntConsumer onSlotsChange) {
 		this.onSlotsChange = onSlotsChange;
 	}
 

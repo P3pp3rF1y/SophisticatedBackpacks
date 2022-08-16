@@ -8,7 +8,7 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public interface IBackpackWrapper extends IStorageWrapper {
 	@Override
@@ -30,7 +30,11 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		//noop by default
 	}
 
-	default void registerOnSlotsChangeListener(Consumer<Integer> onSlotsChange) {
+	default void removeContentsUUIDTag() {
+		//noop
+	}
+
+	default void registerOnSlotsChangeListener(IntConsumer onSlotsChange) {
 		//noop
 	}
 
