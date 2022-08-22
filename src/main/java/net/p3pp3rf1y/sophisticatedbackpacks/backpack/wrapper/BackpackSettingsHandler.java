@@ -6,7 +6,6 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 
 public class BackpackSettingsHandler extends SettingsHandler {
-	public static final String SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG = "sophisticatedBackpackSettings";
 	public static final String SETTINGS_TAG = "settings";
 
 	public BackpackSettingsHandler(IStorageWrapper backpackWrapper, CompoundTag backpackContentsNbt, Runnable markBackpackContentsDirty) {
@@ -33,7 +32,7 @@ public class BackpackSettingsHandler extends SettingsHandler {
 
 	@Override
 	protected void addGlobalSettingsCategory(CompoundTag settingsNbt) {
-		addSettingsCategory(settingsNbt, BackpackMainSettingsCategory.NAME, markContentsDirty, (categoryNbt, saveNbt) -> new BackpackMainSettingsCategory(categoryNbt, saveNbt, SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG));
+		addSettingsCategory(settingsNbt, BackpackMainSettingsCategory.NAME, markContentsDirty, (categoryNbt, saveNbt) -> new BackpackMainSettingsCategory(categoryNbt, saveNbt));
 	}
 
 	@Override
