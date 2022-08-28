@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
@@ -69,13 +68,14 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	}
 
 	private void renderItemDisplay(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo) {
-		BackpackRenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = renderInfo.getItemDisplayRenderInfo();
-		poseStack.pushPose();
-		poseStack.translate(0, 0.6, 0.25);
-		poseStack.scale(0.5f, 0.5f, 0.5f);
-		poseStack.mulPose(Vector3f.XN.rotationDegrees(180));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180f + itemDisplayRenderInfo.getRotation()));
-		Minecraft.getInstance().getItemRenderer().renderStatic(itemDisplayRenderInfo.getItem(), ItemTransforms.TransformType.FIXED, combinedLight, combinedOverlay, poseStack, buffer, 0);
-		poseStack.popPose();
+		renderInfo.getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
+			poseStack.pushPose();
+			poseStack.translate(0, 0.6, 0.25);
+			poseStack.scale(0.5f, 0.5f, 0.5f);
+			poseStack.mulPose(Vector3f.XN.rotationDegrees(180));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180f + displayItem.getRotation()));
+			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemTransforms.TransformType.FIXED, combinedLight, combinedOverlay, poseStack, buffer, 0);
+			poseStack.popPose();
+		});
 	}
 }

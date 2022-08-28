@@ -19,6 +19,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -92,6 +93,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 	private static final class BackpackBakedModel implements IDynamicBakedModel {
 		private static final Map<ItemTransforms.TransformType, Transformation> TRANSFORMS;
+		private static final ItemTransforms ITEM_TRANSFORMS;
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
 		static {
@@ -137,6 +139,20 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 					new Vector3f(0.75f, 0.75f, 0.75f), null
 			));
 			TRANSFORMS = builder.build();
+			ITEM_TRANSFORMS = createItemTransforms();
+		}
+
+		@SuppressWarnings("deprecation")
+		private static ItemTransforms createItemTransforms() {
+			return new ItemTransforms(fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND)), fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)),
+					fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND)), fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)),
+					fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.HEAD)), fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.GUI)),
+					fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.GROUND)), fromTransformation(TRANSFORMS.get(ItemTransforms.TransformType.FIXED)));
+		}
+
+		@SuppressWarnings("deprecation")
+		private static ItemTransform fromTransformation(Transformation transformation) {
+			return new ItemTransform(transformation.getLeftRotation().toXYZ(), transformation.getTranslation(), transformation.getScale());
 		}
 
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
@@ -304,6 +320,12 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			return this;
 		}
 
+		@SuppressWarnings("deprecation")
+		@Override
+		public ItemTransforms getTransforms() {
+			return ITEM_TRANSFORMS;
+		}
+
 		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
 			BakedQuadBuilder builder = new BakedQuadBuilder(sprite);
 			Vec3i dirVec = face.getNormal();
@@ -318,7 +340,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 
 		private void putVertex(BakedQuadBuilder builder, Vector3f normal,
 				float x, float y, float z, float u, float v, TextureAtlasSprite sprite, float[] col) {
-			ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements().asList();
+			ImmutableList<VertexFormatElement> elements = builder.getVertexFormat().getElements();
 			for (int e = 0; e < elements.size(); e++) {
 				switch (elements.get(e).getUsage()) {
 					case POSITION:
