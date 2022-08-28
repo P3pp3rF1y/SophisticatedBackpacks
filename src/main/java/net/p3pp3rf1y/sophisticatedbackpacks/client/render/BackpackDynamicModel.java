@@ -96,54 +96,45 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			return ChunkRenderTypeSet.of(RenderType.cutout());
 		}
 
-		private static final Map<ItemTransforms.TransformType, ItemTransform> TRANSFORMS;
+		public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
+		private static final ItemTransforms ITEM_TRANSFORMS = createItemTransforms();
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
-		public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
-
-		static {
-			ImmutableMap.Builder<ItemTransforms.TransformType, ItemTransform> builder = ImmutableMap.builder();
-			builder.put(ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, new ItemTransform(
+		@SuppressWarnings("java:S4738") //ItemTransforms require Guava ImmutableMap to be passed in so no way to change that to java Map
+		private static ItemTransforms createItemTransforms() {
+			return new ItemTransforms(new ItemTransform(
 					new Vector3f(85, -90, 0),
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
 					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(85, -90, 0),
 					new Vector3f(0, -2 / 16f, -4.5f / 16f),
 					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(0, 0, 0),
 					new Vector3f(0, 0, 0),
 					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(0, 0, 0),
 					new Vector3f(0, 0, 0),
 					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.HEAD, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(0, 0, 0),
 					new Vector3f(0, 14.25f / 16f, 0),
 					new Vector3f(1, 1, 1), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.GUI, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(30, 225, 0),
 					new Vector3f(0, 1.25f / 16f, 0),
 					new Vector3f(0.9f, 0.9f, 0.9f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.GROUND, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(0, 0, 0),
 					new Vector3f(0, 3 / 16f, 0),
 					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			));
-			builder.put(ItemTransforms.TransformType.FIXED, new ItemTransform(
+			), new ItemTransform(
 					new Vector3f(0, 0, 0),
 					new Vector3f(0, 0, -2.25f / 16f),
 					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			));
-			TRANSFORMS = builder.build();
+			), ImmutableMap.of());
 		}
 
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
@@ -306,9 +297,15 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				return this;
 			}
 
-			TRANSFORMS.get(transformType).apply(applyLeftHandTransform, poseStack);
+			ITEM_TRANSFORMS.getTransform(transformType).apply(applyLeftHandTransform, poseStack);
 
 			return this;
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		public ItemTransforms getTransforms() {
+			return ITEM_TRANSFORMS;
 		}
 
 		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {

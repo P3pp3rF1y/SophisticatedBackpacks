@@ -16,7 +16,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 	private final Minecraft minecraft = Minecraft.getInstance();
@@ -40,15 +39,12 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 		RenderType rendertype = ItemBlockRenderTypes.getRenderType(stack, true);
 		VertexConsumer ivertexbuilder = ItemRenderer.getFoilBufferDirect(buffer, rendertype, true, stack.hasFoil());
 		itemRenderer.renderModelLists(model, stack, combinedLight, combinedOverlay, matrixStack, ivertexbuilder);
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-			RenderInfo.ItemDisplayRenderInfo itemDisplayRenderInfo = backpackWrapper.getRenderInfo().getItemDisplayRenderInfo();
-			ItemStack displayItem = itemDisplayRenderInfo.getItem();
-			if (!displayItem.isEmpty()) {
-				matrixStack.translate(0.5, 0.6, 0.25);
-				matrixStack.scale(0.5f, 0.5f, 0.5f);
-				matrixStack.mulPose(Vector3f.ZP.rotationDegrees(itemDisplayRenderInfo.getRotation()));
-				itemRenderer.renderStatic(displayItem, ItemTransforms.TransformType.FIXED, combinedLight, combinedOverlay, matrixStack, buffer, 0);
-			}
-		});
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
+				backpackWrapper.getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
+					matrixStack.translate(0.5, 0.6, 0.25);
+					matrixStack.scale(0.5f, 0.5f, 0.5f);
+					matrixStack.mulPose(Vector3f.ZP.rotationDegrees(displayItem.getRotation()));
+					itemRenderer.renderStatic(displayItem.getItem(), ItemTransforms.TransformType.FIXED, combinedLight, combinedOverlay, matrixStack, buffer, 0);
+				}));
 	}
 }
