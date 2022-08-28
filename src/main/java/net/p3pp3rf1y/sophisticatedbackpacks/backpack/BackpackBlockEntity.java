@@ -12,9 +12,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
@@ -39,6 +44,13 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private boolean updateBlockRender = true;
 
 	private boolean chunkBeingUnloaded = false;
+
+	@Nullable
+	private LazyOptional<IItemHandler> itemHandlerCap;
+	@Nullable
+	private LazyOptional<IFluidHandler> fluidHandlerCap;
+	@Nullable
+	private LazyOptional<IEnergyStorage> energyStorageCap;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
@@ -127,13 +139,39 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput()).cast();
+			if (itemHandlerCap == null) {
+				itemHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput());
+			}
+			return itemHandlerCap.cast();
 		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-			return getBackpackWrapper().getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
+			if (fluidHandlerCap == null) {
+				fluidHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
+			}
+			return fluidHandlerCap.cast();
 		} else if (cap == CapabilityEnergy.ENERGY) {
-			return getBackpackWrapper().getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
+			if (energyStorageCap == null) {
+				energyStorageCap = LazyOptional.of(() -> getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
+			}
+			return energyStorageCap.cast();
 		}
 		return super.getCapability(cap, side);
+	}
+
+	@Override
+	public void invalidateCaps() {
+		super.invalidateCaps();
+		if (itemHandlerCap != null) {
+			itemHandlerCap.invalidate();
+			itemHandlerCap = null;
+		}
+		if (fluidHandlerCap != null) {
+			fluidHandlerCap.invalidate();
+			fluidHandlerCap = null;
+		}
+		if (energyStorageCap != null) {
+			energyStorageCap.invalidate();
+			energyStorageCap = null;
+		}
 	}
 
 	public void refreshRenderState() {
