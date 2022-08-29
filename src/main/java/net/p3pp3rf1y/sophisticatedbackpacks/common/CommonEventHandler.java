@@ -35,10 +35,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
@@ -67,6 +67,7 @@ public class CommonEventHandler {
 		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
+		eventBus.addListener(this::onPlayerRespawn);
 		eventBus.addListener(this::onWorldTick);
 		eventBus.addListener(this::interactWithEntity);
 	}
@@ -117,13 +118,21 @@ public class CommonEventHandler {
 	}
 
 	private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getEntity(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getEntity(), playerTagName)));
+		sendPlayerSettingsToClient(event.getEntity());
 	}
 
 	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		String playerTagName = BackpackSettingsHandler.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) event.getEntity(), new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(event.getEntity(), playerTagName)));
+		Player player = event.getEntity();
+		sendPlayerSettingsToClient(player);
+	}
+
+	private void sendPlayerSettingsToClient(Player player) {
+		String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
+		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) player, new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+	}
+
+	private void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+		sendPlayerSettingsToClient(event.getEntity());
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
