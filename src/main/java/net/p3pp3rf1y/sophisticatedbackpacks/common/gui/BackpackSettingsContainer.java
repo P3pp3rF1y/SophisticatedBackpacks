@@ -60,16 +60,16 @@ public class BackpackSettingsContainer extends SettingsContainer<IBackpackWrappe
 
 		if (lastSettingsNbt == null || !lastSettingsNbt.equals(storageWrapper.getSettingsHandler().getNbt())) {
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
-		}
 
-		storageWrapper.getContentsUuid().ifPresent(uuid -> {
-			CompoundTag settingsContents = new CompoundTag();
-			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
-			if (!settingsNbt.isEmpty()) {
-				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
-			}
-		});
+			storageWrapper.getContentsUuid().ifPresent(uuid -> {
+				CompoundTag settingsContents = new CompoundTag();
+				CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
+				if (!settingsNbt.isEmpty()) {
+					settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
+					SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
+				}
+			});
+		}
 	}
 
 	@Override
