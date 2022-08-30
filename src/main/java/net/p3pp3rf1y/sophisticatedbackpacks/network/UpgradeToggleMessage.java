@@ -38,7 +38,7 @@ public class UpgradeToggleMessage {
 			return;
 		}
 
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, inventoryName, slot) -> {
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(w -> {
 				Map<Integer, IUpgradeWrapper> slotWrappers = w.getUpgradeHandler().getSlotWrappers();
 				if (slotWrappers.containsKey(msg.upgradeSlot)) {

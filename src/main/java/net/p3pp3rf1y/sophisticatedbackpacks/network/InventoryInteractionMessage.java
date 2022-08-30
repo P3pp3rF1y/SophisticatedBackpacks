@@ -40,7 +40,7 @@ public class InventoryInteractionMessage {
 		if (sender == null) {
 			return;
 		}
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, slot) -> {
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> {
 			InventoryInteractionHelper.tryInventoryInteraction(msg.pos, sender.level, backpack, msg.face, sender);
 			sender.swing(Hand.MAIN_HAND, true);
 			return true;

@@ -49,17 +49,17 @@ public class EntityToolSwapMessage {
 
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(backpackWrapper -> {
-					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
-							.forEach(upgrade -> {
-								if (!upgrade.canProcessEntityInteract() || result.get()) {
-									return;
-								}
-								anyUpgradeCanInteract.set(true);
+							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
+									.forEach(upgrade -> {
+										if (!upgrade.canProcessEntityInteract() || result.get()) {
+											return;
+										}
+										anyUpgradeCanInteract.set(true);
 
-								result.set(upgrade.onEntityInteract(world, entity, sender));
-							});
+										result.set(upgrade.onEntityInteract(world, entity, sender));
+									});
 							return result.get();
 						}
 				).orElse(false)

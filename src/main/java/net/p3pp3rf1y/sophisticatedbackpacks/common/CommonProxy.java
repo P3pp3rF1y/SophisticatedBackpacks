@@ -97,7 +97,7 @@ public class CommonProxy {
 
 		event.world.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
-			SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, handlerName, slot) -> {
+			SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(player, (backpack, handlerName, identifier, slot) -> {
 				numberOfBackpacks.incrementAndGet();
 				return false;
 			});
@@ -168,7 +168,7 @@ public class CommonProxy {
 		}
 		PlayerEntity player = event.getPlayer();
 		BlockPos pos = event.getPos();
-		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
@@ -184,7 +184,7 @@ public class CommonProxy {
 		if (player.level.isClientSide) {
 			return;
 		}
-		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
@@ -231,14 +231,14 @@ public class CommonProxy {
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		PlayerEntity player = event.getPlayer();
 		World world = player.getCommandSenderWorld();
-		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnBackpack(world, remainingStackSimulated.get(), wrapper, true));
 					return remainingStackSimulated.get().isEmpty();
 				}).orElse(false));
 		if (remainingStackSimulated.get().isEmpty()) {
 			ItemStack remainingStack = itemEntity.getItem().copy();
-			playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			playerInventoryProvider.runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.map(wrapper -> InventoryHelper.runPickupOnBackpack(world, player, remainingStack, wrapper, false).isEmpty()).orElse(false)
 			);
 			if (!itemEntity.isSilent()) {
