@@ -88,6 +88,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private IntConsumer onSlotsChange = diff -> {};
 
 	private Runnable onInventoryHandlerRefresh = () -> {};
+	private Runnable upgradeCachesInvalidatedHandler = () -> {};
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -233,6 +234,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 					fluidHandler = null;
 					energyStorageInitialized = false;
 					energyStorage = null;
+					upgradeCachesInvalidatedHandler.run();
 				}) {
 					@Override
 					public boolean isItemValid(int slot, ItemStack stack) {
@@ -245,6 +247,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 			}
 		}
 		return upgradeHandler;
+	}
+
+	@Override
+	public void setUpgradeCachesInvalidatedHandler(Runnable handler) {
+		upgradeCachesInvalidatedHandler = handler;
 	}
 
 	private int getNumberOfUpgradeSlots() {
