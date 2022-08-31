@@ -40,17 +40,17 @@ public class BlockToolSwapMessage {
 		}
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.map(backpackWrapper -> {
-					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
-							.forEach(upgrade -> {
-								if (!upgrade.canProcessBlockInteract() || result.get()) {
-									return;
-								}
-								anyUpgradeCanInteract.set(true);
+							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
+									.forEach(upgrade -> {
+										if (!upgrade.canProcessBlockInteract() || result.get()) {
+											return;
+										}
+										anyUpgradeCanInteract.set(true);
 
-								result.set(upgrade.onBlockInteract(sender.level, msg.pos, sender.level.getBlockState(msg.pos), sender));
-							});
+										result.set(upgrade.onBlockInteract(sender.level, msg.pos, sender.level.getBlockState(msg.pos), sender));
+									});
 							return result.get();
 						}
 				).orElse(false)

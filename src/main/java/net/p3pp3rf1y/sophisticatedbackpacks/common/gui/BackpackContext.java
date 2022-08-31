@@ -115,15 +115,20 @@ public abstract class BackpackContext {
 
 	public static class Item extends BackpackContext {
 		protected final String handlerName;
+		protected String identifier;
 		protected final int backpackSlotIndex;
 		private final boolean openFromInventory;
 
 		public Item(String handlerName, int backpackSlotIndex) {
-			this(handlerName, backpackSlotIndex, false);
+			this(handlerName, "", backpackSlotIndex);
+		}
+		public Item(String handlerName, String identifier, int backpackSlotIndex) {
+			this(handlerName, identifier, backpackSlotIndex, false);
 		}
 
-		public Item(String handlerName, int backpackSlotIndex, boolean openFromInventory) {
+		public Item(String handlerName, String identifier, int backpackSlotIndex, boolean openFromInventory) {
 			this.handlerName = handlerName;
+			this.identifier = identifier;
 			this.backpackSlotIndex = backpackSlotIndex;
 			this.openFromInventory = openFromInventory;
 		}
@@ -140,17 +145,17 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean shouldLockBackpackSlot(PlayerEntity player) {
-			return SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(player, handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
+			return SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(handlerName).map(PlayerInventoryHandler::isVisibleInGui).orElse(false);
 		}
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(PlayerEntity player) {
-			Optional<PlayerInventoryHandler> inventoryHandler = SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(player, handlerName);
+			Optional<PlayerInventoryHandler> inventoryHandler = SophisticatedBackpacks.PROXY.getPlayerInventoryProvider().getPlayerInventoryHandler(handlerName);
 			if (!inventoryHandler.isPresent()) {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find inventory handler for \"{}\"", handlerName);
 				return NoopBackpackWrapper.INSTANCE;
 			}
-			LazyOptional<IBackpackWrapper> backpackWrapper = inventoryHandler.get().getStackInSlot(player, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+			LazyOptional<IBackpackWrapper> backpackWrapper = inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
 			if (!backpackWrapper.isPresent()) {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find backpack at slot index {} in \"{}\" inventory handler", backpackSlotIndex, handlerName);
 				return NoopBackpackWrapper.INSTANCE;
@@ -173,7 +178,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new ItemSubBackpack(handlerName, backpackSlotIndex, openFromInventory, subBackpackSlotIndex);
+			return new ItemSubBackpack(handlerName, identifier, backpackSlotIndex, openFromInventory, subBackpackSlotIndex);
 		}
 
 		@Override
@@ -187,12 +192,13 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean());
+			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
 		public void addToBuffer(PacketBuffer packetBuffer) {
 			packetBuffer.writeUtf(handlerName);
+			packetBuffer.writeUtf(identifier);
 			packetBuffer.writeInt(backpackSlotIndex);
 			packetBuffer.writeBoolean(openFromInventory);
 		}
@@ -208,8 +214,8 @@ public abstract class BackpackContext {
 		@Nullable
 		private IBackpackWrapper parentWrapper;
 
-		public ItemSubBackpack(String handlerName, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
-			super(handlerName, backpackSlotIndex, parentOpenFromInventory);
+		public ItemSubBackpack(String handlerName, String identifier, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
+			super(handlerName, identifier, backpackSlotIndex, parentOpenFromInventory);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
 		}
 
@@ -228,7 +234,7 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(PacketBuffer packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
+			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
 		}
 
 		@Override
@@ -239,7 +245,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.Item(handlerName, backpackSlotIndex, super.wasOpenFromInventory());
+			return new BackpackContext.Item(handlerName, identifier, backpackSlotIndex, super.wasOpenFromInventory());
 		}
 
 		@Override
@@ -319,7 +325,7 @@ public abstract class BackpackContext {
 		@Override
 		public boolean canInteractWith(PlayerEntity player) {
 			return player.level.getBlockEntity(pos) instanceof BackpackTileEntity
-					&& (player.distanceToSqr((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D);
+					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
 		}
 
 		@Override

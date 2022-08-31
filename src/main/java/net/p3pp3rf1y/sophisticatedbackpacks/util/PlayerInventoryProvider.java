@@ -10,8 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Function;
 
 public class PlayerInventoryProvider {
@@ -22,30 +21,20 @@ public class PlayerInventoryProvider {
 	private final Map<String, PlayerInventoryHandler> playerInventoryHandlers = new LinkedHashMap<>();
 	private final List<String> renderedHandlers = new ArrayList<>();
 
-	private boolean playerInventoryHandlersInitialized = false;
-	private Consumer<PlayerEntity> playerInventoryHandlerInitCallback = player -> {};
-
 	public PlayerInventoryProvider() {
-		addPlayerInventoryHandler(MAIN_INVENTORY, player -> player.inventory.items.size(),
-				(player, slot) -> player.inventory.items.get(slot), (player, slot, stack) -> player.inventory.items.set(slot, stack), true, false, false);
-		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> player.inventory.offhand.size(),
-				(player, slot) -> player.inventory.offhand.get(slot), (player, slot, stack) -> player.inventory.offhand.set(slot, stack), false, false, false);
-		addPlayerInventoryHandler(ARMOR_INVENTORY, player -> 1,
-				(player, slot) -> player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()), (player, slot, stack) -> player.inventory.armor.set(EquipmentSlotType.CHEST.getIndex(), stack), false, true, false);
+		addPlayerInventoryHandler(MAIN_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> player.inventory.items.size(),
+				(player, identifier, slot) -> player.inventory.items.get(slot), true, false, false);
+		addPlayerInventoryHandler(OFFHAND_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> player.inventory.offhand.size(),
+				(player, identifier, slot) -> player.inventory.offhand.get(slot), false, false, false);
+		addPlayerInventoryHandler(ARMOR_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
+				(player, identifier, slot) -> player.inventory.armor.get(EquipmentSlotType.CHEST.getIndex()), false, true, false);
 
 	}
 
-	public void setPlayerInventoryHandlerInitCallback(Consumer<PlayerEntity> callback) {
-		playerInventoryHandlerInitCallback = callback;
-		//there seems to be a bug where something triggers one of the backpack codes too early before curio has time
-		// to register its callback which causes the callback not to be called if initialized wasn't set to false here
-		playerInventoryHandlersInitialized = false;
-	}
-
-	public void addPlayerInventoryHandler(String name, Function<PlayerEntity, Integer> getSlotCount, BiFunction<PlayerEntity, Integer, ItemStack> getStackInSlot, PlayerInventoryHandler.IStackInSlotModifier setStackInSlot, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
+	public void addPlayerInventoryHandler(String name, Function<Long, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
-		playerInventoryHandlers.put(name, new PlayerInventoryHandler(getSlotCount, getStackInSlot, setStackInSlot, visibleInGui, ownRenderer));
+		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer));
 		playerInventoryHandlers.putAll(temp);
 
 		if (rendered) {
@@ -57,49 +46,47 @@ public class PlayerInventoryProvider {
 	}
 
 	public Optional<RenderInfo> getBackpackFromRendered(PlayerEntity player) {
-		initialize(player);
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
-			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
-				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
-				if (slotStack.getItem() instanceof BackpackItem) {
-					return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+			if (invHandler == null) {
+				return Optional.empty();
+			}
+			for (String identifier : invHandler.getIdentifiers(player.level.getGameTime())) {
+				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
+					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
+					if (slotStack.getItem() instanceof BackpackItem) {
+						return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+					}
 				}
 			}
 		}
 		return Optional.empty();
 	}
 
-	private Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers(PlayerEntity player) {
-		initialize(player);
+	private Map<String, PlayerInventoryHandler> getPlayerInventoryHandlers() {
 		return playerInventoryHandlers;
 	}
 
-	private void initialize(PlayerEntity player) {
-		if (!playerInventoryHandlersInitialized) {
-			playerInventoryHandlerInitCallback.accept(player);
-			playerInventoryHandlersInitialized = true;
-		}
-	}
-
-	public Optional<PlayerInventoryHandler> getPlayerInventoryHandler(PlayerEntity player, String name) {
-		return Optional.ofNullable(getPlayerInventoryHandlers(player).get(name));
+	public Optional<PlayerInventoryHandler> getPlayerInventoryHandler(String name) {
+		return Optional.ofNullable(getPlayerInventoryHandlers().get(name));
 	}
 
 	public void runOnBackpacks(PlayerEntity player, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
-		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers(player).entrySet()) {
+		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers().entrySet()) {
 			PlayerInventoryHandler invHandler = entry.getValue();
-			for (int slot = 0; slot < invHandler.getSlotCount(player); slot++) {
-				ItemStack slotStack = invHandler.getStackInSlot(player, slot);
-				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), slot)) {
-					return;
+			for (String identifier : invHandler.getIdentifiers(player.level.getGameTime())) {
+				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
+					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
+					if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), identifier, slot)) {
+						return;
+					}
 				}
 			}
 		}
 	}
 
 	public interface BackpackInventorySlotConsumer {
-		boolean accept(ItemStack backpack, String inventoryHandlerName, int slot);
+		boolean accept(ItemStack backpack, String inventoryHandlerName, String identifier, int slot);
 	}
 
 	public static class RenderInfo {

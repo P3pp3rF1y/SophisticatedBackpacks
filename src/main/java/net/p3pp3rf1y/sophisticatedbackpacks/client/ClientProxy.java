@@ -219,7 +219,7 @@ public class ClientProxy extends CommonProxy {
 			Slot slot = backpackScreen.getSlotUnderMouse();
 			if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
 				if (slot.getItem().getCount() == 1) {
-					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index, true));
+					PacketHandler.sendToServer(new BackpackOpenMessage(slot.index));
 				}
 			} else {
 				PacketHandler.sendToServer(new BackpackCloseMessage());
@@ -228,7 +228,7 @@ public class ClientProxy extends CommonProxy {
 			Slot slot = ((InventoryScreen) screen).getSlotUnderMouse();
 
 			if (slot != null && isSupportedPlayerInventorySlot(slot.index) && slot.getItem().getItem() instanceof BackpackItem) {
-				PacketHandler.sendToServer(new BackpackOpenMessage(slot.getSlotIndex(), false));
+				PacketHandler.sendToServer(new BackpackOpenMessage(slot.getSlotIndex()));
 			}
 		}
 	}
