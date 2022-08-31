@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.function.IntConsumer;
 
 public interface IBackpackWrapper extends IStorageWrapper {
+
 	@Override
 	BackpackSettingsHandler getSettingsHandler();
 
