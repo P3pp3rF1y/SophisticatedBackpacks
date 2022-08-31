@@ -6,7 +6,13 @@ import it.unimi.dsi.fastutil.ints.IntComparators;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.*;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -18,7 +24,11 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.SlotItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.*;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IOverflowResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackSettingsManager;
@@ -40,7 +50,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.nosort.NoSortSettingsCatego
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.client.gui.utils.TranslationHelper.translError;
@@ -282,7 +300,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 				@Override
 				public void setChanged() {
 					super.setChanged();
-					closeBackpackScreenIfSomethingMessedWithBackpackStack(getItem());
+					closeBackpackScreenIfSomethingMessedWithBackpackStack();
 				}
 			};
 		} else {
@@ -292,15 +310,14 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 		return addSlot(slot);
 	}
 
-	public void closeBackpackScreenIfSomethingMessedWithBackpackStack(ItemStack supposedToBeBackpackStack) {
-		if (!isClientSide() && isNotCorrectBackpack(supposedToBeBackpackStack)) {
+	public void closeBackpackScreenIfSomethingMessedWithBackpackStack() {
+		if (!isClientSide() && isNotCorrectBackpack()) {
 			player.closeContainer();
 		}
 	}
 
-	private boolean isNotCorrectBackpack(ItemStack supposedToBeBackpackStack) {
-		return supposedToBeBackpackStack.isEmpty() || !(supposedToBeBackpackStack.getItem() instanceof BackpackItem) || supposedToBeBackpackStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(w -> w != (isFirstLevelBackpack() ? backpackWrapper : parentBackpackWrapper)).orElse(true);
+	private boolean isNotCorrectBackpack() {
+		return backpackContext.getBackpackWrapper(player) != backpackWrapper;
 	}
 
 	private boolean isClientSide() {
@@ -894,7 +911,7 @@ public class BackpackContainer extends Container implements ISyncedContainer {
 
 	@Override
 	public void broadcastChanges() {
-		getVisibleStorageItem().ifPresent(this::closeBackpackScreenIfSomethingMessedWithBackpackStack);
+		closeBackpackScreenIfSomethingMessedWithBackpackStack();
 		detectAndSendChangesIn(upgradeItemStacks, upgradeSlots);
 		detectAndSendChangesIn(realInventoryItemStacks, realInventorySlots);
 		if (lastSettingsNbt == null || !lastSettingsNbt.equals(backpackWrapper.getSettingsHandler().getNbt())) {
