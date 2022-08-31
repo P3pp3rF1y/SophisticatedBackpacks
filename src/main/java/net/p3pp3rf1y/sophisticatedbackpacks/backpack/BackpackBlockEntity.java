@@ -64,6 +64,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
+		backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateBackpackCaps);
 	}
 
 	@Override
@@ -160,6 +161,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void invalidateCaps() {
 		super.invalidateCaps();
+		invalidateBackpackCaps();
+	}
+
+	private void invalidateBackpackCaps() {
 		if (itemHandlerCap != null) {
 			itemHandlerCap.invalidate();
 			itemHandlerCap = null;
