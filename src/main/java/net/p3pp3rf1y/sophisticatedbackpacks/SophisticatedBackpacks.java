@@ -66,7 +66,7 @@ public class SophisticatedBackpacks {
 	private static void setup(FMLCommonSetupEvent event) {
 		PACKET_HANDLER.init();
 		ModCompat.initCompats();
-		ModItems.registerDispenseBehavior();
+		event.enqueueWork(ModItems::registerDispenseBehavior);
 		ModItems.registerCauldronInteractions();
 		SBPCommand.registerArgumentTypes();
 	}
