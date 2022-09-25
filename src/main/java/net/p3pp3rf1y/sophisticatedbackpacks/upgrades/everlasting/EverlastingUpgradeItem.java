@@ -28,5 +28,10 @@ public class EverlastingUpgradeItem extends UpgradeItemBase<EverlastingUpgradeIt
 		public boolean hideSettingsTab() {
 			return true;
 		}
+
+		@Override
+		public boolean canBeDisabled() {
+			return false;
+		}
 	}
 }
