@@ -402,6 +402,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void refreshInventoryForInputOutput() {
 		inventoryIOHandler = null;
+		upgradeCachesInvalidatedHandler.run();
 	}
 
 	@Override
