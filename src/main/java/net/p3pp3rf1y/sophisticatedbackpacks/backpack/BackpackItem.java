@@ -325,7 +325,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
-		if (level.isClientSide || !Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()) {
+		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
@@ -337,7 +337,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (level.isClientSide || !(entityIn instanceof Player player) || (Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
+		if (level.isClientSide || !(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
