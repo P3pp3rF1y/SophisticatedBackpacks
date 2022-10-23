@@ -72,7 +72,7 @@ public class SophisticatedBackpacks {
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
-		KeybindHandler.register(event);
+		KeybindHandler.register();
 	}
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
