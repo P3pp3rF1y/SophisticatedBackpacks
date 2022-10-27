@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -46,6 +47,8 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandle
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,7 +76,7 @@ public class CommonEventHandler {
 	}
 
 	private static final int BACKPACK_COUNT_CHECK_COOLDOWN = 40;
-	private long nextBackpackCountCheck = 0;
+	private Map<ResourceLocation, Long> nextBackpackCountChecks = new HashMap<>();
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
 		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
@@ -97,11 +100,13 @@ public class CommonEventHandler {
 		}
 	}
 
+
 	private void onWorldTick(TickEvent.WorldTickEvent event) {
-		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountCheck > event.world.getGameTime()) {
+		ResourceLocation dimensionKey = event.world.dimension().location();
+		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountChecks.getOrDefault(dimensionKey, 0L) > event.world.getGameTime()) {
 			return;
 		}
-		nextBackpackCountCheck = event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN;
+		nextBackpackCountChecks.put(dimensionKey, event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN);
 
 		event.world.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
