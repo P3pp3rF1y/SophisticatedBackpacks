@@ -124,6 +124,7 @@ public class BackpackStorage extends SavedData {
 					updatedBackpackSettingsFlags.add(backpackUuid);
 				}
 			}
+			setDirty();
 		}
 	}
 
