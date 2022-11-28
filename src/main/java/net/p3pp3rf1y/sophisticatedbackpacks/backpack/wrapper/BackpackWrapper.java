@@ -35,7 +35,6 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import javax.annotation.Nullable;
@@ -243,7 +242,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 					}
 				};
 			} else {
-				upgradeHandler = NoopStorageWrapper.INSTANCE.getUpgradeHandler();
+				upgradeHandler = Noop.INSTANCE.getUpgradeHandler();
 			}
 		}
 		return upgradeHandler;
@@ -284,10 +283,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void clearDummyHandlers() {
-		if (upgradeHandler == NoopStorageWrapper.INSTANCE.getUpgradeHandler()) {
+		if (upgradeHandler == Noop.INSTANCE.getUpgradeHandler()) {
 			upgradeHandler = null;
 		}
-		if (settingsHandler == NoopStorageWrapper.INSTANCE.getSettingsHandler()) {
+		if (settingsHandler == Noop.INSTANCE.getSettingsHandler()) {
 			settingsHandler = null;
 		}
 	}
