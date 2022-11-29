@@ -10,13 +10,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
@@ -139,17 +137,17 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+		if (cap == ForgeCapabilities.ITEM_HANDLER) {
 			if (itemHandlerCap == null) {
 				itemHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput());
 			}
 			return itemHandlerCap.cast();
-		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+		} else if (cap == ForgeCapabilities.FLUID_HANDLER) {
 			if (fluidHandlerCap == null) {
 				fluidHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
 			}
 			return fluidHandlerCap.cast();
-		} else if (cap == CapabilityEnergy.ENERGY) {
+		} else if (cap == ForgeCapabilities.ENERGY) {
 			if (energyStorageCap == null) {
 				energyStorageCap = LazyOptional.of(() -> getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
 			}

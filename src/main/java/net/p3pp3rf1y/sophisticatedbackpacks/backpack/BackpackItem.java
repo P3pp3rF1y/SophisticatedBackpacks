@@ -38,14 +38,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullLazy;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -303,11 +301,11 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				initWrapper();
 				if (cap == CapabilityBackpackWrapper.getCapabilityInstance()) {
 					return LazyOptional.of(() -> wrapper).cast();
-				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+				} else if (cap == ForgeCapabilities.ITEM_HANDLER) {
 					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
-				} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY && Boolean.TRUE.equals(Config.COMMON.itemFluidHandlerEnabled.get())) {
+				} else if (cap == ForgeCapabilities.FLUID_HANDLER_ITEM && Boolean.TRUE.equals(Config.COMMON.itemFluidHandlerEnabled.get())) {
 					return wrapper.getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
-				} else if (cap == CapabilityEnergy.ENERGY) {
+				} else if (cap == ForgeCapabilities.ENERGY) {
 					return wrapper.getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
 				}
 				return LazyOptional.empty();

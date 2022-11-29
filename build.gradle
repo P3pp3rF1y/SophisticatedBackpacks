@@ -49,9 +49,6 @@ minecraft {
     mappings channel: 'parchment', version: "$parchment_version"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
-        all {
-            property 'ignoreList', "bootstraplauncher,securejarhandler,asm-commons,asm-util,asm-analysis,asm-tree,asm,client-extra,fmlcore,javafmllanguage,mclanguage,forge-${project.minecraft_version}-${project.forge_version},${project.minecraft_version}-forge-${project.forge_version}"
-        }
         client {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -193,3 +190,6 @@ sonarqube {
     }
 }
 
+task printVersionName {
+    println "version:" + project.version
+}
