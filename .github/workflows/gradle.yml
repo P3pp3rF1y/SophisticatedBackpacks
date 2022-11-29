@@ -9,10 +9,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Set up JDK 1.17
-        uses: actions/setup-java@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.17
+          java-version: 17
+          distribution: zulu
+          cache: gradle
       - name: Build with Gradle
         uses: nick-invision/retry@v2
         with:
@@ -23,7 +25,50 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build publish
+      - name: Cleanup old artifacts
+        uses: actions/delete-package-versions@v3
+        with:
+          package-name: 'sophisticatedbackpacks.sophisticatedbackpacks'
+          min-versions-to-keep: 10
       - name: Code Quality
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.organization=p3pp3rf1y-github sonarqube
+      - name : Retrieve Version
+        run: |
+          echo "$(${{github.workspace}}/gradlew -q printVersionName | awk -F "version:" '{printf $2}')"
+          echo "VERSION_NAME=$(${{github.workspace}}/gradlew -q printVersionName | awk -F "version:" '{printf $2}')" >> $GITHUB_OUTPUT
+        id: version
+      - name : Compile version message
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const gh = ${{ toJSON(github) }};
+
+            core.setOutput('EMBED_TITLE', "[" + gh.event.repository.name + ":" + gh.ref_name +"] new build ${{steps.version.outputs.VERSION_NAME}}");
+            core.setOutput('EMBED_URL', "https://github.com/P3pp3rF1y/SophisticatedBackpacks/packages/454305?version=${{steps.version.outputs.VERSION_NAME}}");
+            core.setOutput('EMBED_AUTHOR_NAME', gh.event.sender.login);
+            core.setOutput('EMBED_AUTHOR_ICON_URL', gh.event.sender.avatar_url);
+
+            const commits = ${{ toJSON(github.event.commits) }};
+            let description = "";
+            for (const commit of commits) {
+              if (description.length !== 0) {
+                description += "\n";
+              }
+              description += "[" + commit.id.slice(0,7) + "](<" + commit.url + ">) " + commit.message + " - " + commit.author.username;
+            }
+            core.setOutput('EMBED_DESCRIPTION', description);
+        id: embed
+      - name: Send Discord Notification
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          embeds: ${{steps.embed.outputs.EMBEDS}}
+          content: null
+          embed-title: "${{steps.embed.outputs.EMBED_TITLE}}"
+          embed-url: "${{steps.embed.outputs.EMBED_URL}}"
+          embed-description: "${{steps.embed.outputs.EMBED_DESCRIPTION}}"
+          embed-author-name: "${{steps.embed.outputs.EMBED_AUTHOR_NAME}}"
+          embed-author-icon-url: "${{steps.embed.outputs.EMBED_AUTHOR_ICON_URL}}"
+          embed-color: 58633
