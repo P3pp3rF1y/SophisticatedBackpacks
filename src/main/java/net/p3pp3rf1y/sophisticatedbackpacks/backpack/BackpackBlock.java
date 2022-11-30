@@ -187,11 +187,11 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private static void putInPlayersHandAndRemove(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand) {
 		ItemStack backpack = WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
-		player.setItemInHand(hand, backpack);
+		stopBackpackSounds(backpack, world, pos);
+
+		player.setItemInHand(hand, backpack.copy());
 		player.getCooldowns().addCooldown(backpack.getItem(), 5);
 		world.removeBlock(pos, false);
-
-		stopBackpackSounds(backpack, world, pos);
 
 		SoundType soundType = state.getSoundType();
 		world.playSound(null, pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
