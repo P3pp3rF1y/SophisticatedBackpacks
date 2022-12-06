@@ -47,7 +47,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
@@ -247,8 +247,8 @@ public class ModItems {
 	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = MENU_TYPES.register("backpack",
 			() -> IForgeMenuType.create(BackpackContainer::fromBuffer));
 
-	public static final RegistryObject<MenuType<BackpackSettingsContainer>> SETTINGS_CONTAINER_TYPE = MENU_TYPES.register("settings",
-			() -> IForgeMenuType.create(BackpackSettingsContainer::fromBuffer));
+	public static final RegistryObject<MenuType<BackpackSettingsContainerMenu>> SETTINGS_CONTAINER_TYPE = MENU_TYPES.register("settings",
+			() -> IForgeMenuType.create(BackpackSettingsContainerMenu::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITY_TYPES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
