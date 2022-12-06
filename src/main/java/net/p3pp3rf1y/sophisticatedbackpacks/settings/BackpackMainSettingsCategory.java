@@ -10,7 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import java.util.function.Consumer;
 
-public class BackpackMainSettingsCategory extends MainSettingsCategory {
+public class BackpackMainSettingsCategory extends MainSettingsCategory<BackpackMainSettingsCategory> {
 	public static final String SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG = "sophisticatedBackpackSettings";
 	public static final MainSetting<Boolean> ANOTHER_PLAYER_CAN_OPEN =
 			new MainSetting<>("anotherPlayerCanOpen", NBTHelper::getBoolean, CompoundTag::putBoolean, true);
