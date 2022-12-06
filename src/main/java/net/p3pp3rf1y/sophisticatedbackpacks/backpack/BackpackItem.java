@@ -388,7 +388,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public boolean isItemStashable(ItemStack storageStack, ItemStack stack) {
-		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().isItemValid(0, stack)).orElse(false);
+		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() != stack.getCount()).orElse(false);
 	}
 
 	public record BackpackContentsTooltip(ItemStack backpack) implements TooltipComponent {

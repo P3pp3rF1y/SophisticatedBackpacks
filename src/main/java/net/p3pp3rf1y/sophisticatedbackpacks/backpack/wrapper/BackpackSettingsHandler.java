@@ -5,10 +5,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategor
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.settings.ISettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class BackpackSettingsHandler extends SettingsHandler {
@@ -43,8 +45,13 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	}
 
 	@Override
-	protected void addGlobalSettingsCategory(CompoundTag settingsNbt) {
-		addSettingsCategory(settingsNbt, BackpackMainSettingsCategory.NAME, markContentsDirty, BackpackMainSettingsCategory::new);
+	public String getGlobalSettingsCategoryName() {
+		return BackpackMainSettingsCategory.NAME;
+	}
+
+	@Override
+	public ISettingsCategory instantiateGlobalSettingsCategory(CompoundTag categoryNbt, Consumer<CompoundTag> saveNbt) {
+		return new BackpackMainSettingsCategory(categoryNbt, saveNbt);
 	}
 
 	@Override
