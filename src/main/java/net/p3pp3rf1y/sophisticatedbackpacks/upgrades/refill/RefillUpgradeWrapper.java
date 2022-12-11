@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -15,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -45,24 +47,31 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			if (filter.isEmpty()) {
 				return;
 			}
-			int missingCount = InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize());
-			if (missingCount == 0) {
-				return;
-			}
-			IItemHandler extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
-			ItemStack toMove = filter.copy();
-			toMove.setCount(missingCount);
-			ItemStack extracted = InventoryHelper.extractFromInventory(toMove, extractFromHandler, true);
-			if (extracted.isEmpty()) {
-				return;
-			}
-			if (missingCount < filter.getMaxStackSize()) {
-				refillExistingStack(playerInvHandler, extractFromHandler, extracted);
-			} else {
-				refillAnywhereInInventory(playerInvHandler, extractFromHandler, toMove, extracted);
-			}
+			tryRefillFilter(entity, playerInvHandler, filter);
 		}));
 		setCooldown(world, COOLDOWN);
+	}
+
+	private void tryRefillFilter(@Nonnull LivingEntity entity, IItemHandler playerInvHandler, ItemStack filter) {
+		int missingCount = InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize());
+		if (entity instanceof Player player && ItemHandlerHelper.canItemStacksStack(player.containerMenu.getCarried(), filter)) {
+			missingCount -= Math.min(missingCount, player.containerMenu.getCarried().getCount());
+		}
+		if (missingCount == 0) {
+			return;
+		}
+		IItemHandler extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
+		ItemStack toMove = filter.copy();
+		toMove.setCount(missingCount);
+		ItemStack extracted = InventoryHelper.extractFromInventory(toMove, extractFromHandler, true);
+		if (extracted.isEmpty()) {
+			return;
+		}
+		if (missingCount < filter.getMaxStackSize()) {
+			refillExistingStack(playerInvHandler, extractFromHandler, extracted);
+		} else {
+			refillAnywhereInInventory(playerInvHandler, extractFromHandler, toMove, extracted);
+		}
 	}
 
 	private void refillExistingStack(IItemHandler playerInvHandler, IItemHandler extractFromHandler, ItemStack extracted) {
