@@ -40,7 +40,7 @@ public class ItemStackKey {
 			hash = hash * 31 + stack.getTag().hashCode();
 		}
 		CompoundNBT capNbt = getCapNbt(stack);
-		if (capNbt != null) {
+		if (capNbt != null && !capNbt.isEmpty()) {
 			hash = hash * 31 + capNbt.hashCode();
 		}
 		return hash;
