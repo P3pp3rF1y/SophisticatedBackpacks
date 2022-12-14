@@ -270,6 +270,17 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_REFILL_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
+				.pattern(" D ")
+				.pattern("GFG")
+				.pattern("RRR")
+				.define('D', Tags.Items.GEMS_DIAMOND)
+				.define('G', Tags.Items.INGOTS_GOLD)
+				.define('R', Tags.Items.DUSTS_REDSTONE)
+				.define('F', ModItems.REFILL_UPGRADE.get())
+				.unlockedBy("has_refill_upgrade", has(ModItems.REFILL_UPGRADE.get()))
+				.save(consumer);
+
 		ShapeBasedRecipeBuilder.shaped(ModItems.INCEPTION_UPGRADE.get())
 				.pattern("ESE")
 				.pattern("DBD")

@@ -23,6 +23,10 @@ apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
+if (findProject(':SophisticatedCore') != null) {
+    evaluationDependsOn(':SophisticatedCore')
+}
+
 repositories {
     mavenCentral()
     maven { url "https://dvs1.progwml6.com/files/maven" }
@@ -83,6 +87,11 @@ minecraft {
             args '--mod', 'sophisticatedbackpacks', '--flat', '--all', '--output', file('src/generated/resources/')
 
             mods {
+                if (findProject(':SophisticatedCore') != null) {
+                    SophisticatedCore {
+                        source project(':SophisticatedCore').sourceSets.main
+                    }
+                }
                 sophisticatedbackpacks {
                     source sourceSets.main
                 }
