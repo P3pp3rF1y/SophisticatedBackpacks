@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         maven {
             name = "forge"
             url = "https://maven.minecraftforge.net"
@@ -23,6 +22,10 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
+
+if (findProject(':SophisticatedCore') != null) {
+    evaluationDependsOn(':SophisticatedCore')
+}
 
 repositories {
     mavenCentral()
@@ -84,6 +87,11 @@ minecraft {
             args '--mod', 'sophisticatedbackpacks', '--flat', '--all', '--output', file('src/generated/resources/')
 
             mods {
+                if (findProject(':SophisticatedCore') != null) {
+                    SophisticatedCore {
+                        source project(':SophisticatedCore').sourceSets.main
+                    }
+                }
                 sophisticatedbackpacks {
                     source sourceSets.main
                 }

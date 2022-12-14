@@ -65,6 +65,7 @@ public class Config {
 		public final FilteredUpgradeConfig pickupUpgrade;
 		public final FilteredUpgradeConfig advancedPickupUpgrade;
 		public final FilteredUpgradeConfig refillUpgrade;
+		public final FilteredUpgradeConfig advancedRefillUpgrade;
 		public final FilteredUpgradeConfig restockUpgrade;
 		public final FilteredUpgradeConfig advancedRestockUpgrade;
 		public final VoidUpgradeConfig voidUpgrade;
@@ -119,6 +120,7 @@ public class Config {
 			pickupUpgrade = new FilteredUpgradeConfig(builder, "Pickup Upgrade", "pickupUpgrade", 9, 3);
 			advancedPickupUpgrade = new FilteredUpgradeConfig(builder, "Advanced Pickup Upgrade", "advancedPickupUpgrade", 16, 4);
 			refillUpgrade = new FilteredUpgradeConfig(builder, "Refill Upgrade", "refillUpgrade", 6, 3);
+			advancedRefillUpgrade = new FilteredUpgradeConfig(builder, "Advanced Refill Upgrade", "advancedRefillUpgrade", 12, 4);
 			restockUpgrade = new FilteredUpgradeConfig(builder, "Restock Upgrade", "restockUpgrade", 9, 3);
 			advancedRestockUpgrade = new FilteredUpgradeConfig(builder, "Advanced Restock Upgrade", "advancedRestockUpgrade", 16, 4);
 			voidUpgrade = new VoidUpgradeConfig(builder, "Void Upgrade", "voidUpgrade", 9, 3);
