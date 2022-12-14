@@ -38,6 +38,11 @@ public class RefillUpgradeContainer extends UpgradeContainerBase<RefillUpgradeWr
 		return upgradeWrapper.getTargetSlots();
 	}
 
+	public RefillUpgradeWrapper.TargetSlot getTargetSlot(int slot) {
+		RefillUpgradeWrapper.TargetSlot targetSlot = upgradeWrapper.getTargetSlots().get(slot);
+		return targetSlot != null ? targetSlot : RefillUpgradeWrapper.TargetSlot.ANY;
+	}
+
 	@Override
 	public void handleMessage(CompoundTag data) {
 		filterLogicContainer.handleMessage(data);
@@ -49,5 +54,9 @@ public class RefillUpgradeContainer extends UpgradeContainerBase<RefillUpgradeWr
 				setTargetSlot(slot.get(), targetSlot.get());
 			}
 		}
+	}
+
+	public boolean allowsTargetSlotSelection() {
+		return upgradeWrapper.allowsTargetSlotSelection();
 	}
 }

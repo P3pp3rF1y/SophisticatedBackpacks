@@ -122,6 +122,10 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}
 	}
 
+	public boolean allowsTargetSlotSelection() {
+		return upgradeItem.allowsTargetSlotSelection();
+	}
+
 	public enum TargetSlot implements StringRepresentable {
 		ANY("any", SBPTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any"), SBPTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any.tooltip").withStyle(ChatFormatting.DARK_GREEN),
 				(player, playerInvHandler, filter) -> InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize()),
