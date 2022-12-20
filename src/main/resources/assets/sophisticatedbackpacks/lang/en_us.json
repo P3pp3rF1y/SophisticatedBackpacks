@@ -46,7 +46,7 @@
     "item.sophisticatedbackpacks.refill_upgrade": "Refill Upgrade",
     "item.sophisticatedbackpacks.refill_upgrade.tooltip": "Keeps refilling stack of selected items in player's inventory",
     "item.sophisticatedbackpacks.advanced_refill_upgrade": "Advanced Refill Upgrade",
-    "item.sophisticatedbackpacks.advanced_refill_upgrade.tooltip": "Keeps refilling stack of selected items in player's inventory\nAllows for more precise target slot selection",
+    "item.sophisticatedbackpacks.advanced_refill_upgrade.tooltip": "Keeps refilling stack of selected items in player's inventory\nAllows for more precise target slot selection\nAlso allows middle click picking blocks from backpack",
     "item.sophisticatedbackpacks.inception_upgrade": "Inception Upgrade",
     "item.sophisticatedbackpacks.inception_upgrade.tooltip": "Makes it possible to put backpacks into the backpack",
     "item.sophisticatedbackpacks.everlasting_upgrade": "Everlasting Upgrade",
