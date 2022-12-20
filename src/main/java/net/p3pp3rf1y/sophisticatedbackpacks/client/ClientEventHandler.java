@@ -2,14 +2,22 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,6 +32,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 
 import java.util.Map;
 
@@ -45,6 +54,7 @@ public class ClientEventHandler {
 		modBus.addListener(ModBlockColors::registerBlockColorHandlers);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
+		eventBus.addListener(ClientEventHandler::handleBlockPick);
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterGeometryLoaders event) {
@@ -80,5 +90,29 @@ public class ClientEventHandler {
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		});
+	}
+
+	public static void handleBlockPick(InputEvent.InteractionKeyMappingTriggered event) {
+		Minecraft mc = Minecraft.getInstance();
+		LocalPlayer player = mc.player;
+		if (player == null || player.isCreative() || !event.isPickBlock() || mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK) {
+			return;
+		}
+		HitResult target = mc.hitResult;
+		Level level = player.level;
+		BlockPos pos = ((BlockHitResult)target).getBlockPos();
+		BlockState state = level.getBlockState(pos);
+
+		if (state.isAir()) {
+			return;
+		}
+
+		ItemStack result = state.getCloneItemStack(target, level, pos, player);
+
+		if (result.isEmpty() || player.getInventory().findSlotMatchingItem(result) > -1) {
+			return;
+		}
+
+		SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BlockPickMessage(result));
 	}
 }
