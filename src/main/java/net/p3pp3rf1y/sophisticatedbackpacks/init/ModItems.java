@@ -200,9 +200,9 @@ public class ModItems {
 	public static final RegistryObject<DepositUpgradeItem> ADVANCED_DEPOSIT_UPGRADE = ITEMS.register("advanced_deposit_upgrade",
 			() -> new DepositUpgradeItem(Config.COMMON.advancedDepositUpgrade.filterSlots::get));
 	public static final RegistryObject<RefillUpgradeItem> REFILL_UPGRADE = ITEMS.register("refill_upgrade",
-			() -> new RefillUpgradeItem(Config.COMMON.refillUpgrade.filterSlots::get, false));
+			() -> new RefillUpgradeItem(Config.COMMON.refillUpgrade.filterSlots::get, false, false));
 	public static final RegistryObject<RefillUpgradeItem> ADVANCED_REFILL_UPGRADE = ITEMS.register("advanced_refill_upgrade",
-			() -> new RefillUpgradeItem(Config.COMMON.advancedRefillUpgrade.filterSlots::get, true));
+			() -> new RefillUpgradeItem(Config.COMMON.advancedRefillUpgrade.filterSlots::get, true, true));
 	public static final RegistryObject<InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.register("inception_upgrade",
 			InceptionUpgradeItem::new);
 	public static final RegistryObject<EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.register("everlasting_upgrade",

@@ -15,8 +15,11 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -29,12 +32,14 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrapper, RefillUpgradeItem>
-		implements IFilteredUpgrade, ITickableUpgrade {
+		implements IFilteredUpgrade, ITickableUpgrade, IBlockPickResponseUpgrade {
 	private static final int COOLDOWN = 5;
 
 	private final Map<Integer, TargetSlot> targetSlots;
@@ -124,6 +129,40 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 	public boolean allowsTargetSlotSelection() {
 		return upgradeItem.allowsTargetSlotSelection();
+	}
+
+	@Override
+	public boolean pickBlock(Player player, ItemStack filter) {
+		if (!upgradeItem.supportsBlockPick()) {
+			return false;
+		}
+
+		AtomicInteger stashSlot = new AtomicInteger(-1);
+		AtomicBoolean hasItemInBackpack = new AtomicBoolean(false);
+
+		InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
+		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
+			if (ItemHandlerHelper.canItemStacksStack(stack, filter)) {
+				hasItemInBackpack.set(true);
+				if (stack.getCount() <= stack.getMaxStackSize()) {
+					stashSlot.set(slot);
+				}
+			}
+		}, () -> stashSlot.get() > -1);
+
+		ItemStack mainHandItem = player.getMainHandItem();
+		if (hasItemInBackpack.get() && !(mainHandItem.getItem() instanceof BackpackItem) &&
+				(mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), mainHandItem)) || inventoryHandler.insertItem(mainHandItem, true).isEmpty())) {
+			ItemStack toExtract = filter.copy();
+			toExtract.setCount(filter.getMaxStackSize());
+			ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
+			if (!extracted.isEmpty()) {
+				inventoryHandler.insertItem(mainHandItem, false);
+				player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public enum TargetSlot implements StringRepresentable {
@@ -223,6 +262,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		private interface MissingCountGetter {
 			int getMissingCount(Player player, IItemHandler playerInventory, ItemStack filter);
 		}
+
 		private interface Filler {
 			ItemStack fill(Player player, IItemHandler playerInventory, ItemStack stackToAdd);
 		}
