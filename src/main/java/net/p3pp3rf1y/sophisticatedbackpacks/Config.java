@@ -92,7 +92,7 @@ public class Config {
 
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfigEvent.Reloading event) {
-			disallowedItems.setInitialized = false;
+			disallowedItems.initialized = false;
 			stackUpgrade.clearNonStackableItems();
 		}
 
@@ -295,7 +295,7 @@ public class Config {
 
 		public static class DisallowedItems {
 			private final ForgeConfigSpec.ConfigValue<List<String>> disallowedItemsList;
-			private boolean setInitialized = false;
+			private boolean initialized = false;
 			private Set<Item> disallowedItemsSet = null;
 
 			DisallowedItems(ForgeConfigSpec.Builder builder) {
@@ -306,13 +306,14 @@ public class Config {
 				if (!COMMON_SPEC.isLoaded()) {
 					return true;
 				}
-				if (!setInitialized) {
+				if (!initialized) {
 					loadDisallowedSet();
 				}
 				return disallowedItemsSet.contains(item);
 			}
 
 			private void loadDisallowedSet() {
+				initialized = true;
 				disallowedItemsSet = new HashSet<>();
 
 				for (String disallowedItemName : disallowedItemsList.get()) {
