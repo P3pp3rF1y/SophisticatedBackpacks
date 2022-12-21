@@ -3,9 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -46,7 +43,6 @@ import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -209,19 +205,20 @@ public class CommonEventHandler {
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
-				}).orElse(false), Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get());
-		if (remainingStackSimulated.get().isEmpty()) {
-			ItemStack remainingStack = itemEntity.getItem().copy();
+				}).orElse(false), Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
+		);
+
+		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
+			AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.map(wrapper -> InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack, false).isEmpty()).orElse(false)
+					.map(wrapper -> {
+						remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
+						return remainingStack.get().isEmpty();
+					}).orElse(false)
 					, Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 			);
-			if (!itemEntity.isSilent()) {
-				RandomSource rand = itemEntity.level.random;
-				itemEntity.level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(rand) * 0.7F + 1.0F) * 2.0F);
-			}
-			itemEntity.setItem(ItemStack.EMPTY);
-			event.setCanceled(true);
+			itemEntity.setItem(remainingStack.get());
+			event.setCanceled(true); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
 		}
 	}
 }

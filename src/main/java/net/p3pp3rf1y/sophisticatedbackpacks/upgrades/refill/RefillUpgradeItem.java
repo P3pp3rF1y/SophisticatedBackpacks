@@ -10,11 +10,17 @@ public class RefillUpgradeItem extends UpgradeItemBase<RefillUpgradeWrapper> {
 	private static final UpgradeType<RefillUpgradeWrapper> TYPE = new UpgradeType<>(RefillUpgradeWrapper::new);
 	private final IntSupplier filterSlotCount;
 	private final boolean targetSlotSelection;
+	private boolean supportsBlockPick;
 
-	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection) {
+	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection, boolean supportsBlockPick) {
 		super(SophisticatedBackpacks.ITEM_GROUP);
 		this.filterSlotCount = filterSlotCount;
 		this.targetSlotSelection = targetSlotSelection;
+		this.supportsBlockPick = supportsBlockPick;
+	}
+
+	public boolean supportsBlockPick() {
+		return supportsBlockPick;
 	}
 
 	@Override
