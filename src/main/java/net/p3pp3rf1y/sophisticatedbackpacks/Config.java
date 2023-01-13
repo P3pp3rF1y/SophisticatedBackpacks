@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -47,6 +48,7 @@ public class Config {
 
 	public static class Common {
 		public final DisallowedItems disallowedItems;
+		public final NoInteractionBlocks noInteractionBlocks;
 		public final BackpackConfig leatherBackpack;
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
@@ -100,6 +102,7 @@ public class Config {
 			builder.comment("Common Settings").push("common");
 
 			disallowedItems = new DisallowedItems(builder);
+			noInteractionBlocks = new NoInteractionBlocks(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
@@ -290,6 +293,38 @@ public class Config {
 				inventorySlotCount = builder.comment("Number of inventory slots in the backpack").defineInRange("inventorySlotCount", inventorySlotCountDefault, 1, 144);
 				upgradeSlotCount = builder.comment("Number of upgrade slots in the backpack").defineInRange("upgradeSlotCount", upgradeSlotCountDefault, 0, 10);
 				builder.pop();
+			}
+		}
+
+		public static class NoInteractionBlocks {
+			private final ForgeConfigSpec.ConfigValue<List<String>> noInteractionBlocksList;
+			private boolean initialized = false;
+			private Set<Block> noInteractionBlocksSet = null;
+
+			NoInteractionBlocks(ForgeConfigSpec.Builder builder) {
+				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"").define("noInteractionBlocks", new ArrayList<>());
+			}
+
+			public boolean isBlockInteractionDisallowed(Block block) {
+				if (!COMMON_SPEC.isLoaded()) {
+					return true;
+				}
+				if (!initialized) {
+					loadDisallowedSet();
+				}
+				return noInteractionBlocksSet.contains(block);
+			}
+
+			private void loadDisallowedSet() {
+				initialized = true;
+				noInteractionBlocksSet = new HashSet<>();
+
+				for (String disallowedItemName : noInteractionBlocksList.get()) {
+					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
+					if (ForgeRegistries.BLOCKS.containsKey(registryName)) {
+						noInteractionBlocksSet.add(ForgeRegistries.BLOCKS.getValue(registryName));
+					}
+				}
 			}
 		}
 
