@@ -1,8 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 
 public class SBPPacketHandler extends PacketHandler {
+	public static final SBPPacketHandler INSTANCE = new SBPPacketHandler(SophisticatedBackpacks.MOD_ID);
+
 	public SBPPacketHandler(String modId) {
 		super(modId);
 	}
