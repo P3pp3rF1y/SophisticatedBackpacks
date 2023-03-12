@@ -5,11 +5,11 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 
 public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
@@ -29,7 +29,7 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
 				return true;
 			} else if (!getMenu().isFirstLevelStorage()) {
-				SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BackpackOpenMessage());
+				SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage());
 				return true;
 			}
 		}

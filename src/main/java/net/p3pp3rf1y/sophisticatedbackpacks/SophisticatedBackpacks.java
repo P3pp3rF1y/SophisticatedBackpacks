@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedBackpacks {
 	public static final String MOD_ID = "sophisticatedbackpacks";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-	public static final SBPPacketHandler PACKET_HANDLER = new SBPPacketHandler(MOD_ID);
 
 	public static final CreativeModeTab ITEM_GROUP = new SBItemGroup();
 
@@ -64,7 +63,7 @@ public class SophisticatedBackpacks {
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
-		PACKET_HANDLER.init();
+		SBPPacketHandler.INSTANCE.init();
 		ModCompat.initCompats();
 		event.enqueueWork(ModItems::registerDispenseBehavior);
 		ModItems.registerCauldronInteractions();

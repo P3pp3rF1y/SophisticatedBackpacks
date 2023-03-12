@@ -38,6 +38,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 
 import java.util.Map;
 
@@ -127,6 +128,6 @@ public class ClientEventHandler {
 			return;
 		}
 
-		SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new BlockPickMessage(result));
+		SBPPacketHandler.INSTANCE.sendToServer(new BlockPickMessage(result));
 	}
 }

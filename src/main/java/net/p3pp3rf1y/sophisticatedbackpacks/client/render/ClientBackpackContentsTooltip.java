@@ -5,10 +5,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.world.WorldEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltip;
 
 import java.util.UUID;
@@ -33,6 +33,6 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltip 
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new RequestBackpackInventoryContentsMessage(uuid));
+		SBPPacketHandler.INSTANCE.sendToServer(new RequestBackpackInventoryContentsMessage(uuid));
 	}
 }

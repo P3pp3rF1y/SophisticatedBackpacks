@@ -25,7 +25,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	}
 
 	@Override
-	public UpgradeSlotChangeResult canAddUpgradeTo(IStorageWrapper storageWrapper, ItemStack upgradeStack, boolean firstLevelStorage) {
+	public UpgradeSlotChangeResult canAddUpgradeTo(IStorageWrapper storageWrapper, ItemStack upgradeStack, boolean firstLevelStorage, boolean isClientSide) {
 		if (!firstLevelStorage) {
 			return new UpgradeSlotChangeResult.Fail(SBPTranslationHelper.INSTANCE.translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 		}
@@ -45,7 +45,7 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	}
 
 	@Override
-	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IStorageWrapper storageWrapper) {
+	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IStorageWrapper storageWrapper, boolean isClientSide) {
 		Set<Integer> slots = InventoryHelper.getItemSlots(storageWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
 		if (!slots.isEmpty()) {
 			return new UpgradeSlotChangeResult.Fail(SBPTranslationHelper.INSTANCE.translError("remove.inception_sub_backpack"), Collections.emptySet(), slots, Collections.emptySet());
