@@ -166,7 +166,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public boolean hasCustomEntity(ItemStack stack) {
-		return hasEverlastingUpgrade(stack);
+		return true;
 	}
 
 	private boolean hasEverlastingUpgrade(ItemStack stack) {
@@ -176,9 +176,12 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Nullable
 	@Override
 	public Entity createEntity(Level world, Entity entity, ItemStack itemstack) {
-		if (!(entity instanceof ItemEntity)) {
+		if (!(entity instanceof ItemEntity itemEntity)) {
 			return null;
 		}
+
+		UUIDDeduplicator.dedupeBackpackItemEntityInArea(itemEntity);
+
 		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
 	}
 
@@ -302,6 +305,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			@Nonnull
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+				if (stack.getCount() > 1) {
+					return LazyOptional.empty();
+				}
+
 				initWrapper();
 				if (cap == CapabilityBackpackWrapper.getCapabilityInstance()) {
 					return LazyOptional.of(() -> wrapper).cast();
