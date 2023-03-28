@@ -43,7 +43,7 @@ public class SophisticatedBackpacks {
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		commonEventHandler.registerHandlers();
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers();
@@ -52,7 +52,7 @@ public class SophisticatedBackpacks {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
-		modBus.addListener(Config.COMMON::onConfigReload);
+		modBus.addListener(Config.SERVER::onConfigReload);
 		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
 		ModLoot.init(modBus);

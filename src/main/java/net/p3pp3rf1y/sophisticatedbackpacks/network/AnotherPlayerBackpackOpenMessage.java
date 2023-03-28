@@ -42,7 +42,7 @@ public class AnotherPlayerBackpackOpenMessage {
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer player, AnotherPlayerBackpackOpenMessage msg) {
-		if (player == null || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
+		if (player == null || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
 

@@ -11,12 +11,12 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 public class BackpackInventoryHandler extends InventoryHandler {
 	public BackpackInventoryHandler(int numberOfInventorySlots, IStorageWrapper storageWrapper, CompoundTag contentsNbt, Runnable saveHandler, int slotLimit) {
-		super(numberOfInventorySlots, storageWrapper, contentsNbt, saveHandler, slotLimit, Config.COMMON.stackUpgrade);
+		super(numberOfInventorySlots, storageWrapper, contentsNbt, saveHandler, slotLimit, Config.SERVER.stackUpgrade);
 	}
 
 	@Override
 	protected boolean isAllowed(ItemStack stack) {
-		return !Config.COMMON.disallowedItems.isItemDisallowed(stack.getItem())
+		return !Config.SERVER.disallowedItems.isItemDisallowed(stack.getItem())
 				&& (!(stack.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(stack)));
 	}
 

@@ -37,16 +37,16 @@ public class Config {
 
 	private Config() {}
 
-	public static final Common COMMON;
-	public static final ForgeConfigSpec COMMON_SPEC;
+	public static final Server SERVER;
+	public static final ForgeConfigSpec SERVER_SPEC;
 
 	static {
-		final Pair<Common, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Common::new);
-		COMMON_SPEC = commonSpec.getRight();
-		COMMON = commonSpec.getLeft();
+		final Pair<Server, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Server::new);
+		SERVER_SPEC = commonSpec.getRight();
+		SERVER = commonSpec.getLeft();
 	}
 
-	public static class Common {
+	public static class Server {
 		public final DisallowedItems disallowedItems;
 		public final NoInteractionBlocks noInteractionBlocks;
 		public final BackpackConfig leatherBackpack;
@@ -99,8 +99,8 @@ public class Config {
 			stackUpgrade.clearNonStackableItems();
 		}
 
-		Common(ForgeConfigSpec.Builder builder) {
-			builder.comment("Common Settings").push("common");
+		Server(ForgeConfigSpec.Builder builder) {
+			builder.comment("Server Settings").push("server");
 
 			disallowedItems = new DisallowedItems(builder);
 			noInteractionBlocks = new NoInteractionBlocks(builder);
@@ -308,7 +308,7 @@ public class Config {
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
-				if (!COMMON_SPEC.isLoaded()) {
+				if (!SERVER_SPEC.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {
@@ -340,7 +340,7 @@ public class Config {
 			}
 
 			public boolean isItemDisallowed(Item item) {
-				if (!COMMON_SPEC.isLoaded()) {
+				if (!SERVER_SPEC.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {

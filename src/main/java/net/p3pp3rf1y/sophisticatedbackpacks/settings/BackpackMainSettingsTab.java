@@ -46,7 +46,7 @@ public class BackpackMainSettingsTab extends MainSettingsTab<BackpackMainSetting
 	public BackpackMainSettingsTab(BackpackMainSettingsContainer container, Position position, SettingsScreen screen) {
 		super(container, position, screen, BACKPACK_CONTEXT_TOOLTIP, new TranslatableComponent(SBPTranslationHelper.INSTANCE.translSettingsButton("context_backpack")),
 				SBPTranslationHelper.INSTANCE.translSettings("backpack"), SBPTranslationHelper.INSTANCE.translSettingsTooltip("backpack"), onTabIconClicked -> new ImageButton(new Position(position.x() + 1, position.y() + 4), Dimension.SQUARE_16, ICON, onTabIconClicked));
-		if (Boolean.TRUE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
+		if (Boolean.TRUE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			addHideableChild(new ToggleButton<>(new Position(x + 39, y + 46), ANOTHER_PLAYER_CAN_OPEN, button -> container.toggleAnotherPlayerCanOpen(), container::canAnotherPlayerOpen));
 		}
 	}
