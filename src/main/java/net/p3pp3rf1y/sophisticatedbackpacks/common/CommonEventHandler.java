@@ -79,7 +79,7 @@ public class CommonEventHandler {
 	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
+		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
 
@@ -102,8 +102,8 @@ public class CommonEventHandler {
 
 	private void onWorldTick(TickEvent.LevelTickEvent event) {
 		ResourceLocation dimensionKey = event.level.dimension().location();
-		boolean runSlownessLogic = Boolean.TRUE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get());
-		boolean runDedupeLogic = Boolean.FALSE.equals(Config.COMMON.tickDedupeLogicDisabled.get());
+		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
+		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());
 		if (event.phase != TickEvent.Phase.END
 				|| (!runSlownessLogic && !runDedupeLogic)
 				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.level.getGameTime()) {
@@ -126,9 +126,9 @@ public class CommonEventHandler {
 				return false;
 			});
 			if (runSlownessLogic) {
-				int maxNumberOfBackpacks = Config.COMMON.nerfsConfig.maxNumberOfBackpacks.get();
+				int maxNumberOfBackpacks = Config.SERVER.nerfsConfig.maxNumberOfBackpacks.get();
 				if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
-					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.COMMON.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
 					player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
 				}
 			}
@@ -234,7 +234,7 @@ public class CommonEventHandler {
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
-				}).orElse(false), Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
+				}).orElse(false), Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 		);
 
 		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
@@ -244,7 +244,7 @@ public class CommonEventHandler {
 								remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
 								return remainingStack.get().isEmpty();
 							}).orElse(false)
-					, Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
+					, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 			);
 			itemEntity.setItem(remainingStack.get());
 			event.setCanceled(true); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player

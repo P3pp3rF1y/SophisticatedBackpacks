@@ -101,8 +101,8 @@ public class EntityBackpackAdditionHandler {
 
 	static void addBackpack(Monster monster) {
 		RandomSource rnd = monster.level.random;
-		if (!Config.COMMON.entityBackpackAdditions.canWearBackpack(monster.getType())
-				|| rnd.nextInt((int) (1 / Config.COMMON.entityBackpackAdditions.chance.get())) != 0) {
+		if (!Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
+				|| rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) != 0) {
 			return;
 		}
 
@@ -114,10 +114,10 @@ public class EntityBackpackAdditionHandler {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
 			int difficulty = Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1));
-			equipBackpack(monster, backpack, difficulty, Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0);
+			equipBackpack(monster, backpack, difficulty, Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0);
 			applyPotions(monster, difficulty, minDifficulty);
 			raiseHealth(monster, minDifficulty);
-			if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.equipWithArmor.get())) {
+			if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.equipWithArmor.get())) {
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getHelmetChances(), EquipmentSlot.HEAD);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getLeggingsChances(), EquipmentSlot.LEGS);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getBootsChances(), EquipmentSlot.FEET);
@@ -175,7 +175,7 @@ public class EntityBackpackAdditionHandler {
 			if (records == null) {
 				musicDiscs = new ArrayList<>();
 			} else {
-				Set<String> blockedDiscs = new HashSet<>(Config.COMMON.entityBackpackAdditions.discBlockList.get());
+				Set<String> blockedDiscs = new HashSet<>(Config.SERVER.entityBackpackAdditions.discBlockList.get());
 				musicDiscs = new ArrayList<>();
 				records.forEach((sound, musicDisc) -> {
 					//noinspection ConstantConditions - by this point the disc has registry name
@@ -190,7 +190,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void raiseHealth(Monster monster, int minDifficulty) {
-		if (Boolean.FALSE.equals(Config.COMMON.entityBackpackAdditions.buffHealth.get())) {
+		if (Boolean.FALSE.equals(Config.SERVER.entityBackpackAdditions.buffHealth.get())) {
 			return;
 		}
 		AttributeInstance maxHealth = monster.getAttribute(Attributes.MAX_HEALTH);
@@ -233,13 +233,13 @@ public class EntityBackpackAdditionHandler {
 			return;
 		}
 
-		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.addLoot.get())) {
+		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.addLoot.get())) {
 			addLoot(monster, backpackWrapper, difficulty);
 		}
 	}
 
 	private static void applyPotions(Monster monster, int difficulty, int minDifficulty) {
-		if (Boolean.TRUE.equals(Config.COMMON.entityBackpackAdditions.buffWithPotionEffects.get())) {
+		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get())) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(applicableEffect -> {
 						int amplifier = Math.min(Math.max(minDifficulty, monster.level.random.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
@@ -250,7 +250,7 @@ public class EntityBackpackAdditionHandler {
 
 	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
 		if (difficulty != 0) {
-			Config.COMMON.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
+			Config.SERVER.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
 				float lootPercentage = (float) difficulty / MAX_DIFFICULTY;
 				backpackWrapper.setLoot(lootTableName, lootPercentage);
 			});
@@ -261,7 +261,7 @@ public class EntityBackpackAdditionHandler {
 		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			LivingEntity mob = event.getEntity();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
-			Config.Common.EntityBackpackAdditionsConfig additionsConfig = Config.COMMON.entityBackpackAdditions;
+			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
 			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
 					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
