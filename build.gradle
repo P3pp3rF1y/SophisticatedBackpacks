@@ -112,6 +112,7 @@ dependencies {
     } else {
         compileOnly fg.deobf("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}")
         runtimeOnly fg.deobf("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}")
+        testImplementation fg.deobf("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}")
     }
 
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
