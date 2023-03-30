@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -116,6 +117,7 @@ public abstract class BackpackContext {
 		public Item(String handlerName, int backpackSlotIndex) {
 			this(handlerName, "", backpackSlotIndex);
 		}
+
 		public Item(String handlerName, String identifier, int backpackSlotIndex) {
 			this(handlerName, identifier, backpackSlotIndex, false);
 		}
@@ -161,7 +163,7 @@ public abstract class BackpackContext {
 		public void onUpgradeChanged(Player player) {
 			if (!player.level.isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
-				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
+				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
 			}
 		}
 
@@ -385,6 +387,7 @@ public abstract class BackpackContext {
 
 	public static class AnotherPlayer extends Item {
 		protected final Player otherPlayer;
+
 		public AnotherPlayer(String handlerName, String identifier, int backpackSlotIndex, Player otherPlayer) {
 			super(handlerName, identifier, backpackSlotIndex);
 			this.otherPlayer = otherPlayer;
@@ -435,6 +438,7 @@ public abstract class BackpackContext {
 			return new BackpackContext.AnotherPlayer(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), Objects.requireNonNull(otherPlayer));
 		}
 	}
+
 	public static class AnotherPlayerSubBackpack extends AnotherPlayer {
 		private final int subBackpackSlotIndex;
 		@Nullable

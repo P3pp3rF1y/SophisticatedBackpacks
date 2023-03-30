@@ -37,16 +37,16 @@ public class Config {
 
 	private Config() {}
 
-	public static final Common COMMON;
-	public static final ForgeConfigSpec COMMON_SPEC;
+	public static final Server SERVER;
+	public static final ForgeConfigSpec SERVER_SPEC;
 
 	static {
-		final Pair<Common, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Common::new);
-		COMMON_SPEC = commonSpec.getRight();
-		COMMON = commonSpec.getLeft();
+		final Pair<Server, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Server::new);
+		SERVER_SPEC = commonSpec.getRight();
+		SERVER = commonSpec.getLeft();
 	}
 
-	public static class Common {
+	public static class Server {
 		public final DisallowedItems disallowedItems;
 		public final NoInteractionBlocks noInteractionBlocks;
 		public final BackpackConfig leatherBackpack;
@@ -84,6 +84,7 @@ public class Config {
 		public final ForgeConfigSpec.BooleanValue itemFluidHandlerEnabled;
 		public final ForgeConfigSpec.BooleanValue allowOpeningOtherPlayerBackpacks;
 		public final ForgeConfigSpec.BooleanValue itemDisplayDisabled;
+		public final ForgeConfigSpec.BooleanValue tickDedupeLogicDisabled;
 		public final FilteredUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
@@ -98,8 +99,8 @@ public class Config {
 			stackUpgrade.clearNonStackableItems();
 		}
 
-		Common(ForgeConfigSpec.Builder builder) {
-			builder.comment("Common Settings").push("common");
+		Server(ForgeConfigSpec.Builder builder) {
+			builder.comment("Server Settings").push("server");
 
 			disallowedItems = new DisallowedItems(builder);
 			noInteractionBlocks = new NoInteractionBlocks(builder);
@@ -148,6 +149,7 @@ public class Config {
 			itemFluidHandlerEnabled = builder.comment("Turns on/off item fluid handler of backpack in its item form. There are some dupe bugs caused by default fluid handling implementation that manifest when backpack is drained / filled in its item form in another mod's tank and the only way to prevent them is disallowing drain/fill in item form altogether").define("itemFluidHandlerEnabled", true);
 			allowOpeningOtherPlayerBackpacks = builder.comment("Determines whether player can right click on backpack that another player is wearing to open it. If off will turn off that capability for everyone and remove related settings from backpack.").define("allowOpeningOtherPlayerBackpacks", true);
 			itemDisplayDisabled = builder.comment("Allows disabling item display settings. Primarily in cases where custom backpack model doesn't support showing the item. (Requires game restart to take effect)").define("itemDisplayDisabled", false);
+			tickDedupeLogicDisabled = builder.comment("Allows disabling logic that dedupes backpacks with the same UUID in players' inventory. This is here to allow turning off the logic just in case it would be causing performance issues.").define("tickDedupeLogicDisabled", false);
 
 			builder.pop();
 		}
@@ -168,8 +170,8 @@ public class Config {
 		}
 
 		public static class EntityBackpackAdditionsConfig {
-			private static final String REGISTRY_NAME_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)";
-			private static final String ENTITY_LOOT_MATCHER = "([a-z1-9_.-]+:[a-z1-9_/.-]+)\\|(null|[a-z1-9_.-]+:[a-z1-9/_.-]+)";
+			private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
+			private static final String ENTITY_LOOT_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)\\|(null|[a-z0-9_.-]+:[a-z0-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
 			public final ForgeConfigSpec.BooleanValue buffWithPotionEffects;
@@ -306,7 +308,7 @@ public class Config {
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
-				if (!COMMON_SPEC.isLoaded()) {
+				if (!SERVER_SPEC.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {
@@ -338,7 +340,7 @@ public class Config {
 			}
 
 			public boolean isItemDisallowed(Item item) {
-				if (!COMMON_SPEC.isLoaded()) {
+				if (!SERVER_SPEC.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {

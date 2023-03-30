@@ -27,7 +27,7 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("restock"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
-					Config.COMMON.restockUpgrade.slotsInRow.get(), contentsFilterButton));
+					Config.SERVER.restockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 
@@ -35,7 +35,7 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
 			super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("advanced_restock"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
-					Config.COMMON.advancedRestockUpgrade.slotsInRow.get(), contentsFilterButton));
+					Config.SERVER.advancedRestockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 }

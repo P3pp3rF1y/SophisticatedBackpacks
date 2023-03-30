@@ -115,7 +115,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
 		super.fillItemCategory(group, items);
 
-		if (!allowdedIn(group) || this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(this)) {
+		if (!allowdedIn(group) || this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
@@ -166,7 +166,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public boolean hasCustomEntity(ItemStack stack) {
-		return hasEverlastingUpgrade(stack);
+		return true;
 	}
 
 	private boolean hasEverlastingUpgrade(ItemStack stack) {
@@ -176,9 +176,12 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Nullable
 	@Override
 	public Entity createEntity(Level world, Entity entity, ItemStack itemstack) {
-		if (!(entity instanceof ItemEntity)) {
+		if (!(entity instanceof ItemEntity itemEntity)) {
 			return null;
 		}
+
+		UUIDDeduplicator.dedupeBackpackItemEntityInArea(itemEntity);
+
 		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
 	}
 
@@ -302,12 +305,16 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			@Nonnull
 			@Override
 			public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+				if (stack.getCount() > 1) {
+					return LazyOptional.empty();
+				}
+
 				initWrapper();
 				if (cap == CapabilityBackpackWrapper.getCapabilityInstance()) {
 					return LazyOptional.of(() -> wrapper).cast();
 				} else if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
-				} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY && Boolean.TRUE.equals(Config.COMMON.itemFluidHandlerEnabled.get())) {
+				} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY && Boolean.TRUE.equals(Config.SERVER.itemFluidHandlerEnabled.get())) {
 					return wrapper.getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
 				} else if (cap == CapabilityEnergy.ENERGY) {
 					return wrapper.getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
@@ -325,7 +332,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
-		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
+		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
@@ -337,7 +344,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (level.isClientSide || !(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
+		if (level.isClientSide || !(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(

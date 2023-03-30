@@ -28,7 +28,7 @@ public class InventoryInteractionHelper {
 	}
 
 	public static boolean tryInventoryInteraction(BlockPos pos, Level world, ItemStack backpack, Direction face, Player player) {
-		if (Config.COMMON.noInteractionBlocks.isBlockInteractionDisallowed(world.getBlockState(pos).getBlock())) {
+		if (Config.SERVER.noInteractionBlocks.isBlockInteractionDisallowed(world.getBlockState(pos).getBlock())) {
 			return false;
 		}
 

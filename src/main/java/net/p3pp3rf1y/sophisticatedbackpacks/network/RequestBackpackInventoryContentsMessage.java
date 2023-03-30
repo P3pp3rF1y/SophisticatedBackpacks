@@ -5,7 +5,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -52,6 +51,6 @@ public class RequestBackpackInventoryContentsMessage {
 			inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
 		}
 
-		SophisticatedBackpacks.PACKET_HANDLER.sendToClient(player, new BackpackContentsMessage(msg.backpackUuid, inventoryContents));
+		SBPPacketHandler.INSTANCE.sendToClient(player, new BackpackContentsMessage(msg.backpackUuid, inventoryContents));
 	}
 }

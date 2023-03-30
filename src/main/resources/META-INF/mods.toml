@@ -60,7 +60,7 @@ side="BOTH"
 [[dependencies.sophisticatedbackpacks]]
 modId="sophisticatedcore" #mandatory
 mandatory=true #mandatory
-versionRange="[1.18.2-0.5.36,)" #mandatory
+versionRange="[1.18.2-0.5.39,)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER

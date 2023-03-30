@@ -166,16 +166,19 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	private void invalidateBackpackCaps() {
 		if (itemHandlerCap != null) {
-			itemHandlerCap.invalidate();
+			LazyOptional<IItemHandler> tempItemHandlerCap = itemHandlerCap;
 			itemHandlerCap = null;
+			tempItemHandlerCap.invalidate();
 		}
 		if (fluidHandlerCap != null) {
-			fluidHandlerCap.invalidate();
+			LazyOptional<IFluidHandler> tempFluidHandlerCap = fluidHandlerCap;
 			fluidHandlerCap = null;
+			tempFluidHandlerCap.invalidate();
 		}
 		if (energyStorageCap != null) {
-			energyStorageCap.invalidate();
+			LazyOptional<IEnergyStorage> tempEnergyStorageCap = energyStorageCap;
 			energyStorageCap = null;
+			tempEnergyStorageCap.invalidate();
 		}
 	}
 

@@ -29,23 +29,27 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,11 +75,11 @@ public class CommonEventHandler {
 		eventBus.addListener(this::interactWithEntity);
 	}
 
-	private static final int BACKPACK_COUNT_CHECK_COOLDOWN = 40;
-	private final Map<ResourceLocation, Long> nextBackpackCountChecks = new HashMap<>();
+	private static final int BACKPACK_CHECK_COOLDOWN = 40;
+	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.COMMON.allowOpeningOtherPlayerBackpacks.get())) {
+		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
 
@@ -92,28 +96,52 @@ public class CommonEventHandler {
 		}
 		if (targetPlayer.level.isClientSide) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
-			SophisticatedBackpacks.PACKET_HANDLER.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
+			SBPPacketHandler.INSTANCE.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
 		}
 	}
 
-
 	private void onWorldTick(TickEvent.WorldTickEvent event) {
 		ResourceLocation dimensionKey = event.world.dimension().location();
-		if (event.phase != TickEvent.Phase.END || Boolean.FALSE.equals(Config.COMMON.nerfsConfig.tooManyBackpacksSlowness.get()) || nextBackpackCountChecks.getOrDefault(dimensionKey, 0L) > event.world.getGameTime()) {
+		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
+		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());
+		if (event.phase != TickEvent.Phase.END
+				|| (!runSlownessLogic && !runDedupeLogic)
+				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.world.getGameTime()) {
 			return;
 		}
-		nextBackpackCountChecks.put(dimensionKey, event.world.getGameTime() + BACKPACK_COUNT_CHECK_COOLDOWN);
+		nextBackpackCheckTime.put(dimensionKey, event.world.getGameTime() + BACKPACK_CHECK_COOLDOWN);
+
+		Set<UUID> backpackIds = new HashSet<>();
 
 		event.world.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, identifier, slot) -> {
-				numberOfBackpacks.incrementAndGet();
+				if (runSlownessLogic) {
+					numberOfBackpacks.incrementAndGet();
+				}
+				if (runDedupeLogic) {
+					backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
+							addBackpackIdIfUniqueOrDedupe(backpackIds, backpackWrapper));
+				}
 				return false;
 			});
-			int maxNumberOfBackpacks = Config.COMMON.nerfsConfig.maxNumberOfBackpacks.get();
-			if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
-				int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.COMMON.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
-				player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BACKPACK_COUNT_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
+			if (runSlownessLogic) {
+				int maxNumberOfBackpacks = Config.SERVER.nerfsConfig.maxNumberOfBackpacks.get();
+				if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
+					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+					player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
+				}
+			}
+		});
+	}
+
+	private static void addBackpackIdIfUniqueOrDedupe(Set<UUID> backpackIds, IBackpackWrapper backpackWrapper) {
+		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
+			if (backpackIds.contains(backpackId)) {
+				backpackWrapper.removeContentsUUIDTag();
+				backpackWrapper.onContentsNbtUpdated();
+			} else {
+				backpackIds.add(backpackId);
 			}
 		});
 	}
@@ -129,7 +157,7 @@ public class CommonEventHandler {
 
 	private void sendPlayerSettingsToClient(Player player) {
 		String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		SophisticatedCore.PACKET_HANDLER.sendToClient((ServerPlayer) player, new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+		PacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
 	}
 
 	private void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -206,17 +234,17 @@ public class CommonEventHandler {
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
-				}).orElse(false), Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
+				}).orElse(false), Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 		);
 
 		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
 			AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.map(wrapper -> {
-						remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
-						return remainingStack.get().isEmpty();
-					}).orElse(false)
-					, Config.COMMON.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
+							.map(wrapper -> {
+								remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
+								return remainingStack.get().isEmpty();
+							}).orElse(false)
+					, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 			);
 			itemEntity.setItem(remainingStack.get());
 			event.setCanceled(true); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
