@@ -71,7 +71,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	protected ToolSwapperUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.COMMON.toolSwapperUpgrade.filterSlots.get());
+		filterLogic = new FilterLogic(upgrade, upgradeSaveHandler, Config.SERVER.toolSwapperUpgrade.filterSlots.get());
 	}
 
 	@Override

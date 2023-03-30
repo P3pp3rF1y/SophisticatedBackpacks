@@ -11,7 +11,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkHooks;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -20,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHan
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -68,7 +68,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-				SophisticatedBackpacks.PACKET_HANDLER.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
+				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
 		});
 	}

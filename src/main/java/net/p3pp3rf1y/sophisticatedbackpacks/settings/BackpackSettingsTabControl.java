@@ -47,7 +47,7 @@ public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 	@Override
 	protected boolean isSettingsCategoryDisabled(String categoryName) {
 		if (categoryName.equals(ItemDisplaySettingsCategory.NAME)) {
-			return Boolean.TRUE.equals(Config.COMMON.itemDisplayDisabled.get());
+			return Boolean.TRUE.equals(Config.SERVER.itemDisplayDisabled.get());
 		}
 		return super.isSettingsCategoryDisabled(categoryName);
 	}

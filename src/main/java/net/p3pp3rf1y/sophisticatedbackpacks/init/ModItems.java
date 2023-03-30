@@ -154,72 +154,72 @@ public class ModItems {
 	private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SophisticatedBackpacks.MOD_ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
-			() -> new BackpackItem(Config.COMMON.leatherBackpack.inventorySlotCount::get, Config.COMMON.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
+			() -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
 	public static final RegistryObject<BackpackItem> IRON_BACKPACK = ITEMS.register("iron_backpack",
-			() -> new BackpackItem(Config.COMMON.ironBackpack.inventorySlotCount::get, Config.COMMON.ironBackpack.upgradeSlotCount::get, ModBlocks.IRON_BACKPACK));
+			() -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get, ModBlocks.IRON_BACKPACK));
 	public static final RegistryObject<BackpackItem> GOLD_BACKPACK = ITEMS.register("gold_backpack",
-			() -> new BackpackItem(Config.COMMON.goldBackpack.inventorySlotCount::get, Config.COMMON.goldBackpack.upgradeSlotCount::get, ModBlocks.GOLD_BACKPACK));
+			() -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get, ModBlocks.GOLD_BACKPACK));
 	public static final RegistryObject<BackpackItem> DIAMOND_BACKPACK = ITEMS.register("diamond_backpack",
-			() -> new BackpackItem(Config.COMMON.diamondBackpack.inventorySlotCount::get, Config.COMMON.diamondBackpack.upgradeSlotCount::get, ModBlocks.DIAMOND_BACKPACK));
+			() -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get, ModBlocks.DIAMOND_BACKPACK));
 	public static final RegistryObject<BackpackItem> NETHERITE_BACKPACK = ITEMS.register("netherite_backpack",
-			() -> new BackpackItem(Config.COMMON.netheriteBackpack.inventorySlotCount::get, Config.COMMON.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
+			() -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
 
 	public static final ResourceLocation BACKPACK_UPGRADE_TAG_NAME = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "upgrade");
 
 	public static final TagKey<Item> BACKPACK_UPGRADE_TAG = TagKey.create(Registry.ITEM_REGISTRY, BACKPACK_UPGRADE_TAG_NAME);
 
 	public static final RegistryObject<PickupUpgradeItem> PICKUP_UPGRADE = ITEMS.register("pickup_upgrade",
-			() -> new PickupUpgradeItem(Config.COMMON.pickupUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new PickupUpgradeItem(Config.SERVER.pickupUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<PickupUpgradeItem> ADVANCED_PICKUP_UPGRADE = ITEMS.register("advanced_pickup_upgrade",
-			() -> new PickupUpgradeItem(Config.COMMON.advancedPickupUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new PickupUpgradeItem(Config.SERVER.advancedPickupUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<FilterUpgradeItem> FILTER_UPGRADE = ITEMS.register("filter_upgrade",
-			() -> new FilterUpgradeItem(Config.COMMON.filterUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new FilterUpgradeItem(Config.SERVER.filterUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<FilterUpgradeItem> ADVANCED_FILTER_UPGRADE = ITEMS.register("advanced_filter_upgrade",
-			() -> new FilterUpgradeItem(Config.COMMON.advancedFilterUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new FilterUpgradeItem(Config.SERVER.advancedFilterUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<MagnetUpgradeItem> MAGNET_UPGRADE = ITEMS.register("magnet_upgrade",
-			() -> new MagnetUpgradeItem(Config.COMMON.magnetUpgrade.magnetRange::get, Config.COMMON.magnetUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new MagnetUpgradeItem(Config.SERVER.magnetUpgrade.magnetRange::get, Config.SERVER.magnetUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<MagnetUpgradeItem> ADVANCED_MAGNET_UPGRADE = ITEMS.register("advanced_magnet_upgrade",
-			() -> new MagnetUpgradeItem(Config.COMMON.advancedMagnetUpgrade.magnetRange::get, Config.COMMON.advancedMagnetUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new MagnetUpgradeItem(Config.SERVER.advancedMagnetUpgrade.magnetRange::get, Config.SERVER.advancedMagnetUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<FeedingUpgradeItem> FEEDING_UPGRADE = ITEMS.register("feeding_upgrade",
-			() -> new FeedingUpgradeItem(Config.COMMON.feedingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new FeedingUpgradeItem(Config.SERVER.feedingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<FeedingUpgradeItem> ADVANCED_FEEDING_UPGRADE = ITEMS.register("advanced_feeding_upgrade",
-			() -> new FeedingUpgradeItem(Config.COMMON.advancedFeedingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new FeedingUpgradeItem(Config.SERVER.advancedFeedingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<CompactingUpgradeItem> COMPACTING_UPGRADE = ITEMS.register("compacting_upgrade",
-			() -> new CompactingUpgradeItem(false, Config.COMMON.compactingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new CompactingUpgradeItem(false, Config.SERVER.compactingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<CompactingUpgradeItem> ADVANCED_COMPACTING_UPGRADE = ITEMS.register("advanced_compacting_upgrade",
-			() -> new CompactingUpgradeItem(true, Config.COMMON.advancedCompactingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new CompactingUpgradeItem(true, Config.SERVER.advancedCompactingUpgrade.filterSlots::get, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<VoidUpgradeItem> VOID_UPGRADE = ITEMS.register("void_upgrade",
-			() -> new VoidUpgradeItem(Config.COMMON.voidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new VoidUpgradeItem(Config.SERVER.voidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<VoidUpgradeItem> ADVANCED_VOID_UPGRADE = ITEMS.register("advanced_void_upgrade",
-			() -> new VoidUpgradeItem(Config.COMMON.advancedVoidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
+			() -> new VoidUpgradeItem(Config.SERVER.advancedVoidUpgrade, SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<RestockUpgradeItem> RESTOCK_UPGRADE = ITEMS.register("restock_upgrade",
-			() -> new RestockUpgradeItem(Config.COMMON.restockUpgrade.filterSlots::get));
+			() -> new RestockUpgradeItem(Config.SERVER.restockUpgrade.filterSlots::get));
 	public static final RegistryObject<RestockUpgradeItem> ADVANCED_RESTOCK_UPGRADE = ITEMS.register("advanced_restock_upgrade",
-			() -> new RestockUpgradeItem(Config.COMMON.advancedRestockUpgrade.filterSlots::get));
+			() -> new RestockUpgradeItem(Config.SERVER.advancedRestockUpgrade.filterSlots::get));
 	public static final RegistryObject<DepositUpgradeItem> DEPOSIT_UPGRADE = ITEMS.register("deposit_upgrade",
-			() -> new DepositUpgradeItem(Config.COMMON.depositUpgrade.filterSlots::get));
+			() -> new DepositUpgradeItem(Config.SERVER.depositUpgrade.filterSlots::get));
 	public static final RegistryObject<DepositUpgradeItem> ADVANCED_DEPOSIT_UPGRADE = ITEMS.register("advanced_deposit_upgrade",
-			() -> new DepositUpgradeItem(Config.COMMON.advancedDepositUpgrade.filterSlots::get));
+			() -> new DepositUpgradeItem(Config.SERVER.advancedDepositUpgrade.filterSlots::get));
 	public static final RegistryObject<RefillUpgradeItem> REFILL_UPGRADE = ITEMS.register("refill_upgrade",
-			() -> new RefillUpgradeItem(Config.COMMON.refillUpgrade.filterSlots::get, false, false));
+			() -> new RefillUpgradeItem(Config.SERVER.refillUpgrade.filterSlots::get, false, false));
 	public static final RegistryObject<RefillUpgradeItem> ADVANCED_REFILL_UPGRADE = ITEMS.register("advanced_refill_upgrade",
-			() -> new RefillUpgradeItem(Config.COMMON.advancedRefillUpgrade.filterSlots::get, true, true));
+			() -> new RefillUpgradeItem(Config.SERVER.advancedRefillUpgrade.filterSlots::get, true, true));
 	public static final RegistryObject<InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.register("inception_upgrade",
 			InceptionUpgradeItem::new);
 	public static final RegistryObject<EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.register("everlasting_upgrade",
 			EverlastingUpgradeItem::new);
 	public static final RegistryObject<SmeltingUpgradeItem> SMELTING_UPGRADE = ITEMS.register("smelting_upgrade",
-			() -> new SmeltingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.smeltingUpgrade));
+			() -> new SmeltingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.smeltingUpgrade));
 	public static final RegistryObject<AutoSmeltingUpgradeItem> AUTO_SMELTING_UPGRADE = ITEMS.register("auto_smelting_upgrade",
-			() -> new AutoSmeltingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.autoSmeltingUpgrade));
+			() -> new AutoSmeltingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.autoSmeltingUpgrade));
 	public static final RegistryObject<SmokingUpgradeItem> SMOKING_UPGRADE = ITEMS.register("smoking_upgrade",
-			() -> new SmokingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.smokingUpgrade));
+			() -> new SmokingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.smokingUpgrade));
 	public static final RegistryObject<AutoSmokingUpgradeItem> AUTO_SMOKING_UPGRADE = ITEMS.register("auto_smoking_upgrade",
-			() -> new AutoSmokingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.autoSmokingUpgrade));
+			() -> new AutoSmokingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.autoSmokingUpgrade));
 	public static final RegistryObject<BlastingUpgradeItem> BLASTING_UPGRADE = ITEMS.register("blasting_upgrade",
-			() -> new BlastingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.blastingUpgrade));
+			() -> new BlastingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.blastingUpgrade));
 	public static final RegistryObject<AutoBlastingUpgradeItem> AUTO_BLASTING_UPGRADE = ITEMS.register("auto_blasting_upgrade",
-			() -> new AutoBlastingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.autoBlastingUpgrade));
+			() -> new AutoBlastingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.autoBlastingUpgrade));
 	public static final RegistryObject<CraftingUpgradeItem> CRAFTING_UPGRADE = ITEMS.register("crafting_upgrade",
 			() -> new CraftingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP));
 	public static final RegistryObject<StonecutterUpgradeItem> STONECUTTER_UPGRADE = ITEMS.register("stonecutter_upgrade",
@@ -238,11 +238,11 @@ public class ModItems {
 			() -> new ToolSwapperUpgradeItem(false, false));
 	public static final RegistryObject<ToolSwapperUpgradeItem> ADVANCED_TOOL_SWAPPER_UPGRADE = ITEMS.register("advanced_tool_swapper_upgrade",
 			() -> new ToolSwapperUpgradeItem(true, true));
-	public static final RegistryObject<TankUpgradeItem> TANK_UPGRADE = ITEMS.register("tank_upgrade", () -> new TankUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.tankUpgrade));
-	public static final RegistryObject<BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.register("battery_upgrade", () -> new BatteryUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.batteryUpgrade));
-	public static final RegistryObject<PumpUpgradeItem> PUMP_UPGRADE = ITEMS.register("pump_upgrade", () -> new PumpUpgradeItem(false, false, SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.pumpUpgrade));
-	public static final RegistryObject<PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.pumpUpgrade));
-	public static final RegistryObject<XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.COMMON.xpPumpUpgrade));
+	public static final RegistryObject<TankUpgradeItem> TANK_UPGRADE = ITEMS.register("tank_upgrade", () -> new TankUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.tankUpgrade));
+	public static final RegistryObject<BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.register("battery_upgrade", () -> new BatteryUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.batteryUpgrade));
+	public static final RegistryObject<PumpUpgradeItem> PUMP_UPGRADE = ITEMS.register("pump_upgrade", () -> new PumpUpgradeItem(false, false, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.pumpUpgrade));
+	public static final RegistryObject<PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.pumpUpgrade));
+	public static final RegistryObject<XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.xpPumpUpgrade));
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16), SophisticatedBackpacks.ITEM_GROUP));
 
@@ -356,29 +356,29 @@ public class ModItems {
 			MenuScreens.register(SETTINGS_CONTAINER_TYPE.get(), BackpackSettingsScreen::constructScreen);
 
 			UpgradeGuiManager.registerTab(PICKUP_BASIC_TYPE, (ContentsFilteredUpgradeContainer<PickupUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
-					new PickupUpgradeTab.Basic(uc, p, s, Config.COMMON.pickupUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new PickupUpgradeTab.Basic(uc, p, s, Config.SERVER.pickupUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(PICKUP_ADVANCED_TYPE, (ContentsFilteredUpgradeContainer<PickupUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
-					new PickupUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedPickupUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new PickupUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedPickupUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(FilterUpgradeContainer.BASIC_TYPE, (FilterUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new FilterUpgradeTab.Basic(uc, p, s, Config.COMMON.filterUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new FilterUpgradeTab.Basic(uc, p, s, Config.SERVER.filterUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(FilterUpgradeContainer.ADVANCED_TYPE, (FilterUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new FilterUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedFilterUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new FilterUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedFilterUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(MAGNET_BASIC_TYPE, (MagnetUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new MagnetUpgradeTab.Basic(uc, p, s, Config.COMMON.magnetUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new MagnetUpgradeTab.Basic(uc, p, s, Config.SERVER.magnetUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(MAGNET_ADVANCED_TYPE, (MagnetUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new MagnetUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedMagnetUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
+					new MagnetUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedMagnetUpgrade.slotsInRow.get(), SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(FEEDING_TYPE, (FeedingUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new FeedingUpgradeTab.Basic(uc, p, s, Config.COMMON.feedingUpgrade.slotsInRow.get()));
+					new FeedingUpgradeTab.Basic(uc, p, s, Config.SERVER.feedingUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(ADVANCED_FEEDING_TYPE, (FeedingUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new FeedingUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedFeedingUpgrade.slotsInRow.get()));
+					new FeedingUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedFeedingUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(COMPACTING_TYPE, (CompactingUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new CompactingUpgradeTab.Basic(uc, p, s, Config.COMMON.compactingUpgrade.slotsInRow.get()));
+					new CompactingUpgradeTab.Basic(uc, p, s, Config.SERVER.compactingUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(ADVANCED_COMPACTING_TYPE, (CompactingUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new CompactingUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedCompactingUpgrade.slotsInRow.get()));
+					new CompactingUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedCompactingUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(VOID_TYPE, (VoidUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new VoidUpgradeTab.Basic(uc, p, s, Config.COMMON.voidUpgrade.slotsInRow.get()));
+					new VoidUpgradeTab.Basic(uc, p, s, Config.SERVER.voidUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(ADVANCED_VOID_TYPE, (VoidUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
-					new VoidUpgradeTab.Advanced(uc, p, s, Config.COMMON.advancedVoidUpgrade.slotsInRow.get()));
+					new VoidUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedVoidUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(RESTOCK_TYPE, (ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
 					new RestockUpgradeTab.Basic(uc, p, s, SBPButtonDefinitions.BACKPACK_CONTENTS_FILTER_TYPE));
 			UpgradeGuiManager.registerTab(ADVANCED_RESTOCK_TYPE, (ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
@@ -386,18 +386,18 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(DEPOSIT_TYPE, DepositUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_DEPOSIT_TYPE, DepositUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(REFILL_TYPE, (RefillUpgradeContainer uc, Position p, StorageScreenBase<?> s) -> new RefillUpgradeTab.Basic(uc, p, s,
-					Config.COMMON.refillUpgrade.slotsInRow.get()));
+					Config.SERVER.refillUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(ADVANCED_REFILL_TYPE, (RefillUpgradeContainer uc, Position p, StorageScreenBase<?> s) -> new RefillUpgradeTab.Advanced(uc, p, s,
-					Config.COMMON.advancedRefillUpgrade.slotsInRow.get()));
+					Config.SERVER.advancedRefillUpgrade.slotsInRow.get()));
 			UpgradeGuiManager.registerTab(SMELTING_TYPE, CookingUpgradeTab.SmeltingUpgradeTab::new);
 			UpgradeGuiManager.registerTab(AUTO_SMELTING_TYPE, (AutoCookingUpgradeContainer<SmeltingRecipe, AutoCookingUpgradeWrapper.AutoSmeltingUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
-					new AutoCookingUpgradeTab.AutoSmeltingUpgradeTab(uc, p, s, Config.COMMON.autoSmeltingUpgrade.inputFilterSlotsInRow.get(), Config.COMMON.autoSmeltingUpgrade.fuelFilterSlotsInRow.get()));
+					new AutoCookingUpgradeTab.AutoSmeltingUpgradeTab(uc, p, s, Config.SERVER.autoSmeltingUpgrade.inputFilterSlotsInRow.get(), Config.SERVER.autoSmeltingUpgrade.fuelFilterSlotsInRow.get()));
 			UpgradeGuiManager.registerTab(SMOKING_TYPE, CookingUpgradeTab.SmokingUpgradeTab::new);
 			UpgradeGuiManager.registerTab(AUTO_SMOKING_TYPE, (AutoCookingUpgradeContainer<SmokingRecipe, AutoCookingUpgradeWrapper.AutoSmokingUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
-					new AutoCookingUpgradeTab.AutoSmokingUpgradeTab(uc, p, s, Config.COMMON.autoSmokingUpgrade.inputFilterSlotsInRow.get(), Config.COMMON.autoSmokingUpgrade.fuelFilterSlotsInRow.get()));
+					new AutoCookingUpgradeTab.AutoSmokingUpgradeTab(uc, p, s, Config.SERVER.autoSmokingUpgrade.inputFilterSlotsInRow.get(), Config.SERVER.autoSmokingUpgrade.fuelFilterSlotsInRow.get()));
 			UpgradeGuiManager.registerTab(BLASTING_TYPE, CookingUpgradeTab.BlastingUpgradeTab::new);
 			UpgradeGuiManager.registerTab(AUTO_BLASTING_TYPE, (AutoCookingUpgradeContainer<BlastingRecipe, AutoCookingUpgradeWrapper.AutoBlastingUpgradeWrapper> uc, Position p, StorageScreenBase<?> s) ->
-					new AutoCookingUpgradeTab.AutoBlastingUpgradeTab(uc, p, s, Config.COMMON.autoBlastingUpgrade.inputFilterSlotsInRow.get(), Config.COMMON.autoBlastingUpgrade.fuelFilterSlotsInRow.get()));
+					new AutoCookingUpgradeTab.AutoBlastingUpgradeTab(uc, p, s, Config.SERVER.autoBlastingUpgrade.inputFilterSlotsInRow.get(), Config.SERVER.autoBlastingUpgrade.fuelFilterSlotsInRow.get()));
 			UpgradeGuiManager.registerTab(CRAFTING_TYPE, (CraftingUpgradeContainer uc, Position p, StorageScreenBase<?> s) ->
 					new CraftingUpgradeTab(uc, p, s, SBPButtonDefinitions.SHIFT_CLICK_TARGET));
 			UpgradeGuiManager.registerTab(INCEPTION_TYPE, InceptionUpgradeTab::new);
@@ -412,7 +412,7 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(PUMP_TYPE, PumpUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_PUMP_TYPE, PumpUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(XP_PUMP_TYPE, (XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->
-					new XpPumpUpgradeTab(upgradeContainer, position, screen, Config.COMMON.xpPumpUpgrade.mendingOn.get()));
+					new XpPumpUpgradeTab(upgradeContainer, position, screen, Config.SERVER.xpPumpUpgrade.mendingOn.get()));
 		});
 	}
 
