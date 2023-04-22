@@ -40,7 +40,7 @@
     "item.sophisticatedbackpacks.advanced_restock_upgrade": "Просунуте покращення «Поповнення»",
     "item.sophisticatedbackpacks.advanced_restock_upgrade.tooltip": "Поповнює запаси ранця з інвентарю, клацнувши ПКМ\nМає більше опцій фільтру",
     "item.sophisticatedbackpacks.deposit_upgrade": "Покращення «Розміщення»",
-    "item.sophisticatedbackpacks.deposit_upgrade.tooltip": "Розміщує предмети з рюкзака в інвентар, клацнувши ПКМ",
+    "item.sophisticatedbackpacks.deposit_upgrade.tooltip": "Розміщує предмети з ранця в інвентар, клацнувши ПКМ",
     "item.sophisticatedbackpacks.advanced_deposit_upgrade": "Просунуте покращення «Розміщення»",
     "item.sophisticatedbackpacks.advanced_deposit_upgrade.tooltip": "Розміщує предмети з ранця в інвентар, клацнувши ПКМ\nМає більше опцій фільтру",
     "item.sophisticatedbackpacks.refill_upgrade": "Покращення «Поновлення»",
