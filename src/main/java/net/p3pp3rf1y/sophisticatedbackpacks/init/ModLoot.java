@@ -34,7 +34,7 @@ public class ModLoot {
 	}
 
 	public static void lootLoad(LootTableLoadEvent evt) {
-		if (Boolean.FALSE.equals(Config.SERVER.chestLootEnabled.get())) {
+		if (Boolean.FALSE.equals(Config.COMMON.chestLootEnabled.get())) {
 			return;
 		}
 
