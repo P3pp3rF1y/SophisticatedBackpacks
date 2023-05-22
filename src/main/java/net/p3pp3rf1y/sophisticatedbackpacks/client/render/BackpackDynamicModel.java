@@ -33,7 +33,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -43,6 +42,7 @@ import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
+import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
@@ -225,7 +225,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			}
 		}
 
-		private void addFluid(List<BakedQuad> ret, Fluid fluid, float ratio, double xMin) {
+		private void addFluid(List<BakedQuad> ret, FluidStack fluidStack, float ratio, double xMin) {
 			if (Mth.equal(ratio, 0.0f)) {
 				return;
 			}
@@ -234,9 +234,9 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			double yMax = yMin + (ratio * 6) / 16d;
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
-			IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
-			ResourceLocation texture = renderProperties.getStillTexture();
-			int color = renderProperties.getTintColor();
+			IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+			ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+			int color = renderProperties.getTintColor(fluidStack);
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
