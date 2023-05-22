@@ -250,8 +250,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			double yMax = yMin + (ratio * 6) / 16d;
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
-			ResourceLocation texture = fluidStack.getFluid().getAttributes().getStillTexture();
-			int color = fluidStack.getFluid().getAttributes().getColor();
+			ResourceLocation texture = fluidStack.getFluid().getAttributes().getStillTexture(fluidStack);
+			int color = fluidStack.getFluid().getAttributes().getColor(fluidStack);
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
