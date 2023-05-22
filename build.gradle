@@ -29,7 +29,6 @@ if (findProject(':SophisticatedCore') != null) {
 
 repositories {
     mavenCentral()
-    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { url "https://maven.theillusivec4.top/" }
     maven { url "https://maven.tterrag.com/" }
     maven { url = "https://modmaven.dev/" }
