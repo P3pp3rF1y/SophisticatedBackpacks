@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
@@ -26,8 +25,8 @@ public class BackpackDyeRecipe extends StorageDyeRecipeBase {
 	}
 
 	@Override
-	protected boolean isStorageItem(Item item) {
-		return item instanceof BackpackItem;
+	protected boolean isDyeableStorageItem(ItemStack stack) {
+		return stack.getItem() instanceof BackpackItem;
 	}
 
 	@Override

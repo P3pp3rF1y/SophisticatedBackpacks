@@ -36,7 +36,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
@@ -44,6 +43,7 @@ import net.minecraftforge.client.model.data.IDynamicBakedModel;
 import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
+import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
@@ -241,7 +241,7 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			}
 		}
 
-		private void addFluid(List<BakedQuad> ret, Fluid fluid, float ratio, double xMin) {
+		private void addFluid(List<BakedQuad> ret, FluidStack fluidStack, float ratio, double xMin) {
 			if (Mth.equal(ratio, 0.0f)) {
 				return;
 			}
@@ -250,8 +250,8 @@ public class BackpackDynamicModel implements IModelGeometry<BackpackDynamicModel
 			double yMax = yMin + (ratio * 6) / 16d;
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
-			ResourceLocation texture = fluid.getAttributes().getStillTexture();
-			int color = fluid.getAttributes().getColor();
+			ResourceLocation texture = fluidStack.getFluid().getAttributes().getStillTexture(fluidStack);
+			int color = fluidStack.getFluid().getAttributes().getColor(fluidStack);
 			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 			float bx1 = 0;
