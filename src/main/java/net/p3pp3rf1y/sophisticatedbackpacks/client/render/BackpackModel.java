@@ -26,7 +26,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
@@ -418,17 +417,17 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	@Override
-	public void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, Fluid fluid, float fill, boolean left) {
+	public void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, FluidStack fluidStack, float fill, boolean left) {
 		if (Mth.equal(fill, 0.0f)) {
 			return;
 		}
 
-		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluid);
-		ResourceLocation texture = renderProperties.getStillTexture(new FluidStack(fluid, 5000));
+		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
 		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
 		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
-		int color = renderProperties.getTintColor();
+		int color = renderProperties.getTintColor(fluidStack);
 		float red = (color >> 16 & 255) / 255.0F;
 		float green = (color >> 8 & 255) / 255.0F;
 		float blue = (color & 255) / 255.0F;
