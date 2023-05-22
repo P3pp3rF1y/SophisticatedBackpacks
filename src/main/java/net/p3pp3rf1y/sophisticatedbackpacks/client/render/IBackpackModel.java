@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public interface IBackpackModel {
@@ -14,7 +14,7 @@ public interface IBackpackModel {
 
 	void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio);
 
-	void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, Fluid fluid, float fill, boolean left);
+	void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, FluidStack fluid, float fill, boolean left);
 
 	EquipmentSlot getRenderEquipmentSlot();
 
