@@ -8,9 +8,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.p3pp3rf1y.sophisticatedcore.util.RotatedShapes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class BackpackShapes {
@@ -21,7 +21,7 @@ public class BackpackShapes {
 	}
 
 	public static final IShapeProvider DEFAULT_SHAPE_PROVIDER = new IShapeProvider() {
-		private static final Map<Integer, VoxelShape> SHAPES = new HashMap<>();
+		private static final Map<Integer, VoxelShape> SHAPES = new ConcurrentHashMap<>();
 		@Override
 		public VoxelShape getShape(Block backpackBlock, Direction dir, boolean leftTank, boolean rightTank, boolean battery) {
 			int key = getKey(dir, leftTank, rightTank, battery);
