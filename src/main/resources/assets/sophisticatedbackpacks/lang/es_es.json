@@ -48,7 +48,7 @@
     "item.sophisticatedbackpacks.inception_upgrade": "Mejora de matrioska",
     "item.sophisticatedbackpacks.inception_upgrade.tooltip": "Permite guardar mochilas dentro de otras mochilas.",
     "item.sophisticatedbackpacks.everlasting_upgrade": "Mejora de eternidad",
-    "item.sophisticatedbackpacks.everlasting_upgrade.tooltip": "La mochila se vuelve indestructible.\No puede desaparecer ni eliminarse.",
+    "item.sophisticatedbackpacks.everlasting_upgrade.tooltip": "La mochila se vuelve indestructible.\nNo puede desaparecer ni eliminarse.",
     "item.sophisticatedbackpacks.smelting_upgrade": "Mejora de fundido",
     "item.sophisticatedbackpacks.smelting_upgrade.tooltip": "Permite fundir objetos en una pestaña de mejora.",
     "item.sophisticatedbackpacks.auto_smelting_upgrade": "Mejora de autofundido",
@@ -121,7 +121,7 @@
     "gui.sophisticatedbackpacks.upgrades.inception": "Matrioska",
     "gui.sophisticatedbackpacks.upgrades.advanced_tool_swapper": "Cambio de herramienta",
     "gui.sophisticatedbackpacks.upgrades.restock.tooltip": "Ajustes de reabastecimiento",
-    "gui.sophisticatedbackpacks.upgrades.advanced_restock.tooltip": "Ajustes de reabastecimiento avanzado";
+    "gui.sophisticatedbackpacks.upgrades.advanced_restock.tooltip": "Ajustes de reabastecimiento avanzado",
     "gui.sophisticatedbackpacks.upgrades.deposit.tooltip": "Ajustes de depósito",
     "gui.sophisticatedbackpacks.upgrades.advanced_deposit.tooltip": "Ajustes de depósito avanzado",
     "gui.sophisticatedbackpacks.upgrades.refill.tooltip": "Ajustes de recarga",

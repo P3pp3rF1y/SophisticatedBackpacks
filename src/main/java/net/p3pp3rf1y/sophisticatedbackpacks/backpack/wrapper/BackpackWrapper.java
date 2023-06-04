@@ -223,7 +223,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				upgradeHandler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
 					if (handler != null) {
 						handler.clearListeners();
-						handler.setSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
+						handler.setBaseSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
 					}
 					getInventoryHandler().clearListeners();
 					handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);

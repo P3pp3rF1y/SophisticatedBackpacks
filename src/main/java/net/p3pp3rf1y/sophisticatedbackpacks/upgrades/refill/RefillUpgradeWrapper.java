@@ -53,7 +53,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			FilterLogic.ObservableFilterItemStackHandler filterHandler = filterLogic.getFilterHandler();
 			filterHandler.setOnSlotChange(s -> onFilterChange(filterHandler, s));
 		}
-		filterLogic.setAllowByDefault();
+		filterLogic.setAllowByDefault(true);
 	}
 
 	private void onFilterChange(FilterLogic.ObservableFilterItemStackHandler filterHandler, int slot) {
