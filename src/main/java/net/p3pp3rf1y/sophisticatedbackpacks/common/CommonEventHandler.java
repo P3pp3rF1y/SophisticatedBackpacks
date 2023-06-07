@@ -200,7 +200,7 @@ public class CommonEventHandler {
 	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Monster monster && monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
-			EntityBackpackAdditionHandler.addBackpack(monster);
+			EntityBackpackAdditionHandler.addBackpack(monster, event.getLevel());
 		}
 	}
 
@@ -218,7 +218,7 @@ public class CommonEventHandler {
 		if (!(event.getEntity() instanceof Monster)) {
 			return;
 		}
-		EntityBackpackAdditionHandler.removeBackpackUuid((Monster) event.getEntity());
+		EntityBackpackAdditionHandler.removeBackpackUuid((Monster) event.getEntity(), event.getLevel());
 	}
 
 	private void onItemPickup(EntityItemPickupEvent event) {
