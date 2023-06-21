@@ -426,7 +426,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void fillWithLoot(Player playerEntity) {
-		if (playerEntity.level.isClientSide) {
+		if (playerEntity.level().isClientSide) {
 			return;
 		}
 		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
@@ -480,8 +480,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void fillWithLootFromTable(Player playerEntity, String lootName) {
-		MinecraftServer server = playerEntity.level.getServer();
-		if (server == null || !(playerEntity.level instanceof ServerLevel world)) {
+		MinecraftServer server = playerEntity.level().getServer();
+		if (server == null || !(playerEntity.level() instanceof ServerLevel serverLevel)) {
 			return;
 		}
 
@@ -491,10 +491,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 		backpack.removeTagKey(LOOT_TABLE_NAME_TAG);
 		backpack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
-		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
+		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, serverLevel, playerEntity);
 		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
 		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
-		LootHelper.fillWithLoot(world.random, loot, getInventoryHandler());
+		LootHelper.fillWithLoot(serverLevel.random, loot, getInventoryHandler());
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {

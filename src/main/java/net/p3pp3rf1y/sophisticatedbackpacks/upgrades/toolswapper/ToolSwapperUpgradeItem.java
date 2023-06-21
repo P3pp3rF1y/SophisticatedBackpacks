@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeSlotChangeResult;
@@ -18,7 +17,7 @@ public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWr
 	private final boolean swapToolOnKeyPress;
 
 	public ToolSwapperUpgradeItem(boolean hasSettingsTab, boolean swapToolOnKeyPress) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.hasSettingsTab = hasSettingsTab;
 		this.swapToolOnKeyPress = swapToolOnKeyPress;
 	}

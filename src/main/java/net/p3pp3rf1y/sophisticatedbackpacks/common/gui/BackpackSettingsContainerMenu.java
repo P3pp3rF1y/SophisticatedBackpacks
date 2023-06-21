@@ -31,12 +31,12 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	}
 
 	public static BackpackSettingsContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-		return new BackpackSettingsContainerMenu(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.level));
+		return new BackpackSettingsContainerMenu(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.level()));
 	}
 
 	@Override
 	public void detectSettingsChangeAndReload() {
-		if (player.level.isClientSide) {
+		if (player.level().isClientSide) {
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				BackpackStorage storage = BackpackStorage.get();
 				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
@@ -54,7 +54,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	}
 
 	private void sendBackpackSettingsToClient() {
-		if (player.level.isClientSide) {
+		if (player.level().isClientSide) {
 			return;
 		}
 

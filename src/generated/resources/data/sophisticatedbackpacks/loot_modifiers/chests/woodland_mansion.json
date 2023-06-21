@@ -1,0 +1,14 @@
+{
+  "type": "sophisticatedbackpacks:inject_loot",
+  "conditions": [
+    {
+      "condition": "sophisticatedbackpacks:loot_enabled"
+    },
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/woodland_mansion"
+    }
+  ],
+  "loot_table": "sophisticatedbackpacks:inject/chests/woodland_mansion",
+  "loot_table_to_inject_into": "minecraft:chests/woodland_mansion"
+}

@@ -2,11 +2,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
-import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -25,12 +26,12 @@ public class SBPRecipeProvider extends RecipeProvider {
 	private static final String HAS_UPGRADE_BASE = "has_upgrade_base";
 	private static final String HAS_SMELTING_UPGRADE = "has_smelting_upgrade";
 
-	public SBPRecipeProvider(DataGenerator generatorIn) {
-		super(generatorIn);
+	public SBPRecipeProvider(PackOutput packOutput) {
+		super(packOutput);
 	}
 
 	@Override
-	protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+	protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
 		ShapeBasedRecipeBuilder.shaped(ModItems.BACKPACK.get(), ModItems.BASIC_BACKPACK_RECIPE_SERIALIZER.get())
 				.pattern("SLS")
 				.pattern("SCS")
@@ -568,8 +569,8 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
 				.save(consumer, SophisticatedBackpacks.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
 
-		new UpgradeRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER.get(), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
-				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
+		new SmithingTransformRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER.get(), Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
+				Ingredient.of(Items.NETHERITE_INGOT), RecipeCategory.MISC, ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
 				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
 	}

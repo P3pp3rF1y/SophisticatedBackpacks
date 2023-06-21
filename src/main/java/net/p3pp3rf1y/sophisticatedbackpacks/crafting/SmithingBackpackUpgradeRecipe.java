@@ -1,11 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -14,17 +14,15 @@ import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWrapperRecipe<UpgradeRecipe> {
+public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe implements IWrapperRecipe<SmithingTransformRecipe> {
 	public static final Set<ResourceLocation> REGISTERED_RECIPES = new LinkedHashSet<>();
-	private final UpgradeRecipe compose;
+	private final SmithingTransformRecipe compose;
 
-	public SmithingBackpackUpgradeRecipe(UpgradeRecipe compose) {
-		super(compose.getId(), Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44518_")),
-				Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, compose, "f_44519_")), compose.getResultItem());
+	public SmithingBackpackUpgradeRecipe(SmithingTransformRecipe compose) {
+		super(compose.getId(), compose.template, compose.base, compose.addition, compose.result);
 		this.compose = compose;
 		REGISTERED_RECIPES.add(compose.getId());
 	}
@@ -35,8 +33,8 @@ public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWra
 	}
 
 	@Override
-	public ItemStack assemble(Container inv) {
-		ItemStack upgradedBackpack = getCraftingResult().copy();
+	public ItemStack assemble(Container inv, RegistryAccess registryAccess) {
+		ItemStack upgradedBackpack = result.copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
 			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -48,12 +46,8 @@ public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWra
 		return upgradedBackpack;
 	}
 
-	private ItemStack getCraftingResult() {
-		return Objects.requireNonNull(ObfuscationReflectionHelper.getPrivateValue(UpgradeRecipe.class, this, "f_44520_"));
-	}
-
 	private Optional<ItemStack> getBackpack(Container inv) {
-		ItemStack slotStack = inv.getItem(0);
+		ItemStack slotStack = inv.getItem(1);
 		if (slotStack.getItem() instanceof BackpackItem) {
 			return Optional.of(slotStack);
 		}
@@ -66,13 +60,13 @@ public class SmithingBackpackUpgradeRecipe extends UpgradeRecipe implements IWra
 	}
 
 	@Override
-	public UpgradeRecipe getCompose() {
+	public SmithingTransformRecipe getCompose() {
 		return compose;
 	}
 
-	public static class Serializer extends RecipeWrapperSerializer<UpgradeRecipe, SmithingBackpackUpgradeRecipe> {
+	public static class Serializer extends RecipeWrapperSerializer<SmithingTransformRecipe, SmithingBackpackUpgradeRecipe> {
 		public Serializer() {
-			super(SmithingBackpackUpgradeRecipe::new, RecipeSerializer.SMITHING);
+			super(SmithingBackpackUpgradeRecipe::new, RecipeSerializer.SMITHING_TRANSFORM);
 		}
 	}
 }

@@ -160,7 +160,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level.isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+			if (!player.level().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
 				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
 			}
@@ -273,8 +273,8 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level.isClientSide) {
-				WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
+			if (!player.level().isClientSide) {
+				WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
 			}
 		}
 
@@ -290,7 +290,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
+			return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
@@ -319,7 +319,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.level.getBlockEntity(pos) instanceof BackpackBlockEntity
+			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity
 					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
 		}
 

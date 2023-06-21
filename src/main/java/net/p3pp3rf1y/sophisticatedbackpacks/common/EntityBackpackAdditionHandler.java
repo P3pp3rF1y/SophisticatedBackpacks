@@ -265,8 +265,8 @@ public class EntityBackpackAdditionHandler {
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
 			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
-					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
-				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
+					Math.max(mob.level().random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
+				ItemEntity backpackEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
 				event.getEntity().getTags().remove(SPAWNED_WITH_BACKPACK);
@@ -304,7 +304,7 @@ public class EntityBackpackAdditionHandler {
 		entity.getItemBySlot(EquipmentSlot.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.ifPresent(backpackWrapper -> backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
 					if (wrapper.isPlaying()) {
-						wrapper.tick(entity, entity.level, entity.blockPosition());
+						wrapper.tick(entity, entity.level(), entity.blockPosition());
 					} else {
 						wrapper.play(entity);
 					}

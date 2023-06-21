@@ -2,29 +2,29 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:advanced_refill_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_refill_upgrade"
     }
-  ],
-  "pattern": [
-    " D ",
-    "GFG",
-    "RRR"
   ],
   "key": {
     "D": {
       "tag": "forge:gems/diamond"
+    },
+    "F": {
+      "item": "sophisticatedbackpacks:refill_upgrade"
     },
     "G": {
       "tag": "forge:ingots/gold"
     },
     "R": {
       "tag": "forge:dusts/redstone"
-    },
-    "F": {
-      "item": "sophisticatedbackpacks:refill_upgrade"
     }
   },
+  "pattern": [
+    " D ",
+    "GFG",
+    "RRR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:advanced_refill_upgrade"
   }

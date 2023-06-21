@@ -2,18 +2,13 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:pump_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:pump_upgrade"
     }
   ],
-  "pattern": [
-    "GUG",
-    "PBS",
-    "GUG"
-  ],
   "key": {
-    "U": {
-      "item": "minecraft:bucket"
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
     },
     "G": {
       "tag": "forge:glass"
@@ -24,10 +19,15 @@
     "S": {
       "item": "minecraft:sticky_piston"
     },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
+    "U": {
+      "item": "minecraft:bucket"
     }
   },
+  "pattern": [
+    "GUG",
+    "PBS",
+    "GUG"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:pump_upgrade"
   }

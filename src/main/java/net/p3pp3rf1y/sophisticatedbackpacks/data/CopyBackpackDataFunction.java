@@ -11,7 +11,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
 public class CopyBackpackDataFunction extends LootItemConditionalFunction {
 	protected CopyBackpackDataFunction(LootItemCondition[] conditionsIn) {
@@ -30,7 +30,7 @@ public class CopyBackpackDataFunction extends LootItemConditionalFunction {
 
 	@Override
 	public LootItemFunctionType getType() {
-		return ModLoot.COPY_BACKPACK_DATA;
+		return ModItems.COPY_BACKPACK_DATA.get();
 	}
 
 	public static CopyBackpackDataFunction.Builder builder() {

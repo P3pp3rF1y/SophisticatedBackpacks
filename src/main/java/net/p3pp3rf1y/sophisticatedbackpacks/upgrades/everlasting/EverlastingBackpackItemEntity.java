@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -21,11 +22,11 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public void tick() {
-		if (!level.isClientSide) {
+		if (!level().isClientSide) {
 			double d0 = getX() + 0.5F - random.nextFloat();
 			double d1 = getY() + random.nextFloat() * 0.5F;
 			double d2 = getZ() + 0.5F - random.nextFloat();
-			ServerLevel serverWorld = (ServerLevel) level;
+			ServerLevel serverWorld = (ServerLevel) level();
 			if (random.nextInt(20) == 0) {
 				serverWorld.sendParticles(ParticleTypes.HAPPY_VILLAGER, d0, d1, d2, 0, 0, 0.1D, 0, 1f);
 			}
@@ -63,12 +64,12 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 	}
 
 	@Override
-	protected void outOfWorld() {
+	protected void onBelowWorld() {
 		//do nothing as the only thing that vanilla does here is remove entity from world, but it can't for this
 	}
 
 	@Override
-	public Packet<?> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 }

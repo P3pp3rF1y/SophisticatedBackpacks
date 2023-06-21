@@ -2,14 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:void_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:void_upgrade"
     }
-  ],
-  "pattern": [
-    " E ",
-    "OBO",
-    "ROR"
   ],
   "key": {
     "B": {
@@ -25,6 +20,11 @@
       "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    " E ",
+    "OBO",
+    "ROR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:void_upgrade"
   }

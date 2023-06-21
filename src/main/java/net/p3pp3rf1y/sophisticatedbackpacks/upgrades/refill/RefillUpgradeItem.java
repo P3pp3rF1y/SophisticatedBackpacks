@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeType;
 
@@ -13,7 +12,7 @@ public class RefillUpgradeItem extends UpgradeItemBase<RefillUpgradeWrapper> {
 	private boolean supportsBlockPick;
 
 	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection, boolean supportsBlockPick) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.filterSlotCount = filterSlotCount;
 		this.targetSlotSelection = targetSlotSelection;
 		this.supportsBlockPick = supportsBlockPick;

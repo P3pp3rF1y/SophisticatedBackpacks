@@ -2,14 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:deposit_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:deposit_upgrade"
     }
-  ],
-  "pattern": [
-    " P ",
-    "IBI",
-    "RCR"
   ],
   "key": {
     "B": {
@@ -21,13 +16,18 @@
     "I": {
       "tag": "forge:ingots/iron"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
     "P": {
       "item": "minecraft:piston"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    " P ",
+    "IBI",
+    "RCR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:deposit_upgrade"
   }

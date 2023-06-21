@@ -19,7 +19,7 @@ public class RemoveNonPlayerCommand {
 
 	private static int removeNonPlayerBackpacks(CommandSourceStack source, boolean onlyWithEmptyInventory) {
 		int numberRemoved = BackpackStorage.get().removeNonPlayerBackpackContents(onlyWithEmptyInventory);
-		source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.remove_non_player.success", numberRemoved), false);
+		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.remove_non_player.success", numberRemoved), false);
 		return 0;
 	}
 }

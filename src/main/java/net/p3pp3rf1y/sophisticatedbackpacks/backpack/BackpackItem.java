@@ -6,7 +6,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -92,7 +90,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, UnaryOperator<Properties> updateProperties) {
-		super(updateProperties.apply(new Properties().stacksTo(1)), SophisticatedBackpacks.ITEM_GROUP);
+		super(updateProperties.apply(new Properties().stacksTo(1)));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
@@ -111,17 +109,17 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	@Override
-	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-		super.fillItemCategory(group, items);
+	public void addCreativeTabItems(Consumer<ItemStack> itemConsumer) {
+		super.addCreativeTabItems(itemConsumer);
 
-		if (!allowedIn(group) || this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(this)) {
+		if (this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack stack = new ItemStack(this);
 			new BackpackWrapper(stack).setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors()));
-			items.add(stack);
+			itemConsumer.accept(stack);
 		}
 
 		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(
@@ -133,13 +131,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 		ItemStack stack = new ItemStack(this);
 		new BackpackWrapper(stack).setColors(clothColor, trimColor);
-		items.add(stack);
+		itemConsumer.accept(stack);
 	}
 
 	@Override
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
-		if (flagIn == TooltipFlag.Default.ADVANCED) {
+		if (flagIn == TooltipFlag.ADVANCED) {
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY))));
 		}
@@ -191,7 +189,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			backpackItemEntity.setPos(itemEntity.getX(), itemEntity.getY(), itemEntity.getZ());
 			backpackItemEntity.setItem(itemstack);
 			backpackItemEntity.setPickUpDelay(getPickupDelay(itemEntity));
-			backpackItemEntity.setThrower(itemEntity.getThrower());
+			backpackItemEntity.setThrower(itemEntity.getOwner() != null ? itemEntity.getOwner().getUUID() : null);
 			backpackItemEntity.setDeltaMovement(itemEntity.getDeltaMovement());
 		}
 		return backpackItemEntity;
@@ -336,7 +334,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
+						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
 		);
 		super.onArmorTick(stack, level, player);
 	}
@@ -348,7 +346,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
+						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
 		);
 		super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
 	}

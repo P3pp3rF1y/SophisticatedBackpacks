@@ -46,7 +46,7 @@ public class AnotherPlayerBackpackOpenMessage {
 			return;
 		}
 
-		if (player.level.getEntity(msg.anotherPlayerId) instanceof Player anotherPlayer) {
+		if (player.level().getEntity(msg.anotherPlayerId) instanceof Player anotherPlayer) {
 			PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
 				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 

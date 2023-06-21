@@ -2,16 +2,14 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:advanced_compacting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_compacting_upgrade"
     }
   ],
-  "pattern": [
-    " D ",
-    "GCG",
-    "RRR"
-  ],
   "key": {
+    "C": {
+      "item": "sophisticatedbackpacks:compacting_upgrade"
+    },
     "D": {
       "tag": "forge:gems/diamond"
     },
@@ -20,11 +18,13 @@
     },
     "R": {
       "tag": "forge:dusts/redstone"
-    },
-    "C": {
-      "item": "sophisticatedbackpacks:compacting_upgrade"
     }
   },
+  "pattern": [
+    " D ",
+    "GCG",
+    "RRR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:advanced_compacting_upgrade"
   }

@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -14,8 +15,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import java.util.List;
 
 public class BackpackDyeRecipe extends StorageDyeRecipeBase {
-	public BackpackDyeRecipe(ResourceLocation registryName) {
-		super(registryName);
+	public BackpackDyeRecipe(ResourceLocation registryName, CraftingBookCategory category) {
+		super(registryName, category);
 	}
 
 	@Override

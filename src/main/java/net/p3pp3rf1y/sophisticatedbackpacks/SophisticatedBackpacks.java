@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,7 +23,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +32,6 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedBackpacks {
 	public static final String MOD_ID = "sophisticatedbackpacks";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
-
-	public static final CreativeModeTab ITEM_GROUP = new SBItemGroup();
 
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
@@ -57,7 +53,6 @@ public class SophisticatedBackpacks {
 		modBus.addListener(Config.SERVER::onConfigReload);
 		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
-		ModLoot.init(modBus);
 		SBPCommand.init(modBus);
 
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;

@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -37,7 +37,7 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				String tagName = GsonHelper.getAsString(jsonObject, "tag");
-				TagKey<Item> tag = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tagName));
+				TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(tagName));
 				return Optional.of(new ItemTagMatcher(tag));
 			}
 		});

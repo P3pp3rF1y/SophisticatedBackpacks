@@ -2,29 +2,29 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:pickup_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:pickup_upgrade"
     }
-  ],
-  "pattern": [
-    " P ",
-    "SBS",
-    "RRR"
   ],
   "key": {
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "P": {
+      "item": "minecraft:sticky_piston"
     },
     "R": {
       "tag": "forge:dusts/redstone"
     },
     "S": {
       "tag": "forge:string"
-    },
-    "P": {
-      "item": "minecraft:sticky_piston"
     }
   },
+  "pattern": [
+    " P ",
+    "SBS",
+    "RRR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:pickup_upgrade"
   }

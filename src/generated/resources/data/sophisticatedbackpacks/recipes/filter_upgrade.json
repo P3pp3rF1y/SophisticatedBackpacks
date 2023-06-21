@@ -2,14 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:filter_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:filter_upgrade"
     }
-  ],
-  "pattern": [
-    "RSR",
-    "SBS",
-    "RSR"
   ],
   "key": {
     "B": {
@@ -22,6 +17,11 @@
       "tag": "forge:string"
     }
   },
+  "pattern": [
+    "RSR",
+    "SBS",
+    "RSR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:filter_upgrade"
   }

@@ -100,7 +100,7 @@ public class ClientEventHandler {
 			return;
 		}
 		HitResult target = mc.hitResult;
-		Level level = player.level;
+		Level level = player.level();
 		BlockPos pos = ((BlockHitResult)target).getBlockPos();
 		BlockState state = level.getBlockState(pos);
 

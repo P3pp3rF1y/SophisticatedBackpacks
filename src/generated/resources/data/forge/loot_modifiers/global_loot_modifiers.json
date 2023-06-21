@@ -1,0 +1,13 @@
+{
+  "entries": [
+    "sophisticatedbackpacks:chests/end_city_treasure",
+    "sophisticatedbackpacks:chests/abandoned_mineshaft",
+    "sophisticatedbackpacks:chests/shipwreck_treasure",
+    "sophisticatedbackpacks:chests/simple_dungeon",
+    "sophisticatedbackpacks:chests/bastion_treasure",
+    "sophisticatedbackpacks:chests/desert_pyramid",
+    "sophisticatedbackpacks:chests/woodland_mansion",
+    "sophisticatedbackpacks:chests/nether_bridge"
+  ],
+  "replace": false
+}

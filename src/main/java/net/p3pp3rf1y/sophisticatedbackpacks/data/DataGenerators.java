@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.data.event.GatherDataEvent;
 
 public class DataGenerators {
@@ -8,8 +9,9 @@ public class DataGenerators {
 
 	public static void gatherData(GatherDataEvent evt) {
 		DataGenerator generator = evt.getGenerator();
-		generator.addProvider(evt.includeServer(), new SBPBlockLootProvider(generator));
-		generator.addProvider(evt.includeServer(), new SBPRecipeProvider(generator));
-		generator.addProvider(evt.includeServer(), new SBPLootInjectProvider(generator));
+		PackOutput packOutput = generator.getPackOutput();
+		generator.addProvider(evt.includeServer(), new SBLootTableProvider(packOutput));
+		generator.addProvider(evt.includeServer(), new SBLootModifierProvider(packOutput));
+		generator.addProvider(evt.includeServer(), new SBPRecipeProvider(packOutput));
 	}
 }

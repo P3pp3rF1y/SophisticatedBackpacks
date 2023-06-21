@@ -40,7 +40,7 @@ public class EntityToolSwapMessage {
 			return;
 		}
 
-		Level world = sender.level;
+		Level world = sender.level();
 		Entity entity = world.getEntity(msg.entityId);
 
 		if (entity == null) {

@@ -2,8 +2,6 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "name": "main",
-      "rolls": 1.0,
       "bonus_rolls": 0.0,
       "entries": [
         {
@@ -15,7 +13,9 @@
         {
           "function": "sophisticatedbackpacks:copy_backpack_data"
         }
-      ]
+      ],
+      "rolls": 1.0
     }
-  ]
+  ],
+  "random_sequence": "sophisticatedbackpacks:blocks/diamond_backpack"
 }

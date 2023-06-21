@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
@@ -52,11 +53,11 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 	}
 
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (!shouldRender.getAsBoolean()) {
 			return;
 		}
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
 		if (!filterLogicControl.isMouseOver(mouseX, mouseY)) {
 			resetAdditionalTooltip();
@@ -104,13 +105,13 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 
 		@Override
-		protected void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 			if (!getContainer().allowsTargetSlotSelection()) {
 				return;
 			}
 
-			renderTargetSlotAcronyms(poseStack);
+			renderTargetSlotAcronyms(guiGraphics);
 			updateTargetSlotTooltip(mouseX, mouseY);
 		}
 
@@ -128,7 +129,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 			}
 		}
 
-		private void renderTargetSlotAcronyms(PoseStack poseStack) {
+		private void renderTargetSlotAcronyms(GuiGraphics guiGraphics) {
+			PoseStack poseStack = guiGraphics.pose();
 			poseStack.pushPose();
 			poseStack.translate(0, 0, 100);
 			getContainer().getSlots().forEach(slot -> {
@@ -136,7 +138,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 					int slotIndex = slot.getSlotIndex();
 					RefillUpgradeWrapper.TargetSlot ts = getContainer().getTargetSlot(slotIndex);
 					RefillUpgradeWrapper.TargetSlot targetSlot = slotBeingChanged == slotIndex ? targetSlotBeingChanged : ts;
-					drawString(poseStack, font, targetSlot.getAcronym(),
+					guiGraphics.drawString(font, targetSlot.getAcronym(),
 							getX() + (slotIndex % slotsInRow) * 18 + 10, getY() + (slotIndex / slotsInRow) * 18 + 2, DyeColor.GREEN.getTextColor());
 				}
 					});
@@ -151,8 +153,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 
 		@Override
-		public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.render(matrixStack, mouseX, mouseY, partialTicks);
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			super.render(guiGraphics, mouseX, mouseY, partialTicks);
 
 			int slot = getSlot(mouseX, mouseY);
 

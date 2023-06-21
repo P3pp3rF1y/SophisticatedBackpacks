@@ -82,6 +82,7 @@ public class KeybindHandler {
 	public static void register() {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(KeybindHandler::handleKeyInputEvent);
+		eventBus.addListener(KeybindHandler::screenKeyPressed);
 		eventBus.addListener(EventPriority.HIGH, KeybindHandler::handleGuiMouseKeyPress);
 		eventBus.addListener(EventPriority.HIGH, KeybindHandler::handleGuiKeyPress);
 	}
@@ -95,8 +96,11 @@ public class KeybindHandler {
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
-		if (SORT_KEYBIND.isActiveAndMatches(InputConstants.getKey(event.getKeyCode(), event.getScanCode())) && tryCallSort(event.getScreen())) {
+		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
+		if (SORT_KEYBIND.isActiveAndMatches(key) && tryCallSort(event.getScreen())) {
 			event.setCanceled(true);
+		} else if (BACKPACK_OPEN_KEYBIND.isActiveAndMatches(key)) {
+			sendBackpackOpenOrCloseMessage();
 		}
 	}
 
@@ -123,6 +127,10 @@ public class KeybindHandler {
 				}
 			}
 		}
+	}
+
+	private static void screenKeyPressed(ScreenEvent.KeyPressed.Post event) {
+
 	}
 
 	private static boolean tryCallSort(Screen gui) {

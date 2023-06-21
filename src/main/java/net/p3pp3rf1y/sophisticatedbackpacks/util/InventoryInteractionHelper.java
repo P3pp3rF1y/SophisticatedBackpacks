@@ -34,7 +34,7 @@ public class InventoryInteractionHelper {
 
 		return WorldHelper.getBlockEntity(world, pos)
 				.map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
-						.map(itemHandler -> player.level.isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+						.map(itemHandler -> player.level().isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))
 								.orElse(false)).orElse(false)
 				).orElse(false);

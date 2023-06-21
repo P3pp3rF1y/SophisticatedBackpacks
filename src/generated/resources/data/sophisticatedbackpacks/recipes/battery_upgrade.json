@@ -2,26 +2,26 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:battery_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:battery_upgrade"
     }
   ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "G": {
+      "tag": "forge:ingots/gold"
+    },
+    "R": {
+      "tag": "forge:storage_blocks/redstone"
+    }
+  },
   "pattern": [
     "GRG",
     "RBR",
     "GRG"
   ],
-  "key": {
-    "R": {
-      "tag": "forge:storage_blocks/redstone"
-    },
-    "G": {
-      "tag": "forge:ingots/gold"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:battery_upgrade"
   }

@@ -2,19 +2,17 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "name": "main",
-      "rolls": 1.0,
       "bonus_rolls": 0.0,
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 5,
-          "name": "sophisticatedbackpacks:backpack"
+          "name": "sophisticatedbackpacks:backpack",
+          "weight": 5
         },
         {
           "type": "minecraft:item",
-          "weight": 3,
-          "name": "sophisticatedbackpacks:iron_backpack"
+          "name": "sophisticatedbackpacks:iron_backpack",
+          "weight": 3
         },
         {
           "type": "minecraft:item",
@@ -22,14 +20,16 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 2,
-          "name": "sophisticatedbackpacks:magnet_upgrade"
+          "name": "sophisticatedbackpacks:magnet_upgrade",
+          "weight": 2
         },
         {
           "type": "minecraft:empty",
           "weight": 89
         }
-      ]
+      ],
+      "rolls": 1.0
     }
-  ]
+  ],
+  "random_sequence": "sophisticatedbackpacks:inject/chests/abandoned_mineshaft"
 }

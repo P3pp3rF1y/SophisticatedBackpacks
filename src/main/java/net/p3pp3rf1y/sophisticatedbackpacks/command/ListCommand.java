@@ -33,7 +33,7 @@ public class ListCommand {
 	private static int printBackpackList(List<AccessLogRecord> allLogs, CommandSourceStack source) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
 		allLogs.sort(Comparator.comparing(AccessLogRecord::getAccessTime).reversed());
-		source.sendSuccess(Component.translatable("commands.sophisticatedbackpacks.list.header"), false);
+		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.list.header"), false);
 		allLogs.forEach(alr -> {
 			MutableComponent message = Component.literal("");
 			message.append(Component.literal(alr.getBackpackName())
@@ -54,7 +54,7 @@ public class ListCommand {
 			message.append(Component.literal(alr.getPlayerName()));
 			message.append(Component.literal(", "));
 			message.append(Component.literal(dateFormat.format(new Date(alr.getAccessTime()))));
-			source.sendSuccess(message, false);
+			source.sendSuccess(() -> message, false);
 		});
 		return 0;
 	}

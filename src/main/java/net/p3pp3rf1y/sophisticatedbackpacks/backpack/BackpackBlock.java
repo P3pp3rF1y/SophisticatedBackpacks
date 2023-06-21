@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -62,6 +62,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 
@@ -76,14 +77,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	private static final int BEDROCK_RESISTANCE = 3600000;
 
 	public BackpackBlock() {
-		super(Properties.of(Material.WOOL).noOcclusion().strength(0.8F).sound(SoundType.WOOL));
+		super(Properties.of().mapColor(MapColor.WOOL).noOcclusion().strength(0.8F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY));
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false));
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public PushReaction getPistonPushReaction(BlockState pState) {
-		return PushReaction.DESTROY;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -220,25 +215,25 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	public static void playerInteract(PlayerInteractEvent.RightClickBlock event) {
 		Player player = event.getEntity();
-		Level world = player.level;
+		Level level = player.level();
 		BlockPos pos = event.getPos();
 
 		if (!player.isShiftKeyDown() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(event)) {
 			return;
 		}
 
-		if (world.isClientSide) {
+		if (level.isClientSide) {
 			event.setCanceled(true);
 			event.setCancellationResult(InteractionResult.SUCCESS);
 			return;
 		}
 
-		BlockState state = world.getBlockState(pos);
+		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof BackpackBlock)) {
 			return;
 		}
 
-		putInPlayersHandAndRemove(state, world, pos, player, player.getMainHandItem().isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+		putInPlayersHandAndRemove(state, level, pos, player, player.getMainHandItem().isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
 
 		event.setCanceled(true);
 		event.setCancellationResult(InteractionResult.SUCCESS);
@@ -306,9 +301,9 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private static Vector3f getBackpackMiddleFacePoint(BlockPos pos, Direction facing, Vector3f vector) {
-		Vector3f point = vector.copy();
+		Vector3f point = new Vector3f(vector);
 		point.add(0, 0, 0.41f);
-		point.transform(Vector3f.YN.rotationDegrees(facing.toYRot()));
+		point.rotate(Axis.YN.rotationDegrees(facing.toYRot()));
 		point.add(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
 		return point;
 	}

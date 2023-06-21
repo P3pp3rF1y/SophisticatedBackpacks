@@ -21,7 +21,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -94,7 +94,7 @@ public class CommonEventHandler {
 		if (!isPointingAtBody || !isPointingAtBack) {
 			return;
 		}
-		if (targetPlayer.level.isClientSide) {
+		if (targetPlayer.level().isClientSide) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
 			SBPPacketHandler.INSTANCE.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
 		}
@@ -183,7 +183,7 @@ public class CommonEventHandler {
 
 	private void onAttackEntity(AttackEntityEvent event) {
 		Player player = event.getEntity();
-		if (player.level.isClientSide) {
+		if (player.level().isClientSide) {
 			return;
 		}
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -197,7 +197,7 @@ public class CommonEventHandler {
 				}).orElse(false));
 	}
 
-	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
+	private void onLivingSpecialSpawn(MobSpawnEvent.FinalizeSpawn event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Monster monster && monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 			EntityBackpackAdditionHandler.addBackpack(monster, event.getLevel());
