@@ -42,10 +42,10 @@ repositories {
     maven { url "https://maven.blamejared.com/" }
     maven {
         name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
+        url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
         credentials {
-            username = System.getenv("GITHUB_ACTOR")
-            password = System.getenv("GITHUB_TOKEN")
+            username = System.getenv("USERNAME")
+            password = System.getenv("READ_PACKAGES_TOKEN")
         }
     }
 }
@@ -117,9 +117,15 @@ dependencies {
     if (findProject(':SophisticatedCore') != null) {
         implementation project(':SophisticatedCore')
     } else {
-        compileOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}")
-        runtimeOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}")
-        testImplementation fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}")
+        compileOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+            transitive = false
+        }
+        runtimeOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+            transitive = false
+        }
+        testImplementation fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+            transitive = false
+        }
     }
 
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
