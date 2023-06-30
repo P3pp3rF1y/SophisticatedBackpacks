@@ -259,8 +259,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void registerController(ControllerBlockEntityBase controllerBlockEntity) {
 		IControllableStorage.super.registerController(controllerBlockEntity);
-		backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
-		backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+		if (level != null && !level.isClientSide) {
+			backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
+			backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+		}
 	}
 
 	@Override
