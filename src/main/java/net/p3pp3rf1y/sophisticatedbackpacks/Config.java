@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("java:S1192") //don't complain about repeated config names if two upgrades happen to have the same setting
 public class Config {
 
+	private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
+
 	private Config() {}
 
 	public static final Server SERVER;
@@ -56,6 +58,7 @@ public class Config {
 	public static class Server {
 		public final DisallowedItems disallowedItems;
 		public final NoInteractionBlocks noInteractionBlocks;
+		public final NoConnectionBlocks noConnectionBlocks;
 		public final BackpackConfig leatherBackpack;
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
@@ -99,6 +102,7 @@ public class Config {
 		public final XpPumpUpgradeConfig xpPumpUpgrade;
 		public final NerfsConfig nerfsConfig;
 
+
 		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfigEvent.Reloading event) {
 			disallowedItems.initialized = false;
@@ -110,6 +114,7 @@ public class Config {
 
 			disallowedItems = new DisallowedItems(builder);
 			noInteractionBlocks = new NoInteractionBlocks(builder);
+			noConnectionBlocks = new NoConnectionBlocks(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
@@ -158,7 +163,6 @@ public class Config {
 
 			builder.pop();
 		}
-
 		public static class NerfsConfig {
 			public final ForgeConfigSpec.BooleanValue tooManyBackpacksSlowness;
 			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
@@ -172,10 +176,9 @@ public class Config {
 				onlyWornBackpackTriggersUpgrades = builder.comment("Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.").define("onlyWornBackpackTriggersUpgrades", false);
 				builder.pop();
 			}
-		}
 
+		}
 		public static class EntityBackpackAdditionsConfig {
-			private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
 			private static final String ENTITY_LOOT_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)\\|(null|[a-z0-9_.-]+:[a-z0-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
@@ -330,6 +333,39 @@ public class Config {
 					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
 					if (ForgeRegistries.BLOCKS.containsKey(registryName)) {
 						noInteractionBlocksSet.add(ForgeRegistries.BLOCKS.getValue(registryName));
+					}
+				}
+			}
+		}
+
+		public static class NoConnectionBlocks {
+			private final ForgeConfigSpec.ConfigValue<List<? extends String>> noConnectionBlocksList;
+			private boolean initialized = false;
+			private Set<Block> noConnnectionBlocksSet = null;
+
+			NoConnectionBlocks(ForgeConfigSpec.Builder builder) {
+				noConnectionBlocksList = builder.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
+						.defineList("noConnectionBlocks", new ArrayList<>(), mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+			}
+
+			public boolean isBlockConnectionDisallowed(Block block) {
+				if (!SERVER_SPEC.isLoaded()) {
+					return true;
+				}
+				if (!initialized) {
+					loadDisallowedSet();
+				}
+				return noConnnectionBlocksSet.contains(block);
+			}
+
+			private void loadDisallowedSet() {
+				initialized = true;
+				noConnnectionBlocksSet = new HashSet<>();
+
+				for (String disallowedItemName : noConnectionBlocksList.get()) {
+					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
+					if (ForgeRegistries.BLOCKS.containsKey(registryName)) {
+						noConnnectionBlocksSet.add(ForgeRegistries.BLOCKS.getValue(registryName));
 					}
 				}
 			}
