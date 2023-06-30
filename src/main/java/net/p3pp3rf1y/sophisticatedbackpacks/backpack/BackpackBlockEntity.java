@@ -18,6 +18,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -139,6 +140,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+		if (side != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(side)).getBlock())) {
+			return super.getCapability(cap, side);
+		}
+
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			if (itemHandlerCap == null) {
 				itemHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput());
@@ -254,8 +259,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void registerController(ControllerBlockEntityBase controllerBlockEntity) {
 		IControllableStorage.super.registerController(controllerBlockEntity);
-		backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
-		backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+		if (level != null && !level.isClientSide) {
+			backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
+			backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
+		}
 	}
 
 	@Override
