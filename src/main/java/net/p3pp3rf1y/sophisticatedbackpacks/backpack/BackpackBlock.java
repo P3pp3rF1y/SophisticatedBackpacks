@@ -77,7 +77,11 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	private static final int BEDROCK_RESISTANCE = 3600000;
 
 	public BackpackBlock() {
-		super(Properties.of(Material.WOOL).noOcclusion().strength(0.8F).sound(SoundType.WOOL));
+		this(0.8F);
+	}
+
+	public BackpackBlock(float explosionResistance) {
+		super(Properties.of(Material.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL));
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false));
 	}
 
