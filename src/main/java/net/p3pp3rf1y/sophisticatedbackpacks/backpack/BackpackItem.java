@@ -439,4 +439,9 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 		return super.overrideOtherStackedOnMe(storageStack, otherStack, slot, action, player, carriedAccess);
 	}
+
+	@Override
+	public boolean canFitInsideContainerItems() {
+		return Config.SERVER.canBePlacedInContainerItems.get();
+	}
 }
