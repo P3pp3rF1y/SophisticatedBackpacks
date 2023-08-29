@@ -18,6 +18,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -79,6 +80,14 @@ public class EntityBackpackAdditionHandler {
 			new WeightedElement<>(81, Items.LEATHER_BOOTS)
 	);
 
+	private static final Map<Item, Float> dropChanceMultiplier = Map.of(
+			ModItems.BACKPACK.get(), 1F,
+			ModItems.IRON_BACKPACK.get(), 1.5F,
+			ModItems.GOLD_BACKPACK.get(), 3F,
+			ModItems.DIAMOND_BACKPACK.get(), 4.5F,
+			ModItems.NETHERITE_BACKPACK.get(), 6F
+	);
+
 	private static final List<WeightedElement<BackpackAddition>> BACKPACK_CHANCES = List.of(
 			new WeightedElement<>(1, new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
 					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1))),
@@ -101,7 +110,7 @@ public class EntityBackpackAdditionHandler {
 	static void addBackpack(Monster monster) {
 		Random rnd = monster.level.random;
 		if (!Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
-				|| rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) != 0) {
+				|| rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) != 0 || (monster instanceof Raider raider && raider.getCurrentRaid() != null)) {
 			return;
 		}
 
@@ -218,11 +227,10 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(
-			new ApplicableEffect(MobEffects.DAMAGE_RESISTANCE, 2),
+			new ApplicableEffect(List.of(MobEffects.DAMAGE_RESISTANCE, MobEffects.REGENERATION), 1),
 			new ApplicableEffect(MobEffects.FIRE_RESISTANCE),
 			new ApplicableEffect(MobEffects.ABSORPTION),
 			new ApplicableEffect(MobEffects.HEALTH_BOOST),
-			new ApplicableEffect(MobEffects.REGENERATION, 2),
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 
@@ -242,7 +250,7 @@ public class EntityBackpackAdditionHandler {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(applicableEffect -> {
 						int amplifier = Math.min(Math.max(minDifficulty, monster.level.random.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
-						monster.addEffect(new MobEffectInstance(applicableEffect.getEffect(), 30 * 60 * 20, amplifier));
+						monster.addEffect(new MobEffectInstance(applicableEffect.getRandomEffect(monster.level.random), 30 * 60 * 20, amplifier));
 					});
 		}
 	}
@@ -261,8 +269,7 @@ public class EntityBackpackAdditionHandler {
 			LivingEntity mob = event.getEntityLiving();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
-			if (event.getSource().getEntity() instanceof Player && (Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) || !(event.getSource().getEntity() instanceof FakePlayer)) &&
-					Math.max(mob.level.random.nextFloat() - event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get(), 0.0F) < additionsConfig.backpackDropChance.get()) {
+			if (shouldDropBackpack(event, additionsConfig, mob, backpack)) {
 				ItemEntity backpackEntity = new ItemEntity(mob.level, mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
@@ -271,6 +278,17 @@ public class EntityBackpackAdditionHandler {
 				removeContentsUuid(backpack);
 			}
 		}
+	}
+
+	private static boolean shouldDropBackpack(LivingDropsEvent event, Config.Server.EntityBackpackAdditionsConfig additionsConfig, LivingEntity mob, ItemStack backpack) {
+		if (!(event.getSource().getEntity() instanceof Player)) {
+			return false;
+		}
+		if (!Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) && event.getSource().getEntity() instanceof FakePlayer) {
+			return false;
+		}
+		float lootingChanceMultiplier = dropChanceMultiplier.getOrDefault(backpack.getItem(), 1F);
+		return mob.level.random.nextFloat() < (additionsConfig.backpackDropChance.get() + event.getLootingLevel() * additionsConfig.lootingChanceIncreasePerLevel.get()) * lootingChanceMultiplier;
 	}
 
 	public static void removeBeneficialEffects(Creeper creeper) {
@@ -334,21 +352,21 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static class ApplicableEffect {
-		private final MobEffect effect;
+		private final List<MobEffect> effects;
 
 		private final int maxAmplifier;
 
 		private ApplicableEffect(MobEffect effect) {
-			this(effect, Integer.MAX_VALUE);
+			this(List.of(effect), Integer.MAX_VALUE);
 		}
 
-		private ApplicableEffect(MobEffect effect, int maxAmplifier) {
-			this.effect = effect;
+		private ApplicableEffect(List<MobEffect> effects, int maxAmplifier) {
+			this.effects = effects;
 			this.maxAmplifier = maxAmplifier;
 		}
 
-		public MobEffect getEffect() {
-			return effect;
+		public MobEffect getRandomEffect(Random random) {
+			return effects.get(random.nextInt(effects.size()));
 		}
 
 		public int getMaxAmplifier() {
