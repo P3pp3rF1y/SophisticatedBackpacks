@@ -44,7 +44,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public boolean isInWater() {
-		return getY() < -63 || super.isInWater();
+		return getY() < level.getMinBuildHeight() + 1 || super.isInWater();
 	}
 
 	@Override
