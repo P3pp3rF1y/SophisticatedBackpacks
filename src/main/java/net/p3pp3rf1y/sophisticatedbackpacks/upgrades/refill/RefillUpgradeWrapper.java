@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
@@ -140,7 +141,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		AtomicInteger stashSlot = new AtomicInteger(-1);
 		AtomicBoolean hasItemInBackpack = new AtomicBoolean(false);
 
-		InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
+		ITrackedContentsItemHandler inventoryHandler = storageWrapper.getInventoryForUpgradeProcessing();
 		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
 			if (ItemHandlerHelper.canItemStacksStack(stack, filter)) {
 				hasItemInBackpack.set(true);
