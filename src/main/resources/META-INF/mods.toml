@@ -50,7 +50,7 @@ Fancy and functional backpacks.
 [[dependencies.sophisticatedbackpacks]]
 modId="forge" #mandatory
 mandatory=true #mandatory
-versionRange="[${neo_version},)" #mandatory
+versionRange="${neo_version_range}" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
