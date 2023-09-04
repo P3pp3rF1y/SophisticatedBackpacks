@@ -1,27 +1,10 @@
-buildscript {
-    repositories {
-        maven {
-            name = "forge"
-            url = "https://maven.minecraftforge.net"
-        }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+', changing: true
-    }
-}
-
 plugins {
+    id 'idea'
     id "org.sonarqube" version "3.3"
     id "maven-publish"
+    id 'net.neoforged.gradle' version '[6.0.18,6.2)'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
 
 if (findProject(':SophisticatedCore') != null) {
     evaluationDependsOn(':SophisticatedCore')
@@ -50,47 +33,36 @@ repositories {
     }
 }
 
-group = 'sophisticatedbackpacks'
+group = mod_group_id
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
-archivesBaseName = 'sophisticatedbackpacks'
+archivesBaseName = mod_id
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
     mappings channel: 'parchment', version: "$parchment_version"
+    copyIdeResources = true
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
-        client {
-            workingDirectory project.file('run')
+        configureEach {
+            workingDirectory project.file("run/${it.name}")
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             property "mixin.env.disableRefMap", "true"
             //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
-                sophisticatedbackpacks {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
+        }
+        client {
         }
         server {
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            property "mixin.env.disableRefMap", "true"
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            workingDirectory project.file('run')
-            mods {
-                sophisticatedbackpacks {
-                    source sourceSets.main
-                }
-            }
         }
         data {
-            property 'forge.logging.markers', 'REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
             property 'fml.earlyprogresswindow', 'false'
-            property "mixin.env.disableRefMap", "true"
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            workingDirectory project.file('run')
             args '--mod', 'sophisticatedbackpacks', '--flat', '--all', '--output', file('src/generated/resources/')
 
             mods {
@@ -98,9 +70,6 @@ minecraft {
                     SophisticatedCore {
                         source project(':SophisticatedCore').sourceSets.main
                     }
-                }
-                sophisticatedbackpacks {
-                    source sourceSets.main
                 }
             }
         }
@@ -112,7 +81,7 @@ sourceSets.main.resources {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
 
     if (findProject(':SophisticatedCore') != null) {
         implementation project(':SophisticatedCore')
@@ -144,35 +113,38 @@ dependencies {
 */
 }
 
-test {
-    useTestNG()
-}
-
-task generateSources(type: Copy) {
-    from 'src/replaceme/java'
-    into "$buildDir/generated-src"
-    filter { line -> line.replaceAll('@MOD_VERSION@', '${project.version}') }
-}
-
-jar {
+tasks.named('jar', Jar).configure {
     from('/') {
         include 'LICENSE'
     }
 
     manifest {
-        attributes(["Specification-Title"     : "sophisticatedbackpacks",
-                    "Specification-Vendor"    : "p3pp3rf1y",
-                    "Specification-Version"   : "1",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${project.version}",
-                    "Implementation-Vendor"   : "p3pp3rf1y",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : "p3pp3rf1y",
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : "p3pp3rf1y",
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 
-processResources {
-    // Exclude datagenerator .cache directory
-    exclude '.cache'
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+            neo_version         : neo_version, neo_version_range: neo_version_range,
+            loader_version_range: loader_version_range,
+            mod_id              : mod_id, mod_version: mod_version,
+            mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
+            sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf('.'))
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
+    }
 }
 
 static def getBuildNumber() {
@@ -183,17 +155,21 @@ static def getBuildNumber() {
 }
 
 static def getStable() {
-    if ((System.getenv("GITHUB_REF") != null && System.getenv("GITHUB_REF").endsWith("-dev"))) {
-        return "-alpha"
+    if ((System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev"))) {
+        return "-SNAPSHOT"
     }
     return ""
+}
+
+tasks.named('publish').configure {
+    dependsOn 'reobfJar'
 }
 
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
+            url = uri("${github_package_url}")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -202,7 +178,7 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            artifactId = 'sophisticatedbackpacks'
+            artifactId = mod_id
             from(components.java)
         }
     }
@@ -210,8 +186,8 @@ publishing {
 
 sonarqube {
     properties {
-        property "sonar.projectName", "SophisticatedBackpacks"
-        property "sonar.projectKey", "sophisticatedbackpacks:SophisticatedBackpacks"
+        property "sonar.projectName", "${mod_id}"
+        property "sonar.projectKey", "${sonar_project_key}"
     }
 }
 

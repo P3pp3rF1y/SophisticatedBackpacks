@@ -10,6 +10,7 @@
 !build.gradle
 !build.properties
 !gradle.properties
+!settings.gradle
 !.github/
 
 # include markdowns
