@@ -7,7 +7,7 @@
 modLoader="javafml" #mandatory
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the minecraft version (without the 1.)
-loaderVersion = "[18,)" #mandatory
+loaderVersion="${loader_version_range}" #mandatory
 
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="" #optional
@@ -37,7 +37,7 @@ authors="P3pp3rF1y, Ridanisaurus" #optional
 modId="sophisticatedbackpacks" #mandatory
 
 # The version number of the mod
-version="${file.jarVersion}" #mandatory
+version="${mod_full_version}" #mandatory
 
 # A display name for the mod
 displayName="Sophisticated Backpacks" #mandatory
@@ -50,7 +50,7 @@ Fancy and functional backpacks.
 [[dependencies.sophisticatedbackpacks]]
 modId="forge" #mandatory
 mandatory=true #mandatory
-versionRange="[43.0.0,)" #mandatory
+versionRange="[${neo_version},)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -60,7 +60,7 @@ side="BOTH"
 [[dependencies.sophisticatedbackpacks]]
 modId="sophisticatedcore" #mandatory
 mandatory=true #mandatory
-versionRange="[1.20.1-0.5.62,)" #mandatory
+versionRange="[${sc_version},)" #mandatory
 # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
 ordering="NONE"
 # Side this dependency is applied on - BOTH, CLIENT or SERVER
