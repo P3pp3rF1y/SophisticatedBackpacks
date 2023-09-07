@@ -63,6 +63,7 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
@@ -397,7 +398,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
 				return StashResult.NO_SPACE;
 			}
-			if (wrapper.getInventoryForUpgradeProcessing().getTrackedStacks().contains(ItemStackKey.of(stack))) {
+			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
 				return StashResult.MATCH_AND_SPACE;
 			}
 
