@@ -138,7 +138,7 @@ tasks.withType(ProcessResources).configureEach {
             loader_version_range: loader_version_range,
             mod_id              : mod_id, mod_version: mod_version,
             mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
-            sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf('.'))
+            sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf(',')) + ".+"
     ]
     inputs.properties replaceProperties
 
@@ -155,7 +155,7 @@ static def getBuildNumber() {
 }
 
 static def getStable() {
-    if ((System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev"))) {
+    if (System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev")) {
         return "-SNAPSHOT"
     }
     return ""
