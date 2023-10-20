@@ -62,7 +62,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
-import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -114,7 +113,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void addCreativeTabItems(Consumer<ItemStack> itemConsumer) {
 		super.addCreativeTabItems(itemConsumer);
 
-		if (this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(this)) {
+		if (this != ModItems.BACKPACK.get() || !net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(this)) {
 			return;
 		}
 
