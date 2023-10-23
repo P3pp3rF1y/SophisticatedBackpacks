@@ -112,6 +112,7 @@
     "gui.sophisticatedbackpacks.status.no_tool_found_for_entity": "No tool was found that works on entity",
     "gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present": "No upgrade present that can do tool swap on key press",
     "gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player": "This backpack cannot be open by another player",
+    "gui.sophisticatedbackpacks.status.no_space_for_mainhand_item": "There's no place for item in hand in either backpack or player's inventory",
     "gui.sophisticatedbackpacks.settings.tooltip": "Backpack Settings",
     "gui.sophisticatedbackpacks.settings.title": "Backpack Settings",
     "gui.sophisticatedbackpacks.back_to_backpack.tooltip": "Back To Backpack",
