@@ -77,7 +77,7 @@
     "item.sophisticatedbackpacks.stack_upgrade_tier_4.tooltip": "Multipliziert die Anzahl der Stapel, die in einen Slot passen, mit 16",
     "item.sophisticatedbackpacks.battery_upgrade": "Akku-Upgrade",
     "item.sophisticatedbackpacks.battery_upgrade.tooltip": "Ersetzt einen Teil des Inventars des Rucksacks durch Energiespeicher",
-    "item.sophisticatedbackpacks.tank_upgrade": "Panzer-Upgrade",
+    "item.sophisticatedbackpacks.tank_upgrade": "Tank-Upgrade",
     "item.sophisticatedbackpacks.tank_upgrade.tooltip": "Ersetzt einen Teil des Rucksackinventars durch Flüssigkeitsspeicher",
     "item.sophisticatedbackpacks.pump_upgrade": "Pumpen-Upgrade",
     "item.sophisticatedbackpacks.pump_upgrade.tooltip": "Pumpt Flüssigkeiten zwischen Tank-Upgrade und angrenzenden Blöcken",
