@@ -15,7 +15,6 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
@@ -143,22 +142,49 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
 			if (ItemHandlerHelper.canItemStacksStack(stack, filter)) {
 				hasItemInBackpack.set(true);
-				if (stack.getCount() <= stack.getMaxStackSize()) {
-					stashSlot.set(slot);
-				}
+				stashSlot.set(slot);
 			}
 		}, () -> stashSlot.get() > -1);
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (hasItemInBackpack.get() && !(mainHandItem.getItem() instanceof BackpackItem) &&
-				(mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), mainHandItem)) || inventoryHandler.insertItem(mainHandItem, true).isEmpty())) {
-			ItemStack toExtract = filter.copy();
-			toExtract.setCount(filter.getMaxStackSize());
-			ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
-			if (!extracted.isEmpty()) {
+		ItemStack toExtract = filter.copy();
+		toExtract.setCount(filter.getMaxStackSize());
+		if (hasItemInBackpack.get() && !InventoryHelper.extractFromInventory(toExtract, inventoryHandler, true).isEmpty()) {
+			if ((inventoryHandler.getStackInSlot(stashSlot.get()).getCount() > filter.getMaxStackSize() || !inventoryHandler.isItemValid(stashSlot.get(), mainHandItem))
+				&& !inventoryHandler.insertItem(mainHandItem, true).isEmpty()) {
+				if (canMoveMainHandToInventory(player)) {
+					ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
+					player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
+					player.getInventory().add(mainHandItem);
+					return true;
+				} else {
+					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"), true);
+					return false;
+				}
+			} else {
+				ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
 				inventoryHandler.insertItem(mainHandItem, false);
 				player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
 				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean canMoveMainHandToInventory(Player player) {
+		int countToAdd = player.getMainHandItem().getCount();
+		for (int slot = 0; slot < player.getInventory().getContainerSize() - 5; slot++) {
+			if (slot == player.getInventory().selected) {
+				continue;
+			}
+			ItemStack slotStack = player.getInventory().getItem(slot);
+			if (slotStack.isEmpty()) {
+				return true;
+			} else if (ItemHandlerHelper.canItemStacksStack(slotStack, player.getMainHandItem())) {
+				countToAdd -= (slotStack.getMaxStackSize() - slotStack.getCount());
+				if (countToAdd <= 0) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -309,3 +335,4 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}
 	}
 }
+
