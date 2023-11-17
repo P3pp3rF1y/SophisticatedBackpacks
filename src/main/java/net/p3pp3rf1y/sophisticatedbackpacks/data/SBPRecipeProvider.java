@@ -11,14 +11,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped.ChippedCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds;
+import net.p3pp3rf1y.sophisticatedcore.compat.chipped.BlockTransformationUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
@@ -576,6 +581,32 @@ public class SBPRecipeProvider extends RecipeProvider {
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
 				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK.get()));
+
+		addChippedUpgradeRecipes(consumer);
+	}
+
+	private static void addChippedUpgradeRecipes(Consumer<FinishedRecipe> consumer) {
+		addChippedUpgradeRecipe(consumer, ChippedCompat.BOTANIST_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.BOTANIST_WORKBENCH.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.GLASSBLOWER_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.GLASSBLOWER.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.CARPENTER_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.CARPENTERS_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.SHEPHERD_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.LOOM_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.MASON_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.MASON_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.PHILOSOPHER_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.ALCHEMY_BENCH.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.TINKERER_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.registry.ModBlocks.MECHANIST_WORKBENCH.get());
+	}
+
+	private static void addChippedUpgradeRecipe(Consumer<FinishedRecipe> consumer, BlockTransformationUpgradeItem upgrade, Block workbench) {
+		ShapeBasedRecipeBuilder.shaped(upgrade)
+				.pattern(" W ")
+				.pattern("IBI")
+				.pattern(" R ")
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.define('R', Tags.Items.DUSTS_REDSTONE)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('W', workbench)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.condition(new ModLoadedCondition(CompatModIds.CHIPPED))
+				.save(consumer);
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance hasLeather() {
