@@ -105,6 +105,12 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
     compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
     runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:chipped-456956:${chipped_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:chipped-456956:${chipped_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:athena-841890:${athena_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:athena-841890:${athena_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
 /*
     compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")

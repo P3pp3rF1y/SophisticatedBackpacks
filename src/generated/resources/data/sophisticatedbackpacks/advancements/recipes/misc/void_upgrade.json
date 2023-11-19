@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:void_upgrade"
     ]
-  },
-  "sends_telemetry_event": true
+  }
 }

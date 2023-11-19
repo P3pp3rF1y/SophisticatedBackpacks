@@ -41,6 +41,7 @@ public class SophisticatedBackpacks {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
 		commonEventHandler.registerHandlers();
+		ModCompat.initCompats();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers();
@@ -61,7 +62,7 @@ public class SophisticatedBackpacks {
 
 	private static void setup(FMLCommonSetupEvent event) {
 		SBPPacketHandler.INSTANCE.init();
-		ModCompat.initCompats();
+		ModCompat.compatsSetup();
 		event.enqueueWork(ModItems::registerDispenseBehavior);
 		ModItems.registerCauldronInteractions();
 	}
