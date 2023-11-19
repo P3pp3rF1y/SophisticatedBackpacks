@@ -2,23 +2,23 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:smoking_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:smoking_upgrade"
     }
   ],
+  "key": {
+    "L": {
+      "tag": "minecraft:logs"
+    },
+    "S": {
+      "item": "sophisticatedbackpacks:smelting_upgrade"
+    }
+  },
   "pattern": [
     " L ",
     "LSL",
     " L "
   ],
-  "key": {
-    "S": {
-      "item": "sophisticatedbackpacks:smelting_upgrade"
-    },
-    "L": {
-      "tag": "minecraft:logs"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:smoking_upgrade"
   }

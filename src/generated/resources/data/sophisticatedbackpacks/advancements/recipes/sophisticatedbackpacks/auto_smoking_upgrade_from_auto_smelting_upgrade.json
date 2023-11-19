@@ -1,13 +1,7 @@
 {
   "parent": "minecraft:recipes/root",
-  "rewards": {
-    "recipes": [
-      "sophisticatedbackpacks:auto_smoking_upgrade_from_auto_smelting_upgrade"
-    ]
-  },
   "criteria": {
     "has_auto_smelting_upgrade": {
-      "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
@@ -16,13 +10,14 @@
             ]
           }
         ]
-      }
+      },
+      "trigger": "minecraft:inventory_changed"
     },
     "has_the_recipe": {
-      "trigger": "minecraft:recipe_unlocked",
       "conditions": {
         "recipe": "sophisticatedbackpacks:auto_smoking_upgrade_from_auto_smelting_upgrade"
-      }
+      },
+      "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
@@ -30,5 +25,10 @@
       "has_auto_smelting_upgrade",
       "has_the_recipe"
     ]
-  ]
+  ],
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:auto_smoking_upgrade_from_auto_smelting_upgrade"
+    ]
+  }
 }

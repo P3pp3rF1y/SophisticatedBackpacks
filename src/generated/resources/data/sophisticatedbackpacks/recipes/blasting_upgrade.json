@@ -2,29 +2,29 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:blasting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:blasting_upgrade"
     }
-  ],
-  "pattern": [
-    "RIR",
-    "IBI",
-    "RFR"
   ],
   "key": {
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
+    "F": {
+      "item": "minecraft:blast_furnace"
     },
     "I": {
       "tag": "forge:ingots/iron"
     },
-    "F": {
-      "item": "minecraft:blast_furnace"
+    "R": {
+      "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    "RIR",
+    "IBI",
+    "RFR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:blasting_upgrade"
   }

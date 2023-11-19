@@ -2,14 +2,9 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:advanced_magnet_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_magnet_upgrade"
     }
-  ],
-  "pattern": [
-    "EIE",
-    "IPI",
-    "R L"
   ],
   "key": {
     "E": {
@@ -18,16 +13,21 @@
     "I": {
       "tag": "forge:ingots/iron"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
     "L": {
       "tag": "forge:gems/lapis"
     },
     "P": {
       "item": "sophisticatedbackpacks:advanced_pickup_upgrade"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
     }
   },
+  "pattern": [
+    "EIE",
+    "IPI",
+    "R L"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:advanced_magnet_upgrade"
   }

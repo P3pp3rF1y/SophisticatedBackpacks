@@ -2,14 +2,9 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:advanced_restock_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_restock_upgrade"
     }
-  ],
-  "pattern": [
-    " D ",
-    "GVG",
-    "RRR"
   ],
   "key": {
     "D": {
@@ -25,6 +20,11 @@
       "item": "sophisticatedbackpacks:restock_upgrade"
     }
   },
+  "pattern": [
+    " D ",
+    "GVG",
+    "RRR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:advanced_restock_upgrade"
   }

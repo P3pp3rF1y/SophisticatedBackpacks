@@ -2,26 +2,26 @@
   "type": "sophisticatedbackpacks:basic_backpack",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:backpack",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:backpack"
     }
   ],
-  "pattern": [
-    "SLS",
-    "SCS",
-    "LLL"
-  ],
   "key": {
-    "L": {
-      "tag": "forge:leather"
-    },
     "C": {
       "tag": "forge:chests/wooden"
+    },
+    "L": {
+      "tag": "forge:leather"
     },
     "S": {
       "tag": "forge:string"
     }
   },
+  "pattern": [
+    "SLS",
+    "SCS",
+    "LLL"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:backpack"
   }

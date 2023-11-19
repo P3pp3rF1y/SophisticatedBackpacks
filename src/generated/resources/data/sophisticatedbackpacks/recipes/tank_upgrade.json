@@ -2,23 +2,23 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:tank_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:tank_upgrade"
     }
   ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "G": {
+      "tag": "forge:glass"
+    }
+  },
   "pattern": [
     "GGG",
     "GBG",
     "GGG"
   ],
-  "key": {
-    "G": {
-      "tag": "forge:glass"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:tank_upgrade"
   }

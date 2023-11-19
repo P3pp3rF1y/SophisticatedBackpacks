@@ -2,23 +2,23 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_tier_2",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_tier_2"
     }
   ],
+  "key": {
+    "G": {
+      "tag": "forge:storage_blocks/gold"
+    },
+    "S": {
+      "item": "sophisticatedbackpacks:stack_upgrade_tier_1"
+    }
+  },
   "pattern": [
     "GGG",
     "GSG",
     "GGG"
   ],
-  "key": {
-    "S": {
-      "item": "sophisticatedbackpacks:stack_upgrade_tier_1"
-    },
-    "G": {
-      "tag": "forge:storage_blocks/gold"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:stack_upgrade_tier_2"
   }

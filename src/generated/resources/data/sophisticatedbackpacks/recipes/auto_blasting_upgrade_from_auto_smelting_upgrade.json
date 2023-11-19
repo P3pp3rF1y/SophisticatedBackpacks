@@ -2,26 +2,26 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:auto_blasting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:auto_blasting_upgrade"
     }
   ],
-  "pattern": [
-    "III",
-    "ISI",
-    "TTT"
-  ],
   "key": {
-    "S": {
-      "item": "sophisticatedbackpacks:auto_smelting_upgrade"
-    },
     "I": {
       "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "item": "sophisticatedbackpacks:auto_smelting_upgrade"
     },
     "T": {
       "item": "minecraft:smooth_stone"
     }
   },
+  "pattern": [
+    "III",
+    "ISI",
+    "TTT"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:auto_blasting_upgrade"
   }

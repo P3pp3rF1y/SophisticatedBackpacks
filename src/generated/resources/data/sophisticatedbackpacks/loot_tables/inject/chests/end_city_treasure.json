@@ -2,30 +2,30 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "name": "main",
-      "rolls": 1.0,
       "bonus_rolls": 0.0,
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 3,
-          "name": "sophisticatedbackpacks:diamond_backpack"
+          "name": "sophisticatedbackpacks:diamond_backpack",
+          "weight": 3
         },
         {
           "type": "minecraft:item",
-          "weight": 5,
-          "name": "sophisticatedbackpacks:gold_backpack"
+          "name": "sophisticatedbackpacks:gold_backpack",
+          "weight": 5
         },
         {
           "type": "minecraft:item",
-          "weight": 2,
-          "name": "sophisticatedbackpacks:advanced_magnet_upgrade"
+          "name": "sophisticatedbackpacks:advanced_magnet_upgrade",
+          "weight": 2
         },
         {
           "type": "minecraft:empty",
           "weight": 90
         }
-      ]
+      ],
+      "name": "main",
+      "rolls": 1.0
     }
   ]
 }

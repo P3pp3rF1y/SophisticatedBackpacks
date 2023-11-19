@@ -2,23 +2,23 @@
   "type": "sophisticatedbackpacks:backpack_upgrade",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:gold_backpack",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:gold_backpack"
     }
   ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:iron_backpack"
+    },
+    "G": {
+      "tag": "forge:ingots/gold"
+    }
+  },
   "pattern": [
     "GGG",
     "GBG",
     "GGG"
   ],
-  "key": {
-    "G": {
-      "tag": "forge:ingots/gold"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:iron_backpack"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:gold_backpack"
   }
