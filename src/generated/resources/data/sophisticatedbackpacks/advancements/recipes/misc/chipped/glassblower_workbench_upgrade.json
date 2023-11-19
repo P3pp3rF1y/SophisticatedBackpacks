@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:smoking_upgrade"
+        "recipe": "sophisticatedbackpacks:chipped/glassblower_workbench_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
@@ -28,7 +28,8 @@
   ],
   "rewards": {
     "recipes": [
-      "sophisticatedbackpacks:smoking_upgrade"
+      "sophisticatedbackpacks:chipped/glassblower_workbench_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:advanced_magnet_upgrade_from_basic"
     ]
-  },
-  "sends_telemetry_event": true
+  }
 }

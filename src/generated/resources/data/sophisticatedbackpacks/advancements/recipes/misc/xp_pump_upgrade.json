@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:xp_pump_upgrade"
     ]
-  },
-  "sends_telemetry_event": true
+  }
 }

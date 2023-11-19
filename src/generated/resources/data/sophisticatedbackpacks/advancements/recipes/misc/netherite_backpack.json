@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:netherite_backpack"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

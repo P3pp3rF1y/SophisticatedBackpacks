@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:jukebox_upgrade"
     ]
-  },
-  "sends_telemetry_event": true
+  }
 }

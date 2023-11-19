@@ -30,6 +30,5 @@
     "recipes": [
       "sophisticatedbackpacks:iron_backpack"
     ]
-  },
-  "sends_telemetry_event": true
+  }
 }
