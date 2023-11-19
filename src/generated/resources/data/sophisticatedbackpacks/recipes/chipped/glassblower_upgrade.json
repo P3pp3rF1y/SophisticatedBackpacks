@@ -7,7 +7,7 @@
     },
     {
       "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:chipped/tinkerer_workbench_upgrade"
+      "itemRegistryName": "sophisticatedbackpacks:chipped/glassblower_upgrade"
     }
   ],
   "key": {
@@ -21,7 +21,7 @@
       "tag": "forge:dusts/redstone"
     },
     "W": {
-      "item": "chipped:tinkering_table"
+      "item": "chipped:glassblower"
     }
   },
   "pattern": [
@@ -30,6 +30,6 @@
     " R "
   ],
   "result": {
-    "item": "sophisticatedbackpacks:chipped/tinkerer_workbench_upgrade"
+    "item": "sophisticatedbackpacks:chipped/glassblower_upgrade"
   }
 }

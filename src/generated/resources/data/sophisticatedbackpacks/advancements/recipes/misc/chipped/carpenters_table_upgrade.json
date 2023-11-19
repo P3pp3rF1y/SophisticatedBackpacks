@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:chipped/mason_workbench_upgrade"
+        "recipe": "sophisticatedbackpacks:chipped/carpenters_table_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "sophisticatedbackpacks:chipped/mason_workbench_upgrade"
+      "sophisticatedbackpacks:chipped/carpenters_table_upgrade"
     ]
   },
   "sends_telemetry_event": true

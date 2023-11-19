@@ -1,6 +1,0 @@
-{
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "sophisticatedbackpacks:item/chipped/carpenter_workbench_upgrade"
-    }
-}

@@ -7,7 +7,7 @@
     },
     {
       "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:chipped/carpenter_workbench_upgrade"
+      "itemRegistryName": "sophisticatedbackpacks:chipped/alchemy_bench_upgrade"
     }
   ],
   "key": {
@@ -21,7 +21,7 @@
       "tag": "forge:dusts/redstone"
     },
     "W": {
-      "item": "chipped:carpenters_table"
+      "item": "chipped:alchemy_bench"
     }
   },
   "pattern": [
@@ -30,6 +30,6 @@
     " R "
   ],
   "result": {
-    "item": "sophisticatedbackpacks:chipped/carpenter_workbench_upgrade"
+    "item": "sophisticatedbackpacks:chipped/alchemy_bench_upgrade"
   }
 }

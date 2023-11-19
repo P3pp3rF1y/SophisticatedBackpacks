@@ -28,17 +28,17 @@ public class ChippedCompat implements ICompat {
 
 	public static final RegistryObject<BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/botanist_workbench_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.BOTANIST_WORKBENCH_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> GLASSBLOWER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/glassblower_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> GLASSBLOWER_UPGRADE = ModItems.ITEMS.register("chipped/glassblower_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.GLASSBLOWER_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> CARPENTER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/carpenter_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> CARPENTERS_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/carpenters_table_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.CARPENTERS_TABLE_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> SHEPHERD_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/shepherd_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> LOOM_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/loom_table_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.LOOM_TABLE_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> MASON_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/mason_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> MASON_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/mason_table_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.MASON_TABLE_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> PHILOSOPHER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/philosopher_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> ALCHEMY_BENCH_UPGRADE = ModItems.ITEMS.register("chipped/alchemy_bench_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.ALCHEMY_BENCH_TYPE));
-	public static final RegistryObject<BlockTransformationUpgradeItem> TINKERER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/tinkerer_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> TINKERING_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/tinkering_table_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.TINKERING_TABLE_TYPE));
 
 	@Override
@@ -48,12 +48,12 @@ public class ChippedCompat implements ICompat {
 
 		SBPPlugin.setAdditionalCatalystRegistrar(registration -> {
 			registration.addRecipeCatalyst(new ItemStack(BOTANIST_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.BOTANIST_WORKBENCH_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(GLASSBLOWER_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.GLASSBLOWER_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(CARPENTER_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.CARPENTERS_TABLE_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(SHEPHERD_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.LOOM_TABLE_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(MASON_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.MASON_TABLE_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(PHILOSOPHER_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.ALCHEMY_BENCH_RECIPE);
-			registration.addRecipeCatalyst(new ItemStack(TINKERER_WORKBENCH_UPGRADE.get()), ChippedRecipeCategory.TINKERING_TABLE_RECIPE);		});
+			registration.addRecipeCatalyst(new ItemStack(GLASSBLOWER_UPGRADE.get()), ChippedRecipeCategory.GLASSBLOWER_RECIPE);
+			registration.addRecipeCatalyst(new ItemStack(CARPENTERS_TABLE_UPGRADE.get()), ChippedRecipeCategory.CARPENTERS_TABLE_RECIPE);
+			registration.addRecipeCatalyst(new ItemStack(LOOM_TABLE_UPGRADE.get()), ChippedRecipeCategory.LOOM_TABLE_RECIPE);
+			registration.addRecipeCatalyst(new ItemStack(MASON_TABLE_UPGRADE.get()), ChippedRecipeCategory.MASON_TABLE_RECIPE);
+			registration.addRecipeCatalyst(new ItemStack(ALCHEMY_BENCH_UPGRADE.get()), ChippedRecipeCategory.ALCHEMY_BENCH_RECIPE);
+			registration.addRecipeCatalyst(new ItemStack(TINKERING_TABLE_UPGRADE.get()), ChippedRecipeCategory.TINKERING_TABLE_RECIPE);		});
 	}
 
 	public void registerContainers(RegisterEvent event) {
@@ -61,12 +61,12 @@ public class ChippedCompat implements ICompat {
 			return;
 		}
 		registerUpgradeContainer(BOTANIST_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(GLASSBLOWER_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(CARPENTER_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(SHEPHERD_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(MASON_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(PHILOSOPHER_WORKBENCH_UPGRADE);
-		registerUpgradeContainer(TINKERER_WORKBENCH_UPGRADE);
+		registerUpgradeContainer(GLASSBLOWER_UPGRADE);
+		registerUpgradeContainer(CARPENTERS_TABLE_UPGRADE);
+		registerUpgradeContainer(LOOM_TABLE_UPGRADE);
+		registerUpgradeContainer(MASON_TABLE_UPGRADE);
+		registerUpgradeContainer(ALCHEMY_BENCH_UPGRADE);
+		registerUpgradeContainer(TINKERING_TABLE_UPGRADE);
 	}
 
 	private void registerUpgradeContainer(RegistryObject<BlockTransformationUpgradeItem> item) {

@@ -7,7 +7,7 @@
     },
     {
       "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:chipped/shepherd_workbench_upgrade"
+      "itemRegistryName": "sophisticatedbackpacks:chipped/carpenters_table_upgrade"
     }
   ],
   "key": {
@@ -21,7 +21,7 @@
       "tag": "forge:dusts/redstone"
     },
     "W": {
-      "item": "chipped:loom_table"
+      "item": "chipped:carpenters_table"
     }
   },
   "pattern": [
@@ -30,6 +30,6 @@
     " R "
   ],
   "result": {
-    "item": "sophisticatedbackpacks:chipped/shepherd_workbench_upgrade"
+    "item": "sophisticatedbackpacks:chipped/carpenters_table_upgrade"
   }
 }

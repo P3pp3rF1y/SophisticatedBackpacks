@@ -7,7 +7,7 @@
     },
     {
       "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:chipped/mason_workbench_upgrade"
+      "itemRegistryName": "sophisticatedbackpacks:chipped/loom_table_upgrade"
     }
   ],
   "key": {
@@ -21,7 +21,7 @@
       "tag": "forge:dusts/redstone"
     },
     "W": {
-      "item": "chipped:mason_table"
+      "item": "chipped:loom_table"
     }
   },
   "pattern": [
@@ -30,6 +30,6 @@
     " R "
   ],
   "result": {
-    "item": "sophisticatedbackpacks:chipped/mason_workbench_upgrade"
+    "item": "sophisticatedbackpacks:chipped/loom_table_upgrade"
   }
 }
