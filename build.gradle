@@ -138,8 +138,13 @@ dependencies {
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
     compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:chipped-456956:${chipped_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:chipped-456956:${chipped_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:ctm-267602:${ctm_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:ctm-267602:${ctm_cf_file_id}")
+    compileOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
+    runtimeOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
 }
 
 test {

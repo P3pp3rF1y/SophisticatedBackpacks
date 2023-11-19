@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "chipped"
+    },
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:chipped/tinkerer_workbench_upgrade"
+    }
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "chipped:tinkering_table"
+    }
+  },
+  "pattern": [
+    " W ",
+    "IBI",
+    " R "
+  ],
+  "result": {
+    "item": "sophisticatedbackpacks:chipped/tinkerer_workbench_upgrade"
+  }
+}

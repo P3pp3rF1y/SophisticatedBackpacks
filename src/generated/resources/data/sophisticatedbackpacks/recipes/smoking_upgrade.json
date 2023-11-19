@@ -2,29 +2,29 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:smoking_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:smoking_upgrade"
     }
-  ],
-  "pattern": [
-    "RIR",
-    "IBI",
-    "RSR"
   ],
   "key": {
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
     "I": {
       "tag": "forge:ingots/iron"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
     },
     "S": {
       "item": "minecraft:smoker"
     }
   },
+  "pattern": [
+    "RIR",
+    "IBI",
+    "RSR"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:smoking_upgrade"
   }

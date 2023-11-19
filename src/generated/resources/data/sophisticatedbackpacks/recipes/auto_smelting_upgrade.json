@@ -2,14 +2,9 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:auto_smelting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:auto_smelting_upgrade"
     }
-  ],
-  "pattern": [
-    "DHD",
-    "RSH",
-    "GHG"
   ],
   "key": {
     "D": {
@@ -18,16 +13,21 @@
     "G": {
       "tag": "forge:ingots/gold"
     },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
     "H": {
       "item": "minecraft:hopper"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
     },
     "S": {
       "item": "sophisticatedbackpacks:smelting_upgrade"
     }
   },
+  "pattern": [
+    "DHD",
+    "RSH",
+    "GHG"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:auto_smelting_upgrade"
   }

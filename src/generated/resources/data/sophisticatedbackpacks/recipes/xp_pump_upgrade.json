@@ -2,29 +2,29 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:xp_pump_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:xp_pump_upgrade"
     }
   ],
+  "key": {
+    "C": {
+      "item": "minecraft:experience_bottle"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "P": {
+      "item": "sophisticatedbackpacks:advanced_pump_upgrade"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
   "pattern": [
     "RER",
     "CPC",
     "RER"
   ],
-  "key": {
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "C": {
-      "item": "minecraft:experience_bottle"
-    },
-    "P": {
-      "item": "sophisticatedbackpacks:advanced_pump_upgrade"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:xp_pump_upgrade"
   }

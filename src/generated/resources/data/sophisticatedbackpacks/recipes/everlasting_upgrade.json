@@ -2,26 +2,26 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:everlasting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:everlasting_upgrade"
     }
-  ],
-  "pattern": [
-    "CSC",
-    "SBS",
-    "CSC"
   ],
   "key": {
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
     },
-    "S": {
-      "tag": "forge:nether_stars"
-    },
     "C": {
       "item": "minecraft:end_crystal"
+    },
+    "S": {
+      "tag": "forge:nether_stars"
     }
   },
+  "pattern": [
+    "CSC",
+    "SBS",
+    "CSC"
+  ],
   "result": {
     "item": "sophisticatedbackpacks:everlasting_upgrade"
   }

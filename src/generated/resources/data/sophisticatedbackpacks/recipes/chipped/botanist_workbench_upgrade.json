@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "chipped"
+    },
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:chipped/botanist_workbench_upgrade"
+    }
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "chipped:botanist_workbench"
+    }
+  },
+  "pattern": [
+    " W ",
+    "IBI",
+    " R "
+  ],
+  "result": {
+    "item": "sophisticatedbackpacks:chipped/botanist_workbench_upgrade"
+  }
+}
