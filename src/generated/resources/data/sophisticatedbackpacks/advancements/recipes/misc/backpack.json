@@ -28,5 +28,6 @@
     "recipes": [
       "sophisticatedbackpacks:backpack"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

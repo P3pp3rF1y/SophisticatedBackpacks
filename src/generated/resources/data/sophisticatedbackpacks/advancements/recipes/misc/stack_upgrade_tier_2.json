@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:stack_upgrade_tier_2"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

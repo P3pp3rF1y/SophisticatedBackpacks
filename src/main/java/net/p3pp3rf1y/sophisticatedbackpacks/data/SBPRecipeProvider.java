@@ -574,6 +574,18 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
 				.save(consumer, SophisticatedBackpacks.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.ANVIL_UPGRADE.get())
+				.pattern("ADA")
+				.pattern("IBI")
+				.pattern(" C ")
+				.define('A', Items.ANVIL)
+				.define('D', Tags.Items.GEMS_DIAMOND)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.define('C', Tags.Items.CHESTS_WOODEN)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(consumer);
+
 		new SmithingTransformRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER.get(), Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), RecipeCategory.MISC, ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))

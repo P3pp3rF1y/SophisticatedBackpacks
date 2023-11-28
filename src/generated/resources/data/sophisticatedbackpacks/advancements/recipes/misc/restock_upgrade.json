@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:restock_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

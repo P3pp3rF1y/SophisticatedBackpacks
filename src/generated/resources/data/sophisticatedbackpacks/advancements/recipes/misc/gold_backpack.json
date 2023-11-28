@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:gold_backpack"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:tank_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }
