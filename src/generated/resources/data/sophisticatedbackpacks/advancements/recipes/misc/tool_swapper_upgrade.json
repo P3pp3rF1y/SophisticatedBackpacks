@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:tool_swapper_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

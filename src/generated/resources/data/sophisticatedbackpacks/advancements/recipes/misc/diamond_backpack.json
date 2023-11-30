@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:diamond_backpack"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

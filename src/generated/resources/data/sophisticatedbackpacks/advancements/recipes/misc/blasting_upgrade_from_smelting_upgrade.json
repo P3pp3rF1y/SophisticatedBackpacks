@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:blasting_upgrade_from_smelting_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }

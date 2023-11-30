@@ -30,5 +30,6 @@
     "recipes": [
       "sophisticatedbackpacks:auto_smoking_upgrade_from_auto_smelting_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }
