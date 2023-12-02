@@ -24,7 +24,7 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-			if (getMenu().isFirstLevelStorage() && getMenu().getBackpackContext().wasOpenFromInventory() && mouseNotOverBackpack()) {
+			if (getMenu().isFirstLevelStorage() && getMenu().getBackpackContext().wasOpenFromInventory() && (keyCode == 256 || mouseNotOverBackpack())) {
 				getMinecraft().player.closeContainer();
 				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
 				return true;
