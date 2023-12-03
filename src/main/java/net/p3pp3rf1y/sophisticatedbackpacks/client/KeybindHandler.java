@@ -30,7 +30,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
@@ -200,16 +199,9 @@ public class KeybindHandler {
 					return true;
 				}
 			}
-			if (screen instanceof BackpackScreen) {
-				if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
-					if (slot.getItem().getCount() == 1) {
-						SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage(slot.index));
-						return true;
-					}
-				} else {
-					SBPPacketHandler.INSTANCE.sendToServer(new BackpackCloseMessage());
-					return true;
-				}
+			if (screen instanceof BackpackScreen && slot != null && slot.getItem().getItem() instanceof BackpackItem && slot.getItem().getCount() == 1) {
+				SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage(slot.index));
+				return true;
 			}
 		}
 		return false;
