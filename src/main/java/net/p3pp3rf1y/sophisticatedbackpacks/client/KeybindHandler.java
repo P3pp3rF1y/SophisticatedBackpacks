@@ -199,16 +199,9 @@ public class KeybindHandler {
 					return true;
 				}
 			}
-			if (screen instanceof BackpackScreen) {
-				if (slot != null && slot.getItem().getItem() instanceof BackpackItem) {
-					if (slot.getItem().getCount() == 1) {
-						SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage(slot.index));
-						return true;
-					}
-				} else {
-					SBPPacketHandler.INSTANCE.sendToServer(new BackpackCloseMessage());
-					return true;
-				}
+			if (screen instanceof BackpackScreen && slot != null && slot.getItem().getItem() instanceof BackpackItem && slot.getItem().getCount() == 1) {
+				SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage(slot.index));
+				return true;
 			}
 		}
 		return false;
