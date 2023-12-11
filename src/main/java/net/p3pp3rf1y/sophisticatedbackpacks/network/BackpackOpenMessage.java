@@ -19,6 +19,7 @@ public class BackpackOpenMessage {
 	private static final int OFFHAND_SLOT = 40;
 	private final int slotIndex;
 	private final String identifier;
+	private final String handlerName;
 	public BackpackOpenMessage() {
 		this(-1);
 	}
@@ -26,18 +27,25 @@ public class BackpackOpenMessage {
 	public BackpackOpenMessage(int backpackSlot) {
 		this(backpackSlot, "");
 	}
-	public BackpackOpenMessage(int backpackSlot, String identifier) {
+
+	public BackpackOpenMessage(int backpackSlot, String identifier, String handlerName) {
 		slotIndex = backpackSlot;
 		this.identifier = identifier;
+		this.handlerName = handlerName;
+	}
+
+	public BackpackOpenMessage(int backpackSlot, String identifier) {
+		this(backpackSlot, identifier, "");
 	}
 
 	public static void encode(BackpackOpenMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeInt(msg.slotIndex);
 		packetBuffer.writeUtf(msg.identifier);
+		packetBuffer.writeUtf(msg.handlerName);
 	}
 
 	public static BackpackOpenMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readUtf());
+		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readUtf(), packetBuffer.readUtf());
 	}
 
 	static void onMessage(BackpackOpenMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -51,7 +59,17 @@ public class BackpackOpenMessage {
 			return;
 		}
 
-		if (player.containerMenu instanceof BackpackContainer backpackContainer) {
+		if (!msg.handlerName.isEmpty()) {
+			int slotIndex = msg.slotIndex;
+			if (msg.slotIndex == CHEST_SLOT) {
+				slotIndex -= 36;
+			} else if (msg.slotIndex == OFFHAND_SLOT) {
+				slotIndex = 0;
+			}
+			BackpackContext.Item backpackContext = new BackpackContext.Item(msg.handlerName, msg.identifier, slotIndex,
+					player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.getBackpackContext().wasOpenFromInventory()));
+			openBackpack(player, backpackContext);
+		} else if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 			BackpackContext backpackContext = backpackContainer.getBackpackContext();
 			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
@@ -60,18 +78,6 @@ public class BackpackOpenMessage {
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
-			openBackpack(player, backpackContext);
-		} else if (msg.slotIndex > -1 && player.containerMenu instanceof InventoryMenu) {
-			int slotIndex = msg.slotIndex;
-			String inventoryProvider = PlayerInventoryProvider.MAIN_INVENTORY;
-			if (msg.slotIndex == CHEST_SLOT) {
-				inventoryProvider = PlayerInventoryProvider.ARMOR_INVENTORY;
-			} else if (msg.slotIndex == OFFHAND_SLOT) {
-				inventoryProvider = PlayerInventoryProvider.OFFHAND_INVENTORY;
-				slotIndex = 0;
-			}
-
-			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryProvider, msg.identifier, slotIndex, true);
 			openBackpack(player, backpackContext);
 		} else {
 			findAndOpenFirstBackpack(player);
