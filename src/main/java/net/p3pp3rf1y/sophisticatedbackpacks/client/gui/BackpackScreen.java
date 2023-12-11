@@ -24,9 +24,13 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-			if (getMenu().isFirstLevelStorage() && getMenu().getBackpackContext().wasOpenFromInventory() && mouseNotOverBackpack()) {
-				getMinecraft().player.closeContainer();
-				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+			if (getMenu().isFirstLevelStorage() && (keyCode == 256 || mouseNotOverBackpack())) {
+				if (getMenu().getBackpackContext().wasOpenFromInventory()) {
+					getMinecraft().player.closeContainer();
+					getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+				} else {
+					onClose();
+				}
 				return true;
 			} else if (!getMenu().isFirstLevelStorage()) {
 				SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage());
