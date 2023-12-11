@@ -30,6 +30,9 @@ repositories {
             username = System.getenv("USERNAME")
             password = System.getenv("READ_PACKAGES_TOKEN")
         }
+        content {
+            includeGroupByRegex "sophisticatedcore.*"
+        }
     }
 }
 

@@ -1,5 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.core.BlockPos;
@@ -50,6 +53,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -60,7 +64,14 @@ import static net.minecraftforge.common.ToolActions.*;
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
 
-	private static final Set<Item> notTools = new HashSet<>();
+	private static final LoadingCache<ItemStack, Boolean> isToolCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(
+			new CacheLoader<>() {
+				@Override
+				public Boolean load(ItemStack key) {
+					return canPerformToolAction(key);
+				}
+			}
+	);
 
 	private final FilterLogic filterLogic;
 	@Nullable
@@ -163,26 +174,16 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isNotTool(ItemStack stack) {
-		if (notTools.contains(stack.getItem())) {
-			return true;
-		}
-
-		if (canPerformToolAction(stack)) {
-			return false;
-		}
-
-		notTools.add(stack.getItem());
-
-		return true;
+		return !isToolCache.getUnchecked(stack);
 	}
 
-	private boolean canPerformToolAction(ItemStack stack) {
+	private static boolean canPerformToolAction(ItemStack stack) {
 		return canPerformAnyAction(stack, ToolActions.DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_HOE_ACTIONS)
 				|| canPerformAnyAction(stack, ToolActions.DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_SHOVEL_ACTIONS)
 				|| canPerformAnyAction(stack, ToolActions.DEFAULT_SHEARS_ACTIONS);
 	}
 
-	private boolean canPerformAnyAction(ItemStack stack, Set<ToolAction> toolActions) {
+	private static boolean canPerformAnyAction(ItemStack stack, Set<ToolAction> toolActions) {
 		for (ToolAction toolAction : toolActions) {
 			if (stack.canPerformAction(toolAction)) {
 				return true;
