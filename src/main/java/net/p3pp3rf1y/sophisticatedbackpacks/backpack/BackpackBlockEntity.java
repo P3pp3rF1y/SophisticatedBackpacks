@@ -147,7 +147,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			if (itemHandlerCap == null) {
-				itemHandlerCap = LazyOptional.of(() -> new CachedFailedInsertInventoryHandler(getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0));
+				itemHandlerCap = LazyOptional.of(() -> new CachedFailedInsertInventoryHandler(() -> getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0));
 			}
 			return itemHandlerCap.cast();
 		} else if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
