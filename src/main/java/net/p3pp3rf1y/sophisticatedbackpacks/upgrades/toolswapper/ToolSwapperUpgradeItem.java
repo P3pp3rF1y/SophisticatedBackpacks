@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeSlotChangeResult;
@@ -17,7 +18,7 @@ public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWr
 	private final boolean swapToolOnKeyPress;
 
 	public ToolSwapperUpgradeItem(boolean hasSettingsTab, boolean swapToolOnKeyPress) {
-		super();
+		super(Config.SERVER.maxUpgradesPerStorage);
 		this.hasSettingsTab = hasSettingsTab;
 		this.swapToolOnKeyPress = swapToolOnKeyPress;
 	}
@@ -37,6 +38,11 @@ public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWr
 
 	@Override
 	public UpgradeSlotChangeResult canAddUpgradeTo(IStorageWrapper storageWrapper, ItemStack upgradeStack, boolean firstLevelStorage, boolean isClientSide) {
+		UpgradeSlotChangeResult result = super.canAddUpgradeTo(storageWrapper, upgradeStack, firstLevelStorage, isClientSide);
+		if (!result.isSuccessful()) {
+			return result;
+		}
+
 		Set<Integer> errorUpgradeSlots = new HashSet<>();
 		storageWrapper.getUpgradeHandler().getSlotWrappers().forEach((slot, wrapper) -> {
 			if (wrapper instanceof ToolSwapperUpgradeWrapper) {

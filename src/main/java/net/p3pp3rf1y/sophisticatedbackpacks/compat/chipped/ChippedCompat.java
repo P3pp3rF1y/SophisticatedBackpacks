@@ -11,6 +11,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -31,19 +32,19 @@ import java.util.function.Supplier;
 public class ChippedCompat implements ICompat {
 
 	public static final RegistryObject<BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/botanist_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.BOTANIST_WORKBENCH_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.BOTANIST_WORKBENCH_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> GLASSBLOWER_UPGRADE = ModItems.ITEMS.register("chipped/glassblower_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.GLASSBLOWER_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.GLASSBLOWER_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> CARPENTERS_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/carpenters_table_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.CARPENTERS_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.CARPENTERS_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> LOOM_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/loom_table_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.LOOM_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.LOOM_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> MASON_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/mason_table_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.MASON_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.MASON_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> ALCHEMY_BENCH_UPGRADE = ModItems.ITEMS.register("chipped/alchemy_bench_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.ALCHEMY_BENCH_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.ALCHEMY_BENCH_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> TINKERING_TABLE_UPGRADE = ModItems.ITEMS.register("chipped/tinkering_table_upgrade",
-			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.TINKERING_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.TINKERING_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 
 	@Override
 	public void init() {
