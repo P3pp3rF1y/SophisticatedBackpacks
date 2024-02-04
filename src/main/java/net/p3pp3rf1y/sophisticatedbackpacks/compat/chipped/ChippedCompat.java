@@ -15,6 +15,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin;
@@ -36,19 +37,19 @@ import java.util.function.Supplier;
 public class ChippedCompat implements ICompat {
 
 	public static final RegistryObject<BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/botanist_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.BOTANIST_WORKBENCH_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.BOTANIST_WORKBENCH_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> GLASSBLOWER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/glassblower_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.GLASSBLOWER_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.GLASSBLOWER_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> CARPENTER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/carpenter_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.CARPENTERS_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.CARPENTERS_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> SHEPHERD_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/shepherd_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.LOOM_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.LOOM_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> MASON_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/mason_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.MASON_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.MASON_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> PHILOSOPHER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/philosopher_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.ALCHEMY_BENCH_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.ALCHEMY_BENCH_TYPE, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> TINKERER_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/tinkerer_workbench_upgrade",
-			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.TINKERING_TABLE_TYPE));
+			() -> new BlockTransformationUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, ModRecipeTypes.TINKERING_TABLE_TYPE, Config.SERVER.maxUpgradesPerStorage));
 
 	@Override
 	public void init() {
