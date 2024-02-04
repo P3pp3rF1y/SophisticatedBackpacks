@@ -78,8 +78,9 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 
 	private String getInitialNameValue() {
 		ItemStack firstItem = getContainer().getSlots().get(0).getItem();
-		if (!firstItem.isEmpty() && !getContainer().getItemName().isEmpty()) {
-			return getContainer().getItemName();
+		String itemName = getContainer().getItemName();
+		if (!firstItem.isEmpty() && itemName != null && !itemName.isEmpty()) {
+			return itemName;
 		}
 		return firstItem.isEmpty() ? "" : firstItem.getHoverName().getString();
 	}

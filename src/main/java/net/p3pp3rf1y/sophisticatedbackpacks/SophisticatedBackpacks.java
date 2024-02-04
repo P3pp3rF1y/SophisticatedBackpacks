@@ -54,7 +54,7 @@ public class SophisticatedBackpacks {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
-		modBus.addListener(Config.SERVER::onConfigReload);
+		Config.SERVER.initListeners(modBus);
 		modBus.addListener(CapabilityBackpackWrapper::onRegister);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
 		ModLoot.init(modBus);
