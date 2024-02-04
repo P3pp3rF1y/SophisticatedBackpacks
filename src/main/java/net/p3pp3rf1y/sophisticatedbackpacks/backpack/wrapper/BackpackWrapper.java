@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -30,20 +31,10 @@ import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
-import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.*;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.IntConsumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -61,8 +52,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String COLUMNS_TAKEN_TAG = "columnsTaken";
 
 	private final ItemStack backpack;
-	private Runnable backpackSaveHandler = () -> {};
-	private Runnable inventorySlotChangeHandler = () -> {};
+	private Runnable backpackSaveHandler = () -> {
+	};
+	private Runnable inventorySlotChangeHandler = () -> {
+	};
 
 	@Nullable
 	private InventoryHandler handler = null;
@@ -83,10 +76,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private final BackpackRenderInfo renderInfo;
 
-	private IntConsumer onSlotsChange = diff -> {};
+	private IntConsumer onSlotsChange = diff -> {
+	};
 
-	private Runnable onInventoryHandlerRefresh = () -> {};
-	private Runnable upgradeCachesInvalidatedHandler = () -> {};
+	private Runnable onInventoryHandlerRefresh = () -> {
+	};
+	private Runnable upgradeCachesInvalidatedHandler = () -> {
+	};
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
@@ -470,7 +466,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void unregisterOnSlotsChangeListener() {
-		onSlotsChange = diff -> {};
+		onSlotsChange = diff -> {
+		};
 	}
 
 	@Override
@@ -525,11 +522,22 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void unregisterOnInventoryHandlerRefreshListener() {
-		onInventoryHandlerRefresh = () -> {};
+		onInventoryHandlerRefresh = () -> {
+		};
 	}
 
 	@Override
 	public ItemStack getWrappedStorageStack() {
 		return getBackpack();
+	}
+
+	@Override
+	public String getStorageType() {
+		return "backpack";
+	}
+
+	@Override
+	public Component getDisplayName() {
+		return getBackpack().getHoverName();
 	}
 }
