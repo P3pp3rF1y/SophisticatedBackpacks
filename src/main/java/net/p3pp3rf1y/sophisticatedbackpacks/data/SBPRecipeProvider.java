@@ -75,6 +75,24 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_backpack", has(ModItems.BACKPACK.get()))
 				.save(consumer);
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.IRON_BACKPACK.get(), ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get())
+				.pattern(" I ")
+				.pattern("IBI")
+				.pattern(" I ")
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.COPPER_BACKPACK.get())
+				.unlockedBy("has_copper_backpack", has(ModItems.COPPER_BACKPACK.get()))
+				.save(consumer, new ResourceLocation(SophisticatedBackpacks.getRegistryName("iron_backpack_from_copper")));
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.COPPER_BACKPACK.get(), ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get())
+				.pattern("CCC")
+				.pattern("CBC")
+				.pattern("CCC")
+				.define('C', Tags.Items.INGOTS_COPPER)
+				.define('B', ModItems.BACKPACK.get())
+				.unlockedBy("has_backpack", has(ModItems.BACKPACK.get()))
+				.save(consumer);
+
 		ShapeBasedRecipeBuilder.shaped(ModItems.PICKUP_UPGRADE.get())
 				.pattern(" P ")
 				.pattern("SBS")

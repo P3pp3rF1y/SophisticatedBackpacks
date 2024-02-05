@@ -1,34 +1,34 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_the_recipe": {
-      "conditions": {
-        "recipe": "sophisticatedbackpacks:anvil_upgrade"
-      },
-      "trigger": "minecraft:recipe_unlocked"
-    },
-    "has_upgrade_base": {
+    "has_backpack": {
       "conditions": {
         "items": [
           {
             "items": [
-              "sophisticatedbackpacks:upgrade_base"
+              "sophisticatedbackpacks:backpack"
             ]
           }
         ]
       },
       "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:copper_backpack"
+      },
+      "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_upgrade_base",
+      "has_backpack",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "sophisticatedbackpacks:anvil_upgrade"
+      "sophisticatedbackpacks:copper_backpack"
     ]
   }
 }

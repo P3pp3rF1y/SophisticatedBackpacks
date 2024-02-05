@@ -61,6 +61,7 @@ public class Config {
 		public final NoInteractionBlocks noInteractionBlocks;
 		public final NoConnectionBlocks noConnectionBlocks;
 		public final BackpackConfig leatherBackpack;
+		public final BackpackConfig copperBackpack;
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
 		public final BackpackConfig diamondBackpack;
@@ -136,6 +137,7 @@ public class Config {
 			noConnectionBlocks = new NoConnectionBlocks(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
+			copperBackpack = new BackpackConfig(builder, "Copper", 45, 1);
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
 			goldBackpack = new BackpackConfig(builder, "Gold", 81, 3);
 			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);

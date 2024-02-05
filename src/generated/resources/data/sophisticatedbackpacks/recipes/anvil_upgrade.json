@@ -2,32 +2,32 @@
   "type": "minecraft:crafting_shaped",
   "conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:anvil_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:anvil_upgrade"
     }
-  ],
-  "pattern": [
-    "ADA",
-    "IBI",
-    " C "
   ],
   "key": {
     "A": {
       "item": "minecraft:anvil"
-    },
-    "D": {
-      "tag": "forge:gems/diamond"
-    },
-    "I": {
-      "tag": "forge:ingots/iron"
     },
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
     },
     "C": {
       "tag": "forge:chests/wooden"
+    },
+    "D": {
+      "tag": "forge:gems/diamond"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
     }
   },
+  "pattern": [
+    "ADA",
+    "IBI",
+    " C "
+  ],
   "result": {
     "item": "sophisticatedbackpacks:anvil_upgrade"
   }
