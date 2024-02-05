@@ -25,6 +25,7 @@ public class SBPBlockLootSubProvider extends BlockLootSubProvider {
 	@Override
 	public void generate() {
 		add(ModBlocks.BACKPACK.get(), dropBackpackWithContents(ModItems.BACKPACK.get()));
+		add(ModBlocks.COPPER_BACKPACK.get(), dropBackpackWithContents(ModItems.COPPER_BACKPACK.get()));
 		add(ModBlocks.IRON_BACKPACK.get(), dropBackpackWithContents(ModItems.IRON_BACKPACK.get()));
 		add(ModBlocks.GOLD_BACKPACK.get(), dropBackpackWithContents(ModItems.GOLD_BACKPACK.get()));
 		add(ModBlocks.DIAMOND_BACKPACK.get(), dropBackpackWithContents(ModItems.DIAMOND_BACKPACK.get()));
