@@ -36,17 +36,18 @@ public class SBPLootInjectProvider implements DataProvider {
 	public void run(HashCache cache) throws IOException {
 		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
-		tables.put(BuiltInLootTables.SIMPLE_DUNGEON, getLootTable(92,
-				getItemLootEntry(ModItems.BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 2),
-				getItemLootEntry(ModItems.PICKUP_UPGRADE.get(), 2)));
-		tables.put(BuiltInLootTables.ABANDONED_MINESHAFT, getLootTable(89,
+		tables.put(BuiltInLootTables.SIMPLE_DUNGEON, getLootTable(90,
 				getItemLootEntry(ModItems.BACKPACK.get(), 5),
+				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),
+				getItemLootEntry(ModItems.PICKUP_UPGRADE.get(), 2)));
+		tables.put(BuiltInLootTables.ABANDONED_MINESHAFT, getLootTable(84,
+				getItemLootEntry(ModItems.BACKPACK.get(), 7),
+				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
 				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
 		tables.put(BuiltInLootTables.DESERT_PYRAMID, getLootTable(89,
-				getItemLootEntry(ModItems.BACKPACK.get(), 5),
+				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
 				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));

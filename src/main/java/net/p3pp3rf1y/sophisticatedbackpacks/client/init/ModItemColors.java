@@ -23,6 +23,6 @@ public class ModItemColors {
 				}
 				return -1;
 			}).orElse(BackpackWrapper.DEFAULT_CLOTH_COLOR);
-		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 }

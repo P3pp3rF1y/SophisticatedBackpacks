@@ -35,6 +35,7 @@ public class SBPBlockLootProvider implements DataProvider {
 		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
 
 		tables.put(ModBlocks.BACKPACK.getId(), getBackpack(ModItems.BACKPACK.get()));
+		tables.put(ModBlocks.COPPER_BACKPACK.getId(), getBackpack(ModItems.COPPER_BACKPACK.get()));
 		tables.put(ModBlocks.IRON_BACKPACK.getId(), getBackpack(ModItems.IRON_BACKPACK.get()));
 		tables.put(ModBlocks.GOLD_BACKPACK.getId(), getBackpack(ModItems.GOLD_BACKPACK.get()));
 		tables.put(ModBlocks.DIAMOND_BACKPACK.getId(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:iron_backpack_from_copper"
+    ]
+  },
+  "criteria": {
+    "has_copper_backpack": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "sophisticatedbackpacks:copper_backpack"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:iron_backpack_from_copper"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_copper_backpack",
+      "has_the_recipe"
+    ]
+  ]
+}

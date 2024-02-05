@@ -8,8 +8,13 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 5,
+          "weight": 7,
           "name": "sophisticatedbackpacks:backpack"
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "name": "sophisticatedbackpacks:copper_backpack"
         },
         {
           "type": "minecraft:item",
@@ -27,7 +32,7 @@
         },
         {
           "type": "minecraft:empty",
-          "weight": 89
+          "weight": 84
         }
       ]
     }
