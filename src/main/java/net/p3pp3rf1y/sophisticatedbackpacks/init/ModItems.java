@@ -212,6 +212,8 @@ public class ModItems {
 			() -> new CraftingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StonecutterUpgradeItem> STONECUTTER_UPGRADE = ITEMS.register("stonecutter_upgrade",
 			() -> new StonecutterUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
+	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_STARTER_TIER = ITEMS.register("stack_upgrade_starter_tier", () ->
+			new StackUpgradeItem(1.5D, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_TIER_1 = ITEMS.register("stack_upgrade_tier_1", () ->
 			new StackUpgradeItem(2, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_TIER_2 = ITEMS.register("stack_upgrade_tier_2", () ->
