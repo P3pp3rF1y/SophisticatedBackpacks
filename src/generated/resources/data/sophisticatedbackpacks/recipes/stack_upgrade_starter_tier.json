@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_starter_tier",
+      "type": "sophisticatedcore:item_enabled"
+    }
+  ],
+  "pattern": [
+    "CCC",
+    "CBC",
+    "CCC"
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "C": {
+      "tag": "forge:storage_blocks/copper"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:stack_upgrade_starter_tier"
+  }
+}
