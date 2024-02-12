@@ -90,6 +90,7 @@ public class CuriosCompat implements ICompat {
 	public void setup() {
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			CuriosRendererRegistry.register(ModItems.BACKPACK.get(), BackpackCurioRenderer::new);
+			CuriosRendererRegistry.register(ModItems.COPPER_BACKPACK.get(), BackpackCurioRenderer::new);
 			CuriosRendererRegistry.register(ModItems.IRON_BACKPACK.get(), BackpackCurioRenderer::new);
 			CuriosRendererRegistry.register(ModItems.GOLD_BACKPACK.get(), BackpackCurioRenderer::new);
 			CuriosRendererRegistry.register(ModItems.DIAMOND_BACKPACK.get(), BackpackCurioRenderer::new);

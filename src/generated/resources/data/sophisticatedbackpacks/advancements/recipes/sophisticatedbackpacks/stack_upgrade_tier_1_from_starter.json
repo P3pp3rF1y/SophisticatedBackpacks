@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:anvil_upgrade"
+        "recipe": "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "sophisticatedbackpacks:anvil_upgrade"
+      "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
     ]
   }
 }

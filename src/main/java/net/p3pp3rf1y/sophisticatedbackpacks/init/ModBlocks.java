@@ -19,6 +19,7 @@ public class ModBlocks {
 	private ModBlocks() {}
 
 	public static final RegistryObject<BackpackBlock> BACKPACK = BLOCKS.register("backpack", BackpackBlock::new);
+	public static final RegistryObject<BackpackBlock> COPPER_BACKPACK = BLOCKS.register("copper_backpack", BackpackBlock::new);
 	public static final RegistryObject<BackpackBlock> IRON_BACKPACK = BLOCKS.register("iron_backpack", BackpackBlock::new);
 	public static final RegistryObject<BackpackBlock> GOLD_BACKPACK = BLOCKS.register("gold_backpack", BackpackBlock::new);
 	public static final RegistryObject<BackpackBlock> DIAMOND_BACKPACK = BLOCKS.register("diamond_backpack", BackpackBlock::new);

@@ -7,6 +7,11 @@
         {
           "type": "minecraft:item",
           "name": "sophisticatedbackpacks:backpack",
+          "weight": 7
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sophisticatedbackpacks:copper_backpack",
           "weight": 5
         },
         {
@@ -25,7 +30,7 @@
         },
         {
           "type": "minecraft:empty",
-          "weight": 89
+          "weight": 84
         }
       ],
       "name": "main",
