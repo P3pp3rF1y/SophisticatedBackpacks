@@ -3,11 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
-import net.minecraft.data.recipes.SpecialRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -72,6 +68,24 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("IBI")
 				.pattern("III")
 				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.BACKPACK.get())
+				.unlockedBy("has_backpack", has(ModItems.BACKPACK.get()))
+				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.IRON_BACKPACK.get(), ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get())
+				.pattern(" I ")
+				.pattern("IBI")
+				.pattern(" I ")
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.COPPER_BACKPACK.get())
+				.unlockedBy("has_copper_backpack", has(ModItems.COPPER_BACKPACK.get()))
+				.save(consumer, new ResourceLocation(SophisticatedBackpacks.getRegistryName("iron_backpack_from_copper")));
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.COPPER_BACKPACK.get(), ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get())
+				.pattern("CCC")
+				.pattern("CBC")
+				.pattern("CCC")
+				.define('C', Tags.Items.INGOTS_COPPER)
 				.define('B', ModItems.BACKPACK.get())
 				.unlockedBy("has_backpack", has(ModItems.BACKPACK.get()))
 				.save(consumer);
@@ -353,6 +367,15 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_STARTER_TIER.get())
+				.pattern("CCC")
+				.pattern("CBC")
+				.pattern("CCC")
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.define('C', Tags.Items.STORAGE_BLOCKS_COPPER)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(consumer);
+
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_1.get())
 				.pattern("III")
 				.pattern("IBI")
@@ -361,6 +384,15 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.STORAGE_BLOCKS_IRON)
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_1.get())
+				.pattern(" I ")
+				.pattern("ISI")
+				.pattern(" I ")
+				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER.get())
+				.define('I', Tags.Items.STORAGE_BLOCKS_IRON)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(consumer, new ResourceLocation(SophisticatedBackpacks.getRegistryName("stack_upgrade_tier_1_from_starter")));
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_2.get())
 				.pattern("GGG")
