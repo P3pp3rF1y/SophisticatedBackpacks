@@ -1,0 +1,25 @@
+{
+  "type": "sophisticatedbackpacks:backpack_upgrade",
+  "conditions": [
+    {
+      "itemRegistryName": "sophisticatedbackpacks:copper_backpack",
+      "type": "sophisticatedcore:item_enabled"
+    }
+  ],
+  "pattern": [
+    "CCC",
+    "CBC",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    },
+    "B": {
+      "item": "sophisticatedbackpacks:backpack"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:copper_backpack"
+  }
+}

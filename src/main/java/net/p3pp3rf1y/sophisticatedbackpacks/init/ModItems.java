@@ -140,6 +140,8 @@ public class ModItems {
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
 			() -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
+	public static final RegistryObject<BackpackItem> COPPER_BACKPACK = ITEMS.register("copper_backpack",
+			() -> new BackpackItem(Config.SERVER.copperBackpack.inventorySlotCount::get, Config.SERVER.copperBackpack.upgradeSlotCount::get, ModBlocks.COPPER_BACKPACK));
 	public static final RegistryObject<BackpackItem> IRON_BACKPACK = ITEMS.register("iron_backpack",
 			() -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get, ModBlocks.IRON_BACKPACK));
 	public static final RegistryObject<BackpackItem> GOLD_BACKPACK = ITEMS.register("gold_backpack",
@@ -209,6 +211,8 @@ public class ModItems {
 			() -> new CraftingUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StonecutterUpgradeItem> STONECUTTER_UPGRADE = ITEMS.register("stonecutter_upgrade",
 			() -> new StonecutterUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
+	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_STARTER_TIER = ITEMS.register("stack_upgrade_starter_tier", () ->
+			new StackUpgradeItem(1.5D, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_TIER_1 = ITEMS.register("stack_upgrade_tier_1", () ->
 			new StackUpgradeItem(2, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<StackUpgradeItem> STACK_UPGRADE_TIER_2 = ITEMS.register("stack_upgrade_tier_2", () ->

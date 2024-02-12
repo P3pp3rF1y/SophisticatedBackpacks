@@ -1,0 +1,25 @@
+{
+  "type": "sophisticatedbackpacks:backpack_upgrade",
+  "conditions": [
+    {
+      "itemRegistryName": "sophisticatedbackpacks:iron_backpack",
+      "type": "sophisticatedcore:item_enabled"
+    }
+  ],
+  "pattern": [
+    " I ",
+    "IBI",
+    " I "
+  ],
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "item": "sophisticatedbackpacks:copper_backpack"
+    }
+  },
+  "result": {
+    "item": "sophisticatedbackpacks:iron_backpack"
+  }
+}
