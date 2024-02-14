@@ -71,6 +71,8 @@
     "item.sophisticatedbackpacks.stonecutter_upgrade.tooltip": "Cortapiedras en una pestaña de mejora",
     "item.sophisticatedbackpacks.jukebox_upgrade": "Mejora de Tocadiscos",
     "item.sophisticatedbackpacks.jukebox_upgrade.tooltip": "Tocadiscos portátil",
+  "item.sophisticatedbackpacks.stack_upgrade_starter_tier": "Mejora de Stack Nivel Inicial",
+  "item.sophisticatedbackpacks.stack_upgrade_starter_tier.tooltip": "Multiplica el número de stacks que caben en un slot por 1.5",
     "item.sophisticatedbackpacks.stack_upgrade_tier_1": "Mejora de Stack Nivel 1",
     "item.sophisticatedbackpacks.stack_upgrade_tier_1.tooltip": "Multiplica el número de stacks que caben en un slot por 2",
     "item.sophisticatedbackpacks.stack_upgrade_tier_2": "Mejora de Stack Nivel 2",
