@@ -6,6 +6,13 @@ plugins {
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
 if (findProject(':SophisticatedCore') != null) {
     evaluationDependsOn(':SophisticatedCore')
 }
