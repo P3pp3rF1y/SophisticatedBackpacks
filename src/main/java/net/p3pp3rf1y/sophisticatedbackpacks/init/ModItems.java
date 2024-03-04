@@ -408,6 +408,7 @@ public class ModItems {
 
 	public static void registerDispenseBehavior() {
 		DispenserBlock.registerBehavior(BACKPACK.get(), new BackpackDispenseBehavior());
+		DispenserBlock.registerBehavior(COPPER_BACKPACK.get(), new BackpackDispenseBehavior());
 		DispenserBlock.registerBehavior(IRON_BACKPACK.get(), new BackpackDispenseBehavior());
 		DispenserBlock.registerBehavior(GOLD_BACKPACK.get(), new BackpackDispenseBehavior());
 		DispenserBlock.registerBehavior(DIAMOND_BACKPACK.get(), new BackpackDispenseBehavior());
@@ -416,6 +417,7 @@ public class ModItems {
 
 	public static void registerCauldronInteractions() {
 		CauldronInteraction.WATER.put(BACKPACK.get(), new BackpackCauldronInteraction());
+		CauldronInteraction.WATER.put(COPPER_BACKPACK.get(), new BackpackCauldronInteraction());
 		CauldronInteraction.WATER.put(IRON_BACKPACK.get(), new BackpackCauldronInteraction());
 		CauldronInteraction.WATER.put(GOLD_BACKPACK.get(), new BackpackCauldronInteraction());
 		CauldronInteraction.WATER.put(DIAMOND_BACKPACK.get(), new BackpackCauldronInteraction());
