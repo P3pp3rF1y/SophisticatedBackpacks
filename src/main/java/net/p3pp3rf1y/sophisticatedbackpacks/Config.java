@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class Config {
 
 	private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
+	private static final String MAX_UPGRADES_MATCHER = "([a-z0-9_/.-]+\\|\\d+)";
 
 	private Config() {
 	}
@@ -445,13 +446,14 @@ public class Config {
 		}
 
 		public static class MaxUgradesPerStorageConfig implements IUpgradeCountLimitConfig {
-			private final ForgeConfigSpec.ConfigValue<List<String>> maxUpgradesPerStorageList;
+			private final ForgeConfigSpec.ConfigValue<List<? extends String>> maxUpgradesPerStorageList;
 
 			@Nullable
 			private Map<String, Integer> maxUpgradesPerStorage = null;
 
 			protected MaxUgradesPerStorageConfig(ForgeConfigSpec.Builder builder, Map<String, Integer> defaultUpgradesPerStorage) {
-				maxUpgradesPerStorageList = builder.comment("Maximum number of upgrades of type per backpack in format of \"UpgradeRegistryName[or UpgradeGroup]|MaxNumber\"").define("maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage));
+				maxUpgradesPerStorageList = builder.comment("Maximum number of upgrades of type per backpack in format of \"UpgradeRegistryName[or UpgradeGroup]|MaxNumber\"")
+						.defineList("maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage), mapping -> ((String) mapping).matches(MAX_UPGRADES_MATCHER));
 			}
 
 			private List<String> convertToList(Map<String, Integer> defaultUpgradesPerStorage) {
