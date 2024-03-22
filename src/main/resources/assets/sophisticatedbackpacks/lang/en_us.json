@@ -171,6 +171,8 @@
     "gui.sophisticatedbackpacks.upgrades.buttons.match_backpack_contents": "Match Backpack Contents",
     "gui.sophisticatedbackpacks.upgrades.buttons.shift_click_into_backpack": "Shift Click Result Into\nBackpack",
     "gui.sophisticatedbackpacks.upgrades.buttons.shift_click_into_inventory": "Shift Click Result Into\nPlayer's Inventory",
+    "gui.sophisticatedbackpacks.upgrades.buttons.replenish": "Replenish crafting items",
+    "gui.sophisticatedbackpacks.upgrades.buttons.do_not_replenish": "Do not replenish crafting items",
     "gui.sophisticatedbackpacks.upgrades.buttons.swap_weapon": "Swap Weapon",
     "gui.sophisticatedbackpacks.upgrades.buttons.swap_weapon.detail": "Swaps weapon into hand when a tool is clicked on entity",
     "gui.sophisticatedbackpacks.upgrades.buttons.do_not_swap_weapon": "Do Not Swap Weapon",
