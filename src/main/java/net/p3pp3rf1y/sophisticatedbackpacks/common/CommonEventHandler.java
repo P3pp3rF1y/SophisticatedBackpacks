@@ -52,7 +52,7 @@ public class CommonEventHandler {
 	public void registerHandlers(IEventBus modBus) {
 		ModItems.registerHandlers(modBus);
 		ModBlocks.registerHandlers(modBus);
-		modBus.addListener(ModPayloads::registerPackets);
+		modBus.addListener(ModPayloads::registerPayloads);
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(this::onItemPickup);
 		eventBus.addListener(this::onLivingSpecialSpawn);
