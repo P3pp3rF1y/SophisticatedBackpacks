@@ -10,7 +10,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -94,7 +94,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable LivingEntity entity, Level level, BlockPos pos) {
+	public void tick(@Nullable Entity entity, Level level, BlockPos pos) {
 		if (entity == null /*not supported in block form*/ || isInCooldown(level)) {
 			return;
 		}
@@ -107,7 +107,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		setCooldown(level, COOLDOWN);
 	}
 
-	private void tryRefillFilter(@Nonnull LivingEntity entity, IItemHandler playerInvHandler, ItemStack filter, TargetSlot targetSlot) {
+	private void tryRefillFilter(@Nonnull Entity entity, IItemHandler playerInvHandler, ItemStack filter, TargetSlot targetSlot) {
 		if (!(entity instanceof Player player)) {
 			return;
 		}
