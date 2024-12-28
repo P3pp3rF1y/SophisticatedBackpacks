@@ -105,6 +105,7 @@ public class BackpackStorage extends SavedData {
 
 	public void removeBackpackContents(UUID backpackUuid) {
 		backpackContents.remove(backpackUuid);
+		setDirty();
 	}
 
 	public void setBackpackContents(UUID backpackUuid, CompoundTag contents) {

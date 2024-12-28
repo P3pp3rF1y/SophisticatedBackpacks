@@ -286,7 +286,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBackpackUuid(Monster entity, Level level) {
-		if (level.isClientSide() || (entity.getRemovalReason() != Entity.RemovalReason.KILLED && entity.getRemovalReason() != Entity.RemovalReason.DISCARDED) || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (level.isClientSide() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 
