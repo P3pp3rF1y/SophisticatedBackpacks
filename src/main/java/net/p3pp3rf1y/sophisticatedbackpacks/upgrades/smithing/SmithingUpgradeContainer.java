@@ -1,19 +1,26 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 
-public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgradeWrapper, SmithingUpgradeContainer> {
+import java.util.List;
+
+public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgradeWrapper, SmithingUpgradeContainer> implements ICraftingContainer {
 	private static final String DATA_SHIFT_CLICK_INTO_STORAGE = "shiftClickIntoStorage";
 	private final Slot resultSlot;
 	private Runnable onResultChanged = () -> {};
@@ -81,6 +88,26 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 	public Slot getResultSlot() {
 		return smithingMenuDelegate.getSlot(SmithingMenu.RESULT_SLOT);
+	}
+
+	@Override
+	public List<Slot> getRecipeSlots() {
+		return List.of(getTemplateSlot(), getBaseSlot(), getAdditionalSlot());
+	}
+
+	@Override
+	public Container getCraftMatrix() {
+		return smithingMenuDelegate.getInputSlots();
+	}
+
+	@Override
+	public void setRecipeUsed(ResourceLocation recipeId) {
+		smithingMenuDelegate.setSelectedRecipe(recipeId);
+	}
+
+	@Override
+	public RecipeType<?> getRecipeType() {
+		return RecipeType.SMITHING;
 	}
 
 	private class PersistableSmithingMenu extends SmithingMenu {
@@ -154,6 +181,15 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 		public void slotsChanged(Container pInventory) {
 			createResult();
 			onResultChanged.run();
+		}
+
+		public Container getInputSlots() {
+			return inputSlots;
+		}
+
+		public void setSelectedRecipe(ResourceLocation recipeId) {
+			SmithingRecipeInput smithingRecipeInput = new SmithingRecipeInput(getTemplateSlot().getItem(), getBaseSlot().getItem(), getAdditionalSlot().getItem());
+			RecipeHelper.safeGetRecipeFor(RecipeType.SMITHING, smithingRecipeInput, recipeId).ifPresent(recipe -> selectedRecipe = recipe);
 		}
 	}
 }
