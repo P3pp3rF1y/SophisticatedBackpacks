@@ -78,6 +78,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing.SmithingUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing.SmithingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing.SmithingUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing.SmithingUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeTab;
@@ -241,6 +245,7 @@ public class ModItems {
 	public static final RegistryObject<PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, Config.SERVER.pumpUpgrade, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<AnvilUpgradeItem> ANVIL_UPGRADE = ITEMS.register("anvil_upgrade", AnvilUpgradeItem::new);
+	public static final RegistryObject<SmithingUpgradeItem> SMITHING_UPGRADE = ITEMS.register("smithing_upgrade", SmithingUpgradeItem::new);
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
@@ -323,6 +328,7 @@ public class ModItems {
 	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
 	private static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(XpPumpUpgradeContainer::new);
 	private static final UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> ANVIL_TYPE = new UpgradeContainerType<>(AnvilUpgradeContainer::new);
+	public static final UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> SMITHING_TYPE = new UpgradeContainerType<>(SmithingUpgradeContainer::new);
 
 	public static void registerContainers(RegisterEvent event) {
 		if (!event.getRegistryKey().equals(ForgeRegistries.Keys.MENU_TYPES)) {
@@ -364,6 +370,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(ADVANCED_PUMP_UPGRADE.getId(), ADVANCED_PUMP_TYPE);
 		UpgradeContainerRegistry.register(XP_PUMP_UPGRADE.getId(), XP_PUMP_TYPE);
 		UpgradeContainerRegistry.register(ANVIL_UPGRADE.getId(), ANVIL_TYPE);
+		UpgradeContainerRegistry.register(SMITHING_UPGRADE.getId(), SMITHING_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			MenuScreens.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
@@ -428,6 +435,7 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(XP_PUMP_TYPE, (XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->
 					new XpPumpUpgradeTab(upgradeContainer, position, screen, Config.SERVER.xpPumpUpgrade.mendingOn.get()));
 			UpgradeGuiManager.registerTab(ANVIL_TYPE, AnvilUpgradeTab::new);
+			UpgradeGuiManager.registerTab(ModItems.SMITHING_TYPE, SmithingUpgradeTab::new);
 		});
 	}
 

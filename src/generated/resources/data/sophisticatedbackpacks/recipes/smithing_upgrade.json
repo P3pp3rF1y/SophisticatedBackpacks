@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:smithing_upgrade"
+    }
+  ],
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "C": {
+      "tag": "forge:chests/wooden"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "item": "minecraft:smithing_table"
+    }
+  },
+  "pattern": [
+    " S ",
+    "IBI",
+    " C "
+  ],
+  "result": {
+    "item": "sophisticatedbackpacks:smithing_upgrade"
+  }
+}
