@@ -15,6 +15,10 @@ idea {
     }
 }
 
+if (findProject(':SophisticatedCore') != null) {
+    evaluationDependsOn(':SophisticatedCore')
+}
+
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 group = mod_group_id
 
@@ -84,18 +88,17 @@ neoForge {
         data {
             data()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-
-    /*
-            if (findProject(':SophisticatedCore') != null) {
-                modSource project(':SophisticatedCore').sourceSets.main
-            }
-    */
         }
     }
 
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+        }
+        if (findProject(':SophisticatedCore') != null) {
+            "sophisticatedcore" {
+                sourceSet(project(':SophisticatedCore').sourceSets.main)
+            }
         }
     }
 }

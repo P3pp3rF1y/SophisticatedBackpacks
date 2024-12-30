@@ -16,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeContain
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock.RestockUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing.SmithingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeGuiManager;
@@ -118,6 +119,7 @@ public class ModItemsClient {
 		UpgradeGuiManager.registerTab(ModItems.XP_PUMP_TYPE, (XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->
 				new XpPumpUpgradeTab(upgradeContainer, position, screen, Config.SERVER.xpPumpUpgrade.mendingOn.get()));
 		UpgradeGuiManager.registerTab(ModItems.ANVIL_TYPE, AnvilUpgradeTab::new);
+		UpgradeGuiManager.registerTab(ModItems.SMITHING_TYPE, SmithingUpgradeTab::new);
 
 	}
 }
