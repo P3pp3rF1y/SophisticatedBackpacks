@@ -95,6 +95,7 @@ public class SBPPlugin implements IModPlugin {
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
 		registration.addRecipeCatalyst(new ItemStack(ModItems.CRAFTING_UPGRADE.get()), RecipeTypes.CRAFTING);
 		registration.addRecipeCatalyst(new ItemStack(ModItems.STONECUTTER_UPGRADE.get()), RecipeTypes.STONECUTTING);
+		registration.addRecipeCatalyst(new ItemStack(ModItems.SMITHING_UPGRADE.get()), RecipeTypes.SMITHING);
 		additionalCatalystRegistrar.accept(registration);
 	}
 
