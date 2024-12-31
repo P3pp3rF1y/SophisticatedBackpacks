@@ -95,7 +95,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setSaveHandler(Runnable saveHandler) {
+	public void setContentsChangeHandler(Runnable saveHandler) {
 		backpackSaveHandler = saveHandler;
 		refreshInventoryForUpgradeProcessing();
 	}

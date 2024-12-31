@@ -58,7 +58,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public void setBackpack(ItemStack backpack) {
 		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE);
-		backpackWrapper.setSaveHandler(() -> {
+		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);

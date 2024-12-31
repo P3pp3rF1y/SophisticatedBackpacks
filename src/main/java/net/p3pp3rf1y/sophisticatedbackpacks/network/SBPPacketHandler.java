@@ -6,7 +6,7 @@ import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 public class SBPPacketHandler extends PacketHandler {
 	public static final SBPPacketHandler INSTANCE = new SBPPacketHandler(SophisticatedBackpacks.MOD_ID);
 
-	public SBPPacketHandler(String modId) {
+	private SBPPacketHandler(String modId) {
 		super(modId);
 	}
 
