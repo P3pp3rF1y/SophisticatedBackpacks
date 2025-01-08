@@ -46,7 +46,7 @@ repositories {
 }
 
 group = mod_group_id
-version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
+version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}"
 archivesBaseName = mod_id
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
@@ -155,7 +155,7 @@ tasks.withType(ProcessResources).configureEach {
             neo_version         : neo_version, neo_version_range: neo_version_range,
             loader_version_range: loader_version_range,
             mod_id              : mod_id, mod_version: mod_version,
-            mod_full_version    : "${project.mod_version}.${getBuildNumber()}${getStable()}",
+            mod_full_version    : "${project.mod_version}.${getBuildNumber()}",
             sc_version          : sc_version.substring(sc_version.indexOf("-") + 1, sc_version.lastIndexOf(',')) + ".+"
     ]
     inputs.properties replaceProperties
@@ -169,14 +169,7 @@ static def getBuildNumber() {
     if (System.getenv("GITHUB_RUN_NUMBER") != null) {
         return System.getenv("GITHUB_RUN_NUMBER").toString()
     }
-    return ""
-}
-
-static def getStable() {
-    if (System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev")) {
-        return "-SNAPSHOT"
-    }
-    return ""
+    return "1"
 }
 
 tasks.named('publish').configure {
