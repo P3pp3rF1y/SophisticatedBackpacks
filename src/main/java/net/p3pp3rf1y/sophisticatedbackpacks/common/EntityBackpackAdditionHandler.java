@@ -42,6 +42,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
 
@@ -159,7 +160,7 @@ public class EntityBackpackAdditionHandler {
 				wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
 				if (wrapper.getUpgradeHandler().getSlots() > 0) {
 					monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
-					addJukeboxUpgradeAndRandomDisc(wrapper, rnd);
+					addJukeboxUpgradeAndRandomDisc(level.getRandom(), wrapper, rnd);
 				}
 			}
 		});
@@ -167,12 +168,16 @@ public class EntityBackpackAdditionHandler {
 		monster.setDropChance(EquipmentSlot.CHEST, 0);
 	}
 
-	private static void addJukeboxUpgradeAndRandomDisc(IStorageWrapper w, RandomSource rnd) {
-		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.JUKEBOX_UPGRADE.get()));
-		Iterator<JukeboxUpgradeItem.Wrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
+	private static void addJukeboxUpgradeAndRandomDisc(RandomSource random, IStorageWrapper w, RandomSource rnd) {
+		boolean advancedJukebox = random.nextFloat() < 0.25;
+		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(advancedJukebox ? ModItems.ADVANCED_JUKEBOX_UPGRADE.get() : ModItems.JUKEBOX_UPGRADE.get()));
+		Iterator<JukeboxUpgradeWrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
 		if (it.hasNext()) {
-			JukeboxUpgradeItem.Wrapper wrapper = it.next();
-			wrapper.setDisc(new ItemStack(getMusicDiscs().get(rnd.nextInt(getMusicDiscs().size()))));
+			JukeboxUpgradeWrapper wrapper = it.next();
+			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().getSlots() / 3) + 1 : 1;
+			for (int i = 0; i < numberOfDiscs; i++) {
+				wrapper.getDiscInventory().insertItem(i, new ItemStack(getMusicDiscs().get(rnd.nextInt(getMusicDiscs().size())), 1), false);
+			}
 		}
 	}
 
