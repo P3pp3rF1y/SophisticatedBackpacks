@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
@@ -149,5 +150,12 @@ public class BackpackStorage extends SavedData {
 
 	public boolean removeUpdatedBackpackSettingsFlag(UUID backpackUuid) {
 		return updatedBackpackSettingsFlags.remove(backpackUuid);
+	}
+
+	public static void onClientWorldLoad(LevelEvent.Load evt) {
+		if (evt.getLevel().isClientSide()) {
+			clientStorageCopy.backpackContents.clear();
+			clientStorageCopy.accessLogRecords.clear();
+		}
 	}
 }

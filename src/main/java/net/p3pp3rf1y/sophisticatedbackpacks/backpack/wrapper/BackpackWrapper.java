@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -9,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.energy.IEnergyStorage;
@@ -81,6 +83,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	};
 	private Runnable upgradeCachesInvalidatedHandler = () -> {
 	};
+
 	public BackpackWrapper(ItemStack backpackStack) {
 		setBackpackStack(backpackStack);
 	}
@@ -434,13 +437,31 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void fillWithLoot(Player playerEntity) {
-		Level level = playerEntity.level();
+	public void fillWithLoot(Player player) {
+		Level level = player.level();
 		if (level.isClientSide) {
 			return;
 		}
-		BlockPos pos = playerEntity.blockPosition();
+		BlockPos pos = player.blockPosition();
 		fillWithLoot(level, pos);
+		fillWithExtraItems(player);
+	}
+
+	private void fillWithExtraItems(Player player) {
+		ItemStack backpack = getBackpackStack();
+		if (!backpack.has(DataComponents.CONTAINER)) {
+			return;
+		}
+
+		ItemContainerContents containerItems = backpack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+		for (int slot = 0; slot < containerItems.getSlots(); slot++) {
+			ItemStack stack = containerItems.getStackInSlot(slot);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			InventoryHelper.insertOrDropItem(player, stack, getInventoryHandler());
+		}
+		backpack.remove(DataComponents.CONTAINER);
 	}
 
 	private void fillWithLoot(Level level, BlockPos pos) {
