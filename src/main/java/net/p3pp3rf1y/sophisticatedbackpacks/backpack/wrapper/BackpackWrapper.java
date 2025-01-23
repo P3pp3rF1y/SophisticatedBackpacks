@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +15,6 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -263,7 +261,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}) {
 					@Override
 					public boolean isItemValid(int slot, ItemStack stack) {
-						return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace()) || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
+						return super.isItemValid(slot, stack) && (stack.isEmpty() || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
 					}
 				};
 			} else {
