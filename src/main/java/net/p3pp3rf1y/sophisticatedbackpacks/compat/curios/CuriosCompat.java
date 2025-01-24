@@ -32,8 +32,8 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
 public class CuriosCompat implements ICompat {
@@ -49,15 +49,16 @@ public class CuriosCompat implements ICompat {
 				false, true, true, true);
 	}
 
-	private Set<String> backpackCurioIdentifiers = new HashSet<>();
+	private final Set<String> backpackCurioIdentifiers = new CopyOnWriteArraySet<>();
 	private long lastTagsRefresh = -1;
 	private static final int TAGS_REFRESH_COOLDOWN = 100;
 
 	private Set<String> getCurioTags(long gameTime) {
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
-			backpackCurioIdentifiers = new HashSet<>(CuriosApi.getCuriosHelper().getCurioTags(ModItems.BACKPACK.get()));
-			backpackCurioIdentifiers.add(SlotTypePreset.CURIO.getIdentifier());
+			backpackCurioIdentifiers.clear();
+			backpackCurioIdentifiers.addAll(CuriosApi.getItemStackSlots(ModItems.BACKPACK.get().getDefaultInstance()).keySet());
+			backpackCurioIdentifiers.add("curio");
 		}
 		return backpackCurioIdentifiers;
 	}
