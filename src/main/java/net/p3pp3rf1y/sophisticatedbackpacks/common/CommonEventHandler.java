@@ -1,6 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -14,6 +17,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
@@ -27,13 +31,17 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
@@ -42,7 +50,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategor
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,6 +76,7 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onPlayerRespawn);
 		eventBus.addListener(this::onWorldTick);
 		eventBus.addListener(this::interactWithEntity);
+		eventBus.addListener(this::handleBreakBackpackWithInfinityUpgrade);
 	}
 
 	private static final int BACKPACK_CHECK_COOLDOWN = 40;
@@ -236,6 +247,21 @@ public class CommonEventHandler {
 			);
 			itemEntity.setItem(remainingStack.get());
 			event.setCanPickup(TriState.FALSE); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
+		}
+	}
+
+	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
+		Player player = event.getPlayer();
+
+		if (player.hasPermissions(2) || !(event.getState().getBlock() instanceof BackpackBlock)) {
+			return;
+		}
+
+		if (WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class)
+				.map(backpackBlockEntity -> !backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).isEmpty())
+				.orElse(false)) {
+			event.setCanceled(true);
+			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
 		}
 	}
 }

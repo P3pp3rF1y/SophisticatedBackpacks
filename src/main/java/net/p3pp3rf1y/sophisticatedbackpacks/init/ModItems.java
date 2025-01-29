@@ -95,6 +95,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.feeding.FeedingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.feeding.FeedingUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.filter.FilterUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.filter.FilterUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
@@ -229,6 +230,7 @@ public class ModItems {
 	public static final DeferredHolder<Item, XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade, Config.SERVER.maxUpgradesPerStorage));
 	public static final DeferredHolder<Item, AnvilUpgradeItem> ANVIL_UPGRADE = ITEMS.register("anvil_upgrade", AnvilUpgradeItem::new);
 	public static final DeferredHolder<Item, SmithingUpgradeItem> SMITHING_UPGRADE = ITEMS.register("smithing_upgrade", SmithingUpgradeItem::new);
+	public static final DeferredHolder<Item, InfinityUpgradeItem> INFINITY_UPGRADE = ITEMS.register("infinity_upgrade", () -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage));
 
 	public static final Supplier<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -46,6 +47,7 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -145,14 +147,27 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 		ItemStack heldItem = player.getMainHandItem();
 		if (player.isShiftKeyDown() && heldItem.isEmpty()) {
-			putInPlayersHandAndRemove(state, level, pos, player, InteractionHand.MAIN_HAND);
-			return InteractionResult.SUCCESS;
+			if (hasPermissionsToPickup(player)) {
+				putInPlayersHandAndRemove(state, level, pos, player, InteractionHand.MAIN_HAND);
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.FAIL;
+			}
+
 		}
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 
 		player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(level, pos)), backpackContext::toBuffer);
 		return InteractionResult.SUCCESS;
+	}
+
+	private static boolean hasPermissionsToPickup(Player player) {
+		if (player.hasPermissions(2)) {
+			return true;
+		}
+		player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
+		return false;
 	}
 
 	@Override
@@ -231,6 +246,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof BackpackBlock)) {
+			return;
+		}
+
+		if (!hasPermissionsToPickup(player)) {
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.FAIL);
 			return;
 		}
 
