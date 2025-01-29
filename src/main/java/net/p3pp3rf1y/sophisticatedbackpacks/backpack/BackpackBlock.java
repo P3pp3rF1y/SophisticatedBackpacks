@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -47,6 +48,7 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -144,19 +146,24 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-		if (world.isClientSide) {
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		}
 
 		ItemStack heldItem = player.getItemInHand(hand);
 		if (player.isShiftKeyDown() && heldItem.isEmpty()) {
-			putInPlayersHandAndRemove(state, world, pos, player, hand);
-			return InteractionResult.SUCCESS;
+			if (hasPermissionsToPickup(player)) {
+				putInPlayersHandAndRemove(state, level, pos, player, InteractionHand.MAIN_HAND);
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.FAIL;
+			}
+
 		}
 
 		if (!heldItem.isEmpty() && heldItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
-			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class)
+			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class)
 					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
 							player.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(playerInventory -> {
 								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
@@ -174,9 +181,17 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
-				getBackpackDisplayName(world, pos)), backpackContext::toBuffer);
+				getBackpackDisplayName(level, pos)), backpackContext::toBuffer);
 		return InteractionResult.SUCCESS;
 	}
+
+    private static boolean hasPermissionsToPickup(Player player) {
+        if (player.hasPermissions(2)) {
+            return true;
+        }
+        player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
+        return false;
+    }
 
 	private Component getBackpackDisplayName(Level world, BlockPos pos) {
 		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getHoverName();
@@ -234,6 +249,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof BackpackBlock)) {
+			return;
+		}
+
+		if (!hasPermissionsToPickup(player)) {
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.FAIL);
 			return;
 		}
 
