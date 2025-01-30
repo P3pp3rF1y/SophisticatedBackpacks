@@ -60,6 +60,7 @@ import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
@@ -147,7 +148,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 		ItemStack heldItem = player.getMainHandItem();
 		if (player.isShiftKeyDown() && heldItem.isEmpty()) {
-			if (hasPermissionsToPickup(player)) {
+			if (hasPermissionsToPickup(player, pos)) {
 				putInPlayersHandAndRemove(state, level, pos, player, InteractionHand.MAIN_HAND);
 				return InteractionResult.SUCCESS;
 			} else {
@@ -162,12 +163,18 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		return InteractionResult.SUCCESS;
 	}
 
-	private static boolean hasPermissionsToPickup(Player player) {
+	private static boolean hasPermissionsToPickup(Player player, BlockPos pos) {
 		if (player.hasPermissions(2)) {
 			return true;
 		}
-		player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
-		return false;
+
+		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(be -> {
+			if (!be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).isEmpty()) {
+				player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
+				return false;
+			}
+			return true;
+		}).orElse(true);
 	}
 
 	@Override
@@ -249,7 +256,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 			return;
 		}
 
-		if (!hasPermissionsToPickup(player)) {
+		if (!hasPermissionsToPickup(player, pos)) {
 			event.setCanceled(true);
 			event.setCancellationResult(InteractionResult.FAIL);
 			return;
