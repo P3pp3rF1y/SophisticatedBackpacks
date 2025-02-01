@@ -52,11 +52,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandle
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -262,12 +258,13 @@ public class CommonEventHandler {
 	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
 		Player player = event.getPlayer();
 
-		if (player.hasPermissions(2) || !(event.getState().getBlock() instanceof BackpackBlock)) {
+		if (!(event.getState().getBlock() instanceof BackpackBlock)) {
 			return;
 		}
 
 		if (WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class)
-				.map(backpackBlockEntity -> !backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).isEmpty())
+				.map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE)
+						.stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
 				.orElse(false)) {
 			event.setCanceled(true);
 			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
