@@ -2,8 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -17,7 +15,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
@@ -253,12 +250,13 @@ public class CommonEventHandler {
 	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
 		Player player = event.getPlayer();
 
-		if (player.hasPermissions(2) || !(event.getState().getBlock() instanceof BackpackBlock)) {
+		if (!(event.getState().getBlock() instanceof BackpackBlock)) {
 			return;
 		}
 
 		if (WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class)
-				.map(backpackBlockEntity -> !backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).isEmpty())
+				.map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE)
+						.stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
 				.orElse(false)) {
 			event.setCanceled(true);
 			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
