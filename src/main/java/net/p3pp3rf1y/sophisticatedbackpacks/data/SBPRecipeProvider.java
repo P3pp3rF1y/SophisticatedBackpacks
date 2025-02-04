@@ -391,8 +391,8 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern(" I ")
 				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER.get())
 				.define('I', Tags.Items.STORAGE_BLOCKS_IRON)
-				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
-				.save(consumer, new ResourceLocation(SophisticatedBackpacks.getRegistryName("stack_upgrade_tier_1_from_starter")));
+				.unlockedBy("has_stack_upgrade_starter_tier", has(ModItems.STACK_UPGRADE_STARTER_TIER.get()))
+				.save(consumer, SophisticatedBackpacks.getRL("stack_upgrade_tier_1_from_starter"));
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_2.get())
 				.pattern("GGG")
@@ -400,7 +400,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("GGG")
 				.define('S', ModItems.STACK_UPGRADE_TIER_1.get())
 				.define('G', Tags.Items.STORAGE_BLOCKS_GOLD)
-				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_1.get()))
+				.unlockedBy("has_stack_upgrade_tier_1", has(ModItems.STACK_UPGRADE_TIER_1.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_3.get())
@@ -409,7 +409,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("DDD")
 				.define('S', ModItems.STACK_UPGRADE_TIER_2.get())
 				.define('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
-				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_2.get()))
+				.unlockedBy("has_stack_upgrade_tier_2", has(ModItems.STACK_UPGRADE_TIER_2.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_TIER_4.get())
@@ -418,7 +418,45 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.pattern("NNN")
 				.define('S', ModItems.STACK_UPGRADE_TIER_3.get())
 				.define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
-				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.STACK_UPGRADE_TIER_3.get()))
+				.unlockedBy("has_stack_upgrade_tier_3", has(ModItems.STACK_UPGRADE_TIER_3.get()))
+				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_UPGRADE_OMEGA_TIER.get())
+				.pattern("SSS")
+				.pattern("SSS")
+				.pattern("SSS")
+				.define('S', ModItems.STACK_UPGRADE_TIER_4.get())
+				.unlockedBy("has_stack_upgrade_tier_4", has(ModItems.STACK_UPGRADE_TIER_4.get()))
+				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_DOWNGRADE_TIER_1.get())
+				.pattern("SFS")
+				.pattern("SBS")
+				.pattern("FSF")
+				.define('S', Items.STICK)
+				.define('F', Items.FLINT)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_DOWNGRADE_TIER_2.get())
+				.pattern("FSF")
+				.pattern("SBS")
+				.pattern("FSF")
+				.define('S', Items.STICK)
+				.define('F', Items.FLINT)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(consumer);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.STACK_DOWNGRADE_TIER_3.get())
+				.pattern("SFS")
+				.pattern("FBF")
+				.pattern("FSF")
+				.define('S', Items.STICK)
+				.define('F', Items.FLINT)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(ModItems.JUKEBOX_UPGRADE.get())

@@ -1,13 +1,7 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_the_recipe": {
-      "conditions": {
-        "recipe": "sophisticatedbackpacks:stack_upgrade_tier_2"
-      },
-      "trigger": "minecraft:recipe_unlocked"
-    },
-    "has_upgrade_base": {
+    "has_stack_upgrade_tier_1": {
       "conditions": {
         "items": [
           {
@@ -18,11 +12,17 @@
         ]
       },
       "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:stack_upgrade_tier_2"
+      },
+      "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_upgrade_base",
+      "has_stack_upgrade_tier_1",
       "has_the_recipe"
     ]
   ],
