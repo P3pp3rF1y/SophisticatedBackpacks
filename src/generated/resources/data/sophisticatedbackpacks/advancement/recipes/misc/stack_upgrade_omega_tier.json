@@ -2,16 +2,16 @@
   "neoforge:conditions": [
     {
       "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_tier_1"
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_omega_tier"
     }
   ],
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_stack_upgrade_starter_tier": {
+    "has_stack_upgrade_tier_4": {
       "conditions": {
         "items": [
           {
-            "items": "sophisticatedbackpacks:stack_upgrade_starter_tier"
+            "items": "sophisticatedbackpacks:stack_upgrade_tier_4"
           }
         ]
       },
@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
+        "recipe": "sophisticatedbackpacks:stack_upgrade_omega_tier"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -27,12 +27,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_stack_upgrade_starter_tier"
+      "has_stack_upgrade_tier_4"
     ]
   ],
   "rewards": {
     "recipes": [
-      "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
+      "sophisticatedbackpacks:stack_upgrade_omega_tier"
     ]
   }
 }
