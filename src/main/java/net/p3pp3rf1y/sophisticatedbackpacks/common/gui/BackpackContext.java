@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -150,7 +151,12 @@ public abstract class BackpackContext {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find inventory handler for \"{}\"", handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
 			}
-			LazyOptional<IBackpackWrapper> backpackWrapper = inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
+			ItemStack stack = inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex);
+			if (stack.isEmpty()) {
+				return IBackpackWrapper.Noop.INSTANCE;
+			}
+
+			LazyOptional<IBackpackWrapper> backpackWrapper = stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance());
 			if (!backpackWrapper.isPresent()) {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find backpack at slot index {} in \"{}\" inventory handler", backpackSlotIndex, handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
