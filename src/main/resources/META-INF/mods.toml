@@ -19,7 +19,7 @@ issueTrackerURL = "https://github.com/P3pp3rF1y/SophisticatedBackpacks/issues" #
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks" #optional
 
 # License
-license = "GNU General Public License v3.0"
+license = "All Rights Reserved"
 
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile = "logo.png" #optional
