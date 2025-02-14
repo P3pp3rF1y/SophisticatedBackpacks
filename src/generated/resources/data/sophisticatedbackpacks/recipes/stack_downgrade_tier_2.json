@@ -14,7 +14,7 @@
       "item": "minecraft:flint"
     },
     "S": {
-      "item": "minecraft:stick"
+      "tag": "forge:rods/wooden"
     }
   },
   "pattern": [
