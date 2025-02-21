@@ -1,5 +1,5 @@
 {
-    "itemGroup.sophisticatedbackpacks": "Mochilas Sofisticadas",
+    "itemGroup.sophisticatedbackpacks": "Sophisticated Backpacks",
     "item.sophisticatedbackpacks.backpack": "Mochila",
     "block.sophisticatedbackpacks.backpack": "Mochila",
     "item.sophisticatedbackpacks.copper_backpack": "Mochila de cobre",
@@ -127,7 +127,7 @@
     "item.sophisticatedbackpacks.chipped.alchemy_bench_upgrade.tooltip": "Permite usar a Alchemy Bench (Chipped) dentro da mochila",
     "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade": "Módulo de Tinkering Table (Chipped)",
     "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade.tooltip": "Permite usar a Tinkering Table (Chipped) dentro da mochila",
-    "keybind.sophisticatedbackpacks.category": "Mochilas Sofisticadas",
+    "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
     "keybind.sophisticatedbackpacks.open_backpack": "Abrir mochila",
     "keybind.sophisticatedbackpacks.inventory_interaction": "Abrir a aba de módulos",
     "keybind.sophisticatedbackpacks.tool_swap": "Trocar de ferramenta automaticamente",
