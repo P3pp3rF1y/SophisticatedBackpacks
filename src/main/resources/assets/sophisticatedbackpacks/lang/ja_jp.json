@@ -89,7 +89,7 @@
   "item.sophisticatedbackpacks.stack_downgrade_tier_1.tooltip": "1スロットあたりのスタック数を8で割ります。",
   "item.sophisticatedbackpacks.stack_downgrade_tier_2": "スタック数減少/16",
   "item.sophisticatedbackpacks.stack_downgrade_tier_2.tooltip": "1スロットあたりのスタック数を16で割ります。",
-  "item.sophisticatedbackpacks.stack_downgrade_tier_3": "スタック数減少/32,
+  "item.sophisticatedbackpacks.stack_downgrade_tier_3": "スタック数減少/32",
   "item.sophisticatedbackpacks.stack_downgrade_tier_3.tooltip": "1スロットあたりのスタック数を32で割ります。",
   "item.sophisticatedbackpacks.battery_upgrade": "バッテリ機能",
   "item.sophisticatedbackpacks.battery_upgrade.tooltip": "リュック内のインベントリを2列使用して電力を蓄積します。",
