@@ -222,5 +222,5 @@
   "commands.sophisticatedbackpacks.list.trim_color": "トリム",
   "commands.sophisticatedbackpacks.give.success": "[%s]を与えました",
   "commands.sophisticatedbackpacks.remove_non_player.success": "[%s]を削除しました。",
-  "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "クリックでUUIDを付与: %s",
+  "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "クリックでUUIDを付与: %s"
 }
