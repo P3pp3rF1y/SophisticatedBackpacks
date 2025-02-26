@@ -42,7 +42,6 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 	static {
 		entityTranslations = new HashMap<>();
-		entityTranslations.put(EntityType.ENDERMAN, new Vec3(0, -0.8, 0));
 	}
 
 	private static final ResourceLocation BACKPACK_ENTITY_TEXTURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
