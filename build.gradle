@@ -139,6 +139,10 @@ dependencies {
     localRuntime "curse.maven:athena-841890:${athena_cf_file_id}"
     compileOnly "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
     localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
+    compileOnly "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    compileOnly "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
+    localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
 /*
     compileOnly "vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly "vazkii.botania:Botania:${botania_version}")

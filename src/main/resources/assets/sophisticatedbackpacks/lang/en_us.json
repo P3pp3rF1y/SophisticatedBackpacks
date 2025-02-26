@@ -127,6 +127,8 @@
   "item.sophisticatedbackpacks.chipped.alchemy_bench_upgrade.tooltip": "Chipped Alchemy Bench in an upgrade tab",
   "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade": "Chipped: Tinkering Table Upgrade",
   "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade.tooltip": "Chipped Tinkering Table in an upgrade tab",
+  "item.sophisticatedbackpacks.sawmill.sawmill_upgrade": "Sawmill Upgrade",
+  "item.sophisticatedbackpacks.sawmill.sawmill_upgrade.tooltip": "Saw in an upgrade tab",
   "keybind.sophisticatedbackpacks.category": "Sophisticated Backpacks",
   "keybind.sophisticatedbackpacks.open_backpack": "Open Backpack",
   "keybind.sophisticatedbackpacks.inventory_interaction": "Run Inventory Interaction Upgrades",
