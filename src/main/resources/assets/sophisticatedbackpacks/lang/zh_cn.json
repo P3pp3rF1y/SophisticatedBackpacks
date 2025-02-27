@@ -127,6 +127,8 @@
     "item.sophisticatedbackpacks.chipped.alchemy_bench_upgrade.tooltip": "在升级标签页中添加一个Chipped模组的炼金术台",
     "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade": "Chipped：工匠台升级",
     "item.sophisticatedbackpacks.chipped.tinkering_table_upgrade.tooltip": "在升级标签页中添加一个Chipped模组的工匠台",
+    "item.sophisticatedbackpacks.sawmill.sawmill_upgrade": "锯木机升级",
+    "item.sophisticatedbackpacks.sawmill.sawmill_upgrade.tooltip": "在升级标签页中添加一个锯木机",
     "keybind.sophisticatedbackpacks.category": "精妙背包",
     "keybind.sophisticatedbackpacks.open_backpack": "打开背包",
     "keybind.sophisticatedbackpacks.inventory_interaction": "运行物品交互升级（如取货/卸货升级）",
