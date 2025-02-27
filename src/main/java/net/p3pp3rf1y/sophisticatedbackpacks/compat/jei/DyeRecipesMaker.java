@@ -37,7 +37,7 @@ public class DyeRecipesMaker {
 
 		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_MAIN_COLOR, List.of(
-				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
+				DyeColor.YELLOW, DyeColor.LIME
 		));
 		int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_ACCENT_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR, List.of(
 				DyeColor.BLUE, DyeColor.BLACK

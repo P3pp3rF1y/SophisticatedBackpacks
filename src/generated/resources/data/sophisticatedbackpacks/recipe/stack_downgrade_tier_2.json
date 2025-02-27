@@ -1,0 +1,30 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_downgrade_tier_2"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "F": {
+      "item": "minecraft:flint"
+    },
+    "S": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    "FSF",
+    "SBS",
+    "FSF"
+  ],
+  "result": {
+    "count": 1,
+    "id": "sophisticatedbackpacks:stack_downgrade_tier_2"
+  }
+}

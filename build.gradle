@@ -127,8 +127,8 @@ dependencies {
 
     compileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-    compileOnly "curse.maven:curios-1037991:${curios_cf_file_id}"
-    localRuntime "curse.maven:curios-1037991:${curios_cf_file_id}"
+    compileOnly "curse.maven:curios-309927:${curios_cf_file_id}"
+    localRuntime "curse.maven:curios-309927:${curios_cf_file_id}"
     compileOnly "curse.maven:balm-531761:${balm_cf_file_id}"
     localRuntime "curse.maven:balm-531761:${balm_cf_file_id}"
     compileOnly "curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}"
@@ -139,6 +139,10 @@ dependencies {
     localRuntime "curse.maven:athena-841890:${athena_cf_file_id}"
     compileOnly "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
     localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
+    compileOnly "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    compileOnly "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
+    localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
 /*
     compileOnly "vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly "vazkii.botania:Botania:${botania_version}")
@@ -341,7 +345,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     }
     mainFile.addRequirement('sophisticated-core')
     mainFile.addOptional('jei')
-    mainFile.addOptional('curios-continuation')
+    mainFile.addOptional('curios')
     mainFile.addOptional('crafting-tweaks')
     onlyIf { !project.ext.changelog.isEmpty() }
 }
@@ -357,7 +361,7 @@ modrinth {
         required.project "sophisticated-core"
         optional.project "jei"
         optional.project "crafting-tweaks"
-        optional.project "curios-continuation"
+        optional.project "curios"
     }
     changelog = provider {
         project.ext.changelog

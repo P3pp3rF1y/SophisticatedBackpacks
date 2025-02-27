@@ -16,6 +16,7 @@
 # include markdowns
 !README.md
 !LICENSE
+!LICENSE.md
 !COPYING.txt
 
 # include sourcecode

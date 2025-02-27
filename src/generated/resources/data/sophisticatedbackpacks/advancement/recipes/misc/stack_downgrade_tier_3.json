@@ -1,0 +1,38 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_downgrade_tier_3"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:stack_downgrade_tier_3"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_upgrade_base": {
+      "conditions": {
+        "items": [
+          {
+            "items": "sophisticatedbackpacks:upgrade_base"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_upgrade_base"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:stack_downgrade_tier_3"
+    ]
+  }
+}
