@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
@@ -436,12 +437,18 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
+	public void setTemplate(String templateName) {
+		getBackpackStack().set(ModDataComponents.TEMPLATE_NAME, templateName);
+	}
+
+	@Override
 	public void fillWithLoot(Player player) {
 		Level level = player.level();
 		if (level.isClientSide) {
 			return;
 		}
 		BlockPos pos = player.blockPosition();
+		fillFromTemplate();
 		fillWithLoot(level, pos);
 		fillWithExtraItems(stack -> InventoryHelper.insertOrDropItem(player, stack, getInventoryHandler()));
 	}
@@ -480,6 +487,28 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return;
 		}
 		fillWithLootFromTable(level, pos, lootTable);
+	}
+
+	private void fillFromTemplate() {
+		ItemStack backpack = getBackpackStack();
+		String templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
+		if (templateName == null) {
+			return;
+		}
+
+		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
+		if (templateData == null) {
+			return;
+		}
+
+		CompoundTag backpackContent = templateData.getCompound("backpackContents").copy();
+		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), backpackContent);
+		backpack.remove(ModDataComponents.TEMPLATE_NAME);
+
+		// If the template is not marked as persistent we remove it now to not clutter the BackpackStorage
+		if (!templateData.getBoolean("persistent")) {
+			BackpackTemplates.removeBackpackTemplate(templateName);
+		}
 	}
 
 	@Override

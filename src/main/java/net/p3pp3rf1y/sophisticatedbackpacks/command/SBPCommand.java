@@ -24,6 +24,8 @@ public class SBPCommand {
 			ArgumentTypeInfos.registerByClass(BackpackUUIDArgumentType.class, SingletonArgumentInfo.contextFree(BackpackUUIDArgumentType::backpackUuid)));
 	private static final Supplier<SingletonArgumentInfo<BackpackPlayerArgumentType>> PLAYER_NAME_COMMAND_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("player_name", () ->
 			ArgumentTypeInfos.registerByClass(BackpackPlayerArgumentType.class, SingletonArgumentInfo.contextFree(BackpackPlayerArgumentType::playerName)));
+	private static final Supplier<SingletonArgumentInfo<BackpackTemplateArgumentType>> TEMPLATE_NAME_COMMAND_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("template_name", () ->
+			ArgumentTypeInfos.registerByClass(BackpackTemplateArgumentType.class, SingletonArgumentInfo.contextFree(BackpackTemplateArgumentType::templateName)));
 
 	private SBPCommand() {}
 
@@ -41,6 +43,7 @@ public class SBPCommand {
 						.then(ListCommand.register())
 						.then(GiveCommand.register())
 						.then(RemoveNonPlayerCommand.register())
+						.then(TemplateCommand.register())
 		);
 		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermission(OP_LEVEL)).redirect(mainNode));
 	}

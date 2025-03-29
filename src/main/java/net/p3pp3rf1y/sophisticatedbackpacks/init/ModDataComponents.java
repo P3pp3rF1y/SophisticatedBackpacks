@@ -45,6 +45,9 @@ public class ModDataComponents {
     public static final Supplier<DataComponentType<ToolSwapMode>> TOOL_SWAP_MODE = DATA_COMPONENT_TYPES.register("tool_swap_mode",
             () -> new DataComponentType.Builder<ToolSwapMode>().persistent(ToolSwapMode.CODEC).networkSynchronized(ToolSwapMode.STREAM_CODEC).build());
 
+    public static final Supplier<DataComponentType<String>> TEMPLATE_NAME = DATA_COMPONENT_TYPES.register("template_name",
+            () -> new DataComponentType.Builder<String>().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+
     public static void register(IEventBus modBus) {
         DATA_COMPONENT_TYPES.register(modBus);
     }

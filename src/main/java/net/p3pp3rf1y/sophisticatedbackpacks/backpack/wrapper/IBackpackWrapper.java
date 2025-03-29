@@ -31,6 +31,8 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	void setLoot(ResourceLocation lootTableName, float lootPercentage);
 
+	void setTemplate(String templateName);
+
 	default void fillWithLootAndExtraItems(Level level, BlockPos pos) {
 		//noop
 	}
@@ -105,6 +107,11 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+			//noop
+		}
+
+		@Override
+		public void setTemplate(String templateName) {
 			//noop
 		}
 
