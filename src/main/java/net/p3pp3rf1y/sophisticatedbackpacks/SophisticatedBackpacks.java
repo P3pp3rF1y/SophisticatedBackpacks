@@ -64,7 +64,7 @@ public class SophisticatedBackpacks {
 		SBPPacketHandler.INSTANCE.init();
 		ModCompat.compatsSetup();
 		event.enqueueWork(ModItems::registerDispenseBehavior);
-		ModItems.registerCauldronInteractions();
+		event.enqueueWork(ModItems::registerCauldronInteractions);
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
