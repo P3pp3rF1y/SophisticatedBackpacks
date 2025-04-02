@@ -177,10 +177,16 @@ public class EntityBackpackAdditionHandler {
 		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(advancedJukebox ? ModItems.ADVANCED_JUKEBOX_UPGRADE.get() : ModItems.JUKEBOX_UPGRADE.get()));
 		Iterator<JukeboxUpgradeWrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
 		if (it.hasNext()) {
+			List<Item> musicDiscs = getMusicDiscs();
+			if (musicDiscs.isEmpty()) {
+				SophisticatedBackpacks.LOGGER.warn("No music discs found to add to jukebox upgrade, either there are none registered or they are all blocked");
+				return;
+			}
+
 			JukeboxUpgradeWrapper wrapper = it.next();
 			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().getSlots() / 3) + 1 : 1;
 			for (int i = 0; i < numberOfDiscs; i++) {
-				wrapper.getDiscInventory().insertItem(i, new ItemStack(getMusicDiscs().get(rnd.nextInt(getMusicDiscs().size())), 1), false);
+				wrapper.getDiscInventory().insertItem(i, new ItemStack(getMusicDiscs().get(rnd.nextInt(musicDiscs.size())), 1), false);
 			}
 		}
 	}
