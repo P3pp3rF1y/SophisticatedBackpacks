@@ -56,7 +56,7 @@ public class SophisticatedBackpacks {
 
 	private static void setup(FMLCommonSetupEvent event) {
 		event.enqueueWork(ModItems::registerDispenseBehavior);
-		ModItems.registerCauldronInteractions();
+		event.enqueueWork(ModItems::registerCauldronInteractions);
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
