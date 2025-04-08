@@ -26,6 +26,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.*;
@@ -232,7 +233,7 @@ public class KeybindHandler {
 
 		@Override
 		public boolean isActive() {
-			return GUI.isActive() && Minecraft.getInstance().screen instanceof BackpackScreen;
+			return GUI.isActive() && Minecraft.getInstance().screen instanceof IBackpackScreen;
 		}
 
 		@Override

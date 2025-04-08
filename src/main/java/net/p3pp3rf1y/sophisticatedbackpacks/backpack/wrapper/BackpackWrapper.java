@@ -185,6 +185,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			}
 
 			fluidHandler = wrappedHandler;
+			fluidHandlerInitialized = true;
 		}
 
 		return Optional.ofNullable(fluidHandler);

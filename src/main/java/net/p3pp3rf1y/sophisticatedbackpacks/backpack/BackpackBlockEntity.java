@@ -36,6 +36,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
+	public static final String BACKPACK_DATA_TAG = "backpackData";
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -86,7 +87,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
-		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(ItemStack.parseOptional(registryAccess, nbt.getCompound("backpackData"))));
+		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(ItemStack.parseOptional(registryAccess, nbt.getCompound(BACKPACK_DATA_TAG))));
 	}
 
 	@Override
@@ -98,7 +99,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	private void writeBackpack(CompoundTag ret, HolderLookup.Provider registries) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
-		ret.put("backpackData", backpackCopy.save(registries));
+		ret.put(BACKPACK_DATA_TAG, backpackCopy.save(registries));
 	}
 
 	@Override
