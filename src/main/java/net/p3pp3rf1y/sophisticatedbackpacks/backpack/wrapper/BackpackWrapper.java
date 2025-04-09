@@ -49,7 +49,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String BORDER_COLOR_TAG = "borderColor";
 	private static final String OPEN_TAB_ID_TAG = "openTabId";
 	private static final String SORT_BY_TAG = "sortBy";
-	private static final String CONTENTS_UUID_TAG = "contentsUuid";
+	public static final String CONTENTS_UUID_TAG = "contentsUuid";
 	private static final String INVENTORY_SLOTS_TAG = "inventorySlots";
 	private static final String UPGRADE_SLOTS_TAG = "upgradeSlots";
 	private static final String LOOT_TABLE_NAME_TAG = "lootTableName";
@@ -178,6 +178,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			}
 
 			fluidHandler = wrappedHandler;
+			fluidHandlerInitialized = true;
 		}
 
 		return Optional.ofNullable(fluidHandler);

@@ -14,7 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 
-public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
+public class BackpackScreen extends StorageScreenBase<BackpackContainer> implements IBackpackScreen {
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, Inventory inv, Component title) {
 		return new BackpackScreen(screenContainer, inv, title);
 	}

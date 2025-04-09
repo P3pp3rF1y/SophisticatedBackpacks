@@ -26,6 +26,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 public abstract class BackpackContext {
+
+	public static final String SUBBACKPACK_DISPLAY_NAME_PREFIX = "... > ";
+
 	public abstract Optional<IStorageWrapper> getParentBackpackWrapper(Player player);
 
 	public abstract boolean shouldLockBackpackSlot(Player player);
@@ -256,7 +259,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return Component.literal("... > " + super.getDisplayName(player).getString());
+			return Component.literal(SUBBACKPACK_DISPLAY_NAME_PREFIX + super.getDisplayName(player).getString());
 		}
 
 		@Override
@@ -381,7 +384,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return Component.literal("... > " + super.getDisplayName(player).getString());
+			return Component.literal(SUBBACKPACK_DISPLAY_NAME_PREFIX + super.getDisplayName(player).getString());
 		}
 
 		@Override
@@ -486,7 +489,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public Component getDisplayName(Player player) {
-			return Component.literal("... > " + super.getDisplayName(player).getString());
+			return Component.literal(SUBBACKPACK_DISPLAY_NAME_PREFIX + super.getDisplayName(player).getString());
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer, Level level) {

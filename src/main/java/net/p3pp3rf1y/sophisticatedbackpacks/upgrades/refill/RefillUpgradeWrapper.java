@@ -8,9 +8,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -38,6 +40,7 @@ import java.util.function.Supplier;
 
 public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrapper, RefillUpgradeItem>
 		implements IFilteredUpgrade, ITickableUpgrade, IBlockPickResponseUpgrade {
+	private static final int REFILL_RANGE = 3;
 	private static final int COOLDOWN = 5;
 
 	private final Map<Integer, TargetSlot> targetSlots;
@@ -86,17 +89,26 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	@Override
-	public void tick(@Nullable Entity entity, Level world, BlockPos pos) {
-		if (entity == null /*not supported in block form*/ || isInCooldown(world)) {
+	public void tick(@Nullable Entity entity, Level level, BlockPos pos) {
+		if (isInCooldown(level)) {
 			return;
 		}
+
+		if (!(entity instanceof Player)) {
+			level.getEntities(EntityType.PLAYER, new AABB(pos).inflate(REFILL_RANGE), p -> true).forEach(this::refillItemFor);
+		} else {
+			refillItemFor(entity);
+		}
+		setCooldown(level, COOLDOWN);
+	}
+
+	private void refillItemFor(Entity entity) {
 		entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
 			if (filter.isEmpty()) {
 				return;
 			}
 			tryRefillFilter(entity, playerInvHandler, filter, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
 		}));
-		setCooldown(world, COOLDOWN);
 	}
 
 	private void tryRefillFilter(@Nonnull Entity entity, IItemHandler playerInvHandler, ItemStack filter, TargetSlot targetSlot) {
@@ -151,7 +163,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		toExtract.setCount(filter.getMaxStackSize());
 		if (hasItemInBackpack.get() && !InventoryHelper.extractFromInventory(toExtract, inventoryHandler, true).isEmpty()) {
 			if ((inventoryHandler.getStackInSlot(stashSlot.get()).getCount() > filter.getMaxStackSize() || !inventoryHandler.isItemValid(stashSlot.get(), mainHandItem))
-				&& !inventoryHandler.insertItem(mainHandItem, true).isEmpty()) {
+					&& !inventoryHandler.insertItem(mainHandItem, true).isEmpty()) {
 				if (canMoveMainHandToInventory(player)) {
 					ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
 					player.setItemInHand(InteractionHand.MAIN_HAND, extracted);

@@ -17,7 +17,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -38,6 +38,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
+	public static final String BACKPACK_DATA_TAG = "backpackData";
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -57,7 +58,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE);
+		backpackWrapper = new BackpackWrapper(backpack);
 		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
@@ -88,7 +89,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
-		setBackpack(ItemStack.of(nbt.getCompound("backpackData")));
+		setBackpack(ItemStack.of(nbt.getCompound(BACKPACK_DATA_TAG)));
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private void writeBackpack(CompoundTag ret) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
 		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
-		ret.put("backpackData", backpackCopy.save(new CompoundTag()));
+		ret.put(BACKPACK_DATA_TAG, backpackCopy.save(new CompoundTag()));
 	}
 
 	@Override
