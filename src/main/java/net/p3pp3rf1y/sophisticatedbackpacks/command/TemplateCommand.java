@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.command;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -55,8 +56,20 @@ public class TemplateCommand {
 	}
 
 	private static int listTemplates(CommandSourceStack source) {
+		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.list.header"), false);
 		BackpackTemplates.getTemplateNames().forEach(templateName -> {
-			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.list", templateName), false);
+			MutableComponent message = Component.literal(templateName);
+			message.append(Component.literal(", "));
+			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.give")
+					.withStyle(s -> s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template give " + templateName))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.give.tooltip", templateName))))
+			);
+			message.append(Component.literal(", "));
+			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.delete")
+					.withStyle(s -> s.withColor(ChatFormatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template delete " + templateName))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.delete.tooltip", templateName))))
+			);
+			source.sendSuccess(() -> message, false);
 		});
 		return 0;
 	}
