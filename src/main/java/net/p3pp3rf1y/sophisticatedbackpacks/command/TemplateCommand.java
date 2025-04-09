@@ -44,11 +44,11 @@ public class TemplateCommand {
 								.executes(context -> deleteTemplate(context.getSource(), context.getArgument("templateName", String.class)))
 						)
 				)
-				.then(Commands.literal("backpack")
+				.then(Commands.literal("give")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
-								.executes(context -> createBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), List.of(context.getSource().getPlayer())))
+								.executes(context -> giveBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), List.of(context.getSource().getPlayer())))
 								.then(Commands.argument("targets", EntityArgument.players())
-										.executes(context -> createBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), EntityArgument.getPlayers(context, "targets")))
+										.executes(context -> giveBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), EntityArgument.getPlayers(context, "targets")))
 								)
 						)
 				);
@@ -96,7 +96,7 @@ public class TemplateCommand {
 		return 0;
 	}
 
-	private static int createBackpackFromTemplate(CommandSourceStack source, String templateName, Collection<ServerPlayer> players) {
+	private static int giveBackpackFromTemplate(CommandSourceStack source, String templateName, Collection<ServerPlayer> players) {
 		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
 		if (templateData == null) {
 			return 1;
@@ -108,9 +108,9 @@ public class TemplateCommand {
 		players.forEach(p -> giveBackpackToPlayer(backpack.copy(), p));
 
 		if (players.size() == 1) {
-			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.create.backpack.success", players.iterator().next().getDisplayName()), true);
+			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.give.backpack.success", players.iterator().next().getDisplayName()), true);
 		} else {
-			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.create.backpack.success", players.size()), true);
+			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.give.backpack.success", players.size()), true);
 		}
 		return 0;
 	}
