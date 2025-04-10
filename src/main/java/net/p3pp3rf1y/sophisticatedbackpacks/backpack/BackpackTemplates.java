@@ -28,6 +28,10 @@ public class BackpackTemplates {
 		BackpackStorage.get().removeBackpackTemplate(templateName);
 	}
 
+	public static boolean isPersistent(String templateName) {
+		return getBackpackTemplate(templateName).getBoolean("persistent");
+	}
+
 	public static Set<String> getTemplateNames() {
 		return BackpackStorage.get().getBackpackTemplates().keySet();
 	}

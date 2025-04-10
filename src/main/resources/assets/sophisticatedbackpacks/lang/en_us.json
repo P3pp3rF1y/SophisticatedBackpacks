@@ -239,5 +239,7 @@
   "commands.sophisticatedbackpacks.template.create.alreadyexists": "Template '%s' already exists",
   "commands.sophisticatedbackpacks.template.create.success": "Template '%s' created successfully",
   "commands.sophisticatedbackpacks.template.delete.success": "Template '%s' deleted successfully",
-  "commands.sophisticatedbackpacks.template.give.backpack.success": "Gave backpack to %s"
+  "commands.sophisticatedbackpacks.template.give.backpack.success": "Gave backpack to %s",
+  "commands.sophisticatedbackpacks.give.failure.notemplate": "The template '%s' does not exist",
+  "commands.sophisticatedbackpacks.give.failure.notpersistent": "The template '%s' is not persistent and can not be used with the 'template give' command"
 }

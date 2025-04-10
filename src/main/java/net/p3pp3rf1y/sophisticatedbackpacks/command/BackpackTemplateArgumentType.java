@@ -27,7 +27,7 @@ public class BackpackTemplateArgumentType implements ArgumentType<String> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (context.getSource() instanceof CommandSourceStack) {
-			return SharedSuggestionProvider.suggest(BackpackTemplates.getTemplateNames().stream().sorted(Comparator.naturalOrder()).toList(), builder);
+			return SharedSuggestionProvider.suggest(BackpackTemplates.getTemplateNames().stream().filter(BackpackTemplates::isPersistent).sorted(Comparator.naturalOrder()).toList(), builder);
 		} else if (context.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
 			return sharedSuggestionProvider.customSuggestion(context);
 		}

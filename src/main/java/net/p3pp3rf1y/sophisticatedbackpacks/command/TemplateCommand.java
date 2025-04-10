@@ -112,7 +112,13 @@ public class TemplateCommand {
 	private static int giveBackpackFromTemplate(CommandSourceStack source, String templateName, Collection<ServerPlayer> players) {
 		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
 		if (templateData == null) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.give.failure.notemplate", templateName));
 			return 1;
+		}
+
+		if (!templateData.getBoolean("persistent")) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.give.failure.notpersistent", templateName));
+			return 2;
 		}
 
 		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.getString("backpackItemRegistryName"))));
