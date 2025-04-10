@@ -18,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.*;
@@ -116,7 +115,8 @@ public class TemplateCommand {
 		}
 
 		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.getString("backpackItemRegistryName"))));
-		backpack.set(ModDataComponents.TEMPLATE_NAME, templateName);
+		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
+		wrapper.setTemplate(templateName);
 
 		players.forEach(p -> giveBackpackToPlayer(backpack.copy(), p));
 
