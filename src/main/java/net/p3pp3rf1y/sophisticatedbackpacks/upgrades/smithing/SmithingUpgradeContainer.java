@@ -112,7 +112,7 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 	private class PersistableSmithingMenu extends SmithingMenu {
 
 		public PersistableSmithingMenu(Inventory playerInventory) {
-			super(0, playerInventory, ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
+			super(0, playerInventory, playerInventory.player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
 		}
 
 		@Override
