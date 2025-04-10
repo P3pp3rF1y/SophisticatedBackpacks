@@ -228,5 +228,16 @@
   "commands.sophisticatedbackpacks.list.trim_color": "Trim",
   "commands.sophisticatedbackpacks.give.success": "Gave backpack to %s",
   "commands.sophisticatedbackpacks.remove_non_player.success": "Removed %s non player backpacks",
-  "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "Click to give backpack UUID: %s"
+  "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "Click to give backpack UUID: %s",
+  "commands.sophisticatedbackpacks.template.list.header": "Template Name, Actions",
+  "commands.sophisticatedbackpacks.template.list.give": "Give Backpack",
+  "commands.sophisticatedbackpacks.template.list.give.tooltip": "Click to give backpack with template: %s",
+  "commands.sophisticatedbackpacks.template.list.delete": "Delete Template",
+  "commands.sophisticatedbackpacks.template.list.delete.tooltip": "Click to delete template: %s",
+  "commands.sophisticatedbackpacks.template.create.nobackpack": "No backpack in main hand found",
+  "commands.sophisticatedbackpacks.template.create.backpackempty": "Backpack is empty",
+  "commands.sophisticatedbackpacks.template.create.alreadyexists": "Template '%s' already exists",
+  "commands.sophisticatedbackpacks.template.create.success": "Template '%s' created successfully",
+  "commands.sophisticatedbackpacks.template.delete.success": "Template '%s' deleted successfully",
+  "commands.sophisticatedbackpacks.template.give.backpack.success": "Gave backpack to %s"
 }
