@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.*;
@@ -87,7 +88,7 @@ public class TemplateCommand {
 
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
-		if (backpackUuid.isEmpty()) {
+		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.create.backpackempty"));
 			return 3;
 		}
