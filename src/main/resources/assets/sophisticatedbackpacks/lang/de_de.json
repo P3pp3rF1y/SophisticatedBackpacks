@@ -197,5 +197,16 @@
     "commands.sophisticatedbackpacks.list.trim_color": "Zuschneiden",
     "commands.sophisticatedbackpacks.give.success": "Gib Rucksack an %s",
     "commands.sophisticatedbackpacks.remove_non_player.success": "%s Nicht-Spieler-Rucksäcke entfernt",
-    "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "Klicken, um Rucksack-UUID zu geben: %s"
+    "chat.sophisticatedbackpacks.backpack_uuid.tooltip": "Klicken, um Rucksack-UUID zu geben: %s",
+    "commands.sophisticatedbackpacks.template.list.header": "Template Name, Aktionen",
+    "commands.sophisticatedbackpacks.template.list.give": "Gib Rucksack",
+    "commands.sophisticatedbackpacks.template.list.give.tooltip": "Klicken, um einen Rucksack mit dem Template '%s' zu erhalten",
+    "commands.sophisticatedbackpacks.template.list.delete": "Lösche das Template",
+    "commands.sophisticatedbackpacks.template.list.delete.tooltip": "Klicken, um das Template '%s' zu löschen",
+    "commands.sophisticatedbackpacks.template.create.nobackpack": "Keinen Rucksack in der Haupthand gefunden",
+    "commands.sophisticatedbackpacks.template.create.backpackempty": "Der Rucksack ist leer",
+    "commands.sophisticatedbackpacks.template.create.alreadyexists": "Das Template '%s' existiert bereits",
+    "commands.sophisticatedbackpacks.template.create.success": "Das Template '%s' wurde erstellt",
+    "commands.sophisticatedbackpacks.template.delete.success": "Das Template '%s' wurde gelöscht",
+    "commands.sophisticatedbackpacks.template.give.backpack.success": "Gib Rucksack an %s"
 }
