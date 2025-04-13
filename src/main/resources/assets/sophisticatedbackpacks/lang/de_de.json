@@ -203,12 +203,20 @@
     "commands.sophisticatedbackpacks.template.list.give.tooltip": "Klicken, um einen Rucksack mit dem Template '%s' zu erhalten",
     "commands.sophisticatedbackpacks.template.list.delete": "Lösche das Template",
     "commands.sophisticatedbackpacks.template.list.delete.tooltip": "Klicken, um das Template '%s' zu löschen",
+    "commands.sophisticatedbackpacks.template.backpackempty": "Der Rucksack ist leer",
     "commands.sophisticatedbackpacks.template.create.nobackpack": "Keinen Rucksack in der Haupthand gefunden",
-    "commands.sophisticatedbackpacks.template.create.backpackempty": "Der Rucksack ist leer",
     "commands.sophisticatedbackpacks.template.create.alreadyexists": "Das Template '%s' existiert bereits",
     "commands.sophisticatedbackpacks.template.create.success": "Das Template '%s' wurde erstellt",
     "commands.sophisticatedbackpacks.template.delete.success": "Das Template '%s' wurde gelöscht",
     "commands.sophisticatedbackpacks.template.give.backpack.success": "Gib Rucksack an %s",
-    "commands.sophisticatedbackpacks.give.failure.notemplate": "Das Template '%s' existiert nicht",
-    "commands.sophisticatedbackpacks.give.failure.notpersistent": "Das Template '%s' ist nicht persistent und can nicht mit dem 'tempalte give'-Befehl benutzt werden"
+    "commands.sophisticatedbackpacks.template.give.failure.notemplate": "Das Template '%s' existiert nicht",
+    "commands.sophisticatedbackpacks.template.give.failure.notpersistent": "Das Template '%s' ist nicht persistent und can nicht mit dem 'tempalte give'-Befehl benutzt werden",
+    "commands.sophisticatedbackpacks.dynamic.templateInUse": "Das dynamische Template '%s' wird zur Zeit benutzt",
+    "commands.sophisticatedbackpacks.dynamic.templateNotInUse": "Das dynamsiche Template '%s' wird zur Zeit nicht benutzt",
+    "commands.sophisticatedbackpacks.dynamic.begin.success": "Dynamisches Template '%s' erfolgreich gestarted",
+    "commands.sophisticatedbackpacks.dynamic.begin.noBaseTemplate": "Das Template '%s' existiert nicht und kann nicht als Basis für ein dynamisches Template verwendet werden",
+    "commands.sophisticatedbackpacks.dynamic.add.delayed": "Der Gegenstand '%2$s' wird am Ende zum Template '%1$s' hinzugefügt",
+    "commands.sophisticatedbackpacks.dynamic.add.success": "Der Gegenstand '%2$s' wurde erfolgreich zum Template '%1$s' hinzugefügt",
+    "commands.sophisticatedbackpacks.dynamic.end.addRemainingItemsFailed": "Nicht alle Gegenstände konnten hinzugefügt werden: Übrig geblieben %d x %s",
+    "commands.sophisticatedbackpacks.dynamic.end.success": "Das dynamsiche Template '%s' wurde erfolgreich beendet"
 }

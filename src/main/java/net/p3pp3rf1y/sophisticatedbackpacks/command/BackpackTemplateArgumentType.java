@@ -8,14 +8,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.UuidArgument;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BackpackTemplateArgumentType implements ArgumentType<String> {

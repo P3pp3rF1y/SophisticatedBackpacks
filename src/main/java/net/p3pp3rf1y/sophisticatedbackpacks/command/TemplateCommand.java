@@ -81,7 +81,7 @@ public class TemplateCommand {
 
 		ServerPlayer player = source.getPlayer();
 		ItemStack backpack = player.getMainHandItem();
-		if (!(backpack.getItem() instanceof BackpackItem backpackItem)) {
+		if (!(backpack.getItem() instanceof BackpackItem)) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.create.nobackpack"));
 			return 2;
 		}
@@ -89,7 +89,7 @@ public class TemplateCommand {
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
 		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.create.backpackempty"));
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
 
@@ -98,7 +98,7 @@ public class TemplateCommand {
 			return 4;
 		}
 
-		BackpackTemplates.setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem), BackpackStorage.get().getOrCreateBackpackContents(backpackUuid.get()).copy(), true);
+		BackpackTemplates.setBackpackTemplate(templateName, backpackWrapper, true);
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.create.success", templateName), true);
 		return 0;
 	}
@@ -112,12 +112,12 @@ public class TemplateCommand {
 	private static int giveBackpackFromTemplate(CommandSourceStack source, String templateName, Collection<ServerPlayer> players) {
 		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
 		if (templateData == null) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.give.failure.notemplate", templateName));
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notemplate", templateName));
 			return 1;
 		}
 
 		if (!templateData.getBoolean("persistent")) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.give.failure.notpersistent", templateName));
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notpersistent", templateName));
 			return 2;
 		}
 

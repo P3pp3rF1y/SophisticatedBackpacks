@@ -33,6 +33,8 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	void setTemplate(String templateName);
 
+	void fillFromTemplate();
+
 	default void fillWithLootAndExtraItems(Level level, BlockPos pos) {
 		//noop
 	}
@@ -112,6 +114,11 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public void setTemplate(String templateName) {
+			//noop
+		}
+
+		@Override
+		public void fillFromTemplate() {
 			//noop
 		}
 
