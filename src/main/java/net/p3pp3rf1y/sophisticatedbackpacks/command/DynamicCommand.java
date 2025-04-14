@@ -147,6 +147,7 @@ public class DynamicCommand {
 			} else {
 				inventory.setStackInSlot(slot, stack);
 				source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.add.success", templateName, stack.getDisplayName()), false);
+				return 0;
 			}
 		}
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.add.delayed", templateName, stack.getDisplayName()), false);
