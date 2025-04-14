@@ -66,6 +66,10 @@ public class SBPPlugin implements IModPlugin {
 		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<>() {
 			@Override
 			public List<Rect2i> getGuiExtraAreas(BackpackScreen gui) {
+				if (gui.getUpgradeSettingsControl() == null) {
+					return new ArrayList<>(); // when CarryOn cancels opening of the screen it doesn't seem to cancel the even going to JEI and then control is null here
+				}
+
 				List<Rect2i> ret = new ArrayList<>();
 				gui.getUpgradeSlotsRectangle().ifPresent(ret::add);
 				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
