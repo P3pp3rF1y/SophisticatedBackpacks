@@ -1,8 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -28,6 +30,10 @@ public interface IBackpackWrapper extends IStorageWrapper {
 	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
 
 	void setLoot(ResourceLocation lootTableName, float lootPercentage);
+
+	default void fillWithLootAndExtraItems(Level level, BlockPos pos) {
+		//noop
+	}
 
 	void setContentsUuid(UUID storageUuid);
 

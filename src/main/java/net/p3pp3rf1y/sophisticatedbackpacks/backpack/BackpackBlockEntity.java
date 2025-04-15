@@ -50,6 +50,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private IFluidHandler externalFluidHandler;
 	@Nullable
 	private IEnergyStorage externalEnergyStorage;
+	private boolean triedUnpackingLoot = false;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
@@ -151,7 +152,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			return null;
 		}
 		if (externalItemHandler == null) {
-			externalItemHandler = new CachedFailedInsertInventoryHandler(() -> getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0);
+			externalItemHandler = new CachedFailedInsertInventoryHandler(() -> {
+				IBackpackWrapper backpackWrapper = getBackpackWrapper();
+				if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
+					backpackWrapper.fillWithLootAndExtraItems(level, getBlockPos());
+					triedUnpackingLoot = true;
+				}
+				return backpackWrapper.getInventoryForInputOutput();
+			}, () -> level != null ? level.getGameTime() : 0);
 		}
 		return externalItemHandler;
 	}

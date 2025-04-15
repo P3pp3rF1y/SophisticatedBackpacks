@@ -44,8 +44,8 @@ public class BackpackStorage extends SavedData {
 
 	public static BackpackStorage load(CompoundTag nbt, HolderLookup.Provider registries) {
 		BackpackStorage storage = new BackpackStorage();
-		readBackpackContents(nbt, storage);
 		readAccessLogs(nbt, storage);
+		readBackpackContents(nbt, storage);
 		return storage;
 	}
 
@@ -61,8 +61,23 @@ public class BackpackStorage extends SavedData {
 			CompoundTag uuidContentsPair = (CompoundTag) n;
 			UUID uuid = NbtUtils.loadUUID(Objects.requireNonNull(uuidContentsPair.get("uuid")));
 			CompoundTag contents = uuidContentsPair.getCompound("contents");
-			storage.backpackContents.put(uuid, contents);
+			if (isPlayerBackpackOrNotEmpty(storage, uuid, contents)) {
+				storage.backpackContents.put(uuid, contents);
+			}
 		}
+	}
+
+	private static boolean isPlayerBackpackOrNotEmpty(BackpackStorage storage, UUID backpackUuid, CompoundTag contentsNbt) {
+		if (storage.accessLogRecords.containsKey(backpackUuid)) {
+			return true;
+		}
+		if (contentsNbt.contains("inventory")) {
+			CompoundTag inventoryNbt = contentsNbt.getCompound("inventory");
+			if (inventoryNbt.contains("Items")) {
+				return !inventoryNbt.getList("Items", Tag.TAG_COMPOUND).isEmpty();
+			}
+		}
+		return false;
 	}
 
 	@Override

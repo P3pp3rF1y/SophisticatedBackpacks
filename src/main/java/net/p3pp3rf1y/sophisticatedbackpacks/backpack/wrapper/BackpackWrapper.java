@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -39,6 +40,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -438,10 +440,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 		BlockPos pos = player.blockPosition();
 		fillWithLoot(level, pos);
-		fillWithExtraItems(player);
+		fillWithExtraItems(stack -> InventoryHelper.insertOrDropItem(player, stack, getInventoryHandler()));
 	}
 
-	private void fillWithExtraItems(Player player) {
+	private void fillWithExtraItems(Consumer<ItemStack> insertOrDropItem) {
 		ItemStack backpack = getBackpackStack();
 		if (!backpack.has(DataComponents.CONTAINER)) {
 			return;
@@ -453,12 +455,23 @@ public class BackpackWrapper implements IBackpackWrapper {
 			if (stack.isEmpty()) {
 				continue;
 			}
-			InventoryHelper.insertOrDropItem(player, stack, getInventoryHandler());
+			insertOrDropItem.accept(stack);
 		}
 		backpack.remove(DataComponents.CONTAINER);
 	}
 
-	private void fillWithLoot(Level level, BlockPos pos) {
+	@Override
+	public void fillWithLootAndExtraItems(Level level, BlockPos pos) {
+		fillWithLoot(level, pos);
+		fillWithExtraItems(stack -> {
+			ItemStack remaining = InventoryHelper.insertIntoInventory(stack, getInventoryHandler(), false);
+			if (!remaining.isEmpty()) {
+				Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), remaining);
+			}
+		});
+	}
+
+	public void fillWithLoot(Level level, BlockPos pos) {
 		ResourceLocation lootTable = getBackpackStack().get(ModDataComponents.LOOT_TABLE);
 		if (lootTable == null) {
 			return;
