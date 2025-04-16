@@ -81,6 +81,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	};
 	private Runnable upgradeCachesInvalidatedHandler = () -> {
 	};
+	private Runnable onInventoryForInputOutputHandlerRefresh = () -> {
+	};
 
 	public BackpackWrapper(ItemStack backpackStack) {
 		setBackpackStack(backpackStack);
@@ -411,6 +413,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void refreshInventoryForInputOutput() {
 		inventoryIOHandler = null;
 		upgradeCachesInvalidatedHandler.run();
+		onInventoryForInputOutputHandlerRefresh.run();
 	}
 
 	@Override
@@ -579,6 +582,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
 		this.onInventoryHandlerRefresh = onInventoryHandlerRefresh;
+	}
+
+	@Override
+	public void registerOnInventoryInputOutputHandlerRefreshListener(Runnable onInventoryForInputOutputHandlerRefresh) {
+		this.onInventoryForInputOutputHandlerRefresh = onInventoryForInputOutputHandlerRefresh;
 	}
 
 	@Override

@@ -140,6 +140,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		externalItemHandler = null;
 		externalFluidHandler = null;
 		externalEnergyStorage = null;
+		onInventoryInputOutputHandlerRefresh();
 	}
 
 	private boolean isBlockConnectionDisallowed(@Nullable Direction direction) {
