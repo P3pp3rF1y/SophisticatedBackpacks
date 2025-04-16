@@ -175,6 +175,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			itemHandlerCap = null;
 			tempItemHandlerCap.invalidate();
 		}
+		onInventoryInputOutputHandlerRefresh();
 		if (fluidHandlerCap != null) {
 			LazyOptional<IFluidHandler> tempFluidHandlerCap = fluidHandlerCap;
 			fluidHandlerCap = null;
