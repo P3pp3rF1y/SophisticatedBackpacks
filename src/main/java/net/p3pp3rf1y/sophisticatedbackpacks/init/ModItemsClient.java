@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgr
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
+import net.p3pp3rf1y.sophisticatedcore.compat.trashslot.TrashSlotScreenRegistry;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryInventoryPart;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeTab;
@@ -123,5 +124,6 @@ public class ModItemsClient {
 		UpgradeGuiManager.registerTab(ModItems.ANVIL_TYPE, AnvilUpgradeTab::new);
 		UpgradeGuiManager.registerTab(ModItems.SMITHING_TYPE, SmithingUpgradeTab::new);
 
+		TrashSlotScreenRegistry.registerScreen(BackpackScreen.class);
 	}
 }
