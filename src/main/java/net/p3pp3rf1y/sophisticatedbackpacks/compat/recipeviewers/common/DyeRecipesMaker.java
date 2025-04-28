@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
+package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -13,20 +13,25 @@ import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class DyeRecipesMaker {
 	private DyeRecipesMaker() {
 	}
 
 	public static List<RecipeHolder<CraftingRecipe>> getRecipes() {
-		List<RecipeHolder<CraftingRecipe>> recipes = new ArrayList<>();
-		addSingleColorRecipes(recipes);
-		addMultipleColorsRecipe(recipes);
+		return getRecipes(RecipeHolder::new);
+	}
+
+	public static <R> List<R> getRecipes(BiFunction<ResourceLocation, ShapedRecipe, R> transformRecipe) {
+		List<R> recipes = new ArrayList<>();
+		addSingleColorRecipes(recipes, transformRecipe);
+		addMultipleColorsRecipe(recipes, transformRecipe);
 
 		return recipes;
 	}
 
-	private static void addMultipleColorsRecipe(List<RecipeHolder<CraftingRecipe>> recipes) {
+	private static <R> void addMultipleColorsRecipe(List<R> recipes, BiFunction<ResourceLocation, ShapedRecipe,  R> transformRecipe) {
 		NonNullList<Ingredient> ingredients = NonNullList.create();
 		ingredients.add(Ingredient.of(DyeColor.YELLOW.getTag()));
 		ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));
@@ -47,10 +52,10 @@ public class DyeRecipesMaker {
 
 		ShapedRecipePattern pattern = new ShapedRecipePattern(3, 1, ingredients, Optional.empty());
 		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "multiple_colors");
-		recipes.add(new RecipeHolder<>(id, new ShapedRecipe("", CraftingBookCategory.MISC, pattern, backpackOutput)));
+		recipes.add(transformRecipe.apply(id, new ShapedRecipe("", CraftingBookCategory.MISC, pattern, backpackOutput)));
 	}
 
-	private static void addSingleColorRecipes(List<RecipeHolder<CraftingRecipe>> recipes) {
+	private static <R> void addSingleColorRecipes(List<R> recipes, BiFunction<ResourceLocation, ShapedRecipe, R> transformRecipe) {
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
 			BackpackWrapper.fromStack(backpackOutput).setColors(color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
@@ -60,7 +65,7 @@ public class DyeRecipesMaker {
 
 			ShapedRecipePattern pattern = new ShapedRecipePattern(1, 2, ingredients, Optional.empty());
 			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName());
-			recipes.add(new RecipeHolder<>(id, new ShapedRecipe("", CraftingBookCategory.MISC, pattern, backpackOutput)));
+			recipes.add(transformRecipe.apply(id, new ShapedRecipe("", CraftingBookCategory.MISC, pattern, backpackOutput)));
 		}
 	}
 }

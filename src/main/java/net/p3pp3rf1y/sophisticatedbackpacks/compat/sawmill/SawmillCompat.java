@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.sawmill;
 
+import net.mehvahdjukaar.sawmill.integration.emi.EMIPlugin;
 import net.mehvahdjukaar.sawmill.integration.jei.JEIPlugin;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
@@ -10,7 +11,8 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.emi.EmiCompat;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.jei.SBPPlugin;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
@@ -33,6 +35,11 @@ public class SawmillCompat implements ICompat {
 		if (ModList.get().isLoaded(CompatModIds.JEI)) {
 			((Supplier<Runnable>) () -> () -> SBPPlugin.setAdditionalCatalystRegistrar(registration -> {
 				registration.addRecipeCatalyst(new ItemStack(SAWMILL_UPGRADE.get()), JEIPlugin.WOODCUTTING_RECIPE_TYPE);
+			})).get().run();
+		}
+		if (ModList.get().isLoaded(CompatModIds.EMI)) {
+			((Supplier<Runnable>) () -> () -> EmiCompat.setAdditionalWorkstations(registration -> {
+				registration.addWorkstation(EMIPlugin.WOODCUTTING_CATEGORY, SAWMILL_UPGRADE.get());
 			})).get().run();
 		}
 	}
