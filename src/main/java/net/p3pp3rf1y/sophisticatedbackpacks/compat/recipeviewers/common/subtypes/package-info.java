@@ -1,7 +1,7 @@
 // Auto generated package-info by MCP
 
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
+package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.subtypes;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 
