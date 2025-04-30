@@ -26,10 +26,13 @@ public class SBInjectLootSubProvider implements LootTableSubProvider {
 	public static final ResourceLocation SHIPWRECK_TREASURE = new ResourceLocation(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + BuiltInLootTables.SHIPWRECK_TREASURE.getPath());
 	public static final ResourceLocation SIMPLE_DUNGEON = new ResourceLocation(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + BuiltInLootTables.SIMPLE_DUNGEON.getPath());
 	public static final ResourceLocation WOODLAND_MANSION = new ResourceLocation(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + BuiltInLootTables.WOODLAND_MANSION.getPath());
-	public static final Set<ResourceLocation> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE, SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION);
+	public static final ResourceLocation SPAWN_BONUS_CHEST = new ResourceLocation(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + BuiltInLootTables.SPAWN_BONUS_CHEST.getPath());
+	public static final Set<ResourceLocation> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE, SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION, SPAWN_BONUS_CHEST);
 
 	@Override
 	public void generate(BiConsumer<ResourceLocation, LootTable.Builder> tables) {
+		tables.accept(SPAWN_BONUS_CHEST, getLootTable(0,
+				getItemLootEntry(ModItems.BACKPACK.get(), 100)));
 		tables.accept(SIMPLE_DUNGEON, getLootTable(90,
 				getItemLootEntry(ModItems.BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),

@@ -33,6 +33,7 @@ public class SBLootModifierProvider extends GlobalLootModifierProvider {
 		addInjectLootTableModifier(SBInjectLootSubProvider.BASTION_TREASURE, BuiltInLootTables.BASTION_TREASURE);
 		addInjectLootTableModifier(SBInjectLootSubProvider.END_CITY_TREASURE, BuiltInLootTables.END_CITY_TREASURE);
 		addInjectLootTableModifier(SBInjectLootSubProvider.NETHER_BRIDGE, BuiltInLootTables.NETHER_BRIDGE);
+		addInjectLootTableModifier(SBInjectLootSubProvider.SPAWN_BONUS_CHEST, BuiltInLootTables.SPAWN_BONUS_CHEST);
 	}
 
 	private void addInjectLootTableModifier(ResourceLocation lootTable, ResourceLocation lootTableToInjectInto) {
