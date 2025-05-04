@@ -40,8 +40,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @JeiPlugin
 public class SBPPlugin implements IModPlugin {
 	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {};
-	public static void setAdditionalCatalystRegistrar(Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar) {
-		SBPPlugin.additionalCatalystRegistrar = additionalCatalystRegistrar;
+	public static void addAdditionalCatalystRegistrar(Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar) {
+		SBPPlugin.additionalCatalystRegistrar = SBPPlugin.additionalCatalystRegistrar.andThen(additionalCatalystRegistrar);
 	}
 
 	@Override
