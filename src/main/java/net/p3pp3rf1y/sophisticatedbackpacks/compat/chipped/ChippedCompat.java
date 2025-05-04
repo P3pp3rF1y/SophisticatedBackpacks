@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped;
 
 import earth.terrarium.chipped.common.compat.jei.WorkbenchCategory;
+import earth.terrarium.chipped.common.compat.rei.ChippedReiPlugin;
 import earth.terrarium.chipped.common.registry.ModBlocks;
 import earth.terrarium.chipped.common.registry.ModRecipeTypes;
 import net.minecraft.core.registries.Registries;
@@ -15,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.emi.EmiCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.jei.SBPPlugin;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.rei.BackpackReiClientPlugin;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
@@ -67,6 +69,17 @@ public class ChippedCompat implements ICompat {
 				registration.addWorkstation(SophisticatedBackpacks.getRL("mason_table"), ModBlocks.MASON_TABLE.get(), MASON_TABLE_UPGRADE.get());
 				registration.addWorkstation(SophisticatedBackpacks.getRL("alchemy_bench"), ModBlocks.ALCHEMY_BENCH.get(), ALCHEMY_BENCH_UPGRADE.get());
 				registration.addWorkstation(SophisticatedBackpacks.getRL("tinkering_table"), ModBlocks.TINKERING_TABLE.get(), TINKERING_TABLE_UPGRADE.get());
+			})).get().run();
+		}
+		if (ModList.get().isLoaded(CompatModIds.REI)) {
+			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
+				registration.addWorkstations(ChippedReiPlugin.ID, BOTANIST_WORKBENCH_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, GLASSBLOWER_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, CARPENTERS_TABLE_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, LOOM_TABLE_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, MASON_TABLE_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, ALCHEMY_BENCH_UPGRADE.get());
+				registration.addWorkstations(ChippedReiPlugin.ID, TINKERING_TABLE_UPGRADE.get());
 			})).get().run();
 		}
 	}
