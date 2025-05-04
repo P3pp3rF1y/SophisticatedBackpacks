@@ -27,9 +27,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 
 @EmiEntrypoint
 public class EmiCompat implements EmiPlugin {
-	private static Consumer<WorkstationRegistration> additionalWorkstations = (registrar) -> {};
-	public static void setAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
-		EmiCompat.additionalWorkstations = additionalWorkstations;
+	private static Consumer<WorkstationRegistration> additionalWorkstations = registrar -> {};
+	public static void addAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
+		EmiCompat.additionalWorkstations = EmiCompat.additionalWorkstations.andThen(additionalWorkstations);
 	}
 
 	public static class WorkstationRegistration {
