@@ -16,9 +16,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecip
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.GridMenuInfo;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.SettingsGhostDragDropHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.StorageGhostDragDropHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
 
 import java.util.function.Consumer;
@@ -26,10 +26,10 @@ import java.util.function.Consumer;
 import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @EmiEntrypoint
-public class EmiCompat implements EmiPlugin {
+public class BackpackEmiPlugin implements EmiPlugin {
 	private static Consumer<WorkstationRegistration> additionalWorkstations = registrar -> {};
 	public static void addAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
-		EmiCompat.additionalWorkstations = EmiCompat.additionalWorkstations.andThen(additionalWorkstations);
+		BackpackEmiPlugin.additionalWorkstations = BackpackEmiPlugin.additionalWorkstations.andThen(additionalWorkstations);
 	}
 
 	public static class WorkstationRegistration {
@@ -85,8 +85,8 @@ public class EmiCompat implements EmiPlugin {
 			screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
 		});
 
-		registry.addDragDropHandler(BackpackScreen.class, new StorageGhostDragDropHandler<>());
-		registry.addDragDropHandler(SettingsScreen.class, new SettingsGhostDragDropHandler<>());
+		registry.addDragDropHandler(BackpackScreen.class, new EmiStorageGhostDragDropHandler<>());
+		registry.addDragDropHandler(SettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
 	}
 
 	private void registerRecipes(EmiRegistry registry) {
@@ -94,8 +94,8 @@ public class EmiCompat implements EmiPlugin {
 	}
 
 	private void registerRecipeHandlers(EmiRegistry registry) {
-		registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), GridMenuInfo.crafting());
-		registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), GridMenuInfo.smithing());
+		registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), EmiGridMenuInfo.crafting());
+		registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), EmiGridMenuInfo.smithing());
 	}
 
 	private void registerWorkstations(EmiRegistry registry) {
