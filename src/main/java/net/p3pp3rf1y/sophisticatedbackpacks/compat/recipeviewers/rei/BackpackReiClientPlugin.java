@@ -20,9 +20,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ClientTransferHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.SettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.StorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiCraftingContainerTransferHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,8 +70,8 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerTransferHandlers(TransferHandlerRegistry registry) {
-		registry.register(ClientTransferHandler.crafting(BackpackContainer.class));
-		registry.register(ClientTransferHandler.smithing(BackpackContainer.class));
+		registry.register(ReiCraftingContainerTransferHandler.crafting(BackpackContainer.class));
+		registry.register(ReiCraftingContainerTransferHandler.smithing(BackpackContainer.class));
 	}
 
 	@Override
@@ -84,8 +84,8 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
     @Override
     public void registerScreens(ScreenRegistry registry) {
-        registry.registerDraggableStackVisitor(new StorageGhostIngredientHandler<>(BackpackScreen.class));
-		registry.registerDraggableStackVisitor(new SettingsGhostIngredientHandler<>(BackpackSettingsScreen.class));
+        registry.registerDraggableStackVisitor(new ReiStorageGhostIngredientHandler<>(BackpackScreen.class));
+		registry.registerDraggableStackVisitor(new ReiSettingsGhostIngredientHandler<>(BackpackSettingsScreen.class));
     }
 
     @Override

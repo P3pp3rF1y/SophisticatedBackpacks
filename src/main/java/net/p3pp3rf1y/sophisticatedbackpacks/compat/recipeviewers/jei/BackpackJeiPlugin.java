@@ -24,10 +24,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.CraftingContainerRecipeTransferHandlerBase;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.SettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.StorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
 
 import java.util.ArrayList;
@@ -38,10 +38,10 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 
 @SuppressWarnings("unused")
 @JeiPlugin
-public class SBPPlugin implements IModPlugin {
+public class BackpackJeiPlugin implements IModPlugin {
 	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {};
 	public static void addAdditionalCatalystRegistrar(Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar) {
-		SBPPlugin.additionalCatalystRegistrar = SBPPlugin.additionalCatalystRegistrar.andThen(additionalCatalystRegistrar);
+		BackpackJeiPlugin.additionalCatalystRegistrar = BackpackJeiPlugin.additionalCatalystRegistrar.andThen(additionalCatalystRegistrar);
 	}
 
 	@Override
@@ -80,8 +80,8 @@ public class SBPPlugin implements IModPlugin {
 			}
 		});
 
-		registration.addGhostIngredientHandler(BackpackScreen.class, new StorageGhostIngredientHandler<>());
-		registration.addGhostIngredientHandler(SettingsScreen.class, new SettingsGhostIngredientHandler<>());
+		registration.addGhostIngredientHandler(BackpackScreen.class, new JeiStorageGhostIngredientHandler<>());
+		registration.addGhostIngredientHandler(SettingsScreen.class, new JeiSettingsGhostIngredientHandler<>());
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class SBPPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
+		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
 			@Override
 			public Class<BackpackContainer> getContainerClass() {
 				return BackpackContainer.class;
@@ -114,7 +114,7 @@ public class SBPPlugin implements IModPlugin {
 			}
 		}, RecipeTypes.CRAFTING);
 
-		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<SmithingRecipe>>(handlerHelper, stackHelper) {
+		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<SmithingRecipe>>(handlerHelper, stackHelper) {
 			@Override
 			public Class<BackpackContainer> getContainerClass() {
 				return BackpackContainer.class;
