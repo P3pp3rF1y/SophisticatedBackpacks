@@ -29,7 +29,8 @@ public class SBInjectLootSubProvider implements LootTableSubProvider {
 	public static final ResourceKey<LootTable> SHIPWRECK_TREASURE = createInjectLootTableRegistryKey(BuiltInLootTables.SHIPWRECK_TREASURE);
 	public static final ResourceKey<LootTable> SIMPLE_DUNGEON = createInjectLootTableRegistryKey(BuiltInLootTables.SIMPLE_DUNGEON);
 	public static final ResourceKey<LootTable> WOODLAND_MANSION = createInjectLootTableRegistryKey(BuiltInLootTables.WOODLAND_MANSION);
-	public static final Set<ResourceKey<LootTable>> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE, SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION);
+	public static final ResourceKey<LootTable> SPAWN_BONUS_CHEST = createInjectLootTableRegistryKey(BuiltInLootTables.SPAWN_BONUS_CHEST);
+	public static final Set<ResourceKey<LootTable>> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE, SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION, SPAWN_BONUS_CHEST);
 
 	private static ResourceKey<LootTable> createInjectLootTableRegistryKey(ResourceKey<LootTable> vanillaLootTable) {
 		ResourceLocation location = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + vanillaLootTable.location().getPath());
@@ -41,6 +42,8 @@ public class SBInjectLootSubProvider implements LootTableSubProvider {
 
 	@Override
 	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> tables) {
+		tables.accept(SPAWN_BONUS_CHEST, getLootTable(0,
+				getItemLootEntry(ModItems.BACKPACK.get(), 100)));
 		tables.accept(SIMPLE_DUNGEON, getLootTable(90,
 				getItemLootEntry(ModItems.BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),
