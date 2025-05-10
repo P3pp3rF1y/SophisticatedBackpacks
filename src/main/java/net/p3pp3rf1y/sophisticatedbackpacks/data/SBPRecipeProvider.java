@@ -685,6 +685,31 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(recipeOutput);
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.ALCHEMY_UPGRADE.get())
+				.pattern("TGF")
+				.pattern("IBI")
+				.pattern("RPR")
+				.define('T', Items.GHAST_TEAR)
+				.define('G', Items.GLASS_BOTTLE)
+				.define('F', Items.FERMENTED_SPIDER_EYE)
+				.define('R', Items.BLAZE_ROD)
+				.define('P', Items.ENDER_PEARL)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(recipeOutput);
+
+		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_ALCHEMY_UPGRADE.get(), UpgradeNextTierRecipe::new)
+				.pattern(" D ")
+				.pattern("GAG")
+				.pattern("RRR")
+				.define('D', Tags.Items.GEMS_DIAMOND)
+				.define('G', Tags.Items.INGOTS_GOLD)
+				.define('R', Tags.Items.DUSTS_REDSTONE)
+				.define('A', ModItems.ALCHEMY_UPGRADE.get())
+				.unlockedBy("has_alchemy_upgrade", has(ModItems.ALCHEMY_UPGRADE.get()))
+				.save(recipeOutput);
+
 		new SmithingBackpackUpgradeRecipeBuilder(SmithingBackpackUpgradeRecipe::new, Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))
