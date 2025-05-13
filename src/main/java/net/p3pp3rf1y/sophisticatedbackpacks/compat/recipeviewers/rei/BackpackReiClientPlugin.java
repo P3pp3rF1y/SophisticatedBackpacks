@@ -50,23 +50,23 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 	}
 
 	@Override
-    public void registerExclusionZones(ExclusionZones zones) {
-        zones.register(BackpackScreen.class, screen -> {
-            List<Rect2i> ret = new ArrayList<>();
-            screen.getUpgradeSlotsRectangle().ifPresent(ret::add);
-            ret.addAll(screen.getUpgradeSettingsControl().getTabRectangles());
-            screen.getSortButtonsRectangle().ifPresent(ret::add);
-            return ret.stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
-        });
+	public void registerExclusionZones(ExclusionZones zones) {
+		zones.register(BackpackScreen.class, screen -> {
+			List<Rect2i> ret = new ArrayList<>();
+			screen.getUpgradeSlotsRectangle().ifPresent(ret::add);
+			ret.addAll(screen.getUpgradeSettingsControl().getTabRectangles());
+			screen.getSortButtonsRectangle().ifPresent(ret::add);
+			return ret.stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
+		});
 
-        zones.register(BackpackSettingsScreen.class, screen -> {
+		zones.register(BackpackSettingsScreen.class, screen -> {
 			if (screen == null || screen.getSettingsTabControl() == null) {
 				return List.of();
 			}
 
 			return screen.getSettingsTabControl().getTabRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
 		});
-    }
+	}
 
 	@Override
 	public void registerTransferHandlers(TransferHandlerRegistry registry) {
@@ -82,14 +82,14 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 		additionalWorkstations.accept(new WorkstationRegistration(registry));
 	}
 
-    @Override
-    public void registerScreens(ScreenRegistry registry) {
-        registry.registerDraggableStackVisitor(new ReiStorageGhostIngredientHandler<>(BackpackScreen.class));
+	@Override
+	public void registerScreens(ScreenRegistry registry) {
+		registry.registerDraggableStackVisitor(new ReiStorageGhostIngredientHandler<>(BackpackScreen.class));
 		registry.registerDraggableStackVisitor(new ReiSettingsGhostIngredientHandler<>(BackpackSettingsScreen.class));
-    }
+	}
 
-    @Override
-    public void registerDisplays(DisplayRegistry registry) {
+	@Override
+	public void registerDisplays(DisplayRegistry registry) {
 		DyeRecipesMaker.getRecipes().forEach(registry::add);
-    }
+	}
 }

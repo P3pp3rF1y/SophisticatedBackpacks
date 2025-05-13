@@ -52,14 +52,14 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		}
 	}
 
-    @Override
-    public void register(EmiRegistry registry) {
+	@Override
+	public void register(EmiRegistry registry) {
 		registerGuiHandlers(registry);
 		registerRecipes(registry);
 		registerDefaultComparisons(registry);
 		registerRecipeHandlers(registry);
 		registerWorkstations(registry);
-    }
+	}
 
 	private void registerDefaultComparisons(EmiRegistry registry) {
 		getSubtypeInterpreters()
