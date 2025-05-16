@@ -470,7 +470,7 @@ public class Config {
 			}
 
 			@Override
-			public int getMaxUpgradesPerStorage(String storageType, @org.jetbrains.annotations.Nullable ResourceLocation upgradeRegistryName) {
+			public int getMaxUpgradesPerStorage(String storageType, @Nullable ResourceLocation upgradeRegistryName) {
 				if (maxUpgradesPerStorage == null) {
 					initMaxUpgradesPerStorage();
 				}

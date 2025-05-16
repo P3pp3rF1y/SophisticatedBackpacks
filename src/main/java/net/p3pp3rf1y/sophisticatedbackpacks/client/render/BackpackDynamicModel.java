@@ -38,7 +38,6 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
-import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -76,7 +75,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 	private static final class BackpackBakedModel implements IDynamicBakedModel {
 		@Override
-		public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
+		public ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
 			return ChunkRenderTypeSet.of(RenderType.cutout());
 		}
 
