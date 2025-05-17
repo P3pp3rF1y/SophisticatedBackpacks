@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -27,8 +28,9 @@ public class TemplateCommand {
 	private TemplateCommand() {}
 
 	@SuppressWarnings("java:S1452")
-	static ArgumentBuilder<CommandSourceStack, ?> register() {
+	static ArgumentBuilder<CommandSourceStack, ?> register(RegisterCommandsEvent event) {
 		return Commands.literal("template")
+				.then(DynamicCommand.register(event.getBuildContext()))
 				.then(Commands.literal("list").executes(context -> listTemplates(context.getSource())))
 				.then(Commands.literal("create")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())

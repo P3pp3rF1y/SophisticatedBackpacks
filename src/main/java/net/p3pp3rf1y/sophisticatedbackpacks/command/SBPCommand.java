@@ -47,8 +47,7 @@ public class SBPCommand {
 						.then(ListCommand.register())
 						.then(GiveCommand.register())
 						.then(RemoveNonPlayerCommand.register())
-						.then(TemplateCommand.register())
-						.then(DynamicCommand.register(event.getBuildContext()))
+						.then(TemplateCommand.register(event))
 		);
 		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermission(OP_LEVEL)).redirect(mainNode));
 	}
