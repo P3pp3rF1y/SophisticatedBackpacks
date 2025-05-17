@@ -489,6 +489,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		fillWithLootFromTable(level, pos, lootTable);
 	}
 
+	@Override
 	public void fillFromTemplate() {
 		ItemStack backpack = getBackpackStack();
 		String templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
