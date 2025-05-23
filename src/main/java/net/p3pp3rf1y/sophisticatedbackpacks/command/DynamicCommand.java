@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.command;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalNotification;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -37,7 +36,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicCommand {
-	static final Cache<String, DynamicTemplate> DYNAMIC_CACHE = CacheBuilder.newBuilder().removalListener(DynamicCommand::onRemoval).expireAfterAccess(5, TimeUnit.MINUTES).build();
+	static final Cache<String, DynamicTemplate> DYNAMIC_CACHE = CacheBuilder.newBuilder()
+			.expireAfterAccess(5, TimeUnit.MINUTES)
+			.build();
 
 	static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext commandBuildContext) {
 		return Commands.literal("dynamic")
@@ -47,7 +48,7 @@ public class DynamicCommand {
 										.executes(context -> beginNewDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackItemArgumentType.getItem(context, "backpackItem")))
 								)
 								.then(Commands.argument("baseTemplateName", BackpackTemplateArgumentType.templateName())
-										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class), context.getArgument("baseTemplateName", String.class)))
+										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackTemplateArgumentType.getId(context,"baseTemplateName")))
 								)
 						)
 				)
@@ -83,14 +84,6 @@ public class DynamicCommand {
 				);
 	}
 
-	private static void onRemoval(RemovalNotification<String, DynamicTemplate> removal) {
-		DynamicTemplate template = removal.getValue();
-		if (template != null && template.wrapper.getContentsUuid().isPresent()) {
-			// Remove the now unused content data
-			template.wrapper.removeContentsUuid();
-		}
-	}
-
 	private static int beginNewDynamic(CommandSourceStack source, String templateName, ItemInput backpackItem) throws CommandSyntaxException {
 		if (DYNAMIC_CACHE.asMap().containsKey(templateName)) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.templateInUse", templateName));
@@ -98,30 +91,29 @@ public class DynamicCommand {
 		}
 
 		ItemStack backpack = backpackItem.createItemStack(1, false);
-		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-		DYNAMIC_CACHE.put(templateName, new DynamicTemplate(wrapper, new ArrayList<>(), new ArrayList<>()));
+		DYNAMIC_CACHE.put(templateName, new DynamicTemplate(backpack, new ArrayList<>(), new ArrayList<>()));
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.success", templateName), false);
 		return 0;
 	}
 
-	private static int beginBasedDynamic(CommandSourceStack source, String templateName, String baseTemplateName) {
+	private static int beginBasedDynamic(CommandSourceStack source, String templateName, ResourceLocation baseTemplateName) {
 		if (DYNAMIC_CACHE.getIfPresent(templateName) != null) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.templateInUse", templateName));
 			return 1;
 		}
 
-		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(baseTemplateName);
-		if (templateData == null) {
+		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(baseTemplateName);
+		if (templateData.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.noBaseTemplate", templateName));
 			return 1;
 		}
 
-		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.getString("backpackItemRegistryName"))));
+		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.get().getString("backpackItemRegistryName"))));
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 		wrapper.setTemplate(baseTemplateName);
 		wrapper.fillFromTemplate();
 
-		DYNAMIC_CACHE.put(templateName, new DynamicTemplate(wrapper, new ArrayList<>(), new ArrayList<>()));
+		DYNAMIC_CACHE.put(templateName, new DynamicTemplate(backpack, new ArrayList<>(), new ArrayList<>()));
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.success", templateName), false);
 		return 0;
 	}
@@ -141,7 +133,8 @@ public class DynamicCommand {
 				template.itemsForInventoryHandler.add(stack);
 			}
 		} else {
-			ItemStackHandler inventory = upgrade ? template.wrapper.getUpgradeHandler() : template.wrapper.getInventoryHandler();
+			IBackpackWrapper wrapper = BackpackWrapper.fromStack(template.backpack);
+			ItemStackHandler inventory = upgrade ? wrapper.getUpgradeHandler() : wrapper.getInventoryHandler();
 			if (!inventory.getStackInSlot(slot).isEmpty()) {
 				template.itemsForInventoryHandler.add(stack);
 			} else {
@@ -161,9 +154,11 @@ public class DynamicCommand {
 			return 1;
 		}
 
+		IBackpackWrapper wrapper = BackpackWrapper.fromStack(template.backpack);
+
 		List<ItemStack> remainings = new ArrayList<>();
-		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForInventoryHandler, template.wrapper.getInventoryHandler(), false));
-		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForUpgradeHandler, template.wrapper.getUpgradeHandler(), false));
+		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForInventoryHandler, wrapper.getInventoryHandler(), false));
+		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForUpgradeHandler, wrapper.getUpgradeHandler(), false));
 		if (!remainings.isEmpty()) {
 			// List all items that could not be added
 			for (ItemStack remaining : remainings) {
@@ -171,28 +166,20 @@ public class DynamicCommand {
 			}
 		}
 
-		// Create template
-		Optional<UUID> backpackUuid = template.wrapper.getContentsUuid();
-		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(template.wrapper.getInventoryHandler()) && InventoryHelper.isEmpty(template.wrapper.getUpgradeHandler()))) {
+		// Check if backpack wrapper is empty
+		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
+		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(wrapper.getInventoryHandler()) && InventoryHelper.isEmpty(wrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
 
-		String finalTemplateName = templateName + "_" + UUID.randomUUID();
-		BackpackTemplates.setBackpackTemplate(finalTemplateName, template.wrapper, false);
-		template.wrapper.removeContentsUuid();
-
-		// Create backpack item with the new template
-		ItemStack backpack = new ItemStack(template.wrapper.getBackpack().getItem());
-		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-		wrapper.setTemplate(finalTemplateName);
-
+		// Spawn backpack
 		if (source.isPlayer()) {
-			giveBackpackToPlayer(backpack, source.getPlayer());
+			giveBackpackToPlayer(template.backpack(), source.getPlayer());
 		} else if (source.getEntity() != null) {
-			dropBackpackToPosition(backpack, source.getLevel(), source.getEntity().position());
+			dropBackpackToPosition(template.backpack(), source.getLevel(), source.getEntity().position());
 		} else {
-			dropBackpackToPosition(backpack, source.getLevel(), source.getPosition());
+			dropBackpackToPosition(template.backpack(), source.getLevel(), source.getPosition());
 		}
 
 		DYNAMIC_CACHE.invalidate(templateName);
@@ -230,6 +217,6 @@ public class DynamicCommand {
 		level.addFreshEntity(itemEntity);
 	}
 
-	private record DynamicTemplate(IBackpackWrapper wrapper, List<ItemStack> itemsForInventoryHandler, List<ItemStack> itemsForUpgradeHandler) {
+	private record DynamicTemplate(ItemStack backpack, List<ItemStack> itemsForInventoryHandler, List<ItemStack> itemsForUpgradeHandler) {
 	}
 }

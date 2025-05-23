@@ -31,52 +31,73 @@ public class TemplateCommand {
 	static ArgumentBuilder<CommandSourceStack, ?> register(RegisterCommandsEvent event) {
 		return Commands.literal("template")
 				.then(DynamicCommand.register(event.getBuildContext()))
-				.then(Commands.literal("list").executes(context -> listTemplates(context.getSource())))
+				.then(Commands.literal("list").executes(context -> templateDetailComponent(context.getSource())))
 				.then(Commands.literal("create")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
-								.executes(context ->	createTemplate(context.getSource(), context.getArgument("templateName", String.class), false))
+								.executes(context -> createTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), false))
 								.then(Commands.argument("override", BoolArgumentType.bool())
 										.executes(context ->
-												createTemplate(context.getSource(), context.getArgument("templateName", String.class), BoolArgumentType.getBool(context, "override"))
+												createTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), BoolArgumentType.getBool(context, "override"))
 										)
 								)
 						)
 				)
 				.then(Commands.literal("delete")
-						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
-								.executes(context -> deleteTemplate(context.getSource(), context.getArgument("templateName", String.class)))
+						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName(false))
+								.executes(context -> deleteTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName")))
 						)
 				)
 				.then(Commands.literal("give")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
-								.executes(context -> giveBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), List.of(context.getSource().getPlayer())))
+								.executes(context -> giveBackpackFromTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), List.of(context.getSource().getPlayer())))
 								.then(Commands.argument("targets", EntityArgument.players())
-										.executes(context -> giveBackpackFromTemplate(context.getSource(), context.getArgument("templateName", String.class), EntityArgument.getPlayers(context, "targets")))
+										.executes(context -> giveBackpackFromTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), EntityArgument.getPlayers(context, "targets")))
+								)
+						)
+				)
+				.then(Commands.literal("export")
+						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
+								.executes(context -> exportTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), false))
+								.then(Commands.argument("delete", BoolArgumentType.bool())
+										.executes(context -> exportTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), true))
 								)
 						)
 				);
 	}
 
-	private static int listTemplates(CommandSourceStack source) {
+	private static int templateDetailComponent(CommandSourceStack source) {
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.list.header"), false);
-		BackpackTemplates.getTemplateNames().forEach(templateName -> {
-			MutableComponent message = Component.literal(templateName);
+		source.sendSuccess(() -> Component.literal("Datapack"), false);
+		DatapackBackpackTemplateManager.getBackpackTemplates().keySet().forEach(templateName -> source.sendSuccess(() -> templateDetailComponent(templateName, false), false));
+
+		source.sendSuccess(() -> Component.literal("Local"), false);
+		BackpackTemplates.getTemplateNames(false).forEach(templateName -> source.sendSuccess(() -> templateDetailComponent(templateName, true), false));
+		return 0;
+	}
+
+	private static MutableComponent templateDetailComponent(ResourceLocation templateName, boolean includeNonDatapackMessages) {
+		MutableComponent message = Component.literal(templateName.toString());
+		message.append(Component.literal(", "));
+		message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.give")
+				.withStyle(s -> s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template give " + templateName))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.give.tooltip", templateName.toString()))))
+		);
+		if (includeNonDatapackMessages) {
 			message.append(Component.literal(", "));
-			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.give")
-					.withStyle(s -> s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template give " + templateName))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.give.tooltip", templateName))))
+			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.export")
+					.withStyle(s -> s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template export " + templateName))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.export.tooltip", templateName.toString()))))
 			);
 			message.append(Component.literal(", "));
 			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.delete")
 					.withStyle(s -> s.withColor(ChatFormatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template delete " + templateName))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.delete.tooltip", templateName))))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.delete.tooltip", templateName.toString()))))
 			);
-			source.sendSuccess(() -> message, false);
-		});
-		return 0;
+		}
+		return message;
 	}
 
-	private static int createTemplate(CommandSourceStack source, String templateName, boolean override) {
+	private static int createTemplate(CommandSourceStack source, ResourceLocation templateName, boolean override) {
 		if (!source.isPlayer()) {
 			return 1;
 		}
@@ -96,34 +117,29 @@ public class TemplateCommand {
 		}
 
 		if (BackpackTemplates.getTemplateNames().contains(templateName) && !override) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.create.alreadyexists", templateName));
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.create.alreadyexists", templateName.toString()));
 			return 4;
 		}
 
-		BackpackTemplates.setBackpackTemplate(templateName, backpackWrapper, true);
-		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.create.success", templateName), true);
+		BackpackTemplates.setBackpackTemplate(templateName, backpackWrapper);
+		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.create.success", templateName.toString()), true);
 		return 0;
 	}
 
-	private static int deleteTemplate(CommandSourceStack source, String templateName) {
+	private static int deleteTemplate(CommandSourceStack source, ResourceLocation templateName) {
 		BackpackTemplates.removeBackpackTemplate(templateName);
-		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.delete.success", templateName), true);
+		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.delete.success", templateName.toString()), true);
 		return 0;
 	}
 
-	private static int giveBackpackFromTemplate(CommandSourceStack source, String templateName, Collection<ServerPlayer> players) {
-		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
-		if (templateData == null) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notemplate", templateName));
+	private static int giveBackpackFromTemplate(CommandSourceStack source, ResourceLocation templateName, Collection<ServerPlayer> players) {
+		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(templateName);
+		if (templateData.isEmpty()) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notemplate", templateName.toString()));
 			return 1;
 		}
 
-		if (!templateData.getBoolean("persistent")) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notpersistent", templateName));
-			return 2;
-		}
-
-		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.getString("backpackItemRegistryName"))));
+		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(templateData.get().getString("backpackItemRegistryName"))));
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 		wrapper.setTemplate(templateName);
 
@@ -160,5 +176,19 @@ public class TemplateCommand {
 		if (itemEntity != null) {
 			itemEntity.makeFakeItem();
 		}
+	}
+
+	private static int exportTemplate(CommandSourceStack source, ResourceLocation templateName, boolean deleteTemplate) {
+		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplateNoDatapack(templateName);
+		if (templateData.isEmpty()) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.export.failure.notemplate", templateName.toString()));
+			return 1;
+		}
+
+		BackpackTemplates.exportTemplate(source.getPlayer(), templateName, templateData.get());
+		if (deleteTemplate) {
+			BackpackTemplates.removeBackpackTemplate(templateName);
+		}
+		return 0;
 	}
 }

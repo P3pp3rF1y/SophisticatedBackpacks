@@ -437,7 +437,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setTemplate(String templateName) {
+	public void setTemplate(ResourceLocation templateName) {
 		getBackpackStack().set(ModDataComponents.TEMPLATE_NAME, templateName);
 	}
 
@@ -492,24 +492,19 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void fillFromTemplate() {
 		ItemStack backpack = getBackpackStack();
-		String templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
+		ResourceLocation templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
 		if (templateName == null) {
 			return;
 		}
 
-		CompoundTag templateData = BackpackTemplates.getBackpackTemplate(templateName);
-		if (templateData == null) {
+		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(templateName);
+		if (templateData.isEmpty()) {
 			return;
 		}
 
-		CompoundTag backpackContent = templateData.getCompound("backpackContents").copy();
+		CompoundTag backpackContent = templateData.get().getCompound("backpackContents").copy();
 		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), backpackContent);
 		backpack.remove(ModDataComponents.TEMPLATE_NAME);
-
-		// If the template is not marked as persistent we remove it now to not clutter the BackpackStorage
-		if (!templateData.getBoolean("persistent")) {
-			BackpackTemplates.removeBackpackTemplate(templateName);
-		}
 	}
 
 	@Override

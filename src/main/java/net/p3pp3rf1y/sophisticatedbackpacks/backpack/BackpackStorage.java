@@ -16,7 +16,6 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,7 +25,6 @@ public class BackpackStorage extends SavedData {
 	private final Map<UUID, CompoundTag> backpackContents = new HashMap<>();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
-	private final Map<String, CompoundTag> backpackTemplates = new HashMap<>();
 
 	private BackpackStorage() {
 	}
@@ -48,7 +46,6 @@ public class BackpackStorage extends SavedData {
 		BackpackStorage storage = new BackpackStorage();
 		readAccessLogs(nbt, storage);
 		readBackpackContents(nbt, storage);
-		readBackpackTemplates(nbt, storage);
 		return storage;
 	}
 
@@ -83,25 +80,11 @@ public class BackpackStorage extends SavedData {
 		return false;
 	}
 
-	private static void readBackpackTemplates(CompoundTag nbt, BackpackStorage storage) {
-		if (!nbt.contains("backpackTemplates")) {
-			return;
-		}
-
-		for (Tag n : nbt.getList("backpackTemplates", Tag.TAG_COMPOUND)) {
-			CompoundTag templateContentsPair = (CompoundTag) n;
-			String templateName = Objects.requireNonNull(templateContentsPair.getString("templateName"));
-			CompoundTag contents = templateContentsPair.getCompound("contents");
-			storage.backpackTemplates.put(templateName, contents);
-		}
-	}
-
 	@Override
 	public CompoundTag save(CompoundTag compound, HolderLookup.Provider registries) {
 		CompoundTag ret = new CompoundTag();
 		writeBackpackContents(ret);
 		writeAccessLogs(ret);
-		writeBackpackTemplates(ret);
 		return ret;
 	}
 
@@ -124,31 +107,11 @@ public class BackpackStorage extends SavedData {
 		ret.put("accessLogRecords", accessLogsNbt);
 	}
 
-	private void writeBackpackTemplates(CompoundTag ret) {
-		if (backpackTemplates.isEmpty()) {
-			return;
-		}
-
-		ListTag backpackTemplatesNbt = new ListTag();
-		for (Map.Entry<String, CompoundTag> entry : backpackTemplates.entrySet()) {
-			CompoundTag templateContentsPair = new CompoundTag();
-			templateContentsPair.putString("templateName", entry.getKey());
-			templateContentsPair.put("contents", entry.getValue());
-			backpackTemplatesNbt.add(templateContentsPair);
-		}
-		ret.put("backpackTemplates", backpackTemplatesNbt);
-	}
-
 	public CompoundTag getOrCreateBackpackContents(UUID backpackUuid) {
 		return backpackContents.computeIfAbsent(backpackUuid, uuid -> {
 			setDirty();
 			return new CompoundTag();
 		});
-	}
-
-	@Nullable
-	public CompoundTag getBackpackTemplate(String templateName) {
-		return backpackTemplates.get(templateName);
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {
@@ -179,22 +142,8 @@ public class BackpackStorage extends SavedData {
 		}
 	}
 
-	public void setBackpackTemplate(String templateName, CompoundTag contents) {
-		backpackTemplates.put(templateName, contents);
-		setDirty();
-	}
-
-	public void removeBackpackTemplate(String templateName) {
-		backpackTemplates.remove(templateName);
-		setDirty();
-	}
-
 	public Map<UUID, AccessLogRecord> getAccessLogs() {
 		return accessLogRecords;
-	}
-
-	public Map<String, CompoundTag> getBackpackTemplates() {
-		return backpackTemplates;
 	}
 
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
@@ -222,7 +171,6 @@ public class BackpackStorage extends SavedData {
 		if (evt.getLevel().isClientSide()) {
 			clientStorageCopy.backpackContents.clear();
 			clientStorageCopy.accessLogRecords.clear();
-			clientStorageCopy.backpackTemplates.clear();
 		}
 	}
 }
