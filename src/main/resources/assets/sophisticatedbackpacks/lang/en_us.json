@@ -246,6 +246,7 @@
   "commands.sophisticatedbackpacks.template.give.failure.notpersistent": "The template '%s' is not persistent and can not be used with the 'template give' command",
   "commands.sophisticatedbackpacks.template.export.success": "Exported template to %s",
   "commands.sophisticatedbackpacks.template.export.failure.notemplate": "The template '%s' does not exist",
+  "commands.sophisticatedbackpacks.template.export.failure.invalid_characters": "Template name contains invalid character(s): %s",
   "commands.sophisticatedbackpacks.dynamic.templateInUse": "The dynamic template name '%s' is currently in use",
   "commands.sophisticatedbackpacks.dynamic.templateNotInUse": "The dynamic template '%s' is currently not in use",
   "commands.sophisticatedbackpacks.dynamic.begin.success": "Successfully started a dynamic template '%s'",

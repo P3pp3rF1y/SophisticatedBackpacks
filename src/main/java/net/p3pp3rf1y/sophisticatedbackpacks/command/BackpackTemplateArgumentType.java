@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,8 +16,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
 
 public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocation> {
+	private static final DynamicCommandExceptionType ERROR_INVALID =
+			new DynamicCommandExceptionType(BackpackTemplates.INVALID_CHARACTER::apply);
+
 	private final boolean includeDatapackTemplates;
 
 	public BackpackTemplateArgumentType(boolean includeDatapackTemplates) {
@@ -25,7 +30,19 @@ public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocati
 
 	@Override
 	public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
-		return ResourceLocation.read(reader);
+		ResourceLocation templateName = ResourceLocation.read(reader);
+
+		Matcher matcher = BackpackTemplates.EXPORT_TEMPLATE_NAMESPACE_PATTERN.matcher(templateName.getNamespace());
+		if (!matcher.matches()) {
+			throw ERROR_INVALID.createWithContext(reader, BackpackTemplates.findNonMatchingCharacters(matcher, templateName.getNamespace()));
+		}
+
+		matcher = BackpackTemplates.EXPORT_TEMPLATE_PATH_PATTERN.matcher(templateName.getPath());
+		if (!matcher.matches()) {
+			throw ERROR_INVALID.createWithContext(reader, BackpackTemplates.findNonMatchingCharacters(matcher, templateName.getPath()));
+		}
+
+		return templateName;
 	}
 
 	public static ResourceLocation getId(CommandContext<CommandSourceStack> context, String name) {
