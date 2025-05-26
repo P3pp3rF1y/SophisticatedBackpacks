@@ -60,11 +60,11 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 		});
 
 		zones.register(BackpackSettingsScreen.class, screen -> {
-			if (screen == null || screen.getSettingsTabControl() == null) {
+			if (screen == null) {
 				return List.of();
 			}
 
-			return screen.getSettingsTabControl().getTabRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
+			return screen.getExtendedControlsRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
 		});
 	}
 
