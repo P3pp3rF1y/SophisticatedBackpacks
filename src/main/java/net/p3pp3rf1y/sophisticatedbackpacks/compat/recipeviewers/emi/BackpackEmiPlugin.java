@@ -78,11 +78,10 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		});
 
 		registry.addExclusionArea(BackpackSettingsScreen.class, (screen, consumer) -> {
-			//noinspection ConstantValue
-			if (screen == null || screen.getSettingsTabControl() == null) { // Due to how Emi collects the exclusion area this can be null
+			if (screen == null) { // Due to how Emi collects the exclusion area this can be null
 				return;
 			}
-			screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
+			screen.getExtendedControlsRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
 		});
 
 		registry.addDragDropHandler(BackpackScreen.class, new EmiStorageGhostDragDropHandler<>());
