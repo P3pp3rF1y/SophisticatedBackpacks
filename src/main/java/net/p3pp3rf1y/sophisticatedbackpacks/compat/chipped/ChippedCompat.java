@@ -71,7 +71,7 @@ public class ChippedCompat implements ICompat {
 				registration.addWorkstation(SophisticatedBackpacks.getRL("tinkering_table"), ModBlocks.TINKERING_TABLE.get(), TINKERING_TABLE_UPGRADE.get());
 			})).get().run();
 		}
-		if (ModList.get().isLoaded(CompatModIds.REI)) {
+		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
 				registration.addWorkstations(ChippedReiPlugin.ID, BOTANIST_WORKBENCH_UPGRADE.get());
 				registration.addWorkstations(ChippedReiPlugin.ID, GLASSBLOWER_UPGRADE.get());
