@@ -11,6 +11,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
@@ -79,7 +80,7 @@ public class ChippedCompat implements ICompat {
 				registration.addWorkstation(SophisticatedBackpacks.getRL("tinkering_table"), ModBlocks.TINKERING_TABLE.get(), TINKERING_TABLE_UPGRADE.get());
 			})).get().run();
 		}
-		if (ModList.get().isLoaded(CompatModIds.REI)) {
+		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.BOTANIST_WORKBENCH.get())), BOTANIST_WORKBENCH_UPGRADE.get());
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.GLASSBLOWER.get())), GLASSBLOWER_UPGRADE.get());
