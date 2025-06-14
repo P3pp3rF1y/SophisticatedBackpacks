@@ -1,16 +1,10 @@
 {
   "type": "sophisticatedbackpacks:smithing_backpack_upgrade",
-  "addition": {
-    "item": "minecraft:netherite_ingot"
-  },
-  "base": {
-    "item": "sophisticatedbackpacks:diamond_backpack"
-  },
+  "addition": "minecraft:netherite_ingot",
+  "base": "sophisticatedbackpacks:diamond_backpack",
   "result": {
     "count": 1,
     "id": "sophisticatedbackpacks:netherite_backpack"
   },
-  "template": {
-    "item": "minecraft:netherite_upgrade_smithing_template"
-  }
+  "template": "minecraft:netherite_upgrade_smithing_template"
 }

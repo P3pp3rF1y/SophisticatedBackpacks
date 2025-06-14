@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SmithingTemplateItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.*;
@@ -30,7 +30,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	private final ArmorStand armorStandPreview;
 
 	public SmithingUpgradeTab(SmithingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("smithing"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
 		armorStandPreview = new ArmorStand(minecraft.level, 0.0, 0.0, 0.0);
@@ -59,7 +59,10 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			if (!stack.isEmpty()) {
 				ItemStack itemstack = stack.copy();
 				if (stack.getItem() instanceof ArmorItem armoritem) {
-					armorStandPreview.setItemSlot(armoritem.getEquipmentSlot(), itemstack);
+					EquipmentSlot equipmentSlot = armorStandPreview.getEquipmentSlotForItem(stack);
+					if (equipmentSlot != null) {
+						armorStandPreview.setItemSlot(equipmentSlot, itemstack);
+					}
 				} else {
 					armorStandPreview.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
 				}

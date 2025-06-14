@@ -7,6 +7,7 @@ import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.*;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
@@ -21,11 +22,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiRecipeDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
@@ -86,15 +88,21 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		registration.addRecipes(RecipeTypes.CRAFTING, DyeRecipesMaker.getRecipes());
-		registration.addRecipes(RecipeTypes.CRAFTING, ClientRecipeHelper.transformAllRecipesOfType(RecipeType.CRAFTING, BackpackUpgradeRecipe.class, JeiClientRecipeHelper::copyShapedRecipeWithRecipeHolder));
+		JeiRecipeDisplayGenerator generator = new JeiRecipeDisplayGenerator();
+
+		DyeRecipesMaker.addRecipes(generator);
+		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.CRAFTING, BackpackUpgradeRecipe.class);
+		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.SMITHING, SmithingBackpackUpgradeRecipe.class);
+
+		registration.addRecipes(RecipeTypes.CRAFTING, generator.getCraftingRecipes());
+		registration.addRecipes(RecipeTypes.SMITHING, generator.getSmithingRecipes());
 	}
 
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-		registration.addRecipeCatalyst(new ItemStack(ModItems.CRAFTING_UPGRADE.get()), RecipeTypes.CRAFTING);
-		registration.addRecipeCatalyst(new ItemStack(ModItems.STONECUTTER_UPGRADE.get()), RecipeTypes.STONECUTTING);
-		registration.addRecipeCatalyst(new ItemStack(ModItems.SMITHING_UPGRADE.get()), RecipeTypes.SMITHING);
+		registration.addCraftingStation(RecipeTypes.CRAFTING, new ItemStack(ModItems.CRAFTING_UPGRADE.get()));
+		registration.addCraftingStation(RecipeTypes.STONECUTTING, new ItemStack(ModItems.STONECUTTER_UPGRADE.get()));
+		registration.addCraftingStation(RecipeTypes.SMITHING, new ItemStack(ModItems.SMITHING_UPGRADE.get()));
 		additionalCatalystRegistrar.accept(registration);
 	}
 
@@ -109,7 +117,7 @@ public class BackpackJeiPlugin implements IModPlugin {
 			}
 
 			@Override
-			public mezz.jei.api.recipe.RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+			public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
 				return RecipeTypes.CRAFTING;
 			}
 		}, RecipeTypes.CRAFTING);
@@ -121,7 +129,7 @@ public class BackpackJeiPlugin implements IModPlugin {
 			}
 
 			@Override
-			public mezz.jei.api.recipe.RecipeType<RecipeHolder<SmithingRecipe>> getRecipeType() {
+			public IRecipeType<RecipeHolder<SmithingRecipe>> getRecipeType() {
 				return RecipeTypes.SMITHING;
 			}
 		}, RecipeTypes.SMITHING);

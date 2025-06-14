@@ -8,9 +8,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "S": {
-      "item": "sophisticatedbackpacks:stack_upgrade_tier_4"
-    }
+    "S": "sophisticatedbackpacks:stack_upgrade_tier_4"
   },
   "pattern": [
     "SSS",

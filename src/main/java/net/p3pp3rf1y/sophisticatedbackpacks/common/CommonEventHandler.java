@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
@@ -38,12 +39,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
@@ -74,11 +76,12 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onWorldTick);
 		eventBus.addListener(this::interactWithEntity);
 		eventBus.addListener(this::handleBreakBackpackWithInfinityUpgrade);
+		eventBus.addListener(this::handleEverlastingInvulnerability);
 	}
 
 	private static final int BACKPACK_CHECK_COOLDOWN = 40;
-	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
+	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
 		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
@@ -98,6 +101,12 @@ public class CommonEventHandler {
 		if (targetPlayer.level().isClientSide) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
 			PacketDistributor.sendToServer(new AnotherPlayerBackpackOpenPayload(targetPlayer.getId()));
+		}
+	}
+
+	private void handleEverlastingInvulnerability(EntityInvulnerabilityCheckEvent event) {
+		if (event.getEntity() instanceof EverlastingBackpackItemEntity) {
+			event.setInvulnerable(true);
 		}
 	}
 
@@ -259,7 +268,7 @@ public class CommonEventHandler {
 						.stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
 				.orElse(false)) {
 			event.setCanceled(true);
-			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
 		}
 	}
 }

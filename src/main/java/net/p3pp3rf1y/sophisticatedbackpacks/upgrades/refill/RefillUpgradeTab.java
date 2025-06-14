@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeContainer> {
-	private static final Component SCROLL_TOOLTIP = SBPTranslationHelper.INSTANCE.translUpgrade("refill.scroll.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY);
+	private static final Component SCROLL_TOOLTIP = BackpackTranslationHelper.INSTANCE.translUpgrade("refill.scroll.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY);
 	private final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 	private int slotBeingChanged = -1;
 	private RefillUpgradeWrapper.TargetSlot targetSlotBeingChanged = null;
@@ -43,7 +43,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 	}
 
 	protected RefillUpgradeTab(RefillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsInRow, String upgradeName) {
-		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade(upgradeName), SBPTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade(upgradeName), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
 
 		filterLogicControl = addHideableChild(new RefillFilterLogicControl(screen, slotsInRow));
 	}
@@ -149,7 +149,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 		private void updateTooltip(RefillUpgradeWrapper.TargetSlot targetSlot) {
 			resetAdditionalTooltip();
-			additionalTooltip.add(SBPTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.tooltip", targetSlot.getDescription()).withStyle(ChatFormatting.GRAY));
+			additionalTooltip.add(BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.tooltip", targetSlot.getDescription()).withStyle(ChatFormatting.GRAY));
 			additionalTooltip.add(SCROLL_TOOLTIP);
 		}
 

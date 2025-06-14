@@ -8,21 +8,11 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "G": {
-      "tag": "c:glass_blocks"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    },
-    "S": {
-      "item": "minecraft:sticky_piston"
-    },
-    "U": {
-      "item": "minecraft:bucket"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "G": "#c:glass_blocks",
+    "P": "minecraft:piston",
+    "S": "minecraft:sticky_piston",
+    "U": "minecraft:bucket"
   },
   "pattern": [
     "GUG",

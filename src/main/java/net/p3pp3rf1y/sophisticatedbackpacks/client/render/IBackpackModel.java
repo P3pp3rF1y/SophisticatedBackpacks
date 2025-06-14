@@ -3,14 +3,15 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public interface IBackpackModel {
-	<L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
+	<S extends EntityRenderState, M extends EntityModel<? super S>> void render(M parentModel, S entityRenderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
 
 	void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio);
 
@@ -18,5 +19,5 @@ public interface IBackpackModel {
 
 	EquipmentSlot getRenderEquipmentSlot();
 
-	<L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, boolean wearsArmor);
+	<S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor);
 }

@@ -10,12 +10,12 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
-import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
+import net.p3pp3rf1y.sophisticatedbackpacks.command.BackpackCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
@@ -48,7 +48,7 @@ public class SophisticatedBackpacks {
 		modBus.addListener(DataGenerators::gatherData);
 		Config.SERVER.initListeners(modBus);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
-		SBPCommand.init(modBus);
+		BackpackCommand.init(modBus);
 
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(this::onAddReloadListener);
@@ -67,8 +67,8 @@ public class SophisticatedBackpacks {
 		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
 	}
 
-	private void onAddReloadListener(AddReloadListenerEvent event) {
-		event.addListener(registryLoader);
+	private void onAddReloadListener(AddServerReloadListenersEvent event) {
+		event.addListener(RegistryLoader.KEY, registryLoader);
 	}
 
 	public static ResourceLocation getRL(String regName) {

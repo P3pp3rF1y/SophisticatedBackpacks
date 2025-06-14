@@ -19,7 +19,7 @@ public class BackpackDyeRecipe extends StorageDyeRecipeBase {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<BackpackDyeRecipe> getSerializer() {
 		return ModItems.BACKPACK_DYE_RECIPE_SERIALIZER.get();
 	}
 

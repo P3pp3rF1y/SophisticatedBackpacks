@@ -8,12 +8,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "I": {
-      "tag": "c:storage_blocks/iron"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:stack_upgrade_starter_tier"
-    }
+    "I": "#c:storage_blocks/iron",
+    "S": "sophisticatedbackpacks:stack_upgrade_starter_tier"
   },
   "pattern": [
     " I ",

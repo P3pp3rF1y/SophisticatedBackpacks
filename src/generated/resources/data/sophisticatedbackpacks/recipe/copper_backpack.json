@@ -8,12 +8,8 @@
   "type": "sophisticatedbackpacks:backpack_upgrade",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:backpack"
-    },
-    "C": {
-      "tag": "c:ingots/copper"
-    }
+    "B": "sophisticatedbackpacks:backpack",
+    "C": "#c:ingots/copper"
   },
   "pattern": [
     "CCC",

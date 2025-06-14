@@ -8,12 +8,8 @@
   "type": "sophisticatedbackpacks:backpack_upgrade",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:iron_backpack"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    }
+    "B": "sophisticatedbackpacks:iron_backpack",
+    "G": "#c:ingots/gold"
   },
   "pattern": [
     "GGG",

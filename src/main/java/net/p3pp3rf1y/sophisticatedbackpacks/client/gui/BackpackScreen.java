@@ -52,7 +52,7 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> impleme
 
 	@Override
 	protected String getStorageSettingsTabTooltip() {
-		return SBPTranslationHelper.INSTANCE.translGui("settings.tooltip");
+		return BackpackTranslationHelper.INSTANCE.translGui("settings.tooltip");
 	}
 
 	@Override

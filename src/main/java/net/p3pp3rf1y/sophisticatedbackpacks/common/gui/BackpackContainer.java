@@ -17,7 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
@@ -110,7 +110,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			return;
 		}
 		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
-				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title")), false), backpackContext::toBuffer);
+				Component.translatable(BackpackTranslationHelper.INSTANCE.translGui("settings.title")), false), backpackContext::toBuffer);
 	}
 
 	@Override

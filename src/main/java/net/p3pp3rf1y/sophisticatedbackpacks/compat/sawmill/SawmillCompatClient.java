@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.sawmill;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackButtonDefinitions;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
@@ -14,6 +14,6 @@ public class SawmillCompatClient {
 	}
 
 	public static void registerUpgradeTab(UpgradeContainerType<SawmillUpgradeItem.Wrapper, SawmillUpgradeContainer> containerType) {
-		UpgradeGuiManager.registerTab(containerType, (SawmillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> new SawmillUpgradeTab(upgradeContainer, position, screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET));
+		UpgradeGuiManager.registerTab(containerType, (SawmillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> new SawmillUpgradeTab(upgradeContainer, position, screen, BackpackButtonDefinitions.SHIFT_CLICK_TARGET));
 	}
 }

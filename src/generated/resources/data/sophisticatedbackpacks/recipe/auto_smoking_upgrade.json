@@ -8,21 +8,11 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:smoking_upgrade"
-    }
+    "D": "#c:gems/diamond",
+    "G": "#c:ingots/gold",
+    "H": "minecraft:hopper",
+    "R": "#c:dusts/redstone",
+    "S": "sophisticatedbackpacks:smoking_upgrade"
   },
   "pattern": [
     "DHD",

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "sophisticatedbackpacks:backpack",
+    "base": "sophisticatedbackpacks:block/netherite_backpack",
+    "tints": [
+      {
+        "type": "sophisticatedbackpacks:main",
+        "default": -3382982
+      },
+      {
+        "type": "sophisticatedbackpacks:accent",
+        "default": -10342886
+      }
+    ]
+  }
+}

@@ -8,15 +8,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:smelting_upgrade"
-    },
-    "T": {
-      "item": "minecraft:smooth_stone"
-    }
+    "I": "#c:ingots/iron",
+    "S": "sophisticatedbackpacks:smelting_upgrade",
+    "T": "minecraft:smooth_stone"
   },
   "pattern": [
     "III",

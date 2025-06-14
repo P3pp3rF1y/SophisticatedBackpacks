@@ -8,18 +8,10 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    },
-    "V": {
-      "item": "sophisticatedbackpacks:restock_upgrade"
-    }
+    "D": "#c:gems/diamond",
+    "G": "#c:ingots/gold",
+    "R": "#c:dusts/redstone",
+    "V": "sophisticatedbackpacks:restock_upgrade"
   },
   "pattern": [
     " D ",

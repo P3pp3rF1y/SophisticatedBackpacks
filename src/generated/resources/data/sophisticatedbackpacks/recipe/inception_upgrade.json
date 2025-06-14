@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "S": {
-      "tag": "c:nether_stars"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "D": "#c:gems/diamond",
+    "E": "minecraft:ender_eye",
+    "S": "#c:nether_stars"
   },
   "pattern": [
     "ESE",

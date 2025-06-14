@@ -17,7 +17,7 @@ public class CopyBackpackDataFunction implements LootItemFunction {
 
 	@Override
 	public ItemStack apply(ItemStack stack, LootContext lootContext) {
-		BlockEntity be = lootContext.getParamOrNull(LootContextParams.BLOCK_ENTITY);
+		BlockEntity be = lootContext.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 		if (be instanceof BackpackBlockEntity backpackBlockEntity) {
 			return backpackBlockEntity.getBackpackWrapper().getBackpack();
 		}

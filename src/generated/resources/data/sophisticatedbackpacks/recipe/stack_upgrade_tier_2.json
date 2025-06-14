@@ -8,12 +8,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": {
-      "tag": "c:storage_blocks/gold"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:stack_upgrade_tier_1"
-    }
+    "G": "#c:storage_blocks/gold",
+    "S": "sophisticatedbackpacks:stack_upgrade_tier_1"
   },
   "pattern": [
     "GGG",

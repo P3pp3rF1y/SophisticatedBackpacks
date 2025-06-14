@@ -8,12 +8,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "L": {
-      "tag": "minecraft:logs"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:auto_smelting_upgrade"
-    }
+    "L": "#minecraft:logs",
+    "S": "sophisticatedbackpacks:auto_smelting_upgrade"
   },
   "pattern": [
     " L ",

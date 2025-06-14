@@ -8,15 +8,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "F": {
-      "item": "minecraft:flint"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "F": "minecraft:flint",
+    "S": "#c:rods/wooden"
   },
   "pattern": [
     "FSF",

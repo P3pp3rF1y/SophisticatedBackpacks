@@ -27,8 +27,8 @@ import java.util.function.Supplier;
 
 public class SawmillCompat implements ICompat {
 
-	public static final DeferredHolder<Item, SawmillUpgradeItem> SAWMILL_UPGRADE = ModItems.ITEMS.register("sawmill/sawmill_upgrade",
-			() -> new SawmillUpgradeItem(Config.SERVER.maxUpgradesPerStorage));
+	public static final DeferredHolder<Item, SawmillUpgradeItem> SAWMILL_UPGRADE = ModItems.ITEMS.registerItem("sawmill/sawmill_upgrade",
+			properties -> new SawmillUpgradeItem(Config.SERVER.maxUpgradesPerStorage, properties));
 
 	@Override
 	public void init(IEventBus modBus) {
@@ -36,7 +36,7 @@ public class SawmillCompat implements ICompat {
 
 		if (ModList.get().isLoaded(CompatModIds.JEI)) {
 			((Supplier<Runnable>) () -> () -> BackpackJeiPlugin.addAdditionalCatalystRegistrar(registration -> {
-				registration.addRecipeCatalyst(new ItemStack(SAWMILL_UPGRADE.get()), JEIPlugin.WOODCUTTING_RECIPE_TYPE);
+				registration.addCraftingStation(JEIPlugin.WOODCUTTING_RECIPE_TYPE, new ItemStack(SAWMILL_UPGRADE.get()));
 			})).get().run();
 		}
 		if (ModList.get().isLoaded(CompatModIds.EMI)) {
@@ -44,7 +44,7 @@ public class SawmillCompat implements ICompat {
 				registration.addWorkstation(EMIPlugin.WOODCUTTING_CATEGORY, SAWMILL_UPGRADE.get());
 			})).get().run();
 		}
-		if (ModList.get().isLoaded(CompatModIds.REI)) {
+		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
 				registration.addWorkstations(REIPlugin.WOODCUTTING_DISPLAY, SAWMILL_UPGRADE.get());
 			})).get().run();

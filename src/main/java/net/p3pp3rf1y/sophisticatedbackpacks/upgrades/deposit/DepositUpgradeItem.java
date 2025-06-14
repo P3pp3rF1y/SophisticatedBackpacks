@@ -11,8 +11,8 @@ public class DepositUpgradeItem extends UpgradeItemBase<DepositUpgradeWrapper> {
 	private static final UpgradeType<DepositUpgradeWrapper> TYPE = new UpgradeType<>(DepositUpgradeWrapper::new);
 	private final IntSupplier filterSlotCount;
 
-	public DepositUpgradeItem(IntSupplier filterSlotCount) {
-		super(Config.SERVER.maxUpgradesPerStorage);
+	public DepositUpgradeItem(IntSupplier filterSlotCount, Properties properties) {
+		super(Config.SERVER.maxUpgradesPerStorage, properties);
 		this.filterSlotCount = filterSlotCount;
 	}
 

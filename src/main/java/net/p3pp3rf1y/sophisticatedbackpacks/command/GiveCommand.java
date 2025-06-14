@@ -37,7 +37,7 @@ public class GiveCommand {
 
 	private static int giveBackpack(CommandSourceStack source, UUID backpackUuid, Collection<ServerPlayer> players) {
 		BackpackAccessLogger.getBackpackLog(backpackUuid).ifPresent(alr -> {
-			Item item = BuiltInRegistries.ITEM.get(alr.getBackpackItemRegistryName());
+			Item item = BuiltInRegistries.ITEM.get(alr.getBackpackItemRegistryName()).orElseThrow().value();
 			ItemStack backpack = new ItemStack(item);
 			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
 				backpack.set(DataComponents.CUSTOM_NAME, Component.literal(alr.getBackpackName()));

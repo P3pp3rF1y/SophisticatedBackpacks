@@ -8,15 +8,9 @@
   "type": "sophisticatedbackpacks:basic_backpack",
   "category": "misc",
   "key": {
-    "C": {
-      "tag": "c:chests/wooden"
-    },
-    "L": {
-      "tag": "c:leathers"
-    },
-    "S": {
-      "tag": "c:strings"
-    }
+    "C": "#c:chests/wooden",
+    "L": "#c:leathers",
+    "S": "#c:strings"
   },
   "pattern": [
     "SLS",

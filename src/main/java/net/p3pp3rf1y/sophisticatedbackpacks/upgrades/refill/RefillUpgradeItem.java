@@ -13,8 +13,8 @@ public class RefillUpgradeItem extends UpgradeItemBase<RefillUpgradeWrapper> {
 	private final boolean targetSlotSelection;
 	private final boolean supportsBlockPick;
 
-	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection, boolean supportsBlockPick) {
-		super(Config.SERVER.maxUpgradesPerStorage);
+	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection, boolean supportsBlockPick, Properties properties) {
+		super(Config.SERVER.maxUpgradesPerStorage, properties);
 		this.filterSlotCount = filterSlotCount;
 		this.targetSlotSelection = targetSlotSelection;
 		this.supportsBlockPick = supportsBlockPick;

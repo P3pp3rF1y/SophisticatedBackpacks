@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeType;
@@ -13,11 +13,11 @@ import java.util.function.Consumer;
 
 public class EverlastingUpgradeItem extends UpgradeItemBase<EverlastingUpgradeItem.Wrapper> {
 	public static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
-	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(EverlastingUpgradeItem.class::isInstance, 0, SBPTranslationHelper.INSTANCE.translError("add.everlasting_exists")));
+	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(EverlastingUpgradeItem.class::isInstance, 0, BackpackTranslationHelper.INSTANCE.translError("add.everlasting_exists")));
 
-	public EverlastingUpgradeItem() {
-        super(Config.SERVER.maxUpgradesPerStorage);
-    }
+	public EverlastingUpgradeItem(Properties properties) {
+		super(Config.SERVER.maxUpgradesPerStorage, properties);
+	}
 
 	@Override
 	public UpgradeType<Wrapper> getType() {

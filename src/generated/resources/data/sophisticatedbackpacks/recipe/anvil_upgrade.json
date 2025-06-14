@@ -8,21 +8,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "minecraft:anvil"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "C": {
-      "tag": "c:chests/wooden"
-    },
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    }
+    "A": "minecraft:anvil",
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "C": "#c:chests/wooden",
+    "D": "#c:gems/diamond",
+    "I": "#c:ingots/iron"
   },
   "pattern": [
     "ADA",

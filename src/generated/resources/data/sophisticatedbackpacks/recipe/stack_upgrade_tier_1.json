@@ -8,12 +8,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "I": {
-      "tag": "c:storage_blocks/iron"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "I": "#c:storage_blocks/iron"
   },
   "pattern": [
     "III",

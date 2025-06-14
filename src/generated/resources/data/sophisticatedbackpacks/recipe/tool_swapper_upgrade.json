@@ -8,27 +8,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "minecraft:wooden_axe"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "P": {
-      "item": "minecraft:wooden_pickaxe"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    },
-    "S": {
-      "item": "minecraft:wooden_shovel"
-    },
-    "W": {
-      "item": "minecraft:wooden_sword"
-    }
+    "A": "minecraft:wooden_axe",
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "I": "#c:ingots/iron",
+    "P": "minecraft:wooden_pickaxe",
+    "R": "#c:dusts/redstone",
+    "S": "minecraft:wooden_shovel",
+    "W": "minecraft:wooden_sword"
   },
   "pattern": [
     "RWR",

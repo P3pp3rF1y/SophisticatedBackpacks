@@ -8,15 +8,9 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "R": {
-      "tag": "c:storage_blocks/redstone"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "G": "#c:ingots/gold",
+    "R": "#c:storage_blocks/redstone"
   },
   "pattern": [
     "GRG",

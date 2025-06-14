@@ -8,15 +8,9 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "P": {
-      "item": "sophisticatedbackpacks:filter_upgrade"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    }
+    "G": "#c:ingots/gold",
+    "P": "sophisticatedbackpacks:filter_upgrade",
+    "R": "#c:dusts/redstone"
   },
   "pattern": [
     "GPG",

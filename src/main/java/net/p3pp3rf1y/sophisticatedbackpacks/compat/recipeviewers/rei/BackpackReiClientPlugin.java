@@ -15,12 +15,16 @@ import me.shedaniel.rei.forge.REIPluginClient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiCraftingContainerTransferHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiRecipeDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
 
@@ -90,6 +94,8 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
-		DyeRecipesMaker.getRecipes().forEach(registry::add);
+		ReiRecipeDisplayGenerator generator = new ReiRecipeDisplayGenerator(registry);
+		DyeRecipesMaker.addRecipes(generator);
+		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.SMITHING, SmithingBackpackUpgradeRecipe.class);
 	}
 }

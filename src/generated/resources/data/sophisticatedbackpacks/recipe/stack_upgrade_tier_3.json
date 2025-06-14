@@ -8,12 +8,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "D": {
-      "tag": "c:storage_blocks/diamond"
-    },
-    "S": {
-      "item": "sophisticatedbackpacks:stack_upgrade_tier_2"
-    }
+    "D": "#c:storage_blocks/diamond",
+    "S": "sophisticatedbackpacks:stack_upgrade_tier_2"
   },
   "pattern": [
     "DDD",

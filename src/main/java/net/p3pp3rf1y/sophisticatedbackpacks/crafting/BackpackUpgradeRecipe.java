@@ -18,7 +18,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	private final ShapedRecipe compose;
 
 	public BackpackUpgradeRecipe(ShapedRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.pattern, compose.result);
+		super(compose.group(), compose.category(), compose.pattern, compose.result);
 		this.compose = compose;
 	}
 
@@ -35,7 +35,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	@Override
 	public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registries) {
 		ItemStack upgradedBackpack = super.assemble(inv, registries);
-		getBackpack(inv).map(ItemStack::getComponents).ifPresent(upgradedBackpack::applyComponents);
+		getBackpack(inv).map(ItemStack::getComponentsPatch).ifPresent(upgradedBackpack::applyComponents);
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(upgradedBackpack);
 
 		BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
@@ -56,7 +56,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<BackpackUpgradeRecipe> getSerializer() {
 		return ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get();
 	}
 

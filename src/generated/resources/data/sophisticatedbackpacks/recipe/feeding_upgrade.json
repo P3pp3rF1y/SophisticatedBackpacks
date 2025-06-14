@@ -8,21 +8,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "A": {
-      "item": "minecraft:golden_apple"
-    },
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "C": {
-      "item": "minecraft:golden_carrot"
-    },
-    "E": {
-      "tag": "c:ender_pearls"
-    },
-    "M": {
-      "item": "minecraft:glistering_melon_slice"
-    }
+    "A": "minecraft:golden_apple",
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "C": "minecraft:golden_carrot",
+    "E": "#c:ender_pearls",
+    "M": "minecraft:glistering_melon_slice"
   },
   "pattern": [
     " C ",

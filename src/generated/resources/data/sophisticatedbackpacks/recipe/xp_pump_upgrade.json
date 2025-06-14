@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "C": {
-      "item": "minecraft:experience_bottle"
-    },
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "P": {
-      "item": "sophisticatedbackpacks:advanced_pump_upgrade"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    }
+    "C": "minecraft:experience_bottle",
+    "E": "minecraft:ender_eye",
+    "P": "sophisticatedbackpacks:advanced_pump_upgrade",
+    "R": "#c:dusts/redstone"
   },
   "pattern": [
     "RER",

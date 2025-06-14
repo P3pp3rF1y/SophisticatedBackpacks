@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.14'
+    id 'net.neoforged.moddev' version '2.0.63-beta'
     id "org.sonarqube" version "5.0.0.4638"
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
@@ -100,8 +100,8 @@ neoForge {
             programArgument '--nogui'
         }
 
-        data {
-            data()
+        clientData {
+            clientData()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
@@ -143,7 +143,7 @@ dependencies {
     compileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    localRuntime "dev.emi:emi-neoforge:${emi_version}"
+    //localRuntime "dev.emi:emi-neoforge:${emi_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
@@ -155,15 +155,15 @@ dependencies {
     compileOnly "curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}"
     localRuntime "curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}"
     compileOnly "curse.maven:chipped-456956:${chipped_cf_file_id}"
-    localRuntime "curse.maven:chipped-456956:${chipped_cf_file_id}"
+    //localRuntime "curse.maven:chipped-456956:${chipped_cf_file_id}"
     compileOnly "curse.maven:athena-841890:${athena_cf_file_id}"
-    localRuntime "curse.maven:athena-841890:${athena_cf_file_id}"
+    //localRuntime "curse.maven:athena-841890:${athena_cf_file_id}"
     compileOnly "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
-    localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
+    //localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
     compileOnly "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
-    localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    //localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
     compileOnly "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
-    localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
+    //localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
 /*
     compileOnly "vazkii.botania:Botania:${botania_version}:api")
     runtimeOnly "vazkii.botania:Botania:${botania_version}")

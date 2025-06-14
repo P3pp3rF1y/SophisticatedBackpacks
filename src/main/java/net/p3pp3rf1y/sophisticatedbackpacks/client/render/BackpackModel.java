@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -13,16 +12,16 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -37,7 +36,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 import javax.annotation.Nonnull;
 import java.util.*;
 
-public class BackpackModel extends AgeableListModel<LivingEntity> implements IBackpackModel {
+public class BackpackModel extends EntityModel<LivingEntityRenderState> implements IBackpackModel {
 	private static final Map<EntityType<?>, Vec3> entityTranslations;
 
 	static {
@@ -107,6 +106,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	public final ModelPart rightTankGlass;
 
 	public BackpackModel(ModelPart part) {
+		super(new ModelPart(Collections.emptyList(), Collections.emptyMap()));
 		cloth = part.getChild(CLOTH_PART);
 		rightPouchesBorder = part.getChild(RIGHT_POUCHES_BORDER_PART);
 		leftPouchesBorder = part.getChild(LEFT_POUCHES_BORDER_PART);
@@ -327,7 +327,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	@Override
-	public <L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
+	public <S extends EntityRenderState, M extends EntityModel<? super S>> void render(M parentModel, S entityRenderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(BACKPACK_ENTITY_TEXTURE));
 		Set<TankPosition> tankPositions = renderInfo.getTankRenderInfos().keySet();
 		boolean showLeftTank = tankPositions.contains(TankPosition.LEFT);
@@ -414,8 +414,8 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
 		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
-		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
-		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
+		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture);
+		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
 		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
 		int color = renderProperties.getTintColor(fluidStack);
 		fluidBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, color);
@@ -447,7 +447,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	@Override
-	public <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack poseStack, boolean wearsArmor) {
+	public <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			humanoidModel.body.translateAndRotate(poseStack);
 		}
@@ -456,23 +456,23 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.75f;
 
-		if (livingEntity.isBaby()) {
+		if (isBaby) {
 			zOffset += CHILD_Z_OFFSET;
 			yOffset = CHILD_Y_OFFSET;
 		}
 
 		poseStack.translate(0, yOffset, zOffset);
 
-		if (livingEntity instanceof Player) {
+		if (entityType == EntityType.PLAYER) {
 			return;
 		}
 
-		if (livingEntity.isBaby()) {
+		if (isBaby) {
 			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
 		}
 
-		if (entityTranslations.containsKey(livingEntity.getType())) {
-			Vec3 translVector = entityTranslations.get(livingEntity.getType());
+		if (entityTranslations.containsKey(entityType)) {
+			Vec3 translVector = entityTranslations.get(entityType);
 			poseStack.translate(translVector.x(), translVector.y(), translVector.z());
 		}
 	}
@@ -541,22 +541,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack matrixStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
-		//noop
-	}
-
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void setupAnim(LivingEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(LivingEntityRenderState renderState) {
 		//noop
 	}
 }

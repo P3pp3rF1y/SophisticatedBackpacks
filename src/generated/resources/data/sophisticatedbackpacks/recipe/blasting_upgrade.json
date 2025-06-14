@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "F": {
-      "item": "minecraft:blast_furnace"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "R": {
-      "tag": "c:dusts/redstone"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "F": "minecraft:blast_furnace",
+    "I": "#c:ingots/iron",
+    "R": "#c:dusts/redstone"
   },
   "pattern": [
     "RIR",

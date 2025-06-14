@@ -9,14 +9,17 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiRecipeDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
@@ -89,7 +92,9 @@ public class BackpackEmiPlugin implements EmiPlugin {
 	}
 
 	private void registerRecipes(EmiRegistry registry) {
-		DyeRecipesMaker.getRecipes(EmiClientRecipeHelper::wrapSyntheticShapedRecipe).forEach(registry::addRecipe);
+		EmiRecipeDisplayGenerator generator = new EmiRecipeDisplayGenerator(registry);
+		DyeRecipesMaker.addRecipes(generator);
+		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.SMITHING, SmithingBackpackUpgradeRecipe.class);
 	}
 
 	private void registerRecipeHandlers(EmiRegistry registry) {

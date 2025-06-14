@@ -8,8 +8,8 @@ import java.util.List;
 
 public class SmithingUpgradeItem extends UpgradeItemBase<SmithingUpgradeWrapper> {
 	private static final UpgradeType<SmithingUpgradeWrapper> TYPE = new UpgradeType<>(SmithingUpgradeWrapper::new);
-	public SmithingUpgradeItem() {
-		super(Config.SERVER.maxUpgradesPerStorage);
+	public SmithingUpgradeItem(Properties properties) {
+		super(Config.SERVER.maxUpgradesPerStorage, properties);
 	}
 
 	@Override

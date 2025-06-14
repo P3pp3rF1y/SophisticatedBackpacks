@@ -8,15 +8,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "C": {
-      "item": "minecraft:end_crystal"
-    },
-    "S": {
-      "tag": "c:nether_stars"
-    }
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "C": "minecraft:end_crystal",
+    "S": "#c:nether_stars"
   },
   "pattern": [
     "CSC",

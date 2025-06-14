@@ -185,8 +185,7 @@ public class ToolRegistry {
 				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
-				Item item = BuiltInRegistries.ITEM.get(itemName);
-				items.add(item);
+				BuiltInRegistries.ITEM.get(itemName).ifPresent(i -> items.add(i.value()));
 			} else if (jsonElement.isJsonObject()) {
 				Matchers.getItemMatcher(jsonElement).ifPresent(itemPredicates::add);
 			}

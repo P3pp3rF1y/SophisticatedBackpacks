@@ -247,9 +247,9 @@ public class Config {
 				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
 						.define("equipWithArmor", true);
 				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
-						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
+						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, () -> "mod_id:mob_name|mod_id:loot_folder/loot_table_name", mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
 				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
-						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+						.defineList("discBlockList", this::getDefaultDiscBlockList, () -> "mod_id:disc_name", mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
 				dropToFakePlayers = builder.comment("Determines whether backpack drops to fake players if killed by them in addition to real ones that it always drops to").define("dropToFakePlayers", false);
 				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.5, 0, 1);
@@ -372,7 +372,7 @@ public class Config {
 				for (String disallowedItemName : noInteractionBlocksList.get()) {
 					ResourceLocation registryName = ResourceLocation.parse(disallowedItemName);
 					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
-						noInteractionBlocksSet.add(BuiltInRegistries.BLOCK.get(registryName));
+						noInteractionBlocksSet.add(BuiltInRegistries.BLOCK.getValue(registryName));
 					}
 				}
 			}
@@ -385,7 +385,7 @@ public class Config {
 
 			NoConnectionBlocks(ModConfigSpec.Builder builder) {
 				noConnectionBlocksList = builder.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
-						.defineList("noConnectionBlocks", new ArrayList<>(), mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+						.defineList("noConnectionBlocks", new ArrayList<>(), () -> "mod_id:block_name", mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 			}
 
 			public boolean isBlockConnectionDisallowed(Block block) {
@@ -405,7 +405,7 @@ public class Config {
 				for (String disallowedItemName : noConnectionBlocksList.get()) {
 					ResourceLocation registryName = ResourceLocation.parse(disallowedItemName);
 					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
-						noConnnectionBlocksSet.add(BuiltInRegistries.BLOCK.get(registryName));
+						noConnnectionBlocksSet.add(BuiltInRegistries.BLOCK.getValue(registryName));
 					}
 				}
 			}
@@ -458,7 +458,7 @@ public class Config {
 
 			protected MaxUgradesPerStorageConfig(ModConfigSpec.Builder builder, Map<String, Integer> defaultUpgradesPerStorage) {
 				maxUpgradesPerStorageList = builder.comment("Maximum number of upgrades of type per backpack in format of \"UpgradeRegistryName[or UpgradeGroup]|MaxNumber\"")
-						.defineList("maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage), mapping -> ((String) mapping).matches(MAX_UPGRADES_MATCHER));
+						.defineList("maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage), () -> "upgrade_name|1", mapping -> ((String) mapping).matches(MAX_UPGRADES_MATCHER));
 			}
 
 			private List<String> convertToList(Map<String, Integer> defaultUpgradesPerStorage) {

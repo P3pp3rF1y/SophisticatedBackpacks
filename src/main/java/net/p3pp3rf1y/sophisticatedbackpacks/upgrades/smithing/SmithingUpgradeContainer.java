@@ -1,22 +1,22 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 
 import java.util.List;
 
@@ -101,8 +101,8 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 	}
 
 	@Override
-	public void setRecipeUsed(ResourceLocation recipeId) {
-		smithingMenuDelegate.setSelectedRecipe(recipeId);
+	public void setRecipeUsed(ResourceKey<Recipe<?>> recipeId) {
+		//noop - no longer required now that selected recipe isn't used by SmithingMenu anymore
 	}
 
 	@Override
@@ -179,17 +179,14 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 		@Override
 		public void slotsChanged(Container pInventory) {
-			createResult();
+			if (player.level() instanceof ServerLevel) {
+				createResult();
+			}
 			onResultChanged.run();
 		}
 
 		public Container getInputSlots() {
 			return inputSlots;
-		}
-
-		public void setSelectedRecipe(ResourceLocation recipeId) {
-			SmithingRecipeInput smithingRecipeInput = new SmithingRecipeInput(getTemplateSlot().getItem(), getBaseSlot().getItem(), getAdditionalSlot().getItem());
-			RecipeHelper.safeGetRecipeFor(RecipeType.SMITHING, smithingRecipeInput, recipeId).ifPresent(recipe -> selectedRecipe = recipe);
 		}
 	}
 }

@@ -1,12 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.registry;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.fml.ModList;
@@ -16,9 +16,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 
 import java.util.*;
 
-public class RegistryLoader extends SimpleJsonResourceReloadListener {
+//TODO rework this to use CODECs instead if possible
+public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement> {
+	public static final ResourceLocation KEY = SophisticatedBackpacks.getRL("registry_loader");
 	private static final Map<String, IRegistryDataLoader> loaders = new HashMap<>();
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
 	public static void registerParser(IRegistryDataLoader parser) {
 		loaders.put(parser.getName(), parser);
@@ -33,7 +34,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener {
 	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();
 
 	public RegistryLoader() {
-		super(GSON, "registry");
+		super(ExtraCodecs.JSON, FileToIdConverter.json("registry"));
 	}
 
 	private final List<DependentFile> loadLater = new ArrayList<>();

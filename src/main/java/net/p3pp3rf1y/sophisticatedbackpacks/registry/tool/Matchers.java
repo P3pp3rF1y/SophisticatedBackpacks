@@ -49,7 +49,7 @@ public class Matchers {
 				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
-				Item item = BuiltInRegistries.ITEM.get(itemName);
+				Item item = BuiltInRegistries.ITEM.getValue(itemName);
 				return Optional.of(st -> st.getItem() == item && (st.getComponents().isEmpty()));
 			}
 		});

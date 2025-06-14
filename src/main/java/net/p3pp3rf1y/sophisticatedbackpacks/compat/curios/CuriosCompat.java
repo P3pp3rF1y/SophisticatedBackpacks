@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.CuriosSlotTypes;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.Set;
@@ -17,7 +18,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 
 public class CuriosCompat implements ICompat {
-
 	private void addPlayerInventoryHandlers() {
 		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS, this::getCurioTags,
 				(player, identifier) -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
@@ -33,7 +33,7 @@ public class CuriosCompat implements ICompat {
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
 			backpackCurioIdentifiers.clear();
-			backpackCurioIdentifiers.addAll(CuriosApi.getItemStackSlots(ModItems.BACKPACK.get().getDefaultInstance(), FMLLoader.getDist() == Dist.CLIENT).keySet());
+			backpackCurioIdentifiers.addAll(CuriosSlotTypes.getItemSlotTypes(ModItems.BACKPACK.get().getDefaultInstance(), FMLLoader.getDist() == Dist.CLIENT).keySet());
 			backpackCurioIdentifiers.add("curio");
 		}
 		return backpackCurioIdentifiers;

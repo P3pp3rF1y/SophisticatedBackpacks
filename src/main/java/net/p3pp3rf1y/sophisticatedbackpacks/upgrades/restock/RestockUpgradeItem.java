@@ -11,8 +11,8 @@ public class RestockUpgradeItem extends UpgradeItemBase<RestockUpgradeWrapper> {
 	private static final UpgradeType<RestockUpgradeWrapper> TYPE = new UpgradeType<>(RestockUpgradeWrapper::new);
 	private final IntSupplier filterSlotCount;
 
-	public RestockUpgradeItem(IntSupplier filterSlotCount) {
-		super(Config.SERVER.maxUpgradesPerStorage);
+	public RestockUpgradeItem(IntSupplier filterSlotCount, Properties properties) {
+		super(Config.SERVER.maxUpgradesPerStorage, properties);
 		this.filterSlotCount = filterSlotCount;
 	}
 

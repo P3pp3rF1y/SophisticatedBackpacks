@@ -7,12 +7,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -26,7 +26,6 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -148,7 +147,7 @@ public class EntityBackpackAdditionHandler {
 					float additionalDifficulty = level.getCurrentDifficultyAt(monster.blockPosition()).getSpecialMultiplier();
 					int enchantmentLevel = (int) (5F + additionalDifficulty * 18F + minDifficulty * 6);
 					EnchantmentHelper.enchantItem(rnd, armorStack, enchantmentLevel, level.registryAccess(),
-							level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getTag(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT));
+							level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.ON_MOB_SPAWN_EQUIPMENT));
 				}
 				monster.setItemSlot(slot, armorStack);
 			}
@@ -156,18 +155,17 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void equipBackpack(Monster monster, ItemStack backpack, int difficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
-		getSpawnEgg(monster.getType()).ifPresent(egg -> {
-			IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-			wrapper.setColors(egg.getColor(0) | 0xFF_000000, egg.getColor(1) | 0xFF_000000);
-			setLoot(monster, wrapper, difficulty, level);
-			if (playMusicDisc) {
-				wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
-				if (wrapper.getUpgradeHandler().getSlots() > 0) {
-					monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
-					addJukeboxUpgradeAndRandomDisc(level.getRandom(), wrapper, rnd);
-				}
+		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
+		EntityBackpackColors.BackpackColors colors = EntityBackpackColors.getBackpackColors(monster.getType());
+		wrapper.setColors(ARGB.opaque(colors.main()), ARGB.opaque(colors.accent()));
+		setLoot(monster, wrapper, difficulty, level);
+		if (playMusicDisc) {
+			wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
+			if (wrapper.getUpgradeHandler().getSlots() > 0) {
+				monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
+				addJukeboxUpgradeAndRandomDisc(level.getRandom(), wrapper, rnd);
 			}
-		});
+		}
 		monster.setItemSlot(EquipmentSlot.CHEST, backpack);
 		monster.setDropChance(EquipmentSlot.CHEST, 0);
 	}
@@ -195,7 +193,7 @@ public class EntityBackpackAdditionHandler {
 
 	private static List<Item> getMusicDiscs() {
 		if (musicDiscs == null) {
-			BuiltInRegistries.ITEM.getTag(Tags.Items.MUSIC_DISCS).ifPresentOrElse(records -> {
+			BuiltInRegistries.ITEM.get(Tags.Items.MUSIC_DISCS).ifPresentOrElse(records -> {
 				Set<String> blockedDiscs = new HashSet<>(Config.SERVER.entityBackpackAdditions.discBlockList.get());
 				musicDiscs = new ArrayList<>();
 				records.forEach(musicDisc -> {
@@ -222,10 +220,6 @@ public class EntityBackpackAdditionHandler {
 			}
 			monster.setHealth(monster.getMaxHealth());
 		}
-	}
-
-	private static Optional<SpawnEggItem> getSpawnEgg(EntityType<?> entityType) {
-		return Optional.ofNullable(SpawnEggItem.BY_ID.get(entityType));
 	}
 
 	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(
@@ -316,7 +310,7 @@ public class EntityBackpackAdditionHandler {
 			return false;
 		}
 		float lootingChanceMultiplier = dropChanceMultiplier.getOrDefault(backpack.getItem(), 1F);
-		int lootingLevel = player.level().registryAccess().registry(Registries.ENCHANTMENT).map(registry -> player.getMainHandItem().getEnchantmentLevel(registry.getHolderOrThrow(Enchantments.LOOTING))).orElse(0);
+		int lootingLevel = player.level().registryAccess().lookup(Registries.ENCHANTMENT).map(registry -> player.getMainHandItem().getEnchantmentLevel(registry.getOrThrow(Enchantments.LOOTING))).orElse(0);
 		return mob.level().random.nextFloat() < (additionsConfig.backpackDropChance.get() + lootingLevel * additionsConfig.lootingChanceIncreasePerLevel.get()) * lootingChanceMultiplier;
 	}
 

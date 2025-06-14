@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Explosion;
@@ -43,7 +42,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public boolean isInWater() {
-		return getY() < level().getMinBuildHeight() + 1 || super.isInWater();
+		return getY() < level().getMinY() + 1 || super.isInWater();
 	}
 
 	@Override
@@ -53,11 +52,6 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public boolean ignoreExplosion(Explosion explosion) {
-		return true;
-	}
-
-	@Override
-	public boolean isInvulnerableTo(DamageSource source) {
 		return true;
 	}
 

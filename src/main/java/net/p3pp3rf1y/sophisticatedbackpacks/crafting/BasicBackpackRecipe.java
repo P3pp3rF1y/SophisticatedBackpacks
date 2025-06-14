@@ -14,7 +14,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 	private final ShapedRecipe compose;
 
 	public BasicBackpackRecipe(ShapedRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.pattern, compose.result);
+		super(compose.group(), compose.category(), compose.pattern, compose.result);
 		this.compose = compose;
 	}
 
@@ -35,7 +35,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<BasicBackpackRecipe> getSerializer() {
 		return ModItems.BASIC_BACKPACK_RECIPE_SERIALIZER.get();
 	}
 
