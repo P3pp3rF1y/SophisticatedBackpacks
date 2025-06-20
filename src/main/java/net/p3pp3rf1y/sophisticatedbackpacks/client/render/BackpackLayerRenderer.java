@@ -28,7 +28,6 @@ import java.util.function.BiConsumer;
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
 	private static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
 	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getRL("wears_armor"));
-	private static final ContextKey<Boolean> IS_BABY = new ContextKey<>(SophisticatedBackpacks.getRL("is_baby"));
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getRL("entity_type"));
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
@@ -46,7 +45,6 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 				entityRenderState.setRenderData(WEARS_ARMOR, false);
 			}
 		}
-		entityRenderState.setRenderData(IS_BABY, livingEntity.isBaby());
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
 
@@ -64,7 +62,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
 		poseStack.pushPose();
 		boolean wearsArmor = entityRenderState.getRenderData(WEARS_ARMOR);
-		boolean isBaby = entityRenderState.getRenderData(IS_BABY);
+		boolean isBaby = entityRenderState.isBaby;
 		EntityType<?> entityType = entityRenderState.getRenderData(ENTITY_TYPE);
 		renderBackpack(getParentModel(), poseStack, multiBufferSource, packedLight, backpack, wearsArmor, model, entityRenderState, entityType, isBaby);
 		poseStack.popPose();
