@@ -24,7 +24,6 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
-    maven { url "https://maven.tterrag.com/" }
     maven { url = "https://modmaven.dev/" }
     maven { url "https://minecraft.curseforge.com/api/maven/" }
     maven {
