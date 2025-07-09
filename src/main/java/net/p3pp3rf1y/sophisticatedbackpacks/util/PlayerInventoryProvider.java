@@ -52,7 +52,7 @@ public class PlayerInventoryProvider {
 		}
 	}
 
-	public Optional<RenderInfo> getBackpackFromRendered(Player player) {
+	public Optional<RenderInfo> getBackpackFromRendered(Player player, boolean forLayerRendering) {
 		for (String handlerName : renderedHandlers) {
 			PlayerInventoryHandler invHandler = playerInventoryHandlers.get(handlerName);
 			if (invHandler == null) {
@@ -62,7 +62,7 @@ public class PlayerInventoryProvider {
 				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
 					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
 					if (slotStack.getItem() instanceof BackpackItem) {
-						return invHandler.hasItsOwnRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+						return forLayerRendering && invHandler.hasItsOwnLayerRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
 					}
 				}
 			}

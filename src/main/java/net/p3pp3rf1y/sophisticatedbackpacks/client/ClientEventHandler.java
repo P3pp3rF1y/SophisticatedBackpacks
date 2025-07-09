@@ -84,7 +84,7 @@ public class ClientEventHandler {
 	private static void onEntityTick(EntityTickEvent.Post event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
 				ItemStack backpack = backpackRenderInfo.getBackpack();
 				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 				clientTickUpgrades(player, wrapper.getRenderInfo());
