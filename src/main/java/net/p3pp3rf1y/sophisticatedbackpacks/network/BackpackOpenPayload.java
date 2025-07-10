@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -63,7 +64,7 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 			if (payload.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(payload.slotIndex)) {
-				openBackpack(player, backpackContext.getSubBackpackContext(payload.slotIndex));
+				openBackpack(player, backpackContext.getSubBackpackContext(payload.slotIndex, BackpackWrapper.fromStack(backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(payload.slotIndex)).getContentsUuid().isEmpty()));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
