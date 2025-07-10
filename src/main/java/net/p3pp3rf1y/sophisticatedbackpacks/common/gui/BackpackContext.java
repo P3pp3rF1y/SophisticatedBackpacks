@@ -37,7 +37,7 @@ public abstract class BackpackContext {
 
 	public abstract int getBackpackSlotIndex();
 
-	public abstract BackpackContext getSubBackpackContext(int subBackpackSlotIndex);
+	public abstract BackpackContext getSubBackpackContext(int subBackpackSlotIndex, boolean saveAfterOpen);
 
 	public abstract BackpackContext getParentBackpackContext();
 
@@ -76,6 +76,14 @@ public abstract class BackpackContext {
 
 	public boolean wasOpenFromInventory() {
 		return false;
+	}
+
+	public boolean shouldSaveAfterOpen() {
+		return false;
+	}
+
+	public void saveBackpackStack() {
+		//noop by default
 	}
 
 	public enum ContextType {
@@ -181,8 +189,8 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new ItemSubBackpack(handlerName, identifier, backpackSlotIndex, openFromInventory, subBackpackSlotIndex);
+		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex, boolean saveAfterOpen) {
+			return new ItemSubBackpack(handlerName, identifier, backpackSlotIndex, openFromInventory, subBackpackSlotIndex, saveAfterOpen);
 		}
 
 		@Override
@@ -215,12 +223,14 @@ public abstract class BackpackContext {
 
 	public static class ItemSubBackpack extends Item {
 		private final int subBackpackSlotIndex;
+		private final boolean saveAfterOpen;
 		@Nullable
 		private IStorageWrapper parentWrapper;
 
-		public ItemSubBackpack(String handlerName, String identifier, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex) {
+		public ItemSubBackpack(String handlerName, String identifier, int backpackSlotIndex, boolean parentOpenFromInventory, int subBackpackSlotIndex, boolean saveAfterOpen) {
 			super(handlerName, identifier, backpackSlotIndex, parentOpenFromInventory);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
+			this.saveAfterOpen = saveAfterOpen;
 		}
 
 		@Override
@@ -238,13 +248,14 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
+			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
 		public void addToBuffer(FriendlyByteBuf packetBuffer) {
 			super.addToBuffer(packetBuffer);
 			packetBuffer.writeInt(subBackpackSlotIndex);
+			packetBuffer.writeBoolean(saveAfterOpen);
 		}
 
 		@Override
@@ -265,6 +276,18 @@ public abstract class BackpackContext {
 		@Override
 		public void onUpgradeChanged(Player player) {
 			//noop
+		}
+
+		@Override
+		public boolean shouldSaveAfterOpen() {
+			return saveAfterOpen;
+		}
+
+		@Override
+		public void saveBackpackStack() {
+			if (parentWrapper != null) {
+				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+			}
 		}
 	}
 
@@ -308,8 +331,8 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new BlockSubBackpack(pos, subBackpackSlotIndex);
+		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex, boolean saveAfterOpen) {
+			return new BlockSubBackpack(pos, subBackpackSlotIndex, saveAfterOpen);
 		}
 
 		@Override
@@ -340,12 +363,14 @@ public abstract class BackpackContext {
 
 	public static class BlockSubBackpack extends Block {
 		private final int subBackpackSlotIndex;
+		private final boolean saveAfterOpen;
 		@Nullable
 		private IStorageWrapper parentWrapper;
 
-		public BlockSubBackpack(BlockPos pos, int subBackpackSlotIndex) {
+		public BlockSubBackpack(BlockPos pos, int subBackpackSlotIndex, boolean saveAfterOpen) {
 			super(pos);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
+			this.saveAfterOpen = saveAfterOpen;
 		}
 
 		@Override
@@ -363,13 +388,14 @@ public abstract class BackpackContext {
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.BlockSubBackpack(BlockPos.of(packetBuffer.readLong()), packetBuffer.readInt());
+			return new BackpackContext.BlockSubBackpack(BlockPos.of(packetBuffer.readLong()), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
 		public void addToBuffer(FriendlyByteBuf packetBuffer) {
 			super.addToBuffer(packetBuffer);
 			packetBuffer.writeInt(subBackpackSlotIndex);
+			packetBuffer.writeBoolean(saveAfterOpen);
 		}
 
 		@Override
@@ -390,6 +416,18 @@ public abstract class BackpackContext {
 		@Override
 		public void onUpgradeChanged(Player player) {
 			//noop
+		}
+
+		@Override
+		public boolean shouldSaveAfterOpen() {
+			return saveAfterOpen;
+		}
+
+		@Override
+		public void saveBackpackStack() {
+			if (parentWrapper != null) {
+				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+			}
 		}
 	}
 
@@ -412,8 +450,8 @@ public abstract class BackpackContext {
 		}
 
 		@Override
-		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex) {
-			return new AnotherPlayerSubBackpack(otherPlayer, handlerName, identifier, backpackSlotIndex, subBackpackSlotIndex);
+		public BackpackContext getSubBackpackContext(int subBackpackSlotIndex, boolean saveAfterOpen) {
+			return new AnotherPlayerSubBackpack(otherPlayer, handlerName, identifier, backpackSlotIndex, subBackpackSlotIndex, saveAfterOpen);
 		}
 
 		@Override
@@ -449,12 +487,14 @@ public abstract class BackpackContext {
 
 	public static class AnotherPlayerSubBackpack extends AnotherPlayer {
 		private final int subBackpackSlotIndex;
+		private final boolean saveAfterOpen;
 		@Nullable
 		private IStorageWrapper parentWrapper;
 
-		public AnotherPlayerSubBackpack(Player otherPlayer, String handlerName, String identifier, int backpackSlotIndex, int subBackpackSlotIndex) {
+		public AnotherPlayerSubBackpack(Player otherPlayer, String handlerName, String identifier, int backpackSlotIndex, int subBackpackSlotIndex, boolean saveAfterOpen) {
 			super(handlerName, identifier, backpackSlotIndex, otherPlayer);
 			this.subBackpackSlotIndex = subBackpackSlotIndex;
+			this.saveAfterOpen = saveAfterOpen;
 		}
 
 		@Override
@@ -475,6 +515,7 @@ public abstract class BackpackContext {
 		public void addToBuffer(FriendlyByteBuf packetBuffer) {
 			super.addToBuffer(packetBuffer);
 			packetBuffer.writeInt(subBackpackSlotIndex);
+			packetBuffer.writeBoolean(saveAfterOpen);
 		}
 
 		@Override
@@ -496,12 +537,24 @@ public abstract class BackpackContext {
 			int playerId = packetBuffer.readInt();
 			Player otherPlayer = (Player) level.getEntity(playerId);
 
-			return new BackpackContext.AnotherPlayerSubBackpack(Objects.requireNonNull(otherPlayer), packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
+			return new BackpackContext.AnotherPlayerSubBackpack(Objects.requireNonNull(otherPlayer), packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
 		public void onUpgradeChanged(Player player) {
 			//noop
+		}
+
+		@Override
+		public boolean shouldSaveAfterOpen() {
+			return saveAfterOpen;
+		}
+
+		@Override
+		public void saveBackpackStack() {
+			if (parentWrapper != null) {
+				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+			}
 		}
 	}
 }

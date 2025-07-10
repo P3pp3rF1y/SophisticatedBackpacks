@@ -6,6 +6,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -75,7 +76,12 @@ public class BackpackOpenMessage {
 			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(msg.slotIndex)) {
-				openBackpack(player, backpackContext.getSubBackpackContext(msg.slotIndex));
+				openBackpack(player, backpackContext.getSubBackpackContext(msg.slotIndex,
+						backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(msg.slotIndex)
+								.getCapability(CapabilityBackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+								.map(backpackWrapper -> backpackWrapper.getContentsUuid().isEmpty())
+								.orElse(false)
+				));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
