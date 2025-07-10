@@ -88,7 +88,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
-		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(ItemStack.parseOptional(registryAccess, nbt.getCompound(BACKPACK_DATA_TAG))));
+		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(nbt.getCompound(BACKPACK_DATA_TAG).flatMap(dataTag -> ItemStack.parse(registryAccess, dataTag)).orElse(ItemStack.EMPTY)));
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		}
 
 		setBackpackFromNbt(tag);
-		if (tag.getBoolean("updateBlockRender")) {
+		if (tag.getBooleanOr("updateBlockRender", false	)) {
 			WorldHelper.notifyBlockUpdate(this);
 		}
 	}
@@ -277,5 +277,11 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			removeFromController();
 		}
 		super.setRemoved();
+	}
+
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+		removeFromController();
 	}
 }

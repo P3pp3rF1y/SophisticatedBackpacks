@@ -223,12 +223,12 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(
-			new ApplicableEffect(List.of(MobEffects.DAMAGE_RESISTANCE, MobEffects.REGENERATION), 1),
+			new ApplicableEffect(List.of(MobEffects.RESISTANCE, MobEffects.REGENERATION), 1),
 			new ApplicableEffect(MobEffects.FIRE_RESISTANCE),
 			new ApplicableEffect(MobEffects.ABSORPTION),
 			new ApplicableEffect(MobEffects.HEALTH_BOOST),
-			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
-			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
+			new ApplicableEffect(MobEffects.SPEED),
+			new ApplicableEffect(MobEffects.STRENGTH));
 
 	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty, LevelAccessor level) {
 		MinecraftServer server = level.getServer();

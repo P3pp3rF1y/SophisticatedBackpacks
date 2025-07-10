@@ -1,20 +1,18 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.context.UseOnContext;
@@ -26,7 +24,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.IShearable;
-import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -36,7 +33,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
-import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -47,7 +43,6 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -57,15 +52,6 @@ import static net.neoforged.neoforge.common.ItemAbilities.*;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
-
-	private static final LoadingCache<ItemStack, Boolean> isToolCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(
-			new CacheLoader<>() {
-				@Override
-				public Boolean load(ItemStack key) {
-					return canPerformToolAction(key);
-				}
-			}
-	);
 
 	private final FilterLogic filterLogic;
 	@Nullable
@@ -87,7 +73,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || (!isSword(mainHandItem, player) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
+		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && !mainHandItem.is(ItemTags.SWORDS)) || (!mainHandItem.has(DataComponents.WEAPON) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
 			return false;
 		}
 
@@ -156,7 +142,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 		ItemStack mainHandItem = player.getMainHandItem();
 
-		if (isSword(mainHandItem, player)) {
+		if (mainHandItem.is(ItemTags.SWORDS)) {
 			return true;
 		}
 
@@ -168,60 +154,33 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isNotTool(ItemStack stack) {
-		return !isToolCache.getUnchecked(stack);
-	}
-
-	private static boolean canPerformToolAction(ItemStack stack) {
-		return canPerformAnyAction(stack, ItemAbilities.DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, ItemAbilities.DEFAULT_HOE_ACTIONS)
-				|| canPerformAnyAction(stack, ItemAbilities.DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, ItemAbilities.DEFAULT_SHOVEL_ACTIONS)
-				|| canPerformAnyAction(stack, ItemAbilities.DEFAULT_SHEARS_ACTIONS);
-	}
-
-	private static boolean canPerformAnyAction(ItemStack stack, Set<ItemAbility> toolActions) {
-		for (ItemAbility toolAction : toolActions) {
-			if (stack.canPerformAction(toolAction)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isSword(ItemStack stack, Player player) {
-		if (SwordRegistry.isSword(stack)) {
-			return true;
-		}
-
-		AttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
-		if (!stack.isEmpty() && stack.canPerformAction(ItemAbilities.SWORD_SWEEP)) {
-			return attackDamage != null && attackDamage.getModifier(Item.BASE_ATTACK_DAMAGE_ID) != null;
-		}
-		return false;
+		return !stack.has(DataComponents.TOOL);
 	}
 
 	private boolean tryToSwapInWeapon(Player player, ItemStack mainHandItem) {
-		AtomicReference<ItemStack> bestAxe = new AtomicReference<>(ItemStack.EMPTY);
-		AtomicDouble bestAxeDamage = new AtomicDouble(0);
+		AtomicReference<ItemStack> bestTool = new AtomicReference<>(ItemStack.EMPTY);
+		AtomicDouble bestToolDamage = new AtomicDouble(0);
 		AtomicReference<ItemStack> bestSword = new AtomicReference<>(ItemStack.EMPTY);
 		AtomicDouble bestSwordDamage = new AtomicDouble(0);
 
-		updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, mainHandItem);
+		updateBestWeapons(bestTool, bestToolDamage, bestSword, bestSwordDamage, mainHandItem);
 
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryForUpgradeProcessing();
 		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
 			if (filterLogic.matchesFilter(stack)) {
-				updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, stack);
+				updateBestWeapons(bestTool, bestToolDamage, bestSword, bestSwordDamage, stack);
 			}
 		});
 
 		if (!bestSword.get().isEmpty()) {
 			return swapWeapon(player, mainHandItem, backpackInventory, bestSword.get());
-		} else if (!bestAxe.get().isEmpty()) {
-			return swapWeapon(player, mainHandItem, backpackInventory, bestAxe.get());
+		} else if (!bestTool.get().isEmpty()) {
+			return swapWeapon(player, mainHandItem, backpackInventory, bestTool.get());
 		}
 		return false;
 	}
 
-	private void updateBestWeapons(AtomicReference<ItemStack> bestAxe, AtomicDouble bestAxeDamage, AtomicReference<ItemStack> bestSword, AtomicDouble bestSwordDamage, ItemStack stack) {
+	private void updateBestWeapons(AtomicReference<ItemStack> bestTool, AtomicDouble bestToolDamage, AtomicReference<ItemStack> bestSword, AtomicDouble bestSwordDamage, ItemStack stack) {
 		AttributeInstance attribute = new AttributeInstance(Attributes.ATTACK_DAMAGE, a -> {
 		});
 		stack.forEachModifier(EquipmentSlot.MAINHAND, (att, m) -> {
@@ -233,14 +192,16 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		});
 
 		double damageValue = attribute.getValue();
-		if (stack.canPerformAction(ItemAbilities.AXE_DIG)) {
-			if (damageValue > bestAxeDamage.get()) {
-				bestAxe.set(stack);
-				bestAxeDamage.set(damageValue);
+		if (stack.is(ItemTags.SWORDS)) {
+			 if (damageValue > bestSwordDamage.get()) {
+				bestSword.set(stack);
+				 bestSwordDamage.set(damageValue);
+			 }
+		} else 	if (stack.has(DataComponents.TOOL)) {
+			if (damageValue > bestToolDamage.get()) {
+				bestTool.set(stack);
+				bestToolDamage.set(damageValue);
 			}
-		} else if ((SwordRegistry.isSword(stack) || stack.canPerformAction(ItemAbilities.SWORD_SWEEP)) && damageValue > bestSwordDamage.get()) {
-			bestSword.set(stack);
-			bestSwordDamage.set(damageValue);
 		}
 	}
 

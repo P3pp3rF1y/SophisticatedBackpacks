@@ -38,7 +38,7 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
-		ItemStack backpack = player.getInventory().items.get(payload.slotIndex);
+		ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
 		backpackWrapper.setColumnsTaken(payload.columnsTaken, false);

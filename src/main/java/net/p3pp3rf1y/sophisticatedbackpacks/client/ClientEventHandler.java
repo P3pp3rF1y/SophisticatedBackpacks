@@ -68,6 +68,7 @@ public class ClientEventHandler {
 		modBus.addListener(ModBlockColors::registerBlockColorHandlers);
 		modBus.addListener(ClientEventHandler::registerBackpackEntityRenderStateModifier);
 		modBus.addListener(ClientEventHandler::registerBackpackItemModels);
+		modBus.addListener(ClientEventHandler::registerBlockStateModels);
 
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
@@ -77,6 +78,10 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::onEntityTick);
 	}
 
+	private static void registerBlockStateModels(RegisterBlockStateModels event) {
+		event.registerModel(BackpackBlockModel.UnbakedBlockStateModel.ID, BackpackBlockModel.UnbakedBlockStateModel.CODEC);
+	}
+
 	private static void registerBackpackItemModels(RegisterItemModelsEvent event) {
 		event.register(SophisticatedBackpacks.getRL("backpack"), BackpackItemModel.Unbaked.MAP_CODEC);
 	}
@@ -84,7 +89,7 @@ public class ClientEventHandler {
 	private static void onEntityTick(EntityTickEvent.Post event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
 				ItemStack backpack = backpackRenderInfo.getBackpack();
 				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 				clientTickUpgrades(player, wrapper.getRenderInfo());

@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -126,7 +125,6 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 	}
 
 	protected void renderCost(GuiGraphics guiGraphics, int x, int y) {
-		RenderSystem.disableBlend();
 		int i = getContainer().getCost();
 		if (i > 0) {
 			int color = 8453920;

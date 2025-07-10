@@ -29,7 +29,7 @@ public class BackpackSettingsHandler extends SettingsHandler {
 
 	@Override
 	protected CompoundTag getSettingsNbtFromContentsNbt(CompoundTag contentsNbt) {
-		return contentsNbt.getCompound(SETTINGS_TAG);
+		return contentsNbt.getCompoundOrEmpty(SETTINGS_TAG);
 	}
 
 	@Override

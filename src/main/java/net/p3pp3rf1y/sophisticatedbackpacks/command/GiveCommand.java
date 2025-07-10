@@ -37,14 +37,14 @@ public class GiveCommand {
 
 	private static int giveBackpack(CommandSourceStack source, UUID backpackUuid, Collection<ServerPlayer> players) {
 		BackpackAccessLogger.getBackpackLog(backpackUuid).ifPresent(alr -> {
-			Item item = BuiltInRegistries.ITEM.get(alr.getBackpackItemRegistryName()).orElseThrow().value();
+			Item item = BuiltInRegistries.ITEM.get(alr.backpackItemRegistryName()).orElseThrow().value();
 			ItemStack backpack = new ItemStack(item);
-			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
-				backpack.set(DataComponents.CUSTOM_NAME, Component.literal(alr.getBackpackName()));
+			if (!backpack.getHoverName().getString().equals(alr.backpackName())) {
+				backpack.set(DataComponents.CUSTOM_NAME, Component.literal(alr.backpackName()));
 			}
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
-			backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
-			backpackWrapper.setColumnsTaken(alr.getColumnsTaken(), false);
+			backpackWrapper.setColors(alr.clothColor(), alr.trimColor());
+			backpackWrapper.setColumnsTaken(alr.columnsTaken(), false);
 			backpackWrapper.setContentsUuid(backpackUuid);
 
 			players.forEach(p -> giveBackpackToPlayer(backpack, p));

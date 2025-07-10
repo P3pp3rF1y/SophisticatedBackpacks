@@ -1,17 +1,21 @@
 {
   "variants": {
     "facing=east": {
+      "type": "sophisticatedbackpacks:backpack_model_loader",
       "model": "sophisticatedbackpacks:block/copper_backpack",
       "y": 90
     },
     "facing=north": {
+      "type": "sophisticatedbackpacks:backpack_model_loader",
       "model": "sophisticatedbackpacks:block/copper_backpack"
     },
     "facing=south": {
+      "type": "sophisticatedbackpacks:backpack_model_loader",
       "model": "sophisticatedbackpacks:block/copper_backpack",
       "y": 180
     },
     "facing=west": {
+      "type": "sophisticatedbackpacks:backpack_model_loader",
       "model": "sophisticatedbackpacks:block/copper_backpack",
       "y": 270
     }

@@ -11,7 +11,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 
 import java.util.*;
@@ -28,7 +27,6 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 	static {
 		registerParser(new ToolRegistry.BlockToolsLoader());
 		registerParser(new ToolRegistry.EntityToolsLoader());
-		registerParser(new SwordRegistry.SwordsLoader());
 	}
 
 	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();

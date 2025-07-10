@@ -27,7 +27,7 @@ public class DepositFilterLogicContainer extends FilterLogicContainer<DepositFil
 	@Override
 	public boolean handlePacket(CompoundTag data) {
 		if (data.contains(DATA_DEPOSIT_FILTER_TYPE)) {
-			setDepositFilterType(DepositFilterType.fromName(data.getString(DATA_DEPOSIT_FILTER_TYPE)));
+			data.getString(DATA_DEPOSIT_FILTER_TYPE).ifPresent(filterName -> setDepositFilterType(DepositFilterType.fromName(filterName)));
 		}
 		return super.handlePacket(data);
 	}

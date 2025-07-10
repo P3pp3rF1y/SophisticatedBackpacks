@@ -28,28 +28,28 @@ public class ListCommand {
 
 	private static int printBackpackList(List<AccessLogRecord> allLogs, CommandSourceStack source) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
-		allLogs.sort(Comparator.comparing(AccessLogRecord::getAccessTime).reversed());
+		allLogs.sort(Comparator.comparing(AccessLogRecord::accessTime).reversed());
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.list.header"), false);
 		allLogs.forEach(alr -> {
 			MutableComponent message = Component.literal("");
-			message.append(Component.literal(alr.getBackpackName())
+			message.append(Component.literal(alr.backpackName())
 					.withStyle(s ->
-							s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks give @p " + alr.getBackpackUuid()))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.getBackpackUuid().toString())))
+							s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent.SuggestCommand("/sophisticatedbackpacks give @p " + alr.backpackUuid()))
+									.withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.backpackUuid().toString())))
 					)
 			);
 			message.append(Component.literal(", "));
 			MutableComponent clothColor = Component.translatable("commands.sophisticatedbackpacks.list.cloth_color");
-			clothColor.withStyle(clothColor.getStyle().withColor(TextColor.fromRgb(alr.getClothColor())));
+			clothColor.withStyle(clothColor.getStyle().withColor(TextColor.fromRgb(alr.clothColor())));
 			message.append(clothColor);
 			message.append(Component.literal(" "));
 			MutableComponent trimColor = Component.translatable("commands.sophisticatedbackpacks.list.trim_color");
-			trimColor.withStyle(trimColor.getStyle().withColor(TextColor.fromRgb(alr.getTrimColor())));
+			trimColor.withStyle(trimColor.getStyle().withColor(TextColor.fromRgb(alr.trimColor())));
 			message.append(trimColor);
 			message.append(Component.literal(", "));
-			message.append(Component.literal(alr.getPlayerName()));
+			message.append(Component.literal(alr.playerName()));
 			message.append(Component.literal(", "));
-			message.append(Component.literal(dateFormat.format(new Date(alr.getAccessTime()))));
+			message.append(Component.literal(dateFormat.format(new Date(alr.accessTime()))));
 			source.sendSuccess(() -> message, false);
 		});
 		return 0;

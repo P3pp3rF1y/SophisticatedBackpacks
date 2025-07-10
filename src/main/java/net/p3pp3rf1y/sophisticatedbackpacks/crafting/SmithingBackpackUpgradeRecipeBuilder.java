@@ -56,7 +56,7 @@ public class SmithingBackpackUpgradeRecipeBuilder {
 		Objects.requireNonNull(advancement$builder);
 		criteria.forEach(advancement$builder::addCriterion);
 
-		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(Optional.of(template), Optional.of(base), Optional.of(addition), new ItemStack(result)), advancement$builder.build(id.location().withPrefix("recipes/" + category.getFolderName() + "/")));
+		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(Optional.of(template), base, Optional.of(addition), new ItemStack(result)), advancement$builder.build(id.location().withPrefix("recipes/" + category.getFolderName() + "/")));
 	}
 
 	private void ensureValid(ResourceKey<Recipe<?>> recipe) {

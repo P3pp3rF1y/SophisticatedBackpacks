@@ -194,7 +194,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	private boolean canMoveMainHandToInventory(Player player) {
 		int countToAdd = player.getMainHandItem().getCount();
 		for (int slot = 0; slot < player.getInventory().getContainerSize() - 5; slot++) {
-			if (slot == player.getInventory().selected) {
+			if (slot == player.getInventory().getSelectedSlot()) {
 				continue;
 			}
 			ItemStack slotStack = player.getInventory().getItem(slot);

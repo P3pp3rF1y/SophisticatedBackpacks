@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
+import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
@@ -9,13 +11,18 @@ import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -25,19 +32,64 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class BackpackItemModel implements ItemModel {
-	private final SpecialRenderer specialRenderer = new SpecialRenderer();
-	private final BakedModel baseModel;
-	private final List<ItemTintSource> tints;
+	public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
+	private static final ItemTransforms ITEM_TRANSFORMS = createItemTransforms();
+	@SuppressWarnings("java:S4738")
+	//ItemTransforms require Guava ImmutableMap to be passed in so no way to change that to java Map
+	private static ItemTransforms createItemTransforms() {
+		return new ItemTransforms(new ItemTransform(
+				new Vector3f(85, -90, 0),
+				new Vector3f(0, -2 / 16f, -4.5f / 16f),
+				new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(85, -90, 0),
+				new Vector3f(0, -2 / 16f, -4.5f / 16f),
+				new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 0, 0),
+				new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 0, 0),
+				new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 14.25f / 16f, 0),
+				new Vector3f(1, 1, 1), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(30, 225, 0),
+				new Vector3f(0, 1.25f / 16f, 0),
+				new Vector3f(0.9f, 0.9f, 0.9f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 3 / 16f, 0),
+				new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 0, -2.25f / 16f),
+				new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
+		), ImmutableMap.of());
+	}
 
-	public BackpackItemModel(BakedModel baseModel, List<ItemTintSource> tints) {
+
+	private final SpecialRenderer specialRenderer = new SpecialRenderer();
+	private final BackpackBlockModel.BlockStateModel baseModel;
+	private final List<ItemTintSource> tints;
+	private final Supplier<Vector3f[]> extents;
+
+	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
 		this.tints = tints;
+		extents = Suppliers.memoize(() -> BlockModelWrapper.computeExtents(baseModel.getQuads()));
 	}
 
 	@Override
@@ -57,17 +109,19 @@ public class BackpackItemModel implements ItemModel {
 
 		setBackpackModelProperties(stack);
 
-		RenderType renderType = baseModel.getRenderType(stack);
-		renderLayer.setupBlockModel(baseModel, renderType);
-
-		specialRenderer.setModelRenderParameters(tintLayers, baseModel, renderType);
+		renderLayer.setExtents(extents); //TODO are these even required when specialRenderer actually does the rendering?
+		renderLayer.setUsesBlockLight(true);
+		renderLayer.setParticleIcon(baseModel.particleIcon());
+		renderLayer.setTransform(ITEM_TRANSFORMS.getTransform(displayContext));
+		renderLayer.prepareQuadList().addAll(baseModel.getQuads());
+		specialRenderer.setModelRenderParameters(tintLayers, baseModel.getQuads());
 		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().orElse(null);
 
-		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack), baseModel);
+		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack));
 	}
 
 	private void setBackpackModelProperties(ItemStack stack) {
-		if (baseModel instanceof BackpackBlockModel.Baked backpackModel) {
+		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
 			backpackModel.battery = false;
@@ -102,13 +156,18 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public ItemModel bake(BakingContext bakingContext) {
-			return new BackpackItemModel(bakingContext.bake(base), tints);
+		public ItemModel bake(BakingContext context) {
+			ResolvedModel resolved = context.blockModelBaker().getModel(base);
+			if (resolved.wrapped() instanceof BackpackBlockModel base) {
+				return new BackpackItemModel(base.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), tints);
+			}
+
+			throw new IllegalStateException("Expected a BackpackBlockModel, but got " + resolved.getClass().getName());
 		}
 
 		@Override
 		public void resolveDependencies(Resolver resolver) {
-			resolver.resolve(base);
+			resolver.markDependency(base);
 		}
 	}
 
@@ -117,8 +176,7 @@ public class BackpackItemModel implements ItemModel {
 		@Nullable
 		public RenderInfo.DisplayItem displayItem = null;
 		private int[] tintLayers;
-		private BakedModel baseModel;
-		private RenderType renderType;
+		private List<BakedQuad> baseModel;
 
 		@Override
 		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay, boolean hasFoil) {
@@ -130,7 +188,7 @@ public class BackpackItemModel implements ItemModel {
 					packedOverlay,
 					tintLayers,
 					baseModel,
-					renderType,
+					Sheets.translucentItemSheet(),
 					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
 			);
 			if (displayItem != null) {
@@ -142,10 +200,9 @@ public class BackpackItemModel implements ItemModel {
 			}
 		}
 
-		public void setModelRenderParameters(int[] tintLayers, BakedModel baseModel, RenderType renderType) {
+		public void setModelRenderParameters(int[] tintLayers, List<BakedQuad> baseModel) {
 			this.tintLayers = tintLayers;
 			this.baseModel = baseModel;
-			this.renderType = renderType;
 		}
 	}
 }

@@ -41,7 +41,7 @@ public class BackpackAccessLogger {
 		lastCacheRefresh = Util.getEpochMillis();
 
 		playerLogCache.clear();
-		BackpackStorage.get().getAccessLogs().values().forEach(alr -> playerLogCache.computeIfAbsent(alr.getPlayerName(), name -> new HashSet<>()).add(alr));
+		BackpackStorage.get().getAccessLogs().values().forEach(alr -> playerLogCache.computeIfAbsent(alr.playerName(), name -> new HashSet<>()).add(alr));
 	}
 
 	public static Collection<AccessLogRecord> getAllBackpackLogs() {

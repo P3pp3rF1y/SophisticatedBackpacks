@@ -7,7 +7,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
@@ -24,13 +27,13 @@ import java.util.Optional;
 
 public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	final Optional<Ingredient> template;
-	final Optional<Ingredient> base;
+	final Ingredient base;
 	final Optional<Ingredient> addition;
 	final ItemStack result;
 	@Nullable
 	private PlacementInfo placementInfo;
 
-	public SmithingBackpackUpgradeRecipe(Optional<Ingredient> template, Optional<Ingredient> base, Optional<Ingredient> addition, ItemStack result) {
+	public SmithingBackpackUpgradeRecipe(Optional<Ingredient> template, Ingredient base, Optional<Ingredient> addition, ItemStack result) {
 		this.template = template;
 		this.base = base;
 		this.addition = addition;
@@ -71,7 +74,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 		return template;
 	}
 
-	public Optional<Ingredient> baseIngredient() {
+	public Ingredient baseIngredient() {
 		return base;
 	}
 
@@ -81,7 +84,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 
 	public PlacementInfo placementInfo() {
 		if (placementInfo == null) {
-			placementInfo = PlacementInfo.createFromOptionals(List.of(template, base, addition));
+			placementInfo = PlacementInfo.createFromOptionals(List.of(template, Optional.of(base), addition));
 		}
 
 		return placementInfo;
@@ -90,7 +93,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	public List<RecipeDisplay> display() {
 		return List.of(new SmithingRecipeDisplay(
 				Ingredient.optionalIngredientToDisplay(template),
-				Ingredient.optionalIngredientToDisplay(base),
+				base.display(),
 				Ingredient.optionalIngredientToDisplay(addition),
 				new SlotDisplay.ItemStackSlotDisplay(result),
 				new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
@@ -105,7 +108,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	public static class Serializer implements RecipeSerializer<SmithingBackpackUpgradeRecipe> {
 		private static final MapCodec<SmithingBackpackUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
 				Ingredient.CODEC.optionalFieldOf("template").forGetter(recipe -> recipe.template),
-				Ingredient.CODEC.optionalFieldOf("base").forGetter(recipe -> recipe.base),
+				Ingredient.CODEC.fieldOf("base").forGetter(recipe -> recipe.base),
 				Ingredient.CODEC.optionalFieldOf("addition").forGetter(recipe -> recipe.addition),
 				ItemStack.STRICT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result)
 		).apply(builder, SmithingBackpackUpgradeRecipe::new));
@@ -126,7 +129,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 			STREAM_CODEC = StreamCodec.composite(
 					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
 					recipe -> recipe.template,
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+					Ingredient.CONTENTS_STREAM_CODEC,
 					recipe -> recipe.base,
 					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
 					recipe -> recipe.addition,

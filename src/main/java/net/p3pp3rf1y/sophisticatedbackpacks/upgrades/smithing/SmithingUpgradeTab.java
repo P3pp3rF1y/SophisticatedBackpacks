@@ -6,13 +6,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.equipment.Equippable;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
@@ -51,21 +52,16 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 
 	private void updateArmorStandPreview() {
 		ItemStack stack = getContainer().getResultSlot().getItem();
-		if (this.armorStandPreview != null) {
+		if (armorStandPreview != null) {
 			for (EquipmentSlot equipmentslot : EquipmentSlot.values()) {
 				armorStandPreview.setItemSlot(equipmentslot, ItemStack.EMPTY);
 			}
 
 			if (!stack.isEmpty()) {
 				ItemStack itemstack = stack.copy();
-				if (stack.getItem() instanceof ArmorItem armoritem) {
-					EquipmentSlot equipmentSlot = armorStandPreview.getEquipmentSlotForItem(stack);
-					if (equipmentSlot != null) {
-						armorStandPreview.setItemSlot(equipmentSlot, itemstack);
-					}
-				} else {
-					armorStandPreview.setItemSlot(EquipmentSlot.OFFHAND, itemstack);
-				}
+				Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+				EquipmentSlot equipmentSlot = equippable != null ? equippable.slot() : EquipmentSlot.OFFHAND;
+				armorStandPreview.setItemSlot(equipmentSlot, itemstack);
 			}
 		}
 	}

@@ -420,7 +420,7 @@ public class Config {
 			DisallowedItems(ModConfigSpec.Builder builder) {
 				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
 				containerItemsDisallowed = builder.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
-						.define("containerItemsDisallowed", false);
+						.define("containerItemsDisallowed", true);
 			}
 
 			public boolean isItemDisallowed(Item item) {

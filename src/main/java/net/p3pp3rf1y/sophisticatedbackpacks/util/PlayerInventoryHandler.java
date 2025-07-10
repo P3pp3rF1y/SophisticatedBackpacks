@@ -13,15 +13,15 @@ public class PlayerInventoryHandler {
 	private final SlotCountGetter slotCountGetter;
 	private final SlotStackGetter slotStackGetter;
 	private final boolean visibleInGui;
-	private final boolean ownRenderer;
+	private final boolean ownLayerRenderer;
 	private final boolean accessibleByAnotherPlayer;
 
-	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
+	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownLayerRenderer, boolean accessibleByAnotherPlayer) {
 		this.identifiersGetter = identifiersGetter;
 		this.slotCountGetter = slotCountGetter;
 		this.slotStackGetter = slotStackGetter;
 		this.visibleInGui = visibleInGui;
-		this.ownRenderer = ownRenderer;
+		this.ownLayerRenderer = ownLayerRenderer;
 		this.accessibleByAnotherPlayer = accessibleByAnotherPlayer;
 	}
 
@@ -41,8 +41,8 @@ public class PlayerInventoryHandler {
 		return identifiersGetter.apply(gameTime);
 	}
 
-	public boolean hasItsOwnRenderer() {
-		return ownRenderer;
+	public boolean hasItsOwnLayerRenderer() {
+		return ownLayerRenderer;
 	}
 
 	public boolean isAccessibleByAnotherPlayer() {
