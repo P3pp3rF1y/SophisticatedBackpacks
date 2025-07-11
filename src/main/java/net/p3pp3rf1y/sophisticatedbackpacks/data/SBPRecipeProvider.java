@@ -477,7 +477,7 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(recipeOutput);
 
-		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_JUKEBOX_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shaped(ModItems.ADVANCED_JUKEBOX_UPGRADE.get(), UpgradeNextTierRecipe::new)
 				.pattern(" D ")
 				.pattern("GJG")
 				.pattern("RRR")
