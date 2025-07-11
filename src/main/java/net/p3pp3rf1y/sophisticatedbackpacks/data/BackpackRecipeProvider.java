@@ -23,7 +23,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped.ChippedCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.sawmill.SawmillCompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.*;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
@@ -483,7 +486,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(output);
 
-		ShapeBasedRecipeBuilder.shaped(items, ModItems.ADVANCED_JUKEBOX_UPGRADE.get())
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.ADVANCED_JUKEBOX_UPGRADE.get(), UpgradeNextTierRecipe::new)
 				.pattern(" D ")
 				.pattern("GJG")
 				.pattern("RRR")

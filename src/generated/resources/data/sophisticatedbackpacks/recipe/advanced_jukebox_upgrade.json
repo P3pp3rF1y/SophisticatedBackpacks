@@ -5,7 +5,7 @@
       "itemRegistryName": "sophisticatedbackpacks:advanced_jukebox_upgrade"
     }
   ],
-  "type": "minecraft:crafting_shaped",
+  "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
     "D": "#c:gems/diamond",
