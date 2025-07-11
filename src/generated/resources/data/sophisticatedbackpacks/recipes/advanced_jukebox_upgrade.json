@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "sophisticatedcore:upgrade_next_tier",
   "conditions": [
     {
       "type": "sophisticatedcore:item_enabled",
