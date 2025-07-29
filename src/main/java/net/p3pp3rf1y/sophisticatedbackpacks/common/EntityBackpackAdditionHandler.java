@@ -94,24 +94,24 @@ public class EntityBackpackAdditionHandler {
 	);
 
 	private static final List<WeightedElement<BackpackAddition>> BACKPACK_CHANCES = List.of(
-			new WeightedElement<>(1, new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
-					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1))),
-			new WeightedElement<>(5, new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3,
-					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 2))),
-			new WeightedElement<>(25, new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2,
-					HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3), BOOTS_CHANCES.subList(1, 3))),
-			new WeightedElement<>(125, new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1,
-					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4), BOOTS_CHANCES.subList(2, 4))),
-			new WeightedElement<>(250, new BackpackAddition(ModItems.COPPER_BACKPACK.get(), 1,
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.leatherWeight.getAsInt(), new BackpackAddition(ModItems.BACKPACK.get(), 0,
+					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.copperWeight.getAsInt(), new BackpackAddition(ModItems.COPPER_BACKPACK.get(), 1,
 					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5))),
-			new WeightedElement<>(625, new BackpackAddition(ModItems.BACKPACK.get(), 0,
-					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5)))
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.ironWeight.getAsInt(), new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1,
+					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4), BOOTS_CHANCES.subList(2, 4))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.goldWeight.getAsInt(), new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2,
+					HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3), BOOTS_CHANCES.subList(1, 3))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.diamondWeight.getAsInt(), new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3,
+					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 2))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.netheriteWeight.getAsInt(), new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
+					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1)))
 	);
 
 	private static final Map<Integer, List<WeightedElement<BackpackAddition>>> DIFFICULTY_BACKPACK_CHANCES = Map.of(
 			0, BACKPACK_CHANCES,
-			1, BACKPACK_CHANCES.subList(1, 5),
-			2, BACKPACK_CHANCES.subList(2, 5)
+			1, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierMidDifficulty.getAsInt(), 6),
+			2, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierHighDifficulty.getAsInt(), 6)
 	);
 
 	static void addBackpack(Monster monster, LevelAccessor level) {
@@ -121,10 +121,13 @@ public class EntityBackpackAdditionHandler {
 			return;
 		}
 
-		float localDifficulty = level.getCurrentDifficultyAt(monster.blockPosition()).getEffectiveDifficulty();
-		int index = Ints.constrainToRange((int) Math.floor(DIFFICULTY_BACKPACK_CHANCES.size() / MAX_LOCAL_DIFFICULTY * localDifficulty - 0.1f), 0, DIFFICULTY_BACKPACK_CHANCES.size());
+		int difficultyIndex = 0;
+		if (Config.SERVER.entityBackpackAdditions.localDifficultyEffectsBackpackSpawns.getAsBoolean()) {
+			float localDifficulty = level.getCurrentDifficultyAt(monster.blockPosition()).getEffectiveDifficulty();
+			difficultyIndex = Ints.constrainToRange((int) Math.floor(DIFFICULTY_BACKPACK_CHANCES.size() / MAX_LOCAL_DIFFICULTY * localDifficulty - 0.1f), 0, DIFFICULTY_BACKPACK_CHANCES.size() - 1);
+		}
 
-		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(index)).ifPresent(backpackAddition -> {
+		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(difficultyIndex)).ifPresent(backpackAddition -> {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
 			int difficulty = Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1));

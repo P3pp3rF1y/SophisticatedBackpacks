@@ -231,6 +231,15 @@ public class Config {
 			public final ModConfigSpec.BooleanValue dropToFakePlayers;
 			public final ModConfigSpec.DoubleValue backpackDropChance;
 			public final ModConfigSpec.DoubleValue lootingChanceIncreasePerLevel;
+			public final ModConfigSpec.IntValue leatherWeight;
+			public final ModConfigSpec.IntValue copperWeight;
+			public final ModConfigSpec.IntValue ironWeight;
+			public final ModConfigSpec.IntValue goldWeight;
+			public final ModConfigSpec.IntValue diamondWeight;
+			public final ModConfigSpec.IntValue netheriteWeight;
+			public final ModConfigSpec.IntValue minBackpackTierMidDifficulty;
+			public final ModConfigSpec.IntValue minBackpackTierHighDifficulty;
+			public final ModConfigSpec.BooleanValue localDifficultyEffectsBackpackSpawns;
 			public final ModConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
 			public final ModConfigSpec.ConfigValue<List<? extends String>> discBlockList;
 			@Nullable
@@ -254,6 +263,18 @@ public class Config {
 				dropToFakePlayers = builder.comment("Determines whether backpack drops to fake players if killed by them in addition to real ones that it always drops to").define("dropToFakePlayers", false);
 				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.5, 0, 1);
 				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack").defineInRange("lootingChanceIncreasePerLevel", 0.15, 0, 0.3);
+				leatherWeight = builder.comment("Weight of selecting a Leather Backpack when an entity spawns with a backpack").defineInRange("leatherWeight", 625, 0, 9999);
+				copperWeight = builder.comment("Weight of selecting a Copper Backpack when an entity spawns with a backpack").defineInRange("copperWeight", 250, 0, 9999);
+				ironWeight = builder.comment("Weight of selecting a Iron Backpack when an entity spawns with a backpack").defineInRange("ironWeight", 125, 0, 9999);
+				goldWeight = builder.comment("Weight of selecting a Gold Backpack when an entity spawns with a backpack").defineInRange("goldWeight", 25, 0, 9999);
+				diamondWeight = builder.comment("Weight of selecting a Diamond Backpack when an entity spawns with a backpack").defineInRange("diamondWeight", 5, 0, 9999);
+				netheriteWeight = builder.comment("Weight of selecting a Netherite Backpack when an entity spawns with a backpack").defineInRange("netheriteWeight", 1, 0, 9999);
+				minBackpackTierMidDifficulty = builder.comment("Minimum tier of backpack mobs are equipped with at mid local difficulty (above 1/3 of max, 0 is leather)")
+						.defineInRange("minBackpackTierMidDifficulty", 1, 0, 6);
+				minBackpackTierHighDifficulty = builder.comment("Minimum tier of backpack mobs are equipped with at high local difficulty (above 2/3 of max, 0 is leather)")
+						.defineInRange("minBackpackTierHighDifficulty", 2, 0, 6);
+				localDifficultyEffectsBackpackSpawns = builder.comment("If local difficulty is taken into consideration when determining the difficulty. If local difficulty is high enough then it will use difficulty settings above")
+								.define("localDifficultyEffectsBackpackSpawns", true);
 				builder.pop();
 			}
 
