@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -38,7 +38,7 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> impleme
 				}
 				return true;
 			} else if (!getMenu().isFirstLevelStorage()) {
-				PacketDistributor.sendToServer(new BackpackOpenPayload());
+				ClientPacketDistributor.sendToServer(new BackpackOpenPayload());
 				return true;
 			}
 		}

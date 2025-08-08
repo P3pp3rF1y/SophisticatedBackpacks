@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -82,6 +83,7 @@ public class CommonEventHandler {
 	private static final int BACKPACK_CHECK_COOLDOWN = 40;
 
 	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
+
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
 		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
@@ -100,7 +102,7 @@ public class CommonEventHandler {
 		}
 		if (targetPlayer.level().isClientSide) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
-			PacketDistributor.sendToServer(new AnotherPlayerBackpackOpenPayload(targetPlayer.getId()));
+			ClientPacketDistributor.sendToServer(new AnotherPlayerBackpackOpenPayload(targetPlayer.getId()));
 		}
 	}
 
@@ -234,7 +236,7 @@ public class CommonEventHandler {
 
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		Player player = event.getPlayer();
-		Level level = player.getCommandSenderWorld();
+		Level level = player.level();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
 					IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(level, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));

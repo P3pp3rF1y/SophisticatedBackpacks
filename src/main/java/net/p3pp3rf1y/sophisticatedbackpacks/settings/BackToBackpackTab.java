@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.settings;
 
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenPayload;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.Tab;
@@ -18,6 +18,6 @@ public class BackToBackpackTab extends Tab {
 
 	@Override
 	protected void onTabIconClicked(int button) {
-		PacketDistributor.sendToServer(new BackpackOpenPayload());
+		ClientPacketDistributor.sendToServer(new BackpackOpenPayload());
 	}
 }

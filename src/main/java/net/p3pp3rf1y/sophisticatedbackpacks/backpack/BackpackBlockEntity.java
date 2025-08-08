@@ -10,6 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
@@ -25,7 +27,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.CachedFailedInsertInventoryHand
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
-import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -36,7 +38,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
-	public static final String BACKPACK_DATA_TAG = "backpackData";
+	public static final String BACKPACK_DATA = "backpackData";
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -68,10 +70,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.loadAdditional(tag, registries);
-		setBackpackFromNbt(tag);
-		loadControllerPos(tag);
+	public void loadAdditional(ValueInput in) {
+		super.loadAdditional(in);
+		setBackpackFrom(in);
+		loadControllerPos(in);
 
 		if (level != null && !level.isClientSide()) {
 			removeControllerPos();
@@ -87,29 +89,30 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		registerWithControllerOnLoad();
 	}
 
-	private void setBackpackFromNbt(CompoundTag nbt) {
-		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(nbt.getCompound(BACKPACK_DATA_TAG).flatMap(dataTag -> ItemStack.parse(registryAccess, dataTag)).orElse(ItemStack.EMPTY)));
+	private void setBackpackFrom(ValueInput in) {
+		setBackpack(in.read(BACKPACK_DATA, ItemStack.CODEC).orElse(ItemStack.EMPTY));
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-		super.saveAdditional(tag, registries);
-		writeBackpack(tag, registries);
-		saveControllerPos(tag);
+	protected void saveAdditional(ValueOutput out) {
+		super.saveAdditional(out);
+		writeBackpack(out);
+		saveControllerPos(out);
 	}
 
-	private void writeBackpack(CompoundTag ret, HolderLookup.Provider registries) {
+	private void writeBackpack(ValueOutput out) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
-		ret.put(BACKPACK_DATA_TAG, backpackCopy.save(registries));
+		out.store(BACKPACK_DATA, ItemStack.CODEC, backpackCopy);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		CompoundTag ret = super.getUpdateTag(registries);
-		writeBackpack(ret, registries);
-		ret.putBoolean("updateBlockRender", updateBlockRender);
-		updateBlockRender = true;
-		return ret;
+		return ret.merge(ValueIOHelper.collectOutputToTag(registries, out -> {
+			writeBackpack(out);
+			out.putBoolean("updateBlockRender", updateBlockRender);
+			updateBlockRender = true;
+		}));
 	}
 
 	@Nullable
@@ -119,14 +122,9 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-		CompoundTag tag = pkt.getTag();
-		if (tag == null) {
-			return;
-		}
-
-		setBackpackFromNbt(tag);
-		if (tag.getBooleanOr("updateBlockRender", false	)) {
+	public void onDataPacket(Connection net, ValueInput in) {
+		setBackpackFrom(in);
+		if (in.getBooleanOr("updateBlockRender", false)) {
 			WorldHelper.notifyBlockUpdate(this);
 		}
 	}

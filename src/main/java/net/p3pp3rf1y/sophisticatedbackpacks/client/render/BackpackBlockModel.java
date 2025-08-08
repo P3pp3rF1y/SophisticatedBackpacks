@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -126,7 +127,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			addRightSide(builder);
 			addFront(builder);
 
-			parts.add(new SimpleModelWrapper(builder.build(), true, particleIcon, RenderType.CUTOUT));
+			parts.add(new SimpleModelWrapper(builder.build(), true, particleIcon, ChunkSectionLayer.CUTOUT));
 		}
 
 		private void addFront(QuadCollection.Builder builder) {

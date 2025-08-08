@@ -25,10 +25,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -130,7 +130,7 @@ public class ClientEventHandler {
 	}
 
 	private static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
-		PacketDistributor.sendToServer(new RequestPlayerSettingsPayload());
+		ClientPacketDistributor.sendToServer(new RequestPlayerSettingsPayload());
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterLoaders event) {
@@ -190,6 +190,6 @@ public class ClientEventHandler {
 			return;
 		}
 
-		PacketDistributor.sendToServer(new BlockPickPayload(result));
+		ClientPacketDistributor.sendToServer(new BlockPickPayload(result));
 	}
 }

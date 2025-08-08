@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,6 +10,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.IForegroundRenderable;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
@@ -21,9 +21,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicControl;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeContainer> {
+public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeContainer> implements IForegroundRenderable {
 	private static final Component SCROLL_TOOLTIP = BackpackTranslationHelper.INSTANCE.translUpgrade("refill.scroll.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY);
-	private final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
+	private final RefillFilterLogicControl filterLogicControl;
 	private int slotBeingChanged = -1;
 	private RefillUpgradeWrapper.TargetSlot targetSlotBeingChanged = null;
 
@@ -68,6 +68,11 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 	}
 
+	@Override
+	public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		filterLogicControl.renderForeground(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+
 	private void resetAdditionalTooltip() {
 		if (!additionalTooltip.isEmpty()) {
 			additionalTooltip = new ArrayList<>();
@@ -97,7 +102,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 	}
 
-	private class RefillFilterLogicControl extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> {
+	private class RefillFilterLogicControl extends FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> implements IForegroundRenderable {
 		private final int slotsInRow;
 
 		public RefillFilterLogicControl(StorageScreenBase<?> screen, int slotsInRow) {
@@ -112,7 +117,6 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 				return;
 			}
 
-			renderTargetSlotAcronyms(guiGraphics);
 			updateTargetSlotTooltip(mouseX, mouseY);
 		}
 
@@ -131,9 +135,6 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 
 		private void renderTargetSlotAcronyms(GuiGraphics guiGraphics) {
-			PoseStack poseStack = guiGraphics.pose();
-			poseStack.pushPose();
-			poseStack.translate(0, 0, 300);
 			getContainer().getSlots().forEach(slot -> {
 				if (!slot.getItem().isEmpty()) {
 					int slotIndex = slot.getSlotIndex();
@@ -143,8 +144,6 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 							getX() + (slotIndex % slotsInRow) * 18 + 10, getY() + (slotIndex / slotsInRow) * 18 + 2, DyeColor.GREEN.getTextColor());
 				}
 			});
-
-			poseStack.popPose();
 		}
 
 		private void updateTooltip(RefillUpgradeWrapper.TargetSlot targetSlot) {
@@ -180,6 +179,15 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 		private int getSlot(double mouseX, double mouseY) {
 			return ((int) mouseX - getX()) / 18 + slotsInRow * (((int) mouseY - getY()) / 18);
+		}
+
+		@Override
+		public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			if (!getContainer().allowsTargetSlotSelection()) {
+				return;
+			}
+
+			renderTargetSlotAcronyms(guiGraphics);
 		}
 	}
 }

@@ -15,7 +15,7 @@ public class DataGenerators {
 			protected void addTags(HolderLookup.Provider pProvider) {
 				//noop
 			}
-		}, ItemTagProvider::new);
+		}, (packOutput, lookupProvider, blockTagProvider) -> new ItemTagProvider(packOutput, lookupProvider));
 		evt.createProvider(BackpackLootTableProvider::new);
 		evt.createProvider(BackpackLootModifierProvider::new);
 		evt.createProvider(BackpackRecipeProvider.Runner::new);

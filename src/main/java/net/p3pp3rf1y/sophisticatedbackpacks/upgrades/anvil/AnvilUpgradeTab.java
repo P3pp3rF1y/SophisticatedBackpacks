@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.Slot;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
@@ -149,7 +150,7 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 				int yOffset = 0;
 				for (FormattedCharSequence line : lines) {
 					int width = font.width(line);
-					guiGraphics.drawString(font, line, x + 2 + (float) (maxWidth - width) / 2, y + 2 + yOffset, color, true);
+					guiGraphics.drawString(font, line, x + 2 + (maxWidth - width) / 2, y + 2 + yOffset, ARGB.opaque(color), true);
 					yOffset += 12;
 				}
 			}

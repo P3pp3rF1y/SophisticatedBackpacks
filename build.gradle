@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.63-beta'
+    id 'net.neoforged.moddev' version '2.0.103'
     id "org.sonarqube" version "5.0.0.4638"
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
@@ -57,6 +57,12 @@ repositories {
             includeGroup "dev.architectury"
             includeGroup "me.shedaniel"
             includeGroup "me.shedaniel.cloth"
+        }
+    }
+    maven {
+        url = "https://maven.twelveiterations.com/repository/maven-public/"
+        content {
+            includeGroup "net.blay09.mods"
         }
     }
 }
@@ -149,10 +155,10 @@ dependencies {
     localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     compileOnly "curse.maven:curios-309927:${curios_cf_file_id}"
     localRuntime "curse.maven:curios-309927:${curios_cf_file_id}"
-    compileOnly "curse.maven:balm-531761:${balm_cf_file_id}"
-    localRuntime "curse.maven:balm-531761:${balm_cf_file_id}"
-    compileOnly "curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}"
-    localRuntime "curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}"
+    compileOnly "net.blay09.mods:balm-neoforge:${balm_version}"
+    localRuntime "net.blay09.mods:balm-neoforge:${balm_version}"
+    compileOnly "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
+    localRuntime "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
     compileOnly "curse.maven:chipped-456956:${chipped_cf_file_id}"
     //localRuntime "curse.maven:chipped-456956:${chipped_cf_file_id}"
     compileOnly "curse.maven:athena-841890:${athena_cf_file_id}"

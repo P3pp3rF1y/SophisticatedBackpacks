@@ -37,11 +37,13 @@ import org.joml.Vector3f;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class BackpackItemModel implements ItemModel {
 	public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
 	private static final ItemTransforms ITEM_TRANSFORMS = createItemTransforms();
+
 	@SuppressWarnings("java:S4738")
 	//ItemTransforms require Guava ImmutableMap to be passed in so no way to change that to java Map
 	private static ItemTransforms createItemTransforms() {
@@ -81,7 +83,6 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 
-	private final SpecialRenderer specialRenderer = new SpecialRenderer();
 	private final BackpackBlockModel.BlockStateModel baseModel;
 	private final List<ItemTintSource> tints;
 	private final Supplier<Vector3f[]> extents;
@@ -94,33 +95,42 @@ public class BackpackItemModel implements ItemModel {
 
 	@Override
 	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
+		stackRenderState.appendModelIdentityElement(this);
 		final int[] tints = new int[this.tints.size()];
 		for (int j = 0; j < tints.length; j++) {
 			tints[j] = this.tints.get(j).calculate(stack, clientLevel, livingEntity);
+			stackRenderState.appendModelIdentityElement(tints[j]);
 		}
 
 		ItemStackRenderState.LayerRenderState renderLayer = stackRenderState.newLayer();
 		if (stack.hasFoil()) {
 			renderLayer.setFoilType(ItemStackRenderState.FoilType.STANDARD);
+			stackRenderState.appendModelIdentityElement(ItemStackRenderState.FoilType.STANDARD);
 		}
 
 		int[] tintLayers = renderLayer.prepareTintLayers(tints.length);
 		System.arraycopy(tints, 0, tintLayers, 0, tints.length);
 
-		setBackpackModelProperties(stack);
+		setBackpackModelProperties(stack, stackRenderState);
 
-		renderLayer.setExtents(extents); //TODO are these even required when specialRenderer actually does the rendering?
+		renderLayer.setExtents(extents);
 		renderLayer.setUsesBlockLight(true);
 		renderLayer.setParticleIcon(baseModel.particleIcon());
 		renderLayer.setTransform(ITEM_TRANSFORMS.getTransform(displayContext));
 		renderLayer.prepareQuadList().addAll(baseModel.getQuads());
+		SpecialRenderer specialRenderer = new SpecialRenderer();
 		specialRenderer.setModelRenderParameters(tintLayers, baseModel.getQuads());
-		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().orElse(null);
+		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().map(displayItem -> {
+			stackRenderState.appendModelIdentityElement(displayItem.getItem().getItem());
+			stackRenderState.appendModelIdentityElement(displayItem.getItem().getComponents());
+			stackRenderState.appendModelIdentityElement(displayItem.getRotation());
+			return displayItem;
+		}).orElse(null);
 
 		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack));
 	}
 
-	private void setBackpackModelProperties(ItemStack stack) {
+	private void setBackpackModelProperties(ItemStack stack, ItemStackRenderState stackRenderState) {
 		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
@@ -132,14 +142,29 @@ public class BackpackItemModel implements ItemModel {
 				if (pos == TankPosition.LEFT) {
 					backpackModel.tankLeft = true;
 					backpackModel.leftTankRenderInfo = info;
+					stackRenderState.appendModelIdentityElement(TankPosition.LEFT);
+					info.getFluid().ifPresent(fs -> {
+						stackRenderState.appendModelIdentityElement(fs.getFluid());
+						stackRenderState.appendModelIdentityElement(fs.getComponents());
+							});
+					stackRenderState.appendModelIdentityElement(info.getFillRatio());
 				} else {
 					backpackModel.tankRight = true;
 					backpackModel.rightTankRenderInfo = info;
+					stackRenderState.appendModelIdentityElement(TankPosition.RIGHT);
+					info.getFluid().ifPresent(fs -> {
+						stackRenderState.appendModelIdentityElement(fs.getFluid());
+						stackRenderState.appendModelIdentityElement(fs.getComponents());
+					});
+					stackRenderState.appendModelIdentityElement(info.getFillRatio());
 				}
 			});
+
 			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
 				backpackModel.battery = true;
 				backpackModel.batteryRenderInfo = batteryRenderInfo;
+				stackRenderState.appendModelIdentityElement("battery");
+				stackRenderState.appendModelIdentityElement(batteryRenderInfo.getChargeRatio());
 			});
 		}
 	}
@@ -158,8 +183,8 @@ public class BackpackItemModel implements ItemModel {
 		@Override
 		public ItemModel bake(BakingContext context) {
 			ResolvedModel resolved = context.blockModelBaker().getModel(base);
-			if (resolved.wrapped() instanceof BackpackBlockModel base) {
-				return new BackpackItemModel(base.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), tints);
+			if (resolved.wrapped() instanceof BackpackBlockModel baseModel) {
+				return new BackpackItemModel(baseModel.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), tints);
 			}
 
 			throw new IllegalStateException("Expected a BackpackBlockModel, but got " + resolved.getClass().getName());
@@ -203,6 +228,11 @@ public class BackpackItemModel implements ItemModel {
 		public void setModelRenderParameters(int[] tintLayers, List<BakedQuad> baseModel) {
 			this.tintLayers = tintLayers;
 			this.baseModel = baseModel;
+		}
+
+		@Override
+		public void getExtents(Set<Vector3f> set) {
+			//noop - not used in backpack item model as they are provided directly by itself
 		}
 	}
 }

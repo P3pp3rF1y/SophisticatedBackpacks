@@ -3,8 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsPayload;
@@ -33,6 +33,6 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		PacketDistributor.sendToServer(new RequestBackpackInventoryContentsPayload(uuid));
+		ClientPacketDistributor.sendToServer(new RequestBackpackInventoryContentsPayload(uuid));
 	}
 }

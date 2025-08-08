@@ -113,7 +113,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			GuiHelper.blit(guiGraphics, arrowX, arrowY, RED_CROSS);
 		}
 
-		InventoryScreen.renderEntityInInventory(guiGraphics, getX() + getWidth() / 2F, getTopY() + getHeight() - 10, 25.0F,
+		InventoryScreen.renderEntityInInventory(guiGraphics, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10, 25f,
 				SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, armorStandPreview);
 	}
 
@@ -188,10 +188,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private void renderOnboardingTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, Component tooltip) {
-		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate(0, 0, 410);
-		guiGraphics.renderTooltip(font, font.split(tooltip, 115), mouseX, mouseY);
-		guiGraphics.pose().popPose();
+		guiGraphics.setTooltipForNextFrame(font, font.split(tooltip, 115), mouseX, mouseY);
 	}
 
 	private boolean hasRecipeError() {
