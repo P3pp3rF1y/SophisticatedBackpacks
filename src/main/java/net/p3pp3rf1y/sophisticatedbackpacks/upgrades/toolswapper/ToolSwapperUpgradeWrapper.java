@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,11 +44,13 @@ import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
+import net.p3pp3rf1y.sophisticatedcore.util.CoreFakePlayer;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -86,16 +89,20 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
+		BlockState state = player.level().getBlockState(pos);
+		Block block = state.getBlock();
+
+		if (state.isAir()) {
+			return false;
+		}
+
 		ItemStack mainHandItem = player.getMainHandItem();
 		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || (!isSword(mainHandItem, player) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
 			return false;
 		}
 
-		BlockState state = player.level().getBlockState(pos);
-		Block block = state.getBlock();
-
 		double mainToolSpeed = 0;
-		if (isGoodAtBreakingBlock(state, mainHandItem)) {
+		if (isGoodAtBreakingBlock(player, pos, state, mainHandItem)) {
 			if (lastMinedBlock == block) {
 				return true;
 			}
@@ -104,27 +111,41 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 		lastMinedBlock = block;
 
-		return tryToSwapTool(player, state, mainToolSpeed, mainHandItem);
+		return tryToSwapTool(player, pos, state, mainToolSpeed, mainHandItem);
 	}
 
-	private boolean tryToSwapTool(Player player, BlockState state, double mainHandItemSpeed, ItemStack mainHandItem) {
+	private boolean tryToSwapTool(Player player, BlockPos pos, BlockState state, double mainHandItemSpeed, ItemStack mainHandItem) {
+		if (!(player.level() instanceof ServerLevel serverLevel)) {
+			return false;
+		}
+		CoreFakePlayer fakePlayer = CoreFakePlayer.get(serverLevel);
+		fakePlayer.setPosition(Vec3.atCenterOf(pos.above()));
 		AtomicReference<ItemStack> selectedTool = new AtomicReference<>(ItemStack.EMPTY);
 		AtomicInteger selectedSlot = new AtomicInteger(-1);
 		AtomicDouble bestSpeed = new AtomicDouble(mainHandItemSpeed);
+		AtomicBoolean instantDestroyProgress = new AtomicBoolean(false);
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryHandler();
 		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
 			if (stack.isEmpty()) {
 				return;
 			}
-			if (isAllowedAndGoodAtBreakingBlock(state, stack)) {
-				float destroySpeed = stack.getDestroySpeed(state);
-				if (bestSpeed.get() < destroySpeed) {
-					bestSpeed.set(destroySpeed);
+			if (isAllowedAndGoodAtBreakingBlock(fakePlayer, pos, state, stack)) {
+				if (state.getDestroyProgress(fakePlayer, serverLevel, pos) >= 1.0f) {
 					selectedSlot.set(slot);
 					selectedTool.set(stack);
+					instantDestroyProgress.set(true);
+				} else {
+					float destroySpeed = stack.getDestroySpeed(state);
+					if (bestSpeed.get() < destroySpeed) {
+						bestSpeed.set(destroySpeed);
+						selectedSlot.set(slot);
+						selectedTool.set(stack);
+					}
 				}
 			}
-		});
+		}, instantDestroyProgress::get);
+		fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
 		ItemStack tool = selectedTool.get();
 		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItem, tool, selectedSlot.get())) {
 			player.setItemInHand(InteractionHand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
@@ -140,12 +161,18 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
 	}
 
-	private boolean isAllowedAndGoodAtBreakingBlock(BlockState state, ItemStack stack) {
-		return filterLogic.matchesFilter(stack) && isGoodAtBreakingBlock(state, stack);
+	private boolean isAllowedAndGoodAtBreakingBlock(Player player, BlockPos pos, BlockState state, ItemStack stack) {
+		if (!filterLogic.matchesFilter(stack)) {
+			return false;
+		}
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+
+		return isGoodAtBreakingBlock(player, pos, state, stack);
 	}
 
-	private boolean isGoodAtBreakingBlock(BlockState state, ItemStack stack) {
-		return stack.isCorrectToolForDrops(state) && stack.getDestroySpeed(state) > 1.5;
+	private boolean isGoodAtBreakingBlock(Player player, BlockPos pos, BlockState state, ItemStack stack) {
+		return (!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state)) && (stack.getDestroySpeed(state) > 1.5 || state.getDestroyProgress(player, player.level(), pos) >= 1.0f);
 	}
 
 	@Override
