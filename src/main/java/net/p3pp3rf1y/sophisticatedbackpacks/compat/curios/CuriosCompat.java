@@ -22,7 +22,7 @@ public class CuriosCompat implements ICompat {
 		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS, this::getCurioTags,
 				(player, identifier) -> getFromCuriosSlotStackHandler(player, identifier, ICurioStacksHandler::getSlots, 0),
 				(player, identifier, slot) -> getFromCuriosSlotStackHandler(player, identifier, sh -> sh.getStacks().getStackInSlot(slot), ItemStack.EMPTY),
-				false, true, true, true);
+				false, true, true, true, CuriosCompat::isVisible);
 	}
 
 	private final Set<String> backpackCurioIdentifiers = new CopyOnWriteArraySet<>();
@@ -42,6 +42,11 @@ public class CuriosCompat implements ICompat {
 	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
 		return CuriosApi.getCuriosInventory(livingEntity)
 				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+	}
+
+	private static boolean isVisible(LivingEntity livingEntity, String identifier, int slot) {
+		return CuriosApi.getCuriosInventory(livingEntity)
+				.flatMap(inv -> inv.getStacksHandler(identifier).map(h -> h.getRenders().size() > slot && h.getRenders().get(slot))).orElse(false);
 	}
 
 	@Override

@@ -39,9 +39,13 @@ public class PlayerInventoryProvider {
 	}
 
 	public void addPlayerInventoryHandler(String name, Function<Long, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
+		addPlayerInventoryHandler(name, identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, rendered, ownRenderer, accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter.DEFAULT);
+	}
+
+	public void addPlayerInventoryHandler(String name, Function<Long, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter visibleInWorldGetter) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
-		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer, accessibleByAnotherPlayer));
+		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer, accessibleByAnotherPlayer, visibleInWorldGetter));
 		playerInventoryHandlers.putAll(temp);
 
 		if (rendered) {
@@ -60,6 +64,9 @@ public class PlayerInventoryProvider {
 			}
 			for (String identifier : invHandler.getIdentifiers(player.level().getGameTime())) {
 				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
+					if (!invHandler.isVisibleInWorld(player, identifier, slot)) {
+						continue;
+					}
 					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
 					if (slotStack.getItem() instanceof BackpackItem) {
 						return forLayerRendering && invHandler.hasItsOwnLayerRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
