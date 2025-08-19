@@ -15,14 +15,16 @@ public class PlayerInventoryHandler {
 	private final boolean visibleInGui;
 	private final boolean ownLayerRenderer;
 	private final boolean accessibleByAnotherPlayer;
+	private final VisibleInWorldGetter visibleInWorldGetter;
 
-	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownLayerRenderer, boolean accessibleByAnotherPlayer) {
+	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownLayerRenderer, boolean accessibleByAnotherPlayer, VisibleInWorldGetter visibleInWorldGetter) {
 		this.identifiersGetter = identifiersGetter;
 		this.slotCountGetter = slotCountGetter;
 		this.slotStackGetter = slotStackGetter;
 		this.visibleInGui = visibleInGui;
 		this.ownLayerRenderer = ownLayerRenderer;
 		this.accessibleByAnotherPlayer = accessibleByAnotherPlayer;
+		this.visibleInWorldGetter = visibleInWorldGetter;
 	}
 
 	public int getSlotCount(Player player, String identifier) {
@@ -49,6 +51,10 @@ public class PlayerInventoryHandler {
 		return accessibleByAnotherPlayer;
 	}
 
+	public boolean isVisibleInWorld(Player player, String identifier, int slot) {
+		return visibleInWorldGetter.isVisibleInWorld(player, identifier, slot);
+	}
+
 	public interface SlotCountGetter {
 		int getSlotCount(Player player, String identifier);
 	}
@@ -57,4 +63,8 @@ public class PlayerInventoryHandler {
 		ItemStack getStackInSlot(Player player, String identifier, int slot);
 	}
 
+	public interface VisibleInWorldGetter {
+		VisibleInWorldGetter DEFAULT = (player, identifier, slot) -> true;
+		boolean isVisibleInWorld(Player player, String identifier, int slot);
+	}
 }
