@@ -33,7 +33,7 @@ public class SBPButtonDefinitions {
 			Map.of(
 					true, getButtonStateData(new UV(96, 80), Dimension.SQUARE_16, new Position(1, 1),
 							SBPTranslationHelper.INSTANCE.getTranslatedLines(SBPTranslationHelper.INSTANCE.translUpgradeButton("refill_crafting_grid"))),
-					false, getButtonStateData(new UV(112, 64), Dimension.SQUARE_16, new Position(1, 1),
+					false, getButtonStateData(new UV(112, 80), Dimension.SQUARE_16, new Position(1, 1),
 							SBPTranslationHelper.INSTANCE.getTranslatedLines(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_refill_crafting_grid")))
 			));
 }
