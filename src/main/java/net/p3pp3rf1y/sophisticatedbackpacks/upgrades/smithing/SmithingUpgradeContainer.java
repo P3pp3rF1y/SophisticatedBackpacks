@@ -176,7 +176,11 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 		}
 
 		@Override
-		public void slotsChanged(Container pInventory) {
+		public void slotsChanged(Container inventory) {
+			if (inventory != this.inputSlots) {
+				return;
+			}
+
 			if (player.level() instanceof ServerLevel) {
 				createResult();
 			}
