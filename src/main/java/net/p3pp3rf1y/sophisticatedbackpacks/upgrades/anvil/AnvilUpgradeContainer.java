@@ -149,8 +149,10 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 		}
 
 		@Override
-		public void slotsChanged(Container pInventory) {
-			createResult();
+		public void slotsChanged(Container inventory) {
+			if (inventory == this.inputSlots) {
+				createResult();
+			}
 		}
 
 		@Override
