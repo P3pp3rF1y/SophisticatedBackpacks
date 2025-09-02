@@ -97,7 +97,7 @@ public class BackpackTemplates {
 		Path datapacksDir = serverLevel.getServer().getWorldPath(LevelResource.DATAPACK_DIR);
 
 		Path datapackRoot = datapacksDir.resolve(templateName.getNamespace() + "_backpack_templates");
-		Path templatesDir = datapackRoot.resolve("data/" + templateName.getNamespace() + "/sophisticatedbackpacks_wqtemplates");
+		Path templatesDir = datapackRoot.resolve("data/" + templateName.getNamespace() + "/sophisticatedbackpacks_templates");
 
 		if (!initDatapackStructure(datapackRoot, templatesDir)) {
 			return;
