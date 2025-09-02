@@ -32,6 +32,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.BackpackTintSources;
@@ -75,6 +76,7 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientEventHandler::onPlayerLoggingIn);
 		eventBus.addListener(BackpackStorage::onClientWorldLoad);
 		eventBus.addListener(ClientEventHandler::onEntityTick);
+		eventBus.addListener(BackpackTemplateStorage::onClientWorldLoad);
 	}
 
 	private static void registerBackpackItemModels(RegisterItemModelsEvent event) {

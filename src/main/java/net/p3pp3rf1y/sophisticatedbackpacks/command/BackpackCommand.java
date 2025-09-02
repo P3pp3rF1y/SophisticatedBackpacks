@@ -24,6 +24,12 @@ public class BackpackCommand {
 			ArgumentTypeInfos.registerByClass(BackpackUUIDArgumentType.class, SingletonArgumentInfo.contextFree(BackpackUUIDArgumentType::backpackUuid)));
 	private static final Supplier<SingletonArgumentInfo<BackpackPlayerArgumentType>> PLAYER_NAME_COMMAND_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("player_name", () ->
 			ArgumentTypeInfos.registerByClass(BackpackPlayerArgumentType.class, SingletonArgumentInfo.contextFree(BackpackPlayerArgumentType::playerName)));
+	private static final Supplier<SingletonArgumentInfo<BackpackTemplateArgumentType>> TEMPLATE_NAME_COMMAND_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("template_name", () ->
+			ArgumentTypeInfos.registerByClass(BackpackTemplateArgumentType.class, SingletonArgumentInfo.contextFree(BackpackTemplateArgumentType::templateName)));
+	private static final Supplier<SingletonArgumentInfo<BackpackItemArgumentType>> BACKPACK_ITEM_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("backpack_item", () ->
+			ArgumentTypeInfos.registerByClass(BackpackItemArgumentType.class, SingletonArgumentInfo.contextAware(BackpackItemArgumentType::item)));
+	private static final Supplier<SingletonArgumentInfo<BackpackUpgradeItemArgumentType>> BACKPACK_UPGRADE_ITEM_ARGUMENT_TYPE = COMMAND_ARGUMENT_TYPES.register("backpack_upgrade_item", () ->
+			ArgumentTypeInfos.registerByClass(BackpackUpgradeItemArgumentType.class, SingletonArgumentInfo.contextAware(BackpackUpgradeItemArgumentType::item)));
 
 	private BackpackCommand() {}
 
@@ -41,6 +47,7 @@ public class BackpackCommand {
 						.then(ListCommand.register())
 						.then(GiveCommand.register())
 						.then(RemoveNonPlayerCommand.register())
+						.then(TemplateCommand.register(event))
 		);
 		dispatcher.register(Commands.literal("sophisticatedbackpacks").requires(cs -> cs.hasPermission(OP_LEVEL)).redirect(mainNode));
 	}
