@@ -4,11 +4,8 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,17 +13,17 @@ import java.util.Collection;
 public class BackpackUpgradeItemArgumentType extends ItemArgument {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stack_upgrade_tier_1", "sophisticatedbackpacks:stack_upgrade_tier_1");
 
-	static CommandBuildContext upgradeItemContext(final HolderLookup.Provider provider) {
+	static CommandBuildContext upgradeItemContext(final CommandBuildContext contextDelegate) {
 		return new CommandBuildContext() {
 			@Override
 			public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<T>> resourceKey) {
-				return provider.lookupOrThrow(resourceKey).filterElements(item -> new ItemStack((ItemLike) item).is(ModItems.BACKPACK_UPGRADE_TAG));
+				return contextDelegate.holderLookup(resourceKey).filterElements(item -> item instanceof UpgradeItemBase<?>);
 			}
 		};
 	}
 
 	public BackpackUpgradeItemArgumentType(CommandBuildContext context) {
-		super(upgradeItemContext(VanillaRegistries.createLookup()));
+		super(upgradeItemContext(context));
 	}
 
 	public static BackpackUpgradeItemArgumentType item(CommandBuildContext context) {
