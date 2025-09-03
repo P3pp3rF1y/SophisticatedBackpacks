@@ -2,12 +2,13 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -143,7 +144,8 @@ public class CommonEventHandler {
 				int maxNumberOfBackpacks = Config.SERVER.nerfsConfig.maxNumberOfBackpacks.get();
 				if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
 					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
-					player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
+					Holder<MobEffect> effect = Config.SERVER.nerfsConfig.getEffect(event.getLevel().registryAccess());
+					player.addEffect(new MobEffectInstance(effect, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
 				}
 			}
 		});
