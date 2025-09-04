@@ -105,6 +105,9 @@ public class CommonEventHandler {
 	}
 
 	private void onWorldTick(TickEvent.LevelTickEvent event) {
+		if (event.level.isClientSide()) {
+			return;
+		}
 		ResourceLocation dimensionKey = event.level.dimension().location();
 		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
 		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());

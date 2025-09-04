@@ -22,6 +22,7 @@ public class SmithingUpgradeWrapper extends UpgradeWrapperBase<SmithingUpgradeWr
 				save();
 			}
 		};
+		NBTHelper.getCompound(upgrade, "craftingInventory").ifPresent(inventory::deserializeNBT);
 	}
 
 	public ItemStackHandler getInventory() {

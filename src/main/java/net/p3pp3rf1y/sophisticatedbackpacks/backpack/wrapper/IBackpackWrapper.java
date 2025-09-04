@@ -25,6 +25,10 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	void setLoot(ResourceLocation lootTableName, float lootPercentage);
 
+	void setTemplate(ResourceLocation templateName);
+
+	void fillFromTemplate();
+
 	void setContentsUuid(UUID storageUuid);
 
 	default void removeContentsUuid() {
@@ -85,6 +89,16 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+			//noop
+		}
+
+		@Override
+		public void setTemplate(ResourceLocation templateName) {
+			//noop
+		}
+
+		@Override
+		public void fillFromTemplate() {
 			//noop
 		}
 

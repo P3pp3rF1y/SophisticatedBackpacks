@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -55,6 +56,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String LOOT_TABLE_NAME_TAG = "lootTableName";
 	private static final String LOOT_PERCENTAGE_TAG = "lootPercentage";
 	private static final String COLUMNS_TAKEN_TAG = "columnsTaken";
+	private static final String TEMPLATE_NAME_TAG = "templateName";
 
 	private final ItemStack backpack;
 	private Runnable backpackSaveHandler = () -> {
@@ -433,17 +435,40 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void fillWithLoot(Player playerEntity) {
-		Level level = playerEntity.level();
+	public void setTemplate(ResourceLocation templateName) {
+		NBTHelper.putString(backpack.getOrCreateTag(), TEMPLATE_NAME_TAG, templateName.toString());
+	}
+
+	@Override
+	public void fillWithLoot(Player player) {
+		Level level = player.level();
 		if (level.isClientSide) {
 			return;
 		}
-		BlockPos pos = playerEntity.blockPosition();
+		BlockPos pos = player.blockPosition();
+		fillFromTemplate();
 		fillWithLoot(level, pos);
 	}
 
 	private void fillWithLoot(Level level, BlockPos pos) {
 		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(level, pos, ltName));
+	}
+
+	@Override
+	public void fillFromTemplate() {
+		ResourceLocation templateName = NBTHelper.getString(backpack, TEMPLATE_NAME_TAG).map(ResourceLocation::new).orElse(null);
+		if (templateName == null) {
+			return;
+		}
+
+		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(templateName);
+		if (templateData.isEmpty()) {
+			return;
+		}
+
+		CompoundTag backpackContent = templateData.get().getCompound("backpackContents").copy();
+		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), backpackContent);
+		NBTHelper.removeTag(backpack, TEMPLATE_NAME_TAG);
 	}
 
 	@Override
