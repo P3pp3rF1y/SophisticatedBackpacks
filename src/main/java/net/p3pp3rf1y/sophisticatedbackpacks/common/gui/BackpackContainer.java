@@ -46,6 +46,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
 			}
 		});
+
+		if (backpackContext.shouldSaveAfterOpen()) {
+			backpackContext.saveBackpackStack();
+		}
 	}
 
 	@Override

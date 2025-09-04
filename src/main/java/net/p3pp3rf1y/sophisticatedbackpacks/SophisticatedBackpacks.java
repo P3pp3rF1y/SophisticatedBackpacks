@@ -12,6 +12,7 @@ import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactori
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
@@ -69,6 +70,7 @@ public class SophisticatedBackpacks {
 
 	private void onAddReloadListener(AddReloadListenerEvent event) {
 		event.addListener(registryLoader);
+		event.addListener(DatapackBackpackTemplateManager.Loader.INSTANCE);
 	}
 
 	public static ResourceLocation getRL(String regName) {

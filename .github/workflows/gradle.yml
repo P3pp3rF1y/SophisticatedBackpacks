@@ -36,6 +36,7 @@ jobs:
           package-name: 'sophisticatedbackpacks.sophisticatedbackpacks'
           package-type: 'maven'
           min-versions-to-keep: 10
+        continue-on-error: true
       - name: Publish to CurseForge
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
