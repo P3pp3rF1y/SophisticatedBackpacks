@@ -104,7 +104,7 @@ public class DynamicCommand {
 
 		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(baseTemplateName);
 		if (templateData.isEmpty()) {
-			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.noBaseTemplate", templateName));
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.noBaseTemplate", baseTemplateName.toString()));
 			return 1;
 		}
 
