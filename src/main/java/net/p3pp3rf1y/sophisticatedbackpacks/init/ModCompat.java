@@ -20,7 +20,6 @@ public class ModCompat {
 
 	static {
 		compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
-		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new);
 		compatFactories.put(CompatModIds.CHIPPED, () -> ChippedCompat::new);
 	}
 
