@@ -84,7 +84,7 @@
     "item.sophisticatedbackpacks.stack_upgrade_tier_4": "Stack Upgrade Tier 4",
     "item.sophisticatedbackpacks.stack_upgrade_tier_4.tooltip": "Multiplies the number of stacks that can fit in a slot by 16",
   "item.sophisticatedbackpacks.stack_upgrade_omega_tier": "Stack Upgrade Omega Tier",
-  "item.sophisticatedbackpacks.stack_upgrade_omega_tier.tooltip": "Raises the stack size limit to 2,147,483,647",
+  "item.sophisticatedbackpacks.stack_upgrade_omega_tier.tooltip": "Multiplies stacks per slot by the maximum value (×33,554,431)",
   "item.sophisticatedbackpacks.stack_downgrade_tier_1": "Stack Downgrade Tier 1",
   "item.sophisticatedbackpacks.stack_downgrade_tier_1.tooltip": "Divides the number of stacks that can fit in a slot by 8",
   "item.sophisticatedbackpacks.stack_downgrade_tier_2": "Stack Downgrade Tier 2",
