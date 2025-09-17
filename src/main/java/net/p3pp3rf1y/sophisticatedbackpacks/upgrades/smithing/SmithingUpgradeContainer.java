@@ -110,6 +110,11 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 		return RecipeType.SMITHING;
 	}
 
+	@Override
+	public boolean shouldRefillCraftingGrid() {
+		return false;
+	}
+
 	private class PersistableSmithingMenu extends SmithingMenu {
 
 		public PersistableSmithingMenu(Inventory playerInventory) {
