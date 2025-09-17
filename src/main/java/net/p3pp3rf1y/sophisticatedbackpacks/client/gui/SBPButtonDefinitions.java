@@ -31,9 +31,9 @@ public class SBPButtonDefinitions {
 
 	public static final ButtonDefinition.Toggle<Boolean> REFILL_CRAFTING_GRID = net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition(
 			Map.of(
-					true, getButtonStateData(new UV(96, 80), Dimension.SQUARE_16, new Position(1, 1),
+					true, getButtonStateData(new UV(32, 112), Dimension.SQUARE_16, new Position(1, 1),
 							SBPTranslationHelper.INSTANCE.getTranslatedLines(SBPTranslationHelper.INSTANCE.translUpgradeButton("refill_crafting_grid"))),
-					false, getButtonStateData(new UV(112, 64), Dimension.SQUARE_16, new Position(1, 1),
+					false, getButtonStateData(new UV(48, 112), Dimension.SQUARE_16, new Position(1, 1),
 							SBPTranslationHelper.INSTANCE.getTranslatedLines(SBPTranslationHelper.INSTANCE.translUpgradeButton("do_not_refill_crafting_grid")))
 			));
 }
