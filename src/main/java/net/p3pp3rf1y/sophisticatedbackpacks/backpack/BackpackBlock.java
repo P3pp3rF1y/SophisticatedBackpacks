@@ -178,10 +178,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 							CapabilityHelper.getFromItemHandler(player, playerInventory -> {
 								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(stack, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
 								if (resultOfEmptying.isSuccess()) {
+									player.setItemInHand(hand, resultOfEmptying.getResult());
 									return InteractionResult.SUCCESS.heldItemTransformedTo(resultOfEmptying.getResult());
 								} else {
 									FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(stack, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
 									if (resultOfFilling.isSuccess()) {
+										player.setItemInHand(hand, resultOfFilling.getResult());
 										return InteractionResult.SUCCESS.heldItemTransformedTo(resultOfFilling.getResult());
 									}
 								}
