@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -26,9 +25,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.IBackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
@@ -47,7 +44,6 @@ public class KeybindHandler {
 	private static final int KEY_Z = 90;
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
-	private static final int MIDDLE_BUTTON = 2;
 	private static final int CHEST_SLOT_INDEX = 38;
 	private static final int OFFHAND_SLOT_INDEX = 40;
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
@@ -69,8 +65,6 @@ public class KeybindHandler {
 			3, BACKPACK_TOGGLE_UPGRADE_4,
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
-	public static final KeyMapping SORT_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("sort"),
-			BackpackGuiKeyConflictContext.INSTANCE, InputConstants.Type.MOUSE.getOrCreate(MIDDLE_BUTTON), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("tool_swap"),
 			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
@@ -89,20 +83,19 @@ public class KeybindHandler {
 		event.register(BACKPACK_OPEN_KEYBIND);
 		event.register(INVENTORY_INTERACTION_KEYBIND);
 		event.register(TOOL_SWAP_KEYBIND);
-		event.register(SORT_KEYBIND);
 		UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> event.register(keybind));
 	}
 
 	public static void handleGuiKeyPress(ScreenEvent.KeyPressed.Pre event) {
 		InputConstants.Key key = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
-		if (SORT_KEYBIND.isActiveAndMatches(key) && tryCallSort(event.getScreen()) || BACKPACK_OPEN_KEYBIND.isActiveAndMatches(key) && sendBackpackOpenOrCloseMessage()) {
+		if (BACKPACK_OPEN_KEYBIND.isActiveAndMatches(key) && sendBackpackOpenOrCloseMessage()) {
 			event.setCanceled(true);
 		}
 	}
 
 	public static void handleGuiMouseKeyPress(ScreenEvent.MouseButtonPressed.Pre event) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-		if (SORT_KEYBIND.isActiveAndMatches(input) && tryCallSort(event.getScreen()) || BACKPACK_OPEN_KEYBIND.isActiveAndMatches(input) && sendBackpackOpenOrCloseMessage()) {
+		if (BACKPACK_OPEN_KEYBIND.isActiveAndMatches(input) && sendBackpackOpenOrCloseMessage()) {
 			event.setCanceled(true);
 		}
 	}
@@ -121,21 +114,6 @@ public class KeybindHandler {
 				}
 			}
 		}
-	}
-
-	private static boolean tryCallSort(Screen gui) {
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.player != null && mc.player.containerMenu instanceof BackpackContainer container && gui instanceof BackpackScreen screen) {
-			MouseHandler mh = mc.mouseHandler;
-			double mouseX = mh.xpos() * mc.getWindow().getGuiScaledWidth() / mc.getWindow().getScreenWidth();
-			double mouseY = mh.ypos() * mc.getWindow().getGuiScaledHeight() / mc.getWindow().getScreenHeight();
-			Slot selectedSlot = screen.getHoveredSlot(mouseX, mouseY);
-			if (selectedSlot == null || container.isNotPlayersInventorySlot(selectedSlot.index)) {
-				container.sort();
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private static void sendToolSwapMessage() {
@@ -220,20 +198,6 @@ public class KeybindHandler {
 		@Override
 		public boolean isActive() {
 			return !GUI.isActive() || Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>;
-		}
-
-		@Override
-		public boolean conflicts(IKeyConflictContext other) {
-			return this == other;
-		}
-	}
-
-	private static class BackpackGuiKeyConflictContext implements IKeyConflictContext {
-		public static final BackpackGuiKeyConflictContext INSTANCE = new BackpackGuiKeyConflictContext();
-
-		@Override
-		public boolean isActive() {
-			return GUI.isActive() && Minecraft.getInstance().screen instanceof IBackpackScreen;
 		}
 
 		@Override
