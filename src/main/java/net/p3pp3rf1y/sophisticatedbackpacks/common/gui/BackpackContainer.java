@@ -63,12 +63,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	public Optional<Entity> getEntity() {
-		BackpackContext.ContextType type = backpackContext.getType();
-		if (type == BackpackContext.ContextType.BLOCK_BACKPACK || type == BackpackContext.ContextType.BLOCK_SUB_BACKPACK) {
-			return Optional.empty();
-		}
-
-		return Optional.of(player);
+		return backpackContext.getOwnerPlayer(player);
 	}
 
 	@Override
