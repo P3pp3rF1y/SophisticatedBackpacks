@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -61,6 +62,10 @@ public abstract class BackpackContext {
 	}
 
 	public abstract void onUpgradeChanged(Player player);
+
+	public Optional<Entity> getOwnerPlayer(Player player) {
+		return Optional.of(player);
+	}
 
 	public static BackpackContext fromBuffer(FriendlyByteBuf buffer, Level level) {
 		ContextType type = ContextType.fromBuffer(buffer);
@@ -359,6 +364,11 @@ public abstract class BackpackContext {
 		public ContextType getType() {
 			return ContextType.BLOCK_BACKPACK;
 		}
+
+		@Override
+		public Optional<Entity> getOwnerPlayer(Player player) {
+			return Optional.empty();
+		}
 	}
 
 	public static class BlockSubBackpack extends Block {
@@ -482,6 +492,11 @@ public abstract class BackpackContext {
 			Player otherPlayer = (Player) level.getEntity(playerId);
 
 			return new BackpackContext.AnotherPlayer(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), Objects.requireNonNull(otherPlayer));
+		}
+
+		@Override
+		public Optional<Entity> getOwnerPlayer(Player player) {
+			return Optional.of(otherPlayer);
 		}
 	}
 

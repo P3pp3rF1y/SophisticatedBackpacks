@@ -1,6 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -133,6 +136,7 @@ public class Config {
 			disallowedItems.initialized = false;
 			stackUpgrade.clearNonStackableItems();
 			maxUpgradesPerStorage.clearCache();
+			nerfsConfig.cachedEffect = null;
 		}
 
 		Server(ForgeConfigSpec.Builder builder) {
@@ -207,6 +211,10 @@ public class Config {
 			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
 			public final ForgeConfigSpec.DoubleValue slownessLevelsPerAdditionalBackpack;
 			public final ForgeConfigSpec.BooleanValue onlyWornBackpackTriggersUpgrades;
+			public final ForgeConfigSpec.ConfigValue<String> nerfEffect;
+
+			@Nullable
+			private MobEffect cachedEffect = null;
 
 			public NerfsConfig(ForgeConfigSpec.Builder builder) {
 				builder.push("nerfs");
@@ -214,7 +222,15 @@ public class Config {
 				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness").defineInRange("maxNumberOfBackpacks", 3, 1, 27);
 				slownessLevelsPerAdditionalBackpack = builder.comment("Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)").defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
 				onlyWornBackpackTriggersUpgrades = builder.comment("Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.").define("onlyWornBackpackTriggersUpgrades", false);
+				nerfEffect = builder.comment("Effect that is applied to player when they have too many backpacks. Can be any effect including modded ones like overencumbered effect some mods have.").define("nerfEffect", "minecraft:slowness", s -> s instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 				builder.pop();
+			}
+
+			public MobEffect getEffect() {
+				if (cachedEffect == null) {
+					cachedEffect = ForgeRegistries.MOB_EFFECTS.getHolder(new ResourceLocation(nerfEffect.get())).map(Holder::get).orElse(MobEffects.MOVEMENT_SLOWDOWN);
+				}
+				return cachedEffect;
 			}
 		}
 

@@ -105,7 +105,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 		double mainToolSpeed = 0;
 		if (isGoodAtBreakingBlock(player, pos, state, mainHandItem)) {
-			if (lastMinedBlock == block) {
+			if (lastMinedBlock == block || state.getDestroySpeed(player.level(), pos) == 0) {
 				return true;
 			}
 			mainToolSpeed = mainHandItem.getDestroySpeed(state);
