@@ -110,6 +110,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		CompoundTag ret = super.getUpdateTag(registries);
 		return ret.merge(ValueIOHelper.collectOutputToTag(registries, out -> {
 			writeBackpack(out);
+			saveControllerPos(out);
 			out.putBoolean("updateBlockRender", updateBlockRender);
 			updateBlockRender = true;
 		}));
