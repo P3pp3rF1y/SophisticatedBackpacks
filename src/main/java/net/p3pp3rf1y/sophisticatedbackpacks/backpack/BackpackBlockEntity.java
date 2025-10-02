@@ -107,6 +107,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		CompoundTag ret = super.getUpdateTag(registries);
 		writeBackpack(ret, registries);
+		saveControllerPos(ret);
 		ret.putBoolean("updateBlockRender", updateBlockRender);
 		updateBlockRender = true;
 		return ret;
