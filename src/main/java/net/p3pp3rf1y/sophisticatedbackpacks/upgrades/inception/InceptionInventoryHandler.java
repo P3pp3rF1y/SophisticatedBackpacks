@@ -7,7 +7,6 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +39,19 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedInventoryHandler);
 		}
-		combinedInventories = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {}));
+		combinedInventories = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {})) {
+			@Override
+			public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+				ItemStack remaining = stack;
+				for (ITrackedContentsItemHandler handler : handlers) {
+					remaining = handler.insertItem(remaining, simulate);
+					if (remaining.isEmpty()) {
+						break;
+					}
+				}
+				return remaining;
+			}
+		};
 
 		baseIndex = new int[handlers.size()];
 		int index = 0;
@@ -60,19 +71,16 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		return combinedInventories.getSlots();
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		return combinedInventories.getStackInSlot(slot);
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		return combinedInventories.insertItem(slot, stack, simulate);
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		return combinedInventories.extractItem(slot, amount, simulate);
