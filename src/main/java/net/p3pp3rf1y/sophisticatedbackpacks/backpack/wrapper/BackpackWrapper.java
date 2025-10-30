@@ -123,7 +123,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
 					this, getBackpackContentsNbt(), () -> {
 				markBackpackContentsDirty();
-				inventorySlotChangeHandler.run();
+				if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+					inventorySlotChangeHandler.run();
+				}
 			}, StackUpgradeItem.getInventorySlotLimit(this));
 			handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 		}
