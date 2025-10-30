@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
+import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -134,7 +135,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
 					this, getBackpackContentsNbt(), () -> {
 				markBackpackContentsDirty();
-				inventorySlotChangeHandler.run();
+				if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+					inventorySlotChangeHandler.run();
+				}
 			}, StackUpgradeItem.getInventorySlotLimit(this));
 			handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 		}
