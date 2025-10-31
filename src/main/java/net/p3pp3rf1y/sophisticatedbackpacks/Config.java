@@ -417,16 +417,21 @@ public class Config {
 
 		public static class NoConnectionBlocks {
 			private final ForgeConfigSpec.ConfigValue<List<? extends String>> noConnectionBlocksList;
+			private final ForgeConfigSpec.BooleanValue allBlockConnectionsDisallowed;
 			private boolean initialized = false;
 			private Set<Block> noConnnectionBlocksSet = null;
 
 			NoConnectionBlocks(ForgeConfigSpec.Builder builder) {
 				noConnectionBlocksList = builder.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
 						.defineList("noConnectionBlocks", new ArrayList<>(), mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+				allBlockConnectionsDisallowed = builder.comment("If true, disallows all blocks from connecting to backpacks").define("allBlockConnectionsDisallowed", false);
 			}
 
 			public boolean isBlockConnectionDisallowed(Block block) {
 				if (!SERVER_SPEC.isLoaded()) {
+					return true;
+				}
+				if (allBlockConnectionsDisallowed.get()) {
 					return true;
 				}
 				if (!initialized) {
