@@ -1,9 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterAttributes;
@@ -13,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class DepositFilterLogic extends FilterLogic {
 	private Set<ItemStackKey> inventoryFilterStacks = new HashSet<>();
@@ -45,18 +50,18 @@ public class DepositFilterLogic extends FilterLogic {
 		}
 	}
 
-	public void setInventory(IItemHandler inventory) {
+	public void setInventory(ResourceHandler<ItemResource> inventory) {
 		inventoryFilterStacks = InventoryHelper.getUniqueStacks(inventory);
 	}
 
 	@Override
-	public boolean matchesFilter(ItemStack stack) {
+	protected boolean matchesFilter(Stream<TagKey<Item>> tags, Item item, int damageValue, boolean empty, DataComponentMap components) {
 		if (!shouldFilterByInventory()) {
-			return super.matchesFilter(stack);
+			return super.matchesFilter(tags, item, damageValue, empty, components);
 		}
 
 		for (ItemStackKey filterStack : inventoryFilterStacks) {
-			if (stackMatchesFilter(stack, filterStack.getStack())) {
+			if (stackMatchesFilter(filterStack.stack(), item, damageValue, empty, components)) {
 				return true;
 			}
 		}

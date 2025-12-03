@@ -7,7 +7,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -19,12 +18,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplate;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.Collection;
@@ -119,7 +119,7 @@ public class TemplateCommand {
 
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
-		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {
+		if (backpackUuid.isEmpty() || (ResourceHandlerUtil.isEmpty(backpackWrapper.getInventoryHandler()) && ResourceHandlerUtil.isEmpty(backpackWrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
@@ -141,13 +141,13 @@ public class TemplateCommand {
 	}
 
 	private static int giveBackpackFromTemplate(CommandSourceStack source, ResourceLocation templateName, Collection<ServerPlayer> players) {
-		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(templateName);
+		Optional<BackpackTemplate> templateData = BackpackTemplates.getBackpackTemplate(templateName);
 		if (templateData.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notemplate", templateName.toString()));
 			return 1;
 		}
 
-		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.getValue(templateData.get().getString("backpackItemRegistryName").map(ResourceLocation::parse).orElse(null)));
+		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.getValue(templateData.get().itemRegistryName()));
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 		wrapper.setTemplate(templateName);
 
@@ -187,13 +187,13 @@ public class TemplateCommand {
 	}
 
 	private static int exportTemplate(CommandSourceStack source, ResourceLocation templateName, boolean deleteTemplate) {
-		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplateNoDatapack(templateName);
-		if (templateData.isEmpty()) {
+		Optional<BackpackTemplate> template = BackpackTemplates.getBackpackTemplateNoDatapack(templateName);
+		if (template.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.export.failure.notemplate", templateName.toString()));
 			return 1;
 		}
 
-		BackpackTemplates.exportTemplate(source.getPlayer(), templateName, templateData.get());
+		BackpackTemplates.exportTemplate(source.getPlayer(), templateName, template.get());
 		if (deleteTemplate) {
 			BackpackTemplates.removeBackpackTemplate(templateName);
 		}

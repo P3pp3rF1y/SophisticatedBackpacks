@@ -1,15 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class BackpackFluidHandler implements IStorageFluidHandler {
@@ -20,123 +18,69 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 	}
 
 	@Override
-	public int getTanks() {
+	public int size() {
 		return getAllTanks().size();
 	}
 
 	@Override
-	public FluidStack getFluidInTank(int tank) {
-		return isInvalidTank(tank) ? FluidStack.EMPTY : getAllTanks().get(tank).getContents();
+	public FluidResource getResource(int index) {
+		return isInvalidTank(index) ? FluidResource.EMPTY : getAllTanks().get(index).getResource();
 	}
 
-	@Nonnull
+	@Override
+	public long getAmountAsLong(int index) {
+		return isInvalidTank(index) ? 0 : getAllTanks().get(index).getAmount();
+	}
+
 	private List<TankUpgradeWrapper> getAllTanks() {
 		return backpackWrapper.getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE);
 	}
 
 	@Override
-	public int getTankCapacity(int tank) {
-		return isInvalidTank(tank) ? 0 : getAllTanks().get(tank).getTankCapacity();
+	public long getCapacityAsLong(int index, FluidResource resource) {
+		return isInvalidTank(index) || !resource.matches(getAllTanks().get(index).getContents()) ? 0 : getAllTanks().get(index).getCapacity();
 	}
 
 	@Override
-	public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-		if (isInvalidTank(tank)) {
+	public boolean isValid(int index, FluidResource resource) {
+		if (isInvalidTank(index)) {
 			return false;
 		}
 
-		FluidStack contents = getAllTanks().get(tank).getContents();
-		return contents.isEmpty() || FluidStack.isSameFluidSameComponents(contents, stack);
+		FluidStack contents = getAllTanks().get(index).getContents();
+		if (contents.isEmpty()) return true;
+		return resource.matches(contents);
 	}
 
 	@Override
-	public int fill(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
+	public int insert(int index, FluidResource resource, int amount, TransactionContext tx, boolean ignoreInOutLimit) {
 		int filled = 0;
-		FluidStack toFill = resource;
+		int toFill = amount;
 		for (TankUpgradeWrapper tank : getAllTanks()) {
-			filled += tank.fill(toFill, action, ignoreInOutLimit);
-			if (filled == resource.getAmount()) {
-				return resource.getAmount();
+			filled += tank.insert(resource, toFill, tx, ignoreInOutLimit);
+			if (filled >= amount) {
+				return amount;
 			}
-			toFill = new FluidStack(toFill.getFluid(), resource.getAmount() - filled);
+			toFill = amount - filled;
 		}
-
 		return filled;
-
 	}
 
 	@Override
-	public int fill(FluidStack resource, FluidAction action) {
-		return fill(resource, action, false);
-	}
-
-	@Override
-	public FluidStack drain(TagKey<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
-		FluidStack drained = FluidStack.EMPTY;
-		int toDrain = maxDrain;
+	public int extract(int index, FluidResource resource, int amount, TransactionContext tx, boolean ignoreInOutLimit) {
+		int extracted = 0;
+		int toExtract = amount;
 		for (TankUpgradeWrapper tank : getAllTanks()) {
-			if ((drained.isEmpty() && tank.getContents().is(resourceTag)) || FluidStack.isSameFluidSameComponents(tank.getContents(), drained)) {
-				if (drained.isEmpty()) {
-					drained = tank.drain(toDrain, action, ignoreInOutLimit);
-				} else {
-					drained.grow(tank.drain(toDrain, action, ignoreInOutLimit).getAmount());
-				}
-
-				if (drained.getAmount() == maxDrain) {
-					return drained;
-				}
-
-				toDrain = maxDrain - drained.getAmount();
+			extracted += tank.extract(resource, toExtract, tx, ignoreInOutLimit);
+			if (extracted >= amount) {
+				return amount;
 			}
+			toExtract = amount - extracted;
 		}
-
-		return drained;
-	}
-
-	@Override
-	public FluidStack drain(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
-		int drained = 0;
-		int toDrain = resource.getAmount();
-		for (TankUpgradeWrapper tank : getAllTanks()) {
-			if (FluidStack.isSameFluidSameComponents(tank.getContents(), resource)) {
-				drained += tank.drain(toDrain, action, ignoreInOutLimit).getAmount();
-				if (drained == resource.getAmount()) {
-					return resource;
-				}
-				toDrain = resource.getAmount() - drained;
-			}
-		}
-
-		return drained == 0 ? FluidStack.EMPTY : new FluidStack(resource.getFluid(), drained);
-	}
-
-	@Override
-	public FluidStack drain(FluidStack resource, FluidAction action) {
-		return drain(resource, action, false);
-	}
-
-	@Override
-	public FluidStack drain(int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
-		for (TankUpgradeWrapper tank : getAllTanks()) {
-			FluidStack drained = tank.drain(maxDrain, action, ignoreInOutLimit);
-			if (!drained.isEmpty()) {
-				return drained;
-			}
-		}
-		return FluidStack.EMPTY;
-	}
-
-	@Override
-	public FluidStack drain(int maxDrain, FluidAction action) {
-		return drain(maxDrain, action, false);
+		return extracted;
 	}
 
 	private boolean isInvalidTank(int tank) {
-		return tank < 0 || tank >= getTanks();
-	}
-
-	@Override
-	public ItemStack getContainer() {
-		return backpackWrapper.getWrappedStorageStack();
+		return tank < 0 || tank >= size();
 	}
 }

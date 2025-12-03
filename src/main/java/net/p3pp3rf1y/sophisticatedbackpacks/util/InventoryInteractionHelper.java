@@ -6,9 +6,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemResourceHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
@@ -33,12 +34,12 @@ public class InventoryInteractionHelper {
 		}
 
 		return CapabilityHelper.getFromItemHandler(level, pos, face,
-				itemHandler -> player.level().isClientSide || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player),
+				itemHandler -> player.level().isClientSide() || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player),
 				false);
 	}
 
-	private static boolean tryRunningInteractionWrappers(IItemHandler itemHandler, IStorageWrapper wrapper, Player player) {
-		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
+	private static boolean tryRunningInteractionWrappers(ResourceHandler<ItemResource> itemHandler, IStorageWrapper wrapper, Player player) {
+		List<IItemResourceHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemResourceHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;
 		}

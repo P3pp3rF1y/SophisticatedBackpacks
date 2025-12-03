@@ -11,6 +11,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ICraftingContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
@@ -23,9 +24,11 @@ import java.util.List;
 public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgradeWrapper, SmithingUpgradeContainer> implements ICraftingContainer {
 	private static final String DATA_SHIFT_CLICK_INTO_STORAGE = "shiftClickIntoStorage";
 	private final Slot resultSlot;
-	private Runnable onResultChanged = () -> {};
+	private Runnable onResultChanged = () -> {
+	};
 
 	private final PersistableSmithingMenu smithingMenuDelegate;
+
 	public SmithingUpgradeContainer(Player player, int upgradeContainerId, SmithingUpgradeWrapper upgradeWrapper, UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		smithingMenuDelegate = new PersistableSmithingMenu(player.getInventory());
@@ -121,11 +124,11 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 		@Override
 		protected void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
-			for(final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
+			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
 				this.addSlot(new SlotSuppliedHandler(upgradeWrapper::getInventory, slotDefinition.slotIndex(), 0, 0) {
 					@Override
-					public void setChanged() {
-						super.setChanged();
+					protected void setStackCopy(ItemStack stack) {
+						super.setStackCopy(stack);
 						slotsChanged(inputSlots);
 					}
 
@@ -151,8 +154,8 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 				}
 
 				@Override
-				public void setItem(int pIndex, ItemStack pStack) {
-					upgradeWrapper.getInventory().setStackInSlot(pIndex, pStack);
+				public void setItem(int index, ItemStack stack) {
+					upgradeWrapper.getInventory().set(index, ItemResource.of(stack), stack.getCount());
 				}
 			};
 		}

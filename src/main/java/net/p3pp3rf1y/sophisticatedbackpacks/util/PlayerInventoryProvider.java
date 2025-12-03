@@ -22,7 +22,7 @@ public class PlayerInventoryProvider {
 	private static final PlayerInventoryProvider clientProvider = new PlayerInventoryProvider();
 
 	public static PlayerInventoryProvider get() {
-		if (FMLEnvironment.dist == Dist.CLIENT) {
+		if (FMLEnvironment.getDist() == Dist.CLIENT) {
 			return clientProvider;
 		} else {
 			return serverProvider;

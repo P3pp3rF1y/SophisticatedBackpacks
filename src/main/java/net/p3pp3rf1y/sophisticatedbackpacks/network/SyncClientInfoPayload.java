@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -12,18 +11,19 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 
 import javax.annotation.Nullable;
 
-public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderInfoNbt,
+public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data,
 									int columnsTaken) implements CustomPacketPayload {
 	public static final Type<SyncClientInfoPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("sync_client_info"));
-	public static final StreamCodec<ByteBuf, SyncClientInfoPayload> STREAM_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, SyncClientInfoPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			SyncClientInfoPayload::slotIndex,
-			StreamCodecHelper.ofNullable(ByteBufCodecs.COMPOUND_TAG),
-			SyncClientInfoPayload::renderInfoNbt,
+			StreamCodecHelper.ofNullable(RenderData.STREAM_CODEC),
+			SyncClientInfoPayload::data,
 			ByteBufCodecs.INT,
 			SyncClientInfoPayload::columnsTaken,
 			SyncClientInfoPayload::new);
@@ -35,12 +35,12 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 
 	public static void handlePayload(SyncClientInfoPayload payload, IPayloadContext context) {
 		Player player = context.player();
-		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
+		if (payload.data == null || !(player.containerMenu instanceof BackpackContainer)) {
 			return;
 		}
 		ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
-		backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
+		backpackWrapper.getRenderDataHandler().reloadFrom(payload.data);
 		backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
 	}
 }

@@ -3,8 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemResourceHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.FilteredItemHandler;
@@ -19,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrapper, RestockUpgradeItem>
-		implements IContentsFilteredUpgrade, IItemHandlerInteractionUpgrade {
+		implements IContentsFilteredUpgrade, IItemResourceHandlerInteractionUpgrade {
 	private final ContentsFilterLogic filterLogic;
 
 	public RestockUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -35,12 +37,22 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 	}
 
 	@Override
-	public void onHandlerInteract(IItemHandler itemHandler, Player player) {
+	public void onHandlerInteract(ResourceHandler<ItemResource> handler, Player player) {
 		AtomicInteger stacksAdded = new AtomicInteger(0);
 
-		InventoryHelper.transfer(itemHandler,
-				new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList()),
-				s -> stacksAdded.incrementAndGet());
+		try (Transaction tx = Transaction.openRoot()) {
+			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList());
+			InventoryHelper.iterate(handler, (index, resource, amount) -> {
+				int moved = filteredTarget.insert(resource, amount, tx);
+				if (moved > 0) {
+					handler.extract(index, resource, moved, tx);
+					stacksAdded.incrementAndGet();
+				}
+			});
+			if (stacksAdded.get() > 0) {
+				tx.commit();
+			}
+		}
 
 		int stacksRestocked = stacksAdded.get();
 		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";

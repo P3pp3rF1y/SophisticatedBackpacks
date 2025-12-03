@@ -14,10 +14,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
-import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategoryData;
 
 public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements CustomPacketPayload {
 	public static final Type<AnotherPlayerBackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("another_player_backpack_open"));
@@ -52,7 +50,6 @@ public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements C
 	}
 
 	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {
-		MainSettingsCategory<?> category = BackpackWrapper.fromStack(backpack).getSettingsHandler().getGlobalSettingsCategory();
-		return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category, BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);
+		return BackpackWrapper.fromStack(backpack).getSettingsHandler().getMainSettingValue(anotherPlayer, MainSettingsCategoryData::anotherPlayerCanOpen);
 	}
 }

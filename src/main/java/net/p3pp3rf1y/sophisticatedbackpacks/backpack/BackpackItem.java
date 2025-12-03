@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,6 +36,9 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -53,6 +56,7 @@ import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -124,7 +128,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			BackpackWrapper.fromStack(stack).getContentsUuid()
 					.ifPresent(uuid -> tooltipAdder.accept(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY)));
 		}
-		if (!Screen.hasShiftDown()) {
+		if (!Minecraft.getInstance().hasShiftDown()) {
 			tooltipAdder.accept(Component.translatable(
 					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
 					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
@@ -134,7 +138,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			return Optional.ofNullable(BackpackItemClient.getTooltipImage(stack));
 		}
 		return Optional.empty();
@@ -217,7 +221,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				be.tryToAddToController();
 			});
 
-			if (!level.isClientSide) {
+			if (!level.isClientSide()) {
 				stopBackpackSounds(backpack, level, pos);
 			}
 
@@ -255,7 +259,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
 
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			String handlerName = hand == InteractionHand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot() : 0;
 			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);
@@ -266,7 +270,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot) {
-		if (level.isClientSide || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null)) {
+		if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null)) {
 			return;
 		}
 		BackpackWrapper.fromStack(stack).getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
@@ -309,8 +313,8 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		return Optional.of(new BackpackContentsTooltip(stack));
 	}
 
-	public ItemStack stash(ItemStack storageStack, ItemStack stack, boolean simulate) {
-		return BackpackWrapper.fromStack(storageStack).getInventoryForUpgradeProcessing().insertItem(stack, simulate);
+	public int stash(ItemStack storageStack, ItemResource resource, int amount, TransactionContext tx) {
+		return BackpackWrapper.fromStack(storageStack).getInventoryForUpgradeProcessing().insert(resource, amount, tx);
 	}
 
 	@Override
@@ -320,7 +324,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			return StashResult.SPACE; //Assuming that backpack that has no contentsUuid is empty and will have inventory once contentsUuid is created and thus any item can be stashed into it
 		}
 
-		if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
+		if (InventoryHelper.simulateInsert(wrapper.getInventoryForUpgradeProcessing(), ItemResource.of(stack), stack.getCount()) == 0) {
 			return StashResult.NO_SPACE;
 		}
 		if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
@@ -343,18 +347,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 
 		ItemStack stackToStash = slot.getItem();
-		ItemStack stashResult = stash(storageStack, stackToStash, true);
-		if (stashResult.getCount() < stackToStash.getCount()) {
-			int countToTake = stackToStash.getCount() - stashResult.getCount();
-			while (countToTake > 0) {
-				ItemStack takeResult = slot.safeTake(countToTake, countToTake, player);
-				if (takeResult.isEmpty()) {
-					break;
-				}
-				stash(storageStack, takeResult, false);
-				countToTake -= takeResult.getCount();
+		try (Transaction tx = Transaction.openRoot()) {
+			int stashed = stash(storageStack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
+			if (stashed > 0) {
+				slot.safeTake(stashed, stashed, player);
+				tx.commit();
+				return true;
 			}
-			return true;
 		}
 
 		return super.overrideStackedOnOther(storageStack, slot, action, player);
@@ -366,11 +365,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			return super.overrideOtherStackedOnMe(storageStack, otherStack, slot, action, player, carriedAccess);
 		}
 
-		ItemStack result = stash(storageStack, otherStack, false);
-		if (result.getCount() != otherStack.getCount()) {
-			carriedAccess.set(result);
-			slot.set(storageStack);
-			return true;
+		try (Transaction tx = Transaction.openRoot()) {
+			int stashed = stash(storageStack, ItemResource.of(otherStack), otherStack.getCount(), tx);
+			if (stashed > 0) {
+				carriedAccess.set(otherStack.copyWithCount(otherStack.getCount() - stashed));
+				tx.commit();
+				return true;
+			}
 		}
 
 		return super.overrideOtherStackedOnMe(storageStack, otherStack, slot, action, player, carriedAccess);

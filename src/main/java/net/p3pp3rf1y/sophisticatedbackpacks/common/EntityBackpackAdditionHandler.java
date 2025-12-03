@@ -35,6 +35,8 @@ import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -130,10 +132,10 @@ public class EntityBackpackAdditionHandler {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
 			int difficulty = Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1));
-			equipBackpack(monster, backpack, difficulty, Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0, level, rnd);
+			equipBackpack(monster, backpack, difficulty, Config.SERVER.entityBackpackAdditions.playJukebox.get() && rnd.nextInt(4) == 0, level, rnd);
 			applyPotions(monster, difficulty, minDifficulty, rnd);
 			raiseHealth(monster, minDifficulty);
-			if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.equipWithArmor.get())) {
+			if (Config.SERVER.entityBackpackAdditions.equipWithArmor.get()) {
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getHelmetChances(), EquipmentSlot.HEAD, level);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getLeggingsChances(), EquipmentSlot.LEGS, level);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getBootsChances(), EquipmentSlot.FEET, level);
@@ -164,7 +166,7 @@ public class EntityBackpackAdditionHandler {
 		setLoot(monster, wrapper, difficulty, level);
 		if (playMusicDisc) {
 			wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
-			if (wrapper.getUpgradeHandler().getSlots() > 0) {
+			if (wrapper.getUpgradeHandler().size() > 0) {
 				monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
 				addJukeboxUpgradeAndRandomDisc(level.getRandom(), wrapper, rnd);
 			}
@@ -185,9 +187,13 @@ public class EntityBackpackAdditionHandler {
 			}
 
 			JukeboxUpgradeWrapper wrapper = it.next();
-			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().getSlots() / 3) + 1 : 1;
-			for (int i = 0; i < numberOfDiscs; i++) {
-				wrapper.getDiscInventory().insertItem(i, new ItemStack(getMusicDiscs().get(rnd.nextInt(musicDiscs.size())), 1), false);
+			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().size() / 3) + 1 : 1;
+			try (Transaction tx = Transaction.openRoot()) {
+				ItemResource resource = ItemResource.of(getMusicDiscs().get(rnd.nextInt(musicDiscs.size())));
+				for (int i = 0; i < numberOfDiscs; i++) {
+					wrapper.getDiscInventory().insert(i, resource, 1, tx);
+				}
+				tx.commit();
 			}
 		}
 	}
@@ -212,7 +218,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void raiseHealth(Monster monster, int minDifficulty) {
-		if (Boolean.FALSE.equals(Config.SERVER.entityBackpackAdditions.buffHealth.get())) {
+		if (!Config.SERVER.entityBackpackAdditions.buffHealth.get()) {
 			return;
 		}
 		AttributeInstance maxHealth = monster.getAttribute(Attributes.MAX_HEALTH);
@@ -239,13 +245,13 @@ public class EntityBackpackAdditionHandler {
 			return;
 		}
 
-		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.addLoot.get())) {
+		if (Config.SERVER.entityBackpackAdditions.addLoot.get()) {
 			addLoot(monster, backpackWrapper, difficulty);
 		}
 	}
 
 	private static void applyPotions(Monster monster, int difficulty, int minDifficulty, RandomSource rnd) {
-		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get())) {
+		if (Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get()) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(applicableEffect -> {
 						int amplifier = Math.min(Math.max(minDifficulty, rnd.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
@@ -286,15 +292,16 @@ public class EntityBackpackAdditionHandler {
 			List<ItemStack> inventoryItems = new ArrayList<>();
 			IBackpackWrapper backpackwrapper = BackpackWrapper.fromStack(backpack);
 			backpackwrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
-				InventoryHelper.iterate(wrapper.getDiscInventory(), (slot, stack) -> {
-					if (!stack.isEmpty()) {
-						inventoryItems.add(wrapper.getDiscInventory().extractItem(slot, stack.getCount(), false));
-					}
-				});
-			});
-			InventoryHelper.iterate(backpackwrapper.getUpgradeHandler(), (slot, stack) -> {
-				if (!stack.isEmpty()) {
-					inventoryItems.add(backpackwrapper.getUpgradeHandler().extractItem(slot, stack.getCount(), false));
+				try (Transaction tx = Transaction.openRoot()) {
+					InventoryHelper.iterate(wrapper.getDiscInventory(), (slot, resource, amount) -> {
+						if (!resource.isEmpty()) {
+							int moved = wrapper.getDiscInventory().extract(slot, resource, amount, tx);
+							if (moved > 0) {
+								inventoryItems.add(resource.toStack(moved));
+							}
+						}
+					});
+					tx.commit();
 				}
 			});
 			UUID backpackUuid = backpack.remove(ModCoreDataComponents.STORAGE_UUID);
@@ -309,7 +316,7 @@ public class EntityBackpackAdditionHandler {
 		if (!(event.getSource().getEntity() instanceof Player player)) {
 			return false;
 		}
-		if (!Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) && event.getSource().getEntity() instanceof FakePlayer) {
+		if (!additionsConfig.dropToFakePlayers.get() && event.getSource().getEntity() instanceof FakePlayer) {
 			return false;
 		}
 		float lootingChanceMultiplier = dropChanceMultiplier.getOrDefault(backpack.getItem(), 1F);

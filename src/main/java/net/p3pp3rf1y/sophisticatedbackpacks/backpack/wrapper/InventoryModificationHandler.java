@@ -2,29 +2,30 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.OverflowAwareInventoryHandler;
 
 import java.util.List;
 
 public class InventoryModificationHandler {
 	private final IStorageWrapper backpackWrapper;
-	private ITrackedContentsItemHandler modifiedInventoryHandler;
+	private ITrackedContentsItemResourceHandler modifiedInventoryHandler;
 
 	public InventoryModificationHandler(IStorageWrapper backpackWrapper) {
 		this.backpackWrapper = backpackWrapper;
 	}
 
-	public ITrackedContentsItemHandler getModifiedInventoryHandler() {
+	public ITrackedContentsItemResourceHandler getModifiedInventoryHandler() {
 		if (modifiedInventoryHandler == null) {
-			initializeWrappedInventory(backpackWrapper.getInventoryHandler());
+			initializeWrappedInventory(new OverflowAwareInventoryHandler(backpackWrapper.getInventoryHandler()));
 		}
 		return modifiedInventoryHandler;
 	}
 
-	private void initializeWrappedInventory(ITrackedContentsItemHandler inventoryHandler) {
+	private void initializeWrappedInventory(ITrackedContentsItemResourceHandler inventoryHandler) {
 		List<IInventoryWrapperUpgrade> inventoryWrapperUpgrades = backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IInventoryWrapperUpgrade.class);
 
-		ITrackedContentsItemHandler wrappedHandler = inventoryHandler;
+		ITrackedContentsItemResourceHandler wrappedHandler = inventoryHandler;
 		for (IInventoryWrapperUpgrade inventoryWrapperUpgrade : inventoryWrapperUpgrades) {
 			wrappedHandler = inventoryWrapperUpgrade.wrapInventory(wrappedHandler);
 		}

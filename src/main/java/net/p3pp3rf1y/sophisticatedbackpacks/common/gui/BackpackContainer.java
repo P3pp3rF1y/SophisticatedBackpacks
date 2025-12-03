@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,14 +14,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.Optional;
@@ -68,25 +66,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected void sendStorageSettingsToClient() {
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			return;
 		}
 
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
-			CompoundTag settingsContents = new CompoundTag();
-			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
-			if (!settingsNbt.isEmpty()) {
-				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-				if (player instanceof ServerPlayer serverPlayer) {
-					PacketDistributor.sendToPlayer(serverPlayer, new BackpackContentsPayload(uuid, settingsContents));
-				}
+			ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
+			if (player instanceof ServerPlayer serverPlayer) {
+				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData));
 			}
 		});
-	}
-
-	@Override
-	protected StorageUpgradeSlot instantiateUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex) {
-		return new BackpackUpgradeSlot(upgradeHandler, slotIndex);
 	}
 
 	@Override
@@ -117,16 +106,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		return backpackContext.getBackpackWrapper(player) != storageWrapper;
 	}
 
-	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
-		public BackpackUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex) {
-			super(upgradeHandler, slotIndex);
-		}
-
-		@Override
-		protected void onUpgradeChanged() {
-			super.onUpgradeChanged();
-			backpackContext.onUpgradeChanged(player);
-		}
+	@Override
+	protected void onUpgradeChanged() {
+		super.onUpgradeChanged();
+		backpackContext.onUpgradeChanged(player);
 	}
 
 	@Override
@@ -134,7 +117,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		return storageWrapper.getContentsUuid().map(uuid -> {
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
-				storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid));
+				storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid).settings());
 				refreshInventorySlotsIfNeeded();
 				return true;
 			}

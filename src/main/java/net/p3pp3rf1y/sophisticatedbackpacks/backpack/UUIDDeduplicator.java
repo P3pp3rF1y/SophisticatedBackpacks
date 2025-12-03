@@ -26,7 +26,7 @@ public class UUIDDeduplicator {
 				wrapper.getContentsUuid().ifPresent(uuid -> {
 					if (uuid.equals(backpackUuid)) {
 						wrapper.removeContentsUUIDTag();
-						wrapper.onContentsNbtUpdated();
+						wrapper.onContentsUpdated();
 					}
 				});
 			}
@@ -51,7 +51,7 @@ public class UUIDDeduplicator {
 		return BackpackWrapper.fromStack(entity.getItem()).getContentsUuid().map(backpackId -> {
 			if (backpackId.equals(newBackpackId)) {
 				newBackpackWrapper.removeContentsUUIDTag();
-				newBackpackWrapper.onContentsNbtUpdated();
+				newBackpackWrapper.onContentsUpdated();
 				return true;
 			}
 			return false;

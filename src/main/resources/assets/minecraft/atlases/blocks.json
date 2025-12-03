@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "type": "neoforge:namespaced_directory",
+      "namespace": "sophisticatedbackpacks",
+      "source": "entity",
+      "prefix": "entity/"
+    }
+  ]
+}

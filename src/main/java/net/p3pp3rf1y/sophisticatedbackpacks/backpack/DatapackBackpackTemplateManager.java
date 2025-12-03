@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -17,34 +17,36 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DatapackBackpackTemplateManager {
-	private DatapackBackpackTemplateManager() {}
+	private DatapackBackpackTemplateManager() {
+	}
 
-	private static final Map<ResourceLocation, CompoundTag> TEMPLATES = Maps.newTreeMap();
+	private static final Map<ResourceLocation, BackpackTemplate> TEMPLATES = Maps.newTreeMap();
 
-	private static void putBackpackTemplate(ResourceLocation templateName, CompoundTag tag) {
+	private static void putBackpackTemplate(ResourceLocation templateName, BackpackTemplate tag) {
 		TEMPLATES.put(templateName, tag);
 	}
 
-	public static Map<ResourceLocation, CompoundTag> getBackpackTemplates() {
+	public static Map<ResourceLocation, BackpackTemplate> getBackpackTemplates() {
 		return TEMPLATES;
 	}
 
-	public static Optional<CompoundTag> getBackpackTemplate(ResourceLocation templateName) {
+	public static Optional<BackpackTemplate> getBackpackTemplate(ResourceLocation templateName) {
 		return Optional.ofNullable(TEMPLATES.get(templateName));
 	}
 
-	public static class Loader extends SimplePreparableReloadListener<Map<ResourceLocation, CompoundTag>> {
+	public static class Loader extends SimplePreparableReloadListener<Map<ResourceLocation, BackpackTemplate>> {
 		public static final ResourceLocation KEY = SophisticatedBackpacks.getRL("template_loader");
 		public static final Loader INSTANCE = new Loader();
 		private static final String DIRECTORY = "sophisticatedbackpacks_templates";
 		private static final String SUFFIX = ".snbt";
 		private static final int PATH_SUFFIX_LENGTH = SUFFIX.length();
 
-		private Loader() {}
+		private Loader() {
+		}
 
 		@Override
-		protected Map<ResourceLocation, CompoundTag> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-			Map<ResourceLocation, CompoundTag> map = Maps.newHashMap();
+		protected Map<ResourceLocation, BackpackTemplate> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+			Map<ResourceLocation, BackpackTemplate> map = Maps.newHashMap();
 			int i = DIRECTORY.length() + 1;
 
 			resourceManager.listResources(DIRECTORY, fileName -> fileName.getPath().endsWith(SUFFIX)).forEach((resourcelocation, resource) -> {
@@ -57,12 +59,11 @@ public class DatapackBackpackTemplateManager {
 				) {
 					String fileContents = IOUtils.toString(reader);
 
-					CompoundTag tag = TagParser.parseCompoundFully(fileContents);
-					if (map.put(resourceLocationWithoutSuffix, tag) != null) {
+					BackpackTemplate template = BackpackTemplate.CODEC.decode(NbtOps.INSTANCE, TagParser.parseCompoundFully(fileContents)).getOrThrow().getFirst();
+					if (map.put(resourceLocationWithoutSuffix, template) != null) {
 						throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocationWithoutSuffix);
 					}
-				}
-				catch (IllegalArgumentException | IOException | CommandSyntaxException ex) {
+				} catch (IllegalArgumentException | IOException | CommandSyntaxException ex) {
 					SophisticatedBackpacks.LOGGER.error("Couldn't parse data file {} from {}", resourceLocationWithoutSuffix, resourcelocation, ex);
 				}
 			});
@@ -71,7 +72,7 @@ public class DatapackBackpackTemplateManager {
 		}
 
 		@Override
-		protected void apply(Map<ResourceLocation, CompoundTag> templates, ResourceManager resourceManager, ProfilerFiller profiler) {
+		protected void apply(Map<ResourceLocation, BackpackTemplate> templates, ResourceManager resourceManager, ProfilerFiller profiler) {
 			templates.forEach(DatapackBackpackTemplateManager::putBackpackTemplate);
 		}
 	}

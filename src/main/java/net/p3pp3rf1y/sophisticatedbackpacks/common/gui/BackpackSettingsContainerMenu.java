@@ -1,28 +1,26 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.settings.ISettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsContainerBase;
+import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategory;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
 public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpackWrapper> implements IContextAwareContainer {
-	static {
-		SettingsContainerMenu.addFactory(BackpackMainSettingsCategory.NAME, BackpackMainSettingsContainer::new);
-	}
-
+	private static final ISettingsContainerFactory<MainSettingsCategory, BackpackMainSettingsContainer> MAIN_SETTINGS_CONTAINER_FACTORY_OVERRIDE = BackpackMainSettingsContainer::new;
 	private final BackpackContext backpackContext;
-	private CompoundTag lastSettingsNbt = null;
+	private ContainerContents.SettingsData lastSettingsData = null;
 
 	protected BackpackSettingsContainerMenu(int windowId, Player player, BackpackContext backpackContext) {
 		super(SETTINGS_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player));
@@ -35,12 +33,22 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	}
 
 	@Override
+	protected <C extends ISettingsCategory<?, ?>, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
+		if (name.equals(MainSettingsCategory.NAME)) {
+			//noinspection unchecked
+			return (ISettingsContainerFactory<C, T>) MAIN_SETTINGS_CONTAINER_FACTORY_OVERRIDE;
+		}
+
+		return super.getSettingsContainerFactory(name);
+	}
+
+	@Override
 	public void detectSettingsChangeAndReload() {
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				BackpackStorage storage = BackpackStorage.get();
 				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid).settings());
 				}
 			});
 		}
@@ -54,21 +62,17 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	}
 
 	private void sendBackpackSettingsToClient() {
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			return;
 		}
 
-		if (lastSettingsNbt == null || !lastSettingsNbt.equals(storageWrapper.getSettingsHandler().getNbt())) {
-			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
+		if (lastSettingsData == null || !lastSettingsData.equals(storageWrapper.getSettingsHandler().getSettingsData())) {
+			lastSettingsData = storageWrapper.getSettingsHandler().getSettingsData().copy();
 
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
-				CompoundTag settingsContents = new CompoundTag();
-				CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
-				if (!settingsNbt.isEmpty()) {
-					settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-					if (player instanceof ServerPlayer serverPlayer) {
-						PacketDistributor.sendToPlayer(serverPlayer, new BackpackContentsPayload(uuid, settingsContents));
-					}
+				ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
+				if (player instanceof ServerPlayer serverPlayer) {
+					PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData));
 				}
 			});
 		}

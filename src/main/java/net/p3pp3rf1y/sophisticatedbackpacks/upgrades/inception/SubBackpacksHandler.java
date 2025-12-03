@@ -32,8 +32,7 @@ public class SubBackpacksHandler {
 	}
 
 	private void onContentsChanged(int slot) {
-		ItemStack stackInSlot = inventoryHandler.getStackInSlot(slot);
-		boolean backpackIsInTheSlot = stackInSlot.getItem() instanceof BackpackItem;
+		boolean backpackIsInTheSlot = inventoryHandler.getResource(slot).getItem() instanceof BackpackItem;
 		boolean backpackWasInTheSlot = subBackpacks.containsKey(slot);
 		if (!backpackWasInTheSlot && !backpackIsInTheSlot) {
 			return;
@@ -42,7 +41,7 @@ public class SubBackpacksHandler {
 		if (backpackWasInTheSlot != backpackIsInTheSlot) {
 			notifyAndRefreshSubbackpacks();
 		} else {
-			if (BackpackWrapper.fromStack(stackInSlot) != subBackpacks.get(slot)) {
+			if (BackpackWrapper.fromStack(inventoryHandler.getStackInSlot(slot)) != subBackpacks.get(slot)) {
 				notifyAndRefreshSubbackpacks();
 			}
 		}
@@ -71,7 +70,7 @@ public class SubBackpacksHandler {
 	private void refreshSubBackpacks() {
 		subBackpacks.clear();
 
-		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {
+		for (int slot = 0; slot < inventoryHandler.size(); slot++) {
 			ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 			if (slotStack.getItem() instanceof BackpackItem) {
 				subBackpacks.put(slot, BackpackWrapper.fromStack(slotStack));

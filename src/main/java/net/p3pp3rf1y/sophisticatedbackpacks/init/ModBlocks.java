@@ -40,8 +40,8 @@ public class ModBlocks {
 	}
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalItemHandler);
-		event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalFluidHandler);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalEnergyStorage);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalItemHandler);
+		event.registerBlockEntity(Capabilities.Fluid.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalFluidHandler);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, BACKPACK_TILE_TYPE.get(), BackpackBlockEntity::getExternalEnergyHandler);
 	}
 }

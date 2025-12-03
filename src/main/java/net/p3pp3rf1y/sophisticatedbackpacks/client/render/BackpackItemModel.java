@@ -10,12 +10,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
@@ -24,14 +23,15 @@ import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
@@ -79,6 +79,10 @@ public class BackpackItemModel implements ItemModel {
 				new Vector3f(0, 0, 0),
 				new Vector3f(0, 0, -2.25f / 16f),
 				new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
+		), new ItemTransform(
+				new Vector3f(0, 0, 0),
+				new Vector3f(0, 0, -2.25f / 16f),
+				new Vector3f(1.5f, 1.5f, 1.5f), DEFAULT_ROTATION
 		), ImmutableMap.of());
 	}
 
@@ -94,9 +98,10 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	@Override
-	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
+	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable ItemOwner itemOwner, int seed) {
 		stackRenderState.appendModelIdentityElement(this);
 		final int[] tints = new int[this.tints.size()];
+		LivingEntity livingEntity = itemOwner != null ? itemOwner.asLivingEntity() : null;
 		for (int j = 0; j < tints.length; j++) {
 			tints[j] = this.tints.get(j).calculate(stack, clientLevel, livingEntity);
 			stackRenderState.appendModelIdentityElement(tints[j]);
@@ -120,12 +125,17 @@ public class BackpackItemModel implements ItemModel {
 		renderLayer.prepareQuadList().addAll(baseModel.getQuads());
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		specialRenderer.setModelRenderParameters(tintLayers, baseModel.getQuads());
-		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().map(displayItem -> {
-			stackRenderState.appendModelIdentityElement(displayItem.getItem().getItem());
-			stackRenderState.appendModelIdentityElement(displayItem.getItem().getComponents());
-			stackRenderState.appendModelIdentityElement(displayItem.getRotation());
-			return displayItem;
-		}).orElse(null);
+		RenderData.DisplayData displayData = BackpackWrapper.fromStack(stack).getRenderDataHandler().getDisplayData();
+
+		if (!displayData.displayItems().isEmpty()) {
+			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
+			stackRenderState.appendModelIdentityElement(displayItem.item().getItem());
+			stackRenderState.appendModelIdentityElement(displayItem.item().getComponents());
+			stackRenderState.appendModelIdentityElement(displayItem.rotation());
+			specialRenderer.displayItem = new ItemStackRenderState();
+			itemModelResolver.updateForTopItem(specialRenderer.displayItem, displayItem.item(), ItemDisplayContext.FIXED, clientLevel, null, 0);
+			specialRenderer.displayItemRotation = displayItem.rotation();
+		}
 
 		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack));
 	}
@@ -136,35 +146,35 @@ public class BackpackItemModel implements ItemModel {
 			backpackModel.tankLeft = false;
 			backpackModel.battery = false;
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-			RenderInfo renderInfo = backpackWrapper.getRenderInfo();
-			Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
-			tankRenderInfos.forEach((pos, info) -> {
+			RenderDataHandler renderDataHandler = backpackWrapper.getRenderDataHandler();
+			Map<TankPosition, RenderData.TankRenderData> tankRenderData = renderDataHandler.getTankRenderData();
+			tankRenderData.forEach((pos, info) -> {
 				if (pos == TankPosition.LEFT) {
 					backpackModel.tankLeft = true;
-					backpackModel.leftTankRenderInfo = info;
+					backpackModel.leftTankRenderData = info;
 					stackRenderState.appendModelIdentityElement(TankPosition.LEFT);
 					info.getFluid().ifPresent(fs -> {
 						stackRenderState.appendModelIdentityElement(fs.getFluid());
 						stackRenderState.appendModelIdentityElement(fs.getComponents());
-							});
-					stackRenderState.appendModelIdentityElement(info.getFillRatio());
+					});
+					stackRenderState.appendModelIdentityElement(info.fillRatio());
 				} else {
 					backpackModel.tankRight = true;
-					backpackModel.rightTankRenderInfo = info;
+					backpackModel.rightTankRenderData = info;
 					stackRenderState.appendModelIdentityElement(TankPosition.RIGHT);
 					info.getFluid().ifPresent(fs -> {
 						stackRenderState.appendModelIdentityElement(fs.getFluid());
 						stackRenderState.appendModelIdentityElement(fs.getComponents());
 					});
-					stackRenderState.appendModelIdentityElement(info.getFillRatio());
+					stackRenderState.appendModelIdentityElement(info.fillRatio());
 				}
 			});
 
-			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
+			renderDataHandler.getBatteryRenderData().ifPresent(batteryRenderData -> {
 				backpackModel.battery = true;
-				backpackModel.batteryRenderInfo = batteryRenderInfo;
+				backpackModel.batteryRenderData = batteryRenderData;
 				stackRenderState.appendModelIdentityElement("battery");
-				stackRenderState.appendModelIdentityElement(batteryRenderInfo.getChargeRatio());
+				stackRenderState.appendModelIdentityElement(batteryRenderData.chargeRatio());
 			});
 		}
 	}
@@ -199,35 +209,35 @@ public class BackpackItemModel implements ItemModel {
 	public static class SpecialRenderer implements NoDataSpecialModelRenderer {
 		private final Minecraft minecraft = Minecraft.getInstance();
 		@Nullable
-		public RenderInfo.DisplayItem displayItem = null;
+		public ItemStackRenderState displayItem = null;
+		public float displayItemRotation = 0f;
 		private int[] tintLayers;
 		private List<BakedQuad> baseModel;
 
+		public void setModelRenderParameters(int[] tintLayers, List<BakedQuad> baseModel) {
+			this.tintLayers = tintLayers;
+			this.baseModel = baseModel;
+		}
+
 		@Override
-		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay, boolean hasFoil) {
-			ItemRenderer.renderItem(
-					displayContext,
+		public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+			submitNodeCollector.submitItem(
 					poseStack,
-					buffer,
-					combinedLight,
+					displayContext,
+					packedLight,
 					packedOverlay,
-					tintLayers,
-					baseModel,
+					outlineColor,
+					this.tintLayers,
+					this.baseModel,
 					Sheets.translucentItemSheet(),
 					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
 			);
 			if (displayItem != null) {
 				poseStack.translate(0.5, 0.6, 0.25);
 				poseStack.scale(0.5f, 0.5f, 0.5f);
-				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
-				ItemRenderer itemRenderer = minecraft.getItemRenderer();
-				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);
+				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItemRotation));
+				displayItem.submit(poseStack, submitNodeCollector, packedLight, packedOverlay, outlineColor);
 			}
-		}
-
-		public void setModelRenderParameters(int[] tintLayers, List<BakedQuad> baseModel) {
-			this.tintLayers = tintLayers;
-			this.baseModel = baseModel;
 		}
 
 		@Override

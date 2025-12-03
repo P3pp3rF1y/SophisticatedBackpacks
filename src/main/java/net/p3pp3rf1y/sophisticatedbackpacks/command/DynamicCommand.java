@@ -12,7 +12,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,10 +21,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplate;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotStackAccessor;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
@@ -48,7 +50,7 @@ public class DynamicCommand {
 										.executes(context -> beginNewDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackItemArgumentType.getItem(context, "backpackItem")))
 								)
 								.then(Commands.argument("baseTemplateName", BackpackTemplateArgumentType.templateName())
-										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackTemplateArgumentType.getId(context,"baseTemplateName")))
+										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackTemplateArgumentType.getId(context, "baseTemplateName")))
 								)
 						)
 				)
@@ -102,13 +104,13 @@ public class DynamicCommand {
 			return 1;
 		}
 
-		Optional<CompoundTag> templateData = BackpackTemplates.getBackpackTemplate(baseTemplateName);
+		Optional<BackpackTemplate> templateData = BackpackTemplates.getBackpackTemplate(baseTemplateName);
 		if (templateData.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.noBaseTemplate", baseTemplateName.toString()));
 			return 1;
 		}
 
-		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.getValue(templateData.get().getString("backpackItemRegistryName").map(ResourceLocation::parse).orElse(null)));
+		ItemStack backpack = new ItemStack(BuiltInRegistries.ITEM.getValue(templateData.get().itemRegistryName()));
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 		wrapper.setTemplate(baseTemplateName);
 		wrapper.fillFromTemplate();
@@ -134,7 +136,7 @@ public class DynamicCommand {
 			}
 		} else {
 			IBackpackWrapper wrapper = BackpackWrapper.fromStack(template.backpack);
-			ItemStackHandler inventory = upgrade ? wrapper.getUpgradeHandler() : wrapper.getInventoryHandler();
+			ISlotStackAccessor inventory = upgrade ? wrapper.getUpgradeHandler() : wrapper.getInventoryHandler();
 			if (!inventory.getStackInSlot(slot).isEmpty()) {
 				template.itemsForInventoryHandler.add(stack);
 			} else {
@@ -156,19 +158,22 @@ public class DynamicCommand {
 
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(template.backpack);
 
-		List<ItemStack> remainings = new ArrayList<>();
-		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForInventoryHandler, wrapper.getInventoryHandler(), false));
-		remainings.addAll(InventoryHelper.insertIntoInventory(template.itemsForUpgradeHandler, wrapper.getUpgradeHandler(), false));
-		if (!remainings.isEmpty()) {
+		List<ItemStack> remainingItems = new ArrayList<>();
+		try (Transaction tx = Transaction.openRoot()) {
+			remainingItems.addAll(InventoryHelper.insertIntoInventory(template.itemsForInventoryHandler, wrapper.getInventoryHandler(), tx));
+			remainingItems.addAll(InventoryHelper.insertIntoInventory(template.itemsForUpgradeHandler, wrapper.getUpgradeHandler(), tx));
+			tx.commit();
+		}
+		if (!remainingItems.isEmpty()) {
 			// List all items that could not be added
-			for (ItemStack remaining : remainings) {
+			for (ItemStack remaining : remainingItems) {
 				source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.end.addRemainingItemsFailed", remaining.getCount(), remaining.getDisplayName()));
 			}
 		}
 
 		// Check if backpack wrapper is empty
 		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
-		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(wrapper.getInventoryHandler()) && InventoryHelper.isEmpty(wrapper.getUpgradeHandler()))) {
+		if (backpackUuid.isEmpty() || (ResourceHandlerUtil.isEmpty(wrapper.getInventoryHandler()) && ResourceHandlerUtil.isEmpty(wrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
@@ -217,6 +222,7 @@ public class DynamicCommand {
 		level.addFreshEntity(itemEntity);
 	}
 
-	private record DynamicTemplate(ItemStack backpack, List<ItemStack> itemsForInventoryHandler, List<ItemStack> itemsForUpgradeHandler) {
+	private record DynamicTemplate(ItemStack backpack, List<ItemStack> itemsForInventoryHandler,
+								   List<ItemStack> itemsForUpgradeHandler) {
 	}
 }

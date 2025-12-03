@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -178,14 +178,14 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+			if (!player.level().isClientSide() && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
 				//copying render info nbt because in single player the packet just gets handed over to client instead of actually buffer being used and making a copy of the nbt
 				// which resulted in issues where client would happily modify nbt instance which is used on server as well and follow up updates on client would also mess up
 				// as they are free to clear state which caused the new cleared state write into the already existing nbt and server nbt as all were the same instanced
-				CompoundTag modificationSafeRenderInfoNbt = backpackWrapper.getRenderInfo().getNbt().copy();
+				RenderData modificationSafeRenderData = backpackWrapper.getRenderDataHandler().getData().copy();
 				if (player instanceof ServerPlayer serverPlayer) {
-					PacketDistributor.sendToPlayer(serverPlayer, new SyncClientInfoPayload(backpackSlotIndex, modificationSafeRenderInfoNbt, backpackWrapper.getColumnsTaken()));
+					PacketDistributor.sendToPlayer(serverPlayer, new SyncClientInfoPayload(backpackSlotIndex, modificationSafeRenderData, backpackWrapper.getColumnsTaken()));
 				}
 			}
 		}
@@ -299,7 +299,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}
@@ -318,7 +319,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level().isClientSide) {
+			if (!player.level().isClientSide()) {
 				WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
 			}
 		}
@@ -450,7 +451,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}
@@ -583,7 +585,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}

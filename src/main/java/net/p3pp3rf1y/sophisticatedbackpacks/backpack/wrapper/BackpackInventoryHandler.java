@@ -1,29 +1,29 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 public class BackpackInventoryHandler extends InventoryHandler {
-	public BackpackInventoryHandler(int numberOfInventorySlots, IStorageWrapper storageWrapper, CompoundTag contentsNbt, Runnable saveHandler, int slotLimit) {
-		super(numberOfInventorySlots, storageWrapper, contentsNbt, saveHandler, slotLimit, Config.SERVER.stackUpgrade);
+	public BackpackInventoryHandler(int numberOfInventorySlots, IStorageWrapper storageWrapper, ContainerContents containerContents, Runnable saveHandler, int slotLimit) {
+		super(numberOfInventorySlots, storageWrapper, containerContents, saveHandler, slotLimit, Config.SERVER.stackUpgrade);
 	}
 
 	@Override
-	protected boolean isAllowed(ItemStack stack) {
-		return !Config.SERVER.disallowedItems.isItemDisallowed(stack.getItem())
-				&& (!(stack.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(stack)));
+	protected boolean isAllowed(ItemResource resource) {
+		return !Config.SERVER.disallowedItems.isItemDisallowed(resource.getItem())
+				&& (!(resource.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(resource)));
 	}
 
 	private boolean hasInceptionUpgrade() {
 		return storageWrapper.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
 	}
 
-	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
-		return (stack.getItem() instanceof BackpackItem) && !BackpackWrapper.fromStack(stack).getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
+	private boolean isBackpackWithoutInceptionUpgrade(ItemResource resource) {
+		return (resource.getItem() instanceof BackpackItem) && !BackpackWrapper.fromStack(resource.toStack()).getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
 	}
 }

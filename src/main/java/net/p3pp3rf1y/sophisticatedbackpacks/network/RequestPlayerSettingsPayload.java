@@ -8,9 +8,8 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
+import net.p3pp3rf1y.sophisticatedcore.settings.main.PlayerMainSettingsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 
 public record RequestPlayerSettingsPayload() implements CustomPacketPayload {
@@ -19,9 +18,9 @@ public record RequestPlayerSettingsPayload() implements CustomPacketPayload {
 
 	public static void handlePayload(@SuppressWarnings("unused") RequestPlayerSettingsPayload payload, IPayloadContext context) {
 		Player player = context.player();
-		String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
+		String name = SophisticatedBackpacks.MOD_ID;
 		if (player instanceof ServerPlayer serverPlayer) {
-			PacketDistributor.sendToPlayer(serverPlayer, new SyncPlayerSettingsPayload(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+			PacketDistributor.sendToPlayer(serverPlayer, new SyncPlayerSettingsPayload(name, PlayerMainSettingsSavedData.get().get(player.getUUID(), name)));
 		}
 	}
 

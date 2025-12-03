@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,15 +23,15 @@ public class BackpackTemplateStorage extends SavedData {
 			RecordCodecBuilder.create(builder -> builder.group(
 					Codec.unboundedMap(
 							ResourceLocation.CODEC,
-							CompoundTag.CODEC
+							BackpackTemplate.CODEC
 					).fieldOf("backpackTemplates").forGetter(storage -> storage.backpackTemplates)
 			).apply(builder, BackpackTemplateStorage::new))
 	);
 
 	private static final BackpackTemplateStorage clientStorageCopy = new BackpackTemplateStorage();
-	private final Map<ResourceLocation, CompoundTag> backpackTemplates = new HashMap<>();
+	private final Map<ResourceLocation, BackpackTemplate> backpackTemplates = new HashMap<>();
 
-	private BackpackTemplateStorage(Map<ResourceLocation, CompoundTag> backpackTemplates) {
+	private BackpackTemplateStorage(Map<ResourceLocation, BackpackTemplate> backpackTemplates) {
 		this.backpackTemplates.putAll(backpackTemplates);
 	}
 
@@ -52,12 +51,12 @@ public class BackpackTemplateStorage extends SavedData {
 		return clientStorageCopy;
 	}
 
-	public Optional<CompoundTag> getBackpackTemplate(ResourceLocation templateName) {
+	public Optional<BackpackTemplate> getBackpackTemplate(ResourceLocation templateName) {
 		return Optional.ofNullable(backpackTemplates.get(templateName));
 	}
 
-	public void setBackpackTemplate(ResourceLocation templateName, CompoundTag contents) {
-		backpackTemplates.put(templateName, contents);
+	public void setBackpackTemplate(ResourceLocation templateName, BackpackTemplate backpackTemplate) {
+		backpackTemplates.put(templateName, backpackTemplate);
 		setDirty();
 	}
 
@@ -66,7 +65,7 @@ public class BackpackTemplateStorage extends SavedData {
 		setDirty();
 	}
 
-	public Map<ResourceLocation, CompoundTag> getBackpackTemplates() {
+	public Map<ResourceLocation, BackpackTemplate> getBackpackTemplates() {
 		return backpackTemplates;
 	}
 

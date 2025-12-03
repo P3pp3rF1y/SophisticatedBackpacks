@@ -2,35 +2,36 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.inventory.StatefulComponentItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ComponentItemStacksHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 
 import java.util.function.Consumer;
 
 public class AnvilUpgradeWrapper extends UpgradeWrapperBase<AnvilUpgradeWrapper, AnvilUpgradeItem> {
-	private final StatefulComponentItemHandler inventory;
+	private final ComponentItemStacksHandler inventory;
 
 	protected AnvilUpgradeWrapper(IStorageWrapper storageWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(storageWrapper, upgrade, upgradeSaveHandler);
 
-		inventory = new StatefulComponentItemHandler(upgrade, DataComponents.CONTAINER, 2) {
+		inventory = new ComponentItemStacksHandler(upgrade, DataComponents.CONTAINER, 2) {
 			@Override
-			protected void onContentsChanged(int slot, ItemStack oldStack, ItemStack newStack) {
-				super.onContentsChanged(slot, oldStack, newStack);
+			protected void onContentsChanged(int index, ItemStack previousContents) {
+				super.onContentsChanged(index, previousContents);
 				save();
 			}
 
 			@Override
-			public boolean isItemValid(int slot, ItemStack stack) {
+			public boolean isValid(int slot, ItemResource resource) {
 				return true;
 			}
 		};
 	}
 
-	public StatefulComponentItemHandler getInventory() {
+	public ComponentItemStacksHandler getInventory() {
 		return inventory;
 	}
 

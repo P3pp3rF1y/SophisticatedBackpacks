@@ -35,11 +35,11 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
-import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.transfer.EmptyResourceHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -192,9 +192,9 @@ public class ModItems {
 	public static final DeferredHolder<Item, RefillUpgradeItem> ADVANCED_REFILL_UPGRADE = ITEMS.registerItem("advanced_refill_upgrade",
 			properties -> new RefillUpgradeItem(Config.SERVER.advancedRefillUpgrade.filterSlots::get, true, true, properties));
 	public static final DeferredHolder<Item, InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.registerItem("inception_upgrade",
-            InceptionUpgradeItem::new);
+			InceptionUpgradeItem::new);
 	public static final DeferredHolder<Item, EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.registerItem("everlasting_upgrade",
-            EverlastingUpgradeItem::new);
+			EverlastingUpgradeItem::new);
 	public static final DeferredHolder<Item, SmeltingUpgradeItem> SMELTING_UPGRADE = ITEMS.registerItem("smelting_upgrade",
 			properties -> new SmeltingUpgradeItem(Config.SERVER.smeltingUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, AutoSmeltingUpgradeItem> AUTO_SMELTING_UPGRADE = ITEMS.registerItem("auto_smelting_upgrade",
@@ -289,7 +289,7 @@ public class ModItems {
 		ATTACHMENT_TYPES.register(modBus);
 		modBus.addListener(ModItems::registerContainers);
 		modBus.addListener(ModItems::registerCapabilities);
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			ModItemsClient.init(modBus);
 		}
 	}
@@ -397,19 +397,19 @@ public class ModItems {
 	}
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerItem(Capabilities.ItemHandler.ITEM, (stack, v) -> {
+		event.registerItem(Capabilities.Item.ITEM, (stack, v) -> {
 					IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-					return backpackWrapper.getContentsUuid().isEmpty() ? EmptyItemHandler.INSTANCE : backpackWrapper.getInventoryForInputOutput();
+					return backpackWrapper.getContentsUuid().isEmpty() ? EmptyResourceHandler.instance() : backpackWrapper.getInventoryForInputOutput();
 				},
 				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
-		event.registerItem(Capabilities.FluidHandler.ITEM, (stack, v) -> {
-					if (Boolean.FALSE.equals(Config.SERVER.itemFluidHandlerEnabled.get())) {
+		event.registerItem(Capabilities.Fluid.ITEM, (stack, itemAccess) -> {
+					if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
 						return null;
 					}
 					return BackpackWrapper.fromStack(stack).getItemFluidHandler().orElse(null);
 				},
 				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
-		event.registerItem(Capabilities.EnergyStorage.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyStorage().orElse(null),
+		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyHandler().orElse(null),
 				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 
@@ -425,7 +425,7 @@ public class ModItems {
 				return InteractionResult.FAIL;
 			}
 
-			if (!level.isClientSide) {
+			if (!level.isClientSide()) {
 				backpackWrapper.setColors(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR);
 				LayeredCauldronBlock.lowerFillLevel(state, level, pos);
 			}

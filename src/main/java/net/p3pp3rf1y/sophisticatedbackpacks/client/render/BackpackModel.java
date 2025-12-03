@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -10,13 +9,16 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.MaterialMapper;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.AtlasManager;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -25,15 +27,15 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class BackpackModel extends EntityModel<LivingEntityRenderState> implements IBackpackModel {
@@ -43,8 +45,9 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		entityTranslations = new HashMap<>();
 	}
 
-	private static final ResourceLocation BACKPACK_ENTITY_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
-	private static final ResourceLocation TANK_GLASS_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "textures/entity/tank_glass.png");
+	public static final MaterialMapper MAPPER = new MaterialMapper(TextureAtlas.LOCATION_BLOCKS, "entity");
+	public static final Material BACKPACK_ENTITY_TEXTURE = MAPPER.apply(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"));
+	public static final Material TANK_GLASS_TEXTURE = MAPPER.apply(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "tank_glass"));
 	public static final float CHILD_Y_OFFSET = 0.3F;
 	public static final float CHILD_Z_OFFSET = 0.1F;
 	public static final float CHILD_SCALE = 0.55F;
@@ -157,7 +160,6 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		rightTankGlass = modelPart.getChild(RIGHT_TANK_GLASS_PART);
 	}
 
-	@Nonnull
 	private ModelPart getGlassModelPart() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshdefinition.getRoot();
@@ -327,98 +329,102 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 	}
 
 	@Override
-	public <S extends EntityRenderState, M extends EntityModel<? super S>> void render(M parentModel, S entityRenderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo) {
-		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(BACKPACK_ENTITY_TEXTURE));
-		Set<TankPosition> tankPositions = renderInfo.getTankRenderInfos().keySet();
+	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderDataHandler renderDataHandler) {
+		Set<TankPosition> tankPositions = renderDataHandler.getTankRenderData().keySet();
 		boolean showLeftTank = tankPositions.contains(TankPosition.LEFT);
 		boolean showRightTank = tankPositions.contains(TankPosition.RIGHT);
-		Optional<IRenderedBatteryUpgrade.BatteryRenderInfo> batteryRenderInfo = renderInfo.getBatteryRenderInfo();
+		Optional<RenderData.BatteryRenderData> batteryRenderData = renderDataHandler.getBatteryRenderData();
 
+		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		AtlasManager atlasManager = Minecraft.getInstance().getAtlasManager();
+		TextureAtlasSprite mainSprite = atlasManager.get(BACKPACK_ENTITY_TEXTURE);
 		if (showLeftTank) {
-			leftTank.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			leftTankBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
+			submitNodeCollector.submitModelPart(leftTank, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(leftTankBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
 		} else {
-			fabricLeft.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			clipsLeftPouches.get(backpackItem).render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			leftPouches.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, clothColor);
-			leftPouchesBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
+			submitNodeCollector.submitModelPart(fabricLeft, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(clipsLeftPouches.get(backpackItem), poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(leftPouches, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, clothColor, null);
+			submitNodeCollector.submitModelPart(leftPouchesBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
 		}
 
 		if (showRightTank) {
-			rightTank.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			rightTankBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
+			submitNodeCollector.submitModelPart(rightTank, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(rightTankBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
 		} else {
-			fabricRight.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			clipsRightPouches.get(backpackItem).render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			rightPouches.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, clothColor);
-			rightPouchesBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
+			submitNodeCollector.submitModelPart(fabricRight, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(clipsRightPouches.get(backpackItem), poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(rightPouches, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, clothColor, null);
+			submitNodeCollector.submitModelPart(rightPouchesBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
 		}
 
-		if (batteryRenderInfo.isPresent()) {
-			battery.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			batteryBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
-			clipsBattery.get(backpackItem).render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+		if (batteryRenderData.isPresent()) {
+			submitNodeCollector.submitModelPart(battery, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(batteryBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
+			submitNodeCollector.submitModelPart(clipsBattery.get(backpackItem), poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
 		} else {
-			fabricFront.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			clipsFrontPouch.get(backpackItem).render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-			frontPouch.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, clothColor);
-			frontPouchBorder.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
+			submitNodeCollector.submitModelPart(fabricFront, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(clipsFrontPouch.get(backpackItem), poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+			submitNodeCollector.submitModelPart(frontPouch, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, clothColor, null);
+			submitNodeCollector.submitModelPart(frontPouchBorder, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
 		}
 
-		fabric.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
-		clipsBody.get(backpackItem).render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+		submitNodeCollector.submitModelPart(fabric, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+		submitNodeCollector.submitModelPart(clipsBody.get(backpackItem), poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
+		submitNodeCollector.submitModelPart(cloth, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, clothColor, null);
+		submitNodeCollector.submitModelPart(border, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
 
-		cloth.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, clothColor);
-
-		border.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, borderColor);
-
+		RenderType tankGlassRenderType = TANK_GLASS_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		TextureAtlasSprite tankGlassSprite = atlasManager.get(TANK_GLASS_TEXTURE);
 		poseStack.pushPose();
 		poseStack.scale(1 / 2f, 6 / 10f, 1 / 2f);
 		if (showLeftTank) {
-			vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TANK_GLASS_TEXTURE));
-			leftTankGlass.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+			submitNodeCollector.submitModelPart(leftTankGlass, poseStack, tankGlassRenderType, packedLight, OverlayTexture.NO_OVERLAY, tankGlassSprite);
 		}
 		if (showRightTank) {
-			vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TANK_GLASS_TEXTURE));
-			rightTankGlass.render(poseStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+			submitNodeCollector.submitModelPart(rightTankGlass, poseStack, tankGlassRenderType, packedLight, OverlayTexture.NO_OVERLAY, tankGlassSprite);
 		}
 		if (showLeftTank) {
-			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.LEFT);
-			tankRenderInfo.getFluid().ifPresent(f -> renderFluid(poseStack, buffer, packedLight, f, tankRenderInfo.getFillRatio(), true));
+			RenderData.TankRenderData tankRenderData = renderDataHandler.getTankRenderData().get(TankPosition.LEFT);
+			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData,true, packedLight));
 		}
 		if (showRightTank) {
-			IRenderedTankUpgrade.TankRenderInfo tankRenderInfo = renderInfo.getTankRenderInfos().get(TankPosition.RIGHT);
-			tankRenderInfo.getFluid().ifPresent(f -> renderFluid(poseStack, buffer, packedLight, f, tankRenderInfo.getFillRatio(), false));
+			RenderData.TankRenderData tankRenderData = renderDataHandler.getTankRenderData().get(TankPosition.RIGHT);
+			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData,false, packedLight));
 		}
 		poseStack.popPose();
-		if (batteryRenderInfo.isPresent()) {
-			batteryRenderInfo.ifPresent(info -> renderBatteryCharge(poseStack, buffer, packedLight, info.getChargeRatio()));
+		if (batteryRenderData.isPresent()) {
+			batteryRenderData.ifPresent(info -> submitBatteryCharge(submitNodeCollector, poseStack, packedLight, info.chargeRatio()));
 		}
 	}
 
+	private void submitFluid(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, FluidStack fluidStack, RenderData.TankRenderData tankRenderData, boolean left, int packedLight) {
+		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+		TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
+		int color = renderProperties.getTintColor(fluidStack);
+		submitFluid(submitNodeCollector, poseStack, still, tankRenderData.fillRatio(), color, left, packedLight);
+	}
+
 	@Override
-	public void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio) {
+	public void submitBatteryCharge(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, int packedLight, float chargeRatio) {
 		ModelPart charge = batteryCharges.get((int) (chargeRatio * 4));
 		if (charge == null) {
 			return;
 		}
-		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(BACKPACK_ENTITY_TEXTURE));
-		charge.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY);
+		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		AtlasManager atlasManager = Minecraft.getInstance().getAtlasManager();
+		TextureAtlasSprite mainSprite = atlasManager.get(BACKPACK_ENTITY_TEXTURE);
+		submitNodeCollector.submitModelPart(charge, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
 	}
 
 	@Override
-	public void renderFluid(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, FluidStack fluidStack, float fill, boolean left) {
+	public void submitFluid(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, TextureAtlasSprite sprite, float fill, int color, boolean left, int packedLight) {
 		if (Mth.equal(fill, 0.0f)) {
 			return;
 		}
-
-		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
-		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture);
-		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
-		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
-		int color = renderProperties.getTintColor(fluidStack);
-		fluidBox.render(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, color);
+		ModelPart fluidBox = getFluidBar(sprite, (int) (fill * 10), left);
+		submitNodeCollector.submitModelPart(fluidBox, poseStack, RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), packedLight, OverlayTexture.NO_OVERLAY, sprite, color, null);
 	}
 
 	private ModelPart getFluidBar(TextureAtlasSprite still, int fill, boolean left) {
@@ -447,7 +453,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 	}
 
 	@Override
-	public <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
+	public <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			humanoidModel.body.translateAndRotate(poseStack);
 		}
@@ -480,8 +486,12 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 	private record FluidBarCacheKey(int u, int v, int fill) {
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) {return true;}
-			if (o == null || getClass() != o.getClass()) {return false;}
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 			FluidBarCacheKey that = (FluidBarCacheKey) o;
 			return u == that.u && v == that.v && fill == that.fill;
 		}

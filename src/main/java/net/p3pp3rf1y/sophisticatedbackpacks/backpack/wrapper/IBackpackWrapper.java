@@ -1,13 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.Optional;
@@ -65,7 +66,7 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		//noop
 	}
 
-	default Optional<IFluidHandlerItem> getItemFluidHandler() {
+	default Optional<ResourceHandler<FluidResource>> getItemFluidHandler() {
 		return Optional.empty();
 	}
 
@@ -73,7 +74,7 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		public static final Noop INSTANCE = new Noop();
 
 		private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
-		private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(this, new CompoundTag(), () -> {
+		private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(this, new ContainerContents.SettingsData(), () -> {
 		});
 
 		@Override

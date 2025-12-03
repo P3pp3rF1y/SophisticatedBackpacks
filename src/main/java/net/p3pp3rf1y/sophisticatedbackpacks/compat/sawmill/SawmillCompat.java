@@ -44,7 +44,7 @@ public class SawmillCompat implements ICompat {
 				registration.addWorkstation(EMIPlugin.WOODCUTTING_CATEGORY, SAWMILL_UPGRADE.get());
 			})).get().run();
 		}
-		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
+		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.getDist().isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
 				registration.addWorkstations(REIPlugin.WOODCUTTING_DISPLAY, SAWMILL_UPGRADE.get());
 			})).get().run();
@@ -57,7 +57,7 @@ public class SawmillCompat implements ICompat {
 		}
 		UpgradeContainerType<SawmillUpgradeItem.Wrapper, SawmillUpgradeContainer> containerType = new UpgradeContainerType<>(SawmillUpgradeContainer::new);
 		UpgradeContainerRegistry.register(SAWMILL_UPGRADE.getId(), containerType);
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			SawmillCompatClient.registerUpgradeTab(containerType);
 		}
 	}

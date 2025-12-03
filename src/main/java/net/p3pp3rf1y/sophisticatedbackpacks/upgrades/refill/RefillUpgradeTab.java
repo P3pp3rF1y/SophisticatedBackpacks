@@ -183,7 +183,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 		@Override
 		public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-			if (!getContainer().allowsTargetSlotSelection()) {
+			if (!getContainer().allowsTargetSlotSelection() || !isOpen) {
 				return;
 			}
 

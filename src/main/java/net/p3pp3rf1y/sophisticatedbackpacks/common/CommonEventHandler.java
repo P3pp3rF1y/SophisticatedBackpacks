@@ -5,6 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -34,7 +37,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
@@ -46,18 +52,17 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPayload;
-import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
-import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
+import net.p3pp3rf1y.sophisticatedcore.settings.main.PlayerMainSettingsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonEventHandler {
 	public void registerHandlers(IEventBus modBus) {
@@ -101,7 +106,7 @@ public class CommonEventHandler {
 		if (!isPointingAtBody || !isPointingAtBack) {
 			return;
 		}
-		if (targetPlayer.level().isClientSide) {
+		if (targetPlayer.level().isClientSide()) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
 			ClientPacketDistributor.sendToServer(new AnotherPlayerBackpackOpenPayload(targetPlayer.getId()));
 		}
@@ -155,7 +160,7 @@ public class CommonEventHandler {
 		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
 			if (backpackIds.contains(backpackId)) {
 				backpackWrapper.removeContentsUUIDTag();
-				backpackWrapper.onContentsNbtUpdated();
+				backpackWrapper.onContentsUpdated();
 			} else {
 				backpackIds.add(backpackId);
 			}
@@ -168,8 +173,8 @@ public class CommonEventHandler {
 
 	private void sendPlayerSettingsToClient(Player player) {
 		if (player instanceof ServerPlayer serverPlayer) {
-			String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-			PacketDistributor.sendToPlayer(serverPlayer, new SyncPlayerSettingsPayload(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+			String name = SophisticatedBackpacks.MOD_ID;
+			PacketDistributor.sendToPlayer(serverPlayer, new SyncPlayerSettingsPayload(name, PlayerMainSettingsSavedData.get().get(player.getUUID(), name)));
 		}
 	}
 
@@ -178,7 +183,7 @@ public class CommonEventHandler {
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
-		if (event.getLevel().isClientSide) {
+		if (event.getLevel().isClientSide()) {
 			return;
 		}
 		Player player = event.getEntity();
@@ -196,7 +201,7 @@ public class CommonEventHandler {
 
 	private void onAttackEntity(AttackEntityEvent event) {
 		Player player = event.getEntity();
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			return;
 		}
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
@@ -236,32 +241,38 @@ public class CommonEventHandler {
 
 	private void onItemPickup(ItemEntityPickupEvent.Pre event) {
 		ItemEntity itemEntity = event.getItemEntity();
-		if (itemEntity.getItem().isEmpty() || itemEntity.pickupDelay > 0) {
+		ItemStack stack = itemEntity.getItem();
+		if (stack.isEmpty() || itemEntity.pickupDelay > 0) {
 			return;
 		}
 
-		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
 		Player player = event.getPlayer();
 		Level level = player.level();
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
-					IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(level, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
-					return remainingStackSimulated.get().isEmpty();
-				}, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
-		);
-
-		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
-			AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
+		AtomicInteger remainingCount = new AtomicInteger(stack.getCount());
+		try (Transaction tx = Transaction.openRoot()) {
+			ItemResource resource = ItemResource.of(stack);
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
 						IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-						remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(level, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
-						return remainingStack.get().isEmpty();
+						int pickedUpCount = InventoryHelper.runPickupOnPickupResponseUpgrades(level, wrapper.getUpgradeHandler(), resource, remainingCount.get(), tx);
+						remainingCount.addAndGet(-pickedUpCount);
+						if (pickedUpCount > 0) {
+							playPickupSound(level, player);
+							player.awardStat(Stats.ITEM_PICKED_UP.get(stack.getItem()), pickedUpCount);
+						}
+						return remainingCount.get() <= 0;
 					}
 					, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
 			);
-			itemEntity.setItem(remainingStack.get());
-			event.setCanPickup(TriState.FALSE); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
+			if (remainingCount.get() < stack.getCount()) {
+				tx.commit();
+				itemEntity.setItem(resource.toStack(remainingCount.get()));
+				event.setCanPickup(TriState.FALSE); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
+			}
 		}
+	}
+
+	private static void playPickupSound(Level level, Player player) {
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
 	}
 
 	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {

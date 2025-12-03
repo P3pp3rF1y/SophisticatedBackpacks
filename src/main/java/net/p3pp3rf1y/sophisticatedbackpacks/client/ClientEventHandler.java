@@ -9,15 +9,16 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,7 +46,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeClientTickHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeClientRegistry;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeClientData;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeClientDataType;
 import org.joml.Vector3f;
 
@@ -91,25 +92,25 @@ public class ClientEventHandler {
 	private static void onEntityTick(EntityTickEvent.Post event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
-				ItemStack backpack = backpackRenderInfo.getBackpack();
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderData -> {
+				ItemStack backpack = backpackRenderData.getBackpack();
 				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-				clientTickUpgrades(player, wrapper.getRenderInfo());
+				clientTickUpgrades(player, wrapper.getRenderDataHandler());
 			});
 		} else if (entity instanceof LivingEntity livingEntity) {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
 				IBackpackWrapper wrapper = BackpackWrapper.fromStack(chestStack);
-				clientTickUpgrades(livingEntity, wrapper.getRenderInfo());
+				clientTickUpgrades(livingEntity, wrapper.getRenderDataHandler());
 			}
 		}
 	}
 
-	private static void clientTickUpgrades(LivingEntity livingEntity, RenderInfo renderInfo) {
+	private static void clientTickUpgrades(LivingEntity livingEntity, RenderDataHandler renderDataHandler) {
 		if (Minecraft.getInstance().isPaused() || livingEntity.level().random.nextInt(32) != 0) {
 			return;
 		}
-		renderInfo.getUpgradeClientData().forEach((type, data) -> UpgradeClientRegistry.getUpgradeClientTickHandler(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
+		renderDataHandler.getUpgradeClientData().forEach((type, data) -> UpgradeClientRegistry.getUpgradeClientTickHandler(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
 	}
 
 	private static Vector3f getBackpackMiddleFacePoint(LivingEntity livingEntity, Vector3f vector) {
@@ -128,6 +129,7 @@ public class ClientEventHandler {
 	}
 
 	private static void registerBackpackEntityRenderStateModifier(RegisterRenderStateModifiersEvent event) {
+		//noinspection unchecked
 		event.registerEntityModifier((Class<EntityRenderer<LivingEntity, LivingEntityRenderState>>) (Class<?>) LivingEntityRenderer.class, BackpackLayerRenderer.RENDER_STATE_MODIFIER);
 	}
 
@@ -145,7 +147,7 @@ public class ClientEventHandler {
 
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerEntityRenderer(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), ItemEntityRenderer::new);
-		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
+		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), BackpackBlockEntityRenderer::new);
 	}
 
 	public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -155,8 +157,8 @@ public class ClientEventHandler {
 	@SuppressWarnings("java:S3740") //explanation below
 	private static void registerBackpackLayer(ResourceManager resourceManager) {
 		EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-		Map<PlayerSkin.Model, EntityRenderer<? extends Player, ?>> skinMap = renderManager.getSkinMap();
-		for (EntityRenderer<? extends Player, ?> renderer : skinMap.values()) {
+		Map<PlayerModelType, EntityRenderer<? extends Avatar, ?>> playerRenderers = renderManager.getPlayerRenderers();
+		for (EntityRenderer<? extends Avatar, ?> renderer : playerRenderers.values()) {
 			if (renderer instanceof LivingEntityRenderer<?, ?, ?> livingEntityRenderer) {
 				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));

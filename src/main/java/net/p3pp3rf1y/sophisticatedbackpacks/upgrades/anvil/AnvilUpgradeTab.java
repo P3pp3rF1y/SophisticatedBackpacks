@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
@@ -29,12 +30,12 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 		openTabDimension = new Dimension(103, 92);
 		itemNameTextBox = new TextBox(new Position(x + 5, y + 25), new Dimension(90, 14)) {
 			@Override
-			public boolean mouseClicked(double mouseX, double mouseY, int button) {
+			public boolean mouseClicked(MouseButtonEvent event, boolean doubleClicked) {
 				if (isEditable()) {
 					setFocused(true);
 					screen.setFocused(itemNameTextBox);
 				}
-				return super.mouseClicked(mouseX, mouseY, button);
+				return super.mouseClicked(event, doubleClicked);
 			}
 
 			@Override

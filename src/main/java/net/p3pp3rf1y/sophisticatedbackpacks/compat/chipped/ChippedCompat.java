@@ -71,7 +71,7 @@ public class ChippedCompat implements ICompat {
 				registration.addWorkstation(SophisticatedBackpacks.getRL("tinkering_table"), ModBlocks.TINKERING_TABLE.get(), TINKERING_TABLE_UPGRADE.get());
 			})).get().run();
 		}
-		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
+		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.getDist().isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
 				registration.addWorkstations(ChippedReiPlugin.ID, BOTANIST_WORKBENCH_UPGRADE.get());
 				registration.addWorkstations(ChippedReiPlugin.ID, GLASSBLOWER_UPGRADE.get());
@@ -100,7 +100,7 @@ public class ChippedCompat implements ICompat {
 	private void registerUpgradeContainer(DeferredHolder<Item, BlockTransformationUpgradeItem> item) {
 		UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType = new UpgradeContainerType<>(BlockTransformationUpgradeContainer::new);
 		UpgradeContainerRegistry.register(item.getId(), containerType);
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			ChippedCompatClient.registerUpgradeTab(item.getId(), containerType);
 		}
 	}

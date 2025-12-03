@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -15,6 +14,7 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -27,10 +27,10 @@ import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
+import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -96,13 +96,13 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		public boolean tankLeft;
 		@Nullable
-		public IRenderedTankUpgrade.TankRenderInfo leftTankRenderInfo = null;
+		public RenderData.TankRenderData leftTankRenderData = null;
 		public boolean tankRight;
 		@Nullable
-		public IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = null;
+		public RenderData.TankRenderData rightTankRenderData = null;
 		public boolean battery;
 		@Nullable
-		public IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
+		public RenderData.BatteryRenderData batteryRenderData = null;
 
 		public BlockStateModel(Map<ModelPart, QuadCollection> models, ModelState modelState, TextureAtlasSprite particleIcon) {
 			this.models = models;
@@ -132,8 +132,8 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private void addFront(QuadCollection.Builder builder) {
 			if (battery) {
-				if (batteryRenderInfo != null) {
-					addCharge(builder, batteryRenderInfo.getChargeRatio());
+				if (batteryRenderData != null) {
+					addCharge(builder, batteryRenderData.chargeRatio());
 				}
 				builder.addAll(models.get(ModelPart.BATTERY));
 			} else {
@@ -152,14 +152,14 @@ public class BackpackBlockModel implements UnbakedModel {
 			float maxX = minX + pixels / 16f;
 			float maxY = minY + 1 / 16f;
 			float[] cols = new float[]{1f, 1f, 1f, 1f};
-			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(BACKPACK_MODULES_TEXTURE);
+			TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(BACKPACK_MODULES_TEXTURE);
 			builder.addUnculledFace(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
 		}
 
 		private void addRightSide(QuadCollection.Builder builder) {
 			if (tankRight) {
-				if (rightTankRenderInfo != null) {
-					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(builder, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
+				if (rightTankRenderData != null) {
+					rightTankRenderData.getFluid().ifPresent(fluid -> addFluid(builder, fluid, rightTankRenderData.fillRatio(), 0.6 / 16d));
 				}
 				builder.addAll(models.get(ModelPart.RIGHT_TANK));
 			} else {
@@ -169,8 +169,8 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private void addLeftSide(QuadCollection.Builder builder) {
 			if (tankLeft) {
-				if (leftTankRenderInfo != null) {
-					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(builder, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d));
+				if (leftTankRenderData != null) {
+					leftTankRenderData.getFluid().ifPresent(fluid -> addFluid(builder, fluid, leftTankRenderData.fillRatio(), 12.85 / 16d));
 				}
 				builder.addAll(models.get(ModelPart.LEFT_TANK));
 			} else {
@@ -191,7 +191,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
 			int color = renderProperties.getTintColor(fluidStack);
 			float[] cols = new float[]{(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
-			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(texture);
+			TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
 			float bx1 = 0;
 			float bx2 = 5;
 			float by1 = 0;

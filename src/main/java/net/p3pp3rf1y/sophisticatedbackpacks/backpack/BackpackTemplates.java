@@ -5,7 +5,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.structures.NbtToSnbt;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.SnbtPrinterTagVisitor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,6 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.LevelResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.settings.DatapackSettingsTemplateManager;
 
 import java.io.IOException;
@@ -47,19 +48,16 @@ public class BackpackTemplates {
 		backpackUuid.ifPresent(uuid -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem), BackpackStorage.get().getOrCreateBackpackContents(uuid).copy()));
 	}
 
-	public static void setBackpackTemplate(ResourceLocation templateName, ResourceLocation backpackItemRegistryName, CompoundTag contents) {
-		CompoundTag data = new CompoundTag();
-		data.putString("backpackItemRegistryName", backpackItemRegistryName.toString());
-		data.put("backpackContents", contents);
-		BackpackTemplateStorage.get().setBackpackTemplate(templateName, data);
+	public static void setBackpackTemplate(ResourceLocation templateName, ResourceLocation backpackItemRegistryName, ContainerContents contents) {
+		BackpackTemplateStorage.get().setBackpackTemplate(templateName, new BackpackTemplate(backpackItemRegistryName, contents));
 	}
 
-	public static Optional<CompoundTag> getBackpackTemplateNoDatapack(ResourceLocation templateName) {
+	public static Optional<BackpackTemplate> getBackpackTemplateNoDatapack(ResourceLocation templateName) {
 		return BackpackTemplateStorage.get().getBackpackTemplate(templateName);
 	}
 
-	public static Optional<CompoundTag> getBackpackTemplate(ResourceLocation templateName) {
-		Optional<CompoundTag> template = getBackpackTemplateNoDatapack(templateName);
+	public static Optional<BackpackTemplate> getBackpackTemplate(ResourceLocation templateName) {
+		Optional<BackpackTemplate> template = getBackpackTemplateNoDatapack(templateName);
 		return template.or(() -> DatapackBackpackTemplateManager.getBackpackTemplate(templateName));
 	}
 
@@ -80,7 +78,7 @@ public class BackpackTemplates {
 		return templateNames;
 	}
 
-	public static void exportTemplate(ServerPlayer player, ResourceLocation templateName, CompoundTag contentNbt) {
+	public static void exportTemplate(ServerPlayer player, ResourceLocation templateName, BackpackTemplate backpackTemplate) {
 		Matcher matcher = EXPORT_TEMPLATE_NAMESPACE_PATTERN.matcher(templateName.getNamespace());
 		if (!matcher.matches()) {
 			player.displayClientMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getNamespace())), false);
@@ -106,13 +104,13 @@ public class BackpackTemplates {
 		String fileName = templateName.getPath();
 		Path exportPath = templatesDir.resolve(fileName + ".snbt");
 		try {
-			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(contentNbt));
+			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(BackpackTemplate.CODEC.encodeStart(NbtOps.INSTANCE, backpackTemplate).getOrThrow()));
 		} catch (IOException e) {
 			SophisticatedCore.LOGGER.error("Error writing template export", e);
 			return;
 		}
 
-		DatapackSettingsTemplateManager.putTemplate(templateName.getNamespace(), fileName, contentNbt);
+		DatapackSettingsTemplateManager.putTemplate(templateName.getNamespace(), fileName, backpackTemplate.contents().settings());
 
 		player.displayClientMessage(
 				Component.translatable("commands.sophisticatedbackpacks.template.export.success",

@@ -86,7 +86,7 @@ public class Matchers {
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("item_handler") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> blockContext.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, blockContext.getPos(), null) != null);
+				return Optional.of(blockContext -> blockContext.getLevel().getCapability(Capabilities.Item.BLOCK, blockContext.getPos(), null) != null);
 			}
 		});
 		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {

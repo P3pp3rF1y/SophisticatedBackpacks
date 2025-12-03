@@ -4,7 +4,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
@@ -33,7 +32,7 @@ public class CuriosCompat implements ICompat {
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
 			backpackCurioIdentifiers.clear();
-			backpackCurioIdentifiers.addAll(CuriosSlotTypes.getItemSlotTypes(ModItems.BACKPACK.get().getDefaultInstance(), FMLLoader.getDist() == Dist.CLIENT).keySet());
+			backpackCurioIdentifiers.addAll(CuriosSlotTypes.getItemSlotTypes(ModItems.BACKPACK.get().getDefaultInstance(), FMLEnvironment.getDist() == Dist.CLIENT).keySet());
 			backpackCurioIdentifiers.add("curio");
 		}
 		return backpackCurioIdentifiers;
@@ -51,7 +50,7 @@ public class CuriosCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			CuriosCompatClient.registerRenderers();
 		}
 

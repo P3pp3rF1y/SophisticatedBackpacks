@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SlotSuppliedHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
@@ -20,8 +21,10 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 	private final Slot resultSlot;
 
 	private final PersistableAnvilMenu anvilMenuDelegate;
-	private Runnable nameChangeListener = () -> {};
+	private Runnable nameChangeListener = () -> {
+	};
 	private boolean processingOnTakeLogic = false;
+
 	public AnvilUpgradeContainer(Player player, int upgradeContainerId, AnvilUpgradeWrapper upgradeWrapper, UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		anvilMenuDelegate = new PersistableAnvilMenu(player.getInventory());
@@ -97,11 +100,12 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 
 		@Override
 		protected void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
-			for(final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
+			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
 				this.addSlot(new SlotSuppliedHandler(() -> upgradeWrapper.getInventory(), slotDefinition.slotIndex(), 0, 0) {
 					@Override
-					public void setChanged() {
-						super.setChanged();
+					protected void setStackCopy(ItemStack stack) {
+						super.setStackCopy(stack);
+
 						slotsChanged(inputSlots);
 						if (slotDefinition.slotIndex() == 0) {
 							if (upgradeWrapper.getItemName().isEmpty() != getItem().isEmpty()) {
@@ -139,8 +143,8 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 				}
 
 				@Override
-				public void setItem(int pIndex, ItemStack pStack) {
-					upgradeWrapper.getInventory().setStackInSlot(pIndex, pStack);
+				public void setItem(int index, ItemStack stack) {
+					upgradeWrapper.getInventory().set(index, ItemResource.of(stack), stack.getCount());
 				}
 			};
 		}

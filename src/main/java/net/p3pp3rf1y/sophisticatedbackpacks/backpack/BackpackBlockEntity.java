@@ -12,19 +12,19 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.EmptyResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.energy.EmptyEnergyHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
-import net.p3pp3rf1y.sophisticatedcore.inventory.CachedFailedInsertInventoryHandler;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
@@ -47,11 +47,11 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private boolean chunkBeingUnloaded = false;
 
 	@Nullable
-	private IItemHandler externalItemHandler;
+	private ResourceHandler<ItemResource> externalItemHandler;
 	@Nullable
-	private IFluidHandler externalFluidHandler;
+	private ResourceHandler<FluidResource> externalFluidHandler;
 	@Nullable
-	private IEnergyStorage externalEnergyStorage;
+	private EnergyHandler externalEnergyHandler;
 	private boolean triedUnpackingLoot = false;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
@@ -138,7 +138,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		invalidateCapabilities();
 		externalItemHandler = null;
 		externalFluidHandler = null;
-		externalEnergyStorage = null;
+		externalEnergyHandler = null;
 		onInventoryInputOutputHandlerRefresh();
 	}
 
@@ -147,58 +147,56 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	@Nullable
-	public IItemHandler getExternalItemHandler(@Nullable Direction direction) {
+	public ResourceHandler<ItemResource> getExternalItemHandler(@Nullable Direction direction) {
 		if (isBlockConnectionDisallowed(direction)) {
 			return null;
 		}
 		if (externalItemHandler == null) {
-			externalItemHandler = new CachedFailedInsertInventoryHandler(() -> {
-				IBackpackWrapper backpackWrapper = getBackpackWrapper();
-				if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
-					backpackWrapper.fillWithLootAndExtraItems(level, getBlockPos());
-					triedUnpackingLoot = true;
-				}
-				return backpackWrapper.getInventoryForInputOutput();
-			}, () -> level != null ? level.getGameTime() : 0);
+			IBackpackWrapper backpackWrapper = getBackpackWrapper();
+			if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
+				backpackWrapper.fillWithLootAndExtraItems(level, getBlockPos());
+				triedUnpackingLoot = true;
+			}
+			externalItemHandler = backpackWrapper.getInventoryForInputOutput();
 		}
 		return externalItemHandler;
 	}
 
 	@Nullable
-	public IFluidHandler getExternalFluidHandler(@Nullable Direction direction) {
+	public ResourceHandler<FluidResource> getExternalFluidHandler(@Nullable Direction direction) {
 		if (isBlockConnectionDisallowed(direction)) {
 			return null;
 		}
 		if (externalFluidHandler == null) {
-			externalFluidHandler = getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE);
+			externalFluidHandler = getBackpackWrapper().getFluidHandler().map(fh -> (ResourceHandler<FluidResource>) fh).orElse(EmptyResourceHandler.instance());
 		}
 		return externalFluidHandler;
 	}
 
 	@Nullable
-	public IEnergyStorage getExternalEnergyStorage(@Nullable Direction direction) {
+	public EnergyHandler getExternalEnergyHandler(@Nullable Direction direction) {
 		if (isBlockConnectionDisallowed(direction)) {
 			return null;
 		}
-		if (externalEnergyStorage == null) {
-			externalEnergyStorage = getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE);
+		if (externalEnergyHandler == null) {
+			externalEnergyHandler = getBackpackWrapper().getEnergyHandler().orElse(EmptyEnergyHandler.INSTANCE);
 		}
-		return externalEnergyStorage;
+		return externalEnergyHandler;
 	}
 
 	public void refreshRenderState() {
 		BlockState state = getBlockState();
 		state = state.setValue(LEFT_TANK, false);
 		state = state.setValue(RIGHT_TANK, false);
-		RenderInfo renderInfo = backpackWrapper.getRenderInfo();
-		for (TankPosition pos : renderInfo.getTankRenderInfos().keySet()) {
+		RenderDataHandler renderDataHandler = backpackWrapper.getRenderDataHandler();
+		for (TankPosition pos : renderDataHandler.getTankRenderData().keySet()) {
 			if (pos == TankPosition.LEFT) {
 				state = state.setValue(LEFT_TANK, true);
 			} else if (pos == TankPosition.RIGHT) {
 				state = state.setValue(RIGHT_TANK, true);
 			}
 		}
-		state = state.setValue(BATTERY, renderInfo.getBatteryRenderInfo().isPresent());
+		state = state.setValue(BATTERY, renderDataHandler.getBatteryRenderData().isPresent());
 		Level l = Objects.requireNonNull(level);
 		l.setBlockAndUpdate(worldPosition, state);
 		l.updateNeighborsAt(worldPosition, state.getBlock());
@@ -206,7 +204,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	public static void serverTick(Level level, BlockPos blockPos, BackpackBlockEntity backpackBlockEntity) {
-		if (level.isClientSide) {
+		if (level.isClientSide()) {
 			return;
 		}
 		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
@@ -258,7 +256,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void registerController(ControllerBlockEntityBase controllerBlockEntity) {
 		IControllableStorage.super.registerController(controllerBlockEntity);
-		if (level != null && !level.isClientSide) {
+		if (level != null && !level.isClientSide()) {
 			backpackWrapper.registerOnSlotsChangeListener(this::changeSlots);
 			backpackWrapper.registerOnInventoryHandlerRefreshListener(this::registerInventoryStackListeners);
 		}
