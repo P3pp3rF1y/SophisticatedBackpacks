@@ -299,7 +299,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}
@@ -450,7 +451,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}
@@ -583,7 +585,8 @@ public abstract class BackpackContext {
 		@Override
 		public void saveBackpackStack() {
 			if (parentWrapper != null) {
-				parentWrapper.getInventoryHandler().onContentsChanged(subBackpackSlotIndex);
+				parentWrapper.getInventoryHandler().setStackInSlot(subBackpackSlotIndex, parentWrapper.getInventoryHandler().getStackInSlot(subBackpackSlotIndex));
+				parentWrapper.getInventoryHandler().saveInventory();
 			}
 		}
 	}
