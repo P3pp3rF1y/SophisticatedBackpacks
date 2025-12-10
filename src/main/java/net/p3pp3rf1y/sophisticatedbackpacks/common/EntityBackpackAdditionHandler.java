@@ -292,6 +292,7 @@ public class EntityBackpackAdditionHandler {
 			List<ItemStack> inventoryItems = new ArrayList<>();
 			IBackpackWrapper backpackwrapper = BackpackWrapper.fromStack(backpack);
 			backpackwrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
+				wrapper.stop(event.getEntity());
 				try (Transaction tx = Transaction.openRoot()) {
 					InventoryHelper.iterate(wrapper.getDiscInventory(), (slot, resource, amount) -> {
 						if (!resource.isEmpty()) {
@@ -304,6 +305,17 @@ public class EntityBackpackAdditionHandler {
 					tx.commit();
 				}
 			});
+			try (Transaction tx = Transaction.openRoot()) {
+				InventoryHelper.iterate(backpackwrapper.getUpgradeHandler(), (slot, resource, amount) -> {
+					if (!resource.isEmpty()) {
+						int moved = backpackwrapper.getUpgradeHandler().extract(slot, resource, amount, tx);
+						if (moved > 0) {
+							inventoryItems.add(resource.toStack(moved));
+						}
+					}
+				});
+				tx.commit();
+			}
 			UUID backpackUuid = backpack.remove(ModCoreDataComponents.STORAGE_UUID);
 			if (backpackUuid != null) {
 				BackpackStorage.get().removeBackpackContents(backpackUuid);
