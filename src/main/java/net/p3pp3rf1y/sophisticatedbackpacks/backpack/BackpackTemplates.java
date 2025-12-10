@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.SnbtPrinterTagVisitor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -104,7 +105,7 @@ public class BackpackTemplates {
 		String fileName = templateName.getPath();
 		Path exportPath = templatesDir.resolve(fileName + ".snbt");
 		try {
-			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(BackpackTemplate.CODEC.encodeStart(NbtOps.INSTANCE, backpackTemplate).getOrThrow()));
+			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(BackpackTemplate.CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, player.level().registryAccess()), backpackTemplate).getOrThrow()));
 		} catch (IOException e) {
 			SophisticatedCore.LOGGER.error("Error writing template export", e);
 			return;
