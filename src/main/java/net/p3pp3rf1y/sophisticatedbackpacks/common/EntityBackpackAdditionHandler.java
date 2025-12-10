@@ -286,6 +286,7 @@ public class EntityBackpackAdditionHandler {
 			List<ItemStack> inventoryItems = new ArrayList<>();
 			IBackpackWrapper backpackwrapper = BackpackWrapper.fromStack(backpack);
 			backpackwrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
+				wrapper.stop(event.getEntity());
 				InventoryHelper.iterate(wrapper.getDiscInventory(), (slot, stack) -> {
 					if (!stack.isEmpty()) {
 						inventoryItems.add(wrapper.getDiscInventory().extractItem(slot, stack.getCount(), false));
