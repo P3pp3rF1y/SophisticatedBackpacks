@@ -29,21 +29,15 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import java.util.function.BiConsumer;
 
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
-	private static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
+	public static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
 	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getRL("wears_armor"));
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getRL("entity_type"));
 	private static final ContextKey<ItemStackRenderState> DISPLAY_ITEM = new ContextKey<>(SophisticatedBackpacks.getRL("display_item"));
 	private static final ContextKey<Integer> DISPLAY_ITEM_ROTATION = new ContextKey<>(SophisticatedBackpacks.getRL("display_item_rotation"));
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player, true).ifPresent(backpackRenderInfo -> {
-				ItemStack backpack = backpackRenderInfo.getBackpack();
-				entityRenderState.setRenderData(BACKPACK_ITEM_STACK, backpack);
-				IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
-				EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
-				entityRenderState.setRenderData(WEARS_ARMOR, (equipmentSlot != EquipmentSlot.CHEST || !backpackRenderInfo.isArmorSlot()) && !player.getItemBySlot(equipmentSlot).isEmpty());
-				addDisplayItem(entityRenderState, backpack);
-			});
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, true).ifPresent(backpackRenderInfo ->
+					addBackpackRenderState(entityRenderState, player, backpackRenderInfo));
 		} else {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
@@ -54,6 +48,15 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		}
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
+
+	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
+		ItemStack backpack = backpackRenderInfo.getBackpack();
+		entityRenderState.setRenderData(BACKPACK_ITEM_STACK, backpack);
+		IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
+		EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
+		entityRenderState.setRenderData(WEARS_ARMOR, (equipmentSlot != EquipmentSlot.CHEST || !backpackRenderInfo.isArmorSlot()) && !livingEntity.getItemBySlot(equipmentSlot).isEmpty());
+		addDisplayItem(entityRenderState, backpack);
+	}
 
 	private static void addDisplayItem(LivingEntityRenderState entityRenderState, ItemStack backpack) {
 		RenderDataHandler renderDataHandler = BackpackWrapper.fromStack(backpack).getRenderDataHandler();

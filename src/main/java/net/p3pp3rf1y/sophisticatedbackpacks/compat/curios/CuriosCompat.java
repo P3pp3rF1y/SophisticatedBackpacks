@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -28,7 +29,8 @@ public class CuriosCompat implements ICompat {
 	private long lastTagsRefresh = -1;
 	private static final int TAGS_REFRESH_COOLDOWN = 100;
 
-	private Set<String> getCurioTags(long gameTime) {
+	private Set<String> getCurioTags(Player player) {
+		long gameTime = player.level().getGameTime();
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
 			backpackCurioIdentifiers.clear();
