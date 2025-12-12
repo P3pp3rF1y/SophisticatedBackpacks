@@ -26,12 +26,12 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import java.util.function.BiConsumer;
 
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
-	private static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
+	public static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
 	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getRL("wears_armor"));
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getRL("entity_type"));
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player, true).ifPresent(backpackRenderInfo -> {
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
 				ItemStack backpack = backpackRenderInfo.getBackpack();
 				entityRenderState.setRenderData(BACKPACK_ITEM_STACK, backpack);
 				IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());

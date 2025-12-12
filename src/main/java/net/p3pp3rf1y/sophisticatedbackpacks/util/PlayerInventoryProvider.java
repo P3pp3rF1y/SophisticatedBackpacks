@@ -30,19 +30,19 @@ public class PlayerInventoryProvider {
 	}
 
 	private PlayerInventoryProvider() {
-		addPlayerInventoryHandler(MAIN_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> player.getInventory().getNonEquipmentItems().size(),
+		addPlayerInventoryHandler(MAIN_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> player.getInventory().getNonEquipmentItems().size(),
 				(player, identifier, slot) -> player.getInventory().getNonEquipmentItems().get(slot), true, false, false, false);
-		addPlayerInventoryHandler(OFFHAND_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
+		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
 				(player, identifier, slot) -> player.getItemBySlot(EquipmentSlot.OFFHAND), false, false, false, false);
-		addPlayerInventoryHandler(ARMOR_INVENTORY, gameTime -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
+		addPlayerInventoryHandler(ARMOR_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
 				(player, identifier, slot) -> player.getItemBySlot(EquipmentSlot.CHEST), false, true, false, true);
 	}
 
-	public void addPlayerInventoryHandler(String name, Function<Long, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
+	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		addPlayerInventoryHandler(name, identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, rendered, ownRenderer, accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter.DEFAULT);
 	}
 
-	public void addPlayerInventoryHandler(String name, Function<Long, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter visibleInWorldGetter) {
+	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter visibleInWorldGetter) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
 		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer, accessibleByAnotherPlayer, visibleInWorldGetter));
@@ -62,7 +62,7 @@ public class PlayerInventoryProvider {
 			if (invHandler == null) {
 				return Optional.empty();
 			}
-			for (String identifier : invHandler.getIdentifiers(player.level().getGameTime())) {
+			for (String identifier : invHandler.getIdentifiers(player)) {
 				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
 					if (!invHandler.isVisibleInWorld(player, identifier, slot)) {
 						continue;
@@ -96,7 +96,7 @@ public class PlayerInventoryProvider {
 				continue;
 			}
 
-			for (String identifier : invHandler.getIdentifiers(player.level().getGameTime())) {
+			for (String identifier : invHandler.getIdentifiers(player)) {
 				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
 					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
 					if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), identifier, slot)) {

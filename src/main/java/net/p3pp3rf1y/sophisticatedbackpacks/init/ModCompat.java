@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.accessories.AccessoriesCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped.ChippedCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.sawmill.SawmillCompat;
@@ -16,5 +17,6 @@ public class ModCompat {
 		//CompatRegistry.registerCompat(new CompatInfo(CompatModIds.BOTANIA, null), () -> BotaniaCompat::new);
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.CHIPPED, null), () -> modBus -> new ChippedCompat());
 		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.SAWMILL, null), () -> modBus -> new SawmillCompat());
+		CompatRegistry.registerCompat(new CompatInfo(CompatModIds.ACCESSORIES, null), () -> modBus -> new AccessoriesCompat());
 	}
 }
