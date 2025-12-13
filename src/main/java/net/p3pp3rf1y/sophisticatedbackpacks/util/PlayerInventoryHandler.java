@@ -9,14 +9,14 @@ import java.util.function.Function;
 
 public class PlayerInventoryHandler {
 	public static final Set<String> SINGLE_IDENTIFIER = Collections.singleton("");
-	private final Function<Long, Set<String>> identifiersGetter;
+	private final Function<Player, Set<String>> identifiersGetter;
 	private final SlotCountGetter slotCountGetter;
 	private final SlotStackGetter slotStackGetter;
 	private final boolean visibleInGui;
 	private final boolean ownRenderer;
 	private final boolean accessibleByAnotherPlayer;
 
-	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
+	public PlayerInventoryHandler(Function<Player, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		this.identifiersGetter = identifiersGetter;
 		this.slotCountGetter = slotCountGetter;
 		this.slotStackGetter = slotStackGetter;
@@ -37,8 +37,8 @@ public class PlayerInventoryHandler {
 		return visibleInGui;
 	}
 
-	public Set<String> getIdentifiers(long gameTime) {
-		return identifiersGetter.apply(gameTime);
+	public Set<String> getIdentifiers(Player player) {
+		return identifiersGetter.apply(player);
 	}
 
 	public boolean hasItsOwnRenderer() {
