@@ -8,4 +8,5 @@ public class CompatModIds {
 	public static final String QUARK = "quark";
 	public static final String CHIPPED = "chipped";
 	public static final String SAWMILL = "sawmill";
+	public static final String ACCESSORIES = "accessories";
 }
