@@ -61,7 +61,9 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommonEventHandler {
@@ -132,7 +134,7 @@ public class CommonEventHandler {
 		}
 		nextBackpackCheckTime.put(dimensionKey, event.getLevel().getGameTime() + BACKPACK_CHECK_COOLDOWN);
 
-		Set<UUID> backpackIds = new HashSet<>();
+		Map<UUID, ItemStack> backpackIds = new HashMap<>();
 
 		event.getLevel().players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
@@ -156,13 +158,13 @@ public class CommonEventHandler {
 		});
 	}
 
-	private static void addBackpackIdIfUniqueOrDedupe(Set<UUID> backpackIds, IBackpackWrapper backpackWrapper) {
+	private static void addBackpackIdIfUniqueOrDedupe(Map<UUID, ItemStack> backpackIds, IBackpackWrapper backpackWrapper) {
 		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
-			if (backpackIds.contains(backpackId)) {
+			if (backpackIds.containsKey(backpackId) && backpackIds.get(backpackId) != backpackWrapper.getBackpack()) {
 				backpackWrapper.removeContentsUUIDTag();
 				backpackWrapper.onContentsUpdated();
 			} else {
-				backpackIds.add(backpackId);
+				backpackIds.put(backpackId, backpackWrapper.getBackpack());
 			}
 		});
 	}
