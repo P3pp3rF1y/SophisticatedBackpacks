@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
@@ -183,6 +184,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
 				getBackpackDisplayName(level, pos)), backpackContext::toBuffer);
+		level.gameEvent(player, GameEvent.CONTAINER_OPEN, pos);
 		return InteractionResult.SUCCESS;
 	}
 

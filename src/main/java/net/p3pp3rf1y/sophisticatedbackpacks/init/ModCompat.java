@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.accessories.AccessoriesCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped.ChippedCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
@@ -21,6 +22,7 @@ public class ModCompat {
 	static {
 		compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
 		compatFactories.put(CompatModIds.CHIPPED, () -> ChippedCompat::new);
+		compatFactories.put(CompatModIds.ACCESSORIES, () -> AccessoriesCompat::new);
 	}
 
 	public static void compatsSetup() {

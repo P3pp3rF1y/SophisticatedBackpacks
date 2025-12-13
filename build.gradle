@@ -57,6 +57,12 @@ repositories {
             includeGroup "me.shedaniel.cloth"
         }
     }
+    maven {
+        url = 'https://maven.wispforest.io/releases'
+        content {
+            includeGroup "io.wispforest"
+        }
+    }
 }
 
 group = mod_group_id
@@ -141,6 +147,9 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:athena-841890:${athena_cf_file_id}")
     compileOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
     runtimeOnly fg.deobf("curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}")
+    compileOnly fg.deobf("io.wispforest:accessories-neoforge:${accessories_version}") {
+        transitive = false
+    }
 }
 
 tasks.named('jar', Jar).configure {
