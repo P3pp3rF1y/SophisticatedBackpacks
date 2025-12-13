@@ -52,7 +52,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandle
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -118,7 +120,7 @@ public class CommonEventHandler {
 		}
 		nextBackpackCheckTime.put(dimensionKey, event.level.getGameTime() + BACKPACK_CHECK_COOLDOWN);
 
-		Set<UUID> backpackIds = new HashSet<>();
+		Map<UUID, ItemStack> backpackIds = new HashMap<>();
 
 		event.level.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
@@ -143,13 +145,13 @@ public class CommonEventHandler {
 		});
 	}
 
-	private static void addBackpackIdIfUniqueOrDedupe(Set<UUID> backpackIds, IBackpackWrapper backpackWrapper) {
+	private static void addBackpackIdIfUniqueOrDedupe(Map<UUID, ItemStack> backpackIds, IBackpackWrapper backpackWrapper) {
 		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
-			if (backpackIds.contains(backpackId)) {
+			if (backpackIds.containsKey(backpackId) && backpackIds.get(backpackId) != backpackWrapper.getBackpack()) {
 				backpackWrapper.removeContentsUUIDTag();
 				backpackWrapper.onContentsNbtUpdated();
 			} else {
-				backpackIds.add(backpackId);
+				backpackIds.put(backpackId, backpackWrapper.getBackpack());
 			}
 		});
 	}
