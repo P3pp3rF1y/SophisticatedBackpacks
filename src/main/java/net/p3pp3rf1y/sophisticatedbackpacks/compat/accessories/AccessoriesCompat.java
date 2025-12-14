@@ -43,7 +43,7 @@ public class AccessoriesCompat implements ICompat {
 	}
 
 	private void addPlayerInventoryHandlers() {
-		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.CURIOS, this::getAccessoriesSlotTags,
+		PlayerInventoryProvider.get().addPlayerInventoryHandler(CompatModIds.ACCESSORIES, this::getAccessoriesSlotTags,
 				(player, identifier) -> getFromAccessoriesStorage(player, identifier, AccessoriesStorage::getSize, 0),
 				(player, identifier, slot) -> getFromAccessoriesStorage(player, identifier, storage -> storage.getAccessories().getItem(slot), ItemStack.EMPTY),
 				false, true, true, true, AccessoriesCompat::isVisible);
