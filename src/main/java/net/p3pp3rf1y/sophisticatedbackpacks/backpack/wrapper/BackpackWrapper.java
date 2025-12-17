@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
@@ -42,8 +42,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -440,14 +440,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	@Override
-	public void setLoot(ResourceLocation lootTableName, float lootFactor) {
+	public void setLoot(Identifier lootTableName, float lootFactor) {
 		getBackpackStack().set(ModDataComponents.LOOT_TABLE, lootTableName);
 		getBackpackStack().set(ModDataComponents.LOOT_FACTOR, lootFactor);
 		backpackSaveHandler.run();
 	}
 
 	@Override
-	public void setTemplate(ResourceLocation templateName) {
+	public void setTemplate(Identifier templateName) {
 		getBackpackStack().set(ModDataComponents.TEMPLATE_NAME, templateName);
 	}
 
@@ -492,7 +492,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public void fillWithLoot(Level level, BlockPos pos) {
-		ResourceLocation lootTable = getBackpackStack().get(ModDataComponents.LOOT_TABLE);
+		Identifier lootTable = getBackpackStack().get(ModDataComponents.LOOT_TABLE);
 		if (lootTable == null) {
 			return;
 		}
@@ -502,7 +502,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void fillFromTemplate() {
 		ItemStack backpack = getBackpackStack();
-		ResourceLocation templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
+		Identifier templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
 		if (templateName == null) {
 			return;
 		}
@@ -574,7 +574,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return getBackpackStack().getOrDefault(ModDataComponents.COLUMNS_TAKEN, 0);
 	}
 
-	private void fillWithLootFromTable(Level level, BlockPos pos, ResourceLocation lootTable) {
+	private void fillWithLootFromTable(Level level, BlockPos pos, Identifier lootTable) {
 		MinecraftServer server = level.getServer();
 		if (server == null || !(level instanceof ServerLevel serverLevel)) {
 			return;

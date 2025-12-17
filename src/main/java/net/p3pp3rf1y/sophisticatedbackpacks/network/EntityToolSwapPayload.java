@@ -17,7 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public record EntityToolSwapPayload(int entityId) implements CustomPacketPayload {
-	public static final Type<EntityToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("entity_tool_swap"));
+	public static final Type<EntityToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("entity_tool_swap"));
 	public static final StreamCodec<ByteBuf, EntityToolSwapPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			EntityToolSwapPayload::entityId,

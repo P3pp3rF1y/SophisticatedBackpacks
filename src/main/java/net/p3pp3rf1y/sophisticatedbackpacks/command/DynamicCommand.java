@@ -13,7 +13,7 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -98,7 +98,7 @@ public class DynamicCommand {
 		return 0;
 	}
 
-	private static int beginBasedDynamic(CommandSourceStack source, String templateName, ResourceLocation baseTemplateName) {
+	private static int beginBasedDynamic(CommandSourceStack source, String templateName, Identifier baseTemplateName) {
 		if (DYNAMIC_CACHE.getIfPresent(templateName) != null) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.templateInUse", templateName));
 			return 1;

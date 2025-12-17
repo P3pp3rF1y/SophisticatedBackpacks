@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -90,10 +90,10 @@ public class CommonEventHandler {
 
 	private static final int BACKPACK_CHECK_COOLDOWN = 40;
 
-	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
+	private final Map<Identifier, Long> nextBackpackCheckTime = new HashMap<>();
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
-		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
+		if (!(event.getTarget() instanceof Player targetPlayer) || !Config.SERVER.allowOpeningOtherPlayerBackpacks.get()) {
 			return;
 		}
 
@@ -125,9 +125,9 @@ public class CommonEventHandler {
 			return;
 		}
 
-		ResourceLocation dimensionKey = event.getLevel().dimension().location();
-		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
-		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());
+		Identifier dimensionKey = event.getLevel().dimension().identifier();
+		boolean runSlownessLogic = Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get();
+		boolean runDedupeLogic = !Config.SERVER.tickDedupeLogicDisabled.get();
 		if ((!runSlownessLogic && !runDedupeLogic)
 				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.getLevel().getGameTime()) {
 			return;
@@ -286,7 +286,7 @@ public class CommonEventHandler {
 
 		if (WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class)
 				.map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE)
-						.stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
+						.stream().anyMatch(w -> !w.checkPermission(player)))
 				.orElse(false)) {
 			event.setCanceled(true);
 			player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);

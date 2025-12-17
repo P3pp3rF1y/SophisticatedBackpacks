@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -58,7 +58,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	}
 
 	@Override
-	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
 		BlockEntityRenderer.super.extractRenderState(blockEntity, renderState, partialTick, cameraPos, crumblingOverlay);
 
 		BlockState state = blockEntity.getBlockState();
@@ -86,7 +86,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 						entry -> {
 							FluidStack fluidStack = entry.getValue().getFluid().get();
 							IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-							ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+							Identifier texture = renderProperties.getStillTexture(fluidStack);
 							TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
 							return new BackpackRenderState.TankState(still, renderProperties.getTintColor(fluidStack), entry.getValue().fillRatio());
 						}

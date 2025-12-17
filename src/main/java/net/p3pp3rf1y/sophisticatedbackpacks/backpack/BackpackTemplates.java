@@ -9,8 +9,8 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.SnbtPrinterTagVisitor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -43,35 +43,35 @@ public class BackpackTemplates {
 	private BackpackTemplates() {
 	}
 
-	public static void setBackpackTemplate(ResourceLocation templateName, IBackpackWrapper wrapper) {
+	public static void setBackpackTemplate(Identifier templateName, IBackpackWrapper wrapper) {
 		Item backpackItem = wrapper.getBackpack().getItem();
 		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
 		backpackUuid.ifPresent(uuid -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem), BackpackStorage.get().getOrCreateBackpackContents(uuid).copy()));
 	}
 
-	public static void setBackpackTemplate(ResourceLocation templateName, ResourceLocation backpackItemRegistryName, ContainerContents contents) {
+	public static void setBackpackTemplate(Identifier templateName, Identifier backpackItemRegistryName, ContainerContents contents) {
 		BackpackTemplateStorage.get().setBackpackTemplate(templateName, new BackpackTemplate(backpackItemRegistryName, contents));
 	}
 
-	public static Optional<BackpackTemplate> getBackpackTemplateNoDatapack(ResourceLocation templateName) {
+	public static Optional<BackpackTemplate> getBackpackTemplateNoDatapack(Identifier templateName) {
 		return BackpackTemplateStorage.get().getBackpackTemplate(templateName);
 	}
 
-	public static Optional<BackpackTemplate> getBackpackTemplate(ResourceLocation templateName) {
+	public static Optional<BackpackTemplate> getBackpackTemplate(Identifier templateName) {
 		Optional<BackpackTemplate> template = getBackpackTemplateNoDatapack(templateName);
 		return template.or(() -> DatapackBackpackTemplateManager.getBackpackTemplate(templateName));
 	}
 
-	public static void removeBackpackTemplate(ResourceLocation templateName) {
+	public static void removeBackpackTemplate(Identifier templateName) {
 		BackpackTemplateStorage.get().removeBackpackTemplate(templateName);
 	}
 
-	public static Set<ResourceLocation> getTemplateNames() {
+	public static Set<Identifier> getTemplateNames() {
 		return getTemplateNames(true);
 	}
 
-	public static Set<ResourceLocation> getTemplateNames(boolean includeDatapackTemplates) {
-		Set<ResourceLocation> templateNames = Sets.newTreeSet();
+	public static Set<Identifier> getTemplateNames(boolean includeDatapackTemplates) {
+		Set<Identifier> templateNames = Sets.newTreeSet();
 		templateNames.addAll(BackpackTemplateStorage.get().getBackpackTemplates().keySet());
 		if (includeDatapackTemplates) {
 			templateNames.addAll(DatapackBackpackTemplateManager.getBackpackTemplates().keySet());
@@ -79,7 +79,7 @@ public class BackpackTemplates {
 		return templateNames;
 	}
 
-	public static void exportTemplate(ServerPlayer player, ResourceLocation templateName, BackpackTemplate backpackTemplate) {
+	public static void exportTemplate(ServerPlayer player, Identifier templateName, BackpackTemplate backpackTemplate) {
 		Matcher matcher = EXPORT_TEMPLATE_NAMESPACE_PATTERN.matcher(templateName.getNamespace());
 		if (!matcher.matches()) {
 			player.displayClientMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getNamespace())), false);

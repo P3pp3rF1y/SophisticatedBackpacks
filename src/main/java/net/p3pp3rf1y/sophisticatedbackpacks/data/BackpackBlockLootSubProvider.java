@@ -36,7 +36,7 @@ public class BackpackBlockLootSubProvider extends BlockLootSubProvider {
 	@Override
 	protected Iterable<Block> getKnownBlocks() {
 		return BuiltInRegistries.BLOCK.entrySet().stream()
-				.filter(e -> e.getKey().location().getNamespace().equals(SophisticatedBackpacks.MOD_ID))
+				.filter(e -> e.getKey().identifier().getNamespace().equals(SophisticatedBackpacks.MOD_ID))
 				.map(Map.Entry::getValue)
 				.toList();
 	}

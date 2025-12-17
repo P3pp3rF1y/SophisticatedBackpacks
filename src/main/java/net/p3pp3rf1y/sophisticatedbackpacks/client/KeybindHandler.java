@@ -47,7 +47,7 @@ public class KeybindHandler {
 	private static final int KEY_UNKNOWN = -1;
 	private static final int CHEST_SLOT_INDEX = 38;
 	private static final int OFFHAND_SLOT_INDEX = 40;
-	private static final KeyMapping.Category SOPHISTICATEDBACKPACKS_CATEGORY = new KeyMapping.Category(SophisticatedBackpacks.getRL("main"));
+	private static final KeyMapping.Category SOPHISTICATEDBACKPACKS_CATEGORY = new KeyMapping.Category(SophisticatedBackpacks.getIdentifier("main"));
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
 			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_4 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_4"),

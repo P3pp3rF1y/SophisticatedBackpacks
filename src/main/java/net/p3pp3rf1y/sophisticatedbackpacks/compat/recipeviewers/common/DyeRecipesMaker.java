@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -40,7 +40,7 @@ public class DyeRecipesMaker {
 				.define('L', DyeColor.LIME.getTag())
 				.define('E', DyeColor.BLUE.getTag())
 				.define('A', DyeColor.BLACK.getTag())
-				.save(ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "multiple_colors")));
+				.save(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "multiple_colors")));
 	}
 
 	private static <R> void addSingleColorRecipes(IRecipeDisplayGenerator<R> generator) {
@@ -52,7 +52,7 @@ public class DyeRecipesMaker {
 					.pattern("B")
 					.define('D', color.getTag())
 					.define('B', ModItems.BACKPACK.get())
-					.save(ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName())));
+					.save(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName())));
 		}
 	}
 }

@@ -13,8 +13,8 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHan
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapperAccessor;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgradeWrapper, InceptionUpgradeItem>

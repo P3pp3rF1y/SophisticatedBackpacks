@@ -7,7 +7,7 @@ import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.recipe.VanillaEmiRecipeCategories;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
@@ -42,7 +42,7 @@ public class BackpackEmiPlugin implements EmiPlugin {
 			this.registry = registry;
 		}
 
-		public void addWorkstation(ResourceLocation id, Block icon, Item workstation) {
+		public void addWorkstation(Identifier id, Block icon, Item workstation) {
 			addWorkstation(new EmiRecipeCategory(id, EmiStack.of(icon)), workstation);
 		}
 

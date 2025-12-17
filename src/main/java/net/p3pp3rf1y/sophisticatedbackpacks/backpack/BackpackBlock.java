@@ -63,8 +63,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandle
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import org.joml.Vector3f;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
@@ -97,12 +96,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		return Boolean.TRUE.equals(state.getValue(WATERLOGGED)) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
 
 	@Override
 	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess scheduledTickAccess, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
-		if (Boolean.TRUE.equals(state.getValue(WATERLOGGED))) {
+		if (state.getValue(WATERLOGGED)) {
 			scheduledTickAccess.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
 
@@ -163,7 +162,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private static boolean hasPermissionsToPickup(Player player, BlockPos pos) {
 		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(be -> {
-			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel()))) {
+			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !w.checkPermission(player))) {
 				player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
 				return false;
 			}

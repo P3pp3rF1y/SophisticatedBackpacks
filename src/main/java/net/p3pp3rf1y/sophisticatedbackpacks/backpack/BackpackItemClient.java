@@ -3,8 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BackpackItemClient {
 	@Nullable

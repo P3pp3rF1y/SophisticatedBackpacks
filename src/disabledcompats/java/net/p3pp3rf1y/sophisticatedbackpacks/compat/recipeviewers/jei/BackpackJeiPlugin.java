@@ -10,7 +10,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.*;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -47,8 +47,8 @@ public class BackpackJeiPlugin implements IModPlugin {
 	}
 
 	@Override
-	public ResourceLocation getPluginUid() {
-		return ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "default");
+	public Identifier getPluginUid() {
+		return Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "default");
 	}
 
 	@Override

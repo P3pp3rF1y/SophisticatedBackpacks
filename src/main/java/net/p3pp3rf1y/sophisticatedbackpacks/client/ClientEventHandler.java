@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.Avatar;
@@ -59,7 +59,7 @@ public class ClientEventHandler {
 	}
 
 	private static final String BACKPACK_REG_NAME = "backpack";
-	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
+	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::onModelRegistry);
@@ -86,7 +86,7 @@ public class ClientEventHandler {
 	}
 
 	private static void registerBackpackItemModels(RegisterItemModelsEvent event) {
-		event.register(SophisticatedBackpacks.getRL("backpack"), BackpackItemModel.Unbaked.MAP_CODEC);
+		event.register(SophisticatedBackpacks.getIdentifier("backpack"), BackpackItemModel.Unbaked.MAP_CODEC);
 	}
 
 	private static void onEntityTick(EntityTickEvent.Post event) {
@@ -138,11 +138,11 @@ public class ClientEventHandler {
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterLoaders event) {
-		event.register(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), BackpackBlockModel.Loader.INSTANCE);
+		event.register(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), BackpackBlockModel.Loader.INSTANCE);
 	}
 
 	public static void registerReloadListener(AddClientReloadListenersEvent event) {
-		event.addListener(SophisticatedBackpacks.getRL("backpack_layer_registration"), (ResourceManagerReloadListener) ClientEventHandler::registerBackpackLayer);
+		event.addListener(SophisticatedBackpacks.getIdentifier("backpack_layer_registration"), (ResourceManagerReloadListener) ClientEventHandler::registerBackpackLayer);
 	}
 
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

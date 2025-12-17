@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
@@ -20,8 +20,8 @@ import net.neoforged.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -50,11 +50,11 @@ public class ToolRegistry {
 		private final List<IMatcherFactory<C>> objectMatcherFactories;
 		private final ToolMapping<V, C> toolMapping;
 		private final Registry<V> registry;
-		private final Function<ResourceLocation, Optional<V>> getObjectFromRegistry;
+		private final Function<Identifier, Optional<V>> getObjectFromRegistry;
 		private final String name;
 		private final String objectJsonArrayName;
 
-		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, Registry<V> registry, Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
+		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, Registry<V> registry, Function<Identifier, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
 			this.objectMatcherFactories = objectMatcherFactories;
 			this.toolMapping = toolMapping;
 			this.registry = registry;
@@ -124,7 +124,7 @@ public class ToolRegistry {
 		}
 
 		private void parseObjectEntry(Tuple<Set<Item>, Set<Predicate<ItemStack>>> tools, String objectName) {
-			ResourceLocation registryName = ResourceLocation.parse(objectName);
+			Identifier registryName = Identifier.parse(objectName);
 			Optional<V> objectOptional = getObjectFromRegistry.apply(registryName);
 			if (objectOptional.isPresent()) {
 				toolMapping.addObjectTools(tools, objectOptional.get());
@@ -181,7 +181,7 @@ public class ToolRegistry {
 		Set<Predicate<ItemStack>> itemPredicates = new HashSet<>();
 		for (JsonElement jsonElement : toolArray) {
 			if (jsonElement.isJsonPrimitive()) {
-				ResourceLocation itemName = ResourceLocation.parse(jsonElement.getAsString());
+				Identifier itemName = Identifier.parse(jsonElement.getAsString());
 				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}

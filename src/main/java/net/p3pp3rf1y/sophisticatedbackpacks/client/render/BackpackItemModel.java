@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
+import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -22,7 +23,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ResolvedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -33,12 +34,12 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public class BackpackItemModel implements ItemModel {
 	public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
@@ -89,7 +90,7 @@ public class BackpackItemModel implements ItemModel {
 
 	private final BackpackBlockModel.BlockStateModel baseModel;
 	private final List<ItemTintSource> tints;
-	private final Supplier<Vector3f[]> extents;
+	private final Supplier<Vector3fc[]> extents;
 
 	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
@@ -179,9 +180,9 @@ public class BackpackItemModel implements ItemModel {
 		}
 	}
 
-	public record Unbaked(ResourceLocation base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
+	public record Unbaked(Identifier base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
 		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
+				Identifier.CODEC.fieldOf("base").forGetter(Unbaked::base),
 				ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints)
 		).apply(builder, Unbaked::new));
 
@@ -194,7 +195,7 @@ public class BackpackItemModel implements ItemModel {
 		public ItemModel bake(BakingContext context) {
 			ResolvedModel resolved = context.blockModelBaker().getModel(base);
 			if (resolved.wrapped() instanceof BackpackBlockModel baseModel) {
-				return new BackpackItemModel(baseModel.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), tints);
+				return new BackpackItemModel(baseModel.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.IDENTITY), tints);
 			}
 
 			throw new IllegalStateException("Expected a BackpackBlockModel, but got " + resolved.getClass().getName());
@@ -229,7 +230,7 @@ public class BackpackItemModel implements ItemModel {
 					outlineColor,
 					this.tintLayers,
 					this.baseModel,
-					Sheets.translucentItemSheet(),
+					Sheets.translucentBlockItemSheet(),
 					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
 			);
 			if (displayItem != null) {
@@ -241,7 +242,7 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public void getExtents(Set<Vector3f> set) {
+		public void getExtents(Consumer<Vector3fc> consumer) {
 			//noop - not used in backpack item model as they are provided directly by itself
 		}
 	}

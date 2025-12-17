@@ -11,13 +11,12 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BackpackTintSources {
 	public static void register(RegisterColorHandlersEvent.ItemTintSources event) {
-		event.register(SophisticatedBackpacks.getRL("main"), Main.MAP_CODEC);
-		event.register(SophisticatedBackpacks.getRL("accent"), Accent.MAP_CODEC);
+		event.register(SophisticatedBackpacks.getIdentifier("main"), Main.MAP_CODEC);
+		event.register(SophisticatedBackpacks.getIdentifier("accent"), Accent.MAP_CODEC);
 	}
 
 	public record Main(int defaultColor) implements ItemTintSource {

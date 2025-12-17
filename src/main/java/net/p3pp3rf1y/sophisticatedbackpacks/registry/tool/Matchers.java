@@ -4,14 +4,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
@@ -37,7 +37,7 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				String tagName = GsonHelper.getAsString(jsonObject, "tag");
-				TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(tagName));
+				TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(tagName));
 				return Optional.of(new ItemTagMatcher(tag));
 			}
 		});
@@ -45,7 +45,7 @@ public class Matchers {
 		addItemMatcherFactory(new ItemMatcherFactory("nocomponents") {
 			@Override
 			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
-				ResourceLocation itemName = ResourceLocation.parse(GsonHelper.getAsString(jsonObject, "item"));
+				Identifier itemName = Identifier.parse(GsonHelper.getAsString(jsonObject, "item"));
 				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}

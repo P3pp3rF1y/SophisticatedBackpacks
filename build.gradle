@@ -64,6 +64,12 @@ repositories {
         content {
             includeGroup "net.blay09.mods"
         }
+        metadataSources {
+            mavenPom()
+            artifact()
+            ignoreGradleMetadataRedirection()
+            // IMPORTANT: do NOT use gradleMetadata()
+        }
     }
     maven {
         url = 'https://maven.wispforest.io/releases'
@@ -164,7 +170,6 @@ dependencies {
     compileOnly "net.blay09.mods:balm-neoforge:${balm_version}"
     localRuntime "net.blay09.mods:balm-neoforge:${balm_version}"
     compileOnly "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
-    localRuntime "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
     compileOnly "io.wispforest:accessories-neoforge:${accessories_version}"
     compileOnly "curse.maven:chipped-456956:${chipped_cf_file_id}"
     //localRuntime "curse.maven:chipped-456956:${chipped_cf_file_id}"

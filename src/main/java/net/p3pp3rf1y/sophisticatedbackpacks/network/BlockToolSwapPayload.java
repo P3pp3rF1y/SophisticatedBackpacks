@@ -15,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public record BlockToolSwapPayload(BlockPos pos) implements CustomPacketPayload {
-	public static final Type<BlockToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("block_tool_swap"));
+	public static final Type<BlockToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("block_tool_swap"));
 	public static final StreamCodec<ByteBuf, BlockToolSwapPayload> STREAM_CODEC = StreamCodec.composite(
 			BlockPos.STREAM_CODEC,
 			BlockToolSwapPayload::pos,

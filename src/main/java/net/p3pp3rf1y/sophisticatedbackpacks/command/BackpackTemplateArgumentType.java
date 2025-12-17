@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 
 import java.util.Collection;
@@ -18,7 +18,7 @@ import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
-public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocation> {
+public class BackpackTemplateArgumentType implements ArgumentType<Identifier> {
 	private static final DynamicCommandExceptionType ERROR_INVALID =
 			new DynamicCommandExceptionType(BackpackTemplates.INVALID_CHARACTER::apply);
 
@@ -29,8 +29,8 @@ public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocati
 	}
 
 	@Override
-	public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
-		ResourceLocation templateName = ResourceLocation.read(reader);
+	public Identifier parse(StringReader reader) throws CommandSyntaxException {
+		Identifier templateName = Identifier.read(reader);
 
 		Matcher matcher = BackpackTemplates.EXPORT_TEMPLATE_NAMESPACE_PATTERN.matcher(templateName.getNamespace());
 		if (!matcher.matches()) {
@@ -45,8 +45,8 @@ public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocati
 		return templateName;
 	}
 
-	public static ResourceLocation getId(CommandContext<CommandSourceStack> context, String name) {
-		return context.getArgument(name, ResourceLocation.class);
+	public static Identifier getId(CommandContext<CommandSourceStack> context, String name) {
+		return context.getArgument(name, Identifier.class);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class BackpackTemplateArgumentType implements ArgumentType<ResourceLocati
 		if (context.getSource() instanceof CommandSourceStack) {
 			return SharedSuggestionProvider.suggest(
 					BackpackTemplates.getTemplateNames(includeDatapackTemplates).stream()
-							.map(ResourceLocation::toString)
+							.map(Identifier::toString)
 							.sorted(Comparator.naturalOrder())
 							.toList(),
 					builder);

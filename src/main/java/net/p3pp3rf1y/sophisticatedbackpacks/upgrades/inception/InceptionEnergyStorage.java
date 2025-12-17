@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 

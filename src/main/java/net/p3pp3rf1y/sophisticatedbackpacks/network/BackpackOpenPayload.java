@@ -16,7 +16,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 
 public record BackpackOpenPayload(int slotIndex, String identifier, String handlerName) implements CustomPacketPayload {
-	public static final Type<BackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_open"));
+	public static final Type<BackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("backpack_open"));
 	private static final int CHEST_SLOT = 38;
 	private static final int OFFHAND_SLOT = 40;
 

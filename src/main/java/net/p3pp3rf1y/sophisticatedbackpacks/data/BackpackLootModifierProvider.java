@@ -41,7 +41,7 @@ public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
 	}
 
 	private void addInjectLootTableModifier(ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
-		add(lootTableToInjectInto.location().getPath(), new InjectLootModifier(lootTable, lootTableToInjectInto));
+		add(lootTableToInjectInto.identifier().getPath(), new InjectLootModifier(lootTable, lootTableToInjectInto));
 	}
 
 	public static class InjectLootModifier extends LootModifier {
@@ -62,7 +62,7 @@ public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
 
 		protected InjectLootModifier(ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
 			this(new LootItemCondition[]{BackpackLootEnabledCondition.builder().build(),
-					LootTableIdCondition.builder(lootTableToInjectInto.location()).build()}, lootTable, lootTableToInjectInto);
+					LootTableIdCondition.builder(lootTableToInjectInto.identifier()).build()}, lootTable, lootTableToInjectInto);
 		}
 
 		@SuppressWarnings({"deprecation", "java:S1874"}) // Need to call getRandomItemsRaw to skip neo calling modifyLoot event and causing infinite loop

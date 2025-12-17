@@ -11,7 +11,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -83,7 +83,7 @@ public class TemplateCommand {
 		return 0;
 	}
 
-	private static MutableComponent templateDetailComponent(ResourceLocation templateName, boolean includeNonDatapackMessages) {
+	private static MutableComponent templateDetailComponent(Identifier templateName, boolean includeNonDatapackMessages) {
 		MutableComponent message = Component.literal(templateName.toString());
 		message.append(Component.literal(", "));
 		message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.give")
@@ -105,7 +105,7 @@ public class TemplateCommand {
 		return message;
 	}
 
-	private static int createTemplate(CommandSourceStack source, ResourceLocation templateName, boolean override) {
+	private static int createTemplate(CommandSourceStack source, Identifier templateName, boolean override) {
 		if (!source.isPlayer()) {
 			return 1;
 		}
@@ -134,13 +134,13 @@ public class TemplateCommand {
 		return 0;
 	}
 
-	private static int deleteTemplate(CommandSourceStack source, ResourceLocation templateName) {
+	private static int deleteTemplate(CommandSourceStack source, Identifier templateName) {
 		BackpackTemplates.removeBackpackTemplate(templateName);
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.delete.success", templateName.toString()), true);
 		return 0;
 	}
 
-	private static int giveBackpackFromTemplate(CommandSourceStack source, ResourceLocation templateName, Collection<ServerPlayer> players) {
+	private static int giveBackpackFromTemplate(CommandSourceStack source, Identifier templateName, Collection<ServerPlayer> players) {
 		Optional<BackpackTemplate> templateData = BackpackTemplates.getBackpackTemplate(templateName);
 		if (templateData.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.give.failure.notemplate", templateName.toString()));
@@ -186,7 +186,7 @@ public class TemplateCommand {
 		}
 	}
 
-	private static int exportTemplate(CommandSourceStack source, ResourceLocation templateName, boolean deleteTemplate) {
+	private static int exportTemplate(CommandSourceStack source, Identifier templateName, boolean deleteTemplate) {
 		Optional<BackpackTemplate> template = BackpackTemplates.getBackpackTemplateNoDatapack(templateName);
 		if (template.isEmpty()) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.export.failure.notemplate", templateName.toString()));

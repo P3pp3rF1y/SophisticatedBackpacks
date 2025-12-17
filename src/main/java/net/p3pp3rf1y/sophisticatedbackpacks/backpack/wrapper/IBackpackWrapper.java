@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -30,9 +30,9 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots);
 
-	void setLoot(ResourceLocation lootTableName, float lootPercentage);
+	void setLoot(Identifier lootTableName, float lootPercentage);
 
-	void setTemplate(ResourceLocation templateName);
+	void setTemplate(Identifier templateName);
 
 	void fillFromTemplate();
 
@@ -109,12 +109,12 @@ public interface IBackpackWrapper extends IStorageWrapper {
 		}
 
 		@Override
-		public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
+		public void setLoot(Identifier lootTableName, float lootPercentage) {
 			//noop
 		}
 
 		@Override
-		public void setTemplate(ResourceLocation templateName) {
+		public void setTemplate(Identifier templateName) {
 			//noop
 		}
 

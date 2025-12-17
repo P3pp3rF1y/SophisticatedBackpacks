@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.renderer.block.model.VariantMutator;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.generators.blockstate.CustomBlockStateModelBuilder;
 import net.neoforged.neoforge.client.model.generators.blockstate.UnbakedMutator;
@@ -15,7 +15,7 @@ public class BackpackBlockStateModelBuilder extends CustomBlockStateModelBuilder
 		this.variant = variant;
 	}
 
-	public BackpackBlockStateModelBuilder(ResourceLocation modelLocation) {
+	public BackpackBlockStateModelBuilder(Identifier modelLocation) {
 		this(new Variant(modelLocation));
 	}
 

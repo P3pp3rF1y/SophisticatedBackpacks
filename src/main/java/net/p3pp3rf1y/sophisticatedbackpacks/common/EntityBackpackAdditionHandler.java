@@ -31,6 +31,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
@@ -50,6 +51,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -115,7 +117,7 @@ public class EntityBackpackAdditionHandler {
 			2, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierHighDifficulty.getAsInt(), 6)
 	);
 
-	static void addBackpack(Monster monster, LevelAccessor level) {
+	static void addBackpack(Monster monster, ServerLevelAccessor level) {
 		RandomSource rnd = level.getRandom();
 		if (!Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
 				|| rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) != 0 || (monster instanceof Raider raider && raider.getCurrentRaid() != null)) {
@@ -144,7 +146,7 @@ public class EntityBackpackAdditionHandler {
 		});
 	}
 
-	private static void equipArmorPiece(Monster monster, RandomSource rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot, LevelAccessor level) {
+	private static void equipArmorPiece(Monster monster, RandomSource rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot, ServerLevelAccessor level) {
 		RandHelper.getRandomWeightedElement(rnd, armorChances).ifPresent(armorPiece -> {
 			if (armorPiece != Items.AIR) {
 				ItemStack armorStack = new ItemStack(armorPiece);
@@ -198,6 +200,7 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
+	@Nullable
 	private static List<Item> musicDiscs = null;
 
 	private static List<Item> getMusicDiscs() {
@@ -207,7 +210,7 @@ public class EntityBackpackAdditionHandler {
 				musicDiscs = new ArrayList<>();
 				records.forEach(musicDisc -> {
 					//noinspection ConstantConditions - by this point the disc has registry name
-					if (!blockedDiscs.contains(musicDisc.getKey().location().toString())) {
+					if (!blockedDiscs.contains(musicDisc.getKey().identifier().toString())) {
 						musicDiscs.add(musicDisc.value());
 					}
 				});
@@ -225,7 +228,7 @@ public class EntityBackpackAdditionHandler {
 		if (maxHealth != null) {
 			double healthAddition = maxHealth.getBaseValue() * minDifficulty;
 			if (healthAddition > 0.1D) {
-				maxHealth.addPermanentModifier(new AttributeModifier(SophisticatedBackpacks.getRL("backpack_bearer_health_bonus"), healthAddition, AttributeModifier.Operation.ADD_VALUE));
+				maxHealth.addPermanentModifier(new AttributeModifier(SophisticatedBackpacks.getIdentifier("backpack_bearer_health_bonus"), healthAddition, AttributeModifier.Operation.ADD_VALUE));
 			}
 			monster.setHealth(monster.getMaxHealth());
 		}

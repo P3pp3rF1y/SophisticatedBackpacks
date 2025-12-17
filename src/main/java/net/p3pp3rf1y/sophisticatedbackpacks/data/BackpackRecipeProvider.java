@@ -1,8 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import net.mehvahdjukaar.sawmill.SawmillMod;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -16,13 +15,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped.ChippedCompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.sawmill.SawmillCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
@@ -93,7 +88,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('B', ModItems.COPPER_BACKPACK.get())
 				.unlockedBy("has_copper_backpack", has(ModItems.COPPER_BACKPACK.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("iron_backpack_from_copper")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("iron_backpack_from_copper")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.COPPER_BACKPACK.get(), BackpackUpgradeRecipe::new)
 				.pattern("CCC")
@@ -190,7 +185,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('R', Tags.Items.DUSTS_REDSTONE)
 				.define('M', ModItems.MAGNET_UPGRADE.get())
 				.unlockedBy("has_magnet_upgrade", has(ModItems.MAGNET_UPGRADE.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("advanced_magnet_upgrade_from_basic")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("advanced_magnet_upgrade_from_basic")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.FEEDING_UPGRADE.get())
 				.pattern(" C ")
@@ -408,7 +403,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER.get())
 				.define('I', Tags.Items.STORAGE_BLOCKS_IRON)
 				.unlockedBy("has_stack_upgrade_starter_tier", has(ModItems.STACK_UPGRADE_STARTER_TIER.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("stack_upgrade_tier_1_from_starter")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("stack_upgrade_tier_1_from_starter")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_2.get())
 				.pattern("GGG")
@@ -605,7 +600,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('S', ModItems.SMELTING_UPGRADE.get())
 				.define('L', ItemTags.LOGS)
 				.unlockedBy(HAS_SMELTING_UPGRADE, has(ModItems.SMELTING_UPGRADE.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("smoking_upgrade_from_smelting_upgrade")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("smoking_upgrade_from_smelting_upgrade")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.AUTO_SMOKING_UPGRADE.get(), UpgradeNextTierRecipe::new)
 				.pattern("DHD")
@@ -626,7 +621,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('S', ModItems.AUTO_SMELTING_UPGRADE.get())
 				.define('L', ItemTags.LOGS)
 				.unlockedBy("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("auto_smoking_upgrade_from_auto_smelting_upgrade")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("auto_smoking_upgrade_from_auto_smelting_upgrade")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.BLASTING_UPGRADE.get())
 				.pattern("RIR")
@@ -647,7 +642,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('T', Items.SMOOTH_STONE)
 				.unlockedBy(HAS_SMELTING_UPGRADE, has(ModItems.SMELTING_UPGRADE.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("blasting_upgrade_from_smelting_upgrade")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("blasting_upgrade_from_smelting_upgrade")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.AUTO_BLASTING_UPGRADE.get(), UpgradeNextTierRecipe::new)
 				.pattern("DHD")
@@ -669,7 +664,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('I', Tags.Items.INGOTS_IRON)
 				.define('T', Items.SMOOTH_STONE)
 				.unlockedBy("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE.get()))
-				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade")));
+				.save(output, ResourceKey.create(Registries.RECIPE, SophisticatedBackpacks.getIdentifier("auto_blasting_upgrade_from_auto_smelting_upgrade")));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.ANVIL_UPGRADE.get())
 				.pattern("ADA")
@@ -728,16 +723,17 @@ public class BackpackRecipeProvider extends RecipeProvider {
 	}
 
 	private void addCompatUpgradeRecipes(RecipeOutput recipeOutput) {
-		if (ModList.get().isLoaded(net.p3pp3rf1y.sophisticatedcore.compat.CompatModIds.CHIPPED)) {
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.BOTANIST_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.BOTANIST_WORKBENCH.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.GLASSBLOWER_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.GLASSBLOWER.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.CARPENTERS_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.CARPENTERS_TABLE.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.LOOM_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.LOOM_TABLE.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.MASON_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.MASON_TABLE.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.ALCHEMY_BENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.ALCHEMY_BENCH.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, ChippedCompat.TINKERING_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.TINKERING_TABLE.get(), CompatModIds.CHIPPED);
-			addCompatUpgradeRecipe(recipeOutput, SawmillCompat.SAWMILL_UPGRADE.get(), SawmillMod.SAWMILL_BLOCK.get(), CompatModIds.SAWMILL);
-		}
+//TODO readd with Chipped compat
+		/*
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.BOTANIST_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.BOTANIST_WORKBENCH.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.GLASSBLOWER_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.GLASSBLOWER.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.CARPENTERS_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.CARPENTERS_TABLE.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.LOOM_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.LOOM_TABLE.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.MASON_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.MASON_TABLE.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.ALCHEMY_BENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.ALCHEMY_BENCH.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, ChippedCompat.TINKERING_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.TINKERING_TABLE.get(), CompatModIds.CHIPPED);
+		addCompatUpgradeRecipe(recipeOutput, SawmillCompat.SAWMILL_UPGRADE.get(), SawmillMod.SAWMILL_BLOCK.get(), CompatModIds.SAWMILL);
+*/
 	}
 
 	private void addCompatUpgradeRecipe(RecipeOutput recipeOutput, UpgradeItemBase<?> upgrade, Block workbench, String modId) {

@@ -15,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
 import java.util.Map;
 
 public record UpgradeTogglePayload(int upgradeSlot) implements CustomPacketPayload {
-	public static final Type<UpgradeTogglePayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("upgrade_toggle"));
+	public static final Type<UpgradeTogglePayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("upgrade_toggle"));
 	public static final StreamCodec<ByteBuf, UpgradeTogglePayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			UpgradeTogglePayload::upgradeSlot,

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -73,8 +73,8 @@ public class SophisticatedBackpacks {
 		event.addListener(DatapackBackpackTemplateManager.Loader.KEY, DatapackBackpackTemplateManager.Loader.INSTANCE);
 	}
 
-	public static ResourceLocation getRL(String regName) {
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, regName);
+	public static Identifier getIdentifier(String regName) {
+		return Identifier.fromNamespaceAndPath(MOD_ID, regName);
 	}
 
 	public static String getRegistryName(String regName) {

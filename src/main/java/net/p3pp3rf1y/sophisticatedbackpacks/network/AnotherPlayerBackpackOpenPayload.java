@@ -18,7 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategoryData;
 
 public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements CustomPacketPayload {
-	public static final Type<AnotherPlayerBackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("another_player_backpack_open"));
+	public static final Type<AnotherPlayerBackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("another_player_backpack_open"));
 	public static final StreamCodec<ByteBuf, AnotherPlayerBackpackOpenPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			AnotherPlayerBackpackOpenPayload::anotherPlayerId,

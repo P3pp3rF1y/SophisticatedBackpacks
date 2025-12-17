@@ -15,7 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.AtlasIds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.context.ContextMap;
@@ -34,8 +34,8 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -64,8 +64,7 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		resolver.addLast(partModel.textureSlots());
 
-		@Nullable
-		ResourceLocation parent = partModel.parent();
+		Identifier parent = partModel.parent();
 		if (parent != null) {
 			ResolvedModel resolvedParent = baker.getModel(parent);
 			while (resolvedParent != null) {
@@ -79,7 +78,7 @@ public class BackpackBlockModel implements UnbakedModel {
 	@Override
 	public void resolveDependencies(Resolver resolver) {
 		modelParts.values().forEach(model -> {
-			ResourceLocation parent = model.parent();
+			Identifier parent = model.parent();
 			if (parent != null) {
 				resolver.markDependency(parent);
 			}
@@ -88,21 +87,18 @@ public class BackpackBlockModel implements UnbakedModel {
 	}
 
 	public static final class BlockStateModel implements DynamicBlockStateModel {
-		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/backpack_modules");
+		private static final Identifier BACKPACK_MODULES_TEXTURE = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/backpack_modules");
 
 		private final Map<ModelPart, QuadCollection> models;
 		private final ModelState modelState;
 		private final TextureAtlasSprite particleIcon;
 
 		public boolean tankLeft;
-		@Nullable
-		public RenderData.TankRenderData leftTankRenderData = null;
+		public RenderData.@Nullable TankRenderData leftTankRenderData = null;
 		public boolean tankRight;
-		@Nullable
-		public RenderData.TankRenderData rightTankRenderData = null;
+		public RenderData.@Nullable TankRenderData rightTankRenderData = null;
 		public boolean battery;
-		@Nullable
-		public RenderData.BatteryRenderData batteryRenderData = null;
+		public RenderData.@Nullable BatteryRenderData batteryRenderData = null;
 
 		public BlockStateModel(Map<ModelPart, QuadCollection> models, ModelState modelState, TextureAtlasSprite particleIcon) {
 			this.models = models;
@@ -188,7 +184,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
 
 			IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-			ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+			Identifier texture = renderProperties.getStillTexture(fluidStack);
 			int color = renderProperties.getTintColor(fluidStack);
 			float[] cols = new float[]{(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
@@ -219,11 +215,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			quadBaker.setDirection(face);
 			quadBaker.setTintIndex(-1);
 
-			u1 = sprite.getU0() + u1 / 4f * sprite.uvShrinkRatio();
-			u2 = sprite.getU0() + u2 / 4f * sprite.uvShrinkRatio();
+			u1 = sprite.getU(u1 / 16f);
+			u2 = sprite.getU(u2 / 16f);
 
-			v1 = sprite.getV0() + v1 / 4f * sprite.uvShrinkRatio();
-			v2 = sprite.getV0() + v2 / 4f * sprite.uvShrinkRatio();
+			v1 = sprite.getV(v1 / 16f);
+			v2 = sprite.getV(v2 / 16f);
 
 			quadBaker.addVertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u1, v1).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
 			quadBaker.addVertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u1, v2).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
@@ -263,7 +259,7 @@ public class BackpackBlockModel implements UnbakedModel {
 	public record UnbakedBlockStateModel(Variant variant) implements CustomUnbakedBlockStateModel {
 		public static final MapCodec<UnbakedBlockStateModel> CODEC = RecordCodecBuilder.mapCodec(instance ->
 				instance.group(Variant.MAP_CODEC.forGetter(UnbakedBlockStateModel::variant)).apply(instance, UnbakedBlockStateModel::new));
-		public static final ResourceLocation ID = SophisticatedBackpacks.getRL("backpack_model_loader");
+		public static final Identifier ID = SophisticatedBackpacks.getIdentifier("backpack_model_loader");
 
 		@Override
 		public BlockStateModel bake(ModelBaker modelBaker) {
@@ -295,7 +291,7 @@ public class BackpackBlockModel implements UnbakedModel {
 
 			TextureSlots.Data.Builder texturesBuilder = new TextureSlots.Data.Builder();
 			if (modelContents.has("clipsTexture")) {
-				ResourceLocation clipsTexture = ResourceLocation.tryParse(modelContents.get("clipsTexture").getAsString());
+				Identifier clipsTexture = Identifier.tryParse(modelContents.get("clipsTexture").getAsString());
 				if (clipsTexture != null) {
 					texturesBuilder.addTexture("clips", new Material(TextureAtlas.LOCATION_BLOCKS, clipsTexture));
 				}
@@ -307,7 +303,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, TextureSlots.Data textures) {
-			builder.put(modelPart, new BlockModel(null, null, true, ItemTransforms.NO_TRANSFORMS, textures, SophisticatedBackpacks.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH))));
+			builder.put(modelPart, new BlockModel(null, null, true, ItemTransforms.NO_TRANSFORMS, textures, SophisticatedBackpacks.getIdentifier("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH))));
 		}
 	}
 

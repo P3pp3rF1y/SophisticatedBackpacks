@@ -4,16 +4,21 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeSettingsTab;
@@ -28,19 +33,17 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	private final CyclingSlotBackground templateIcon;
 	private final CyclingSlotBackground baseIcon;
 	private final CyclingSlotBackground additionalIcon;
-	private final ArmorStand armorStandPreview;
+	private final ArmorStandRenderState armorStandPreview = new ArmorStandRenderState();
 
 	public SmithingUpgradeTab(SmithingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
 		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
-		armorStandPreview = new ArmorStand(minecraft.level, 0.0, 0.0, 0.0);
-		armorStandPreview.setNoBasePlate(true);
-		armorStandPreview.setShowArms(true);
-		armorStandPreview.yBodyRot = 210.0F;
-		armorStandPreview.setXRot(25.0F);
-		armorStandPreview.yHeadRot = armorStandPreview.getYRot();
-		armorStandPreview.yHeadRotO = armorStandPreview.getYRot();
+		armorStandPreview.entityType = EntityType.ARMOR_STAND;
+		armorStandPreview.showBasePlate = false;
+		armorStandPreview.showArms = true;
+		armorStandPreview.xRot = 25.0F;
+		armorStandPreview.bodyRot = 210.0F;
 		updateArmorStandPreview();
 
 		templateIcon = new CyclingSlotBackground(getContainer().getTemplateSlot().index);
@@ -52,16 +55,37 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 
 	private void updateArmorStandPreview() {
 		ItemStack stack = getContainer().getResultSlot().getItem();
-		if (armorStandPreview != null) {
-			for (EquipmentSlot equipmentslot : EquipmentSlot.values()) {
-				armorStandPreview.setItemSlot(equipmentslot, ItemStack.EMPTY);
-			}
-
-			if (!stack.isEmpty()) {
-				ItemStack itemstack = stack.copy();
-				Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
-				EquipmentSlot equipmentSlot = equippable != null ? equippable.slot() : EquipmentSlot.OFFHAND;
-				armorStandPreview.setItemSlot(equipmentSlot, itemstack);
+		this.armorStandPreview.leftHandItemStack = ItemStack.EMPTY;
+		this.armorStandPreview.leftHandItemState.clear();
+		this.armorStandPreview.headEquipment = ItemStack.EMPTY;
+		this.armorStandPreview.headItem.clear();
+		this.armorStandPreview.chestEquipment = ItemStack.EMPTY;
+		this.armorStandPreview.legsEquipment = ItemStack.EMPTY;
+		this.armorStandPreview.feetEquipment = ItemStack.EMPTY;
+		if (!stack.isEmpty()) {
+			Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+			ItemModelResolver itemmodelresolver = this.minecraft.getItemModelResolver();
+			switch (equippable != null ? equippable.slot() : null) {
+				case HEAD:
+					if (HumanoidArmorLayer.shouldRender(stack, EquipmentSlot.HEAD)) {
+						this.armorStandPreview.headEquipment = stack.copy();
+					} else {
+						itemmodelresolver.updateForTopItem(this.armorStandPreview.headItem, stack, ItemDisplayContext.HEAD, (Level)null, (ItemOwner)null, 0);
+					}
+					break;
+				case CHEST:
+					this.armorStandPreview.chestEquipment = stack.copy();
+					break;
+				case LEGS:
+					this.armorStandPreview.legsEquipment = stack.copy();
+					break;
+				case FEET:
+					this.armorStandPreview.feetEquipment = stack.copy();
+					break;
+				case null:
+				default:
+					this.armorStandPreview.leftHandItemStack = stack.copy();
+					itemmodelresolver.updateForTopItem(this.armorStandPreview.leftHandItemState, stack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, (Level)null, (ItemOwner)null, 0);
 			}
 		}
 	}
@@ -113,8 +137,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			GuiHelper.blit(guiGraphics, arrowX, arrowY, RED_CROSS);
 		}
 
-		InventoryScreen.renderEntityInInventory(guiGraphics, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10, 25f,
-				SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, armorStandPreview);
+		guiGraphics.submitEntityRenderState(armorStandPreview, 25f, SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10);
 	}
 
 	private int getArrowY(int inputSlotsY) {

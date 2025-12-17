@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -45,8 +45,8 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.CoreFakePlayer;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,7 +61,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private final FilterLogic filterLogic;
 	@Nullable
-	private ResourceLocation toolCacheFor = null;
+	private Identifier toolCacheFor = null;
 	private final Queue<ItemStack> toolCache = new LinkedList<>();
 
 	private Block lastMinedBlock = Blocks.AIR;
@@ -304,7 +304,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		return tryToSwapTool(player, stack -> itemWorksOnBlock(level, pos, blockState, player, stack), BuiltInRegistries.BLOCK.getKey(blockState.getBlock()));
 	}
 
-	private boolean tryToSwapTool(Player player, Predicate<ItemStack> isToolValid, @Nullable ResourceLocation targetRegistryName) {
+	private boolean tryToSwapTool(Player player, Predicate<ItemStack> isToolValid, @Nullable Identifier targetRegistryName) {
 		ItemStack mainHandStack = player.getMainHandItem();
 		if (mainHandStack.getItem() instanceof BackpackItem) {
 			return false;

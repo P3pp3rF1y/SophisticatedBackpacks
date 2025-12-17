@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public record BackpackSettingsPayload(UUID backpackUuid,
 									  ContainerContents.SettingsData settingsData) implements CustomPacketPayload {
-	public static final Type<BackpackSettingsPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_settings"));
+	public static final Type<BackpackSettingsPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("backpack_settings"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackSettingsPayload> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC,
 			BackpackSettingsPayload::backpackUuid,

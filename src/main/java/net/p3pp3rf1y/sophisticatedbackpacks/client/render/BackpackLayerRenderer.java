@@ -7,6 +7,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
@@ -29,11 +30,11 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import java.util.function.BiConsumer;
 
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
-	public static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getRL("backpack_item_stack"));
-	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getRL("wears_armor"));
-	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getRL("entity_type"));
-	private static final ContextKey<ItemStackRenderState> DISPLAY_ITEM = new ContextKey<>(SophisticatedBackpacks.getRL("display_item"));
-	private static final ContextKey<Integer> DISPLAY_ITEM_ROTATION = new ContextKey<>(SophisticatedBackpacks.getRL("display_item_rotation"));
+	public static final ContextKey<ItemStack> BACKPACK_ITEM_STACK = new ContextKey<>(SophisticatedBackpacks.getIdentifier("backpack_item_stack"));
+	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getIdentifier("wears_armor"));
+	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getIdentifier("entity_type"));
+	private static final ContextKey<ItemStackRenderState> DISPLAY_ITEM = new ContextKey<>(SophisticatedBackpacks.getIdentifier("display_item"));
+	private static final ContextKey<Integer> DISPLAY_ITEM_ROTATION = new ContextKey<>(SophisticatedBackpacks.getIdentifier("display_item_rotation"));
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, true).ifPresent(backpackRenderInfo ->
@@ -81,7 +82,11 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, S entityRenderState, float netHeadYaw, float headPitch) {
 		ItemStack backpack = entityRenderState.getRenderData(BACKPACK_ITEM_STACK);
 		if (backpack == null) {
-			return;
+			if (entityRenderState instanceof HumanoidRenderState humanoidRenderState && !humanoidRenderState.chestEquipment.isEmpty()) {
+				backpack = humanoidRenderState.chestEquipment;
+			} else {
+				return;
+			}
 		}
 		IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
 		poseStack.pushPose();

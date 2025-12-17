@@ -5,8 +5,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -36,8 +36,8 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -234,7 +234,7 @@ public class Config {
 			public Holder<MobEffect> getEffect(RegistryAccess registryAccess) {
 				if (cachedEffect == null) {
 					Registry<MobEffect> effectRegistry = registryAccess.lookupOrThrow(Registries.MOB_EFFECT);
-					cachedEffect = effectRegistry.get(ResourceLocation.parse(nerfEffect.get())).<Holder<MobEffect>>map(h -> h).orElse(MobEffects.SLOWNESS);
+					cachedEffect = effectRegistry.get(Identifier.parse(nerfEffect.get())).<Holder<MobEffect>>map(h -> h).orElse(MobEffects.SLOWNESS);
 				}
 				return cachedEffect;
 			}
@@ -263,7 +263,7 @@ public class Config {
 			public final ModConfigSpec.ConfigValue<List<? extends String>> entityLootTableList;
 			public final ModConfigSpec.ConfigValue<List<? extends String>> discBlockList;
 			@Nullable
-			private Map<EntityType<?>, ResourceLocation> entityLootTables = null;
+			private Map<EntityType<?>, Identifier> entityLootTables = null;
 
 			public EntityBackpackAdditionsConfig(ModConfigSpec.Builder builder) {
 				builder.comment("Settings for Spawning Entities with Backpack").push("entityBackpackAdditions");
@@ -298,7 +298,7 @@ public class Config {
 				builder.pop();
 			}
 
-			public Optional<ResourceLocation> getLootTableName(EntityType<?> entityType) {
+			public Optional<Identifier> getLootTableName(EntityType<?> entityType) {
 				if (entityLootTables == null) {
 					initEntityLootTables();
 				}
@@ -322,8 +322,8 @@ public class Config {
 					String entityRegistryName = entityLoot[0];
 					String lootTableName = entityLoot[1];
 
-					BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(entityRegistryName))
-							.ifPresent(entityType -> entityLootTables.put(entityType, lootTableName.equals("null") ? null : ResourceLocation.parse(lootTableName)));
+					BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(entityRegistryName))
+							.ifPresent(entityType -> entityLootTables.put(entityType, lootTableName.equals("null") ? null : Identifier.parse(lootTableName)));
 				}
 			}
 
@@ -335,7 +335,7 @@ public class Config {
 			}
 
 			private List<String> getDefaultEntityLootTableList() {
-				return getDefaultEntityLootMapping().entrySet().stream().map(e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getKey()) + "|" + e.getValue().location()).collect(Collectors.toList());
+				return getDefaultEntityLootMapping().entrySet().stream().map(e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getKey()) + "|" + e.getValue().identifier()).collect(Collectors.toList());
 			}
 
 			private Map<EntityType<?>, ResourceKey<LootTable>> getDefaultEntityLootMapping() {
@@ -411,7 +411,7 @@ public class Config {
 				noInteractionBlocksSet = new HashSet<>();
 
 				for (String disallowedItemName : noInteractionBlocksList.get()) {
-					ResourceLocation registryName = ResourceLocation.parse(disallowedItemName);
+					Identifier registryName = Identifier.parse(disallowedItemName);
 					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
 						noInteractionBlocksSet.add(BuiltInRegistries.BLOCK.getValue(registryName));
 					}
@@ -449,7 +449,7 @@ public class Config {
 				noConnnectionBlocksSet = new HashSet<>();
 
 				for (String disallowedItemName : noConnectionBlocksList.get()) {
-					ResourceLocation registryName = ResourceLocation.parse(disallowedItemName);
+					Identifier registryName = Identifier.parse(disallowedItemName);
 					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
 						noConnnectionBlocksSet.add(BuiltInRegistries.BLOCK.getValue(registryName));
 					}
@@ -490,7 +490,7 @@ public class Config {
 				disallowedItemsSet = new HashSet<>();
 
 				for (String disallowedItemName : disallowedItemsList.get()) {
-					ResourceLocation registryName = ResourceLocation.parse(disallowedItemName);
+					Identifier registryName = Identifier.parse(disallowedItemName);
 					BuiltInRegistries.ITEM.getOptional(registryName).ifPresent(disallowedItemsSet::add);
 				}
 			}
@@ -516,7 +516,7 @@ public class Config {
 			}
 
 			@Override
-			public int getMaxUpgradesPerStorage(String storageType, @Nullable ResourceLocation upgradeRegistryName) {
+			public int getMaxUpgradesPerStorage(String storageType, @Nullable Identifier upgradeRegistryName) {
 				if (maxUpgradesPerStorage == null) {
 					initMaxUpgradesPerStorage();
 				}

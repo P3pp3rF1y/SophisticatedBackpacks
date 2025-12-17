@@ -13,12 +13,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data,
 									int columnsTaken) implements CustomPacketPayload {
-	public static final Type<SyncClientInfoPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("sync_client_info"));
+	public static final Type<SyncClientInfoPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("sync_client_info"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, SyncClientInfoPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			SyncClientInfoPayload::slotIndex,

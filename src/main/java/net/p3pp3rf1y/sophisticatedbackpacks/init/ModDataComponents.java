@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 public class ModDataComponents {
 	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, SophisticatedBackpacks.MOD_ID);
 
-	public static final Supplier<DataComponentType<ResourceLocation>> LOOT_TABLE = DATA_COMPONENT_TYPES.register("loot_table",
-			() -> new DataComponentType.Builder<ResourceLocation>().persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC).build());
+	public static final Supplier<DataComponentType<Identifier>> LOOT_TABLE = DATA_COMPONENT_TYPES.register("loot_table",
+			() -> new DataComponentType.Builder<Identifier>().persistent(Identifier.CODEC).networkSynchronized(Identifier.STREAM_CODEC).build());
 
 	public static final Supplier<DataComponentType<Float>> LOOT_FACTOR = DATA_COMPONENT_TYPES.register("loot_factor",
 			() -> new DataComponentType.Builder<Float>().persistent(Codec.FLOAT).networkSynchronized(ByteBufCodecs.FLOAT).build());
@@ -45,8 +45,8 @@ public class ModDataComponents {
 	public static final Supplier<DataComponentType<ToolSwapMode>> TOOL_SWAP_MODE = DATA_COMPONENT_TYPES.register("tool_swap_mode",
 			() -> new DataComponentType.Builder<ToolSwapMode>().persistent(ToolSwapMode.CODEC).networkSynchronized(ToolSwapMode.STREAM_CODEC).build());
 
-	public static final Supplier<DataComponentType<ResourceLocation>> TEMPLATE_NAME = DATA_COMPONENT_TYPES.register("template_location",
-			() -> new DataComponentType.Builder<ResourceLocation>().persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC).build());
+	public static final Supplier<DataComponentType<Identifier>> TEMPLATE_NAME = DATA_COMPONENT_TYPES.register("template_location",
+			() -> new DataComponentType.Builder<Identifier>().persistent(Identifier.CODEC).networkSynchronized(Identifier.STREAM_CODEC).build());
 
 	public static void register(IEventBus modBus) {
 		DATA_COMPONENT_TYPES.register(modBus);

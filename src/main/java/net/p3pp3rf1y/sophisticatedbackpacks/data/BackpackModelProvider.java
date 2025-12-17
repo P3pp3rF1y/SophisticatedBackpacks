@@ -11,8 +11,8 @@ import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.template.CustomLoaderBuilder;
@@ -58,7 +58,7 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 
 	private void generateBackpackBlockAndItemModel(BlockModelGenerators blockModels, ItemModelGenerators itemModels, ResourceKey<Item> key, BackpackItem item) {
 		String clips;
-		String backpackRegistryName = key.location().getPath();
+		String backpackRegistryName = key.identifier().getPath();
 		if (backpackRegistryName.contains("_")) {
 			clips = backpackRegistryName.substring(0, backpackRegistryName.indexOf('_')) + "_clips";
 		} else {
@@ -72,17 +72,17 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 
 		Block block = item.getBackpackBlock();
 
-		ResourceLocation blockModel = provider.create(block, blockModels.modelOutput);
+		Identifier blockModel = provider.create(block, blockModels.modelOutput);
 		blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, MultiVariant.of(new BackpackBlockStateModelBuilder(blockModel))).with(BlockModelGenerators.ROTATION_HORIZONTAL_FACING));
 		blockModels.itemModelOutput.accept(item, new BackpackItemModel.Unbaked(blockModel, List.of(new BackpackTintSources.Main(BackpackWrapper.DEFAULT_MAIN_COLOR), new BackpackTintSources.Accent(BackpackWrapper.DEFAULT_ACCENT_COLOR))));
-		itemModels.createFlatItemModel(item, ModelTemplates.create(key.location().toString()));
+		itemModels.createFlatItemModel(item, ModelTemplates.create(key.identifier().toString()));
 	}
 
 	private static class BackpackLoaderBuilder extends CustomLoaderBuilder {
 		private final String clipsTexture;
 
 		protected BackpackLoaderBuilder(String clipsTexture) {
-			super(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"), false);
+			super(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"), false);
 			this.clipsTexture = clipsTexture;
 		}
 
@@ -94,7 +94,7 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 		@Override
 		public JsonObject toJson(JsonObject json) {
 			json = super.toJson(json);
-			json.add("clipsTexture", new JsonPrimitive(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/" + clipsTexture).toString()));
+			json.add("clipsTexture", new JsonPrimitive(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/" + clipsTexture).toString()));
 			return json;
 		}
 	}

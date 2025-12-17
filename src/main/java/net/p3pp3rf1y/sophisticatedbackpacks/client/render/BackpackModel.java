@@ -10,17 +10,18 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.MaterialMapper;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.AtlasManager;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -34,8 +35,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class BackpackModel extends EntityModel<LivingEntityRenderState> implements IBackpackModel {
@@ -46,8 +47,8 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 	}
 
 	public static final MaterialMapper MAPPER = new MaterialMapper(TextureAtlas.LOCATION_BLOCKS, "entity");
-	public static final Material BACKPACK_ENTITY_TEXTURE = MAPPER.apply(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"));
-	public static final Material TANK_GLASS_TEXTURE = MAPPER.apply(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "tank_glass"));
+	public static final Material BACKPACK_ENTITY_TEXTURE = MAPPER.apply(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"));
+	public static final Material TANK_GLASS_TEXTURE = MAPPER.apply(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "tank_glass"));
 	public static final float CHILD_Y_OFFSET = 0.3F;
 	public static final float CHILD_Z_OFFSET = 0.1F;
 	public static final float CHILD_SCALE = 0.55F;
@@ -335,7 +336,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		boolean showRightTank = tankPositions.contains(TankPosition.RIGHT);
 		Optional<RenderData.BatteryRenderData> batteryRenderData = renderDataHandler.getBatteryRenderData();
 
-		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderTypes::entityCutoutNoCull);
 		AtlasManager atlasManager = Minecraft.getInstance().getAtlasManager();
 		TextureAtlasSprite mainSprite = atlasManager.get(BACKPACK_ENTITY_TEXTURE);
 		if (showLeftTank) {
@@ -374,7 +375,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		submitNodeCollector.submitModelPart(cloth, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, clothColor, null);
 		submitNodeCollector.submitModelPart(border, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite, borderColor, null);
 
-		RenderType tankGlassRenderType = TANK_GLASS_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		RenderType tankGlassRenderType = TANK_GLASS_TEXTURE.renderType(RenderTypes::entityCutoutNoCull);
 		TextureAtlasSprite tankGlassSprite = atlasManager.get(TANK_GLASS_TEXTURE);
 		poseStack.pushPose();
 		poseStack.scale(1 / 2f, 6 / 10f, 1 / 2f);
@@ -386,11 +387,11 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		}
 		if (showLeftTank) {
 			RenderData.TankRenderData tankRenderData = renderDataHandler.getTankRenderData().get(TankPosition.LEFT);
-			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData,true, packedLight));
+			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData, true, packedLight));
 		}
 		if (showRightTank) {
 			RenderData.TankRenderData tankRenderData = renderDataHandler.getTankRenderData().get(TankPosition.RIGHT);
-			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData,false, packedLight));
+			tankRenderData.getFluid().ifPresent(fluidStack -> submitFluid(submitNodeCollector, poseStack, fluidStack, tankRenderData, false, packedLight));
 		}
 		poseStack.popPose();
 		if (batteryRenderData.isPresent()) {
@@ -400,7 +401,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 
 	private void submitFluid(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, FluidStack fluidStack, RenderData.TankRenderData tankRenderData, boolean left, int packedLight) {
 		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+		Identifier texture = renderProperties.getStillTexture(fluidStack);
 		TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
 		int color = renderProperties.getTintColor(fluidStack);
 		submitFluid(submitNodeCollector, poseStack, still, tankRenderData.fillRatio(), color, left, packedLight);
@@ -412,7 +413,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 		if (charge == null) {
 			return;
 		}
-		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderType::entityCutoutNoCull);
+		RenderType mainRenderType = BACKPACK_ENTITY_TEXTURE.renderType(RenderTypes::entityCutoutNoCull);
 		AtlasManager atlasManager = Minecraft.getInstance().getAtlasManager();
 		TextureAtlasSprite mainSprite = atlasManager.get(BACKPACK_ENTITY_TEXTURE);
 		submitNodeCollector.submitModelPart(charge, poseStack, mainRenderType, packedLight, OverlayTexture.NO_OVERLAY, mainSprite);
@@ -424,7 +425,7 @@ public class BackpackModel extends EntityModel<LivingEntityRenderState> implemen
 			return;
 		}
 		ModelPart fluidBox = getFluidBar(sprite, (int) (fill * 10), left);
-		submitNodeCollector.submitModelPart(fluidBox, poseStack, RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), packedLight, OverlayTexture.NO_OVERLAY, sprite, color, null);
+		submitNodeCollector.submitModelPart(fluidBox, poseStack, RenderTypes.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), packedLight, OverlayTexture.NO_OVERLAY, sprite, color, null);
 	}
 
 	private ModelPart getFluidBar(TextureAtlasSprite still, int fill, boolean left) {

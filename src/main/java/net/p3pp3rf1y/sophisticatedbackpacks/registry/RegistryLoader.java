@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -17,7 +17,7 @@ import java.util.*;
 
 //TODO rework this to use CODECs instead if possible
 public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement> {
-	public static final ResourceLocation KEY = SophisticatedBackpacks.getRL("registry_loader");
+	public static final Identifier KEY = SophisticatedBackpacks.getIdentifier("registry_loader");
 	private static final Map<String, IRegistryDataLoader> loaders = new HashMap<>();
 
 	public static void registerParser(IRegistryDataLoader parser) {
@@ -29,7 +29,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 		registerParser(new ToolRegistry.EntityToolsLoader());
 	}
 
-	private final Map<ResourceLocation, String> loadedRegistries = new HashMap<>();
+	private final Map<Identifier, String> loadedRegistries = new HashMap<>();
 
 	public RegistryLoader() {
 		super(ExtraCodecs.JSON, FileToIdConverter.json("registry"));
@@ -38,13 +38,13 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 	private final List<DependentFile> loadLater = new ArrayList<>();
 
 	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> registries, ResourceManager resourceManagerIn, ProfilerFiller profilerIn) {
+	protected void apply(Map<Identifier, JsonElement> registries, ResourceManager resourceManagerIn, ProfilerFiller profilerIn) {
 		loaders.values().forEach(IRegistryDataLoader::clear);
 		registries.forEach(this::loadRegistry);
 		loadDependents(registries);
 	}
 
-	private void loadDependents(Map<ResourceLocation, JsonElement> registries) {
+	private void loadDependents(Map<Identifier, JsonElement> registries) {
 		int lastCountLoadLater = loadLater.size();
 		while (!loadLater.isEmpty()) {
 			Iterator<DependentFile> iterator = loadLater.iterator();
@@ -69,7 +69,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 		}
 	}
 
-	private void loadRegistry(ResourceLocation name, JsonElement fullJson) {
+	private void loadRegistry(Identifier name, JsonElement fullJson) {
 		SophisticatedBackpacks.LOGGER.debug("Started loading registry data from {} ", name);
 		String path = name.getPath();
 		String shortName = path.substring(path.lastIndexOf('/') + 1);
@@ -138,10 +138,10 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 	}
 
 	private static class DependentFile {
-		private final ResourceLocation name;
+		private final Identifier name;
 		private final Set<String> dependencies;
 
-		private DependentFile(ResourceLocation name, Set<String> dependencies) {
+		private DependentFile(Identifier name, Set<String> dependencies) {
 			this.name = name;
 			this.dependencies = dependencies;
 		}
@@ -150,7 +150,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 			return dependencies;
 		}
 
-		public ResourceLocation getName() {
+		public Identifier getName() {
 			return name;
 		}
 	}

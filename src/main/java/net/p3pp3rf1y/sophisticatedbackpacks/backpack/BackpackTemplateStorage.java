@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -22,16 +22,16 @@ public class BackpackTemplateStorage extends SavedData {
 	private static final SavedDataType<BackpackTemplateStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID + "_backpack_templates", BackpackTemplateStorage::new,
 			RecordCodecBuilder.create(builder -> builder.group(
 					Codec.unboundedMap(
-							ResourceLocation.CODEC,
+							Identifier.CODEC,
 							BackpackTemplate.CODEC
 					).fieldOf("backpackTemplates").forGetter(storage -> storage.backpackTemplates)
 			).apply(builder, BackpackTemplateStorage::new))
 	);
 
 	private static final BackpackTemplateStorage clientStorageCopy = new BackpackTemplateStorage();
-	private final Map<ResourceLocation, BackpackTemplate> backpackTemplates = new HashMap<>();
+	private final Map<Identifier, BackpackTemplate> backpackTemplates = new HashMap<>();
 
-	private BackpackTemplateStorage(Map<ResourceLocation, BackpackTemplate> backpackTemplates) {
+	private BackpackTemplateStorage(Map<Identifier, BackpackTemplate> backpackTemplates) {
 		this.backpackTemplates.putAll(backpackTemplates);
 	}
 
@@ -51,21 +51,21 @@ public class BackpackTemplateStorage extends SavedData {
 		return clientStorageCopy;
 	}
 
-	public Optional<BackpackTemplate> getBackpackTemplate(ResourceLocation templateName) {
+	public Optional<BackpackTemplate> getBackpackTemplate(Identifier templateName) {
 		return Optional.ofNullable(backpackTemplates.get(templateName));
 	}
 
-	public void setBackpackTemplate(ResourceLocation templateName, BackpackTemplate backpackTemplate) {
+	public void setBackpackTemplate(Identifier templateName, BackpackTemplate backpackTemplate) {
 		backpackTemplates.put(templateName, backpackTemplate);
 		setDirty();
 	}
 
-	public void removeBackpackTemplate(ResourceLocation templateName) {
+	public void removeBackpackTemplate(Identifier templateName) {
 		backpackTemplates.remove(templateName);
 		setDirty();
 	}
 
-	public Map<ResourceLocation, BackpackTemplate> getBackpackTemplates() {
+	public Map<Identifier, BackpackTemplate> getBackpackTemplates() {
 		return backpackTemplates;
 	}
 
