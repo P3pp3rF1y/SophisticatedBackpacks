@@ -82,7 +82,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, S entityRenderState, float netHeadYaw, float headPitch) {
 		ItemStack backpack = entityRenderState.getRenderData(BACKPACK_ITEM_STACK);
 		if (backpack == null) {
-			if (entityRenderState instanceof HumanoidRenderState humanoidRenderState && !humanoidRenderState.chestEquipment.isEmpty()) {
+			if (entityRenderState instanceof HumanoidRenderState humanoidRenderState && humanoidRenderState.chestEquipment.getItem() instanceof BackpackItem) {
 				backpack = humanoidRenderState.chestEquipment;
 			} else {
 				return;
