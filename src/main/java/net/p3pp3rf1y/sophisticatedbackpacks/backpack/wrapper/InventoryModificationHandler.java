@@ -3,12 +3,13 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
-import net.p3pp3rf1y.sophisticatedcore.inventory.OverflowAwareInventoryHandler;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 public class InventoryModificationHandler {
 	private final IStorageWrapper backpackWrapper;
+	@Nullable
 	private ITrackedContentsItemResourceHandler modifiedInventoryHandler;
 
 	public InventoryModificationHandler(IStorageWrapper backpackWrapper) {
@@ -17,7 +18,7 @@ public class InventoryModificationHandler {
 
 	public ITrackedContentsItemResourceHandler getModifiedInventoryHandler() {
 		if (modifiedInventoryHandler == null) {
-			initializeWrappedInventory(new OverflowAwareInventoryHandler(backpackWrapper.getInventoryHandler()));
+			initializeWrappedInventory(backpackWrapper.getInventoryHandler());
 		}
 		return modifiedInventoryHandler;
 	}
