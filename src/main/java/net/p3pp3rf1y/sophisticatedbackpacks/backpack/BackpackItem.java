@@ -347,13 +347,18 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 
 		ItemStack stackToStash = slot.getItem();
+		int stashed;
+		ItemResource resource = ItemResource.of(stackToStash);
 		try (Transaction tx = Transaction.openRoot()) {
-			int stashed = stash(storageStack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
-			if (stashed > 0) {
-				slot.safeTake(stashed, stashed, player);
+			stashed = stash(storageStack, resource, stackToStash.getCount(), tx);
+		}
+		if (stashed > 0) {
+			slot.safeTake(stashed, stashed, player);
+			try (Transaction tx = Transaction.openRoot()) {
+				stash(storageStack, resource, stashed, tx);
 				tx.commit();
-				return true;
 			}
+			return true;
 		}
 
 		return super.overrideStackedOnOther(storageStack, slot, action, player);
