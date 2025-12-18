@@ -102,8 +102,8 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
 				this.addSlot(new SlotSuppliedHandler(() -> upgradeWrapper.getInventory(), slotDefinition.slotIndex(), 0, 0) {
 					@Override
-					protected void setStackCopy(ItemStack stack) {
-						super.setStackCopy(stack);
+					public void set(ItemStack stack) {
+						super.set(stack);
 
 						slotsChanged(inputSlots);
 						if (slotDefinition.slotIndex() == 0) {
