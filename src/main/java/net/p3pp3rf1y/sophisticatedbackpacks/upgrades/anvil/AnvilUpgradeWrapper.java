@@ -15,8 +15,10 @@ public class AnvilUpgradeWrapper extends UpgradeWrapperBase<AnvilUpgradeWrapper,
 
 	protected AnvilUpgradeWrapper(IStorageWrapper storageWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(storageWrapper, upgrade, upgradeSaveHandler);
-
-		inventory = new StatefulComponentItemHandler(upgrade, DataComponents.CONTAINER, 2) {
+		if (upgrade.has(DataComponents.CONTAINER)) {
+			upgrade.set(ModCoreDataComponents.LENIENT_CONTAINER, upgrade.get(DataComponents.CONTAINER));
+		}
+		inventory = new StatefulComponentItemHandler(upgrade, ModCoreDataComponents.LENIENT_CONTAINER.get(), 2) {
 			@Override
 			protected void onContentsChanged(int slot, ItemStack oldStack, ItemStack newStack) {
 				super.onContentsChanged(slot, oldStack, newStack);
