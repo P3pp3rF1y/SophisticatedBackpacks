@@ -19,7 +19,6 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 	private List<ITrackedContentsItemHandler> handlers;
-	private int[] baseIndex;
 
 	public InceptionInventoryHandler(ITrackedContentsItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
@@ -39,7 +38,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedInventoryHandler);
 		}
-		combinedInventories = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[] {})) {
+		combinedInventories = new CombinedInvWrapper(handlers.toArray(new IItemHandlerModifiable[]{})) {
 			@Override
 			public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 				ItemStack remaining = stack;
@@ -52,13 +51,6 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 				return remaining;
 			}
 		};
-
-		baseIndex = new int[handlers.size()];
-		int index = 0;
-		for (int i = 0; i < handlers.size(); i++) {
-			index += handlers.get(i).getSlots();
-			baseIndex[i] = index;
-		}
 	}
 
 	@Override
@@ -132,35 +124,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	}
 
 	@Override
-	public int getInternalSlotLimit(int slot) {
-		int index = getIndexForSlot(slot);
-		ITrackedContentsItemHandler handler = getHandlerFromIndex(index);
-		int localSlot = getSlotFromIndex(slot, index);
-		return handler.getInternalSlotLimit(localSlot);
-	}
-
-	private int getIndexForSlot(int slot) {
-		if (slot < 0) {return -1;}
-
-		for (int i = 0; i < baseIndex.length; i++) {
-			if (slot - baseIndex[i] < 0) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	private int getSlotFromIndex(int slot, int index) {
-		if (index <= 0 || index >= baseIndex.length) {
-			return slot;
-		}
-		return slot - baseIndex[index - 1];
-	}
-
-	private ITrackedContentsItemHandler getHandlerFromIndex(int index) {
-		if (index < 0 || index >= handlers.size()) {
-			return handlers.getFirst();
-		}
-		return handlers.get(index);
+	public boolean isInsertBlocked() {
+		return handlers.stream().allMatch(ITrackedContentsItemHandler::isInsertBlocked);
 	}
 }
