@@ -152,7 +152,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			return null;
 		}
 		if (externalItemHandler == null) {
-			externalItemHandler = new CachedFailedInsertInventoryHandler(() -> {
+			externalItemHandler = new CachedFailedInsertInventoryHandler<>(() -> {
 				IBackpackWrapper backpackWrapper = getBackpackWrapper();
 				if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
 					backpackWrapper.fillWithLootAndExtraItems(level, getBlockPos());
