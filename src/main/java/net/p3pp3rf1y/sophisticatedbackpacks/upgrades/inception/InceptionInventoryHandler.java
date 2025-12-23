@@ -170,4 +170,9 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 		}
 		return handlers.get(index);
 	}
+
+	@Override
+	public boolean isInsertBlocked() {
+		return handlers.stream().allMatch(ITrackedContentsItemResourceHandler::isInsertBlocked);
+	}
 }
