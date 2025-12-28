@@ -17,6 +17,7 @@ public class SmithingUpgradeWrapper extends UpgradeWrapperBase<SmithingUpgradeWr
 		if (upgrade.has(DataComponents.CONTAINER)) {
 			upgrade.set(ModCoreDataComponents.LENIENT_CONTAINER, upgrade.get(DataComponents.CONTAINER));
 		}
+		upgrade.remove(DataComponents.CONTAINER);
 		inventory = new StatefulComponentItemHandler(upgrade, ModCoreDataComponents.LENIENT_CONTAINER.get(), 3) {
 			@Override
 			protected void onContentsChanged(int slot, ItemStack oldStack, ItemStack newStack) {
