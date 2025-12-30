@@ -12,7 +12,7 @@ public class SBPPacketHandler extends PacketHandler {
 
 	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
 	@Override
-	public void init() {
+	public void registerMessages() {
 		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::encode, BackpackOpenMessage::decode, BackpackOpenMessage::onMessage);
 		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::encode, UpgradeToggleMessage::decode, UpgradeToggleMessage::onMessage);
 		registerMessage(RequestBackpackInventoryContentsMessage.class, RequestBackpackInventoryContentsMessage::encode, RequestBackpackInventoryContentsMessage::decode, RequestBackpackInventoryContentsMessage::onMessage);

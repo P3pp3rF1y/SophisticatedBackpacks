@@ -7,12 +7,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
+import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class BackpackContentsMessage {
+public class BackpackContentsMessage implements ISplittableMessage {
 	private final UUID backpackUuid;
 	@Nullable
 	private final CompoundTag backpackContents;
@@ -28,7 +29,7 @@ public class BackpackContentsMessage {
 	}
 
 	public static BackpackContentsMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BackpackContentsMessage(packetBuffer.readUUID(), packetBuffer.readNbt());
+		return new BackpackContentsMessage(packetBuffer.readUUID(), packetBuffer.readAnySizeNbt());
 	}
 
 	static void onMessage(BackpackContentsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

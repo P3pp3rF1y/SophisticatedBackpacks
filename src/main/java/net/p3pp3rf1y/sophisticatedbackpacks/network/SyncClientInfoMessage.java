@@ -8,11 +8,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public class SyncClientInfoMessage {
+public class SyncClientInfoMessage implements ISplittableMessage {
 	private final int slotIndex;
 	@Nullable
 	private final CompoundTag renderInfoNbt;
@@ -31,7 +32,7 @@ public class SyncClientInfoMessage {
 	}
 
 	public static SyncClientInfoMessage decode(FriendlyByteBuf packetBuffer) {
-		return new SyncClientInfoMessage(packetBuffer.readInt(), packetBuffer.readNbt(), packetBuffer.readInt());
+		return new SyncClientInfoMessage(packetBuffer.readInt(), packetBuffer.readAnySizeNbt(), packetBuffer.readInt());
 	}
 
 	static void onMessage(SyncClientInfoMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
