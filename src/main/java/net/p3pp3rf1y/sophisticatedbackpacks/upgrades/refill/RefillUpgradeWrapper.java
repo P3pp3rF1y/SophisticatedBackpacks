@@ -22,6 +22,7 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -153,7 +154,6 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}
 
 		var handler = storageWrapper.getInventoryForUpgradeProcessing(); // ResourceHandler<ItemResource>
-		ItemStack handCopy = player.getMainHandItem().copy();
 
 		try (Transaction tx = Transaction.openRoot()) {
 			int pulled = handler.extract(ItemResource.of(filter), filter.getMaxStackSize(), tx);
@@ -161,20 +161,29 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 				return false;
 			}
 
+			int slotToUse = player.getInventory().getSuitableHotbarSlot();
+			ItemStack stackInSlot = player.getInventory().getItem(slotToUse);
+
+			if (stackInSlot.getItem() instanceof BackpackItem) {
+				return false;
+			}
+
 			boolean canStashHand =
-					handCopy.isEmpty()
-							|| handler.insert(ItemResource.of(handCopy), handCopy.getCount(), tx) == handCopy.getCount();
+					stackInSlot.isEmpty()
+							|| handler.insert(ItemResource.of(stackInSlot), stackInSlot.getCount(), tx) == stackInSlot.getCount();
 
 			if (canStashHand) {
 				tx.commit();
-				player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, filter.copyWithCount(pulled));
+				player.getInventory().setSelectedSlot(slotToUse);
+				player.getInventory().setSelectedItem(filter.copyWithCount(pulled));
 				return true;
 			} else if (canMoveMainHandToInventory(player)) {
 				tx.commit();
-				if (!handCopy.isEmpty()) {
-					player.getInventory().add(handCopy);
+				if (!stackInSlot.isEmpty()) {
+					player.getInventory().add(stackInSlot.copy());
 				}
-				player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, filter.copyWithCount(pulled));
+				player.getInventory().setSelectedSlot(slotToUse);
+				player.getInventory().setSelectedItem(filter.copyWithCount(pulled));
 				return true;
 			} else {
 				player.displayClientMessage(
