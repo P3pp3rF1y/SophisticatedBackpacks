@@ -164,13 +164,8 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			int slotToUse = player.getInventory().getSuitableHotbarSlot();
 			ItemStack stackInSlot = player.getInventory().getItem(slotToUse);
 
-			if (stackInSlot.getItem() instanceof BackpackItem) {
-				return false;
-			}
-
-			boolean canStashHand =
-					stackInSlot.isEmpty()
-							|| handler.insert(ItemResource.of(stackInSlot), stackInSlot.getCount(), tx) == stackInSlot.getCount();
+			boolean canStashHand = !(stackInSlot.getItem() instanceof BackpackItem)
+					&& (stackInSlot.isEmpty() || handler.insert(ItemResource.of(stackInSlot), stackInSlot.getCount(), tx) == stackInSlot.getCount());
 
 			if (canStashHand) {
 				tx.commit();
@@ -202,7 +197,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}
 		AtomicInteger countAdded = new AtomicInteger();
 		return InventoryHelper.iterate(capability, (slot, resource, amount) -> {
-			if (slot == player.getInventory().getSelectedSlot()) {
+			if (slot > 35 || slot == player.getInventory().getSelectedSlot()) {
 				return false;
 			}
 			if (resource.isEmpty()) {
