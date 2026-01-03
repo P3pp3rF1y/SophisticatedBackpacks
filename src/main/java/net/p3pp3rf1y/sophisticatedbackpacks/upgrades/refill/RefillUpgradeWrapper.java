@@ -166,16 +166,17 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			}
 		}, () -> stashSlot.get() > -1);
 
-		ItemStack mainHandItem = player.getMainHandItem();
 		ItemStack toExtract = filter.copy();
 		toExtract.setCount(filter.getMaxStackSize());
 		if (hasItemInBackpack.get() && !InventoryHelper.extractFromInventory(toExtract, inventoryHandler, true).isEmpty()) {
-			if ((inventoryHandler.getStackInSlot(stashSlot.get()).getCount() > filter.getMaxStackSize() || !inventoryHandler.isItemValid(stashSlot.get(), mainHandItem))
-					&& !inventoryHandler.insertItem(mainHandItem, true).isEmpty()) {
-				if (canMoveMainHandToInventory(player)) {
+			player.getInventory().setSelectedSlot(player.getInventory().getSuitableHotbarSlot());
+			ItemStack selectedItem = player.getInventory().getSelectedItem();
+			if ((inventoryHandler.getStackInSlot(stashSlot.get()).getCount() > filter.getMaxStackSize() || !inventoryHandler.isItemValid(stashSlot.get(), selectedItem))
+					&& !inventoryHandler.insertItem(selectedItem, true).isEmpty()) {
+				if (canMoveSelectedToInventory(player)) {
 					ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
 					player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
-					player.getInventory().add(mainHandItem);
+					player.getInventory().add(selectedItem);
 					return true;
 				} else {
 					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"), true);
@@ -183,7 +184,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 				}
 			} else {
 				ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, false);
-				inventoryHandler.insertItem(mainHandItem, false);
+				inventoryHandler.insertItem(selectedItem, false);
 				player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
 				return true;
 			}
@@ -191,7 +192,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		return false;
 	}
 
-	private boolean canMoveMainHandToInventory(Player player) {
+	private boolean canMoveSelectedToInventory(Player player) {
 		int countToAdd = player.getMainHandItem().getCount();
 		for (int slot = 0; slot < player.getInventory().getContainerSize() - 5; slot++) {
 			if (slot == player.getInventory().getSelectedSlot()) {
