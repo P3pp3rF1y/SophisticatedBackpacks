@@ -127,4 +127,20 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	public boolean isInsertBlocked() {
 		return handlers.stream().allMatch(ITrackedContentsItemHandler::isInsertBlocked);
 	}
+
+	@Override
+	public ItemStack extractItem(ItemStack stack, boolean simulate) {
+		ItemStack remaining = stack;
+		for (ITrackedContentsItemHandler handler : handlers) {
+			ItemStack extracted = handler.extractItem(remaining, simulate);
+			if (extracted.getCount() > 0) {
+				remaining = stack.copyWithCount(remaining.getCount() - extracted.getCount());
+			}
+			if (remaining.isEmpty()) {
+				break;
+			}
+		}
+
+		return stack.getCount() == remaining.getCount() ? ItemStack.EMPTY : stack.copyWithCount(stack.getCount() - remaining.getCount());
+	}
 }
