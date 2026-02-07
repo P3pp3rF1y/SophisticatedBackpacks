@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common;
 import com.google.common.primitives.Ints;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.EnchantmentTags;
@@ -32,7 +31,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -44,8 +42,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.DiscHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.VanillaDiscHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
@@ -114,6 +114,10 @@ public class EntityBackpackAdditionHandler {
 			2, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierHighDifficulty.getAsInt(), 6)
 	);
 
+	static {
+		VanillaDiscHandler.setDiscBlockListGetter(Config.SERVER.entityBackpackAdditions.discBlockList);
+	}
+
 	static void addBackpack(Monster monster, LevelAccessor level) {
 		RandomSource rnd = level.getRandom();
 		if (!Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
@@ -180,8 +184,7 @@ public class EntityBackpackAdditionHandler {
 		w.getUpgradeHandler().setStackInSlot(0, new ItemStack(advancedJukebox ? ModItems.ADVANCED_JUKEBOX_UPGRADE.get() : ModItems.JUKEBOX_UPGRADE.get()));
 		Iterator<JukeboxUpgradeWrapper> it = w.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).iterator();
 		if (it.hasNext()) {
-			List<Item> musicDiscs = getMusicDiscs();
-			if (musicDiscs.isEmpty()) {
+			if (DiscHandlerRegistry.getHandlers().isEmpty()) {
 				SophisticatedBackpacks.LOGGER.warn("No music discs found to add to jukebox upgrade, either there are none registered or they are all blocked");
 				return;
 			}
@@ -189,28 +192,10 @@ public class EntityBackpackAdditionHandler {
 			JukeboxUpgradeWrapper wrapper = it.next();
 			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().getSlots() / 3) + 1 : 1;
 			for (int i = 0; i < numberOfDiscs; i++) {
-				wrapper.getDiscInventory().insertItem(i, new ItemStack(getMusicDiscs().get(rnd.nextInt(musicDiscs.size())), 1), false);
+				final int slot = i;
+				DiscHandlerRegistry.getRandomDisc(rnd).ifPresent(disc -> wrapper.getDiscInventory().insertItem(slot, disc, false));
 			}
 		}
-	}
-
-	private static List<Item> musicDiscs = null;
-
-	private static List<Item> getMusicDiscs() {
-		if (musicDiscs == null) {
-			BuiltInRegistries.ITEM.getTag(Tags.Items.MUSIC_DISCS).ifPresentOrElse(records -> {
-				Set<String> blockedDiscs = new HashSet<>(Config.SERVER.entityBackpackAdditions.discBlockList.get());
-				musicDiscs = new ArrayList<>();
-				records.forEach(musicDisc -> {
-					//noinspection ConstantConditions - by this point the disc has registry name
-					if (!blockedDiscs.contains(musicDisc.getKey().location().toString())) {
-						musicDiscs.add(musicDisc.value());
-					}
-				});
-			}, () -> musicDiscs = Collections.emptyList());
-		}
-
-		return musicDiscs;
 	}
 
 	private static void raiseHealth(Monster monster, int minDifficulty) {
