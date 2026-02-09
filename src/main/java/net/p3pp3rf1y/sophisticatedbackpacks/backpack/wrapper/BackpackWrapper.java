@@ -450,9 +450,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (level.isClientSide) {
 			return;
 		}
-		BlockPos pos = player.blockPosition();
 		fillFromTemplate();
-		fillWithLoot(level, pos);
+		fillWithLoot(level, player.blockPosition(), player);
 		fillWithExtraItems(stack -> InventoryHelper.insertOrDropItem(player, stack, getInventoryHandler()));
 	}
 
@@ -485,11 +484,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public void fillWithLoot(Level level, BlockPos pos) {
+		fillWithLoot(level, pos, null);
+	}
+
+	public void fillWithLoot(Level level, BlockPos pos, @Nullable Player player) {
 		ResourceLocation lootTable = getBackpackStack().get(ModDataComponents.LOOT_TABLE);
 		if (lootTable == null) {
 			return;
 		}
-		fillWithLootFromTable(level, pos, lootTable);
+		fillWithLootFromTable(level, pos, lootTable, player);
 	}
 
 	@Override
@@ -568,7 +571,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return getBackpackStack().getOrDefault(ModDataComponents.COLUMNS_TAKEN, 0);
 	}
 
-	private void fillWithLootFromTable(Level level, BlockPos pos, ResourceLocation lootTable) {
+	private void fillWithLootFromTable(Level level, BlockPos pos, ResourceLocation lootTable, @Nullable Player player) {
 		MinecraftServer server = level.getServer();
 		if (server == null || !(level instanceof ServerLevel serverLevel)) {
 			return;
@@ -579,9 +582,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 		getBackpackStack().remove(ModDataComponents.LOOT_TABLE);
 		getBackpackStack().remove(ModDataComponents.LOOT_FACTOR);
 
-		List<ItemStack> loot = LootHelper.getLoot(lootTable, server, serverLevel, pos);
-		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
-		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootFactor));
+		List<ItemStack> loot = new ArrayList<>();
+		while (lootFactor > 0) {
+			List<ItemStack> generatedLoot = LootHelper.getLoot(lootTable, server, serverLevel, pos, player);
+			generatedLoot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
+			loot.addAll(RandHelper.getNRandomElements(generatedLoot, (int) (generatedLoot.size() * (lootFactor > 1 ? 1 : lootFactor))));
+			lootFactor--;
+		}
 		LootHelper.fillWithLoot(serverLevel.random, loot, getInventoryHandler());
 	}
 
