@@ -134,9 +134,8 @@ public class EntityBackpackAdditionHandler {
 		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(difficultyIndex)).ifPresent(backpackAddition -> {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
-			int difficulty = Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1));
-			equipBackpack(monster, backpack, difficulty, Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0, level, rnd);
-			applyPotions(monster, difficulty, minDifficulty, rnd);
+			equipBackpack(monster, backpack, minDifficulty, Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0, level, rnd);
+			applyPotions(monster, Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1)), minDifficulty, rnd);
 			raiseHealth(monster, minDifficulty);
 			if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.equipWithArmor.get())) {
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getHelmetChances(), EquipmentSlot.HEAD, level);
@@ -162,11 +161,14 @@ public class EntityBackpackAdditionHandler {
 		});
 	}
 
-	private static void equipBackpack(Monster monster, ItemStack backpack, int difficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
+	private static void equipBackpack(Monster monster, ItemStack backpack, int minDifficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
 		getSpawnEgg(monster.getType()).ifPresent(egg -> {
 			IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 			wrapper.setColors(egg.getColor(0) | 0xFF_000000, egg.getColor(1) | 0xFF_000000);
-			setLoot(monster, wrapper, difficulty, level);
+			int partialRolls = rnd.nextInt(minDifficulty, minDifficulty + 3);
+			if (partialRolls != 0) {
+				setLoot(monster, wrapper, level, (float) partialRolls / MAX_DIFFICULTY);
+			}
 			if (playMusicDisc) {
 				wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
 				if (wrapper.getUpgradeHandler().getSlots() > 0) {
@@ -224,14 +226,14 @@ public class EntityBackpackAdditionHandler {
 			new ApplicableEffect(MobEffects.MOVEMENT_SPEED),
 			new ApplicableEffect(MobEffects.DAMAGE_BOOST));
 
-	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty, LevelAccessor level) {
+	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, LevelAccessor level, float lootFactor) {
 		MinecraftServer server = level.getServer();
 		if (server == null) {
 			return;
 		}
 
 		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.addLoot.get())) {
-			addLoot(monster, backpackWrapper, difficulty);
+			addLoot(monster, backpackWrapper, lootFactor);
 		}
 	}
 
@@ -245,13 +247,10 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, int difficulty) {
-		if (difficulty != 0) {
-			Config.SERVER.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
-				float lootFactor = (float) difficulty / MAX_DIFFICULTY;
-				backpackWrapper.setLoot(lootTableName, lootFactor);
-			});
-		}
+	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, float lootFactor) {
+		Config.SERVER.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> {
+			backpackWrapper.setLoot(lootTableName, lootFactor);
+		});
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
