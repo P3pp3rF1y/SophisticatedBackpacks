@@ -447,13 +447,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (level.isClientSide) {
 			return;
 		}
-		BlockPos pos = player.blockPosition();
 		fillFromTemplate();
-		fillWithLoot(level, pos);
+		fillWithLoot(level, player.blockPosition(), player);
 	}
 
 	private void fillWithLoot(Level level, BlockPos pos) {
-		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(level, pos, ltName));
+		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(level, pos, ltName, null));
+	}
+
+	public void fillWithLoot(Level level, BlockPos pos, @Nullable Player player) {
+		NBTHelper.getString(backpack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(level, pos, ltName, player));
 	}
 
 	@Override
@@ -521,7 +524,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return NBTHelper.getInt(backpack, COLUMNS_TAKEN_TAG).orElse(0);
 	}
 
-	private void fillWithLootFromTable(Level level, BlockPos pos, String lootName) {
+	private void fillWithLootFromTable(Level level, BlockPos pos, String lootName, @Nullable Player player) {
 		MinecraftServer server = level.getServer();
 		if (server == null || !(level instanceof ServerLevel serverLevel)) {
 			return;
@@ -533,9 +536,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 		backpack.removeTagKey(LOOT_TABLE_NAME_TAG);
 		backpack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
-		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, serverLevel, pos);
-		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
-		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
+		List<ItemStack> loot = new ArrayList<>();
+		while (lootPercentage > 0) {
+			List<ItemStack> generatedLoot = LootHelper.getLoot(lootTableName, server, serverLevel, pos, player);
+			generatedLoot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
+			loot.addAll(RandHelper.getNRandomElements(generatedLoot, (int) (generatedLoot.size() * (lootPercentage > 1 ? 1 : lootPercentage))));
+			lootPercentage--;
+		}
 		LootHelper.fillWithLoot(serverLevel.random, loot, getInventoryHandler());
 	}
 
