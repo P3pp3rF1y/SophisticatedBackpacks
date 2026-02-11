@@ -194,9 +194,19 @@ public class EntityBackpackAdditionHandler {
 			JukeboxUpgradeWrapper wrapper = it.next();
 			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().size() / 3) + 1 : 1;
 			try (Transaction tx = Transaction.openRoot()) {
-				for (int i = 0; i < numberOfDiscs; i++) {
+				List<ItemStack> discsUsed = new ArrayList<>();
+				for (int i = 0; i < numberOfDiscs * 2; i++) {
 					int slot = i;
-					DiscHandlerRegistry.getRandomDisc(rnd).ifPresent(disc -> wrapper.getDiscInventory().insert(slot, ItemResource.of(disc), 1, tx));
+					DiscHandlerRegistry.getRandomDisc(rnd).ifPresent(disc -> {
+						if (discsUsed.stream().anyMatch(s -> ItemStack.isSameItemSameComponents(s, disc))) {
+							return;
+						}
+						wrapper.getDiscInventory().insert(slot, ItemResource.of(disc), 1, tx);
+						discsUsed.add(disc);
+					});
+					if (discsUsed.size() >= numberOfDiscs) {
+						break;
+					}
 				}
 				tx.commit();
 			}
