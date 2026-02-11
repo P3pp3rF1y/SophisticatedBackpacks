@@ -26,6 +26,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -40,10 +41,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.VanillaDiscHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class EntityBackpackAdditionHandler {
 	private static final int MAX_DIFFICULTY = 3;
@@ -185,9 +183,19 @@ public class EntityBackpackAdditionHandler {
 
 			JukeboxUpgradeWrapper wrapper = it.next();
 			int numberOfDiscs = advancedJukebox ? random.nextInt(wrapper.getDiscInventory().getSlots() / 3) + 1 : 1;
-			for (int i = 0; i < numberOfDiscs; i++) {
+			List<ItemStack> discsUsed = new ArrayList<>();
+			for (int i = 0; i < numberOfDiscs * 2; i++) {
 				final int slot = i;
-				DiscHandlerRegistry.getRandomDisc(rnd).ifPresent(disc -> wrapper.getDiscInventory().insertItem(slot, disc, false));
+				DiscHandlerRegistry.getRandomDisc(rnd).ifPresent(disc -> {
+					if (discsUsed.stream().anyMatch(s -> ItemHandlerHelper.canItemStacksStack(s, disc))) {
+						return;
+					}
+					wrapper.getDiscInventory().insertItem(slot, disc, false);
+					discsUsed.add(disc);
+				});
+				if (discsUsed.size() >= numberOfDiscs) {
+					break;
+				}
 			}
 		}
 	}
