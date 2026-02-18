@@ -52,10 +52,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandle
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonEventHandler {
@@ -123,10 +120,10 @@ public class CommonEventHandler {
 		Map<UUID, ItemStack> backpackIds = new HashMap<>();
 
 		event.level.players().forEach(player -> {
-			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
+			Set<ItemStack> allBackpacks = new HashSet<>();
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, identifier, slot) -> {
 				if (runSlownessLogic) {
-					numberOfBackpacks.incrementAndGet();
+					allBackpacks.add(backpack);
 				}
 				if (runDedupeLogic) {
 					backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
@@ -136,8 +133,8 @@ public class CommonEventHandler {
 			});
 			if (runSlownessLogic) {
 				int maxNumberOfBackpacks = Config.SERVER.nerfsConfig.maxNumberOfBackpacks.get();
-				if (numberOfBackpacks.get() > maxNumberOfBackpacks) {
-					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((numberOfBackpacks.get() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+				if (allBackpacks.size() > maxNumberOfBackpacks) {
+					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((allBackpacks.size() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
 					MobEffect effect = Config.SERVER.nerfsConfig.getEffect();
 					player.addEffect(new MobEffectInstance(effect, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
 				}
