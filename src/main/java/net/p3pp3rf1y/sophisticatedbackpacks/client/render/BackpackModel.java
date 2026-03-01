@@ -18,13 +18,11 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -38,11 +36,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 
 public class BackpackModel extends AgeableListModel<LivingEntity> implements IBackpackModel {
-	private static final Map<EntityType<?>, Vec3> entityTranslations;
-
-	static {
-		entityTranslations = new HashMap<>();
-	}
 
 	private static final ResourceLocation BACKPACK_ENTITY_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "textures/entity/backpack.png");
 	private static final ResourceLocation TANK_GLASS_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "textures/entity/tank_glass.png");
@@ -453,8 +446,9 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 		}
 
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
-		float yOffset = -0.75f;
+		float yOffset = -0.25f;
 
 		if (livingEntity.isBaby()) {
 			zOffset += CHILD_Z_OFFSET;
@@ -469,11 +463,6 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 		if (livingEntity.isBaby()) {
 			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
-		}
-
-		if (entityTranslations.containsKey(livingEntity.getType())) {
-			Vec3 translVector = entityTranslations.get(livingEntity.getType());
-			poseStack.translate(translVector.x(), translVector.y(), translVector.z());
 		}
 	}
 

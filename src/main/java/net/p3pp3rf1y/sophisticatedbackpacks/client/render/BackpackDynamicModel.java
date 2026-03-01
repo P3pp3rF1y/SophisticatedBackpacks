@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -8,11 +9,16 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -20,12 +26,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.IDynamicBakedModel;
+import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
 import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
@@ -34,15 +44,12 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
@@ -50,80 +57,72 @@ import java.util.function.Function;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
 public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicModel> {
-	private final Map<ModelPart, UnbakedModel> modelParts;
+	static final ItemDisplayContext WORN = ItemDisplayContext.valueOf("SOPHISTICATEDBACKPACKS_WORN");
+	private final Map<ModelPart, ResourceLocation> modelPartParents;
 
-	private BackpackDynamicModel(Map<ModelPart, UnbakedModel> modelParts) {
-		this.modelParts = modelParts;
+	private BackpackDynamicModel(Map<ModelPart, ResourceLocation> modelPartParents) {
+		this.modelPartParents = modelPartParents;
 	}
 
 	@Override
 	public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
 		ImmutableMap.Builder<ModelPart, BakedModel> builder = ImmutableMap.builder();
-		modelParts.forEach((part, model) -> {
+		modelPartParents.forEach((part, parentModel) -> {
+			UnbakedModel model = createPartModel(context, parentModel);
+			model.resolveParents(baker::getModel);
 			BakedModel bakedModel = model.bake(baker, spriteGetter, modelTransform);
 			if (bakedModel != null) {
 				builder.put(part, bakedModel);
 			}
 		});
-		return new BackpackBakedModel(builder.build(), modelTransform);
+		return new BackpackBakedModel(builder.build(), context.getTransforms());
 	}
 
-	@Override
-	public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context) {
-		modelParts.values().forEach(model -> model.resolveParents(modelGetter));
-	}
+	private static UnbakedModel createPartModel(IGeometryBakingContext context, ResourceLocation parentModel) {
+		ImmutableMap.Builder<String, Either<Material, String>> textures = ImmutableMap.builder();
 
-	private static final class BackpackBakedModel implements IDynamicBakedModel {
-		@Override
-		public ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
-			return ChunkRenderTypeSet.of(RenderType.cutout());
+		if (context.hasMaterial("clips")) {
+			textures.put("clips", Either.left(context.getMaterial("clips")));
 		}
 
-		public static final Vector3f DEFAULT_ROTATION = new Vector3f(0.0F, 0.0F, 0.0F);
-		private static final ItemTransforms ITEM_TRANSFORMS = createItemTransforms();
-		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/backpack_modules");
+		return new BlockModel(parentModel, Collections.emptyList(), textures.build(), true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList());
+	}
 
-		@SuppressWarnings("java:S4738")
-		//ItemTransforms require Guava ImmutableMap to be passed in so no way to change that to java Map
-		private static ItemTransforms createItemTransforms() {
-			return new ItemTransforms(new ItemTransform(
-					new Vector3f(85, -90, 0),
-					new Vector3f(0, -2 / 16f, -4.5f / 16f),
-					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(85, -90, 0),
-					new Vector3f(0, -2 / 16f, -4.5f / 16f),
-					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(0, 0, 0),
-					new Vector3f(0, 0, 0),
-					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(0, 0, 0),
-					new Vector3f(0, 0, 0),
-					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(0, 0, 0),
-					new Vector3f(0, 14.25f / 16f, 0),
-					new Vector3f(1, 1, 1), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(30, 225, 0),
-					new Vector3f(0, 1.25f / 16f, 0),
-					new Vector3f(0.9f, 0.9f, 0.9f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(0, 0, 0),
-					new Vector3f(0, 3 / 16f, 0),
-					new Vector3f(0.5f, 0.5f, 0.5f), DEFAULT_ROTATION
-			), new ItemTransform(
-					new Vector3f(0, 0, 0),
-					new Vector3f(0, 0, -2.25f / 16f),
-					new Vector3f(0.75f, 0.75f, 0.75f), DEFAULT_ROTATION
-			), ImmutableMap.of());
+	public static final class BackpackBakedModel implements IDynamicBakedModel {
+		private static final ModelProperty<Boolean> HAS_TANK_LEFT = new ModelProperty<>();
+		private static final ModelProperty<Boolean> HAS_TANK_RIGHT = new ModelProperty<>();
+		private static final ModelProperty<Boolean> HAS_BATTERY = new ModelProperty<>();
+		private static final ModelProperty<IRenderedTankUpgrade.TankRenderInfo> LEFT_TANK_RENDER_INFO = new ModelProperty<>();
+		private static final ModelProperty<IRenderedTankUpgrade.TankRenderInfo> RIGHT_TANK_RENDER_INFO = new ModelProperty<>();
+		private static final ModelProperty<IRenderedBatteryUpgrade.BatteryRenderInfo> BATTERY_RENDER_INFO = new ModelProperty<>();
+
+		private int cachedLeftTankSteps = -1;
+		private final Map<FluidCacheKey, List<BakedQuad>> leftTankFluidCache = new HashMap<>();
+		private int cachedRightTankSteps = -1;
+		private final Map<FluidCacheKey, List<BakedQuad>> rightTankFluidCache = new HashMap<>();
+		private int cachedBatterySteps = -1;
+		private final Map<Integer, List<BakedQuad>> batteryChargeCache = new HashMap<>();
+		private ItemDisplayContext lastContext = ItemDisplayContext.NONE;
+
+		@Override
+		public ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource rand, ModelData data) {
+			return ChunkRenderTypeSet.of(RenderType.cutout(), RenderType.translucent());
+		}
+
+		@Override
+		public List<BakedModel> getRenderPasses(ItemStack itemStack, boolean fabulous) {
+			return List.of(tankBakedModel, this);
 		}
 
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
 		private final Map<ModelPart, BakedModel> models;
-		private final ModelState modelTransform;
+
+		@Nullable
+		private AABB leftTankFluidBounds;
+		@Nullable
+		private AABB rightTankFluidBounds;
+		@Nullable
+		private AABB batteryChargeBounds;
 
 		private boolean tankLeft;
 		@Nullable
@@ -134,16 +133,39 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		private boolean battery;
 		@Nullable
 		private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
+		private final ItemTransforms itemTransforms;
 
-		public BackpackBakedModel(Map<ModelPart, BakedModel> models, ModelState modelTransform) {
+		private final TankBakedModel tankBakedModel = new TankBakedModel();
+
+		public BackpackBakedModel(Map<ModelPart, BakedModel> models, ItemTransforms itemTransforms) {
 			this.models = models;
-			this.modelTransform = modelTransform;
+			this.itemTransforms = itemTransforms;
 		}
 
-		@Nonnull
+		@Nullable
+		public BakedQuad getDisplayItemQuad() {
+			BakedModel displayItemModel = models.get(ModelPart.DISPLAY_ITEM);
+			if (displayItemModel == null) {
+				return null;
+			}
+			List<BakedQuad> quads = displayItemModel.getQuads(null, null, RandomSource.create(), ModelData.EMPTY, null);
+			if (quads.isEmpty()) {
+				return null;
+			}
+			return quads.getFirst();
+		}
+
 		@Override
 		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData,
 										@Nullable RenderType renderType) {
+			if (state != null) {
+				setPropertiesFromModelData(extraData);
+			}
+
+			if (renderType == RenderType.translucent()) {
+				return tankBakedModel.getQuads(state, side, rand, extraData, renderType);
+			}
+
 			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand, extraData, renderType));
 			if (state == null) {
 				addLeftSide(state, side, rand, extraData, ret, tankLeft, renderType);
@@ -155,14 +177,35 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				addFront(state, side, rand, extraData, ret, state.getValue(BATTERY), renderType);
 			}
 
+			if (lastContext != WORN) {
+				ret.addAll(models.get(ModelPart.STRAPS).getQuads(state, side, rand, extraData, renderType));
+			}
+
 			return ret;
+		}
+
+		private void setPropertiesFromModelData(ModelData extraData) {
+			tankLeft = extraData.has(HAS_TANK_LEFT) && extraData.get(HAS_TANK_LEFT);
+			leftTankRenderInfo = extraData.get(LEFT_TANK_RENDER_INFO);
+			tankRight = extraData.has(HAS_TANK_RIGHT) && extraData.get(HAS_TANK_RIGHT);
+			rightTankRenderInfo = extraData.get(RIGHT_TANK_RENDER_INFO);
+			battery = extraData.has(HAS_BATTERY) && extraData.get(HAS_BATTERY);
+			batteryRenderInfo = extraData.get(BATTERY_RENDER_INFO);
 		}
 
 		private void addFront(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
 							  boolean battery, @Nullable RenderType renderType) {
 			if (battery) {
-				if (batteryRenderInfo != null) {
-					addCharge(ret, batteryRenderInfo.getChargeRatio());
+				if (batteryRenderInfo != null && batteryRenderInfo.getChargeRatio() != 0) {
+					float ratio = batteryRenderInfo.getChargeRatio();
+
+					if (cachedBatterySteps < 0) {
+						ret.addAll(getBatteryChargeFromModel(state, rand, extraData, renderType, ratio));
+					} else {
+						int step = ratioToStep(ratio, cachedBatterySteps);
+						ret.addAll(batteryChargeCache.computeIfAbsent(step,
+								s -> getBatteryChargeFromModel(state, rand, extraData, renderType, stepToRatio(s, cachedBatterySteps))));
+					}
 				}
 				ret.addAll(models.get(ModelPart.BATTERY).getQuads(state, side, rand, extraData, renderType));
 			} else {
@@ -170,27 +213,74 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			}
 		}
 
-		private void addCharge(List<BakedQuad> ret, float chargeRatio) {
-			if (Mth.equal(chargeRatio, 0)) {
-				return;
+		private List<BakedQuad> getBatteryChargeFromModel(@Nullable BlockState state, RandomSource rand, ModelData extraData,
+														  @Nullable RenderType renderType, float chargeRatio) {
+			BakedModel chargeModel = models.get(ModelPart.BATTERY_CHARGE);
+			if (chargeModel == null) {
+				return Collections.emptyList();
 			}
-			int pixels = (int) (chargeRatio * 4);
-			float minX = (10 - pixels) / 16f;
-			float minY = 2 / 16f;
-			float minZ = 1.95f / 16f;
-			float maxX = minX + pixels / 16f;
-			float maxY = minY + 1 / 16f;
-			float[] cols = new float[]{1f, 1f, 1f, 1f};
-			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BACKPACK_MODULES_TEXTURE);
-			ret.add(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
+
+			List<BakedQuad> src = getAllQuads(chargeModel, state, rand, extraData, renderType);
+			if (src.isEmpty()) {
+				return Collections.emptyList();
+			}
+
+			if (cachedBatterySteps < 0) {
+				cachedBatterySteps = computeStepsFromModelUV(src, Direction.Axis.X);
+			}
+
+			AABB bounds = batteryChargeBounds != null ? batteryChargeBounds : computeBoundsFromQuads(src);
+			batteryChargeBounds = bounds;
+			if (bounds == null) {
+				return Collections.emptyList();
+			}
+
+			int step = ratioToStep(chargeRatio, cachedBatterySteps);
+			if (step <= 0) {
+				return Collections.emptyList();
+			}
+			if (step >= cachedBatterySteps) {
+				return src;
+			}
+
+			float stepRatio = stepToRatio(step, cachedBatterySteps);
+
+			SliceSpec s = horizontalSliceSpec(src.getFirst().getDirection(), bounds, stepRatio);
+			return sliceQuadsAxis(src, s.axis(), s.cut(), s.keepGreaterOrEqual());
+		}
+
+		private record SliceSpec(Direction.Axis axis, double cut, boolean keepGreaterOrEqual) {}
+
+		private static SliceSpec horizontalSliceSpec(Direction face, AABB b, float ratio) {
+			ratio = Mth.clamp(ratio, 0f, 1f);
+
+			return switch (face) {
+				case SOUTH -> {
+					double cut = b.minX + (b.maxX - b.minX) * ratio;
+					yield new SliceSpec(Direction.Axis.X, cut, false);
+				}
+				case NORTH -> {
+					double cut = b.maxX - (b.maxX - b.minX) * ratio;
+					yield new SliceSpec(Direction.Axis.X, cut, true);
+				}
+				case EAST -> {
+					double cut = b.minZ + (b.maxZ - b.minZ) * ratio;
+					yield new SliceSpec(Direction.Axis.Z, cut, false);
+				}
+				case WEST -> {
+					double cut = b.maxZ - (b.maxZ - b.minZ) * ratio;
+					yield new SliceSpec(Direction.Axis.Z, cut, true);
+				}
+				default -> {
+					double cut = b.minX + (b.maxX - b.minX) * ratio;
+					yield new SliceSpec(Direction.Axis.X, cut, false);
+				}
+			};
 		}
 
 		private void addRightSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
 								  boolean tankRight, @Nullable RenderType renderType) {
 			if (tankRight) {
-				if (rightTankRenderInfo != null) {
-					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
-				}
 				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand, extraData, renderType));
 			} else {
 				ret.addAll(models.get(ModelPart.RIGHT_POUCH).getQuads(state, side, rand, extraData, renderType));
@@ -200,47 +290,543 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		private void addLeftSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
 								 boolean tankLeft, @Nullable RenderType renderType) {
 			if (tankLeft) {
-				if (leftTankRenderInfo != null) {
-					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d));
-				}
 				ret.addAll(models.get(ModelPart.LEFT_TANK).getQuads(state, side, rand, extraData, renderType));
 			} else {
 				ret.addAll(models.get(ModelPart.LEFT_POUCH).getQuads(state, side, rand, extraData, renderType));
 			}
 		}
 
-		private void addFluid(List<BakedQuad> ret, FluidStack fluidStack, float ratio, double xMin) {
-			if (fluidStack == FluidStack.EMPTY || Mth.equal(ratio, 0.0f)) {
-				return;
-			}
-
-			double yMin = 1.5 / 16d;
-			double yMax = yMin + (ratio * 6) / 16d;
-			AABB bounds = new AABB(xMin, yMin, 6.75 / 16d, xMin + 2.5 / 16d, yMax, 9.25 / 16d);
-
-			IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-			ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
-			int color = renderProperties.getTintColor(fluidStack);
-			float[] cols = new float[]{(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
-			TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
-			float bx1 = 0;
-			float bx2 = 5;
-			float by1 = 0;
-			float by2 = ratio * 10;
-			float bz1 = 0;
-			float bz2 = 5;
-
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.UP, bx1, bx2, bz1, bz2));
-			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.minZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.minZ)), cols, still, Direction.NORTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ)), cols, still, Direction.SOUTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ)), cols, still, Direction.WEST, bz1, bz2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.EAST, bz1, bz2, by1, by2));
+		private record FluidCacheKey(Fluid fluid, PatchedDataComponentMap components, int step) {
 		}
 
-		private Vector3f getVector(double x, double y, double z) {
-			Vector3f ret = new Vector3f((float) x, (float) y, (float) z);
-			rotate(ret, modelTransform.getRotation().getMatrix());
+		private List<BakedQuad> getTankFluidFromModel(@Nullable BlockState state, RandomSource rand, ModelData extraData, @Nullable RenderType renderType,
+													  ModelPart fluidPart, FluidStack fluidStack, float ratio, boolean isLeft) {
+
+			if (fluidStack == FluidStack.EMPTY || Mth.equal(ratio, 0f)) {
+				return Collections.emptyList();
+			}
+
+			BakedModel fluidModel = models.get(fluidPart);
+			if (fluidModel == null) {
+				return Collections.emptyList();
+			}
+
+			List<BakedQuad> src = getAllQuads(fluidModel, state, rand, extraData, renderType);
+			if (src.isEmpty()) {
+				return Collections.emptyList();
+			}
+
+			int steps = isLeft ? cachedLeftTankSteps : cachedRightTankSteps;
+			if (steps < 0) {
+				steps = computeStepsFromModelUV(src, Direction.Axis.Y);
+				if (isLeft) cachedLeftTankSteps = steps;
+				else cachedRightTankSteps = steps;
+			}
+
+			AABB cached = isLeft ? leftTankFluidBounds : rightTankFluidBounds;
+			AABB max = cached != null ? cached : computeBoundsFromQuads(src);
+			if (isLeft) {
+				leftTankFluidBounds = max;
+			} else {
+				rightTankFluidBounds = max;
+			}
+			if (max == null) {
+				return Collections.emptyList();
+			}
+
+			int step = ratioToStep(ratio, steps);
+			if (step <= 0) {
+				return Collections.emptyList();
+			}
+			if (step >= steps) {
+				step = steps;
+			}
+
+			float stepRatio = stepToRatio(step, steps);
+
+			double cut = max.minY + (max.maxY - max.minY) * stepRatio;
+
+			List<BakedQuad> sliced = sliceQuadsAxis(src, Direction.Axis.Y, cut, false);
+			if (sliced.isEmpty()) {
+				return Collections.emptyList();
+			}
+
+			IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+			ResourceLocation stillTex = props.getStillTexture(fluidStack);
+			TextureAtlasSprite newSprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(stillTex);
+			int argb = props.getTintColor(fluidStack);
+
+			List<BakedQuad> ret = respriteAndTintQuads(sliced, newSprite, argb);
+
+			BakedQuad top = buildFluidTopQuad((float) cut, max, src, newSprite, argb);
+			if (top != null) {
+				ret.add(top);
+			}
+
 			return ret;
+		}
+
+		@Nullable
+		private static BakedQuad buildFluidTopQuad(float y, AABB max, List<BakedQuad> src, TextureAtlasSprite sprite, int argb) {
+			if (y <= (float) max.minY + 1e-6f) {
+				return null;
+			}
+
+			float a = (argb >>> 24 & 0xFF) / 255f;
+			float r = (argb >>> 16 & 0xFF) / 255f;
+			float g = (argb >>> 8 & 0xFF) / 255f;
+			float b = (argb & 0xFF) / 255f;
+
+			double pxPerUnitX = computePixelsPerUnitFromU(src, Direction.NORTH, Direction.SOUTH, Direction.Axis.X);
+			double pxPerUnitZ = computePixelsPerUnitFromU(src, Direction.EAST, Direction.WEST, Direction.Axis.Z);
+
+			if (pxPerUnitX <= 0) {
+				pxPerUnitX = 16.0;
+			}
+			if (pxPerUnitZ <= 0) {
+				pxPerUnitZ = pxPerUnitX;
+			}
+
+			double widthX = (max.maxX - max.minX);
+			double depthZ = (max.maxZ - max.minZ);
+
+			double uPixels = widthX * pxPerUnitX;
+			double vPixels = depthZ * pxPerUnitZ;
+
+			int sw = sprite.contents().width();
+			int sh = sprite.contents().height();
+			if (sw <= 0 || sh <= 0) {
+				return null;
+			}
+
+			float u0 = sprite.getU0();
+			float v0 = sprite.getV0();
+			float du = (float) ((uPixels / sw) * (sprite.getU1() - sprite.getU0()));
+			float dv = (float) ((vPixels / sh) * (sprite.getV1() - sprite.getV0()));
+			float u1 = u0 + du;
+			float v1 = v0 + dv;
+
+			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
+			qb.setSprite(sprite);
+			qb.setDirection(Direction.UP);
+			qb.setTintIndex(-1);
+			Vec3i n = Direction.UP.getNormal();
+
+			float x0 = (float) max.minX;
+			float x1 = (float) max.maxX;
+			float z0 = (float) max.minZ;
+			float z1 = (float) max.maxZ;
+
+			qb.addVertex(x0, y, z0).setColor(r, g, b, a).setUv(u0, v0).setNormal(n.getX(), n.getY(), n.getZ());
+			qb.addVertex(x0, y, z1).setColor(r, g, b, a).setUv(u0, v1).setNormal(n.getX(), n.getY(), n.getZ());
+			qb.addVertex(x1, y, z1).setColor(r, g, b, a).setUv(u1, v1).setNormal(n.getX(), n.getY(), n.getZ());
+			qb.addVertex(x1, y, z0).setColor(r, g, b, a).setUv(u1, v0).setNormal(n.getX(), n.getY(), n.getZ());
+
+			return qb.bakeQuad();
+		}
+
+		private static double computePixelsPerUnitFromU(List<BakedQuad> quads, Direction d1, Direction d2, Direction.Axis modelAxis) {
+			double bestSpan = -1;
+			double bestPxPerUnit = -1;
+
+			for (BakedQuad q : quads) {
+				Direction dir = q.getDirection();
+				if (dir != d1 && dir != d2) {
+					continue;
+				}
+
+				int[] v = q.getVertices();
+				int stride = v.length / 4;
+
+				float minCoord = Float.POSITIVE_INFINITY;
+				float maxCoord = Float.NEGATIVE_INFINITY;
+				float minU = Float.POSITIVE_INFINITY;
+				float maxU = Float.NEGATIVE_INFINITY;
+
+				for (int i = 0; i < 4; i++) {
+					int base = i * stride;
+					float x = Float.intBitsToFloat(v[base]);
+					float y = Float.intBitsToFloat(v[base + 1]);
+					float z = Float.intBitsToFloat(v[base + 2]);
+					float u = Float.intBitsToFloat(v[base + 4]);
+
+					float coord = switch (modelAxis) {
+						case X -> x;
+						case Y -> y;
+						case Z -> z;
+					};
+
+					minCoord = Math.min(minCoord, coord);
+					maxCoord = Math.max(maxCoord, coord);
+					minU = Math.min(minU, u);
+					maxU = Math.max(maxU, u);
+				}
+
+				double modelSpan = maxCoord - minCoord;
+				if (modelSpan <= 1e-6) {
+					continue;
+				}
+
+				TextureAtlasSprite s = q.getSprite();
+				if (s == null) {
+					continue;
+				}
+
+				double uDen = (s.getU1() - s.getU0());
+				if (Math.abs(uDen) < 1e-9) {
+					continue;
+				}
+
+				double uNormSpan = Math.abs(maxU - minU) / uDen;
+				int texW = s.contents().width();
+				if (texW <= 0) {
+					continue;
+				}
+
+				double uPixels = uNormSpan * texW;
+				double pxPerUnit = uPixels / modelSpan;
+
+				if (modelSpan > bestSpan) {
+					bestSpan = modelSpan;
+					bestPxPerUnit = pxPerUnit;
+				}
+			}
+
+			return bestPxPerUnit;
+		}
+
+		private static int ratioToStep(float ratio, int steps) {
+			ratio = Mth.clamp(ratio, 0f, 1f);
+			if (steps <= 0) {
+				return 0;
+			}
+			int step = Mth.floor(ratio * steps + 1e-6f);
+			return Mth.clamp(step, 0, steps);
+		}
+
+		private static float stepToRatio(int step, int steps) {
+			return steps <= 0 ? 0f : (step / (float) steps);
+		}
+
+		private static List<BakedQuad> getAllQuads(BakedModel m,
+												   @Nullable BlockState state,
+												   RandomSource rand, ModelData extraData,
+												   @Nullable RenderType renderType) {
+			List<BakedQuad> all = m.getQuads(state, null, rand, extraData, renderType);
+			if (!all.isEmpty()) {
+				return all;
+			}
+			List<BakedQuad> ret = Lists.newArrayList();
+			for (Direction d : Direction.values()) {
+				ret.addAll(m.getQuads(state, d, rand, extraData, renderType));
+			}
+			return ret;
+		}
+
+		@Nullable
+		private static AABB computeBoundsFromQuads(List<BakedQuad> quads) {
+			if (quads.isEmpty()) {
+				return null;
+			}
+			float minX = Float.POSITIVE_INFINITY, minY = Float.POSITIVE_INFINITY, minZ = Float.POSITIVE_INFINITY;
+			float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY, maxZ = Float.NEGATIVE_INFINITY;
+
+			for (BakedQuad q : quads) {
+				int[] v = q.getVertices();
+				final int stride = v.length / 4;
+				for (int i = 0; i < 4; i++) {
+					int base = i * stride;
+					float x = Float.intBitsToFloat(v[base]);
+					float y = Float.intBitsToFloat(v[base + 1]);
+					float z = Float.intBitsToFloat(v[base + 2]);
+					minX = Math.min(minX, x);
+					minY = Math.min(minY, y);
+					minZ = Math.min(minZ, z);
+					maxX = Math.max(maxX, x);
+					maxY = Math.max(maxY, y);
+					maxZ = Math.max(maxZ, z);
+				}
+			}
+			if (!Float.isFinite(minX) || !Float.isFinite(minY) || !Float.isFinite(minZ)) {
+				return null;
+			}
+			return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+		}
+
+		private static List<BakedQuad> sliceQuadsAxis(List<BakedQuad> src, Direction.Axis axis, double cut, boolean keepGreaterOrEqual) {
+			List<BakedQuad> out = new ArrayList<>(src.size());
+			for (BakedQuad q : src) {
+				BakedQuad sliced = sliceQuadAxis(q, axis, (float) cut, keepGreaterOrEqual);
+				if (sliced != null) {
+					out.add(sliced);
+				}
+			}
+			return out;
+		}
+
+		@Nullable
+		private static BakedQuad sliceQuadAxis(BakedQuad q, Direction.Axis axis, float cut, boolean keepGreaterOrEqual) {
+			int[] v = q.getVertices();
+			int stride = v.length / 4;
+
+			Vert[] in = new Vert[4];
+			for (int i = 0; i < 4; i++) {
+				int base = i * stride;
+				in[i] = new Vert(
+						Float.intBitsToFloat(v[base]),
+						Float.intBitsToFloat(v[base + 1]),
+						Float.intBitsToFloat(v[base + 2]),
+						Float.intBitsToFloat(v[base + 4]),
+						Float.intBitsToFloat(v[base + 5])
+				);
+			}
+
+			List<Vert> out = clipAgainstPlane(Arrays.asList(in), axis, cut, keepGreaterOrEqual);
+
+			if (out.isEmpty()) return null;
+
+			while (out.size() < 4) {
+				out.add(out.get(out.size() - 1));
+			}
+			if (out.size() > 4) {
+				out = out.subList(0, 4);
+			}
+
+			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
+			qb.setSprite(q.getSprite());
+			qb.setDirection(q.getDirection());
+			qb.setTintIndex(q.getTintIndex());
+			Vec3i n = q.getDirection().getNormal();
+
+			for (int i = 0; i < 4; i++) {
+				Vert p = out.get(i);
+				qb.addVertex(p.x, p.y, p.z)
+						.setColor(1f, 1f, 1f, 1f)
+						.setUv(p.u, p.v)
+						.setNormal(n.getX(), n.getY(), n.getZ());
+			}
+
+			return qb.bakeQuad();
+		}
+
+		private static List<Vert> clipAgainstPlane(List<Vert> poly, Direction.Axis axis, float cut, boolean keepGE) {
+			List<Vert> out = new ArrayList<>(poly.size() + 2);
+
+			Vert prev = poly.get(poly.size() - 1);
+			boolean prevIn = inside(prev, axis, cut, keepGE);
+
+			for (Vert cur : poly) {
+				boolean curIn = inside(cur, axis, cut, keepGE);
+
+				if (prevIn && curIn) {
+					out.add(cur);
+				} else if (prevIn && !curIn) {
+					out.add(intersect(prev, cur, axis, cut));
+				} else if (!prevIn && curIn) {
+					out.add(intersect(prev, cur, axis, cut));
+					out.add(cur);
+				}
+
+				prev = cur;
+				prevIn = curIn;
+			}
+
+			return out;
+		}
+
+		private static boolean inside(Vert p, Direction.Axis axis, float cut, boolean keepGE) {
+			float c = switch (axis) {
+				case X -> p.x;
+				case Y -> p.y;
+				case Z -> p.z;
+			};
+			float eps = 1e-6f;
+			return keepGE ? (c + eps >= cut) : (c <= cut + eps);
+		}
+
+		private static Vert intersect(Vert a, Vert b, Direction.Axis axis, float cut) {
+			float ca = switch (axis) {
+				case X -> a.x;
+				case Y -> a.y;
+				case Z -> a.z;
+			};
+			float cb = switch (axis) {
+				case X -> b.x;
+				case Y -> b.y;
+				case Z -> b.z;
+			};
+
+			float denom = (cb - ca);
+			float t = denom == 0f ? 0f : (cut - ca) / denom;
+			t = Mth.clamp(t, 0f, 1f);
+
+			return new Vert(
+					Mth.lerp(t, a.x, b.x),
+					Mth.lerp(t, a.y, b.y),
+					Mth.lerp(t, a.z, b.z),
+					Mth.lerp(t, a.u, b.u),
+					Mth.lerp(t, a.v, b.v)
+			);
+		}
+
+		private record Vert(float x, float y, float z, float u, float v) {
+		}
+
+		private static List<BakedQuad> respriteAndTintQuads(List<BakedQuad> src, TextureAtlasSprite newSprite, int argb) {
+			float a = (argb >>> 24 & 0xFF) / 255f;
+			float r = (argb >>> 16 & 0xFF) / 255f;
+			float g = (argb >>> 8 & 0xFF) / 255f;
+			float b = (argb & 0xFF) / 255f;
+			float[] cols = new float[]{a, r, g, b};
+			List<BakedQuad> out = new ArrayList<>(src.size());
+			for (BakedQuad q : src) {
+				out.add(respriteAndTintQuad(q, newSprite, cols));
+			}
+			return out;
+		}
+
+		private static BakedQuad respriteAndTintQuad(BakedQuad q, TextureAtlasSprite newSprite, float[] cols) {
+			TextureAtlasSprite oldSprite = q.getSprite();
+			int[] in = q.getVertices();
+
+			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
+			qb.setSprite(newSprite);
+			qb.setDirection(q.getDirection());
+			qb.setTintIndex(-1);
+
+			Vec3i n = q.getDirection().getNormal();
+
+			for (int vi = 0; vi < 4; vi++) {
+				int base = vi * IQuadTransformer.STRIDE;
+
+				float x = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION]);
+				float y = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION + 1]);
+				float z = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION + 2]);
+
+				float uOld = Float.intBitsToFloat(in[base + IQuadTransformer.UV0]);
+				float vOld = Float.intBitsToFloat(in[base + IQuadTransformer.UV0 + 1]);
+
+				float uNew = remapU(oldSprite, newSprite, uOld);
+				float vNew = remapV(oldSprite, newSprite, vOld);
+
+				int packedUv2 = in[base + IQuadTransformer.UV2];
+				int lightU = packedUv2 & 0xFFFF;
+				int lightV = (packedUv2 >>> 16) & 0xFFFF;
+
+				qb.addVertex(x, y, z)
+						.setColor(cols[1], cols[2], cols[3], cols[0])
+						.setUv(uNew, vNew)
+						.setUv2(lightU, lightV)
+						.setNormal(n.getX(), n.getY(), n.getZ());
+
+				if (IQuadTransformer.UV1 >= 0) {
+					int packedUv1 = in[base + IQuadTransformer.UV1];
+					int ovU = packedUv1 & 0xFFFF;
+					int ovV = (packedUv1 >>> 16) & 0xFFFF;
+					qb.setUv1(ovU, ovV);
+				}
+			}
+
+			return qb.bakeQuad();
+		}
+
+		private static float remapU(TextureAtlasSprite oldS, TextureAtlasSprite newS, float u) {
+			float denom = (oldS.getU1() - oldS.getU0());
+			if (denom == 0f) {
+				return newS.getU0();
+			}
+			float t = (u - oldS.getU0()) / denom;
+			return newS.getU0() + t * (newS.getU1() - newS.getU0());
+		}
+
+		private static float remapV(TextureAtlasSprite oldS, TextureAtlasSprite newS, float v) {
+			float denom = (oldS.getV1() - oldS.getV0());
+			if (denom == 0f) {
+				return newS.getV0();
+			}
+			float t = (v - oldS.getV0()) / denom;
+			return newS.getV0() + t * (newS.getV1() - newS.getV0());
+		}
+
+		private static int computeStepsFromModelUV(List<BakedQuad> quads, Direction.Axis fillAxis) {
+			if (quads.isEmpty()) return 0;
+
+			double bestModelSpan = -1;
+			double bestPixelSpan = -1;
+
+			for (BakedQuad q : quads) {
+				if (fillAxis == Direction.Axis.Y && (q.getDirection() == Direction.UP || q.getDirection() == Direction.DOWN)) {
+					continue;
+				}
+
+				int[] v = q.getVertices();
+				int stride = v.length / 4;
+
+				float minCoord = Float.POSITIVE_INFINITY;
+				float maxCoord = Float.NEGATIVE_INFINITY;
+
+				float minU = Float.POSITIVE_INFINITY, maxU = Float.NEGATIVE_INFINITY;
+				float minV = Float.POSITIVE_INFINITY, maxV = Float.NEGATIVE_INFINITY;
+
+				for (int i = 0; i < 4; i++) {
+					int base = i * stride;
+					float x = Float.intBitsToFloat(v[base]);
+					float y = Float.intBitsToFloat(v[base + 1]);
+					float z = Float.intBitsToFloat(v[base + 2]);
+
+					float u = Float.intBitsToFloat(v[base + 4]);
+					float vv = Float.intBitsToFloat(v[base + 5]);
+
+					float coord = switch (fillAxis) {
+						case X -> x;
+						case Y -> y;
+						case Z -> z;
+					};
+
+					minCoord = Math.min(minCoord, coord);
+					maxCoord = Math.max(maxCoord, coord);
+
+					minU = Math.min(minU, u);
+					maxU = Math.max(maxU, u);
+					minV = Math.min(minV, vv);
+					maxV = Math.max(maxV, vv);
+				}
+
+				double modelSpan = maxCoord - minCoord;
+				if (modelSpan <= 1e-6) continue;
+
+				TextureAtlasSprite s = q.getSprite();
+
+				double pixelSpan;
+				if (fillAxis == Direction.Axis.X) {
+					double denom = (s.getU1() - s.getU0());
+					if (Math.abs(denom) < 1e-9) continue;
+					double uNormSpan = Math.abs(maxU - minU) / denom;
+					int texW = s.contents().width();
+					pixelSpan = uNormSpan * texW;
+				} else if (fillAxis == Direction.Axis.Y) {
+					double denom = (s.getV1() - s.getV0());
+					if (Math.abs(denom) < 1e-9) continue;
+					double vNormSpan = Math.abs(maxV - minV) / denom;
+					int texH = s.contents().height();
+					pixelSpan = vNormSpan * texH;
+				} else {
+					double denom = (s.getU1() - s.getU0());
+					if (Math.abs(denom) < 1e-9) continue;
+					double uNormSpan = Math.abs(maxU - minU) / denom;
+					int texW = s.contents().width();
+					pixelSpan = uNormSpan * texW;
+				}
+
+				if (modelSpan > bestModelSpan) {
+					bestModelSpan = modelSpan;
+					bestPixelSpan = pixelSpan;
+				}
+			}
+
+			if (bestPixelSpan <= 0) return 0;
+
+			return Mth.clamp((int) Math.round(bestPixelSpan), 1, 64);
 		}
 
 		@Override
@@ -264,7 +850,6 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		}
 
 		@SuppressWarnings("java:S1874")
-		//don't have model data to pass in here and just calling getParticleTexture of baked model that doesn't need model data
 		@Override
 		public TextureAtlasSprite getParticleIcon() {
 			//noinspection deprecation
@@ -282,7 +867,8 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				return this;
 			}
 
-			ITEM_TRANSFORMS.getTransform(transformType).apply(applyLeftHandTransform, poseStack);
+			lastContext = transformType;
+			itemTransforms.getTransform(transformType).apply(applyLeftHandTransform, poseStack);
 
 			return this;
 		}
@@ -290,33 +876,114 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		@SuppressWarnings("deprecation")
 		@Override
 		public ItemTransforms getTransforms() {
-			return ITEM_TRANSFORMS;
+			return itemTransforms;
 		}
 
-		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
-			QuadBakingVertexConsumer quadBaker = new QuadBakingVertexConsumer();
-			quadBaker.setSprite(sprite);
-			Vec3i dirVec = face.getNormal();
-			quadBaker.setDirection(face);
-			quadBaker.setTintIndex(-1);
-
-			u1 = sprite.getU0() + u1 / 4f * sprite.uvShrinkRatio();
-			u2 = sprite.getU0() + u2 / 4f * sprite.uvShrinkRatio();
-
-			v1 = sprite.getV0() + v1 / 4f * sprite.uvShrinkRatio();
-			v2 = sprite.getV0() + v2 / 4f * sprite.uvShrinkRatio();
-
-			quadBaker.addVertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u1, v1).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			quadBaker.addVertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u1, v2).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			quadBaker.addVertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u2, v2).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			quadBaker.addVertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z()).setColor(colors[1], colors[2], colors[3], colors[0]).setUv(u2, v1).setNormal(dirVec.getX(), dirVec.getY(), dirVec.getZ());
-			return quadBaker.bakeQuad();
+		@Override
+		public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData) {
+			return level.getBlockEntity(pos, ModBlocks.BACKPACK_TILE_TYPE.get()).map(backpackBlockEntity -> {
+				ModelData.Builder modelDataBuilder = modelData.derive();
+				RenderInfo renderInfo = backpackBlockEntity.getBackpackWrapper().getRenderInfo();
+				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
+				tankRenderInfos.forEach((tankPos, tankInfo) -> {
+					if (tankPos == TankPosition.LEFT) {
+						modelDataBuilder.with(HAS_TANK_LEFT, true);
+						modelDataBuilder.with(LEFT_TANK_RENDER_INFO, tankInfo);
+					} else {
+						modelDataBuilder.with(HAS_TANK_RIGHT, true);
+						modelDataBuilder.with(RIGHT_TANK_RENDER_INFO, tankInfo);
+					}
+				});
+				renderInfo.getBatteryRenderInfo().ifPresent(batteryInfo -> {
+					modelDataBuilder.with(HAS_BATTERY, true);
+					modelDataBuilder.with(BATTERY_RENDER_INFO, batteryInfo);
+				});
+				return modelDataBuilder.build();
+			}).orElse(modelData);
 		}
 
-		private void rotate(Vector3f posIn, Matrix4f transform) {
-			Vector3f originIn = new Vector3f(0.5f, 0.5f, 0.5f);
-			Vector4f vector4f = transform.transform(new Vector4f(posIn.x() - originIn.x(), posIn.y() - originIn.y(), posIn.z() - originIn.z(), 1.0F));
-			posIn.set(vector4f.x() + originIn.x(), vector4f.y() + originIn.y(), vector4f.z() + originIn.z());
+		private class TankBakedModel implements IDynamicBakedModel {
+			@Override
+			public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, @Nullable RenderType renderType) {
+				if (side != null) {
+					return Collections.emptyList();
+				}
+				List<BakedQuad> ret = new ArrayList<>();
+
+				boolean left = state == null ? tankLeft : state.getValue(LEFT_TANK);
+				boolean right = state == null ? tankRight : state.getValue(RIGHT_TANK);
+
+				if (left && leftTankRenderInfo != null && leftTankRenderInfo.getFillRatio() != 0) {
+					leftTankRenderInfo.getFluid().ifPresent(fluid -> {
+						if (cachedLeftTankSteps != -1) {
+							FluidCacheKey cacheKey = getFluidCacheKey(fluid, cachedLeftTankSteps, leftTankRenderInfo.getFillRatio());
+							if (leftTankFluidCache.containsKey(cacheKey)) {
+								ret.addAll(leftTankFluidCache.get(cacheKey));
+								return;
+							}
+						}
+						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.LEFT_TANK_FLUID, fluid, leftTankRenderInfo.getFillRatio(), true);
+						leftTankFluidCache.put(getFluidCacheKey(fluid, cachedLeftTankSteps, leftTankRenderInfo.getFillRatio()), fluidQuads);
+						ret.addAll(fluidQuads);
+					});
+				}
+				if (right && rightTankRenderInfo != null && rightTankRenderInfo.getFillRatio() != 0) {
+					rightTankRenderInfo.getFluid().ifPresent(fluid -> {
+						if (cachedRightTankSteps != -1) {
+							FluidCacheKey cacheKey = getFluidCacheKey(fluid, cachedRightTankSteps, rightTankRenderInfo.getFillRatio());
+							if (rightTankFluidCache.containsKey(cacheKey)) {
+								ret.addAll(rightTankFluidCache.get(cacheKey));
+								return;
+							}
+						}
+						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.RIGHT_TANK_FLUID, fluid, rightTankRenderInfo.getFillRatio(), false);
+						rightTankFluidCache.put(getFluidCacheKey(fluid, cachedRightTankSteps, rightTankRenderInfo.getFillRatio()), fluidQuads);
+						ret.addAll(fluidQuads);
+					});
+				}
+
+				return ret;
+			}
+
+			private FluidCacheKey getFluidCacheKey(FluidStack fluid, int cachedSteps, float fillRatio) {
+				int step = cachedSteps > 0 ? ratioToStep(fillRatio, cachedSteps) : 0;
+				return new FluidCacheKey(fluid.getFluid(), fluid.getComponents(), step);
+			}
+
+			@Override
+			public List<RenderType> getRenderTypes(ItemStack itemStack, boolean fabulous) {
+				return List.of(RenderType.translucent());
+			}
+
+			@Override
+			public boolean useAmbientOcclusion() {
+				return BackpackBakedModel.this.useAmbientOcclusion();
+			}
+
+			@Override
+			public boolean isGui3d() {
+				return BackpackBakedModel.this.isGui3d();
+			}
+
+			@Override
+			public boolean usesBlockLight() {
+				return BackpackBakedModel.this.usesBlockLight();
+			}
+
+			@Override
+			public boolean isCustomRenderer() {
+				return BackpackBakedModel.this.isCustomRenderer();
+			}
+
+			@Override
+			public TextureAtlasSprite getParticleIcon() {
+				return BackpackBakedModel.this.getParticleIcon();
+			}
+
+			@Override
+			public ItemOverrides getOverrides() {
+				return BackpackBakedModel.this.getOverrides();
+			}
 		}
 	}
 
@@ -349,7 +1016,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				backpackModel.battery = true;
 				backpackModel.batteryRenderInfo = batteryRenderInfo;
 			});
-			
+
 			return backpackModel;
 		}
 	}
@@ -359,24 +1026,11 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 		@Override
 		public BackpackDynamicModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
-			ImmutableMap.Builder<ModelPart, UnbakedModel> builder = ImmutableMap.builder();
-
-			ImmutableMap.Builder<String, Either<Material, String>> texturesBuilder = ImmutableMap.builder();
-			if (modelContents.has("clipsTexture")) {
-				ResourceLocation clipsTexture = ResourceLocation.tryParse(modelContents.get("clipsTexture").getAsString());
-				if (clipsTexture != null) {
-					texturesBuilder.put("clips", Either.left(new Material(InventoryMenu.BLOCK_ATLAS, clipsTexture)));
-				}
-			}
-			ImmutableMap<String, Either<Material, String>> textures = texturesBuilder.build();
+			ImmutableMap.Builder<ModelPart, ResourceLocation> builder = ImmutableMap.builder();
 			for (ModelPart part : ModelPart.values()) {
-				addPartModel(builder, part, textures);
+				builder.put(part, SophisticatedBackpacks.getRL("block/backpack_" + part.name().toLowerCase(Locale.ENGLISH)));
 			}
 			return new BackpackDynamicModel(builder.build());
-		}
-
-		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, ImmutableMap<String, Either<Material, String>> textures) {
-			builder.put(modelPart, new BlockModel(SophisticatedBackpacks.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList()));
 		}
 	}
 
@@ -387,6 +1041,11 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		LEFT_POUCH,
 		LEFT_TANK,
 		RIGHT_POUCH,
-		RIGHT_TANK
+		RIGHT_TANK,
+		STRAPS,
+		LEFT_TANK_FLUID,
+		RIGHT_TANK_FLUID,
+		BATTERY_CHARGE,
+		DISPLAY_ITEM
 	}
 }

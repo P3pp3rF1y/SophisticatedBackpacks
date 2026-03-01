@@ -1,0 +1,18 @@
+{
+  "texture_size": [32, 32],
+  "textures": {
+    "fluid": "minecraft:block/water_still"
+  },
+  "elements": [
+    {
+      "name": "fluid",
+      "from": [0.7, 1.5, 6.8],
+      "to": [2.5, 7.5, 9.2],
+      "faces": {
+        "north": {"uv": [0, 0, 3, 10], "texture": "#fluid"},
+        "south": {"uv": [0, 0, 3, 10], "texture": "#fluid"},
+        "west": {"uv": [0, 0, 4, 10], "texture": "#fluid"}
+      }
+    }
+  ]
+}

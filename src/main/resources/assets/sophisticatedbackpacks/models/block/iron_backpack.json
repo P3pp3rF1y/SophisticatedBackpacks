@@ -1,4 +1,6 @@
 {
-    "loader": "sophisticatedbackpacks:backpack",
-    "clipsTexture": "sophisticatedbackpacks:block/iron_clips"
+  "parent": "sophisticatedbackpacks:block/backpack",
+  "textures": {
+    "clips": "sophisticatedbackpacks:block/iron_clips"
+  }
 }

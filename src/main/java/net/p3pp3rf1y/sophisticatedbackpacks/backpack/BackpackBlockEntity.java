@@ -60,11 +60,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		backpackWrapper = BackpackWrapper.fromStack(backpack);
 		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
-			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
 		backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateHandlers);
+		backpackWrapper.getRenderInfo().setRenderUpdateChangeListener(renderInfo -> {
+			updateBlockRender = true;
+			WorldHelper.notifyBlockUpdate(this);
+		});
 	}
 
 	@Override
@@ -109,7 +112,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		writeBackpack(ret, registries);
 		saveControllerPos(ret);
 		ret.putBoolean("updateBlockRender", updateBlockRender);
-		updateBlockRender = true;
+		updateBlockRender = false;
 		return ret;
 	}
 

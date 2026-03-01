@@ -18,11 +18,11 @@ public class BackpackCurioRenderer implements ICurioRenderer {
 	@Override
 	public <T extends LivingEntity, M extends EntityModel<T>> void render(ItemStack stack, SlotContext slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if (!stack.isEmpty()) {
-			matrixStack.pushPose();
 			if (renderLayerParent.getModel() instanceof HumanoidModel<?> parentModel) {
+				matrixStack.pushPose();
 				IBackpackModel model = BackpackModelManager.getBackpackModel(stack.getItem());
 				EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
-				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack, !slotContext.entity().getItemBySlot(equipmentSlot).isEmpty(), BackpackModelManager.getBackpackModel(stack.getItem()));
+				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack, !slotContext.entity().getItemBySlot(equipmentSlot).isEmpty());
 				matrixStack.popPose();
 			}
 		}

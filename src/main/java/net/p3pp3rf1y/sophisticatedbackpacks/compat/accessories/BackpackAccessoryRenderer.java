@@ -21,7 +21,7 @@ public class BackpackAccessoryRenderer implements AccessoryRenderer {
 			if (model instanceof HumanoidModel<?> parentModel) {
 				IBackpackModel backpackModel = BackpackModelManager.getBackpackModel(stack.getItem());
 				EquipmentSlot equipmentSlot = backpackModel.getRenderEquipmentSlot();
-				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack, !reference.entity().getItemBySlot(equipmentSlot).isEmpty(), BackpackModelManager.getBackpackModel(stack.getItem()));
+				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack, !reference.entity().getItemBySlot(equipmentSlot).isEmpty());
 				poseStack.popPose();
 			}
 		}
