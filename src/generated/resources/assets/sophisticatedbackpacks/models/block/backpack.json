@@ -1,4 +1,111 @@
 {
-  "clipsTexture": "sophisticatedbackpacks:block/leather_clips",
-  "loader": "sophisticatedbackpacks:backpack"
+  "display": {
+    "firstperson_lefthand": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "firstperson_righthand": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "translation": [
+        0,
+        0,
+        -2.25
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "translation": [
+        0,
+        1.25,
+        0
+      ]
+    },
+    "head": {
+      "translation": [
+        0,
+        14.25,
+        0
+      ]
+    },
+    "sophisticatedbackpacks:worn": {
+      "scale": [
+        0.99,
+        0.99,
+        0.99
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        85,
+        -90,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "translation": [
+        0,
+        -2,
+        -4.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        85,
+        -90,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "translation": [
+        0,
+        -2,
+        -4.5
+      ]
+    }
+  },
+  "loader": "sophisticatedbackpacks:backpack",
+  "textures": {
+    "clips": "sophisticatedbackpacks:block/leather_clips"
+  }
 }
