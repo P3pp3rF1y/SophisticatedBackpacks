@@ -1,0 +1,14 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/world/item/ItemDisplayContext",
+      "name": "SOPHISTICATEDBACKPACKS_WORN",
+      "constructor": "(ILjava/lang/String;Ljava/lang/String;)V",
+      "parameters": [
+        -1,
+        "sophisticatedbackpacks:worn",
+        "FIXED"
+      ]
+    }
+  ]
+}

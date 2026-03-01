@@ -8,8 +8,6 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModelManager;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.IBackpackModel;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
@@ -18,8 +16,7 @@ public class BackpackCurioRenderer implements ICurioRenderer {
 	public <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void render(ItemStack stack, SlotContext slotContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, S renderState, RenderLayerParent<S, M> renderLayerParent, EntityRendererProvider.Context context, float yRotation, float xRotation) {
 		if (!stack.isEmpty()) {
 			poseStack.pushPose();
-			IBackpackModel model = BackpackModelManager.getBackpackModel(stack.getItem());
-			BackpackLayerRenderer.submitBackpack(renderLayerParent.getModel(), renderState, poseStack, submitNodeCollector, packedLight, stack, model);
+			BackpackLayerRenderer.submitBackpack(renderLayerParent.getModel(), renderState, poseStack, submitNodeCollector, packedLight);
 			poseStack.popPose();
 		}
 	}

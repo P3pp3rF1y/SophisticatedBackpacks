@@ -1,4 +1,7 @@
 {
-  "clipsTexture": "sophisticatedbackpacks:block/netherite_clips",
-  "loader": "sophisticatedbackpacks:backpack"
+  "parent": "sophisticatedbackpacks:block/backpack",
+  "loader": "sophisticatedbackpacks:backpack",
+  "textures": {
+    "clips": "sophisticatedbackpacks:block/netherite_clips"
+  }
 }

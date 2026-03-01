@@ -1,19 +1,19 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.template.CustomLoaderBuilder;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.BackpackTintSources;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.data.SophisticatedModelProvider;
@@ -57,6 +58,7 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 	}
 
 	private void generateBackpackBlockAndItemModel(BlockModelGenerators blockModels, ItemModelGenerators itemModels, ResourceKey<Item> key, BackpackItem item) {
+		TextureSlot clipsSlot = TextureSlot.create("clips");
 		String clips;
 		String backpackRegistryName = key.identifier().getPath();
 		if (backpackRegistryName.contains("_")) {
@@ -64,10 +66,26 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 		} else {
 			clips = "leather_clips";
 		}
+		ExtendedModelTemplateBuilder modelTemplateBuilder = ExtendedModelTemplateBuilder.builder();
+		if (!backpackRegistryName.contains("_")) {
+			modelTemplateBuilder
+					.transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND, transform -> transform.rotation(85, -90, 0).translation(0, -2, -4.5f).scale(0.75f))
+					.transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, transform -> transform.rotation(85, -90, 0).translation(0, -2, -4.5f).scale(0.75f))
+					.transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transform -> transform.rotation(0, 0, 0).translation(0, 0, 0).scale(0.5f))
+					.transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, transform -> transform.rotation(0, 0, 0).translation(0, 0, 0).scale(0.5f))
+					.transform(ItemDisplayContext.HEAD, transform -> transform.rotation(0, 0, 0).translation(0, 14.25f, 0).scale(1f))
+					.transform(ItemDisplayContext.GUI, transform -> transform.rotation(30, 225, 0).translation(0, 1.25f, 0).scale(0.9f))
+					.transform(ItemDisplayContext.GROUND, transform -> transform.rotation(0, 0, 0).translation(0, 3, 0).scale(0.5f))
+					.transform(ItemDisplayContext.FIXED, transform -> transform.rotation(0, 0, 0).translation(0, 0, -2.25f).scale(0.75f))
+					.transform(BackpackBlockModel.WORN, transform -> transform.rotation(0, 0, 0).translation(0, 0, 0).scale(0.99f));
 
-		TexturedModel.Provider provider = TexturedModel.createDefault(b -> new TextureMapping(),
-				ExtendedModelTemplateBuilder.builder().customLoader(() -> new BackpackLoaderBuilder(clips), loader -> {
-				}).build()
+		} else {
+			modelTemplateBuilder.parent(SophisticatedBackpacks.getRL("backpack").withPrefix("block/"));
+		}
+
+		TexturedModel.Provider provider = TexturedModel.createDefault(b -> new TextureMapping()
+				.put(clipsSlot, SophisticatedBackpacks.getRL(clips).withPrefix("block/")),
+				modelTemplateBuilder.customLoader(BackpackLoaderBuilder::new, loader -> {}).requiredTextureSlot(clipsSlot).build()
 		);
 
 		Block block = item.getBackpackBlock();
@@ -79,23 +97,13 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 	}
 
 	private static class BackpackLoaderBuilder extends CustomLoaderBuilder {
-		private final String clipsTexture;
-
-		protected BackpackLoaderBuilder(String clipsTexture) {
+		protected BackpackLoaderBuilder() {
 			super(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack"), false);
-			this.clipsTexture = clipsTexture;
 		}
 
 		@Override
 		protected CustomLoaderBuilder copyInternal() {
-			return new BackpackLoaderBuilder(clipsTexture);
-		}
-
-		@Override
-		public JsonObject toJson(JsonObject json) {
-			json = super.toJson(json);
-			json.add("clipsTexture", new JsonPrimitive(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "block/" + clipsTexture).toString()));
-			return json;
+			return new BackpackLoaderBuilder();
 		}
 	}
 }
