@@ -62,7 +62,6 @@ public class ClientEventHandler {
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::onModelRegistry);
-		modBus.addListener(ClientEventHandler::registerLayer);
 		modBus.addListener(ClientEventHandler::registerEntityRenderers);
 		modBus.addListener(ClientEventHandler::registerReloadListener);
 		modBus.addListener(BackpackTintSources::register);
@@ -141,10 +140,6 @@ public class ClientEventHandler {
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerEntityRenderer(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), ItemEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
-	}
-
-	public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
-		event.registerLayerDefinition(BACKPACK_LAYER, BackpackModel::createBodyLayer);
 	}
 
 	@SuppressWarnings("java:S3740") //explanation below

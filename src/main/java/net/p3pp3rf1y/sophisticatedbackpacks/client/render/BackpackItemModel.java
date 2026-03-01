@@ -10,6 +10,7 @@ import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
@@ -38,6 +39,9 @@ public class BackpackItemModel implements ItemModel {
 	public BackpackItemModel(BakedModel baseModel, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
 		this.tints = tints;
+		if (baseModel instanceof BackpackBlockModel.Baked backpackModel) {
+			specialRenderer.displayItemQuad = backpackModel.getDisplayItemQuad();
+		}
 	}
 
 	@Override
@@ -90,6 +94,10 @@ public class BackpackItemModel implements ItemModel {
 		}
 	}
 
+	public BakedModel getBaseModel() {
+		return baseModel;
+	}
+
 	public record Unbaked(ResourceLocation base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
 		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
 				ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
@@ -116,6 +124,8 @@ public class BackpackItemModel implements ItemModel {
 		private final Minecraft minecraft = Minecraft.getInstance();
 		@Nullable
 		public RenderInfo.DisplayItem displayItem = null;
+		@Nullable
+		public BakedQuad displayItemQuad = null;
 		private int[] tintLayers;
 		private BakedModel baseModel;
 		private RenderType renderType;
@@ -134,8 +144,11 @@ public class BackpackItemModel implements ItemModel {
 					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
 			);
 			if (displayItem != null) {
-				poseStack.translate(0.5, 0.6, 0.25);
-				poseStack.scale(0.5f, 0.5f, 0.5f);
+				if (displayItemQuad == null) {
+					return;
+				}
+				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack);
+				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				ItemRenderer itemRenderer = minecraft.getItemRenderer();
 				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);

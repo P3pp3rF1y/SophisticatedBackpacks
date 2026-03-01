@@ -4,9 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.context.ContextKey;
@@ -14,15 +17,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
+import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
@@ -34,9 +34,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
 				ItemStack backpack = backpackRenderInfo.getBackpack();
 				entityRenderState.setRenderData(BACKPACK_ITEM_STACK, backpack);
-				IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
-				EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
-				entityRenderState.setRenderData(WEARS_ARMOR, (equipmentSlot != EquipmentSlot.CHEST || !backpackRenderInfo.isArmorSlot()) && !player.getInventory().armor.get(equipmentSlot.getIndex()).isEmpty());
+				entityRenderState.setRenderData(WEARS_ARMOR, !backpackRenderInfo.isArmorSlot() && !player.getInventory().armor.get(EquipmentSlot.CHEST.getIndex()).isEmpty());
 			});
 		} else {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
@@ -48,9 +46,15 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
 
+	public static final float CHILD_Y_OFFSET = 0.3F;
+	public static final float CHILD_Z_OFFSET = 0.1F;
+	public static final float CHILD_SCALE = 0.55F;
+
+	private static ItemRenderer itemRenderer;
+
 	public BackpackLayerRenderer(RenderLayerParent<S, M> entityRendererIn) {
 		super(entityRendererIn);
-		BackpackModelManager.initModels();
+		itemRenderer = Minecraft.getInstance().getItemRenderer();
 	}
 
 	@Override
@@ -59,33 +63,42 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		if (backpack == null) {
 			return;
 		}
-		IBackpackModel model = BackpackModelManager.getBackpackModel(backpack.getItem());
 		poseStack.pushPose();
 		boolean wearsArmor = entityRenderState.getRenderData(WEARS_ARMOR);
 		boolean isBaby = entityRenderState.isBaby;
 		EntityType<?> entityType = entityRenderState.getRenderData(ENTITY_TYPE);
-		renderBackpack(getParentModel(), poseStack, multiBufferSource, packedLight, backpack, wearsArmor, model, entityRenderState, entityType, isBaby);
+		renderBackpack(getParentModel(), poseStack, multiBufferSource, packedLight, backpack, wearsArmor, entityType, isBaby);
 		poseStack.popPose();
 	}
 
-	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void renderBackpack(M parentModel, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, IBackpackModel model, S livingEntityRenderState, EntityType<?> entityType, boolean isBaby) {
-		model.translateRotateAndScale(parentModel, entityType, isBaby, matrixStack, wearsArmor);
-
-		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-		int clothColor = wrapper.getMainColor();
-		int borderColor = wrapper.getAccentColor();
-		model.render(parentModel, livingEntityRenderState, matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
-		renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo());
+	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void renderBackpack(M parentModel, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, @Nullable EntityType<?> entityType, boolean isBaby) {
+		translateRotateAndScale(parentModel, entityType, isBaby, poseStack, wearsArmor);
+		itemRenderer.renderStatic(backpack, BackpackBlockModel.WORN, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, null, 0);
 	}
 
-	private static void renderItemShown(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, RenderInfo renderInfo) {
-		renderInfo.getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
-			matrixStack.pushPose();
-			matrixStack.translate(0, 0.9, -0.25);
-			matrixStack.scale(0.5f, 0.5f, 0.5f);
-			matrixStack.mulPose(Axis.ZP.rotationDegrees(180f + displayItem.getRotation()));
-			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, packedLight, OverlayTexture.NO_OVERLAY, matrixStack, buffer, null, 0);
-			matrixStack.popPose();
-		});
+	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
+		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
+			humanoidModel.body.translateAndRotate(poseStack);
+		}
+
+		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
+		float zOffset = wearsArmor ? -0.35f : -0.3f;
+		float yOffset = -0.25f;
+
+		if (isBaby) {
+			zOffset += CHILD_Z_OFFSET;
+			yOffset = CHILD_Y_OFFSET;
+		}
+
+		poseStack.translate(0, yOffset, zOffset);
+
+		if (entityType == EntityType.PLAYER) {
+			return;
+		}
+
+		if (isBaby) {
+			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
+		}
 	}
 }
