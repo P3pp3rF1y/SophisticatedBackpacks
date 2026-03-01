@@ -13,6 +13,7 @@ logoFile="${mod_logo_file}"
 credits="${mod_credits}"
 authors="${mod_authors}"
 description='''${mod_description}'''
+enumExtensions="META-INF/enumextensions.json"
 
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"
