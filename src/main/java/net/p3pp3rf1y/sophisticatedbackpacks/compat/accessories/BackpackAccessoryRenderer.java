@@ -10,8 +10,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModelManager;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.IBackpackModel;
 
 public class BackpackAccessoryRenderer implements AccessoryRenderer {
 	@Override
@@ -19,9 +17,7 @@ public class BackpackAccessoryRenderer implements AccessoryRenderer {
 		if (!stack.isEmpty()) {
 			poseStack.pushPose();
 			if (model instanceof HumanoidModel<?> parentModel) {
-				IBackpackModel backpackModel = BackpackModelManager.getBackpackModel(stack.getItem());
-				EquipmentSlot equipmentSlot = backpackModel.getRenderEquipmentSlot();
-				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack, !reference.entity().getItemBySlot(equipmentSlot).isEmpty());
+				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack, !reference.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 				poseStack.popPose();
 			}
 		}

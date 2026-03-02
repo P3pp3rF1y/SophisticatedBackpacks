@@ -9,8 +9,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModelManager;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.IBackpackModel;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.ICurioRenderer;
 
@@ -20,9 +18,7 @@ public class BackpackCurioRenderer implements ICurioRenderer {
 		if (!stack.isEmpty()) {
 			if (renderLayerParent.getModel() instanceof HumanoidModel<?> parentModel) {
 				matrixStack.pushPose();
-				IBackpackModel model = BackpackModelManager.getBackpackModel(stack.getItem());
-				EquipmentSlot equipmentSlot = model.getRenderEquipmentSlot();
-				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack, !slotContext.entity().getItemBySlot(equipmentSlot).isEmpty());
+				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack, !slotContext.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 				matrixStack.popPose();
 			}
 		}
