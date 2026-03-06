@@ -40,11 +40,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class BackpackItemModel implements ItemModel {
-	private final SpecialRenderer specialRenderer = new SpecialRenderer();
 	private final BackpackBlockModel.BlockStateModel baseModel;
 	private final List<ItemTintSource> tints;
 	private final Supplier<Vector3f[]> extents;
 	private final ModelRenderProperties properties;
+	@Nullable
+	private final BakedQuad displayItemQuad;
 
 	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, ModelRenderProperties properties, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
@@ -52,7 +53,9 @@ public class BackpackItemModel implements ItemModel {
 		extents = Suppliers.memoize(() -> BlockModelWrapper.computeExtents(baseModel.getQuads()));
 		this.properties = properties;
 		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
-			specialRenderer.displayItemQuad = backpackModel.getDisplayItemQuad();
+			displayItemQuad = backpackModel.getDisplayItemQuad();
+		} else {
+			displayItemQuad = null;
 		}
 	}
 
@@ -83,6 +86,7 @@ public class BackpackItemModel implements ItemModel {
 		renderLayer.setParticleIcon(baseModel.particleIcon());
 		renderLayer.prepareQuadList().addAll(quads);
 		SpecialRenderer specialRenderer = new SpecialRenderer();
+		specialRenderer.displayItemQuad = this.displayItemQuad;
 		specialRenderer.setModelRenderParameters(tintLayers, quads);
 		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().map(displayItem -> {
 			stackRenderState.appendModelIdentityElement(displayItem.getItem().getItem());
