@@ -1,0 +1,17 @@
+{
+	"texture_size": [32, 32],
+	"textures": {
+		"modules": "sophisticatedbackpacks:block/backpack_modules"
+	},
+	"elements": [
+		{
+			"name": "charge",
+			"from": [6, 2, 1.9],
+			"to": [10, 3, 2.9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0, 0.9]},
+			"faces": {
+				"north": {"uv": [14, 6, 16, 6.5], "texture": "#modules"}
+			}
+		}
+	]
+}

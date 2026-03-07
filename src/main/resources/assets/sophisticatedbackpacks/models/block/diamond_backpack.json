@@ -1,4 +1,6 @@
 {
-    "loader": "sophisticatedbackpacks:backpack",
-    "clipsTexture": "sophisticatedbackpacks:block/diamond_clips"
+  "parent": "sophisticatedbackpacks:block/backpack",
+  "textures": {
+    "clips": "sophisticatedbackpacks:block/diamond_clips"
+  }
 }

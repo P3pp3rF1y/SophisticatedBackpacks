@@ -21,6 +21,9 @@ displayURL = "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpac
 # License
 license = "All Rights Reserved"
 
+# Enum extension declarations consumed by Forge/NeoForge at startup
+enumExtensions = "META-INF/enumextensions.json"
+
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile = "logo.png" #optional
 

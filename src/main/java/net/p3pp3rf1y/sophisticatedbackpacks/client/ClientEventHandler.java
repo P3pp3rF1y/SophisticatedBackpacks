@@ -1,16 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,7 +25,10 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.*;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
@@ -39,12 +41,11 @@ public class ClientEventHandler {
 	private ClientEventHandler() {}
 
 	private static final String BACKPACK_REG_NAME = "backpack";
-	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(new ResourceLocation(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
+	public static final ItemDisplayContext WORN = ItemDisplayContext.create("SOPHISTICATEDBACKPACKS_WORN", SophisticatedBackpacks.getRL("worn"), ItemDisplayContext.FIXED);
 
 	public static void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modBus.addListener(ClientEventHandler::onModelRegistry);
-		modBus.addListener(ClientEventHandler::registerLayer);
 		modBus.addListener(ClientEventHandler::registerEntityRenderers);
 		modBus.addListener(ClientEventHandler::registerReloadListener);
 		modBus.addListener(ModItemColors::registerItemColorHandlers);
@@ -65,10 +66,6 @@ public class ClientEventHandler {
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerEntityRenderer(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), ItemEntityRenderer::new);
 		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
-	}
-
-	public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
-		event.registerLayerDefinition(BACKPACK_LAYER, BackpackModel::createBodyLayer);
 	}
 
 	@SuppressWarnings("java:S3740") //explanation below
