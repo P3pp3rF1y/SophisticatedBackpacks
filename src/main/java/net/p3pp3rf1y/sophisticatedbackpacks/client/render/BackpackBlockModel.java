@@ -233,8 +233,13 @@ public class BackpackBlockModel implements UnbakedModel {
 				return QuadCollection.EMPTY;
 			}
 
+			Direction.Axis batteryFillAxis = getHorizontalFillAxis(src);
 			if (cachedBatterySteps < 0) {
-				cachedBatterySteps = computeStepsFromModelUV(src, Direction.Axis.X);
+				cachedBatterySteps = computeStepsFromModelUV(src, batteryFillAxis);
+				if (cachedBatterySteps <= 0) {
+					batteryFillAxis = batteryFillAxis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+					cachedBatterySteps = computeStepsFromModelUV(src, batteryFillAxis);
+				}
 			}
 
 			AABB bounds = batteryChargeBounds != null ? batteryChargeBounds : computeBoundsFromQuads(src);
@@ -253,38 +258,63 @@ public class BackpackBlockModel implements UnbakedModel {
 
 			float stepRatio = stepToRatio(step, cachedBatterySteps);
 
-			SliceSpec s = horizontalSliceSpec(src.getFirst().direction(), bounds, stepRatio);
+			SliceSpec s = horizontalSliceSpecFromUv(src, bounds, stepRatio, batteryFillAxis);
 			return sliceQuadsAxis(src, s.axis(), s.cut(), s.keepGreaterOrEqual());
 		}
 
 		private record SliceSpec(Direction.Axis axis, double cut, boolean keepGreaterOrEqual) {
 		}
 
-		private static SliceSpec horizontalSliceSpec(Direction face, AABB b, float ratio) {
+		private static SliceSpec horizontalSliceSpecFromUv(List<BakedQuad> quads, AABB b, float ratio, Direction.Axis axis) {
 			ratio = Mth.clamp(ratio, 0f, 1f);
-
-			return switch (face) {
-				case SOUTH -> {
-					double cut = b.minX + (b.maxX - b.minX) * ratio;
-					yield new SliceSpec(Direction.Axis.X, cut, false);
-				}
-				case NORTH -> {
-					double cut = b.maxX - (b.maxX - b.minX) * ratio;
-					yield new SliceSpec(Direction.Axis.X, cut, true);
-				}
-				case EAST -> {
-					double cut = b.minZ + (b.maxZ - b.minZ) * ratio;
-					yield new SliceSpec(Direction.Axis.Z, cut, false);
-				}
-				case WEST -> {
-					double cut = b.maxZ - (b.maxZ - b.minZ) * ratio;
-					yield new SliceSpec(Direction.Axis.Z, cut, true);
-				}
-				default -> {
-					double cut = b.minX + (b.maxX - b.minX) * ratio;
-					yield new SliceSpec(Direction.Axis.X, cut, false);
-				}
+			boolean lowUAtLowCoord = isLowUAtLowCoord(quads, axis);
+			return switch (axis) {
+				case X -> lowUAtLowCoord
+						? new SliceSpec(Direction.Axis.X, b.minX + (b.maxX - b.minX) * ratio, false)
+						: new SliceSpec(Direction.Axis.X, b.maxX - (b.maxX - b.minX) * ratio, true);
+				case Z -> lowUAtLowCoord
+						? new SliceSpec(Direction.Axis.Z, b.minZ + (b.maxZ - b.minZ) * ratio, false)
+						: new SliceSpec(Direction.Axis.Z, b.maxZ - (b.maxZ - b.minZ) * ratio, true);
+				default -> new SliceSpec(Direction.Axis.X, b.minX + (b.maxX - b.minX) * ratio, false);
 			};
+		}
+
+		private static Direction.Axis getHorizontalFillAxis(List<BakedQuad> quads) {
+			int xSteps = computeStepsFromModelUV(quads, Direction.Axis.X);
+			int zSteps = computeStepsFromModelUV(quads, Direction.Axis.Z);
+			return zSteps > xSteps ? Direction.Axis.Z : Direction.Axis.X;
+		}
+
+		private static boolean isLowUAtLowCoord(List<BakedQuad> quads, Direction.Axis axis) {
+			float minU = Float.POSITIVE_INFINITY;
+			float maxU = Float.NEGATIVE_INFINITY;
+			float coordAtMinU = 0f;
+			float coordAtMaxU = 0f;
+			boolean found = false;
+
+			for (BakedQuad q : quads) {
+				int[] v = q.vertices();
+				int stride = v.length / 4;
+				for (int i = 0; i < 4; i++) {
+					int base = i * stride;
+					float x = Float.intBitsToFloat(v[base]);
+					float z = Float.intBitsToFloat(v[base + 2]);
+					float u = Float.intBitsToFloat(v[base + 4]);
+					float coord = axis == Direction.Axis.Z ? z : x;
+					if (u < minU) {
+						minU = u;
+						coordAtMinU = coord;
+						found = true;
+					}
+					if (u > maxU) {
+						maxU = u;
+						coordAtMaxU = coord;
+						found = true;
+					}
+				}
+			}
+
+			return !found || coordAtMinU <= coordAtMaxU;
 		}
 
 		private void addRightSide(QuadCollection.Builder builder, QuadCollection.Builder translucentBuilder) {
