@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -12,6 +13,7 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
@@ -24,7 +26,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
@@ -37,10 +38,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
@@ -387,7 +385,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			}
 
 			IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-			ResourceLocation stillTex = props.getStillTexture(fluidStack);
+			Identifier stillTex = props.getStillTexture(fluidStack);
 			TextureAtlasSprite newSprite = FluidSpriteCache.getSprite(stillTex);
 			int argb = props.getTintColor(fluidStack);
 
@@ -470,20 +468,16 @@ public class BackpackBlockModel implements UnbakedModel {
 					continue;
 				}
 
-				int[] v = q.vertices();
-				int stride = v.length / 4;
-
 				float minCoord = Float.POSITIVE_INFINITY;
 				float maxCoord = Float.NEGATIVE_INFINITY;
 				float minU = Float.POSITIVE_INFINITY;
 				float maxU = Float.NEGATIVE_INFINITY;
 
 				for (int i = 0; i < 4; i++) {
-					int base = i * stride;
-					float x = Float.intBitsToFloat(v[base]);
-					float y = Float.intBitsToFloat(v[base + 1]);
-					float z = Float.intBitsToFloat(v[base + 2]);
-					float u = Float.intBitsToFloat(v[base + 4]);
+					float x = q.position(i).x();
+					float y = q.position(i).y();
+					float z = q.position(i).z();
+					float u = UVPair.unpackU(q.packedUV(i));
 
 					float coord = switch (modelAxis) {
 						case X -> x;
@@ -552,13 +546,10 @@ public class BackpackBlockModel implements UnbakedModel {
 			float maxX = Float.NEGATIVE_INFINITY, maxY = Float.NEGATIVE_INFINITY, maxZ = Float.NEGATIVE_INFINITY;
 
 			for (BakedQuad q : quads) {
-				int[] v = q.vertices();
-				final int stride = v.length / 4;
 				for (int i = 0; i < 4; i++) {
-					int base = i * stride;
-					float x = Float.intBitsToFloat(v[base]);
-					float y = Float.intBitsToFloat(v[base + 1]);
-					float z = Float.intBitsToFloat(v[base + 2]);
+					float x = q.position(i).x();
+					float y = q.position(i).y();
+					float z = q.position(i).z();
 					minX = Math.min(minX, x);
 					minY = Math.min(minY, y);
 					minZ = Math.min(minZ, z);
@@ -586,18 +577,14 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		@Nullable
 		private static BakedQuad sliceQuadAxis(BakedQuad q, Direction.Axis axis, float cut, boolean keepGreaterOrEqual) {
-			int[] v = q.vertices();
-			int stride = v.length / 4;
-
 			Vert[] in = new Vert[4];
 			for (int i = 0; i < 4; i++) {
-				int base = i * stride;
 				in[i] = new Vert(
-						Float.intBitsToFloat(v[base]),
-						Float.intBitsToFloat(v[base + 1]),
-						Float.intBitsToFloat(v[base + 2]),
-						Float.intBitsToFloat(v[base + 4]),
-						Float.intBitsToFloat(v[base + 5])
+						q.position(i).x(),
+						q.position(i).y(),
+						q.position(i).z(),
+						UVPair.unpackU(q.packedUV(i)),
+						UVPair.unpackV(q.packedUV(i))
 				);
 			}
 
@@ -707,7 +694,6 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private static BakedQuad respriteAndTintQuad(BakedQuad q, TextureAtlasSprite newSprite, float[] cols) {
 			TextureAtlasSprite oldSprite = q.sprite();
-			int[] in = q.vertices();
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
 			qb.setSprite(newSprite);
@@ -717,19 +703,17 @@ public class BackpackBlockModel implements UnbakedModel {
 			Vec3i n = q.direction().getUnitVec3i();
 
 			for (int vi = 0; vi < 4; vi++) {
-				int base = vi * IQuadTransformer.STRIDE;
+				float x = q.position(vi).x();
+				float y = q.position(vi).y();
+				float z = q.position(vi).z();
 
-				float x = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION]);
-				float y = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION + 1]);
-				float z = Float.intBitsToFloat(in[base + IQuadTransformer.POSITION + 2]);
-
-				float uOld = Float.intBitsToFloat(in[base + IQuadTransformer.UV0]);
-				float vOld = Float.intBitsToFloat(in[base + IQuadTransformer.UV0 + 1]);
+				float uOld = UVPair.unpackU(q.packedUV(vi));
+				float vOld = UVPair.unpackV(q.packedUV(vi));
 
 				float uNew = remapU(oldSprite, newSprite, uOld);
 				float vNew = remapV(oldSprite, newSprite, vOld);
 
-				int packedUv2 = in[base + IQuadTransformer.UV2];
+				int packedUv2 = q.lightEmission();
 				int lightU = packedUv2 & 0xFFFF;
 				int lightV = (packedUv2 >>> 16) & 0xFFFF;
 
@@ -738,13 +722,6 @@ public class BackpackBlockModel implements UnbakedModel {
 						.setUv(uNew, vNew)
 						.setUv2(lightU, lightV)
 						.setNormal(n.getX(), n.getY(), n.getZ());
-
-				if (IQuadTransformer.UV1 >= 0) {
-					int packedUv1 = in[base + IQuadTransformer.UV1];
-					int ovU = packedUv1 & 0xFFFF;
-					int ovV = (packedUv1 >>> 16) & 0xFFFF;
-					qb.setUv1(ovU, ovV);
-				}
 			}
 
 			return qb.bakeQuad();
@@ -779,9 +756,6 @@ public class BackpackBlockModel implements UnbakedModel {
 					continue;
 				}
 
-				int[] v = q.vertices();
-				int stride = v.length / 4;
-
 				float minCoord = Float.POSITIVE_INFINITY;
 				float maxCoord = Float.NEGATIVE_INFINITY;
 
@@ -789,13 +763,13 @@ public class BackpackBlockModel implements UnbakedModel {
 				float minV = Float.POSITIVE_INFINITY, maxV = Float.NEGATIVE_INFINITY;
 
 				for (int i = 0; i < 4; i++) {
-					int base = i * stride;
-					float x = Float.intBitsToFloat(v[base]);
-					float y = Float.intBitsToFloat(v[base + 1]);
-					float z = Float.intBitsToFloat(v[base + 2]);
+					float x = q.position(i).x();
+					float y = q.position(i).y();
+					float z = q.position(i).z();
 
-					float u = Float.intBitsToFloat(v[base + 4]);
-					float vv = Float.intBitsToFloat(v[base + 5]);
+					long packedUV = q.packedUV(i);
+					float u = UVPair.unpackU(packedUV);
+					float vv = UVPair.unpackV(packedUV);
 
 					float coord = switch (fillAxis) {
 						case X -> x;

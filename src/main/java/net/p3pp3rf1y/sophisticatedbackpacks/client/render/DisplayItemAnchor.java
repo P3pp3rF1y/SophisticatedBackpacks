@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
 import org.joml.Quaternionf;
 
 public final class DisplayItemAnchor {
@@ -29,8 +28,6 @@ public final class DisplayItemAnchor {
     }
 
     public static DisplayItemAnchor fromQuad(BakedQuad quad) {
-        final int[] vertices = quad.vertices();
-
         float minX = Float.POSITIVE_INFINITY;
         float minY = Float.POSITIVE_INFINITY;
         float minZ = Float.POSITIVE_INFINITY;
@@ -39,11 +36,9 @@ public final class DisplayItemAnchor {
         float maxZ = Float.NEGATIVE_INFINITY;
 
         for (int i = 0; i < 4; i++) {
-            int base = i * IQuadTransformer.STRIDE;
-
-            float x = Float.intBitsToFloat(vertices[base]);
-            float y = Float.intBitsToFloat(vertices[base + 1]);
-            float z = Float.intBitsToFloat(vertices[base + 2]);
+            float x = quad.position(i).x();
+            float y = quad.position(i).y();
+            float z = quad.position(i).z();
 
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);

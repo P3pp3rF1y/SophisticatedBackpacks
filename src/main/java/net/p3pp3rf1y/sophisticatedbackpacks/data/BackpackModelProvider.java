@@ -80,11 +80,11 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 					.transform(BackpackBlockModel.WORN, transform -> transform.rotation(0, 0, 0).translation(0, 0, 0).scale(0.99f));
 
 		} else {
-			modelTemplateBuilder.parent(SophisticatedBackpacks.getRL("backpack").withPrefix("block/"));
+			modelTemplateBuilder.parent(SophisticatedBackpacks.getIdentifier("backpack").withPrefix("block/"));
 		}
 
 		TexturedModel.Provider provider = TexturedModel.createDefault(b -> new TextureMapping()
-				.put(clipsSlot, SophisticatedBackpacks.getRL(clips).withPrefix("block/")),
+				.put(clipsSlot, SophisticatedBackpacks.getIdentifier(clips).withPrefix("block/")),
 				modelTemplateBuilder.customLoader(BackpackLoaderBuilder::new, loader -> {}).requiredTextureSlot(clipsSlot).build()
 		);
 

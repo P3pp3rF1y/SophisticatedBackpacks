@@ -10,12 +10,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.TextureSlots;
 import net.minecraft.client.renderer.item.*;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelBaker;
@@ -44,7 +44,7 @@ public class BackpackItemModel implements ItemModel {
 	private final List<ItemTintSource> tints;
 	private final Supplier<Vector3fc[]> extents;
 	private final ModelRenderProperties properties;
-	@javax.annotation.Nullable
+	@Nullable
 	private final BakedQuad displayItemQuad;
 
 	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, ModelRenderProperties properties, List<ItemTintSource> tints) {
@@ -174,8 +174,8 @@ public class BackpackItemModel implements ItemModel {
 			List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY).getAll();
 			ModelRenderProperties modelrenderproperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolvedmodel, textureslots);
 			RenderTypeGroup renderTypeGroup = resolvedmodel.getTopAdditionalProperties().getOptional(NeoForgeModelProperties.RENDER_TYPE);
-			RenderType renderType = renderTypeGroup == null ? null : renderTypeGroup.entity();
-			return new BlockModelWrapper(tints, list, modelrenderproperties, renderType);
+			RenderType renderType = renderTypeGroup == null ? Sheets.translucentBlockItemSheet() : renderTypeGroup.entityItem();
+			return new BlockModelWrapper(tints, list, modelrenderproperties, stack -> renderType);
 		}
 
 		@Override

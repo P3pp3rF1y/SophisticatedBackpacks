@@ -52,10 +52,6 @@ public class CuriosCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		if (FMLEnvironment.getDist().isClient()) {
-			CuriosCompatClient.registerRenderers();
-		}
-
 		addPlayerInventoryHandlers();
 	}
 }
