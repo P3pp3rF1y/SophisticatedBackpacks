@@ -88,7 +88,10 @@ public class BackpackItemModel implements ItemModel {
 		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
+			backpackModel.rightTankRenderInfo = null;
+			backpackModel.leftTankRenderInfo = null;
 			backpackModel.battery = false;
+			backpackModel.batteryRenderInfo = null;
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
 			RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 			Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();

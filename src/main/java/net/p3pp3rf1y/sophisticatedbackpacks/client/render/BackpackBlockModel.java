@@ -320,6 +320,7 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private void addRightSide(QuadCollection.Builder builder, QuadCollection.Builder translucentBuilder) {
 			if (tankRight) {
+				IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = this.rightTankRenderInfo;
 				if (rightTankRenderInfo != null && rightTankRenderInfo.getFillRatio() != 0) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedRightTankSteps != -1) {
@@ -342,6 +343,7 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private void addLeftSide(QuadCollection.Builder builder, QuadCollection.Builder translucentBuilder) {
 			if (tankLeft) {
+				IRenderedTankUpgrade.TankRenderInfo leftTankRenderInfo = this.leftTankRenderInfo;
 				if (leftTankRenderInfo != null && leftTankRenderInfo.getFillRatio() != 0) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedLeftTankSteps != -1) {
