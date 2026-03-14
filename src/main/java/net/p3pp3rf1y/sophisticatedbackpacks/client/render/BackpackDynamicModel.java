@@ -964,6 +964,8 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 				boolean left = state == null ? tankLeft : state.getValue(LEFT_TANK);
 				boolean right = state == null ? tankRight : state.getValue(RIGHT_TANK);
+				IRenderedTankUpgrade.TankRenderInfo leftTankRenderInfo = BackpackBakedModel.this.leftTankRenderInfo;
+				IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = BackpackBakedModel.this.rightTankRenderInfo;
 
 				if (left && leftTankRenderInfo != null && leftTankRenderInfo.getFillRatio() != 0) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> {
@@ -1051,7 +1053,10 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity livingEntity, int seed) {
 			backpackModel.tankRight = false;
 			backpackModel.tankLeft = false;
+			backpackModel.rightTankRenderInfo = null;
+			backpackModel.leftTankRenderInfo = null;
 			backpackModel.battery = false;
+			backpackModel.batteryRenderInfo = null;
 			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
 				RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
