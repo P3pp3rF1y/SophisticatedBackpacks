@@ -304,6 +304,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		private void addRightSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
 								  boolean tankRight, @Nullable RenderType renderType) {
 			if (tankRight) {
+				IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = this.rightTankRenderInfo;
 				if (side == null && (renderType == null || renderType == RenderType.translucent()) && rightTankRenderInfo != null && rightTankRenderInfo.getFillRatio() != 0) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedRightTankSteps != -1) {
@@ -327,6 +328,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		private void addLeftSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
 								 boolean tankLeft, @Nullable RenderType renderType) {
 			if (tankLeft) {
+				IRenderedTankUpgrade.TankRenderInfo leftTankRenderInfo = this.leftTankRenderInfo;
 				if (side == null && (renderType == null || renderType == RenderType.translucent()) && leftTankRenderInfo != null && leftTankRenderInfo.getFillRatio() != 0) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedLeftTankSteps != -1) {
