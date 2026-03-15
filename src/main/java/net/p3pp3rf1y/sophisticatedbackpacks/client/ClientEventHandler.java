@@ -31,6 +31,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
@@ -69,7 +70,7 @@ public class ClientEventHandler {
 		modBus.addListener(ClientEventHandler::registerBackpackEntityRenderStateModifier);
 		modBus.addListener(ClientEventHandler::registerBackpackItemModels);
 		modBus.addListener(ClientEventHandler::registerBlockStateModels);
-
+		BackpackShapes.setShapeProvider(ClientBackpackShapeProvider.INSTANCE);
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(ClientEventHandler::handleBlockPick);
@@ -139,7 +140,12 @@ public class ClientEventHandler {
 	}
 
 	public static void registerReloadListener(AddClientReloadListenersEvent event) {
-		event.addListener(SophisticatedBackpacks.getRL("backpack_layer_registration"), (ResourceManagerReloadListener) ClientEventHandler::registerBackpackLayer);
+		event.addListener(SophisticatedBackpacks.getRL("backpack_layer_registration"), (ResourceManagerReloadListener) resourceManager -> {
+			registerBackpackLayer(resourceManager);
+			BackpackShapes.reloadDefaultShapeProvider(resourceManager);
+			ClientBackpackShapeProvider.INSTANCE.rebuildShapes();
+			BackpackShapes.setShapeProvider(ClientBackpackShapeProvider.INSTANCE);
+		});
 	}
 
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
