@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -30,6 +31,9 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.IDynamicBakedModel;
@@ -42,6 +46,7 @@ import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -52,6 +57,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
@@ -67,18 +73,23 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 	@Override
 	public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
 		ImmutableMap.Builder<ModelPart, BakedModel> builder = ImmutableMap.builder();
+		ImmutableMap.Builder<ModelPart, VoxelShape> shapeBuilder = ImmutableMap.builder();
 		modelPartParents.forEach((part, parentModel) -> {
-			UnbakedModel model = createPartModel(context, parentModel);
+			BlockModel model = createPartModel(context, parentModel);
 			model.resolveParents(baker::getModel);
 			BakedModel bakedModel = model.bake(baker, spriteGetter, modelTransform);
 			if (bakedModel != null) {
 				builder.put(part, bakedModel);
 			}
+			VoxelShape shape = getModelShape(model);
+			if (!shape.isEmpty()) {
+				shapeBuilder.put(part, shape);
+			}
 		});
-		return new BackpackBakedModel(builder.build(), context.getTransforms());
+		return new BackpackBakedModel(builder.build(), shapeBuilder.build(), context.getTransforms());
 	}
 
-	private static UnbakedModel createPartModel(IGeometryBakingContext context, ResourceLocation parentModel) {
+	private static BlockModel createPartModel(IGeometryBakingContext context, ResourceLocation parentModel) {
 		ImmutableMap.Builder<String, Either<Material, String>> textures = ImmutableMap.builder();
 
 		if (context.hasMaterial("clips")) {
@@ -86,6 +97,29 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		}
 
 		return new BlockModel(parentModel, Collections.emptyList(), textures.build(), true, null, ItemTransforms.NO_TRANSFORMS, Collections.emptyList());
+	}
+
+	private static VoxelShape getModelShape(BlockModel model) {
+		List<BlockElement> elements = model.getElements();
+		if (elements.isEmpty()) {
+			return Shapes.empty();
+		}
+
+		VoxelShape shape = Shapes.empty();
+		for (BlockElement element : elements) {
+			if (element.rotation != null && Math.abs(element.rotation.angle()) > 0.000001f) {
+				return Shapes.empty();
+			}
+			shape = Shapes.joinUnoptimized(shape, Shapes.box(
+					Math.min(element.from.x(), element.to.x()) / 16d,
+					Math.min(element.from.y(), element.to.y()) / 16d,
+					Math.min(element.from.z(), element.to.z()) / 16d,
+					Math.max(element.from.x(), element.to.x()) / 16d,
+					Math.max(element.from.y(), element.to.y()) / 16d,
+					Math.max(element.from.z(), element.to.z()) / 16d
+			), BooleanOp.OR);
+		}
+		return shape.optimize();
 	}
 
 	public static final class BackpackBakedModel implements IDynamicBakedModel {
@@ -116,6 +150,8 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 		private final BackpackItemOverrideList overrideList = new BackpackItemOverrideList(this);
 		private final Map<ModelPart, BakedModel> models;
+		private final Map<ModelPart, VoxelShape> partShapes;
+		private final Map<BackpackShapeHelper.ShapeKey, VoxelShape> shapeCache = new ConcurrentHashMap<>();
 
 		@Nullable
 		private AABB leftTankFluidBounds;
@@ -137,9 +173,46 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 		private final TankBakedModel tankBakedModel = new TankBakedModel();
 
-		public BackpackBakedModel(Map<ModelPart, BakedModel> models, ItemTransforms itemTransforms) {
+		public BackpackBakedModel(Map<ModelPart, BakedModel> models, Map<ModelPart, VoxelShape> partShapes, ItemTransforms itemTransforms) {
 			this.models = models;
+			this.partShapes = partShapes;
 			this.itemTransforms = itemTransforms;
+		}
+
+		public Optional<VoxelShape> getShape(Direction dir, boolean leftTank, boolean rightTank, boolean battery) {
+			if (!hasPartShapes()) {
+				return Optional.empty();
+			}
+
+			BackpackShapeHelper.ShapeKey key = BackpackShapeHelper.ShapeKey.of(dir, leftTank, rightTank, battery);
+			return Optional.of(shapeCache.computeIfAbsent(key, k -> composeShape(dir, leftTank, rightTank, battery)));
+		}
+
+		private boolean hasPartShapes() {
+			return partShapes.containsKey(ModelPart.BASE)
+					&& partShapes.containsKey(ModelPart.LEFT_POUCH)
+					&& partShapes.containsKey(ModelPart.LEFT_TANK)
+					&& partShapes.containsKey(ModelPart.RIGHT_POUCH)
+					&& partShapes.containsKey(ModelPart.RIGHT_TANK)
+					&& partShapes.containsKey(ModelPart.FRONT_POUCH)
+					&& partShapes.containsKey(ModelPart.BATTERY);
+		}
+
+		private VoxelShape composeShape(Direction dir, boolean leftTank, boolean rightTank, boolean battery) {
+			BackpackShapeHelper.ShapeKey key = BackpackShapeHelper.ShapeKey.of(dir, leftTank, rightTank, battery);
+			return BackpackShapeHelper.composeAndRotate(key, this::getPartShape);
+		}
+
+		private VoxelShape getPartShape(BackpackShapeHelper.Part part) {
+			return switch (part) {
+				case BASE -> partShapes.get(ModelPart.BASE);
+				case BATTERY -> partShapes.get(ModelPart.BATTERY);
+				case FRONT_POUCH -> partShapes.get(ModelPart.FRONT_POUCH);
+				case LEFT_POUCH -> partShapes.get(ModelPart.LEFT_POUCH);
+				case LEFT_TANK -> partShapes.get(ModelPart.LEFT_TANK);
+				case RIGHT_POUCH -> partShapes.get(ModelPart.RIGHT_POUCH);
+				case RIGHT_TANK -> partShapes.get(ModelPart.RIGHT_TANK);
+			};
 		}
 
 		@Nullable
@@ -1017,6 +1090,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 				return BackpackBakedModel.this.getOverrides();
 			}
 		}
+
 	}
 
 	private static class BackpackItemOverrideList extends ItemOverrides {
