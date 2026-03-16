@@ -12,6 +12,7 @@ import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactori
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeReloadListener;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
@@ -71,6 +72,7 @@ public class SophisticatedBackpacks {
 	private void onAddReloadListener(AddServerReloadListenersEvent event) {
 		event.addListener(RegistryLoader.KEY, registryLoader);
 		event.addListener(DatapackBackpackTemplateManager.Loader.KEY, DatapackBackpackTemplateManager.Loader.INSTANCE);
+		event.addListener(BackpackShapeReloadListener.KEY, BackpackShapeReloadListener.INSTANCE);
 	}
 
 	public static Identifier getIdentifier(String regName) {
