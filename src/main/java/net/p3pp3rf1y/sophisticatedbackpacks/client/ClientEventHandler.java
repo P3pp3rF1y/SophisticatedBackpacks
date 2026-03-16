@@ -23,11 +23,13 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackShapeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
@@ -50,6 +52,7 @@ public class ClientEventHandler {
 		modBus.addListener(ClientEventHandler::registerReloadListener);
 		modBus.addListener(ModItemColors::registerItemColorHandlers);
 		modBus.addListener(ModBlockColors::registerBlockColorHandlers);
+		BackpackShapes.setShapeProvider(ClientBackpackShapeProvider.INSTANCE);
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(ClientEventHandler::handleBlockPick);
@@ -60,7 +63,12 @@ public class ClientEventHandler {
 	}
 
 	public static void registerReloadListener(RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener((ResourceManagerReloadListener) resourceManager -> registerBackpackLayer());
+		event.registerReloadListener((ResourceManagerReloadListener) resourceManager -> {
+			registerBackpackLayer();
+			BackpackShapes.reloadDefaultShapeProvider(resourceManager);
+			ClientBackpackShapeProvider.INSTANCE.rebuildShapes();
+			BackpackShapes.setShapeProvider(ClientBackpackShapeProvider.INSTANCE);
+		});
 	}
 
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
