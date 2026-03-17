@@ -237,10 +237,11 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 				return Collections.emptyList();
 			}
 			if (step >= cachedBatterySteps) {
-				return src;
+				step = cachedBatterySteps;
 			}
 
-			float stepRatio = stepToRatio(step, cachedBatterySteps);
+			// Avoid exact 1.0 slice for full charge to prevent edge-case clipping/z-fighting artifacts on custom pack quads.
+			float stepRatio = step >= cachedBatterySteps ? 0.9999f : stepToRatio(step, cachedBatterySteps);
 
 			SliceSpec s = horizontalSliceSpecFromUv(src, bounds, stepRatio, batteryFillAxis);
 			return sliceQuadsAxis(src, s.axis(), s.cut(), s.keepGreaterOrEqual());
