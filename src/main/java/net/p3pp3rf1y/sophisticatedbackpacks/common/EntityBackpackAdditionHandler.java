@@ -27,6 +27,7 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
@@ -34,10 +35,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.DiscHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.VanillaDiscHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WeightedElement;
 
@@ -268,6 +271,8 @@ public class EntityBackpackAdditionHandler {
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
 			if (shouldDropBackpack(event, additionsConfig, mob, backpack)) {
+				putJukeboxItemsInContainerAndRemoveStorageUuid(event, backpack);
+
 				ItemEntity backpackEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
@@ -276,6 +281,36 @@ public class EntityBackpackAdditionHandler {
 				removeContentsUuid(backpack);
 			}
 		}
+	}
+
+	private static void putJukeboxItemsInContainerAndRemoveStorageUuid(LivingDropsEvent event, ItemStack backpack) {
+		if (!event.getEntity().getTags().remove(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
+			return;
+		}
+
+		List<ItemStack> inventoryItems = new ArrayList<>();
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+			backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
+				wrapper.stop(event.getEntity());
+				InventoryHelper.iterate(wrapper.getDiscInventory(), (slot, stack) -> {
+					if (!stack.isEmpty()) {
+						inventoryItems.add(wrapper.getDiscInventory().extractItem(slot, stack.getCount(), false));
+					}
+				});
+			});
+			InventoryHelper.iterate(backpackWrapper.getUpgradeHandler(), (slot, stack) -> {
+				if (!stack.isEmpty()) {
+					inventoryItems.add(backpackWrapper.getUpgradeHandler().extractItem(slot, stack.getCount(), false));
+				}
+			});
+			backpackWrapper.removeContentsUuid();
+		});
+
+		ItemStackHandler inventory = new ItemStackHandler(inventoryItems.size());
+		for (int i = 0; i < inventoryItems.size(); i++) {
+			inventory.setStackInSlot(i, inventoryItems.get(i));
+		}
+		backpack.addTagElement(InventoryHandler.INVENTORY_TAG, inventory.serializeNBT());
 	}
 
 	private static boolean shouldDropBackpack(LivingDropsEvent event, Config.Server.EntityBackpackAdditionsConfig additionsConfig, LivingEntity mob, ItemStack backpack) {
@@ -296,7 +331,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBackpackUuid(Monster entity, Level level) {
-		if (level.isClientSide() || (entity.getRemovalReason() != Entity.RemovalReason.KILLED && entity.getRemovalReason() != Entity.RemovalReason.DISCARDED) || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (level.isClientSide() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
 			return;
 		}
 

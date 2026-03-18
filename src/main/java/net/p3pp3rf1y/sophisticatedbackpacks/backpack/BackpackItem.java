@@ -394,6 +394,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Override
 	public StashResult getItemStashable(ItemStack storageStack, ItemStack stack) {
 		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
+			if (wrapper.getContentsUuid().isEmpty()) {
+				return StashResult.SPACE; //Assuming that backpack that has no contentsUuid is empty and will have inventory once contentsUuid is created and thus any item can be stashed into it
+			}
+
 			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
 				return StashResult.NO_SPACE;
 			}
