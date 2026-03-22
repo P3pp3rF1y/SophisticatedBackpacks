@@ -24,15 +24,24 @@ group = mod_group_id
 
 repositories {
     mavenCentral()
-    maven { url = "https://modmaven.dev/" }
-    maven { url "https://minecraft.curseforge.com/api/maven/" }
+    maven {
+        url "https://minecraft.curseforge.com/api/maven/"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
     maven {
         url "https://www.cursemaven.com"
         content {
             includeGroup "curse.maven"
         }
     }
-    maven { url "https://maven.blamejared.com/" }
+    maven {
+        url "https://maven.blamejared.com/"
+        content {
+            includeGroup "mezz.jei"
+        }
+    }
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
