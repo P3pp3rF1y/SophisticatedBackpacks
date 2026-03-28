@@ -107,7 +107,7 @@ public class ClientEventHandler {
 	}
 
 	private static void clientTickUpgrades(LivingEntity livingEntity, RenderDataHandler renderDataHandler) {
-		if (Minecraft.getInstance().isPaused() || livingEntity.level().random.nextInt(32) != 0) {
+		if (Minecraft.getInstance().isPaused() || livingEntity.level().getRandom().nextInt(32) != 0) {
 			return;
 		}
 		renderDataHandler.getUpgradeClientData().forEach((type, data) -> UpgradeClientRegistry.getUpgradeClientTickHandler(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
@@ -125,7 +125,7 @@ public class ClientEventHandler {
 
 	private static <T extends IUpgradeClientData> void renderUpgrade(IUpgradeClientTickHandler<T> renderer, LivingEntity livingEntity, UpgradeClientDataType<?> type, IUpgradeClientData data) {
 		//noinspection unchecked
-		type.cast(data).ifPresent(clientData -> renderer.onClientTick(livingEntity.level(), livingEntity.level().random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) clientData));
+		type.cast(data).ifPresent(clientData -> renderer.onClientTick(livingEntity.level(), livingEntity.level().getRandom(), vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) clientData));
 	}
 
 	private static void registerBackpackEntityRenderStateModifier(RegisterRenderStateModifiersEvent event) {

@@ -4,10 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO after 1.22 remove support for legacy UUID deserialization via strings
 public class BackpackStorage extends SavedData {
-	private static final SavedDataType<BackpackStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID, BackpackStorage::new,
+	private static final SavedDataType<BackpackStorage> TYPE = new SavedDataType<>(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack_storage"), BackpackStorage::new,
 			RecordCodecBuilder.create(
 					builder -> builder.group(
 							Codec.unboundedMap(
@@ -57,7 +58,7 @@ public class BackpackStorage extends SavedData {
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
 				//noinspection ConstantConditions - by this time overworld is loaded
-				DimensionDataStorage storage = overworld.getDataStorage();
+				SavedDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}
 		}

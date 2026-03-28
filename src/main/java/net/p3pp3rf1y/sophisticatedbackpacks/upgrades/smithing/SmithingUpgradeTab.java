@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.smithing;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CyclingSlotBackground;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
@@ -91,8 +91,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics guiGraphics, Minecraft minecraft, int mouseX, int mouseY) {
-		super.renderBg(guiGraphics, minecraft, mouseX, mouseY);
+	protected void extractBg(GuiGraphicsExtractor guiGraphics, Minecraft minecraft, int mouseX, int mouseY) {
+		super.extractBg(guiGraphics, minecraft, mouseX, mouseY);
 
 		if (getContainer().isOpen()) {
 			renderSlotBg(guiGraphics, getContainer().getTemplateSlot());
@@ -100,25 +100,25 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			renderSlotBg(guiGraphics, getContainer().getAdditionalSlot());
 			renderSlotBg(guiGraphics, getContainer().getResultSlot());
 
-			templateIcon.render(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
-			baseIcon.render(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
-			additionalIcon.render(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
+			templateIcon.extractRenderState(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
+			baseIcon.extractRenderState(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
+			additionalIcon.extractRenderState(screen.getMenu(), guiGraphics, 0, screen.getLeftX(), screen.getTopY());
 		}
 	}
 
-	private void renderSlotBg(GuiGraphics guiGraphics, Slot slot) {
+	private void renderSlotBg(GuiGraphicsExtractor guiGraphics, Slot slot) {
 		GuiHelper.renderSlotsBackground(guiGraphics, slot.x + screen.getGuiLeft() - 1, slot.y + screen.getGuiTop() - 1, 1, 1);
 	}
 
 	@Override
-	public void renderTooltip(Screen screen, GuiGraphics guiGraphics, int mouseX, int mouseY) {
-		super.renderTooltip(screen, guiGraphics, mouseX, mouseY);
+	public void extractTooltip(Screen screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+		super.extractTooltip(screen, guiGraphics, mouseX, mouseY);
 		renderOnboardingTooltips(guiGraphics, mouseX, mouseY);
 	}
 
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+	protected void extractWidget(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		super.extractWidget(guiGraphics, mouseX, mouseY, partialTicks);
 
 		if (!isOpen) {
 			return;
@@ -137,7 +137,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			GuiHelper.blit(guiGraphics, arrowX, arrowY, RED_CROSS);
 		}
 
-		guiGraphics.submitEntityRenderState(armorStandPreview, 25f, SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10);
+		guiGraphics.entity(armorStandPreview, 25f, SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10);
 	}
 
 	private int getArrowY(int inputSlotsY) {
@@ -192,7 +192,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop() && mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
 	}
 
-	private void renderOnboardingTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+	private void renderOnboardingTooltips(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
 		if (this.hasRecipeError() && isHoveringRedCross(mouseX, mouseY)) {
 			Component tooltip = SmithingScreen.ERROR_TOOLTIP;
 			renderOnboardingTooltip(guiGraphics, mouseX, mouseY, tooltip);
@@ -210,7 +210,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 		}
 	}
 
-	private void renderOnboardingTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY, Component tooltip) {
+	private void renderOnboardingTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, Component tooltip) {
 		guiGraphics.setTooltipForNextFrame(font, font.split(tooltip, 115), mouseX, mouseY);
 	}
 

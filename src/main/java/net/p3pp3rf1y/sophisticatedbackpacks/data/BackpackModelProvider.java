@@ -8,6 +8,7 @@ import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.data.models.model.TexturedModel;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
@@ -84,7 +85,7 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 		}
 
 		TexturedModel.Provider provider = TexturedModel.createDefault(b -> new TextureMapping()
-				.put(clipsSlot, SophisticatedBackpacks.getIdentifier(clips).withPrefix("block/")),
+				.put(clipsSlot, new Material(SophisticatedBackpacks.getIdentifier(clips).withPrefix("block/"))),
 				modelTemplateBuilder.customLoader(BackpackLoaderBuilder::new, loader -> {}).requiredTextureSlot(clipsSlot).build()
 		);
 

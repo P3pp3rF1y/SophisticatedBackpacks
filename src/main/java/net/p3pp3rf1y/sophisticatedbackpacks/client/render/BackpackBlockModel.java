@@ -5,31 +5,44 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.builders.UVPair;
-import net.minecraft.client.renderer.block.model.*;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.*;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.ResolvedModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
-import net.neoforged.neoforge.client.textures.FluidSpriteCache;
+import net.neoforged.neoforge.client.fluid.FluidTintSource;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -62,7 +75,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			//noinspection DataFlowIssue - the model is constructed in the Loader class below and will always have parent
 			builder.put(part, baker.getModel(model.parent()).getTopGeometry().bake(getTextureSlots(baker, model, resolvedModel), baker, modelState, resolvedModel, ContextMap.EMPTY));
 		});
-		return new BlockStateModel(builder.build(), modelState, this.itemTransforms, resolvedModel.resolveParticleSprite(getTextureSlots(baker, modelParts.get(ModelPart.BASE), resolvedModel), baker));
+		return new BlockStateModel(builder.build(), modelState, this.itemTransforms, resolvedModel.resolveParticleMaterial(getTextureSlots(baker, modelParts.get(ModelPart.BASE), resolvedModel), baker));
 	}
 
 	private TextureSlots getTextureSlots(ModelBaker baker, UnbakedModel partModel, ModelDebugName debugName) {
@@ -113,7 +126,7 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		private final Map<ModelPart, QuadCollection> models;
 		private final ModelState modelState;
-		private final TextureAtlasSprite particleIcon;
+		private final Material.Baked particleMaterial;
 		@Nullable
 		private AABB leftTankFluidBounds;
 		@Nullable
@@ -129,10 +142,10 @@ public class BackpackBlockModel implements UnbakedModel {
 		public RenderData.@Nullable BatteryRenderData batteryRenderData = null;
 		private final ItemTransforms itemTransforms;
 
-		public BlockStateModel(Map<ModelPart, QuadCollection> models, ModelState modelState, ItemTransforms itemTransforms, TextureAtlasSprite particleIcon) {
+		public BlockStateModel(Map<ModelPart, QuadCollection> models, ModelState modelState, ItemTransforms itemTransforms, Material.Baked particleMaterial) {
 			this.models = models;
 			this.modelState = modelState;
-			this.particleIcon = particleIcon;
+			this.particleMaterial = particleMaterial;
 			this.itemTransforms = itemTransforms;
 		}
 
@@ -150,7 +163,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		@Override
-		public void collectParts(@Nullable BlockAndTintGetter level, BlockPos pos, @Nullable BlockState state, RandomSource rand, List<BlockModelPart> parts) {
+		public void collectParts(@Nullable BlockAndTintGetter level, BlockPos pos, @Nullable BlockState state, RandomSource rand, List<BlockStateModelPart> parts) {
 			if (state != null) {
 				tankLeft = state.getValue(LEFT_TANK);
 				tankRight = state.getValue(RIGHT_TANK);
@@ -178,11 +191,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			collectPartsNoStateUpdate(parts);
 		}
 
-		private void collectPartsNoStateUpdate(List<BlockModelPart> parts) {
+		private void collectPartsNoStateUpdate(List<BlockStateModelPart> parts) {
 			collectPartsNoStateUpdate(parts, lastContext);
 		}
 
-		private void collectPartsNoStateUpdate(List<BlockModelPart> parts, ItemDisplayContext context) {
+		private void collectPartsNoStateUpdate(List<BlockStateModelPart> parts, ItemDisplayContext context) {
 			QuadCollection.Builder builder = new QuadCollection.Builder();
 			QuadCollection.Builder translucentBuilder = new QuadCollection.Builder();
 			builder.addAll(models.get(ModelPart.BASE));
@@ -194,8 +207,8 @@ public class BackpackBlockModel implements UnbakedModel {
 				builder.addAll(models.get(ModelPart.STRAPS));
 			}
 
-			parts.add(new SimpleModelWrapper(builder.build(), true, particleIcon, ChunkSectionLayer.CUTOUT));
-			parts.add(new SimpleModelWrapper(translucentBuilder.build(), true, particleIcon, ChunkSectionLayer.TRANSLUCENT));
+			parts.add(new SimpleModelWrapper(builder.build(), true, particleMaterial));
+			parts.add(new SimpleModelWrapper(translucentBuilder.build(), true, new Material.Baked(particleMaterial.sprite(), true)));
 		}
 
 		private void addFront(QuadCollection.Builder builder) {
@@ -361,7 +374,7 @@ public class BackpackBlockModel implements UnbakedModel {
 			return new FluidCacheKey(fluid.getFluid(), fluid.getComponents(), step);
 		}
 
-		private record FluidCacheKey(Fluid fluid, PatchedDataComponentMap components, int step) {
+		private record FluidCacheKey(Fluid fluid, DataComponentMap components, int step) {
 		}
 
 		private QuadCollection getTankFluidFromModel(ModelPart fluidPart, FluidStack fluidStack, float ratio, boolean isLeft) {
@@ -414,10 +427,10 @@ public class BackpackBlockModel implements UnbakedModel {
 				return QuadCollection.EMPTY;
 			}
 
-			IClientFluidTypeExtensions props = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-			Identifier stillTex = props.getStillTexture(fluidStack);
-			TextureAtlasSprite newSprite = FluidSpriteCache.getSprite(stillTex);
-			int argb = props.getTintColor(fluidStack);
+			FluidState fluidState = fluidStack.getFluid().defaultFluidState();
+			FluidModel fluidStateModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
+			TextureAtlasSprite newSprite = fluidStateModel.stillMaterial().sprite();
+			int argb = fluidStateModel.tintSource() instanceof FluidTintSource fluidTintSource ? fluidTintSource.colorAsStack(fluidStack) : fluidStateModel.tintSource() != null ? fluidStateModel.tintSource().color(fluidState.createLegacyBlock()) : -1;
 
 			QuadCollection.Builder builder = respriteAndTintQuads(sliced, newSprite, argb);
 
@@ -470,9 +483,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			float v1 = v0 + dv;
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
-			qb.setSprite(sprite);
+			qb.setSprite(sprite, ChunkSectionLayer.TRANSLUCENT, net.minecraft.client.renderer.Sheets.translucentBlockItemSheet());
 			qb.setDirection(Direction.UP);
 			qb.setTintIndex(-1);
+			qb.setShade(false);
+			qb.setAmbientOcclusion(false);
 			Vec3i n = Direction.UP.getUnitVec3i();
 
 			float x0 = (float) max.minX;
@@ -526,7 +541,7 @@ public class BackpackBlockModel implements UnbakedModel {
 					continue;
 				}
 
-				TextureAtlasSprite s = q.sprite();
+				TextureAtlasSprite s = q.materialInfo().sprite();
 				if (s == null) {
 					continue;
 				}
@@ -630,9 +645,13 @@ public class BackpackBlockModel implements UnbakedModel {
 			}
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
-			qb.setSprite(q.sprite());
+			BakedQuad.MaterialInfo materialInfo = q.materialInfo();
+			qb.setSprite(materialInfo.sprite(), materialInfo.layer(), materialInfo.itemRenderType());
 			qb.setDirection(q.direction());
-			qb.setTintIndex(q.tintIndex());
+			qb.setTintIndex(materialInfo.tintIndex());
+			qb.setShade(materialInfo.shade());
+			qb.setLightEmission(materialInfo.lightEmission());
+			qb.setAmbientOcclusion(materialInfo.ambientOcclusion());
 			Vec3i n = q.direction().getUnitVec3i();
 
 			for (int i = 0; i < 4; i++) {
@@ -723,12 +742,16 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private static BakedQuad respriteAndTintQuad(BakedQuad q, TextureAtlasSprite newSprite, float[] cols) {
-			TextureAtlasSprite oldSprite = q.sprite();
+			TextureAtlasSprite oldSprite = q.materialInfo().sprite();
+			BakedQuad.MaterialInfo materialInfo = q.materialInfo();
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
-			qb.setSprite(newSprite);
+			qb.setSprite(newSprite, materialInfo.layer(), materialInfo.itemRenderType());
 			qb.setDirection(q.direction());
 			qb.setTintIndex(-1);
+			qb.setShade(materialInfo.shade());
+			qb.setLightEmission(materialInfo.lightEmission());
+			qb.setAmbientOcclusion(materialInfo.ambientOcclusion());
 
 			Vec3i n = q.direction().getUnitVec3i();
 
@@ -743,7 +766,7 @@ public class BackpackBlockModel implements UnbakedModel {
 				float uNew = remapU(oldSprite, newSprite, uOld);
 				float vNew = remapV(oldSprite, newSprite, vOld);
 
-				int packedUv2 = q.lightEmission();
+				int packedUv2 = materialInfo.lightEmission();
 				int lightU = packedUv2 & 0xFFFF;
 				int lightV = (packedUv2 >>> 16) & 0xFFFF;
 
@@ -819,7 +842,7 @@ public class BackpackBlockModel implements UnbakedModel {
 				double modelSpan = maxCoord - minCoord;
 				if (modelSpan <= 1e-6) continue;
 
-				TextureAtlasSprite s = q.sprite();
+				TextureAtlasSprite s = q.materialInfo().sprite();
 
 				double pixelSpan;
 				if (fillAxis == Direction.Axis.X) {
@@ -854,8 +877,13 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		@Override
-		public TextureAtlasSprite particleIcon() {
-			return particleIcon;
+		public Material.Baked particleMaterial() {
+			return particleMaterial;
+		}
+
+		@Override
+		public int materialFlags() {
+			return models.values().stream().mapToInt(QuadCollection::materialFlags).reduce(0, (a, b) -> a | b);
 		}
 
 		public List<BakedQuad> getQuads() {
@@ -863,12 +891,12 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		public List<BakedQuad> getQuads(ItemDisplayContext context) {
-			List<BlockModelPart> parts = new ArrayList<>();
+			List<BlockStateModelPart> parts = new ArrayList<>();
 			collectPartsNoStateUpdate(parts, context);
 
 			List<BakedQuad> bakedQuads = new ArrayList<>();
 
-			for (BlockModelPart part : parts) {
+			for (BlockStateModelPart part : parts) {
 				for (Direction dir : Direction.values()) {
 					bakedQuads.addAll(part.getQuads(dir));
 				}
@@ -937,7 +965,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, TextureSlots.Data textures) {
-			builder.put(modelPart, new BlockModel(null, null, true, ItemTransforms.NO_TRANSFORMS, textures, SophisticatedBackpacks.getIdentifier("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH))));
+			builder.put(modelPart, new PartModel(SophisticatedBackpacks.getIdentifier("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), textures));
 		}
 	}
 
@@ -954,5 +982,22 @@ public class BackpackBlockModel implements UnbakedModel {
 		RIGHT_TANK_FLUID,
 		BATTERY_CHARGE,
 		DISPLAY_ITEM
+	}
+
+	private record PartModel(Identifier parent, TextureSlots.Data textures) implements UnbakedModel {
+		@Override
+		public Boolean ambientOcclusion() {
+			return true;
+		}
+
+		@Override
+		public ItemTransforms transforms() {
+			return ItemTransforms.NO_TRANSFORMS;
+		}
+
+		@Override
+		public TextureSlots.Data textureSlots() {
+			return textures;
+		}
 	}
 }

@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -23,8 +23,8 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 	}
 
 	@Override
-	public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics guiGraphics) {
-		renderTooltip(BackpackWrapper.fromStack(backpack), font, x, y, guiGraphics);
+	public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
+		extractTooltip(BackpackWrapper.fromStack(backpack), font, x, y, guiGraphics);
 	}
 
 	public ClientBackpackContentsTooltip(BackpackItem.BackpackContentsTooltip tooltip) {

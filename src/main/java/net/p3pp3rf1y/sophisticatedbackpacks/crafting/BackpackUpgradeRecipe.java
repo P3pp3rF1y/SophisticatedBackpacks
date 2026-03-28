@@ -1,10 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -12,13 +15,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
+import java.util.List;
 import java.util.Optional;
 
-public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecipe<ShapedRecipe> {
+public class BackpackUpgradeRecipe implements CraftingRecipe, IWrapperRecipe<ShapedRecipe> {
+	public static final RecipeSerializer<BackpackUpgradeRecipe> SERIALIZER = RecipeWrapperSerializer.create(BackpackUpgradeRecipe::new, ShapedRecipe.SERIALIZER);
 	private final ShapedRecipe compose;
 
 	public BackpackUpgradeRecipe(ShapedRecipe compose) {
-		super(compose.group(), compose.category(), compose.pattern, compose.result);
 		this.compose = compose;
 	}
 
@@ -28,13 +32,18 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
+	public boolean matches(CraftingInput input, Level level) {
+		return compose.matches(input, level);
+	}
+
+	@Override
 	public boolean isSpecial() {
 		return true;
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registries) {
-		ItemStack upgradedBackpack = super.assemble(inv, registries);
+	public ItemStack assemble(CraftingInput inv) {
+		ItemStack upgradedBackpack = compose.assemble(inv);
 		getBackpack(inv).map(ItemStack::getComponentsPatch).ifPresent(upgradedBackpack::applyComponents);
 		IBackpackWrapper wrapper = BackpackWrapper.fromStack(upgradedBackpack);
 
@@ -60,9 +69,29 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 		return ModItems.BACKPACK_UPGRADE_RECIPE_SERIALIZER.get();
 	}
 
-	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BackpackUpgradeRecipe> {
-		public Serializer() {
-			super(BackpackUpgradeRecipe::new, RecipeSerializer.SHAPED_RECIPE);
-		}
+	@Override
+	public boolean showNotification() {
+		return compose.showNotification();
 	}
+
+	@Override
+	public String group() {
+		return compose.group();
+	}
+
+	@Override
+	public CraftingBookCategory category() {
+		return compose.category();
+	}
+
+	@Override
+	public PlacementInfo placementInfo() {
+		return compose.placementInfo();
+	}
+
+	@Override
+	public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+		return compose.display();
+	}
+
 }

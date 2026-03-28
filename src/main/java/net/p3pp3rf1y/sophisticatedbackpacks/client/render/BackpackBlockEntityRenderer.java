@@ -4,26 +4,26 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.FluidModel;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.client.fluid.FluidTintSource;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -106,10 +106,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 						Map.Entry::getKey,
 						entry -> {
 							FluidStack fluidStack = entry.getValue().getFluid().get();
-							IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-							Identifier texture = renderProperties.getStillTexture(fluidStack);
-							TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
-							return new BackpackRenderState.TankState(still, renderProperties.getTintColor(fluidStack), entry.getValue().fillRatio());
+							return new BackpackRenderState.TankState(getStillSprite(fluidStack), getTintColor(fluidStack), entry.getValue().fillRatio());
 						}
 				));
 		renderState.batteryChargeRatio = renderDataHandler.getBatteryRenderData().map(RenderData.BatteryRenderData::chargeRatio).orElse(0f);
@@ -145,5 +142,16 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			displayItemQuad = backpackBlockModel.getDisplayItemQuad();
 		}
 		return null;
+	}
+
+	private static TextureAtlasSprite getStillSprite(FluidStack fluidStack) {
+		FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidStack.getFluid().defaultFluidState());
+		return fluidModel.stillMaterial().sprite();
+	}
+
+	private static int getTintColor(FluidStack fluidStack) {
+		FluidState fluidState = fluidStack.getFluid().defaultFluidState();
+		FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
+		return fluidModel.tintSource() instanceof FluidTintSource fluidTintSource ? fluidTintSource.colorAsStack(fluidStack) : fluidModel.tintSource() != null ? fluidModel.tintSource().color(fluidState.createLegacyBlock()) : -1;
 	}
 }

@@ -163,7 +163,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	private static boolean hasPermissionsToPickup(Player player, BlockPos pos) {
 		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(be -> {
 			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !w.checkPermission(player))) {
-				player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
+				player.sendOverlayMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED));
 				return false;
 			}
 			return true;

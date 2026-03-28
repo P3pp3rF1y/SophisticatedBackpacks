@@ -55,11 +55,11 @@ public record EntityToolSwapPayload(int entityId) implements CustomPacketPayload
 		);
 
 		if (!anyUpgradeCanInteract.get()) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);
+			player.sendOverlayMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"));
 			return;
 		}
 		if (!result.get()) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"), true);
+			player.sendOverlayMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_found_for_entity"));
 		}
 	}
 }

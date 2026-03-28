@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import net.minecraft.client.renderer.block.model.Variant;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 import net.neoforged.neoforge.client.model.generators.blockstate.CustomBlockStateModelBuilder;

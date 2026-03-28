@@ -38,10 +38,12 @@ public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvide
 
 	public void rebuildShapes() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.getBlockRenderer() == null) {
+		try {
+			minecraft.getModelManager().getBlockStateModelSet();
+		} catch (NullPointerException | IllegalArgumentException ex) {
 			if (!warnedRendererMissing) {
 				warnedRendererMissing = true;
-				SophisticatedBackpacks.LOGGER.warn("Backpack block renderer is not ready yet, using base model-derived shapes until client models are available");
+				SophisticatedBackpacks.LOGGER.warn("Backpack block models are not ready yet, using base model-derived shapes until client models are available");
 			}
 			shapeCache = Map.of();
 			return;
@@ -68,7 +70,7 @@ public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvide
 	}
 
 	private VoxelShape computeShapeFromLoadedModel(Minecraft minecraft, BlockState state) {
-		Object model = minecraft.getBlockRenderer().getBlockModel(state);
+		Object model = minecraft.getModelManager().getBlockStateModelSet().get(state);
 		return getDefaultShapeWithWarning(state, model);
 	}
 

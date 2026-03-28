@@ -35,7 +35,7 @@ public record UpgradeTogglePayload(int upgradeSlot) implements CustomPacketPaylo
 				if (upgradeWrapper.canBeDisabled()) {
 					upgradeWrapper.setEnabled(!upgradeWrapper.isEnabled());
 					String translKey = upgradeWrapper.isEnabled() ? "gui.sophisticatedbackpacks.status.upgrade_switched_on" : "gui.sophisticatedbackpacks.status.upgrade_switched_off";
-					player.displayClientMessage(Component.translatable(translKey, upgradeWrapper.getUpgradeStack().getHoverName()), true);
+					player.sendOverlayMessage(Component.translatable(translKey, upgradeWrapper.getUpgradeStack().getHoverName()));
 				}
 			}
 			return true;

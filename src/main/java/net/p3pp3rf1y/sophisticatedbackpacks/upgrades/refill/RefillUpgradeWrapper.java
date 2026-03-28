@@ -181,10 +181,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 				player.getInventory().setSelectedItem(filter.copyWithCount(pulled));
 				return true;
 			} else {
-				player.displayClientMessage(
-						net.minecraft.network.chat.Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"),
-						true
-				);
+				player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"));
 				return false;
 			}
 		}

@@ -82,13 +82,13 @@ public class BackpackTemplates {
 	public static void exportTemplate(ServerPlayer player, Identifier templateName, BackpackTemplate backpackTemplate) {
 		Matcher matcher = EXPORT_TEMPLATE_NAMESPACE_PATTERN.matcher(templateName.getNamespace());
 		if (!matcher.matches()) {
-			player.displayClientMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getNamespace())), false);
+			player.sendSystemMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getNamespace())));
 			return;
 		}
 
 		matcher = EXPORT_TEMPLATE_PATH_PATTERN.matcher(templateName.getPath());
 		if (!matcher.matches()) {
-			player.displayClientMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getPath())), false);
+			player.sendSystemMessage(INVALID_CHARACTER.apply(findNonMatchingCharacters(matcher, templateName.getPath())));
 			return;
 		}
 
@@ -113,7 +113,7 @@ public class BackpackTemplates {
 
 		DatapackSettingsTemplateManager.putTemplate(templateName.getNamespace(), fileName, backpackTemplate.contents().settings());
 
-		player.displayClientMessage(
+		player.sendSystemMessage(
 				Component.translatable("commands.sophisticatedbackpacks.template.export.success",
 						serverLevel.getServer().getWorldPath(LevelResource.ROOT).relativize(exportPath).toString()), false
 		);

@@ -125,7 +125,7 @@ public class KeybindHandler {
 			return;
 		}
 		if (player.getMainHandItem().getItem() instanceof BackpackItem) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"), true);
+			player.sendOverlayMessage(Component.translatable("gui.sophisticatedbackpacks.status.unable_to_swap_tool_for_backpack"));
 			return;
 		}
 		HitResult rayTrace = mc.hitResult;

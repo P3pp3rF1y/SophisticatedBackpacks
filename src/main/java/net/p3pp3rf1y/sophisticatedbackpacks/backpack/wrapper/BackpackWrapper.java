@@ -595,7 +595,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			loot.addAll(RandHelper.getNRandomElements(generatedLoot, (int) (generatedLoot.size() * (lootFactor > 1 ? 1 : lootFactor))));
 			lootFactor--;
 		}
-		LootHelper.fillWithLoot(serverLevel.random, loot, getInventoryHandler());
+		LootHelper.fillWithLoot(serverLevel.getRandom(), loot, getInventoryHandler());
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {

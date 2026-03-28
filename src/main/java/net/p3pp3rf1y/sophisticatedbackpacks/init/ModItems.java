@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.cauldron.CauldronInteractions;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,8 +27,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -132,8 +133,8 @@ public class ModItems {
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SophisticatedBackpacks.MOD_ID);
 	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(), SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTION_TYPES = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<LootItemConditionType> LOOT_CONDITION_TYPES = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<MapCodec<? extends LootItemFunction>> LOOT_FUNCTION_TYPES = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<MapCodec<? extends LootItemCondition>> LOOT_CONDITION_TYPES = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
 	public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(NeoForgeRegistries.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.MOD_ID);
 	private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(BuiltInRegistries.MENU, SophisticatedBackpacks.MOD_ID);
 	private static final DeferredRegister.Entities ENTITY_TYPES = DeferredRegister.createEntities(SophisticatedBackpacks.MOD_ID);
@@ -265,13 +266,13 @@ public class ModItems {
 
 	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.MOD_ID);
 
-	public static final Supplier<CustomRecipe.Serializer<BackpackDyeRecipe>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye", () -> new CustomRecipe.Serializer<>(BackpackDyeRecipe::new));
-	public static final Supplier<RecipeSerializer<BackpackUpgradeRecipe>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
-	public static final Supplier<RecipeSerializer<SmithingBackpackUpgradeRecipe>> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
-	public static final Supplier<RecipeSerializer<BasicBackpackRecipe>> BASIC_BACKPACK_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("basic_backpack", BasicBackpackRecipe.Serializer::new);
+	public static final Supplier<RecipeSerializer<BackpackDyeRecipe>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye", () -> BackpackDyeRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<BackpackUpgradeRecipe>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade", () -> BackpackUpgradeRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<SmithingBackpackUpgradeRecipe>> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("smithing_backpack_upgrade", () -> SmithingBackpackUpgradeRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<BasicBackpackRecipe>> BASIC_BACKPACK_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("basic_backpack", () -> BasicBackpackRecipe.SERIALIZER);
 
-	public static final Supplier<LootItemFunctionType<CopyBackpackDataFunction>> COPY_BACKPACK_DATA = LOOT_FUNCTION_TYPES.register("copy_backpack_data", () -> new LootItemFunctionType<>(CopyBackpackDataFunction.CODEC));
-	public static final Supplier<LootItemConditionType> LOOT_ENABLED_CONDITION = LOOT_CONDITION_TYPES.register("loot_enabled", () -> new LootItemConditionType(BackpackLootEnabledCondition.CODEC));
+	public static final Supplier<MapCodec<? extends LootItemFunction>> COPY_BACKPACK_DATA = LOOT_FUNCTION_TYPES.register("copy_backpack_data", () -> CopyBackpackDataFunction.CODEC);
+	public static final Supplier<MapCodec<? extends LootItemCondition>> LOOT_ENABLED_CONDITION = LOOT_CONDITION_TYPES.register("loot_enabled", () -> BackpackLootEnabledCondition.CODEC);
 	public static final Supplier<MapCodec<BackpackLootModifierProvider.InjectLootModifier>> INJECT_LOOT = LOOT_MODIFIERS.register("inject_loot", () -> BackpackLootModifierProvider.InjectLootModifier.CODEC);
 
 	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SophisticatedBackpacks.MOD_ID);
@@ -388,12 +389,13 @@ public class ModItems {
 	}
 
 	public static void registerCauldronInteractions() {
-		CauldronInteraction.WATER.map().put(BACKPACK.get(), new BackpackCauldronInteraction());
-		CauldronInteraction.WATER.map().put(COPPER_BACKPACK.get(), new BackpackCauldronInteraction());
-		CauldronInteraction.WATER.map().put(IRON_BACKPACK.get(), new BackpackCauldronInteraction());
-		CauldronInteraction.WATER.map().put(GOLD_BACKPACK.get(), new BackpackCauldronInteraction());
-		CauldronInteraction.WATER.map().put(DIAMOND_BACKPACK.get(), new BackpackCauldronInteraction());
-		CauldronInteraction.WATER.map().put(NETHERITE_BACKPACK.get(), new BackpackCauldronInteraction());
+		BackpackCauldronInteraction interaction = new BackpackCauldronInteraction();
+		CauldronInteractions.WATER.put(BACKPACK.get(), interaction);
+		CauldronInteractions.WATER.put(COPPER_BACKPACK.get(), interaction);
+		CauldronInteractions.WATER.put(IRON_BACKPACK.get(), interaction);
+		CauldronInteractions.WATER.put(GOLD_BACKPACK.get(), interaction);
+		CauldronInteractions.WATER.put(DIAMOND_BACKPACK.get(), interaction);
+		CauldronInteractions.WATER.put(NETHERITE_BACKPACK.get(), interaction);
 	}
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {

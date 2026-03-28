@@ -92,7 +92,7 @@ public class DynamicCommand {
 			return 1;
 		}
 
-		ItemStack backpack = backpackItem.createItemStack(1, false);
+		ItemStack backpack = backpackItem.createItemStack(1);
 		DYNAMIC_CACHE.put(templateName, new DynamicTemplate(backpack, new ArrayList<>(), new ArrayList<>()));
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.begin.success", templateName), false);
 		return 0;
@@ -127,7 +127,7 @@ public class DynamicCommand {
 			return 1;
 		}
 
-		ItemStack stack = item.createItemStack(count, true);
+		ItemStack stack = item.createItemStack(count);
 		if (slot == -1) {
 			if (upgrade) {
 				template.itemsForUpgradeHandler.add(stack);

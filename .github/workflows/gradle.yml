@@ -7,5 +7,5 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: P3pp3rF1y/MultiWorkspace/.github/workflows/mod-build-template.yml@1.21.x
+    uses: P3pp3rF1y/MultiWorkspace/.github/workflows/mod-build-template.yml@26.1
     secrets: inherit

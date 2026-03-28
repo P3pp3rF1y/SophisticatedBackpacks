@@ -2,13 +2,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -26,18 +27,46 @@ import java.util.List;
 import java.util.Optional;
 
 public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
+	public static final MapCodec<SmithingBackpackUpgradeRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+			Recipe.CommonInfo.MAP_CODEC.forGetter(recipe -> recipe.commonInfo),
+			Ingredient.CODEC.optionalFieldOf("template").forGetter(recipe -> recipe.template),
+			Ingredient.CODEC.fieldOf("base").forGetter(recipe -> recipe.base),
+			Ingredient.CODEC.optionalFieldOf("addition").forGetter(recipe -> recipe.addition),
+			ItemStackTemplate.CODEC.fieldOf("result").forGetter(recipe -> recipe.resultTemplate)
+	).apply(builder, SmithingBackpackUpgradeRecipe::new));
+	public static final StreamCodec<RegistryFriendlyByteBuf, SmithingBackpackUpgradeRecipe> STREAM_CODEC = StreamCodec.composite(
+			Recipe.CommonInfo.STREAM_CODEC,
+			recipe -> recipe.commonInfo,
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+			recipe -> recipe.template,
+			Ingredient.CONTENTS_STREAM_CODEC,
+			recipe -> recipe.base,
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+			recipe -> recipe.addition,
+			ItemStackTemplate.STREAM_CODEC,
+			recipe -> recipe.resultTemplate,
+			SmithingBackpackUpgradeRecipe::new
+	);
+	public static final RecipeSerializer<SmithingBackpackUpgradeRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+
+	private final Recipe.CommonInfo commonInfo;
 	final Optional<Ingredient> template;
 	final Ingredient base;
 	final Optional<Ingredient> addition;
-	final ItemStack result;
+	final ItemStackTemplate resultTemplate;
 	@Nullable
 	private PlacementInfo placementInfo;
 
 	public SmithingBackpackUpgradeRecipe(Optional<Ingredient> template, Ingredient base, Optional<Ingredient> addition, ItemStack result) {
+		this(new Recipe.CommonInfo(true), template, base, addition, ItemStackTemplate.fromNonEmptyStack(result));
+	}
+
+	public SmithingBackpackUpgradeRecipe(Recipe.CommonInfo commonInfo, Optional<Ingredient> template, Ingredient base, Optional<Ingredient> addition, ItemStackTemplate resultTemplate) {
+		this.commonInfo = commonInfo;
 		this.template = template;
 		this.base = base;
 		this.addition = addition;
-		this.result = result;
+		this.resultTemplate = resultTemplate;
 	}
 
 	@Override
@@ -46,8 +75,8 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(SmithingRecipeInput inv, HolderLookup.Provider registryAccess) {
-		ItemStack upgradedBackpack = result.copy();
+	public ItemStack assemble(SmithingRecipeInput inv) {
+		ItemStack upgradedBackpack = resultTemplate.create();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inv).map(ItemStack::getComponentsPatch).ifPresent(upgradedBackpack::applyComponents);
 			IBackpackWrapper wrapper = BackpackWrapper.fromStack(upgradedBackpack);
@@ -95,48 +124,24 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 				Ingredient.optionalIngredientToDisplay(template),
 				base.display(),
 				Ingredient.optionalIngredientToDisplay(addition),
-				new SlotDisplay.ItemStackSlotDisplay(result),
+				new SlotDisplay.ItemStackSlotDisplay(resultTemplate),
 				new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
 		));
 	}
 
 	@Override
 	public ItemStack result() {
-		return result;
+		return resultTemplate.create();
 	}
 
-	public static class Serializer implements RecipeSerializer<SmithingBackpackUpgradeRecipe> {
-		private static final MapCodec<SmithingBackpackUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				Ingredient.CODEC.optionalFieldOf("template").forGetter(recipe -> recipe.template),
-				Ingredient.CODEC.fieldOf("base").forGetter(recipe -> recipe.base),
-				Ingredient.CODEC.optionalFieldOf("addition").forGetter(recipe -> recipe.addition),
-				ItemStack.STRICT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result)
-		).apply(builder, SmithingBackpackUpgradeRecipe::new));
-		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingBackpackUpgradeRecipe> STREAM_CODEC;
-
-		public Serializer() {
-		}
-
-		public MapCodec<SmithingBackpackUpgradeRecipe> codec() {
-			return CODEC;
-		}
-
-		public StreamCodec<RegistryFriendlyByteBuf, SmithingBackpackUpgradeRecipe> streamCodec() {
-			return STREAM_CODEC;
-		}
-
-		static {
-			STREAM_CODEC = StreamCodec.composite(
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
-					recipe -> recipe.template,
-					Ingredient.CONTENTS_STREAM_CODEC,
-					recipe -> recipe.base,
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
-					recipe -> recipe.addition,
-					ItemStack.STREAM_CODEC,
-					recipe -> recipe.result,
-					SmithingBackpackUpgradeRecipe::new
-			);
-		}
+	@Override
+	public boolean showNotification() {
+		return commonInfo.showNotification();
 	}
+
+	@Override
+	public String group() {
+		return "";
+	}
+
 }

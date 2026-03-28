@@ -52,7 +52,7 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_leather", hasLeather())
 				.save(output);
 
-		SpecialRecipeBuilder.special(BackpackDyeRecipe::new).save(output, SophisticatedBackpacks.getRegistryName("backpack_dye"));
+		SpecialRecipeBuilder.special(() -> BackpackDyeRecipe.INSTANCE).save(output, SophisticatedBackpacks.getRegistryName("backpack_dye"));
 
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.DIAMOND_BACKPACK.get(), BackpackUpgradeRecipe::new)
 				.pattern("DDD")

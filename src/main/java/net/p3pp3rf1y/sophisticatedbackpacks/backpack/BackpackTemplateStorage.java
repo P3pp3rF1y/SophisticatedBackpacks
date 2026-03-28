@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BackpackTemplateStorage extends SavedData {
-	private static final SavedDataType<BackpackTemplateStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID + "_backpack_templates", BackpackTemplateStorage::new,
+	private static final SavedDataType<BackpackTemplateStorage> TYPE = new SavedDataType<>(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack_templates"), BackpackTemplateStorage::new,
 			RecordCodecBuilder.create(builder -> builder.group(
 					Codec.unboundedMap(
 							Identifier.CODEC,
@@ -44,7 +44,7 @@ public class BackpackTemplateStorage extends SavedData {
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
 				//noinspection ConstantConditions - by this time overworld is loaded
-				DimensionDataStorage storage = overworld.getDataStorage();
+				SavedDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}
 		}

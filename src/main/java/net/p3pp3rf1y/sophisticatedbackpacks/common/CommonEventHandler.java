@@ -272,7 +272,7 @@ public class CommonEventHandler {
 	}
 
 	private static void playPickupSound(Level level, Player player) {
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, RandHelper.getRandomMinusOneToOne(level.getRandom()) * 1.4F + 2.0F);
 	}
 
 	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
@@ -287,7 +287,7 @@ public class CommonEventHandler {
 						.stream().anyMatch(w -> !w.checkPermission(player)))
 				.orElse(false)) {
 			event.setCanceled(true);
-			player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
+			player.sendOverlayMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED));
 		}
 	}
 }

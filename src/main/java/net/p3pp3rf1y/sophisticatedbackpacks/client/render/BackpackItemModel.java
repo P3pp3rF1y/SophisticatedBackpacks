@@ -10,28 +10,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.TextureSlots;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.client.renderer.item.*;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.RenderTypeGroup;
-import net.neoforged.neoforge.client.model.NeoForgeModelProperties;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import org.joml.Matrix4fc;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
@@ -50,7 +48,7 @@ public class BackpackItemModel implements ItemModel {
 	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, ModelRenderProperties properties, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
 		this.tints = tints;
-		extents = Suppliers.memoize(() -> BlockModelWrapper.computeExtents(baseModel.getQuads()));
+		extents = Suppliers.memoize(() -> CuboidItemModelWrapper.computeExtents(baseModel.getQuads()));
 		this.properties = properties;
 		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
 			displayItemQuad = backpackModel.getDisplayItemQuad();
@@ -75,8 +73,9 @@ public class BackpackItemModel implements ItemModel {
 			stackRenderState.appendModelIdentityElement(ItemStackRenderState.FoilType.STANDARD);
 		}
 
-		int[] tintLayers = renderLayer.prepareTintLayers(tints.length);
-		System.arraycopy(tints, 0, tintLayers, 0, tints.length);
+		for (int tint : tints) {
+			renderLayer.tintLayers().add(tint);
+		}
 
 		setBackpackModelProperties(stack, stackRenderState);
 
@@ -84,11 +83,11 @@ public class BackpackItemModel implements ItemModel {
 		properties.applyToLayer(renderLayer, displayContext);
 		renderLayer.setUsesBlockLight(true);
 		List<BakedQuad> quads = baseModel.getQuads(displayContext);
-		renderLayer.setParticleIcon(baseModel.particleIcon());
+		renderLayer.setParticleMaterial(baseModel.particleMaterial());
 		renderLayer.prepareQuadList().addAll(quads);
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		specialRenderer.displayItemQuad = this.displayItemQuad;
-		specialRenderer.setModelRenderParameters(tintLayers, quads);
+		specialRenderer.setModelRenderParameters(renderLayer.tintLayers() == null ? ItemStackRenderState.LayerRenderState.EMPTY_TINTS : renderLayer.tintLayers().toIntArray(), quads);
 		RenderData.DisplayData displayData = BackpackWrapper.fromStack(stack).getRenderDataHandler().getDisplayData();
 
 		if (!displayData.displayItems().isEmpty()) {
@@ -162,7 +161,7 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public ItemModel bake(BakingContext context) {
+		public ItemModel bake(BakingContext context, Matrix4fc transformation) {
 			ResolvedModel resolved = context.blockModelBaker().getModel(base);
 			if (resolved.wrapped() instanceof BackpackBlockModel baseModel) {
 				TextureSlots textureslots = resolved.getTopTextureSlots();
@@ -174,11 +173,9 @@ public class BackpackItemModel implements ItemModel {
 			ModelBaker modelbaker = context.blockModelBaker();
 			ResolvedModel resolvedmodel = modelbaker.getModel(base);
 			TextureSlots textureslots = resolvedmodel.getTopTextureSlots();
-			List<BakedQuad> list = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY).getAll();
+			QuadCollection quads = resolvedmodel.bakeTopGeometry(textureslots, modelbaker, BlockModelRotation.IDENTITY);
 			ModelRenderProperties modelrenderproperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolvedmodel, textureslots);
-			RenderTypeGroup renderTypeGroup = resolvedmodel.getTopAdditionalProperties().getOptional(NeoForgeModelProperties.RENDER_TYPE);
-			RenderType renderType = renderTypeGroup == null ? Sheets.translucentBlockItemSheet() : renderTypeGroup.entityItem();
-			return new BlockModelWrapper(tints, list, modelrenderproperties, stack -> renderType);
+			return new CuboidItemModelWrapper(tints, quads, modelrenderproperties, transformation);
 		}
 
 		@Override
@@ -203,16 +200,15 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
+		public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
 			submitNodeCollector.submitItem(
 					poseStack,
-					displayContext,
+					ItemDisplayContext.NONE,
 					packedLight,
 					packedOverlay,
 					outlineColor,
 					this.tintLayers,
 					this.baseModel,
-					Sheets.translucentBlockItemSheet(),
 					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
 			);
 			if (displayItem != null) {
