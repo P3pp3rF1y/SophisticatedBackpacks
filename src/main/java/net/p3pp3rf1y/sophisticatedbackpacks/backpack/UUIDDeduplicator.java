@@ -20,18 +20,18 @@ public class UUIDDeduplicator {
 	private UUIDDeduplicator() {}
 
 	public static void checkForDuplicateBackpacksAndRemoveTheirUUID(Player player, UUID backpackUuid, ItemStack backpack) {
-		PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
-			if (otherBackpack != backpack) {
-				otherBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-						.ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid -> {
-							if (uuid.equals(backpackUuid)) {
-								wrapper.removeContentsUUIDTag();
-								wrapper.onContentsNbtUpdated();
-							}
-						}));
-			}
-			return false;
-		});
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
+				PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
+					if (otherBackpack != backpack) {
+						otherBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+								.ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid -> {
+									if (uuid.equals(backpackUuid)) {
+										dedupeBackpackWrappers(backpackWrapper, wrapper);
+									}
+								}));
+					}
+					return false;
+				}));
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
@@ -43,20 +43,44 @@ public class UUIDDeduplicator {
 
 	private static void dedupeBackpackItemEntityInArea(IBackpackWrapper newBackpackWrapper, ItemEntity newBackpackItemEntity, UUID backpackId) {
 		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10), Entity::isAlive)) {
-			if (checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity)) {
-				break;
+			if (entity != newBackpackItemEntity) {
+				checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity);
 			}
 		}
 	}
 
 	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
-		return entity.getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).resolve().flatMap(IStorageWrapper::getContentsUuid).map(backpackId -> {
-			if (backpackId.equals(newBackpackId)) {
-				newBackpackWrapper.removeContentsUUIDTag();
-				newBackpackWrapper.onContentsNbtUpdated();
-				return true;
-			}
-			return false;
-		}).orElse(false);
+		return entity.getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).resolve().map(wrapper ->
+				wrapper.getContentsUuid().map(backpackId -> {
+					if (backpackId.equals(newBackpackId)) {
+						dedupeBackpackWrappers(newBackpackWrapper, wrapper);
+						return true;
+					}
+					return false;
+				}).orElse(false)
+		).orElse(false);
+	}
+
+	public static IBackpackWrapper dedupeBackpackWrappers(IBackpackWrapper firstBackpackWrapper, IBackpackWrapper secondBackpackWrapper) {
+		if (isFirstBackpackPreferred(firstBackpackWrapper, secondBackpackWrapper)) {
+			removeUuid(secondBackpackWrapper);
+			return firstBackpackWrapper;
+		}
+
+		removeUuid(firstBackpackWrapper);
+		return secondBackpackWrapper;
+	}
+
+	public static boolean isFirstBackpackPreferred(IBackpackWrapper firstBackpackWrapper, IBackpackWrapper secondBackpackWrapper) {
+		return getInventorySize(firstBackpackWrapper) >= getInventorySize(secondBackpackWrapper);
+	}
+
+	private static int getInventorySize(IBackpackWrapper backpackWrapper) {
+		return backpackWrapper.getInventoryHandler().getSlots();
+	}
+
+	private static void removeUuid(IBackpackWrapper backpackWrapper) {
+		backpackWrapper.removeContentsUUIDTag();
+		backpackWrapper.onContentsNbtUpdated();
 	}
 }
