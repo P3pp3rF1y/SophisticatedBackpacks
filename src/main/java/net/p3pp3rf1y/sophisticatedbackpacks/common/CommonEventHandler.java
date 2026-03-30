@@ -37,6 +37,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
@@ -115,7 +116,7 @@ public class CommonEventHandler {
 		}
 		nextBackpackCheckTime.put(dimensionKey, event.getLevel().getGameTime() + BACKPACK_CHECK_COOLDOWN);
 
-		Map<UUID, ItemStack> backpackIds = new HashMap<>();
+		Map<UUID, IBackpackWrapper> backpackIds = new HashMap<>();
 
 		event.getLevel().players().forEach(player -> {
 			Set<ItemStack> allBackpacks = new HashSet<>();
@@ -139,14 +140,16 @@ public class CommonEventHandler {
 		});
 	}
 
-	private static void addBackpackIdIfUniqueOrDedupe(Map<UUID, ItemStack> backpackIds, IBackpackWrapper backpackWrapper) {
+	private static void addBackpackIdIfUniqueOrDedupe(Map<UUID, IBackpackWrapper> backpackIds, IBackpackWrapper backpackWrapper) {
 		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
-			if (backpackIds.containsKey(backpackId) && backpackIds.get(backpackId) != backpackWrapper.getBackpack()) {
-				backpackWrapper.removeContentsUUIDTag();
-				backpackWrapper.onContentsNbtUpdated();
-			} else {
-				backpackIds.put(backpackId, backpackWrapper.getBackpack());
+			IBackpackWrapper existingBackpackWrapper = backpackIds.get(backpackId);
+			if (existingBackpackWrapper == null || existingBackpackWrapper.getBackpack() == backpackWrapper.getBackpack()) {
+				backpackIds.put(backpackId, backpackWrapper);
+				return;
 			}
+
+			IBackpackWrapper backpackToKeep = UUIDDeduplicator.dedupeBackpackWrappers(existingBackpackWrapper, backpackWrapper);
+			backpackIds.put(backpackId, backpackToKeep);
 		});
 	}
 
