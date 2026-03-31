@@ -6,9 +6,11 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -20,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
@@ -53,6 +56,27 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Nullable
 	private IEnergyStorage externalEnergyStorage;
 	private boolean triedUnpackingLoot = false;
+	private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
+		@Override
+		protected void onOpen(Level level, BlockPos pos, BlockState state) {
+			setOpenBlockState(state, true);
+		}
+
+		@Override
+		protected void onClose(Level level, BlockPos pos, BlockState state) {
+			setOpenBlockState(state, false);
+		}
+
+		@Override
+		protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int count, int openCount) {
+		}
+
+		@Override
+		protected boolean isOwnContainer(Player player) {
+			return player.containerMenu instanceof BackpackContainer backpackContainer
+					&& backpackContainer.getBlockPosition().map(worldPosition::equals).orElse(false);
+		}
+	};
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
@@ -206,6 +230,36 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		l.setBlockAndUpdate(worldPosition, state);
 		l.updateNeighborsAt(worldPosition, state.getBlock());
 		WorldHelper.notifyBlockUpdate(this);
+	}
+
+	private void setOpenBlockState(BlockState state, boolean open) {
+		if (level == null || !state.hasProperty(OPEN) || state.getValue(OPEN) == open) {
+			return;
+		}
+
+		level.setBlock(worldPosition, state.setValue(OPEN, open), 3);
+	}
+
+	public void startOpen(Player player) {
+		if (level == null || level.isClientSide || remove || player.isSpectator()) {
+			return;
+		}
+
+		openersCounter.incrementOpeners(player, level, getBlockPos(), getBlockState());
+	}
+
+	public void stopOpen(Player player) {
+		if (level == null || level.isClientSide || remove || player.isSpectator()) {
+			return;
+		}
+
+		openersCounter.decrementOpeners(player, level, getBlockPos(), getBlockState());
+	}
+
+	public void recheckOpen() {
+		if (!remove && level != null) {
+			openersCounter.recheckOpeners(level, getBlockPos(), getBlockState());
+		}
 	}
 
 	public static void serverTick(Level level, BlockPos blockPos, BackpackBlockEntity backpackBlockEntity) {
