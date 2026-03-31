@@ -76,6 +76,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	public static final BooleanProperty LEFT_TANK = BooleanProperty.create("left_tank");
 	public static final BooleanProperty RIGHT_TANK = BooleanProperty.create("right_tank");
 	public static final BooleanProperty BATTERY = BooleanProperty.create("battery");
+	public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final int BEDROCK_RESISTANCE = 3600000;
@@ -86,7 +87,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	public BackpackBlock(float explosionResistance) {
 		super(Properties.of().mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY));
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false).setValue(BATTERY, false).setValue(OPEN, false));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -119,7 +120,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK, BATTERY);
+		builder.add(FACING, WATERLOGGED, LEFT_TANK, RIGHT_TANK, BATTERY, OPEN);
+	}
+
+	@Override
+	public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::recheckOpen);
 	}
 
 	@Override
