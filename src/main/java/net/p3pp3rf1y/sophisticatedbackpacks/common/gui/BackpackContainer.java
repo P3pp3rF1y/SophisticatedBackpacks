@@ -12,6 +12,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
@@ -24,6 +25,7 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Optional;
 
@@ -49,6 +51,11 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 		if (backpackContext.shouldSaveAfterOpen()) {
 			backpackContext.saveBackpackStack();
+		}
+
+		if (!player.level().isClientSide) {
+			getBlockPosition().flatMap(pos -> WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class))
+					.ifPresent(backpackBlockEntity -> backpackBlockEntity.startOpen(player));
 		}
 	}
 
@@ -92,6 +99,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	public boolean stillValid(Player player) {
 		return backpackContext.canInteractWith(player);
+	}
+
+	@Override
+	public void removed(Player player) {
+		if (!player.level().isClientSide) {
+			getBlockPosition().flatMap(pos -> WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class))
+					.ifPresent(backpackBlockEntity -> backpackBlockEntity.stopOpen(player));
+		}
+
+		super.removed(player);
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
