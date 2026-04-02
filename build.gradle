@@ -14,8 +14,10 @@ buildscript {
 }
 
 plugins {
-    id "org.sonarqube" version "3.3"
+    id "org.sonarqube" version "5.0.0.4638"
     id "maven-publish"
+    id "net.darkhax.curseforgegradle" version "1.1.15"
+    id "com.modrinth.minotaur" version "2.4.5"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -44,18 +46,18 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
         credentials {
-            username = System.getenv("USERNAME")
-            password = System.getenv("READ_PACKAGES_TOKEN")
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
         }
         content {
-            includeGroupByRegex "sophisticatedcore.*"
+            includeModule("net.p3pp3rf1y", "sophisticatedcore")
         }
     }
 }
 
-group = 'sophisticatedbackpacks'
-version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
-archivesBaseName = 'sophisticatedbackpacks'
+group = mod_group_id
+version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}"
+archivesBaseName = mod_id
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
@@ -120,13 +122,13 @@ dependencies {
     if (findProject(':SophisticatedCore') != null) {
         implementation project(':SophisticatedCore')
     } else {
-        compileOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+        compileOnly fg.deobf("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
             transitive = false
         }
-        runtimeOnly fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+        runtimeOnly fg.deobf("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
             transitive = false
         }
-        testImplementation fg.deobf("sophisticatedcore:sophisticatedcore:${sc_version}") {
+        testImplementation fg.deobf("net.p3pp3rf1y:sophisticatedcore:${sc_version}") {
             transitive = false
         }
     }
@@ -188,18 +190,11 @@ static def getBuildNumber() {
     return ""
 }
 
-static def getStable() {
-    if ((System.getenv("GITHUB_REF") != null && System.getenv("GITHUB_REF").endsWith("-dev"))) {
-        return "-alpha"
-    }
-    return ""
-}
-
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
+            url = uri("${github_package_url}")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -208,17 +203,141 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            artifactId = 'sophisticatedbackpacks'
+            artifactId = mod_id
             from(components.java)
         }
     }
 }
 
-sonarqube {
+sonar {
     properties {
-        property "sonar.projectName", "SophisticatedBackpacks"
-        property "sonar.projectKey", "sophisticatedbackpacks:SophisticatedBackpacks"
+        property "sonar.organization", "p3pp3rf1y-github"
+        property "sonar.projectKey", "${sonar_project_key}"
     }
+}
+
+task generateChangelog {
+    doLast {
+        def changelog = new StringBuilder()
+
+        def removeHighUnicodeChars = { text ->
+            text.codePoints()
+                    .filter { codePoint -> codePoint <= 0x007F }
+                    .collect { codePoint -> new String(Character.toChars(codePoint)) }
+                    .join('')
+        }
+
+        def formatMultilineMessage = { message ->
+            def lines = message.split('\n')
+            def formattedMessage = lines[0].trim()
+            if (lines.size() > 1) {
+                formattedMessage += "\n" + lines[1..-1].collect { line ->
+                    def trimmedLine = line.trim()
+                    if (trimmedLine.startsWith('-')) {
+                        trimmedLine = trimmedLine.substring(1).trim()
+                    }
+                    "    - ${trimmedLine}"
+                }.join('\n')
+            }
+            return formattedMessage
+        }
+
+        def removeDevSection = { message ->
+            def devIndex = message.indexOf('[DEV]')
+            if (devIndex != -1) {
+                return message.substring(0, devIndex).trim()
+            }
+            return message
+        }
+
+        def latestCommitHash = "git rev-parse HEAD".execute().text.trim()
+        def parentCommits = "git rev-list --parents -n 1 ${latestCommitHash}".execute().text.split()
+        logger.info("Parent commits: ${parentCommits}")
+
+        def commitMessages = []
+        if (parentCommits.size() > 2) {
+            def firstParent = parentCommits[1]
+            def secondParent = parentCommits[2]
+            def gitLogCommand = [
+                    "bash", "-c", "git log --pretty=format:%B ${firstParent}..${secondParent}"
+            ]
+            commitMessages = gitLogCommand.execute().text.split('\n\n')
+            logger.info("Merge commit, ran git log command: ${gitLogCommand.join(' ')} and got ${commitMessages}")
+        } else {
+            commitMessages = "git log -1 --pretty=%B".execute().text.split('\n\n')
+            logger.info("Single commit, ran git log command: git log -1 --pretty=%B and got ${commitMessages}")
+        }
+
+        def features = []
+        def fixes = []
+        commitMessages.each { commitMessage ->
+            commitMessage = removeHighUnicodeChars(commitMessage)
+            commitMessage = removeDevSection(commitMessage)
+
+            if (commitMessage.startsWith('feat: ')) {
+                features.add(commitMessage.replaceFirst('feat: ', '').trim())
+            } else if (commitMessage.startsWith('fix: ')) {
+                fixes.add(commitMessage.replaceFirst('fix: ', '').trim())
+            }
+        }
+
+        if (features) {
+            changelog.append("### Features\n")
+            features.each { feature -> changelog.append("- ${formatMultilineMessage(feature)}\n") }
+        }
+
+        if (fixes) {
+            changelog.append("### Fixes\n")
+            fixes.each { fix -> changelog.append("- ${formatMultilineMessage(fix)}\n") }
+        }
+
+        logger.info("Compiled changelog: " + changelog.toString())
+        project.ext.changelog = changelog.toString()
+    }
+    project.ext.changelog = ""
+}
+
+task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    dependsOn 'generateChangelog'
+
+    apiToken = System.getenv("CURSEFORGE_TOKEN")
+    def mainFile = upload(project.curseforge_id, file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
+    mainFile.changelogType = 'markdown'
+    mainFile.changelog = { project.ext.changelog }
+    mainFile.addModLoader('Forge')
+    mainFile.releaseType = "${release_type}"
+    "${release_versions}".split(',').each {
+        mainFile.addGameVersion("${it}")
+    }
+    mainFile.addRequirement('sophisticated-core')
+    mainFile.addOptional('jei')
+    mainFile.addOptional('curios')
+    mainFile.addOptional('crafting-tweaks')
+    mainFile.addOptional('chipped')
+    onlyIf { !project.ext.changelog.isEmpty() }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "${modrinth_project_id}"
+    versionType = "${release_type}"
+    uploadFile = jar
+    gameVersions = "${release_versions}".split(',').collect { e -> e }
+    loaders = ["forge"]
+    dependencies {
+        required.project "sophisticated-core"
+        optional.project "jei"
+        optional.project "crafting-tweaks"
+        optional.project "curios"
+        optional.project "chipped"
+    }
+    changelog = provider {
+        project.ext.changelog
+    }
+}
+tasks.modrinth {
+    dependsOn(tasks.generateChangelog)
+    onlyIf { !project.ext.changelog.isEmpty() }
 }
 
 task printVersionName {
