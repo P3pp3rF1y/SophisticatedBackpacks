@@ -164,12 +164,19 @@ public class BackpackBlockModel implements UnbakedModel {
 
 		@Override
 		public void collectParts(@Nullable BlockAndTintGetter level, BlockPos pos, @Nullable BlockState state, RandomSource rand, List<BlockStateModelPart> parts) {
-			if (state != null) {
+			tankLeft = false;
+			leftTankRenderData = null;
+			tankRight = false;
+			rightTankRenderData = null;
+			battery = false;
+			batteryRenderData = null;
+
+			if (state != null && state.hasProperty(LEFT_TANK) && state.hasProperty(RIGHT_TANK) && state.hasProperty(BATTERY)) {
 				tankLeft = state.getValue(LEFT_TANK);
 				tankRight = state.getValue(RIGHT_TANK);
 				battery = state.getValue(BATTERY);
 
-				if (tankLeft || tankRight || battery) {
+				if ((tankLeft || tankRight || battery) && level != null) {
 					level.getBlockEntity(pos, ModBlocks.BACKPACK_TILE_TYPE.get()).ifPresent(backpackBlockEntity -> {
 						RenderDataHandler renderDataHandler = backpackBlockEntity.getBackpackWrapper().getRenderDataHandler();
 						Map<TankPosition, RenderData.TankRenderData> tankRenderData = renderDataHandler.getTankRenderData();
@@ -186,7 +193,6 @@ public class BackpackBlockModel implements UnbakedModel {
 					});
 				}
 			}
-
 
 			collectPartsNoStateUpdate(parts);
 		}
