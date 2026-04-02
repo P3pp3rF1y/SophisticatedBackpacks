@@ -216,86 +216,8 @@ sonar {
     }
 }
 
-task generateChangelog {
-    doLast {
-        def changelog = new StringBuilder()
-
-        def removeHighUnicodeChars = { text ->
-            text.codePoints()
-                    .filter { codePoint -> codePoint <= 0x007F }
-                    .collect { codePoint -> new String(Character.toChars(codePoint)) }
-                    .join('')
-        }
-
-        def formatMultilineMessage = { message ->
-            def lines = message.split('\n')
-            def formattedMessage = lines[0].trim()
-            if (lines.size() > 1) {
-                formattedMessage += "\n" + lines[1..-1].collect { line ->
-                    def trimmedLine = line.trim()
-                    if (trimmedLine.startsWith('-')) {
-                        trimmedLine = trimmedLine.substring(1).trim()
-                    }
-                    "    - ${trimmedLine}"
-                }.join('\n')
-            }
-            return formattedMessage
-        }
-
-        def removeDevSection = { message ->
-            def devIndex = message.indexOf('[DEV]')
-            if (devIndex != -1) {
-                return message.substring(0, devIndex).trim()
-            }
-            return message
-        }
-
-        def latestCommitHash = "git rev-parse HEAD".execute().text.trim()
-        def parentCommits = "git rev-list --parents -n 1 ${latestCommitHash}".execute().text.split()
-        logger.info("Parent commits: ${parentCommits}")
-
-        def commitMessages = []
-        if (parentCommits.size() > 2) {
-            def firstParent = parentCommits[1]
-            def secondParent = parentCommits[2]
-            def gitLogCommand = [
-                    "bash", "-c", "git log --pretty=format:%B ${firstParent}..${secondParent}"
-            ]
-            commitMessages = gitLogCommand.execute().text.split('\n\n')
-            logger.info("Merge commit, ran git log command: ${gitLogCommand.join(' ')} and got ${commitMessages}")
-        } else {
-            commitMessages = "git log -1 --pretty=%B".execute().text.split('\n\n')
-            logger.info("Single commit, ran git log command: git log -1 --pretty=%B and got ${commitMessages}")
-        }
-
-        def features = []
-        def fixes = []
-        commitMessages.each { commitMessage ->
-            commitMessage = removeHighUnicodeChars(commitMessage)
-            commitMessage = removeDevSection(commitMessage)
-
-            if (commitMessage.startsWith('feat: ')) {
-                features.add(commitMessage.replaceFirst('feat: ', '').trim())
-            } else if (commitMessage.startsWith('fix: ')) {
-                fixes.add(commitMessage.replaceFirst('fix: ', '').trim())
-            }
-        }
-
-        if (features) {
-            changelog.append("### Features\n")
-            features.each { feature -> changelog.append("- ${formatMultilineMessage(feature)}\n") }
-        }
-
-        if (fixes) {
-            changelog.append("### Fixes\n")
-            fixes.each { fix -> changelog.append("- ${formatMultilineMessage(fix)}\n") }
-        }
-
-        logger.info("Compiled changelog: " + changelog.toString())
-        project.ext.changelog = changelog.toString()
-    }
-    project.ext.changelog = ""
-}
+def sharedChangelogScript = file('../../MultiWorkspace1.20.1/gradle/changelog.gradle')
+apply from: sharedChangelogScript.exists() ? sharedChangelogScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/1.20.x/gradle/changelog.gradle'
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     dependsOn 'generateChangelog'
