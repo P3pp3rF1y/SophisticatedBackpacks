@@ -11,7 +11,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
@@ -56,7 +56,7 @@ public class SmithingBackpackUpgradeRecipeBuilder {
 		Objects.requireNonNull(advancement$builder);
 		criteria.forEach(advancement$builder::addCriterion);
 
-		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(Optional.of(template), base, Optional.of(addition), new ItemStack(result)), advancement$builder.build(id.identifier().withPrefix("recipes/" + category.getFolderName() + "/")));
+		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(new Recipe.CommonInfo(true), Optional.of(template), base, Optional.of(addition), new ItemStackTemplate(result)), advancement$builder.build(id.identifier().withPrefix("recipes/" + category.getFolderName() + "/")));
 	}
 
 	private void ensureValid(ResourceKey<Recipe<?>> recipe) {

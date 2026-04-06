@@ -21,6 +21,7 @@ if (findProject(':SophisticatedCore') != null) {
 
 version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
 group = mod_group_id
+def isClientDataRun = gradle.startParameter.taskNames.any { it.toLowerCase().contains('clientdata') }
 
 repositories {
     mavenCentral()
@@ -167,17 +168,25 @@ dependencies {
 //    implementation files('/libs/sophisticatedcore-1.20.4-0.6.18.-SNAPSHOT.jar')
 
     compileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-    localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
+    if (!isClientDataRun) {
+        localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
+    }
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     //localRuntime "dev.emi:emi-neoforge:${emi_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-    localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+    if (!isClientDataRun) {
+        localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+        localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
+    }
     compileOnly "curse.maven:curios-309927:${curios_cf_file_id}"
-    localRuntime "curse.maven:curios-309927:${curios_cf_file_id}"
+    if (!isClientDataRun) {
+        localRuntime "curse.maven:curios-309927:${curios_cf_file_id}"
+    }
     compileOnly "net.blay09.mods:balm-neoforge:${balm_version}"
-    localRuntime "net.blay09.mods:balm-neoforge:${balm_version}"
+    if (!isClientDataRun) {
+        localRuntime "net.blay09.mods:balm-neoforge:${balm_version}"
+    }
     compileOnly "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
     compileOnly "io.wispforest:accessories-neoforge:${accessories_version}"
     compileOnly "curse.maven:chipped-456956:${chipped_cf_file_id}"

@@ -3,7 +3,6 @@
   "addition": "minecraft:netherite_ingot",
   "base": "sophisticatedbackpacks:diamond_backpack",
   "result": {
-    "count": 1,
     "id": "sophisticatedbackpacks:netherite_backpack"
   },
   "template": "minecraft:netherite_upgrade_smithing_template"

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
@@ -94,6 +95,7 @@ public class BackpackEmiPlugin implements EmiPlugin {
 	private void registerRecipes(EmiRegistry registry) {
 		EmiRecipeDisplayGenerator generator = new EmiRecipeDisplayGenerator(registry);
 		DyeRecipesMaker.addRecipes(generator);
+		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.CRAFTING, BackpackUpgradeRecipe.class);
 		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.SMITHING, SmithingBackpackUpgradeRecipe.class);
 	}
 
