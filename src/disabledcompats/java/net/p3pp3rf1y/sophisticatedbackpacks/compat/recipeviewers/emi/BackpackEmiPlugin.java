@@ -16,7 +16,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiRecipeDisplayGenerator;
@@ -88,7 +87,7 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		});
 
 		registry.addDragDropHandler(BackpackScreen.class, new EmiStorageGhostDragDropHandler<>());
-		registry.addDragDropHandler(SettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
+		registry.addDragDropHandler(BackpackSettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
 	}
 
 	private void registerRecipes(EmiRegistry registry) {
