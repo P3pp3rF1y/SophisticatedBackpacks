@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import com.google.common.primitives.Ints;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -31,6 +33,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -49,11 +52,14 @@ import java.util.*;
 public class EntityBackpackAdditionHandler {
 	private static final int MAX_DIFFICULTY = 3;
 	private static final float MAX_LOCAL_DIFFICULTY = 6.75f;
+	private static final UUID BACKPACK_BEARER_HEALTH_BONUS_UUID = UUID.fromString("f7b6ff5b-2e0b-4c0b-8d02-e3f9b1a5c23c");
+	private static final String BACKPACK_BEARER_HEALTH_BONUS = "Backpack bearer health bonus";
+	private static final String ENTITY_DATA_TAG = SophisticatedBackpacks.MOD_ID;
+	private static final String ENTITY_DATA_SPAWNED_WITH_BACKPACK = "spawnedWithBackpack";
+	private static final String ENTITY_DATA_SPAWNED_WITH_JUKEBOX_UPGRADE = "spawnedWithJukeboxUpgrade";
+	private static final String ENTITY_DATA_CONVERTING = "converting";
 
 	private EntityBackpackAdditionHandler() {}
-
-	private static final String SPAWNED_WITH_BACKPACK = "spawnedWithBackpack";
-	private static final String SPAWNED_WITH_JUKEBOX_UPGRADE = SophisticatedBackpacks.MOD_ID + ":jukebox";
 
 	private static final List<WeightedElement<Item>> HELMET_CHANCES = List.of(
 			new WeightedElement<>(1, Items.NETHERITE_HELMET),
@@ -128,15 +134,15 @@ public class EntityBackpackAdditionHandler {
 		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(difficultyIndex)).ifPresent(backpackAddition -> {
 			ItemStack backpack = new ItemStack(backpackAddition.getBackpackItem());
 			int minDifficulty = backpackAddition.getMinDifficulty();
-			equipBackpack(monster, backpack, minDifficulty, Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.playJukebox.get()) && rnd.nextInt(4) == 0, level, rnd);
+			equipBackpack(monster, backpack, minDifficulty, Config.SERVER.entityBackpackAdditions.playJukebox.get() && rnd.nextInt(4) == 0, level, rnd);
 			applyPotions(monster, Math.max(minDifficulty, rnd.nextInt(MAX_DIFFICULTY + 1)), minDifficulty, rnd);
 			raiseHealth(monster, minDifficulty);
-			if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.equipWithArmor.get())) {
+			if (Config.SERVER.entityBackpackAdditions.equipWithArmor.get()) {
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getHelmetChances(), EquipmentSlot.HEAD, level);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getLeggingsChances(), EquipmentSlot.LEGS, level);
 				equipArmorPiece(monster, rnd, minDifficulty, backpackAddition.getBootsChances(), EquipmentSlot.FEET, level);
 			}
-			monster.addTag(SPAWNED_WITH_BACKPACK);
+			setSpawnedBackpack(monster, true);
 		});
 	}
 
@@ -155,6 +161,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void equipBackpack(Monster monster, ItemStack backpack, int minDifficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
+		setSpawnedBackpack(monster, true);
 		getSpawnEgg(monster.getType()).ifPresent(egg -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 				.ifPresent(w -> {
 					w.setColors(getPrimaryColor(egg), getSecondaryColor(egg));
@@ -165,7 +172,7 @@ public class EntityBackpackAdditionHandler {
 					if (playMusicDisc) {
 						w.getInventoryHandler(); //just to assign uuid and real upgrade handler
 						if (w.getUpgradeHandler().getSlots() > 0) {
-							monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
+							setSpawnedJukeboxUpgrade(monster, true);
 							addJukeboxUpgradeAndRandomDisc(level.getRandom(), w, rnd);
 						}
 					}
@@ -204,14 +211,14 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void raiseHealth(Monster monster, int minDifficulty) {
-		if (Boolean.FALSE.equals(Config.SERVER.entityBackpackAdditions.buffHealth.get())) {
+		if (!Config.SERVER.entityBackpackAdditions.buffHealth.get()) {
 			return;
 		}
 		AttributeInstance maxHealth = monster.getAttribute(Attributes.MAX_HEALTH);
 		if (maxHealth != null) {
 			double healthAddition = maxHealth.getBaseValue() * minDifficulty;
 			if (healthAddition > 0.1D) {
-				maxHealth.addPermanentModifier(new AttributeModifier("Backpack bearer health bonus", healthAddition, AttributeModifier.Operation.ADDITION));
+				maxHealth.addPermanentModifier(new AttributeModifier(BACKPACK_BEARER_HEALTH_BONUS_UUID, BACKPACK_BEARER_HEALTH_BONUS, healthAddition, AttributeModifier.Operation.ADDITION));
 			}
 			monster.setHealth(monster.getMaxHealth());
 		}
@@ -246,13 +253,13 @@ public class EntityBackpackAdditionHandler {
 			return;
 		}
 
-		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.addLoot.get())) {
+		if (Config.SERVER.entityBackpackAdditions.addLoot.get()) {
 			addLoot(monster, backpackWrapper, lootFactor);
 		}
 	}
 
 	private static void applyPotions(Monster monster, int difficulty, int minDifficulty, RandomSource rnd) {
-		if (Boolean.TRUE.equals(Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get())) {
+		if (Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get()) {
 			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
 					.forEach(applicableEffect -> {
 						int amplifier = Math.min(Math.max(minDifficulty, rnd.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
@@ -266,7 +273,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
-		if (event.getEntity().getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (hasSpawnedBackpack(event.getEntity())) {
 			LivingEntity mob = event.getEntity();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
@@ -276,15 +283,54 @@ public class EntityBackpackAdditionHandler {
 				ItemEntity backpackEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), backpack);
 				event.getDrops().add(backpackEntity);
 				mob.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
-				event.getEntity().getTags().remove(SPAWNED_WITH_BACKPACK);
+				clearSpawnedBackpackData(mob);
 			} else {
+				clearSpawnedBackpackData(mob);
 				removeContentsUuid(backpack);
 			}
 		}
 	}
 
+	static void handleLivingConversionPre(LivingConversionEvent.Pre event) {
+		if (hasSpawnedBackpack(event.getEntity())) {
+			getOrCreateBackpackEntityData(event.getEntity()).putBoolean(ENTITY_DATA_CONVERTING, true);
+		}
+	}
+
+	static void handleLivingConversion(LivingConversionEvent.Post event) {
+		LivingEntity entity = event.getEntity();
+		LivingEntity outcome = event.getOutcome();
+		ItemStack backpack = outcome.getItemBySlot(EquipmentSlot.CHEST);
+		if (!hasSpawnedBackpack(entity) || !(backpack.getItem() instanceof BackpackItem)) {
+			return;
+		}
+
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
+				backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> wrapper.stop(entity)));
+
+		copySpawnedBackpackData(entity, outcome);
+		transferHealthBonus(entity, outcome);
+	}
+
+	private static void transferHealthBonus(LivingEntity entity, LivingEntity outcome) {
+		AttributeInstance sourceMaxHealth = entity.getAttribute(Attributes.MAX_HEALTH);
+		AttributeInstance outcomeMaxHealth = outcome.getAttribute(Attributes.MAX_HEALTH);
+		if (sourceMaxHealth == null || outcomeMaxHealth == null) {
+			return;
+		}
+
+		AttributeModifier healthModifier = sourceMaxHealth.getModifier(BACKPACK_BEARER_HEALTH_BONUS_UUID);
+		if (healthModifier == null || outcomeMaxHealth.getModifier(BACKPACK_BEARER_HEALTH_BONUS_UUID) != null) {
+			return;
+		}
+
+		float healthRatio = entity.getHealth() / entity.getMaxHealth();
+		outcomeMaxHealth.addPermanentModifier(healthModifier);
+		outcome.setHealth(Math.min(outcome.getMaxHealth(), outcome.getMaxHealth() * healthRatio));
+	}
+
 	private static void putJukeboxItemsInContainerAndRemoveStorageUuid(LivingDropsEvent event, ItemStack backpack) {
-		if (!event.getEntity().getTags().remove(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
+		if (!hasSpawnedJukeboxUpgrade(event.getEntity())) {
 			return;
 		}
 
@@ -317,7 +363,7 @@ public class EntityBackpackAdditionHandler {
 		if (!(event.getSource().getEntity() instanceof Player)) {
 			return false;
 		}
-		if (!Boolean.TRUE.equals(additionsConfig.dropToFakePlayers.get()) && event.getSource().getEntity() instanceof FakePlayer) {
+		if (!additionsConfig.dropToFakePlayers.get() && event.getSource().getEntity() instanceof FakePlayer) {
 			return false;
 		}
 		float lootingChanceMultiplier = dropChanceMultiplier.getOrDefault(backpack.getItem(), 1F);
@@ -325,17 +371,21 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	public static void removeBeneficialEffects(Creeper creeper) {
-		if (creeper.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (hasSpawnedBackpack(creeper)) {
 			creeper.getActiveEffects().removeIf(e -> e.getEffect().isBeneficial());
 		}
 	}
 
 	public static void removeBackpackUuid(Monster entity, Level level) {
-		if (level.isClientSide() || !entity.getTags().contains(SPAWNED_WITH_BACKPACK)) {
+		if (level.isClientSide() || !hasSpawnedBackpack(entity)) {
+			return;
+		}
+		if (isConverting(entity)) {
 			return;
 		}
 
 		ItemStack stack = entity.getItemBySlot(EquipmentSlot.CHEST);
+		clearSpawnedBackpackData(entity);
 		removeContentsUuid(stack);
 	}
 
@@ -346,7 +396,7 @@ public class EntityBackpackAdditionHandler {
 
 	public static void onLivingUpdate(LivingEvent.LivingTickEvent event) {
 		LivingEntity entity = event.getEntity();
-		if (!entity.getTags().contains(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
+		if (entity.level().isClientSide() || entity instanceof Player || !hasSpawnedJukeboxUpgrade(entity)) {
 			return;
 		}
 		entity.getItemBySlot(EquipmentSlot.CHEST).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -357,6 +407,55 @@ public class EntityBackpackAdditionHandler {
 						wrapper.play(entity);
 					}
 				}));
+	}
+
+	private static boolean hasSpawnedBackpack(LivingEntity entity) {
+		return getBackpackEntityData(entity).getBoolean(ENTITY_DATA_SPAWNED_WITH_BACKPACK);
+	}
+
+	private static boolean hasSpawnedJukeboxUpgrade(LivingEntity entity) {
+		return getBackpackEntityData(entity).getBoolean(ENTITY_DATA_SPAWNED_WITH_JUKEBOX_UPGRADE);
+	}
+
+	private static void setSpawnedBackpack(LivingEntity entity, boolean spawnedWithBackpack) {
+		getOrCreateBackpackEntityData(entity).putBoolean(ENTITY_DATA_SPAWNED_WITH_BACKPACK, spawnedWithBackpack);
+	}
+
+	private static void setSpawnedJukeboxUpgrade(LivingEntity entity, boolean spawnedWithJukeboxUpgrade) {
+		getOrCreateBackpackEntityData(entity).putBoolean(ENTITY_DATA_SPAWNED_WITH_JUKEBOX_UPGRADE, spawnedWithJukeboxUpgrade);
+	}
+
+	private static CompoundTag getBackpackEntityData(LivingEntity entity) {
+		return entity.getPersistentData().getCompound(ENTITY_DATA_TAG);
+	}
+
+	private static CompoundTag getOrCreateBackpackEntityData(LivingEntity entity) {
+		CompoundTag persistentData = entity.getPersistentData();
+		if (!persistentData.contains(ENTITY_DATA_TAG)) {
+			persistentData.put(ENTITY_DATA_TAG, new CompoundTag());
+		}
+		return persistentData.getCompound(ENTITY_DATA_TAG);
+	}
+
+	private static void copySpawnedBackpackData(LivingEntity entity, LivingEntity outcome) {
+		CompoundTag sourceData = entity.getPersistentData().getCompound(ENTITY_DATA_TAG);
+		if (sourceData.isEmpty()) {
+			setSpawnedBackpack(outcome, true);
+			return;
+		}
+
+		setSpawnedBackpack(outcome, sourceData.getBoolean(ENTITY_DATA_SPAWNED_WITH_BACKPACK));
+		if (hasSpawnedJukeboxUpgrade(entity)) {
+			setSpawnedJukeboxUpgrade(outcome, true);
+		}
+	}
+
+	private static boolean isConverting(LivingEntity entity) {
+		return getBackpackEntityData(entity).getBoolean(ENTITY_DATA_CONVERTING);
+	}
+
+	private static void clearSpawnedBackpackData(LivingEntity entity) {
+		entity.getPersistentData().remove(ENTITY_DATA_TAG);
 	}
 
 	private record BackpackAddition(Item backpackItem, int minDifficulty,

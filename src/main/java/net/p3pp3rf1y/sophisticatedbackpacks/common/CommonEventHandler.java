@@ -21,6 +21,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -64,6 +65,8 @@ public class CommonEventHandler {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(this::onItemPickup);
 		eventBus.addListener(this::onLivingSpecialSpawn);
+		eventBus.addListener(this::onLivingConversionPre);
+		eventBus.addListener(this::onLivingConversion);
 		eventBus.addListener(this::onLivingDrops);
 		eventBus.addListener(this::onEntityMobGriefing);
 		eventBus.addListener(this::onEntityLeaveWorld);
@@ -216,6 +219,14 @@ public class CommonEventHandler {
 
 	private void onLivingDrops(LivingDropsEvent event) {
 		EntityBackpackAdditionHandler.handleBackpackDrop(event);
+	}
+
+	private void onLivingConversionPre(LivingConversionEvent.Pre event) {
+		EntityBackpackAdditionHandler.handleLivingConversionPre(event);
+	}
+
+	private void onLivingConversion(LivingConversionEvent.Post event) {
+		EntityBackpackAdditionHandler.handleLivingConversion(event);
 	}
 
 	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
