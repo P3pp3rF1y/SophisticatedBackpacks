@@ -37,7 +37,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		} else {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
-				entityRenderState.setRenderData(WEARS_ARMOR, false);
+				addBackpackRenderState(entityRenderState, livingEntity, chestStack, false);
 			}
 		}
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
@@ -48,8 +48,11 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	public static final float CHILD_SCALE = 0.55F;
 
 	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
-		ItemStack backpack = backpackRenderInfo.getBackpack();
-		entityRenderState.setRenderData(WEARS_ARMOR, !backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
+		addBackpackRenderState(entityRenderState, livingEntity, backpackRenderInfo.getBackpack(), !backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
+	}
+
+	private static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, ItemStack backpack, boolean wearsArmor) {
+		entityRenderState.setRenderData(WEARS_ARMOR, wearsArmor);
 		Minecraft mc = Minecraft.getInstance();
 		ItemModelResolver itemModelResolver = mc.getItemModelResolver();
 		ItemStackRenderState backpackRenderState = new ItemStackRenderState();
