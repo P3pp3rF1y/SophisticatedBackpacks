@@ -25,6 +25,7 @@ import net.neoforged.neoforge.event.entity.EntityInvulnerabilityCheckEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.LivingConversionEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
@@ -66,6 +67,8 @@ public class CommonEventHandler {
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(this::onItemPickup);
 		eventBus.addListener(this::onLivingSpecialSpawn);
+		eventBus.addListener(this::onLivingConversionPre);
+		eventBus.addListener(this::onLivingConversion);
 		eventBus.addListener(this::onLivingDrops);
 		eventBus.addListener(this::onEntityMobGriefing);
 		eventBus.addListener(this::onEntityLeaveWorld);
@@ -219,6 +222,14 @@ public class CommonEventHandler {
 
 	private void onLivingDrops(LivingDropsEvent event) {
 		EntityBackpackAdditionHandler.handleBackpackDrop(event);
+	}
+
+	private void onLivingConversionPre(LivingConversionEvent.Pre event) {
+		EntityBackpackAdditionHandler.handleLivingConversionPre(event);
+	}
+
+	private void onLivingConversion(LivingConversionEvent.Post event) {
+		EntityBackpackAdditionHandler.handleLivingConversion(event);
 	}
 
 	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
