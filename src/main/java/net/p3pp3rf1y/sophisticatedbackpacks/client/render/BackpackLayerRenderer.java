@@ -30,6 +30,9 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	private static final ContextKey<ItemStackRenderState> BACKPACK = new ContextKey<>(SophisticatedBackpacks.getIdentifier("backpack"));
 	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getIdentifier("wears_armor"));
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getIdentifier("entity_type"));
+	private static final float BABY_BACKPACK_SCALE = 0.5F;
+	private static final float BABY_BACKPACK_Y_OFFSET = 0.15F;
+	private static final float BABY_BACKPACK_Z_OFFSET = 0.145F;
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo ->
@@ -42,10 +45,6 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		}
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
-
-	public static final float CHILD_Y_OFFSET = 0.3F;
-	public static final float CHILD_Z_OFFSET = 0.1F;
-	public static final float CHILD_SCALE = 0.55F;
 
 	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
 		addBackpackRenderState(entityRenderState, livingEntity, backpackRenderInfo.getBackpack(), !backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
@@ -95,9 +94,9 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
 
-		if (isBaby) {
-			zOffset += CHILD_Z_OFFSET;
-			yOffset = CHILD_Y_OFFSET;
+		if (isBaby && entityType != EntityType.PLAYER) {
+			zOffset += BABY_BACKPACK_Z_OFFSET;
+			yOffset = BABY_BACKPACK_Y_OFFSET;
 		}
 
 		poseStack.translate(0, yOffset, zOffset);
@@ -107,7 +106,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		}
 
 		if (isBaby) {
-			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
+			poseStack.scale(BABY_BACKPACK_SCALE, BABY_BACKPACK_SCALE, BABY_BACKPACK_SCALE);
 		}
 	}
 }
