@@ -27,9 +27,8 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import org.joml.Vector3f;
 
 public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
-	public static final float CHILD_Y_OFFSET = 0.3F;
-	public static final float CHILD_Z_OFFSET = 0.1F;
-	public static final float CHILD_SCALE = 0.55F;
+	private static final float BABY_BODY_SCALE = 0.5F;
+	private static final float BABY_BODY_Y_OFFSET = 1.5F;
 
 	private static ItemRenderer itemRenderer;
 
@@ -67,6 +66,11 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 
 	private static <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
+			if (livingEntity.isBaby() && !(livingEntity instanceof Player)) {
+				poseStack.scale(BABY_BODY_SCALE, BABY_BODY_SCALE, BABY_BODY_SCALE);
+				poseStack.translate(0.0F, BABY_BODY_Y_OFFSET, 0.0F);
+			}
+
 			humanoidModel.body.translateAndRotate(poseStack);
 		}
 
@@ -75,19 +79,10 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
 
-		if (livingEntity.isBaby()) {
-			zOffset += CHILD_Z_OFFSET;
-			yOffset = CHILD_Y_OFFSET;
-		}
-
 		poseStack.translate(0, yOffset, zOffset);
 
 		if (livingEntity instanceof Player) {
 			return;
-		}
-
-		if (livingEntity.isBaby()) {
-			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
 		}
 	}
 
