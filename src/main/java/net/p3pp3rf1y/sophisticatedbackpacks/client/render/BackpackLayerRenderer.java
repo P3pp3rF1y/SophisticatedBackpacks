@@ -43,10 +43,6 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
 
-	public static final float CHILD_Y_OFFSET = 0.3F;
-	public static final float CHILD_Z_OFFSET = 0.1F;
-	public static final float CHILD_SCALE = 0.55F;
-
 	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
 		addBackpackRenderState(entityRenderState, livingEntity, backpackRenderInfo.getBackpack(), !backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 	}
@@ -95,19 +91,6 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
 
-		if (isBaby) {
-			zOffset += CHILD_Z_OFFSET;
-			yOffset = CHILD_Y_OFFSET;
-		}
-
 		poseStack.translate(0, yOffset, zOffset);
-
-		if (entityType == EntityType.PLAYER) {
-			return;
-		}
-
-		if (isBaby) {
-			poseStack.scale(CHILD_SCALE, CHILD_SCALE, CHILD_SCALE);
-		}
 	}
 }
