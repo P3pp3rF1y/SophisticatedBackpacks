@@ -82,6 +82,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private IEnergyStorage energyStorage = null;
 
 	private final BackpackRenderInfo renderInfo;
+	private boolean renderInfoValidationPending = true;
 
 	private IntConsumer onSlotsChange = diff -> {
 	};
@@ -548,6 +549,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
 		NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
+	}
+
+	@Override
+	public void onInit(Level level) {
+		IBackpackWrapper.super.onInit(level);
+		if (renderInfoValidationPending && !level.isClientSide()) {
+			getRenderInfo().validate(this, level);
+			renderInfoValidationPending = false;
+		}
 	}
 
 	@Override
