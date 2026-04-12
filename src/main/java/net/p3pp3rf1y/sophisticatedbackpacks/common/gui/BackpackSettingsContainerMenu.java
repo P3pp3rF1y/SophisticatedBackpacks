@@ -28,6 +28,9 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 		super(SETTINGS_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player));
 
 		this.backpackContext = backpackContext;
+		if (!player.level().isClientSide && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK || backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
+			storageWrapper.onInit(player.level());
+		}
 	}
 
 	public static BackpackSettingsContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {

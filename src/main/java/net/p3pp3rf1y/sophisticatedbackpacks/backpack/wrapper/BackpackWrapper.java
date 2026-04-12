@@ -75,6 +75,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nullable
 	private BackpackRenderInfo renderInfo;
+	private boolean renderInfoValidationPending = false;
 
 	private IntConsumer onSlotsChange = diff -> {
 	};
@@ -234,7 +235,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 		if (renderInfo == null) {
 			renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 		}
+		renderInfoValidationPending = true;
 		return this;
+	}
+
+	@Override
+	public void onInit(Level level) {
+		IBackpackWrapper.super.onInit(level);
+		if (renderInfoValidationPending && !level.isClientSide()) {
+			getRenderInfo().validate(this, level);
+			renderInfoValidationPending = false;
+		}
 	}
 
 	@Override
