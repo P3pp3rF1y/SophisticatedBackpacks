@@ -94,6 +94,9 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			updateBlockRender = true;
 			WorldHelper.notifyBlockUpdate(this);
 		});
+		if (level != null && !level.isClientSide()) {
+			backpackWrapper.onInit(level);
+		}
 	}
 
 	@Override

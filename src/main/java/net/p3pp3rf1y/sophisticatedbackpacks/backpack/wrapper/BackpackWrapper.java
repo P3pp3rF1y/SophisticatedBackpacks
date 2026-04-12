@@ -47,6 +47,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_MAIN_COLOR = 0xFF_CC613A;
@@ -78,6 +79,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nullable
 	private RenderDataHandler renderDataHandler;
+	private boolean renderDataValidationPending = false;
 
 	private IntConsumer onSlotsChange = diff -> {
 	};
@@ -235,12 +237,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
 		if (renderDataHandler == null) {
-			java.util.function.Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
-			renderDataHandler = new RenderDataHandler(Optional.ofNullable(backpack.get(ModCoreDataComponents.RENDER_DATA)).map(RenderData::copy).orElseGet(RenderData::new), renderData -> {
-				backpack.set(ModCoreDataComponents.RENDER_DATA, renderData.copy());
-				getSaveHandler.get().run();
-			});
+			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
+				renderDataHandler = new RenderDataHandler(Optional.ofNullable(backpack.get(ModCoreDataComponents.RENDER_DATA)).map(RenderData::copy).orElseGet(RenderData::new), renderData -> {
+					backpack.set(ModCoreDataComponents.RENDER_DATA, renderData.copy());
+					getSaveHandler.get().run();
+				});
 		}
+		renderDataValidationPending = true;
 		return this;
 	}
 
@@ -600,6 +603,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
 		getBackpackStack().set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
+	}
+
+	@Override
+	public void onInit(Level level) {
+		IBackpackWrapper.super.onInit(level);
+		if (renderDataValidationPending && !level.isClientSide()) {
+			getRenderDataHandler().validate(this, level);
+			renderDataValidationPending = false;
+		}
 	}
 
 	@Override
