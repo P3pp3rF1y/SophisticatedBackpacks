@@ -44,6 +44,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_MAIN_COLOR = 0xFF_CC613A;
@@ -75,6 +76,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nullable
 	private BackpackRenderInfo renderInfo;
+	private boolean renderInfoValidationPending = false;
 
 	private IntConsumer onSlotsChange = diff -> {
 	};
@@ -232,8 +234,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
 		if (renderInfo == null) {
-			renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
+			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
+			renderInfo = new BackpackRenderInfo(backpack, getSaveHandler);
 		}
+		renderInfoValidationPending = true;
 		return this;
 	}
 
@@ -594,6 +598,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
 		getBackpackStack().set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
+	}
+
+	@Override
+	public void onInit(Level level) {
+		IBackpackWrapper.super.onInit(level);
+		if (renderInfoValidationPending && !level.isClientSide()) {
+			getRenderInfo().validate(this, level);
+			renderInfoValidationPending = false;
+		}
 	}
 
 	@Override
