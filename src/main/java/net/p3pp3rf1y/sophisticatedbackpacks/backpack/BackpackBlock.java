@@ -41,9 +41,13 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.resource.ResourceStack;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
@@ -180,11 +184,35 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		if (!stack.isEmpty() && stack.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stack)) != null) {
+			if (player.hasInfiniteMaterials() && interactWithBackpackFluidHandlerInCreative(level, pos, hitResult.getDirection(), player, stack)) {
+				return InteractionResult.SUCCESS.heldItemTransformedTo(player.getItemInHand(hand));
+			}
 			if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
 				return InteractionResult.SUCCESS.heldItemTransformedTo(player.getItemInHand(hand));
 			}
 		}
 		return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+	}
+
+	private boolean interactWithBackpackFluidHandlerInCreative(Level level, BlockPos pos, Direction side, Player player, ItemStack stack) {
+		ResourceHandler<FluidResource> blockHandler = level.getCapability(Capabilities.Fluid.BLOCK, pos, side);
+		ResourceHandler<FluidResource> itemHandler = BackpackWrapper.fromStack(stack).getItemFluidHandler().orElse(null);
+		if (blockHandler == null || itemHandler == null) {
+			return false;
+		}
+
+		ResourceStack<FluidResource> moved = ResourceHandlerUtil.moveFirst(blockHandler, itemHandler, fluidResource -> true, Integer.MAX_VALUE, null);
+		boolean pickup = true;
+		if (moved == null) {
+			moved = ResourceHandlerUtil.moveFirst(itemHandler, blockHandler, fluidResource -> true, Integer.MAX_VALUE, null);
+			pickup = false;
+		}
+
+		if (moved != null) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private Component getBackpackDisplayName(Level level, BlockPos pos) {

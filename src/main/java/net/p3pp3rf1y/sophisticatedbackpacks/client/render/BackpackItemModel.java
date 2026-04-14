@@ -93,11 +93,12 @@ public class BackpackItemModel implements ItemModel {
 
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
-			stackRenderState.appendModelIdentityElement(displayItem.item().getItem());
-			stackRenderState.appendModelIdentityElement(displayItem.item().getComponents());
+			ItemStack displayStack = displayItem.createItemStack();
+			stackRenderState.appendModelIdentityElement(displayStack.getItem());
+			stackRenderState.appendModelIdentityElement(displayStack.getComponents());
 			stackRenderState.appendModelIdentityElement(displayItem.rotation());
 			specialRenderer.displayItem = new ItemStackRenderState();
-			itemModelResolver.updateForTopItem(specialRenderer.displayItem, displayItem.item(), ItemDisplayContext.FIXED, clientLevel, null, 0);
+			itemModelResolver.updateForTopItem(specialRenderer.displayItem, displayStack, ItemDisplayContext.FIXED, clientLevel, null, 0);
 			specialRenderer.displayItemRotation = displayItem.rotation();
 		}
 

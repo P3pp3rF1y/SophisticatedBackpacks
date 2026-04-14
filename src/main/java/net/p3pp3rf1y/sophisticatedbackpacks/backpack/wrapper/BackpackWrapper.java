@@ -13,6 +13,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -207,6 +208,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public Optional<ResourceHandler<FluidResource>> getItemFluidHandler() {
 		return getFluidHandler().map(FluidHandlerItemWrapper::new);
+	}
+
+	@Override
+	public Optional<ResourceHandler<FluidResource>> getItemFluidHandler(ItemAccess itemAccess) {
+		return Optional.of(new ItemAccessBackpackFluidHandler(itemAccess));
 	}
 
 	@Override
@@ -703,6 +709,82 @@ public class BackpackWrapper implements IBackpackWrapper {
 		@Override
 		public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
 			return delegate.extract(index, resource, amount, tx);
+		}
+	}
+
+	private static class ItemAccessBackpackFluidHandler implements ResourceHandler<FluidResource> {
+		private final ItemAccess itemAccess;
+
+		private ItemAccessBackpackFluidHandler(ItemAccess itemAccess) {
+			this.itemAccess = itemAccess;
+		}
+
+		private record MutableBackpackDelegate(ItemStack backpackStack, ResourceHandler<FluidResource> delegate) {
+		}
+
+		private Optional<ResourceHandler<FluidResource>> getDelegate() {
+			ItemStack backpackStack = itemAccess.getResource().toStack(itemAccess.getAmount());
+			if (backpackStack.isEmpty()) {
+				return Optional.empty();
+			}
+			return new BackpackWrapper(backpackStack).getFluidHandler().map(FluidHandlerItemWrapper::new);
+		}
+
+		private Optional<MutableBackpackDelegate> getWritableDelegate() {
+			ItemStack backpackStack = itemAccess.getResource().toStack(itemAccess.getAmount());
+			if (backpackStack.isEmpty()) {
+				return Optional.empty();
+			}
+
+			BackpackWrapper wrapper = new BackpackWrapper(backpackStack);
+			return wrapper.getFluidHandler().map(FluidHandlerItemWrapper::new).map(delegate -> new MutableBackpackDelegate(backpackStack, delegate));
+		}
+
+		@Override
+		public int size() {
+			return getDelegate().map(ResourceHandler::size).orElse(0);
+		}
+
+		@Override
+		public FluidResource getResource(int index) {
+			return getDelegate().map(delegate -> delegate.getResource(index)).orElse(FluidResource.EMPTY);
+		}
+
+		@Override
+		public long getAmountAsLong(int index) {
+			return getDelegate().map(delegate -> delegate.getAmountAsLong(index)).orElse(0L);
+		}
+
+		@Override
+		public long getCapacityAsLong(int index, FluidResource resource) {
+			return getDelegate().map(delegate -> delegate.getCapacityAsLong(index, resource)).orElse(0L);
+		}
+
+		@Override
+		public boolean isValid(int index, FluidResource resource) {
+			return getDelegate().map(delegate -> delegate.isValid(index, resource)).orElse(false);
+		}
+
+		@Override
+		public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
+			return getWritableDelegate().map(mutableDelegate -> {
+				int inserted = mutableDelegate.delegate().insert(index, resource, amount, tx);
+				if (inserted > 0) {
+					itemAccess.exchange(ItemResource.of(mutableDelegate.backpackStack()), itemAccess.getAmount(), tx);
+				}
+				return inserted;
+			}).orElse(0);
+		}
+
+		@Override
+		public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
+			return getWritableDelegate().map(mutableDelegate -> {
+				int extracted = mutableDelegate.delegate().extract(index, resource, amount, tx);
+				if (extracted > 0) {
+					itemAccess.exchange(ItemResource.of(mutableDelegate.backpackStack()), itemAccess.getAmount(), tx);
+				}
+				return extracted;
+			}).orElse(0);
 		}
 	}
 }

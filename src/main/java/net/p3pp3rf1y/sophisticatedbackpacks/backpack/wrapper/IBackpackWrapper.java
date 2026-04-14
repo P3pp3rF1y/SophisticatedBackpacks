@@ -5,6 +5,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -68,6 +69,10 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 	default Optional<ResourceHandler<FluidResource>> getItemFluidHandler() {
 		return Optional.empty();
+	}
+
+	default Optional<ResourceHandler<FluidResource>> getItemFluidHandler(ItemAccess itemAccess) {
+		return getItemFluidHandler();
 	}
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {
