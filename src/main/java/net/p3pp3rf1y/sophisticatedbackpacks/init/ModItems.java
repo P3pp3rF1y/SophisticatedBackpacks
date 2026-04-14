@@ -399,7 +399,7 @@ public class ModItems {
 	}
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerItem(Capabilities.Item.ITEM, (stack, v) -> {
+		event.registerItem(Capabilities.Item.ITEM, (stack, itemAccess) -> {
 					IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
 					return backpackWrapper.getContentsUuid().isEmpty() ? EmptyResourceHandler.instance() : backpackWrapper.getInventoryForInputOutput();
 				},
@@ -408,7 +408,7 @@ public class ModItems {
 					if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
 						return null;
 					}
-					return BackpackWrapper.fromStack(stack).getItemFluidHandler().orElse(null);
+					return BackpackWrapper.fromStack(stack).getItemFluidHandler(itemAccess).orElse(null);
 				},
 				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyHandler().orElse(null),

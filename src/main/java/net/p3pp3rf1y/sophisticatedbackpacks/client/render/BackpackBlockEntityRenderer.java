@@ -93,7 +93,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		RenderData.DisplayData displayData = renderDataHandler.getDisplayData();
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
-			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.item(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null, 0);
+			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null, 0);
 			renderState.displayItemRotation = displayItem.rotation();
 		} else {
 			renderState.displayItem = new ItemStackRenderState();
