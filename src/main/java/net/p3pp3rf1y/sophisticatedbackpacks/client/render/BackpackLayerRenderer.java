@@ -30,6 +30,8 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	private static final ContextKey<ItemStackRenderState> BACKPACK = new ContextKey<>(SophisticatedBackpacks.getIdentifier("backpack"));
 	private static final ContextKey<Boolean> WEARS_ARMOR = new ContextKey<>(SophisticatedBackpacks.getIdentifier("wears_armor"));
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getIdentifier("entity_type"));
+	private static final float WITHER_SKELETON_SCALE = 1.2F;
+	private static final float WITHER_SKELETON_Y_OFFSET_ADJUSTMENT = 0.25f;
 	private static final float BABY_BACKPACK_SCALE = 0.5F;
 	private static final float BABY_BACKPACK_Y_OFFSET = 0.15F;
 	private static final float BABY_BACKPACK_Z_OFFSET = 0.145F;
@@ -85,6 +87,10 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	}
 
 	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
+		if (entityType == EntityType.WITHER_SKELETON) {
+			poseStack.scale(WITHER_SKELETON_SCALE, WITHER_SKELETON_SCALE, WITHER_SKELETON_SCALE);
+		}
+
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			humanoidModel.body.translateAndRotate(poseStack);
 		}
@@ -93,6 +99,9 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
+		if (entityType == EntityType.WITHER_SKELETON) {
+			yOffset += WITHER_SKELETON_Y_OFFSET_ADJUSTMENT;
+		}
 
 		if (isBaby && entityType != EntityType.PLAYER) {
 			zOffset += BABY_BACKPACK_Z_OFFSET;
