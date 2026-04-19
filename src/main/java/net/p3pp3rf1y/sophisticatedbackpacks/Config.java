@@ -145,8 +145,6 @@ public class Config {
 		}
 
 		Server(ModConfigSpec.Builder builder) {
-			builder.comment("Server Settings").push("server");
-
 			disallowedItems = new DisallowedItems(builder);
 			noInteractionBlocks = new NoInteractionBlocks(builder);
 			noConnectionBlocks = new NoConnectionBlocks(builder);
@@ -207,8 +205,6 @@ public class Config {
 			itemDisplayDisabled = builder.comment("Allows disabling item display settings. Primarily in cases where custom backpack model doesn't support showing the item. (Requires game restart to take effect)").define("itemDisplayDisabled", false);
 			tickDedupeLogicDisabled = builder.comment("Allows disabling logic that dedupes backpacks with the same UUID in players' inventory. This is here to allow turning off the logic just in case it would be causing performance issues.").define("tickDedupeLogicDisabled", false);
 			canBePlacedInContainerItems = builder.comment("Determines if backpacks can be placed in container items (those that check for return value of canFitInsideContainerItems)").define("canBePlacedInContainerItems", false);
-
-			builder.pop();
 		}
 
 		public static class NerfsConfig {
@@ -388,12 +384,13 @@ public class Config {
 		}
 
 		public static class NoInteractionBlocks {
-			private final ModConfigSpec.ConfigValue<List<String>> noInteractionBlocksList;
+			private final ModConfigSpec.ConfigValue<List<? extends String>> noInteractionBlocksList;
 			private boolean initialized = false;
 			private Set<Block> noInteractionBlocksSet = null;
 
 			NoInteractionBlocks(ModConfigSpec.Builder builder) {
-				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"").define("noInteractionBlocks", new ArrayList<>());
+				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"")
+						.defineListAllowEmpty("noInteractionBlocks", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
@@ -459,14 +456,15 @@ public class Config {
 
 		public static class DisallowedItems {
 			private final ModConfigSpec.BooleanValue containerItemsDisallowed;
-			private final ModConfigSpec.ConfigValue<List<String>> disallowedItemsList;
+			private final ModConfigSpec.ConfigValue<List<? extends String>> disallowedItemsList;
 			private boolean initialized = false;
 			private Set<Item> disallowedItemsSet = null;
 
 			DisallowedItems(ModConfigSpec.Builder builder) {
-				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
+				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"")
+						.defineListAllowEmpty("disallowedItems", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 				containerItemsDisallowed = builder.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
-						.define("containerItemsDisallowed", true);
+						.define("containerItemsDisallowed", false);
 			}
 
 			public boolean isItemDisallowed(Item item) {
@@ -554,10 +552,7 @@ public class Config {
 		public final ModConfigSpec.BooleanValue chestLootEnabled;
 
 		Common(ModConfigSpec.Builder builder) {
-			builder.comment("Common Settings").push("common");
-
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
-			builder.pop();
 		}
 	}
 }
