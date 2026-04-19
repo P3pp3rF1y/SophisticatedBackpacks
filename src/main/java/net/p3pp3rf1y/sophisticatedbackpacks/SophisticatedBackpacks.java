@@ -4,10 +4,13 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
@@ -38,6 +41,9 @@ public class SophisticatedBackpacks {
 	public SophisticatedBackpacks(IEventBus modBus, Dist dist, ModContainer container) {
 		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		container.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+		if (dist == Dist.CLIENT && !ModList.get().isLoaded("configured")) {
+			container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+		}
 		commonEventHandler.registerHandlers(modBus);
 		ModCompat.register();
 		if (dist == Dist.CLIENT) {

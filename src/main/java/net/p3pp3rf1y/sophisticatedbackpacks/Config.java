@@ -273,7 +273,7 @@ public class Config {
 						.define("buffWithPotionEffects", true);
 				buffHealth = builder.comment("Turns on/off buffing the entity that wears backpack with additional health. Health is scaled based on backpack tier the mob wears.")
 						.define("buffHealth", true);
-				equipWithArmor = builder.comment("Turns on/off equiping the entity that wears backpack with armor. What armor material and how enchanted is scaled based on backpack tier the mob wears.")
+				equipWithArmor = builder.comment("Turns on/off equipping the entity that wears backpack with armor. What armor material and how enchanted it is scales based on backpack tier the mob wears.")
 						.define("equipWithArmor", true);
 				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
 						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, () -> "mod_id:mob_name|mod_id:loot_folder/loot_table_name", mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
@@ -388,12 +388,13 @@ public class Config {
 		}
 
 		public static class NoInteractionBlocks {
-			private final ModConfigSpec.ConfigValue<List<String>> noInteractionBlocksList;
+			private final ModConfigSpec.ConfigValue<List<? extends String>> noInteractionBlocksList;
 			private boolean initialized = false;
 			private Set<Block> noInteractionBlocksSet = null;
 
 			NoInteractionBlocks(ModConfigSpec.Builder builder) {
-				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"").define("noInteractionBlocks", new ArrayList<>());
+				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"")
+						.defineListAllowEmpty("noInteractionBlocks", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
@@ -459,12 +460,13 @@ public class Config {
 
 		public static class DisallowedItems {
 			private final ModConfigSpec.BooleanValue containerItemsDisallowed;
-			private final ModConfigSpec.ConfigValue<List<String>> disallowedItemsList;
+			private final ModConfigSpec.ConfigValue<List<? extends String>> disallowedItemsList;
 			private boolean initialized = false;
 			private Set<Item> disallowedItemsSet = null;
 
 			DisallowedItems(ModConfigSpec.Builder builder) {
-				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
+				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"")
+						.defineListAllowEmpty("disallowedItems", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 				containerItemsDisallowed = builder.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
 						.define("containerItemsDisallowed", true);
 			}
