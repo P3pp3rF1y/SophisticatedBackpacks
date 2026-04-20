@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.transfer.EmptyResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.energy.EmptyEnergyHandler;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
@@ -198,7 +197,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			return null;
 		}
 		if (externalFluidHandler == null) {
-			externalFluidHandler = getBackpackWrapper().getFluidHandler().map(fh -> (ResourceHandler<FluidResource>) fh).orElse(EmptyResourceHandler.instance());
+			externalFluidHandler = getBackpackWrapper().getFluidHandler().filter(fh -> fh.size() > 0).orElse(null);
 		}
 		return externalFluidHandler;
 	}

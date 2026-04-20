@@ -212,7 +212,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<ResourceHandler<FluidResource>> getItemFluidHandler(ItemAccess itemAccess) {
-		return Optional.of(new ItemAccessBackpackFluidHandler(itemAccess));
+		return Optional.<ResourceHandler<FluidResource>>of(new ItemAccessBackpackFluidHandler(itemAccess)).filter(handler -> handler.size() > 0);
 	}
 
 	@Override
