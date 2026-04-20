@@ -35,7 +35,7 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -289,7 +289,7 @@ public class CommonEventHandler {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, RandHelper.getRandomMinusOneToOne(level.getRandom()) * 1.4F + 2.0F);
 	}
 
-	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
+	private void handleBreakBackpackWithInfinityUpgrade(BreakBlockEvent event) {
 		Player player = event.getPlayer();
 
 		if (!(event.getState().getBlock() instanceof BackpackBlock)) {
@@ -301,7 +301,10 @@ public class CommonEventHandler {
 						.stream().anyMatch(w -> !w.checkPermission(player)))
 				.orElse(false)) {
 			event.setCanceled(true);
-			player.sendOverlayMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED));
+			if (!event.getLevel().isClientSide()) {
+				event.setNotifyClient(true);
+				player.sendOverlayMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED));
+			}
 		}
 	}
 }

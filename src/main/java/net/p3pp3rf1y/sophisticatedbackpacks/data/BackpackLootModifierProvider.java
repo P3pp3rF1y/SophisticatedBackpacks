@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import java.util.concurrent.CompletableFuture;
 
 public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
+	private static final int DEFAULT_PRIORITY = 1000;
 
 	BackpackLootModifierProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
 		super(packOutput, registries, SophisticatedBackpacks.MOD_ID);
@@ -54,15 +55,15 @@ public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
 		private final ResourceKey<LootTable> lootTable;
 		private final ResourceKey<LootTable> lootTableToInjectInto;
 
-		protected InjectLootModifier(LootItemCondition[] conditions, ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
-			super(conditions);
+		protected InjectLootModifier(LootItemCondition[] conditions, int priority, ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
+			super(conditions, priority);
 			this.lootTable = lootTable;
 			this.lootTableToInjectInto = lootTableToInjectInto;
 		}
 
 		protected InjectLootModifier(ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
 			this(new LootItemCondition[]{BackpackLootEnabledCondition.builder().build(),
-					LootTableIdCondition.builder(lootTableToInjectInto.identifier()).build()}, lootTable, lootTableToInjectInto);
+					LootTableIdCondition.builder(lootTableToInjectInto.identifier()).build()}, DEFAULT_PRIORITY, lootTable, lootTableToInjectInto);
 		}
 
 		@SuppressWarnings({"deprecation", "java:S1874"}) // Need to call getRandomItemsRaw to skip neo calling modifyLoot event and causing infinite loop
