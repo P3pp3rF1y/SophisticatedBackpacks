@@ -6,12 +6,34 @@ plugins {
     id "org.sonarqube" version "7.0.1.6134"
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
+    id "com.diffplug.spotless" version "7.0.4"
 }
 
 idea {
     module {
         downloadJavadoc = true
         downloadSources = true
+    }
+}
+
+spotless {
+    enforceCheck = false
+    def spotlessFiles = findProperty("spotlessFiles")
+
+    java {
+        target spotlessFiles == null ? "src/*/java/**/*.java" : spotlessFiles.toString().split(/\s*,\s*/).findAll { it.endsWith(".java") }
+
+        eclipse().configFile "$projectDir/codeformat/eclipse-java-format.xml"
+        importOrder "", "javax", "java"
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    groovyGradle {
+        target spotlessFiles == null ? "*.gradle" : spotlessFiles.toString().split(/\s*,\s*/).findAll { it.endsWith(".gradle") }
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
 
