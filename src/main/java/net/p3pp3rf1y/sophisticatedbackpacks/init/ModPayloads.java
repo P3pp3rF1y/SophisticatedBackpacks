@@ -10,7 +10,7 @@ public class ModPayloads {
 	}
 
 	public static void registerPayloads(final RegisterPayloadHandlersEvent event) {
-		final PayloadRegistrar registrar = event.registrar(SophisticatedBackpacks.MOD_ID).versioned("1.0");
+		final PayloadRegistrar registrar = event.registrar(SophisticatedBackpacks.MOD_ID).versioned(SophisticatedBackpacks.getNetworkProtocolVersion());
 		registrar.playToServer(BackpackOpenPayload.TYPE, BackpackOpenPayload.STREAM_CODEC, BackpackOpenPayload::handlePayload);
 		registrar.playToServer(UpgradeTogglePayload.TYPE, UpgradeTogglePayload.STREAM_CODEC, UpgradeTogglePayload::handlePayload);
 		registrar.playToServer(RequestBackpackInventoryContentsPayload.TYPE, RequestBackpackInventoryContentsPayload.STREAM_CODEC, RequestBackpackInventoryContentsPayload::handlePayload);
