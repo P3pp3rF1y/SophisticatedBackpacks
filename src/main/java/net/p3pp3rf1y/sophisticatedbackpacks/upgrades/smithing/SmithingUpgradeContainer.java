@@ -97,6 +97,16 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 	}
 
 	@Override
+	public int getCraftingGridWidth() {
+		return 3;
+	}
+
+	@Override
+	public int getCraftingGridHeight() {
+		return 1;
+	}
+
+	@Override
 	public Container getCraftMatrix() {
 		return smithingMenuDelegate.getInputSlots();
 	}
