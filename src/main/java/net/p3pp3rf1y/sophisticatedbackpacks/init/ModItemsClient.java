@@ -21,7 +21,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgr
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeGuiManager;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
-import net.p3pp3rf1y.sophisticatedcore.compat.trashslot.TrashSlotCompat;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.alchemy.AlchemyUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryInventoryPart;
@@ -127,6 +126,5 @@ public class ModItemsClient {
 		UpgradeGuiManager.registerTab(ModItems.ALCHEMY_TYPE, AlchemyUpgradeTab.Basic::new);
 		UpgradeGuiManager.registerTab(ModItems.ADVANCED_ALCHEMY_TYPE, AlchemyUpgradeTab.Advanced::new);
 
-		TrashSlotCompat.registerMenuType(ModItems.BACKPACK_CONTAINER_TYPE.get());
 	}
 }
