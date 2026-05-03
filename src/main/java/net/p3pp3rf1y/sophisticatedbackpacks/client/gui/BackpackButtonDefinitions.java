@@ -36,4 +36,12 @@ public class BackpackButtonDefinitions {
 					false, getButtonStateData(new UV(48, 112), Dimension.SQUARE_16, new Position(1, 1),
 							BackpackTranslationHelper.INSTANCE.getTranslatedLines(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_refill_crafting_grid")))
 			));
+
+	public static final ButtonDefinition.Toggle<Boolean> REFILL_INPUT = net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ButtonDefinitions.createToggleButtonDefinition(
+			Map.of(
+					true, getButtonStateData(new UV(64, 112), Dimension.SQUARE_16, new Position(1, 1),
+							BackpackTranslationHelper.INSTANCE.getTranslatedLines(BackpackTranslationHelper.INSTANCE.translUpgradeButton("refill_input"))),
+					false, getButtonStateData(new UV(80, 112), Dimension.SQUARE_16, new Position(1, 1),
+							BackpackTranslationHelper.INSTANCE.getTranslatedLines(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_refill_input")))
+			));
 }

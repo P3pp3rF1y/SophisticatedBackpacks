@@ -17,7 +17,7 @@ public class ChippedCompatClient {
 	public static void registerUpgradeTab(Identifier itemId, UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType) {
 		UpgradeGuiManager.registerTab(containerType, (BlockTransformationUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> {
 			String itemName = itemId.getPath();
-			return new BlockTransformationUpgradeTab(upgradeContainer, position, screen, BackpackButtonDefinitions.SHIFT_CLICK_TARGET, itemName.replace('/', '_').substring(0, itemName.length() - "_upgrade".length()));
+			return new BlockTransformationUpgradeTab(upgradeContainer, position, screen, BackpackButtonDefinitions.SHIFT_CLICK_TARGET, BackpackButtonDefinitions.REFILL_INPUT, itemName.replace('/', '_').substring(0, itemName.length() - "_upgrade".length()));
 		});
 	}
 }

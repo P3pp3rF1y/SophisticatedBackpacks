@@ -109,7 +109,7 @@ public class ModItemsClient {
 				new CraftingUpgradeTab(uc, p, s, BackpackButtonDefinitions.SHIFT_CLICK_TARGET, BackpackButtonDefinitions.REFILL_CRAFTING_GRID));
 		UpgradeGuiManager.registerTab(ModItems.INCEPTION_TYPE, InceptionUpgradeTab::new);
 		UpgradeGuiManager.registerTab(ModItems.STONECUTTER_TYPE, (StonecutterUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->
-				new StonecutterUpgradeTab(upgradeContainer, position, screen, BackpackButtonDefinitions.SHIFT_CLICK_TARGET));
+				new StonecutterUpgradeTab(upgradeContainer, position, screen, BackpackButtonDefinitions.SHIFT_CLICK_TARGET, BackpackButtonDefinitions.REFILL_INPUT));
 		UpgradeGuiManager.registerTab(ModItems.JUKEBOX_TYPE, JukeboxUpgradeTab.Basic::new);
 		UpgradeGuiManager.registerTab(ModItems.ADVANCED_JUKEBOX_TYPE, (JukeboxUpgradeContainer uc, Position p, StorageScreenBase<?> s) -> new JukeboxUpgradeTab.Advanced(uc, p, s, Config.SERVER.advancedJukeboxUpgrade.slotsInRow.get()));
 		UpgradeGuiManager.registerTab(ModItems.TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
