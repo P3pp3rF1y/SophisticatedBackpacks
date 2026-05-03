@@ -142,6 +142,21 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		return BackpackShapes.getShape(state);
 	}
 
+	@Override
+	public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return BackpackShapes.getAuthoritativeShapeProvider().getShape(state);
+	}
+
+	@Override
+	public VoxelShape getBlockSupportShape(BlockState state, BlockGetter level, BlockPos pos) {
+		return BackpackShapes.getAuthoritativeShapeProvider().getShape(state);
+	}
+
+	@Override
+	public VoxelShape getVisualShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return BackpackShapes.getAuthoritativeShapeProvider().getShape(state);
+	}
+
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
