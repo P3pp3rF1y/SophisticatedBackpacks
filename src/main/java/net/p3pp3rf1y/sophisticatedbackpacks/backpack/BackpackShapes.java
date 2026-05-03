@@ -23,10 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.BATTERY;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.FACING;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 
 public class BackpackShapes {
 	private BackpackShapes() {
@@ -36,8 +33,10 @@ public class BackpackShapes {
 		VoxelShape getShape(BlockState state);
 	}
 
-	private static volatile IShapeProvider defaultShapeProvider =
+	private static final IShapeProvider authoritativeShapeProvider =
 			new JsonModelShapeProvider(new CompositeModelJsonSource(ClasspathModelJsonSource.INSTANCE));
+	private static volatile IShapeProvider defaultShapeProvider =
+			authoritativeShapeProvider;
 	private static volatile IShapeProvider shapeProvider = defaultShapeProvider;
 
 	public static void setShapeProvider(IShapeProvider provider) {
@@ -49,6 +48,10 @@ public class BackpackShapes {
 
 	public static IShapeProvider getDefaultShapeProvider() {
 		return defaultShapeProvider;
+	}
+
+	public static IShapeProvider getAuthoritativeShapeProvider() {
+		return authoritativeShapeProvider;
 	}
 
 	public static VoxelShape getShape(BlockState state) {
