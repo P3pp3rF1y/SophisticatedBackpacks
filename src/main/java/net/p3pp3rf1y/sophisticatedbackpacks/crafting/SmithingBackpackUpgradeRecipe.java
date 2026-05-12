@@ -7,7 +7,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
@@ -16,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerIngredients;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ICustomSmithingRecipe;
 
 import javax.annotation.Nullable;
@@ -79,6 +83,18 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 		return addition;
 	}
 
+	public Ingredient getTemplateIngredient() {
+		return template.orElseGet(RecipeViewerIngredients::empty);
+	}
+
+	public Ingredient getBaseIngredient() {
+		return base.orElseGet(RecipeViewerIngredients::empty);
+	}
+
+	public Ingredient getAdditionIngredient() {
+		return addition.orElseGet(RecipeViewerIngredients::empty);
+	}
+
 	public PlacementInfo placementInfo() {
 		if (placementInfo == null) {
 			placementInfo = PlacementInfo.createFromOptionals(List.of(template, base, addition));
@@ -126,7 +142,7 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 			STREAM_CODEC = StreamCodec.composite(
 					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
 					recipe -> recipe.template,
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+				Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
 					recipe -> recipe.base,
 					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
 					recipe -> recipe.addition,
