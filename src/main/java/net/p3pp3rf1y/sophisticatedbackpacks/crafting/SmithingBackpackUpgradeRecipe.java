@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
@@ -56,6 +57,18 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 	@Override
 	public SmithingTransformRecipe getCompose() {
 		return compose;
+	}
+
+	public Ingredient getTemplateIngredient() {
+		return compose.template;
+	}
+
+	public Ingredient getBaseIngredient() {
+		return compose.base;
+	}
+
+	public Ingredient getAdditionIngredient() {
+		return compose.addition;
 	}
 
 	public static class Serializer extends RecipeWrapperSerializer<SmithingTransformRecipe, SmithingBackpackUpgradeRecipe> {
