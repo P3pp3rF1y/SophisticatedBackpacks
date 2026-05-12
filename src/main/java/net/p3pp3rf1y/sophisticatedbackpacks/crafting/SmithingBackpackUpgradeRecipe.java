@@ -82,6 +82,18 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 		return addition;
 	}
 
+	public Ingredient getTemplateIngredient() {
+		return template.orElse(Ingredient.of(Items.AIR));
+	}
+
+	public Ingredient getBaseIngredient() {
+		return base;
+	}
+
+	public Ingredient getAdditionIngredient() {
+		return addition.orElse(Ingredient.of(Items.AIR));
+	}
+
 	public PlacementInfo placementInfo() {
 		if (placementInfo == null) {
 			placementInfo = PlacementInfo.createFromOptionals(List.of(template, Optional.of(base), addition));
