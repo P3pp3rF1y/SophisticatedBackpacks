@@ -206,7 +206,7 @@ public class BackpackShapes {
 				 InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
 				return JsonParser.parseReader(reader).getAsJsonObject();
 			} catch (Exception e) {
-				throw new IllegalStateException("Failed to read model resource " + resourceLocation, e);
+			throw new IllegalStateException("Failed to read model resource " + resourceLocation, e);
 			}
 		}
 	}
