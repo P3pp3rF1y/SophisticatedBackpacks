@@ -5,7 +5,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.Prop
 
 public class BackpackSubtypeInterpreter extends PropertyBasedSubtypeInterpreter {
 	public BackpackSubtypeInterpreter() {
-		addProperty(s -> BackpackWrapper.fromStack(s).getMainColor(), "clothColor", String::valueOf);
-		addProperty(s -> BackpackWrapper.fromStack(s).getAccentColor(), "borderColor", String::valueOf);
+		addProperty(stack -> BackpackWrapper.fromStack(stack).getMainColor(), "clothColor", String::valueOf);
+		addProperty(stack -> BackpackWrapper.fromStack(stack).getAccentColor(), "borderColor", String::valueOf);
 	}
 }

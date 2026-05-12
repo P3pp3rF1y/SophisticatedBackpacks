@@ -11,29 +11,32 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.registration.*;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.DyeRecipesMaker;
-import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.BackpackRecipeViewerDisplays;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiRecipeDisplayGenerator;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.*;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
@@ -42,6 +45,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @JeiPlugin
 public class BackpackJeiPlugin implements IModPlugin {
 	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {};
+	private IRecipeViewerDisplayCatalog catalog = null;
+
 	public static void addAdditionalCatalystRegistrar(Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar) {
 		BackpackJeiPlugin.additionalCatalystRegistrar = BackpackJeiPlugin.additionalCatalystRegistrar.andThen(additionalCatalystRegistrar);
 	}
@@ -88,21 +93,56 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		JeiRecipeDisplayGenerator generator = new JeiRecipeDisplayGenerator();
+		IRecipeViewerDisplayCatalog catalog = getCatalog();
+		registration.addRecipes(RecipeTypes.CRAFTING, catalog.getCraftingRecipes());
+	}
 
-		DyeRecipesMaker.addRecipes(generator);
-		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.CRAFTING, BackpackUpgradeRecipe.class);
-		ClientRecipeHelper.addAllRecipesOfType(generator, RecipeType.SMITHING, SmithingBackpackUpgradeRecipe.class);
+	@Override
+	public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
+		GroupedCraftingRecipeCategoryExtension.registerOnce(registration);
+		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> stack.getItem() instanceof BackpackItem);
+		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class,
+				new SmithingSpecCategoryExtension<>(recipe -> getCatalog().getSmithingDisplaySpecReplacing(recipe).orElseThrow(), stack -> stack.getItem() instanceof BackpackItem));
+	}
 
-		registration.addRecipes(RecipeTypes.CRAFTING, generator.getCraftingRecipes());
-		registration.addRecipes(RecipeTypes.SMITHING, generator.getSmithingRecipes());
+	@Override
+	public void registerAdvanced(IAdvancedRegistration registration) {
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(), BackpackJeiPlugin::canShowDyeRecipesFor));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING, new SmithingSpecRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+	}
+
+	private static boolean canShowDyeRecipesFor(ItemStack stack) {
+		return stack.getItem() instanceof BackpackItem
+				&& !stack.has(ModCoreDataComponents.MAIN_COLOR)
+				&& !stack.has(ModCoreDataComponents.ACCENT_COLOR)
+				&& !stack.has(ModCoreDataComponents.RENDER_INFO_TAG);
+	}
+
+	private IRecipeViewerDisplayCatalog getCatalog() {
+		if (catalog == null) {
+			catalog = createCatalog(getSubtypeInterpreters());
+		}
+		return catalog;
+	}
+
+	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
+		IRecipeViewerDisplayCatalog catalog = new RecipeViewerDisplayCatalog();
+		IRecipeViewerDisplayContext context = stack -> Optional.ofNullable(subtypeInterpreters.get(stack.getItem()));
+		BackpackRecipeViewerDisplays.register(catalog, context);
+		return catalog;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static RecipeHolder<CraftingRecipe> castCraftingRecipeHolder(RecipeHolder<? extends CraftingRecipe> recipeHolder) {
+		return (RecipeHolder<CraftingRecipe>) recipeHolder;
 	}
 
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-		registration.addCraftingStation(RecipeTypes.CRAFTING, new ItemStack(ModItems.CRAFTING_UPGRADE.get()));
-		registration.addCraftingStation(RecipeTypes.STONECUTTING, new ItemStack(ModItems.STONECUTTER_UPGRADE.get()));
-		registration.addCraftingStation(RecipeTypes.SMITHING, new ItemStack(ModItems.SMITHING_UPGRADE.get()));
+		registration.addRecipeCatalyst(new ItemStack(ModItems.CRAFTING_UPGRADE.get()), RecipeTypes.CRAFTING);
+		registration.addRecipeCatalyst(new ItemStack(ModItems.STONECUTTER_UPGRADE.get()), RecipeTypes.STONECUTTING);
+		registration.addRecipeCatalyst(new ItemStack(ModItems.SMITHING_UPGRADE.get()), RecipeTypes.SMITHING);
 		additionalCatalystRegistrar.accept(registration);
 	}
 

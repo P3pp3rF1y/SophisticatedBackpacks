@@ -39,20 +39,19 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class BackpackItemModel implements ItemModel {
-	private final SpecialRenderer specialRenderer = new SpecialRenderer();
 	private final BackpackBlockModel.BlockStateModel baseModel;
 	private final List<ItemTintSource> tints;
 	private final Supplier<Vector3f[]> extents;
 	private final ModelRenderProperties properties;
+	@Nullable
+	private final BakedQuad displayItemQuad;
 
 	public BackpackItemModel(BackpackBlockModel.BlockStateModel baseModel, ModelRenderProperties properties, List<ItemTintSource> tints) {
 		this.baseModel = baseModel;
 		this.tints = tints;
 		extents = Suppliers.memoize(() -> BlockModelWrapper.computeExtents(baseModel.getQuads()));
 		this.properties = properties;
-		if (baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel) {
-			specialRenderer.displayItemQuad = backpackModel.getDisplayItemQuad();
-		}
+		displayItemQuad = baseModel instanceof BackpackBlockModel.BlockStateModel backpackModel ? backpackModel.getDisplayItemQuad() : null;
 	}
 
 	@Override
@@ -78,6 +77,7 @@ public class BackpackItemModel implements ItemModel {
 		List<BakedQuad> quads = baseModel.getQuads(displayContext);
 		renderLayer.setParticleIcon(baseModel.particleIcon());
 		renderLayer.prepareQuadList().addAll(quads);
+		SpecialRenderer specialRenderer = new SpecialRenderer(displayItemQuad);
 		specialRenderer.setModelRenderParameters(tintLayers, quads);
 		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().orElse(null);
 
@@ -157,9 +157,13 @@ public class BackpackItemModel implements ItemModel {
 		@Nullable
 		public RenderInfo.DisplayItem displayItem = null;
 		@Nullable
-		public BakedQuad displayItemQuad = null;
+		private final BakedQuad displayItemQuad;
 		private int[] tintLayers;
 		private List<BakedQuad> baseModel;
+
+		public SpecialRenderer(@Nullable BakedQuad displayItemQuad) {
+			this.displayItemQuad = displayItemQuad;
+		}
 
 		@Override
 		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay, boolean hasFoil) {
