@@ -4,6 +4,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
@@ -62,6 +63,18 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 	@Override
 	public SmithingTransformRecipe getCompose() {
 		return compose;
+	}
+
+	public Ingredient getTemplateIngredient() {
+		return compose.template;
+	}
+
+	public Ingredient getBaseIngredient() {
+		return compose.base;
+	}
+
+	public Ingredient getAdditionIngredient() {
+		return compose.addition;
 	}
 
 	public static class Serializer extends RecipeWrapperSerializer<SmithingTransformRecipe, SmithingBackpackUpgradeRecipe> {
