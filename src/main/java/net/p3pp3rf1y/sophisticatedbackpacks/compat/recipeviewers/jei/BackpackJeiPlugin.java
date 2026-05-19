@@ -31,7 +31,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingDisplaySpec;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.CraftingDisplayCatalogRecipeManagerPlugin;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.GroupedCraftingRecipeCategoryExtension;
@@ -109,9 +108,6 @@ public class BackpackJeiPlugin implements IModPlugin {
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
 		IRecipeViewerDisplayCatalog catalog = getCatalog();
-		registration.addRecipes(RecipeTypes.CRAFTING, catalog.getGroupedCraftingSpecs().stream()
-				.map(spec -> new RecipeHolder<CraftingRecipe>(spec.id(), spec.recipe()))
-				.toList());
 		registration.addRecipes(RecipeTypes.CRAFTING, catalog.getCraftingRecipes());
 	}
 
@@ -119,7 +115,8 @@ public class BackpackJeiPlugin implements IModPlugin {
 	public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
 		GroupedCraftingRecipeCategoryExtension.registerOnce(registration);
 		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> stack.getItem() instanceof BackpackItem);
-		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class, new SmithingSpecCategoryExtension<>(recipe -> getSmithingSpec(getCatalog(), recipe), stack -> stack.getItem() instanceof BackpackItem));
+		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class,
+				new SmithingSpecCategoryExtension<>(recipe -> getCatalog().getSmithingDisplaySpecReplacing(recipe).orElseThrow(), stack -> stack.getItem() instanceof BackpackItem));
 	}
 
 	@Override
@@ -138,13 +135,6 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	private void onRecipesUpdated(RecipesUpdatedEvent event) {
 		catalog = null;
-	}
-
-	private static SmithingDisplaySpec getSmithingSpec(IRecipeViewerDisplayCatalog catalog, SmithingBackpackUpgradeRecipe recipe) {
-		return catalog.getSmithingSpecs().stream()
-				.filter(spec -> spec.getAllDisplays().stream().anyMatch(variant -> recipe.isBaseIngredient(variant.base()) && ItemStack.isSameItem(recipe.getResultItem(null), variant.result())))
-				.findFirst()
-				.orElseThrow();
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
