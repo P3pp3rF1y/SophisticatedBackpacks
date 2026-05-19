@@ -6,7 +6,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.CraftingDisplaySpec;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.CraftingDisplayVariant;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SourceResultFocusBehavior;
@@ -35,20 +36,28 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromSource(BackpackTierUpgradeVariantPair pair, ItemStack sourceStack) {
-		return new BackpackTierUpgradeVariantPair(sourceStack.copy(), copyWithItem(sourceStack, pair.result().getItem()));
+		ItemStack result = copyWithItem(sourceStack, pair.result().getItem());
+		setSlotNumbers(result);
+		return new BackpackTierUpgradeVariantPair(sourceStack.copy(), result);
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromResult(BackpackTierUpgradeVariantPair pair, ItemStack resultStack) {
-		if (!resultStack.hasTag()) {
-			return pair;
-		}
-		return new BackpackTierUpgradeVariantPair(copyWithItem(resultStack, pair.source().getItem()), resultStack.copy());
+		ItemStack source = copyWithItem(resultStack, pair.source().getItem());
+		setSlotNumbers(source);
+		return new BackpackTierUpgradeVariantPair(source, resultStack.copy());
 	}
 
 	private static ItemStack copyWithItem(ItemStack stack, Item item) {
 		ItemStack copy = new ItemStack(item, stack.getCount());
 		copy.setTag(stack.getTag() == null ? null : stack.getTag().copy());
 		return copy;
+	}
+
+	private static void setSlotNumbers(ItemStack stack) {
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			BackpackItem backpackItem = (BackpackItem) stack.getItem();
+			wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
+		});
 	}
 
 	public CraftingDisplaySpec toSpec() {
@@ -62,8 +71,7 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 	}
 
 	private static boolean isUntinted(ItemStack stack) {
-		BackpackWrapper wrapper = new BackpackWrapper(stack);
-		return wrapper.getMainColor() == BackpackWrapper.DEFAULT_CLOTH_COLOR && wrapper.getAccentColor() == BackpackWrapper.DEFAULT_BORDER_COLOR;
+		return BackpackItem.getMainColor(stack) == BackpackItem.DEFAULT_MAIN_COLOR && BackpackItem.getAccentColor(stack) == BackpackItem.DEFAULT_ACCENT_COLOR;
 	}
 
 	private CraftingDisplayVariant toVariant(BackpackTierUpgradeVariantPair pair) {
@@ -88,7 +96,7 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 
 	private Optional<CraftingDisplayVariant> focusResult(CraftingDisplayVariant variant, ItemStack focusedOutput) {
 		Optional<BackpackTierUpgradeVariantPair> exactPair = findByResult(focusedOutput);
-		if (exactPair.isPresent()) {
+		if (exactPair.isPresent() && !focusedOutput.hasTag()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameTags(variant.firstOutput(), pair.result())).map(this::toVariant);
 		}
 		return findByResultItem(focusedOutput)

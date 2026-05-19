@@ -3,7 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -318,12 +317,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getMainColor() {
-		return NBTHelper.getInt(backpack, CLOTH_COLOR_TAG).orElse(DEFAULT_CLOTH_COLOR);
+		return BackpackItem.getMainColor(backpack);
 	}
 
 	@Override
 	public int getAccentColor() {
-		return NBTHelper.getInt(backpack, BORDER_COLOR_TAG).orElse(DEFAULT_BORDER_COLOR);
+		return BackpackItem.getAccentColor(backpack);
 	}
 
 	@Override
@@ -345,8 +344,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setColors(int mainColor, int accentColor) {
-		backpack.addTagElement(CLOTH_COLOR_TAG, IntTag.valueOf(mainColor));
-		backpack.addTagElement(BORDER_COLOR_TAG, IntTag.valueOf(accentColor));
+		BackpackItem.setColors(backpack, mainColor, accentColor);
 		backpackSaveHandler.run();
 	}
 

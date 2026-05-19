@@ -103,7 +103,8 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() instanceof CraftingRecipe craftingRecipe && catalog.replacesCraftingRecipe(craftingRecipe));
 		catalog.getGroupedCraftingSpecs().stream()
-				.flatMap(spec -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec.recipe()).stream())
+				.flatMap(spec -> spec.getAllDisplays().stream())
+				.flatMap(recipe -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(recipe).stream())
 				.forEach(registry::addRecipe);
 		catalog.getCraftingRecipes().stream()
 				.filter(recipe -> !catalog.replacesCraftingRecipe(recipe))
@@ -116,7 +117,7 @@ public class BackpackEmiPlugin implements EmiPlugin {
 				.forEach(registry::addRecipe);
 
 		catalog.getSmithingSpecs().stream()
-				.flatMap(spec -> SmithingSpecEmiRecipe.of(spec).stream())
+				.flatMap(spec -> SmithingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
 				.forEach(registry::addRecipe);
 	}
 

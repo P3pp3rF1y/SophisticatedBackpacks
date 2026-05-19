@@ -83,6 +83,12 @@ import java.util.function.UnaryOperator;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase implements IStashStorageItem {
+	public static final int DEFAULT_MAIN_COLOR = BackpackWrapper.DEFAULT_CLOTH_COLOR;
+	public static final int DEFAULT_ACCENT_COLOR = BackpackWrapper.DEFAULT_BORDER_COLOR;
+
+	private static final String CLOTH_COLOR_TAG = "clothColor";
+	private static final String BORDER_COLOR_TAG = "borderColor";
+
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -96,6 +102,21 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
+	}
+
+	public static void setColors(ItemStack backpackStack, int mainColor, int accentColor) {
+		backpackStack.getOrCreateTag().putInt(CLOTH_COLOR_TAG, mainColor);
+		backpackStack.getOrCreateTag().putInt(BORDER_COLOR_TAG, accentColor);
+	}
+
+	public static int getMainColor(ItemStack backpackStack) {
+		CompoundTag tag = backpackStack.getTag();
+		return tag != null && tag.contains(CLOTH_COLOR_TAG) ? tag.getInt(CLOTH_COLOR_TAG) : DEFAULT_MAIN_COLOR;
+	}
+
+	public static int getAccentColor(ItemStack backpackStack) {
+		CompoundTag tag = backpackStack.getTag();
+		return tag != null && tag.contains(BORDER_COLOR_TAG) ? tag.getInt(BORDER_COLOR_TAG) : DEFAULT_ACCENT_COLOR;
 	}
 
 	@Override

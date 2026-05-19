@@ -120,8 +120,11 @@ public class BackpackTierUpgradeRecipesMaker {
 		for (DyeColor color : DyeColor.values()) {
 			ItemStack stack = new ItemStack(item);
 			int colorValue = net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(color.getTextureDiffuseColors());
-			new net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper(stack).setColors(colorValue, colorValue);
+			BackpackItem.setColors(stack, colorValue, colorValue);
 			backpackItems.add(stack);
 		}
+		ItemStack stack = new ItemStack(item);
+		BackpackItem.setColors(stack, net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.YELLOW.getTextureDiffuseColors()), net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.LIME.getTextureDiffuseColors()));
+		backpackItems.add(stack);
 	}
 }

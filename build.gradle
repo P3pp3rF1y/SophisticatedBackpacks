@@ -165,7 +165,9 @@ dependencies {
     }
 
     compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
+    if ((findProperty("recipe_viewer") ?: "jei").toString() == "jei") {
+        runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
+    }
     compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}:api")
     compileOnly fg.deobf("me.shedaniel:RoughlyEnoughItems-forge:${rei_version}")
     compileOnly fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")

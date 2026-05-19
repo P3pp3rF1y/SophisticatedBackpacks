@@ -5,13 +5,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingDisplaySpec;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingDisplayVariant;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingSourceResultFocusBehavior;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public record BackpackSmithingUpgradeDisplayRecipe(ResourceLocation id, SmithingRecipe recipe, Ingredient template, Ingredient addition,
 											  List<BackpackTierUpgradeVariantPair> variantPairs) {
@@ -33,7 +35,9 @@ public record BackpackSmithingUpgradeDisplayRecipe(ResourceLocation id, Smithing
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromSource(BackpackTierUpgradeVariantPair pair, ItemStack sourceStack) {
-		return new BackpackTierUpgradeVariantPair(sourceStack.copy(), copyWithItem(sourceStack, pair.result().getItem()));
+		ItemStack result = copyWithItem(sourceStack, pair.result().getItem());
+		setSlotNumbers(result);
+		return new BackpackTierUpgradeVariantPair(sourceStack.copy(), result);
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromResult(BackpackTierUpgradeVariantPair pair, ItemStack resultStack) {
@@ -46,19 +50,25 @@ public record BackpackSmithingUpgradeDisplayRecipe(ResourceLocation id, Smithing
 		return copy;
 	}
 
+	private static void setSlotNumbers(ItemStack stack) {
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+			BackpackItem backpackItem = (BackpackItem) stack.getItem();
+			wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
+		});
+	}
+
 	public SmithingDisplaySpec toSpec() {
 		List<SmithingDisplayVariant> displayVariants = variantPairs.stream().map(pair -> new SmithingDisplayVariant(pair.source(), pair.result())).toList();
 		List<SmithingDisplayVariant> globalVariants = variantPairs.stream()
 				.filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
 				.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()))
 				.toList();
-		return new SmithingDisplaySpec(id, Optional.of(template), Optional.of(addition), displayVariants, globalVariants,
+		return new SmithingDisplaySpec(id, Optional.of(template), Optional.of(addition), displayVariants, globalVariants, Set.of(recipe),
 				new SmithingSourceResultFocusBehavior(this::focusSource, this::focusResult));
 	}
 
 	private static boolean isUntinted(ItemStack stack) {
-		BackpackWrapper wrapper = new BackpackWrapper(stack);
-		return wrapper.getMainColor() == BackpackWrapper.DEFAULT_CLOTH_COLOR && wrapper.getAccentColor() == BackpackWrapper.DEFAULT_BORDER_COLOR;
+		return BackpackItem.getMainColor(stack) == BackpackItem.DEFAULT_MAIN_COLOR && BackpackItem.getAccentColor(stack) == BackpackItem.DEFAULT_ACCENT_COLOR;
 	}
 
 	private Optional<SmithingDisplayVariant> focusSource(SmithingDisplayVariant variant, ItemStack focusedInput) {

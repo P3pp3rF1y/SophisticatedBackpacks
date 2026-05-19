@@ -1,11 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SingleColorDyeRecipeSpec;
@@ -23,8 +20,6 @@ public class BackpackRecipeViewerDisplays {
 		BackpackSmithingUpgradeRecipesMaker.getGroupedSmithingRecipes().stream()
 				.map(BackpackSmithingUpgradeDisplayRecipe::toSpec)
 				.forEach(catalog::addSmithingSpec);
-		ClientRecipeHelper.transformAllRecipesOfType(RecipeType.CRAFTING, BackpackUpgradeRecipe.class, recipe -> recipe)
-				.forEach(catalog::addCraftingRecipe);
 	}
 
 	public static void registerDyeRecipes(IRecipeViewerDisplayCatalog catalog, IRecipeViewerDisplayContext context) {
@@ -40,7 +35,6 @@ public class BackpackRecipeViewerDisplays {
 		if (!(stack.getItem() instanceof BackpackItem)) {
 			return false;
 		}
-		BackpackWrapper wrapper = new BackpackWrapper(stack);
-		return wrapper.getMainColor() != BackpackWrapper.DEFAULT_CLOTH_COLOR || wrapper.getAccentColor() != BackpackWrapper.DEFAULT_BORDER_COLOR;
+		return BackpackItem.getMainColor(stack) != BackpackItem.DEFAULT_MAIN_COLOR || BackpackItem.getAccentColor(stack) != BackpackItem.DEFAULT_ACCENT_COLOR;
 	}
 }
