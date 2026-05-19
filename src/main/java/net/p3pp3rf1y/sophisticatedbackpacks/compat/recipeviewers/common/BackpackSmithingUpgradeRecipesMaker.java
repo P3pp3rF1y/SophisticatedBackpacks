@@ -7,8 +7,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 
@@ -58,10 +56,12 @@ public class BackpackSmithingUpgradeRecipesMaker {
 			BackpackItem.setColors(stack, color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
 			backpackItems.add(stack);
 		}
+		ItemStack stack = new ItemStack(item);
+		BackpackItem.setColors(stack, DyeColor.YELLOW.getTextureDiffuseColor(), DyeColor.LIME.getTextureDiffuseColor());
+		backpackItems.add(stack);
 	}
 
 	private static void copyColors(ItemStack from, ItemStack to) {
-		IBackpackWrapper wrapper = BackpackWrapper.fromStack(from);
-		BackpackItem.setColors(to, wrapper.getMainColor(), wrapper.getAccentColor());
+		BackpackItem.setColors(to, BackpackItem.getMainColor(from), BackpackItem.getAccentColor(from));
 	}
 }

@@ -63,6 +63,9 @@ import java.util.function.UnaryOperator;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class BackpackItem extends ItemBase implements IStashStorageItem {
+	public static final int DEFAULT_MAIN_COLOR = BackpackWrapper.DEFAULT_MAIN_COLOR;
+	public static final int DEFAULT_ACCENT_COLOR = BackpackWrapper.DEFAULT_ACCENT_COLOR;
+
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -85,6 +88,14 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public static void setColors(ItemStack backpackStack, int mainColor, int accentColor) {
 		backpackStack.set(ModCoreDataComponents.MAIN_COLOR, mainColor);
 		backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, accentColor);
+	}
+
+	public static int getMainColor(ItemStack backpackStack) {
+		return backpackStack.getOrDefault(ModCoreDataComponents.MAIN_COLOR, DEFAULT_MAIN_COLOR);
+	}
+
+	public static int getAccentColor(ItemStack backpackStack) {
+		return backpackStack.getOrDefault(ModCoreDataComponents.ACCENT_COLOR, DEFAULT_ACCENT_COLOR);
 	}
 
 	@Override

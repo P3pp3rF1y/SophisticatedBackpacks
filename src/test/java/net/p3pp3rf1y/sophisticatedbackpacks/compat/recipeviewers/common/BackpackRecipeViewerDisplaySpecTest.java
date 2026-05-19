@@ -153,6 +153,8 @@ class BackpackRecipeViewerDisplaySpecTest {
 	@Test
 	void focusedHigherTierSingleColorDyeRecipeNarrowsDyeInputAndResult() {
 		SingleColorDyeRecipeSpec ironBackpackDyeSpec = createCatalog().getGroupedCraftingSpecs().stream()
+				.filter(SingleColorDyeRecipeSpec.class::isInstance)
+				.map(SingleColorDyeRecipeSpec.class::cast)
 				.filter(spec -> spec.sourceStacks().stream().anyMatch(stack -> stack.is(ModItems.IRON_BACKPACK.get())))
 				.findFirst()
 				.orElseThrow();

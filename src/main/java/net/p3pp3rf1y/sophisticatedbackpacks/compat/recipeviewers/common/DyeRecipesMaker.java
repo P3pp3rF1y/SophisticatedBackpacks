@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.ClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.DyeVariantPair;
@@ -36,7 +36,7 @@ public class DyeRecipesMaker {
 			List<DyeVariantPair> variants = new ArrayList<>();
 			for (DyeColor color : DyeColor.values()) {
 				ItemStack backpackOutput = new ItemStack(backpackItem);
-				BackpackWrapper.fromStack(backpackOutput).setColors(color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
+				BackpackItem.setColors(backpackOutput, color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
 				variants.add(new DyeVariantPair(new ItemStack(DyeItem.byColor(color)), backpackOutput));
 			}
 			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "single_color_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
@@ -56,14 +56,14 @@ public class DyeRecipesMaker {
 			ingredients.add(Optional.of(Ingredient.of(DyeItem.byColor(DyeColor.BLACK))));
 
 			ItemStack backpackOutput = new ItemStack(backpackItem);
-			int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_MAIN_COLOR, List.of(
+			int clothColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_MAIN_COLOR, BackpackItem.DEFAULT_MAIN_COLOR, List.of(
 					DyeColor.YELLOW, DyeColor.LIME
 			));
-			int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_ACCENT_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR, List.of(
+			int trimColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_ACCENT_COLOR, BackpackItem.DEFAULT_ACCENT_COLOR, List.of(
 					DyeColor.BLUE, DyeColor.BLACK
 			));
 
-			BackpackWrapper.fromStack(backpackOutput).setColors(clothColor, trimColor);
+			BackpackItem.setColors(backpackOutput, clothColor, trimColor);
 
 			ShapedRecipePattern pattern = new ShapedRecipePattern(3, 1, ingredients, Optional.empty());
 			ResourceLocation id = ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "multiple_colors_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());

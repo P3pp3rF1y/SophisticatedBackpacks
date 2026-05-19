@@ -121,6 +121,9 @@ public class BackpackTierUpgradeRecipesMaker {
 			BackpackItem.setColors(stack, color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
 			backpackItems.add(stack);
 		}
+		ItemStack stack = new ItemStack(item);
+		BackpackItem.setColors(stack, DyeColor.YELLOW.getTextureDiffuseColor(), DyeColor.LIME.getTextureDiffuseColor());
+		backpackItems.add(stack);
 	}
 
 	private static List<ItemStack> getIngredientItems(Optional<Ingredient> ingredient) {

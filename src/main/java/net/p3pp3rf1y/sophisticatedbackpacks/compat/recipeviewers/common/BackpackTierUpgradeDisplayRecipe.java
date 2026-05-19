@@ -1,20 +1,24 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.CraftingDisplaySpec;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.CraftingDisplayVariant;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SourceResultFocusBehavior;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder<CraftingRecipe> recipeHolder, int width, int height,
 											   NonNullList<Ingredient> ingredients, int backpackIngredientIndex, List<BackpackTierUpgradeVariantPair> variantPairs) {
@@ -35,14 +39,42 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromSource(BackpackTierUpgradeVariantPair pair, ItemStack sourceStack) {
-		return new BackpackTierUpgradeVariantPair(sourceStack.copy(), sourceStack.transmuteCopy(pair.result().getItem(), 1));
+		ItemStack source = pair.source().copy();
+		copyRenderComponents(sourceStack, source);
+		setSlotNumbers(source);
+		ItemStack result = pair.result().copy();
+		copyRenderComponents(sourceStack, result);
+		setSlotNumbers(result);
+		return new BackpackTierUpgradeVariantPair(source, result);
+	}
+
+	private static void setSlotNumbers(ItemStack stack) {
+		BackpackItem backpackItem = (BackpackItem) stack.getItem();
+		BackpackWrapper.fromStack(stack).setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromResult(BackpackTierUpgradeVariantPair pair, ItemStack resultStack) {
-		if (resultStack.getComponentsPatch().isEmpty()) {
-			return pair;
+		ItemStack source = pair.source().copy();
+		copyRenderComponents(resultStack, source);
+		setSlotNumbers(source);
+		ItemStack result = pair.result().copy();
+		copyRenderComponents(resultStack, result);
+		setSlotNumbers(result);
+		return new BackpackTierUpgradeVariantPair(source, result);
+	}
+
+	private static void copyRenderComponents(ItemStack from, ItemStack to) {
+		copyComponent(from, to, ModCoreDataComponents.MAIN_COLOR);
+		copyComponent(from, to, ModCoreDataComponents.ACCENT_COLOR);
+		copyComponent(from, to, ModCoreDataComponents.RENDER_INFO_TAG);
+	}
+
+	private static <T> void copyComponent(ItemStack from, ItemStack to, Supplier<DataComponentType<T>> componentSupplier) {
+		DataComponentType<T> component = componentSupplier.get();
+		T value = from.get(component);
+		if (value != null) {
+			to.set(component, value);
 		}
-		return new BackpackTierUpgradeVariantPair(resultStack.transmuteCopy(pair.source().getItem(), 1), resultStack.copy());
 	}
 
 	public CraftingDisplaySpec toSpec() {
@@ -56,8 +88,7 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 	}
 
 	private static boolean isUntinted(ItemStack stack) {
-		BackpackWrapper wrapper = (BackpackWrapper) BackpackWrapper.fromStack(stack);
-		return wrapper.getMainColor() == BackpackWrapper.DEFAULT_MAIN_COLOR && wrapper.getAccentColor() == BackpackWrapper.DEFAULT_ACCENT_COLOR;
+		return BackpackItem.getMainColor(stack) == BackpackItem.DEFAULT_MAIN_COLOR && BackpackItem.getAccentColor(stack) == BackpackItem.DEFAULT_ACCENT_COLOR;
 	}
 
 	private CraftingDisplayVariant toVariant(BackpackTierUpgradeVariantPair pair) {
@@ -69,9 +100,6 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 	}
 
 	private Optional<CraftingDisplayVariant> focusSource(CraftingDisplayVariant variant, ItemStack focusedInput) {
-		if (isUntinted(focusedInput)) {
-			return Optional.empty();
-		}
 		ItemStack source = getSource(variant);
 		Optional<BackpackTierUpgradeVariantPair> exactPair = findBySource(focusedInput);
 		if (exactPair.isPresent()) {
@@ -84,11 +112,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 	}
 
 	private Optional<CraftingDisplayVariant> focusResult(CraftingDisplayVariant variant, ItemStack focusedOutput) {
-		if (isUntinted(focusedOutput)) {
-			return Optional.empty();
-		}
 		Optional<BackpackTierUpgradeVariantPair> exactPair = findByResult(focusedOutput);
-		if (exactPair.isPresent()) {
+		if (exactPair.isPresent() && focusedOutput.getComponentsPatch().isEmpty()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.firstOutput(), pair.result())).map(this::toVariant);
 		}
 		return findByResultItem(focusedOutput)

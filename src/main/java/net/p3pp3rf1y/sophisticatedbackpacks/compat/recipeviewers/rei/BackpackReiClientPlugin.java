@@ -13,11 +13,14 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginClient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultSmithingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -55,6 +58,9 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @REIPluginClient
 public class BackpackReiClientPlugin implements REIClientPlugin {
 	private static Consumer<WorkstationRegistration> additionalWorkstations = registration -> {};
+	private IRecipeViewerDisplayCatalog catalog = null;
+	private boolean catalogCreatedWithoutServer = false;
+
 	public static void addAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
 		BackpackReiClientPlugin.additionalWorkstations = BackpackReiClientPlugin.additionalWorkstations.andThen(additionalWorkstations);
 	}
@@ -68,6 +74,14 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 		public void addWorkstations(CategoryIdentifier<? extends Display> id, Item... workstations) {
 			registry.addWorkstations(id, Arrays.stream(workstations).map(EntryStacks::of).toArray(EntryStack[]::new));
+		}
+	}
+
+	@Override
+	public void preStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
+		if (stage == ReloadStage.START) {
+			catalog = null;
+			catalogCreatedWithoutServer = false;
 		}
 	}
 
@@ -137,11 +151,9 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
-		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
-		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(() -> catalog, stack -> stack.getItem() instanceof BackpackItem));
-		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(() -> catalog, stack -> stack.getItem() instanceof BackpackItem));
-		registry.registerGlobalDisplayGenerator(new SmithingSpecReiDisplayGenerator(() -> catalog, stack -> stack.getItem() instanceof BackpackItem));
+		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registry.registerGlobalDisplayGenerator(new SmithingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerVisibilityPredicate((category, display) -> {
 			if (display instanceof CraftingSpecReiDisplay) {
 				return EventResult.pass();
@@ -152,11 +164,26 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 					return EventResult.interruptFalse();
 				}
 			}
+			if (display instanceof DefaultCraftingDisplay craftingDisplay && craftingDisplayReplaced(getCatalog(), craftingDisplay)) {
+				return EventResult.interruptFalse();
+			}
 			return EventResult.pass();
 		});
+	}
 
-		catalog.getCraftingRecipes()
-				.forEach(registry::add);
+	private IRecipeViewerDisplayCatalog getCatalog() {
+		boolean serverAvailable = Minecraft.getInstance().getSingleplayerServer() != null;
+		if (catalog == null || catalogCreatedWithoutServer && serverAvailable) {
+			catalog = createCatalog(getSubtypeInterpreters());
+			catalogCreatedWithoutServer = !serverAvailable;
+		}
+		return catalog;
+	}
+
+	private static boolean craftingDisplayReplaced(IRecipeViewerDisplayCatalog catalog, DefaultCraftingDisplay craftingDisplay) {
+		return craftingDisplay.getDisplayLocation()
+				.map(displayId -> catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(displayId)))
+				.orElse(false);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

@@ -335,12 +335,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getMainColor() {
-		return getBackpackStack().getOrDefault(ModCoreDataComponents.MAIN_COLOR, DEFAULT_MAIN_COLOR);
+		return BackpackItem.getMainColor(getBackpackStack());
 	}
 
 	@Override
 	public int getAccentColor() {
-		return getBackpackStack().getOrDefault(ModCoreDataComponents.ACCENT_COLOR, DEFAULT_ACCENT_COLOR);
+		return BackpackItem.getAccentColor(getBackpackStack());
 	}
 
 	@Override
