@@ -92,6 +92,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public static IBackpackWrapper fromStack(ItemStack stack) {
+		if (!stack.has(ModCoreDataComponents.STORAGE_UUID)) {
+			return new BackpackWrapper(stack);
+		}
+
 		return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
 		/* TODO try to add uuid based caching in the future
 		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
@@ -526,7 +530,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void setContentsUuid(UUID storageUuid) {
-		getBackpackStack().set(ModCoreDataComponents.STORAGE_UUID, storageUuid);
+		ItemStack backpackStack = getBackpackStack();
+		backpackStack.set(ModCoreDataComponents.STORAGE_UUID, storageUuid);
+		StorageWrapperRepository.setStorageWrapper(backpackStack, this);
 /* TODO add in the future
 		StorageWrapperRepository.migrateToUuid(this, backpack, storageUuid);
 */
