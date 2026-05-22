@@ -23,6 +23,7 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
@@ -43,6 +44,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.GroupedCraftingR
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.SmithingSpecReiDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,7 +150,7 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
-		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(this::getCatalog, BackpackReiClientPlugin::canShowDyeUsagesFor, BackpackReiClientPlugin::canShowDyeRecipesFor));
 		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerGlobalDisplayGenerator(new SmithingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerVisibilityPredicate((category, display) -> {
@@ -171,11 +173,35 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 		getCatalog().getCraftingRecipes().forEach(registry::add);
 	}
 
+	private static boolean canShowDyeUsagesFor(ItemStack stack) {
+		return stack.getItem() instanceof BackpackItem
+				&& (!stack.hasTag() || stack.getTag() == null || !stack.getTag().contains("clothColor") && !stack.getTag().contains("borderColor") && !stack.getTag().contains("renderInfo"));
+	}
+
 	private IRecipeViewerDisplayCatalog getCatalog() {
 		if (catalog == null) {
 			catalog = createCatalog(getSubtypeInterpreters());
 		}
 		return catalog;
+	}
+
+	private static boolean canShowDyeRecipesFor(ItemStack stack) {
+		if (!stack.is(ModItems.BACKPACK.get())) {
+			return false;
+		}
+
+		int mainColor = BackpackItem.getMainColor(stack);
+		int accentColor = BackpackItem.getAccentColor(stack);
+		return mainColor == accentColor && isDyeColor(mainColor);
+	}
+
+	private static boolean isDyeColor(int color) {
+		for (DyeColor dyeColor : DyeColor.values()) {
+			if (ColorHelper.getColor(dyeColor.getTextureDiffuseColors()) == color) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

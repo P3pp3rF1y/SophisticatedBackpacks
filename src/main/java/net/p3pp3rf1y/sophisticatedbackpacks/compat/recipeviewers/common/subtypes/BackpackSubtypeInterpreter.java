@@ -7,5 +7,7 @@ public class BackpackSubtypeInterpreter extends PropertyBasedSubtypeInterpreter 
 	public BackpackSubtypeInterpreter() {
 		addProperty(BackpackItem::getMainColor, "clothColor", String::valueOf);
 		addProperty(BackpackItem::getAccentColor, "borderColor", String::valueOf);
+		addProperty(stack -> stack.hasTag() && stack.getTag() != null && stack.getTag().contains("renderInfo") ? stack.getTag().get("renderInfo").toString() : null,
+				"renderInfo", String::valueOf);
 	}
 }

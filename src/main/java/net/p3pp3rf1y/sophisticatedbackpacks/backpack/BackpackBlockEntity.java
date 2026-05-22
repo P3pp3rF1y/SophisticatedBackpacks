@@ -18,6 +18,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.EmptyHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
@@ -177,6 +178,9 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		}
 
 		if (cap == ForgeCapabilities.ITEM_HANDLER) {
+			if (!(getBackpackWrapper().getBackpack().getItem() instanceof BackpackItem)) {
+				return LazyOptional.of(() -> EmptyHandler.INSTANCE).cast();
+			}
 			if (itemHandlerCap == null) {
 				itemHandlerCap = LazyOptional.of(() -> new CachedFailedInsertInventoryHandler<>(() -> getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0));
 			}

@@ -11,6 +11,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.registration.*;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -34,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingDispl
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.*;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +115,14 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(), stack -> stack.getItem() instanceof BackpackItem));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(), BackpackJeiPlugin::canShowDyeUsagesFor, BackpackJeiPlugin::canShowDyeRecipesFor));
 		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
 		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING, new SmithingSpecRecipeManagerPlugin(this::getCatalog, BackpackRecipeViewerDisplays::needsSyntheticSmithingDisplay));
+	}
+
+	private static boolean canShowDyeUsagesFor(ItemStack stack) {
+		return stack.getItem() instanceof BackpackItem
+				&& (!stack.hasTag() || stack.getTag() == null || !stack.getTag().contains("clothColor") && !stack.getTag().contains("borderColor") && !stack.getTag().contains("renderInfo"));
 	}
 
 	private IRecipeViewerDisplayCatalog getCatalog() {
@@ -123,6 +130,25 @@ public class BackpackJeiPlugin implements IModPlugin {
 			catalog = createCatalog(getSubtypeInterpreters());
 		}
 		return catalog;
+	}
+
+	private static boolean canShowDyeRecipesFor(ItemStack stack) {
+		if (!stack.is(ModItems.BACKPACK.get())) {
+			return false;
+		}
+
+		int mainColor = BackpackItem.getMainColor(stack);
+		int accentColor = BackpackItem.getAccentColor(stack);
+		return mainColor == accentColor && isDyeColor(mainColor);
+	}
+
+	private static boolean isDyeColor(int color) {
+		for (DyeColor dyeColor : DyeColor.values()) {
+			if (ColorHelper.getColor(dyeColor.getTextureDiffuseColors()) == color) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void onRecipesUpdated(RecipesUpdatedEvent event) {
