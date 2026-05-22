@@ -16,6 +16,7 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
@@ -185,6 +186,9 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			return null;
 		}
 		if (externalItemHandler == null) {
+			if (!(getBackpackWrapper().getBackpack().getItem() instanceof BackpackItem)) {
+				return EmptyItemHandler.INSTANCE;
+			}
 			externalItemHandler = new CachedFailedInsertInventoryHandler<>(() -> {
 				IBackpackWrapper backpackWrapper = getBackpackWrapper();
 				if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
