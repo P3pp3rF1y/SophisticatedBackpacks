@@ -61,6 +61,7 @@ public class EntityBackpackAdditionHandler {
 	private static final String ENTITY_DATA_TAG = SophisticatedBackpacks.MOD_ID;
 	private static final String ENTITY_DATA_SPAWNED_WITH_BACKPACK = "spawnedWithBackpack";
 	private static final String ENTITY_DATA_SPAWNED_WITH_JUKEBOX_UPGRADE = "spawnedWithJukeboxUpgrade";
+	private static final String ENTITY_DATA_PENDING_BACKPACK_ADDITION = "pendingBackpackAddition";
 	private static final String ENTITY_DATA_CONVERTING = "converting";
 
 	private EntityBackpackAdditionHandler() {
@@ -122,13 +123,32 @@ public class EntityBackpackAdditionHandler {
 		VanillaDiscHandler.setDiscBlockListGetter(Config.SERVER.entityBackpackAdditions.discBlockList);
 	}
 
-	static void addBackpack(Monster monster, LevelAccessor level) {
+	static void handleBackpackAdditionOnSpawn(Monster monster, LevelAccessor level) {
 		RandomSource rnd = level.getRandom();
-		if (!Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
-				|| rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) != 0 || (monster instanceof Raider raider && raider.getCurrentRaid() != null)) {
+		if (!shouldAddBackpack(monster, rnd)) {
 			return;
 		}
 
+		if (shouldDeferBackpackAddition(level)) {
+			setPendingBackpackAddition(monster, true);
+			return;
+		}
+
+		addBackpack(monster, level, rnd);
+	}
+
+	private static boolean shouldAddBackpack(Monster monster, RandomSource rnd) {
+		return Config.SERVER.entityBackpackAdditions.canWearBackpack(monster.getType())
+				&& rnd.nextInt((int) (1 / Config.SERVER.entityBackpackAdditions.chance.get())) == 0
+				&& (!(monster instanceof Raider raider) || raider.getCurrentRaid() == null);
+	}
+
+	private static boolean shouldDeferBackpackAddition(LevelAccessor level) {
+		MinecraftServer server = level.getServer();
+		return server == null || !server.isSameThread();
+	}
+
+	private static void addBackpack(Monster monster, LevelAccessor level, RandomSource rnd) {
 		int difficultyIndex = 0;
 		if (Config.SERVER.entityBackpackAdditions.localDifficultyEffectsBackpackSpawns.getAsBoolean()) {
 			float localDifficulty = level.getCurrentDifficultyAt(monster.blockPosition()).getEffectiveDifficulty();
@@ -382,7 +402,16 @@ public class EntityBackpackAdditionHandler {
 
 	public static void onLivingUpdate(EntityTickEvent.Post event) {
 		Entity entity = event.getEntity();
-		if (entity.level().isClientSide() || entity instanceof Player || !(entity instanceof LivingEntity livingEntity) || !hasSpawnedJukeboxUpgrade(livingEntity)) {
+		if (entity.level().isClientSide() || entity instanceof Player || !(entity instanceof LivingEntity livingEntity)) {
+			return;
+		}
+		if (livingEntity instanceof Monster monster && hasPendingBackpackAddition(monster)) {
+			setPendingBackpackAddition(monster, false);
+			if (monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
+				addBackpack(monster, entity.level(), entity.level().getRandom());
+			}
+		}
+		if (!hasSpawnedJukeboxUpgrade(livingEntity)) {
 			return;
 		}
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(livingEntity.getItemBySlot(EquipmentSlot.CHEST));
@@ -409,6 +438,22 @@ public class EntityBackpackAdditionHandler {
 
 	private static void setSpawnedJukeboxUpgrade(LivingEntity entity, boolean spawnedWithJukeboxUpgrade) {
 		getOrCreateBackpackEntityData(entity).putBoolean(ENTITY_DATA_SPAWNED_WITH_JUKEBOX_UPGRADE, spawnedWithJukeboxUpgrade);
+	}
+
+	private static boolean hasPendingBackpackAddition(LivingEntity entity) {
+		return getBackpackEntityData(entity).getBoolean(ENTITY_DATA_PENDING_BACKPACK_ADDITION).orElse(false);
+	}
+
+	private static void setPendingBackpackAddition(LivingEntity entity, boolean pendingBackpackAddition) {
+		if (pendingBackpackAddition) {
+			getOrCreateBackpackEntityData(entity).putBoolean(ENTITY_DATA_PENDING_BACKPACK_ADDITION, true);
+		} else {
+			CompoundTag backpackEntityData = getBackpackEntityData(entity);
+			backpackEntityData.remove(ENTITY_DATA_PENDING_BACKPACK_ADDITION);
+			if (backpackEntityData.isEmpty()) {
+				entity.getPersistentData().remove(ENTITY_DATA_TAG);
+			}
+		}
 	}
 
 	private static CompoundTag getBackpackEntityData(LivingEntity entity) {
