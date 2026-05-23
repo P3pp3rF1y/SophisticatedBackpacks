@@ -14,8 +14,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrapper, DepositUpgradeItem>
@@ -34,10 +35,18 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(ResourceHandler<ItemResource> handler, Player player) {
+		List<ItemStack> transferredStacks = depositToHandler(handler);
+
+		int stacksDeposited = transferredStacks.size();
+		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
+		player.sendOverlayMessage(Component.translatable(translKey, stacksDeposited));
+	}
+
+	public List<ItemStack> depositToHandler(ResourceHandler<ItemResource> handler) {
 		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
 			filterLogic.setInventory(handler);
 		}
-		AtomicInteger stacksAdded = new AtomicInteger(0);
+		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		try (Transaction tx = Transaction.openRoot()) {
 			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(handler, Collections.singletonList(filterLogic), Collections.emptyList());
@@ -48,14 +57,12 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 				int moved = filteredTarget.insert(resource, amount, tx);
 				if (moved > 0) {
 					storageWrapper.getInventoryForUpgradeProcessing().extract(index, resource, moved, tx);
-					stacksAdded.incrementAndGet();
+					transferredStacks.add(resource.toStack(moved));
 				}
 			});
 			tx.commit();
 		}
 
-		int stacksDeposited = stacksAdded.get();
-		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
-		player.sendOverlayMessage(Component.translatable(translKey, stacksDeposited));
+		return transferredStacks;
 	}
 }
