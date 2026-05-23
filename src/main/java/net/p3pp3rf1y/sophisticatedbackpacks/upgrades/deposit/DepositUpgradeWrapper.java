@@ -12,8 +12,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrapper, DepositUpgradeItem>
@@ -32,17 +33,23 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IItemHandler itemHandler, Player player) {
+		List<ItemStack> transferredStacks = depositToHandler(itemHandler);
+
+		int stacksDeposited = transferredStacks.size();
+		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
+		player.displayClientMessage(Component.translatable(translKey, stacksDeposited), true);
+	}
+
+	public List<ItemStack> depositToHandler(IItemHandler itemHandler) {
 		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
 			filterLogic.setInventory(itemHandler);
 		}
-		AtomicInteger stacksAdded = new AtomicInteger(0);
+		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		InventoryHelper.transfer(storageWrapper.getInventoryForUpgradeProcessing(),
 				new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()),
-				s -> stacksAdded.incrementAndGet());
+				s -> transferredStacks.add(s.get()));
 
-		int stacksDeposited = stacksAdded.get();
-		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";
-		player.displayClientMessage(Component.translatable(translKey, stacksDeposited), true);
+		return transferredStacks;
 	}
 }
