@@ -16,8 +16,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrapper, RestockUpgradeItem>
@@ -38,7 +39,15 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(ResourceHandler<ItemResource> handler, Player player) {
-		AtomicInteger stacksAdded = new AtomicInteger(0);
+		List<ItemStack> transferredStacks = restockFromHandler(handler);
+
+		int stacksRestocked = transferredStacks.size();
+		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";
+		player.displayClientMessage(Component.translatable(translKey, stacksRestocked), true);
+	}
+
+	public List<ItemStack> restockFromHandler(ResourceHandler<ItemResource> handler) {
+		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		try (Transaction tx = Transaction.openRoot()) {
 			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList());
@@ -46,16 +55,14 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 				int moved = filteredTarget.insert(resource, amount, tx);
 				if (moved > 0) {
 					handler.extract(index, resource, moved, tx);
-					stacksAdded.incrementAndGet();
+					transferredStacks.add(resource.toStack(moved));
 				}
 			});
-			if (stacksAdded.get() > 0) {
+			if (!transferredStacks.isEmpty()) {
 				tx.commit();
 			}
 		}
 
-		int stacksRestocked = stacksAdded.get();
-		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";
-		player.displayClientMessage(Component.translatable(translKey, stacksRestocked), true);
+		return transferredStacks;
 	}
 }
