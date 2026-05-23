@@ -13,8 +13,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IContentsFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrapper, RestockUpgradeItem>
@@ -33,14 +34,20 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 
 	@Override
 	public void onHandlerInteract(IItemHandler itemHandler, Player player) {
-		AtomicInteger stacksAdded = new AtomicInteger(0);
+		List<ItemStack> transferredStacks = restockFromHandler(itemHandler);
+
+		int stacksRestocked = transferredStacks.size();
+		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";
+		player.displayClientMessage(Component.translatable(translKey, stacksRestocked), true);
+	}
+
+	public List<ItemStack> restockFromHandler(IItemHandler itemHandler) {
+		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		InventoryHelper.transfer(itemHandler,
 				new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList()),
-				s -> stacksAdded.incrementAndGet());
+				s -> transferredStacks.add(s.get()));
 
-		int stacksRestocked = stacksAdded.get();
-		String translKey = stacksRestocked > 0 ? "gui.sophisticatedbackpacks.status.stacks_restocked" : "gui.sophisticatedbackpacks.status.nothing_to_restock";
-		player.displayClientMessage(Component.translatable(translKey, stacksRestocked), true);
+		return transferredStacks;
 	}
 }
