@@ -15,6 +15,9 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LegacyBackpackDataMigration;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,6 +64,7 @@ public class BackpackStorage extends SavedData {
 			CompoundTag uuidContentsPair = (CompoundTag) n;
 			UUID uuid = NbtUtils.loadUUID(Objects.requireNonNull(uuidContentsPair.get("uuid")));
 			CompoundTag contents = uuidContentsPair.getCompound("contents");
+			LegacyBackpackDataMigration.normalizeLegacyBackpackContents(contents);
 			if (isPlayerBackpackOrNotEmpty(storage, uuid, contents)) {
 				storage.backpackContents.put(uuid, contents);
 			}
@@ -71,13 +75,20 @@ public class BackpackStorage extends SavedData {
 		if (storage.accessLogRecords.containsKey(backpackUuid)) {
 			return true;
 		}
-		if (contentsNbt.contains("inventory")) {
-			CompoundTag inventoryNbt = contentsNbt.getCompound("inventory");
-			if (inventoryNbt.contains("Items")) {
-				return !inventoryNbt.getList("Items", Tag.TAG_COMPOUND).isEmpty();
-			}
+		return hasItems(contentsNbt, InventoryHandler.INVENTORY_TAG) || hasItems(contentsNbt, UpgradeHandler.UPGRADE_INVENTORY_TAG) || hasOtherBackpackData(contentsNbt);
+	}
+
+	private static boolean hasItems(CompoundTag contentsNbt, String inventoryTag) {
+		if (!contentsNbt.contains(inventoryTag)) {
+			return false;
 		}
-		return false;
+
+		CompoundTag inventoryNbt = contentsNbt.getCompound(inventoryTag);
+		return inventoryNbt.contains("Items") && !inventoryNbt.getList("Items", Tag.TAG_COMPOUND).isEmpty();
+	}
+
+	private static boolean hasOtherBackpackData(CompoundTag contentsNbt) {
+		return contentsNbt.getAllKeys().stream().anyMatch(key -> !key.equals(InventoryHandler.INVENTORY_TAG) && !key.equals(UpgradeHandler.UPGRADE_INVENTORY_TAG));
 	}
 
 	@Override

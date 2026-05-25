@@ -94,7 +94,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	public static IBackpackWrapper fromStack(ItemStack stack) {
 		if (!stack.has(ModCoreDataComponents.STORAGE_UUID)) {
-			return new BackpackWrapper(stack);
+			IBackpackWrapper wrapper = new BackpackWrapper(stack);
+			if (stack.has(ModCoreDataComponents.STORAGE_UUID)) {
+				StorageWrapperRepository.setStorageWrapper(stack, wrapper);
+			}
+			return wrapper;
 		}
 
 		return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
@@ -237,6 +241,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
+		LegacyBackpackDataMigration.normalizeLegacyData(backpack);
 		if (renderInfo == null) {
 			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
 			renderInfo = new BackpackRenderInfo(backpack, getSaveHandler);
@@ -307,7 +312,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<UUID> getContentsUuid() {
-		return Optional.ofNullable(getBackpackStack().get(ModCoreDataComponents.STORAGE_UUID));
+		ItemStack backpackStack = getBackpackStack();
+		UUID contentsUuid = backpackStack.get(ModCoreDataComponents.STORAGE_UUID);
+		if (contentsUuid != null) {
+			return Optional.of(contentsUuid);
+		}
+
+		return LegacyBackpackDataMigration.getContentsUuid(backpackStack).map(legacyContentsUuid -> {
+			setContentsUuid(legacyContentsUuid);
+			return legacyContentsUuid;
+		});
 	}
 
 	private UUID getOrCreateContentsUuid() {
@@ -318,6 +332,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		clearDummyHandlers();
 		UUID newUuid = UUID.randomUUID();
 		setContentsUuid(newUuid);
+		LegacyBackpackDataMigration.migrateBackpackContents(getBackpackStack(), newUuid);
 		return newUuid;
 	}
 
@@ -342,7 +357,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<Integer> getOpenTabId() {
-		return Optional.ofNullable(getBackpackStack().get(ModCoreDataComponents.OPEN_TAB_ID));
+		ItemStack backpackStack = getBackpackStack();
+		Integer openTabId = backpackStack.get(ModCoreDataComponents.OPEN_TAB_ID);
+		if (openTabId != null) {
+			return Optional.of(openTabId);
+		}
+
+		return LegacyBackpackDataMigration.getOpenTabId(backpackStack).map(legacyOpenTabId -> {
+			backpackStack.set(ModCoreDataComponents.OPEN_TAB_ID, legacyOpenTabId);
+			return legacyOpenTabId;
+		});
 	}
 
 	@Override
@@ -372,7 +396,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public SortBy getSortBy() {
-		return getBackpackStack().getOrDefault(ModCoreDataComponents.SORT_BY, SortBy.NAME);
+		ItemStack backpackStack = getBackpackStack();
+		SortBy sortBy = backpackStack.get(ModCoreDataComponents.SORT_BY);
+		if (sortBy != null) {
+			return sortBy;
+		}
+
+		return LegacyBackpackDataMigration.getSortBy(backpackStack).map(legacySortBy -> {
+			backpackStack.set(ModCoreDataComponents.SORT_BY, legacySortBy);
+			return legacySortBy;
+		}).orElse(SortBy.NAME);
 	}
 
 	@Override
@@ -496,7 +529,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public void fillWithLoot(Level level, BlockPos pos, @Nullable Player player) {
-		ResourceLocation lootTable = getBackpackStack().get(ModDataComponents.LOOT_TABLE);
+		ItemStack backpackStack = getBackpackStack();
+		ResourceLocation lootTable = backpackStack.get(ModDataComponents.LOOT_TABLE);
+		if (lootTable == null) {
+			lootTable = LegacyBackpackDataMigration.getLootTableName(backpackStack).orElse(null);
+			if (lootTable != null) {
+				backpackStack.set(ModDataComponents.LOOT_TABLE, lootTable);
+				LegacyBackpackDataMigration.getLootPercentage(backpackStack).ifPresent(lootFactor -> backpackStack.set(ModDataComponents.LOOT_FACTOR, lootFactor));
+			}
+		}
 		if (lootTable == null) {
 			return;
 		}
@@ -507,6 +548,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void fillFromTemplate() {
 		ItemStack backpack = getBackpackStack();
 		ResourceLocation templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
+		if (templateName == null) {
+			templateName = LegacyBackpackDataMigration.getTemplateName(backpack).orElse(null);
+			if (templateName != null) {
+				backpack.set(ModDataComponents.TEMPLATE_NAME, templateName);
+			}
+		}
 		if (templateName == null) {
 			return;
 		}
@@ -578,7 +625,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getColumnsTaken() {
-		return getBackpackStack().getOrDefault(ModDataComponents.COLUMNS_TAKEN, 0);
+		ItemStack backpackStack = getBackpackStack();
+		Integer columnsTaken = backpackStack.get(ModDataComponents.COLUMNS_TAKEN);
+		if (columnsTaken != null) {
+			return columnsTaken;
+		}
+
+		return LegacyBackpackDataMigration.getColumnsTaken(backpackStack).map(legacyColumnsTaken -> {
+			backpackStack.set(ModDataComponents.COLUMNS_TAKEN, legacyColumnsTaken);
+			return legacyColumnsTaken;
+		}).orElse(0);
 	}
 
 	private void fillWithLootFromTable(Level level, BlockPos pos, ResourceLocation lootTable, @Nullable Player player) {

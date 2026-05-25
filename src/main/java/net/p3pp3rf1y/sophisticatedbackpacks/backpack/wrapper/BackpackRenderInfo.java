@@ -25,6 +25,14 @@ public class BackpackRenderInfo extends RenderInfo {
 
 	@Override
 	protected Optional<CompoundTag> getRenderInfoTag() {
-		return Optional.ofNullable(backpack.get(ModCoreDataComponents.RENDER_INFO_TAG)).map(CustomData::copyTag);
+		CustomData renderInfo = backpack.get(ModCoreDataComponents.RENDER_INFO_TAG);
+		if (renderInfo != null) {
+			return Optional.of(renderInfo.copyTag());
+		}
+
+		return LegacyBackpackDataMigration.getRenderInfo(backpack).map(legacyRenderInfo -> {
+			backpack.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(legacyRenderInfo));
+			return legacyRenderInfo;
+		});
 	}
 }

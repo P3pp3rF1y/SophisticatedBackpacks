@@ -38,6 +38,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LegacyBackpackDataMigration;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -85,16 +86,40 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	public static void setColors(ItemStack backpackStack, int mainColor, int accentColor) {
-		backpackStack.set(ModCoreDataComponents.MAIN_COLOR, mainColor);
-		backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, accentColor);
+		backpackStack.set(ModCoreDataComponents.MAIN_COLOR, LegacyBackpackDataMigration.withOpaqueAlpha(mainColor));
+		backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, LegacyBackpackDataMigration.withOpaqueAlpha(accentColor));
 	}
 
 	public static int getMainColor(ItemStack backpackStack) {
-		return backpackStack.getOrDefault(ModCoreDataComponents.MAIN_COLOR, DEFAULT_MAIN_COLOR);
+		Integer mainColor = backpackStack.get(ModCoreDataComponents.MAIN_COLOR);
+		if (mainColor != null) {
+			int normalizedMainColor = LegacyBackpackDataMigration.withOpaqueAlpha(mainColor);
+			if (normalizedMainColor != mainColor) {
+				backpackStack.set(ModCoreDataComponents.MAIN_COLOR, normalizedMainColor);
+			}
+			return normalizedMainColor;
+		}
+
+		return LegacyBackpackDataMigration.getMainColor(backpackStack).map(legacyMainColor -> {
+			backpackStack.set(ModCoreDataComponents.MAIN_COLOR, legacyMainColor);
+			return legacyMainColor;
+		}).orElse(DEFAULT_MAIN_COLOR);
 	}
 
 	public static int getAccentColor(ItemStack backpackStack) {
-		return backpackStack.getOrDefault(ModCoreDataComponents.ACCENT_COLOR, DEFAULT_ACCENT_COLOR);
+		Integer accentColor = backpackStack.get(ModCoreDataComponents.ACCENT_COLOR);
+		if (accentColor != null) {
+			int normalizedAccentColor = LegacyBackpackDataMigration.withOpaqueAlpha(accentColor);
+			if (normalizedAccentColor != accentColor) {
+				backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, normalizedAccentColor);
+			}
+			return normalizedAccentColor;
+		}
+
+		return LegacyBackpackDataMigration.getAccentColor(backpackStack).map(legacyAccentColor -> {
+			backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, legacyAccentColor);
+			return legacyAccentColor;
+		}).orElse(DEFAULT_ACCENT_COLOR);
 	}
 
 	@Override
