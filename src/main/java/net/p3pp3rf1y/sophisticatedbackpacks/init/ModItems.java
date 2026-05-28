@@ -80,6 +80,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapperUpgr
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.alchemy.AlchemyUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.alchemy.AlchemyUpgradeItem;
@@ -400,8 +401,7 @@ public class ModItems {
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerItem(Capabilities.Item.ITEM, (stack, itemAccess) -> {
-					IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-					return backpackWrapper.getContentsUuid().isEmpty() ? EmptyResourceHandler.instance() : backpackWrapper.getInventoryForInputOutput();
+					return stack.has(ModCoreDataComponents.STORAGE_UUID) ? BackpackWrapper.getItemInventoryHandler(itemAccess) : EmptyResourceHandler.instance();
 				},
 				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.Fluid.ITEM, (stack, itemAccess) -> {
