@@ -17,6 +17,8 @@ import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.RootCommitJournal;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyHandlerUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
@@ -91,8 +93,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 	};
 	private Runnable onInventoryForInputOutputHandlerRefresh = () -> {
 	};
+	private final boolean cacheContainedBackpackWrappers;
 
 	public BackpackWrapper(ItemStack backpackStack) {
+		this(backpackStack, true);
+	}
+
+	private BackpackWrapper(ItemStack backpackStack, boolean cacheContainedBackpackWrappers) {
+		this.cacheContainedBackpackWrappers = cacheContainedBackpackWrappers;
 		setBackpackStack(backpackStack);
 	}
 
@@ -101,7 +109,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return new BackpackWrapper(stack);
 		}
 
-		return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
+		IBackpackWrapper backpackWrapper = StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
+		backpackWrapper.getContentsUuid().ifPresent(uuid -> StorageWrapperRepository.registerStorageWrapper(uuid, backpackWrapper));
+		return backpackWrapper;
 		/* TODO try to add uuid based caching in the future
 		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
 		if (uuid == null) {
@@ -118,6 +128,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 
 		return Optional.empty();
+	}
+
+	public static IBackpackWrapper fromStackNoCache(ItemStack stack) {
+		return new BackpackWrapper(stack, false);
+	}
+
+	public boolean shouldCacheContainedBackpackWrappers() {
+		return cacheContainedBackpackWrappers;
 	}
 
 	@Override
@@ -145,6 +163,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
 					this, getBackpackContents(), () -> {
 				markBackpackContentsDirty();
+				getContentsUuid().ifPresent(uuid -> StorageWrapperRepository.invalidateStorageWrapperContents(uuid, this));
 				if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 					inventorySlotChangeHandler.run();
 				}
@@ -190,6 +209,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 			inventoryIOHandler = new InventoryIOHandler(this);
 		}
 		return inventoryIOHandler.getFilteredItemHandler();
+	}
+
+	public static ResourceHandler<ItemResource> getItemInventoryHandler(ItemAccess itemAccess) {
+		return new ItemAccessBackpackInventoryHandler(itemAccess);
 	}
 
 	@Override
@@ -537,6 +560,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		ItemStack backpackStack = getBackpackStack();
 		backpackStack.set(ModCoreDataComponents.STORAGE_UUID, storageUuid);
 		StorageWrapperRepository.setStorageWrapper(backpackStack, this);
+		StorageWrapperRepository.registerStorageWrapper(storageUuid, this);
 /* TODO add in the future
 		StorageWrapperRepository.migrateToUuid(this, backpack, storageUuid);
 */
@@ -791,6 +815,105 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}
 				return extracted;
 			}).orElse(0);
+		}
+	}
+
+	private static class ItemAccessBackpackInventoryHandler implements ResourceHandler<ItemResource> {
+		private final ItemAccess itemAccess;
+		private final RootCommitJournal exchangeBackpackStackJournal = new RootCommitJournal(this::exchangeBackpackStack);
+		@Nullable
+		private ItemStack backpackStackToExchange = null;
+		@Nullable
+		private ResourceHandler<ItemResource> delegate = null;
+		@Nullable
+		private ItemStack delegateBackpackStack = null;
+
+		private ItemAccessBackpackInventoryHandler(ItemAccess itemAccess) {
+			this.itemAccess = itemAccess;
+		}
+
+		private Optional<ResourceHandler<ItemResource>> getDelegate() {
+			ItemStack currentBackpackStack = getBackpackStack();
+			if (currentBackpackStack.isEmpty()) {
+				delegate = null;
+				delegateBackpackStack = null;
+				return Optional.empty();
+			}
+
+			if (delegate != null && delegateBackpackStack != null && ItemStack.isSameItemSameComponents(currentBackpackStack, delegateBackpackStack)) {
+				return Optional.of(delegate);
+			}
+
+			delegateBackpackStack = currentBackpackStack;
+			delegate = new BackpackWrapper(delegateBackpackStack, false).getInventoryForInputOutput();
+			return Optional.of(delegate);
+		}
+
+		@Override
+		public int size() {
+			return getDelegate().map(ResourceHandler::size).orElse(0);
+		}
+
+		@Override
+		public ItemResource getResource(int index) {
+			return getDelegate().map(delegate -> delegate.getResource(index)).orElse(ItemResource.EMPTY);
+		}
+
+		@Override
+		public long getAmountAsLong(int index) {
+			return getDelegate().map(delegate -> delegate.getAmountAsLong(index)).orElse(0L);
+		}
+
+		@Override
+		public long getCapacityAsLong(int index, ItemResource resource) {
+			return getDelegate().map(delegate -> delegate.getCapacityAsLong(index, resource)).orElse(0L);
+		}
+
+		@Override
+		public boolean isValid(int index, ItemResource resource) {
+			return getDelegate().map(delegate -> delegate.isValid(index, resource)).orElse(false);
+		}
+
+		@Override
+		public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+			int inserted = getDelegate().map(delegate -> delegate.insert(index, resource, amount, tx)).orElse(0);
+			if (inserted > 0) {
+				exchangeBackpackStack(tx);
+			}
+			return inserted;
+		}
+
+		@Override
+		public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+			int extracted = getDelegate().map(delegate -> delegate.extract(index, resource, amount, tx)).orElse(0);
+			if (extracted > 0) {
+				exchangeBackpackStack(tx);
+			}
+			return extracted;
+		}
+
+		private ItemStack getBackpackStack() {
+			int accessAmount = itemAccess.getAmount();
+			ItemStack backpackStack = itemAccess.getResource().toStack(accessAmount);
+			return accessAmount > 0 && backpackStack.has(ModCoreDataComponents.STORAGE_UUID) ? backpackStack : ItemStack.EMPTY;
+		}
+
+		private void exchangeBackpackStack(TransactionContext tx) {
+			backpackStackToExchange = delegateBackpackStack;
+			exchangeBackpackStackJournal.updateSnapshots(tx);
+		}
+
+		private void exchangeBackpackStack() {
+			ItemStack backpackStack = backpackStackToExchange;
+			backpackStackToExchange = null;
+			if (backpackStack == null || backpackStack.isEmpty()) {
+				return;
+			}
+
+			try (Transaction tx = Transaction.openRoot()) {
+				itemAccess.exchange(ItemResource.of(backpackStack), itemAccess.getAmount(), tx);
+				tx.commit();
+			}
 		}
 	}
 }

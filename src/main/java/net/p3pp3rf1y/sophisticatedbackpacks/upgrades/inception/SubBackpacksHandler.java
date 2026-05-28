@@ -13,11 +13,13 @@ public class SubBackpacksHandler {
 	private final Map<Integer, IStorageWrapper> subBackpacks = new LinkedHashMap<>();
 
 	private final InventoryHandler inventoryHandler;
+	private final boolean cacheSubBackpackWrappers;
 	private final Set<Consumer<Collection<IStorageWrapper>>> refreshListeners = new HashSet<>();
 	private final Set<Consumer<Collection<IStorageWrapper>>> beforeRefreshListeners = new HashSet<>();
 
-	public SubBackpacksHandler(InventoryHandler inventoryHandler) {
+	public SubBackpacksHandler(InventoryHandler inventoryHandler, boolean cacheSubBackpackWrappers) {
 		this.inventoryHandler = inventoryHandler;
+		this.cacheSubBackpackWrappers = cacheSubBackpackWrappers;
 		this.inventoryHandler.addListener(this::onContentsChanged);
 
 		refreshSubBackpacks();
@@ -41,7 +43,7 @@ public class SubBackpacksHandler {
 		if (backpackWasInTheSlot != backpackIsInTheSlot) {
 			notifyAndRefreshSubbackpacks();
 		} else {
-			if (BackpackWrapper.fromStack(inventoryHandler.getStackInSlot(slot)) != subBackpacks.get(slot)) {
+			if (getBackpackWrapper(inventoryHandler.getStackInSlot(slot)) != subBackpacks.get(slot)) {
 				notifyAndRefreshSubbackpacks();
 			}
 		}
@@ -73,9 +75,13 @@ public class SubBackpacksHandler {
 		for (int slot = 0; slot < inventoryHandler.size(); slot++) {
 			ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 			if (slotStack.getItem() instanceof BackpackItem) {
-				subBackpacks.put(slot, BackpackWrapper.fromStack(slotStack));
+				subBackpacks.put(slot, getBackpackWrapper(slotStack));
 			}
 		}
+	}
+
+	private IStorageWrapper getBackpackWrapper(ItemStack backpack) {
+		return cacheSubBackpackWrappers ? BackpackWrapper.fromStack(backpack) : BackpackWrapper.fromStackNoCache(backpack);
 	}
 
 	public void addBeforeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
