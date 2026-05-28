@@ -6,6 +6,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyHandlerUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -51,7 +52,8 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	private void initSubBackpacksHandler() {
-		subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler());
+		boolean cacheSubBackpackWrappers = !(storageWrapper instanceof BackpackWrapper backpackWrapper) || backpackWrapper.shouldCacheContainedBackpackWrappers();
+		subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler(), cacheSubBackpackWrappers);
 	}
 
 	@Override
