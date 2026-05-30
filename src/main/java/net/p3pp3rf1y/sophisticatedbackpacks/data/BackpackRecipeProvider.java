@@ -714,6 +714,30 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.unlockedBy("has_alchemy_upgrade", has(ModItems.ALCHEMY_UPGRADE.get()))
 				.save(output);
 
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.MOB_CATCHER_UPGRADE.get())
+				.pattern(" E ")
+				.pattern("IBI")
+				.pattern("L L")
+				.define('E', Tags.Items.ENDER_PEARLS)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.define('L', Items.LEAD)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.save(output);
+
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.ADVANCED_MOB_CATCHER_UPGRADE.get(), UpgradeNextTierRecipe::new)
+				.pattern("HDE")
+				.pattern("GBG")
+				.pattern("SSS")
+				.define('H', Items.WITHER_SKELETON_SKULL)
+				.define('D', Tags.Items.GEMS_DIAMOND)
+				.define('E', Items.ENDER_EYE)
+				.define('G', Tags.Items.INGOTS_GOLD)
+				.define('B', ModItems.MOB_CATCHER_UPGRADE.get())
+				.define('S', Blocks.SOUL_SAND)
+				.unlockedBy("has_mob_catcher_upgrade", has(ModItems.MOB_CATCHER_UPGRADE.get()))
+				.save(output);
+
 		SmithingBackpackUpgradeRecipeBuilder.smithing(Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()),
 				Ingredient.of(Items.NETHERITE_INGOT), ModItems.NETHERITE_BACKPACK.get())
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK.get()))

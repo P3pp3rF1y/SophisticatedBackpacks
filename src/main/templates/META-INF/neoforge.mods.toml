@@ -18,6 +18,9 @@ enumExtensions="META-INF/enumextensions.json"
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"
 
+[[mixins]]
+config="sophisticatedbackpacks.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId="sophisticatedcore"
 type="required"

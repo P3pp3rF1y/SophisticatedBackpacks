@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -29,16 +30,22 @@ public class BackpackStorage extends SavedData {
 							).fieldOf("backpackContents").forGetter(storage -> storage.backpackContents),
 							Codec.unboundedMap(
 									CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC
-							).fieldOf("accessLogRecords").forGetter(storage -> storage.accessLogRecords)
+							).fieldOf("accessLogRecords").forGetter(storage -> storage.accessLogRecords),
+							Codec.unboundedMap(
+									CodecHelper.STRING_ENCODED_UUID,
+									CompoundTag.CODEC
+							).optionalFieldOf("additionalBackpackContents", Map.of()).forGetter(storage -> storage.additionalBackpackContents)
 					).apply(builder, BackpackStorage::new)
 			));
 
 	private final Map<UUID, ContainerContents> backpackContents = new HashMap<>();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
+	private final Map<UUID, CompoundTag> additionalBackpackContents = new HashMap<>();
 
-	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords) {
+	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords, Map<UUID, CompoundTag> additionalBackpackContents) {
 		this.accessLogRecords.putAll(accessLogRecords);
+		this.additionalBackpackContents.putAll(additionalBackpackContents);
 		backpackContents.forEach(
 				(uuid, contents) -> {
 					if (isPlayerBackpackOrNotEmpty(this, uuid, contents)) {
@@ -68,7 +75,7 @@ public class BackpackStorage extends SavedData {
 		if (storage.accessLogRecords.containsKey(backpackUuid)) {
 			return true;
 		}
-		return !contents.inventory().stacks().isEmpty();
+		return !contents.inventory().stacks().isEmpty() || !storage.additionalBackpackContents.getOrDefault(backpackUuid, new CompoundTag()).isEmpty();
 	}
 
 	public ContainerContents getOrCreateBackpackContents(UUID backpackUuid) {
@@ -76,6 +83,21 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new ContainerContents();
 		});
+	}
+
+	public CompoundTag getOrCreateAdditionalBackpackContents(UUID backpackUuid) {
+		return additionalBackpackContents.computeIfAbsent(backpackUuid, uuid -> {
+			setDirty();
+			return new CompoundTag();
+		});
+	}
+
+	public void setAdditionalBackpackContents(UUID backpackUuid, CompoundTag contents) {
+		CompoundTag currentContents = getOrCreateAdditionalBackpackContents(backpackUuid);
+		for (String key : contents.keySet()) {
+			currentContents.put(key, contents.get(key));
+		}
+		setDirty();
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {
@@ -110,7 +132,7 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || entry.getValue().inventory().stacks().isEmpty())) {
+			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}

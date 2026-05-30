@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,10 +19,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackAdditionalContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
-import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -82,11 +85,37 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}
 
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
-			ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
 			if (player instanceof ServerPlayer serverPlayer) {
-				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData));
+				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, storageWrapper.getSettingsHandler().getSettingsData()));
+				CompoundTag additionalContents = new CompoundTag();
+				storageWrapper.getUpgradeHandler().getWrappersThatImplement(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(additionalContents));
+				if (!additionalContents.isEmpty()) {
+					PacketDistributor.sendToPlayer(serverPlayer, new BackpackAdditionalContentsPayload(uuid, additionalContents));
+				}
 			}
 		});
+	}
+
+	@Override
+	protected void onStorageItemStackChanged(ItemStack stack) {
+		storageWrapper.setBackpackStack(stack);
+	}
+
+	public void syncClientInfo(RenderData data, int columnsTaken) {
+		storageWrapper.getRenderDataHandler().reloadFrom(data);
+		storageWrapper.setColumnsTaken(columnsTaken, false);
+		storageWrapper.onContentsUpdated();
+		refreshAllSlots();
+		onUpgradesChanged();
+	}
+
+	public boolean canApplyClientInfo(int slotIndex) {
+		return backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
+	}
+
+	public void syncClientStorageContentsToClient() {
+		sendStorageSettingsToClient();
+		refreshAdditionalSlotInfo();
 	}
 
 	@Override

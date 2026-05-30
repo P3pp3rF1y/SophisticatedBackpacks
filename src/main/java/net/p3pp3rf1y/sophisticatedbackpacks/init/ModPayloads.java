@@ -15,6 +15,7 @@ public class ModPayloads {
 		registrar.playToServer(UpgradeTogglePayload.TYPE, UpgradeTogglePayload.STREAM_CODEC, UpgradeTogglePayload::handlePayload);
 		registrar.playToServer(RequestBackpackInventoryContentsPayload.TYPE, RequestBackpackInventoryContentsPayload.STREAM_CODEC, RequestBackpackInventoryContentsPayload::handlePayload);
 		registrar.playToClient(BackpackContentsPayload.TYPE, BackpackContentsPayload.STREAM_CODEC, BackpackContentsPayload::handlePayload);
+		registrar.playToClient(BackpackAdditionalContentsPayload.TYPE, BackpackAdditionalContentsPayload.STREAM_CODEC, BackpackAdditionalContentsPayload::handlePayload);
 		registrar.playToClient(BackpackSettingsPayload.TYPE, BackpackSettingsPayload.STREAM_CODEC, BackpackSettingsPayload::handlePayload);
 		registrar.playToServer(InventoryInteractionPayload.TYPE, InventoryInteractionPayload.STREAM_CODEC, InventoryInteractionPayload::handlePayload);
 		registrar.playToServer(BlockToolSwapPayload.TYPE, BlockToolSwapPayload.STREAM_CODEC, BlockToolSwapPayload::handlePayload);
@@ -24,5 +25,6 @@ public class ModPayloads {
 		registrar.playToServer(AnotherPlayerBackpackOpenPayload.TYPE, AnotherPlayerBackpackOpenPayload.STREAM_CODEC, AnotherPlayerBackpackOpenPayload::handlePayload);
 		registrar.playToServer(BlockPickPayload.TYPE, BlockPickPayload.STREAM_CODEC, BlockPickPayload::handlePayload);
 		registrar.playToServer(RequestPlayerSettingsPayload.TYPE, RequestPlayerSettingsPayload.STREAM_CODEC, RequestPlayerSettingsPayload::handlePayload);
+		registrar.playToServer(MobCatcherReleasePayload.TYPE, MobCatcherReleasePayload.STREAM_CODEC, MobCatcherReleasePayload::handlePayload);
 	}
 }

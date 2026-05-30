@@ -65,6 +65,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
@@ -196,6 +197,10 @@ public class ModItems {
 			InceptionUpgradeItem::new);
 	public static final DeferredHolder<Item, EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.registerItem("everlasting_upgrade",
 			EverlastingUpgradeItem::new);
+	public static final DeferredHolder<Item, MobCatcherUpgradeItem> MOB_CATCHER_UPGRADE = ITEMS.registerItem("mob_catcher_upgrade",
+			properties -> new MobCatcherUpgradeItem(false, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, MobCatcherUpgradeItem> ADVANCED_MOB_CATCHER_UPGRADE = ITEMS.registerItem("advanced_mob_catcher_upgrade",
+			properties -> new MobCatcherUpgradeItem(true, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, SmeltingUpgradeItem> SMELTING_UPGRADE = ITEMS.registerItem("smelting_upgrade",
 			properties -> new SmeltingUpgradeItem(Config.SERVER.smeltingUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, AutoSmeltingUpgradeItem> AUTO_SMELTING_UPGRADE = ITEMS.registerItem("auto_smelting_upgrade",
