@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:mob_catcher_upgrade"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "sophisticatedbackpacks:upgrade_base",
+    "E": "#c:ender_pearls",
+    "I": "#c:ingots/iron",
+    "L": "minecraft:lead"
+  },
+  "pattern": [
+    " E ",
+    "IBI",
+    "L L"
+  ],
+  "result": {
+    "id": "sophisticatedbackpacks:mob_catcher_upgrade"
+  }
+}

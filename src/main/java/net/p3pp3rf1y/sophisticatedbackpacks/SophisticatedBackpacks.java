@@ -20,12 +20,17 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateMan
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientMobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.BackpackCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherContentsData;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHealthTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherStorage;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,6 +45,7 @@ public class SophisticatedBackpacks {
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks(IEventBus modBus, Dist dist, ModContainer container) {
+		ContainerContents.SettingsCategoryDataRegistry.register(MobCatcherContentsData.CODEC, MobCatcherContentsData.STREAM_CODEC, MobCatcherStorage.CAPTURED_MOBS_TAG);
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		container.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
@@ -75,6 +81,7 @@ public class SophisticatedBackpacks {
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
 		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
+		event.register(MobCatcherHealthTooltip.class, ClientMobCatcherHealthTooltip::new);
 	}
 
 	private void onAddReloadListener(AddServerReloadListenersEvent event) {

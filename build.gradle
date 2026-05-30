@@ -266,6 +266,7 @@ neoForge.ideSyncTask generateModMetadata
 def runRecipeViewerRegressionTests = gradle.startParameter.taskNames.any { it == 'recipeViewerRegressionTest' || it == "${project.path}:recipeViewerRegressionTest" } || project.hasProperty('recipeViewerRegression')
 
 test {
+    jvmArgs '-Dnet.bytebuddy.experimental=true'
     inputs.property('recipeViewerRegressionMode', runRecipeViewerRegressionTests)
     useJUnitPlatform {
         if (runRecipeViewerRegressionTests) {

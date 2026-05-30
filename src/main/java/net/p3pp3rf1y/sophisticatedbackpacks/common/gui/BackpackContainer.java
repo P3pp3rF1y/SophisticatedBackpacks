@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -87,6 +88,28 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData));
 			}
 		});
+	}
+
+	@Override
+	protected void onStorageItemStackChanged(ItemStack stack) {
+		storageWrapper.setBackpackStack(stack);
+	}
+
+	public void syncClientInfo(RenderData data, int columnsTaken) {
+		storageWrapper.getRenderDataHandler().reloadFrom(data);
+		storageWrapper.setColumnsTaken(columnsTaken, false);
+		storageWrapper.onContentsUpdated();
+		refreshAllSlots();
+		onUpgradesChanged();
+	}
+
+	public boolean canApplyClientInfo(int slotIndex) {
+		return backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
+	}
+
+	public void syncClientStorageContentsToClient() {
+		sendStorageSettingsToClient();
+		refreshAdditionalSlotInfo();
 	}
 
 	@Override

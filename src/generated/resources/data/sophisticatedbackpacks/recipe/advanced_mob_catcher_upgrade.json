@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:advanced_mob_catcher_upgrade"
+    }
+  ],
+  "type": "sophisticatedcore:upgrade_next_tier",
+  "category": "misc",
+  "key": {
+    "B": "sophisticatedbackpacks:mob_catcher_upgrade",
+    "D": "#c:gems/diamond",
+    "E": "minecraft:ender_eye",
+    "G": "#c:ingots/gold",
+    "H": "minecraft:wither_skeleton_skull",
+    "S": "minecraft:soul_sand"
+  },
+  "pattern": [
+    "HDE",
+    "GBG",
+    "SSS"
+  ],
+  "result": {
+    "id": "sophisticatedbackpacks:advanced_mob_catcher_upgrade"
+  }
+}

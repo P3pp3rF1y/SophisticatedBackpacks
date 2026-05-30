@@ -97,6 +97,7 @@ public class BackpackStorage extends SavedData {
 			ContainerContents currentContents = backpackContents.get(backpackUuid);
 			ContainerContents.SettingsData previousSettings = currentContents.settings().copy();
 			currentContents.reloadFrom(contents);
+			contents.settings().categories().forEach((name, categoryData) -> currentContents.settings().categories().putIfAbsent(name, categoryData.copy()));
 			if (!currentContents.settings().equals(previousSettings)) {
 				updatedBackpackSettingsFlags.add(backpackUuid);
 			}
@@ -111,7 +112,7 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || entry.getValue().inventory().stacks().isEmpty())) {
+			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}
