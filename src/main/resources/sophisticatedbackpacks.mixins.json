@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.p3pp3rf1y.sophisticatedbackpacks.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MobAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+  ]
+}

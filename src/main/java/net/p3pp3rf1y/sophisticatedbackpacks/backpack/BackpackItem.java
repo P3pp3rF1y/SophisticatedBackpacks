@@ -269,8 +269,15 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		if (level.isClientSide || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null)) {
 			return;
 		}
-		BackpackWrapper.fromStack(stack).getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-				.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition())
+		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
+		backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+				.forEach(upgrade -> {
+					if (level.isClientSide) {
+						upgrade.clientTick(player, player.level(), player.blockPosition());
+					} else {
+						upgrade.tick(player, player.level(), player.blockPosition());
+					}
+				}
 				);
 		super.inventoryTick(stack, level, entity, slot);
 	}
