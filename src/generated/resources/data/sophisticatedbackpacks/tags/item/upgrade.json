@@ -1,0 +1,90 @@
+{
+  "values": [
+    "sophisticatedbackpacks:stack_upgrade_tier_2",
+    {
+      "id": "sophisticatedbackpacks:chipped/glassblower_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:smoking_upgrade",
+    "sophisticatedbackpacks:everlasting_upgrade",
+    "sophisticatedbackpacks:stack_upgrade_tier_3",
+    "sophisticatedbackpacks:tank_upgrade",
+    {
+      "id": "sophisticatedbackpacks:chipped/loom_table_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:stack_downgrade_tier_3",
+    "sophisticatedbackpacks:advanced_void_upgrade",
+    "sophisticatedbackpacks:advanced_feeding_upgrade",
+    "sophisticatedbackpacks:advanced_refill_upgrade",
+    "sophisticatedbackpacks:compacting_upgrade",
+    "sophisticatedbackpacks:refill_upgrade",
+    "sophisticatedbackpacks:stack_upgrade_omega_tier",
+    "sophisticatedbackpacks:crafting_upgrade",
+    {
+      "id": "sophisticatedbackpacks:chipped/tinkering_table_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:anvil_upgrade",
+    "sophisticatedbackpacks:void_upgrade",
+    "sophisticatedbackpacks:blasting_upgrade",
+    {
+      "id": "sophisticatedbackpacks:sawmill/sawmill_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:stonecutter_upgrade",
+    "sophisticatedbackpacks:restock_upgrade",
+    {
+      "id": "sophisticatedbackpacks:chipped/mason_table_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:xp_pump_upgrade",
+    "sophisticatedbackpacks:advanced_compacting_upgrade",
+    "sophisticatedbackpacks:advanced_pump_upgrade",
+    "sophisticatedbackpacks:magnet_upgrade",
+    "sophisticatedbackpacks:stack_upgrade_starter_tier",
+    "sophisticatedbackpacks:advanced_tool_swapper_upgrade",
+    "sophisticatedbackpacks:advanced_pickup_upgrade",
+    "sophisticatedbackpacks:stack_downgrade_tier_1",
+    {
+      "id": "sophisticatedbackpacks:chipped/botanist_workbench_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:pickup_upgrade",
+    "sophisticatedbackpacks:filter_upgrade",
+    "sophisticatedbackpacks:alchemy_upgrade",
+    {
+      "id": "sophisticatedbackpacks:chipped/carpenters_table_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:deposit_upgrade",
+    "sophisticatedbackpacks:advanced_magnet_upgrade",
+    "sophisticatedbackpacks:advanced_alchemy_upgrade",
+    "sophisticatedbackpacks:smithing_upgrade",
+    "sophisticatedbackpacks:stack_upgrade_tier_4",
+    "sophisticatedbackpacks:pump_upgrade",
+    "sophisticatedbackpacks:smelting_upgrade",
+    "sophisticatedbackpacks:advanced_restock_upgrade",
+    "sophisticatedbackpacks:mob_catcher_upgrade",
+    "sophisticatedbackpacks:stack_upgrade_tier_1",
+    "sophisticatedbackpacks:advanced_deposit_upgrade",
+    "sophisticatedbackpacks:advanced_jukebox_upgrade",
+    "sophisticatedbackpacks:auto_smelting_upgrade",
+    "sophisticatedbackpacks:stack_downgrade_tier_2",
+    "sophisticatedbackpacks:battery_upgrade",
+    "sophisticatedbackpacks:feeding_upgrade",
+    "sophisticatedbackpacks:advanced_mob_catcher_upgrade",
+    "sophisticatedbackpacks:advanced_filter_upgrade",
+    "sophisticatedbackpacks:auto_smoking_upgrade",
+    "sophisticatedbackpacks:inception_upgrade",
+    {
+      "id": "sophisticatedbackpacks:chipped/alchemy_bench_upgrade",
+      "required": false
+    },
+    "sophisticatedbackpacks:auto_blasting_upgrade",
+    "sophisticatedbackpacks:survival_infinity_upgrade",
+    "sophisticatedbackpacks:jukebox_upgrade",
+    "sophisticatedbackpacks:tool_swapper_upgrade",
+    "sophisticatedbackpacks:infinity_upgrade"
+  ]
+}

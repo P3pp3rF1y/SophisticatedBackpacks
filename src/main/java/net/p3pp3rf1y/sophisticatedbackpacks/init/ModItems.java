@@ -71,6 +71,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeC
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherInventoryControl;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeTab;
@@ -265,6 +267,8 @@ public class ModItems {
 	public static final RegistryObject<InfinityUpgradeItem> SURVIVAL_INFINITY_UPGRADE = ITEMS.register("survival_infinity_upgrade", () -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, false));
 	public static final RegistryObject<AlchemyUpgradeItem> ALCHEMY_UPGRADE = ITEMS.register("alchemy_upgrade", () -> new AlchemyUpgradeItem(Config.SERVER.alchemyUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<AlchemyUpgradeItem> ADVANCED_ALCHEMY_UPGRADE = ITEMS.register("advanced_alchemy_upgrade", () -> new AlchemyUpgradeItem(Config.SERVER.advancedAlchemyUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage));
+	public static final RegistryObject<MobCatcherUpgradeItem> MOB_CATCHER_UPGRADE = ITEMS.register("mob_catcher_upgrade", () -> new MobCatcherUpgradeItem(false, Config.SERVER.maxUpgradesPerStorage));
+	public static final RegistryObject<MobCatcherUpgradeItem> ADVANCED_MOB_CATCHER_UPGRADE = ITEMS.register("advanced_mob_catcher_upgrade", () -> new MobCatcherUpgradeItem(true, Config.SERVER.maxUpgradesPerStorage));
 
 	public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
@@ -456,8 +460,9 @@ public class ModItems {
 			UpgradeGuiManager.registerTab(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
 			UpgradeGuiManager.registerTab(TANK_TYPE, TankUpgradeTab::new);
 			UpgradeGuiManager.registerTab(BATTERY_TYPE, BatteryUpgradeTab::new);
-			UpgradeGuiManager.registerInventoryPart(TANK_TYPE, TankInventoryPart::new);
-			UpgradeGuiManager.registerInventoryPart(BATTERY_TYPE, BatteryInventoryPart::new);
+			UpgradeGuiManager.registerInventoryControl(TANK_TYPE, TankInventoryControl::new);
+			UpgradeGuiManager.registerInventoryControl(BATTERY_TYPE, BatteryInventoryControl::new);
+			UpgradeGuiManager.registerInventoryControl(MobCatcherUpgradeItem.TYPE, MobCatcherInventoryControl::create);
 			UpgradeGuiManager.registerTab(PUMP_TYPE, PumpUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_PUMP_TYPE, PumpUpgradeTab.Advanced::new);
 			UpgradeGuiManager.registerTab(XP_PUMP_TYPE, (XpPumpUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) ->

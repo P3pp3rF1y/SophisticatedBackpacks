@@ -43,7 +43,7 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 
 	private static void handleMessage(SyncClientInfoMessage msg) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
+		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
 		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
@@ -51,5 +51,8 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		});
+		if (backpackContainer.canApplyClientInfo(msg.slotIndex)) {
+			backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
+		}
 	}
 }

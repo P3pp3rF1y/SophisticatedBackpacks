@@ -14,6 +14,7 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,7 +138,7 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !entry.getValue().contains("inventory"))) {
+			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}
@@ -147,6 +148,10 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 		}
 		return numberRemoved.get();
+	}
+
+	private static boolean isPlayerBackpackOrNotEmpty(BackpackStorage backpackStorage, UUID backpackUuid, CompoundTag contents) {
+		return backpackStorage.accessLogRecords.containsKey(backpackUuid) || !contents.getCompound(InventoryHandler.INVENTORY_TAG).isEmpty();
 	}
 
 	private final Set<UUID> updatedBackpackSettingsFlags = new HashSet<>();

@@ -352,24 +352,36 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
-		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
+		if (player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
+						.forEach(upgrade -> {
+							if (level.isClientSide) {
+								upgrade.clientTick(player, player.level(), player.blockPosition());
+							} else {
+								upgrade.tick(player, player.level(), player.blockPosition());
+							}
+						})
 		);
 		super.onArmorTick(stack, level, player);
 	}
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (level.isClientSide || !(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
+		if (!(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
+						.forEach(upgrade -> {
+							if (level.isClientSide) {
+								upgrade.clientTick(player, player.level(), player.blockPosition());
+							} else {
+								upgrade.tick(player, player.level(), player.blockPosition());
+							}
+						})
 		);
 		super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
 	}

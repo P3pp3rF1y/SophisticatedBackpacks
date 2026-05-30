@@ -13,6 +13,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilteredUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeCountLimitConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeGroup;
@@ -112,6 +113,7 @@ public class Config {
 		public final JukeboxUpgradeConfig advancedJukeboxUpgrade;
 		public final AlchemyUpgradeConfig alchemyUpgrade;
 		public final AlchemyUpgradeConfig advancedAlchemyUpgrade;
+		public final MobCatcherUpgradeConfig mobCatcherUpgrade;
 		public final NerfsConfig nerfsConfig;
 		public final MaxUgradesPerStorageConfig maxUpgradesPerStorage;
 
@@ -187,6 +189,7 @@ public class Config {
 			advancedJukeboxUpgrade = new JukeboxUpgradeConfig(builder, "Advanced Jukebox Upgrade", "advancedJukeboxUpgrade", 12);
 			alchemyUpgrade = new AlchemyUpgradeConfig(builder, "Alchemy Upgrade", "alchemyUpgrade", 4);
 			advancedAlchemyUpgrade = new AlchemyUpgradeConfig(builder, "Advanced Alchemy Upgrade", "advancedAlchemyUpgrade", 8);
+			mobCatcherUpgrade = new MobCatcherUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 			nerfsConfig = new NerfsConfig(builder);
 			maxUpgradesPerStorage = new MaxUgradesPerStorageConfig(builder,
