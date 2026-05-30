@@ -35,12 +35,15 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 
 	public static void handlePayload(SyncClientInfoPayload payload, IPayloadContext context) {
 		Player player = context.player();
-		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
+		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
 		ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
 		backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
+		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
+			backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
+		}
 	}
 }

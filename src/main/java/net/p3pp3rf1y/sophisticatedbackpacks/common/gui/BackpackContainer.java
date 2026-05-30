@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
@@ -87,11 +88,36 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
+			}
+			storageWrapper.getUpgradeHandler().getWrappersThatImplement(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(settingsContents));
+			if (!settingsContents.isEmpty()) {
 				if (player instanceof ServerPlayer serverPlayer) {
 					PacketDistributor.sendToPlayer(serverPlayer, new BackpackContentsPayload(uuid, settingsContents));
 				}
 			}
 		});
+	}
+
+	@Override
+	protected void onStorageItemStackChanged(ItemStack stack) {
+		storageWrapper.setBackpackStack(stack);
+	}
+
+	public void syncClientInfo(CompoundTag renderInfoNbt, int columnsTaken) {
+		storageWrapper.getRenderInfo().deserializeFrom(renderInfoNbt);
+		storageWrapper.setColumnsTaken(columnsTaken, false);
+		storageWrapper.onContentsNbtUpdated();
+		refreshAllSlots();
+		onUpgradesChanged();
+	}
+
+	public boolean canApplyClientInfo(int slotIndex) {
+		return backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
+	}
+
+	public void syncClientStorageContentsToClient() {
+		sendStorageSettingsToClient();
+		refreshAdditionalSlotInfo();
 	}
 
 	@Override
@@ -135,6 +161,12 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	protected boolean storageItemHasChanged() {
 		return backpackContext.getBackpackWrapper(player) != storageWrapper;
+	}
+
+	@Override
+	protected void onUpgradeChanged() {
+		super.onUpgradeChanged();
+		backpackContext.onUpgradeChanged(player);
 	}
 
 	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
