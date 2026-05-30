@@ -65,6 +65,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgr
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
@@ -245,6 +246,8 @@ public class ModItems {
 	public static final DeferredHolder<Item, InfinityUpgradeItem> SURVIVAL_INFINITY_UPGRADE = ITEMS.registerItem("survival_infinity_upgrade", properties -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, false, properties));
 	public static final DeferredHolder<Item, AlchemyUpgradeItem> ALCHEMY_UPGRADE = ITEMS.registerItem("alchemy_upgrade", properties -> new AlchemyUpgradeItem(Config.SERVER.alchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, AlchemyUpgradeItem> ADVANCED_ALCHEMY_UPGRADE = ITEMS.registerItem("advanced_alchemy_upgrade", properties -> new AlchemyUpgradeItem(Config.SERVER.advancedAlchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, MobCatcherUpgradeItem> MOB_CATCHER_UPGRADE = ITEMS.registerItem("mob_catcher_upgrade", properties -> new MobCatcherUpgradeItem(false, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, MobCatcherUpgradeItem> ADVANCED_MOB_CATCHER_UPGRADE = ITEMS.registerItem("advanced_mob_catcher_upgrade", properties -> new MobCatcherUpgradeItem(true, Config.SERVER.maxUpgradesPerStorage, properties));
 
 	public static final Supplier<ItemBase> UPGRADE_BASE = ITEMS.registerItem("upgrade_base", properties -> new ItemBase(properties.stacksTo(16)));
 

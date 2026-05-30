@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -55,6 +56,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.settings.main.PlayerMainSettingsSavedData;
@@ -95,6 +97,15 @@ public class CommonEventHandler {
 	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
 	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
+		if (event.getTarget() instanceof LivingEntity livingEntity && event.getEntity().isShiftKeyDown()) {
+			InteractionResult result = MobCatcherHandler.tryCapture(event.getEntity(), event.getHand(), livingEntity);
+			if (result != InteractionResult.PASS) {
+				event.setCancellationResult(result);
+				event.setCanceled(true);
+				return;
+			}
+		}
+
 		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}

@@ -169,6 +169,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}
 			}, StackUpgradeItem.getInventorySlotLimit(this));
 			handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
+			attachInventorySlotBlockers();
 		}
 		return handler;
 	}
