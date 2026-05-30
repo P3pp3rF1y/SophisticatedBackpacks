@@ -20,12 +20,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateMan
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientMobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHealthTooltip;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,6 +77,7 @@ public class SophisticatedBackpacks {
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
 		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
+		event.register(MobCatcherHealthTooltip.class, ClientMobCatcherHealthTooltip::new);
 	}
 
 	private void onAddReloadListener(AddReloadListenerEvent event) {
