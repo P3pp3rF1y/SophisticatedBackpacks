@@ -159,8 +159,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public InventoryHandler getInventoryHandler() {
-		if (handler == null) {
-			handler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
+		InventoryHandler inventoryHandler = handler;
+		if (inventoryHandler == null) {
+			inventoryHandler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
 					this, getBackpackContents(), () -> {
 				markBackpackContentsDirty();
 				getContentsUuid().ifPresent(uuid -> StorageWrapperRepository.invalidateStorageWrapperContents(uuid, this));
@@ -168,10 +169,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 					inventorySlotChangeHandler.run();
 				}
 			}, StackUpgradeItem.getInventorySlotLimit(this));
-			handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
+			handler = inventoryHandler;
+			inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 			attachInventorySlotBlockers();
 		}
-		return handler;
+		return inventoryHandler;
 	}
 
 	private int getNumberOfInventorySlots() {
@@ -295,15 +297,18 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public UpgradeHandler getUpgradeHandler() {
-		if (upgradeHandler == null) {
+		UpgradeHandler handler = upgradeHandler;
+		if (handler == null) {
 			if (getContentsUuid().isPresent()) {
-				upgradeHandler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContents(), this::markBackpackContentsDirty, () -> {
-					if (handler != null) {
-						handler.clearListeners();
-						handler.setBaseSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
+				handler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContents(), this::markBackpackContentsDirty, () -> {
+					InventoryHandler inventoryHandler = this.handler;
+					if (inventoryHandler != null) {
+						inventoryHandler.clearListeners();
+						inventoryHandler.setBaseSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
 					}
-					getInventoryHandler().clearListeners();
-					handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
+					inventoryHandler = getInventoryHandler();
+					inventoryHandler.clearListeners();
+					inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;
 					fluidHandlerInitialized = false;
@@ -318,10 +323,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 					}
 				};
 			} else {
-				upgradeHandler = Noop.INSTANCE.getUpgradeHandler();
+				handler = Noop.INSTANCE.getUpgradeHandler();
 			}
+			upgradeHandler = handler;
 		}
-		return upgradeHandler;
+		return handler;
 	}
 
 	@Override
