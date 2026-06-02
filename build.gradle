@@ -42,6 +42,14 @@ if (findProject(':SophisticatedCore') != null) {
     evaluationDependsOn(':SophisticatedCore')
 }
 
+def backpacksRunDataTaskNames = [':SophisticatedBackpacks:runData', 'SophisticatedBackpacks:runData']
+if (gradle.startParameter.taskNames.any { it in backpacksRunDataTaskNames }) {
+    def prepTaskNames = [':SophisticatedCore:prepareRunDataCompile']
+    if (!prepTaskNames.every { prepTaskName -> gradle.startParameter.taskNames.contains(prepTaskName) }) {
+        gradle.startParameter.setTaskNames(prepTaskNames + gradle.startParameter.taskNames)
+    }
+}
+
 repositories {
     mavenCentral()
     maven { url = "https://modmaven.dev/" }
@@ -343,6 +351,16 @@ modrinth {
 tasks.modrinth {
     dependsOn(tasks.generateChangelog)
     onlyIf { !project.ext.changelog.isEmpty() }
+}
+
+tasks.withType(net.minecraftforge.gradle.common.util.runs.MinecraftRunTask).configureEach {
+    doFirst {
+        List<String> runArgs = getRunConfig().get().getArgs()
+        int fmlVersionArgIdx = runArgs.indexOf("--fml.fmlVersion")
+        if (fmlVersionArgIdx >= 0 && fmlVersionArgIdx + 1 < runArgs.size()) {
+            runArgs[fmlVersionArgIdx + 1] = project.neo_version.toString()
+        }
+    }
 }
 
 task printVersionName {

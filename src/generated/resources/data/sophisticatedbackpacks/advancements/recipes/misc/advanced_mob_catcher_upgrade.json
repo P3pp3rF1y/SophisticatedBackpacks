@@ -1,17 +1,13 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "sophisticatedcore:item_enabled",
-      "itemRegistryName": "sophisticatedbackpacks:advanced_mob_catcher_upgrade"
-    }
-  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_mob_catcher_upgrade": {
       "conditions": {
         "items": [
           {
-            "items": "sophisticatedbackpacks:mob_catcher_upgrade"
+            "items": [
+              "sophisticatedbackpacks:mob_catcher_upgrade"
+            ]
           }
         ]
       },
@@ -26,13 +22,14 @@
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_mob_catcher_upgrade"
+      "has_mob_catcher_upgrade",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
       "sophisticatedbackpacks:advanced_mob_catcher_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": true
 }
