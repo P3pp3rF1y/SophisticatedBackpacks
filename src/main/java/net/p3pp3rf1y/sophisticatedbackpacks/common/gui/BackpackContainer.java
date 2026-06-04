@@ -87,7 +87,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
 			ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
 			CompoundTag additionalContents = new CompoundTag();
-			storageWrapper.getUpgradeHandler().getWrappersThatImplement(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(additionalContents));
+			storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(additionalContents));
 			if (player instanceof ServerPlayer serverPlayer) {
 				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData, additionalContents));
 			}
@@ -108,7 +108,14 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public boolean canApplyClientInfo(int slotIndex) {
-		return backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
+		BackpackContext.ContextType type = backpackContext.getType();
+		if (slotIndex == -1) {
+			return switch (type) {
+				case ITEM_BACKPACK, ITEM_SUB_BACKPACK, BLOCK_BACKPACK, BLOCK_SUB_BACKPACK, ANOTHER_PLAYER_BACKPACK, ANOTHER_PLAYER_SUB_BACKPACK -> true;
+			};
+		}
+
+		return type == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
 	}
 
 	public void syncClientStorageContentsToClient() {

@@ -38,10 +38,12 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data,
 		if (payload.data == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
-		ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
-		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
-		backpackWrapper.getRenderDataHandler().reloadFrom(payload.data);
-		backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
+		if (payload.slotIndex >= 0) {
+			ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
+			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
+			backpackWrapper.getRenderDataHandler().reloadFrom(payload.data);
+			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
+		}
 		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
 			backpackContainer.syncClientInfo(payload.data, payload.columnsTaken);
 		}
