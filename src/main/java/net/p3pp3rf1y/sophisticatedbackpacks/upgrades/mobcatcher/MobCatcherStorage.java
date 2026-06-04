@@ -81,7 +81,7 @@ public class MobCatcherStorage {
 		return getCapturedMobs(backpackWrapper).stream()
 			.filter(capturedMob -> capturedMob.slot() == slot)
 			.findFirst()
-			.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob), getTargetSlot(capturedMob.slot(), columns, targetColumns), capturedMob.width(), capturedMob.height(), getOccupiedSlots(capturedMob, columns, inventoryHandler.getSlots())));
+			.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob), getTargetSlot(capturedMob, columns, targetColumns, inventoryHandler.getSlots()), capturedMob.width(), capturedMob.height(), getOccupiedSlots(capturedMob, columns, inventoryHandler.getSlots())));
 	}
 
 	public static void applyInventoryLayout(IBackpackWrapper backpackWrapper, InventoryLayoutFitResult fitResult, int columns) {
@@ -292,8 +292,12 @@ public class MobCatcherStorage {
 		return occupiedSlots;
 	}
 
-	private static int getTargetSlot(int slot, int columns, int targetColumns) {
-		return slot / columns * targetColumns + slot % columns;
+	static int getTargetSlot(CapturedMob capturedMob, int columns, int targetColumns, int inventorySlots) {
+		int rows = Math.max(1, (int) Math.ceil((double) inventorySlots / columns));
+		int targetRows = rows;
+		int targetX = Math.min(capturedMob.slot() % columns, Math.max(0, targetColumns - capturedMob.width()));
+		int targetY = Math.min(capturedMob.slot() / columns, Math.max(0, targetRows - capturedMob.height()));
+		return targetY * targetColumns + targetX;
 	}
 
 	public static Optional<net.minecraft.world.entity.EntityType<?>> getEntityType(CapturedMob capturedMob) {
