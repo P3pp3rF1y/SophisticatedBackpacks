@@ -104,7 +104,14 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public boolean canApplyClientInfo(int slotIndex) {
-		return backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
+		BackpackContext.ContextType type = backpackContext.getType();
+		if (slotIndex == -1) {
+			return switch (type) {
+				case ITEM_BACKPACK, ITEM_SUB_BACKPACK, BLOCK_BACKPACK, BLOCK_SUB_BACKPACK, ANOTHER_PLAYER_BACKPACK, ANOTHER_PLAYER_SUB_BACKPACK -> true;
+			};
+		}
+
+		return type == BackpackContext.ContextType.ITEM_BACKPACK && backpackContext.getBackpackSlotIndex() == slotIndex;
 	}
 
 	public void syncClientStorageContentsToClient() {

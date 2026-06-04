@@ -300,7 +300,7 @@ public class MobCatcherStorage {
 		return occupiedSlots;
 	}
 
-	private static int getTargetSlot(CapturedMob capturedMob, int columns, int targetColumns, int inventorySlots) {
+	static int getTargetSlot(CapturedMob capturedMob, int columns, int targetColumns, int inventorySlots) {
 		int rows = Math.max(1, (int) Math.ceil((double) inventorySlots / columns));
 		int targetRows = rows;
 		int targetX = Math.min(capturedMob.slot() % columns, Math.max(0, targetColumns - capturedMob.width()));

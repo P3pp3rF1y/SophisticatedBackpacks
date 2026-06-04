@@ -1,10 +1,14 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.entity.LivingEntity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -36,6 +40,15 @@ class MobCatcherStorageTest {
 	@Test
 	void tallHostileSizedMobCanStillUseTallFootprint() {
 		assertEquals(new CapturedMobFootprint(4, 10), MobCatcherStorage.getFootprint(entityWithSize(0.6F, 1.95F), 40));
+	}
+
+	@Test
+	void targetSlotKeepsCapturedMobWithinTargetBoundsWhenColumnsShrink() {
+		assertEquals(5, MobCatcherStorage.getTargetSlot(capturedMob(7, 2, 2), 9, 7, 18));
+	}
+
+	private CapturedMob capturedMob(int slot, int width, int height) {
+		return new CapturedMob(new UUID(0, 1), Identifier.parse("minecraft:pig"), new CompoundTag(), slot, width, height, width * height, false, "minecraft:pig", 10, 10);
 	}
 
 	private LivingEntity entityWithSize(float width, float height) {
