@@ -63,6 +63,15 @@ public abstract class BackpackContext {
 
 	public abstract void onUpgradeChanged(Player player);
 
+	protected void syncOpenBackpackClientInfo(Player player) {
+		if (player.level().isClientSide || !(player instanceof ServerPlayer serverPlayer)) {
+			return;
+		}
+
+		IStorageWrapper backpackWrapper = getBackpackWrapper(player);
+		SBPPacketHandler.INSTANCE.sendToClient(serverPlayer, new SyncClientInfoMessage(-1, backpackWrapper.getRenderInfo().getNbt().copy(), backpackWrapper.getColumnsTaken()));
+	}
+
 	public Optional<Entity> getOwnerPlayer(Player player) {
 		return Optional.of(player);
 	}
@@ -182,9 +191,10 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+			if (!player.level().isClientSide) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
-				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
+				int payloadSlotIndex = handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY) ? backpackSlotIndex : -1;
+				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(payloadSlotIndex, backpackWrapper.getRenderInfo().getNbt().copy(), backpackWrapper.getColumnsTaken()));
 			}
 		}
 
@@ -241,9 +251,17 @@ public abstract class BackpackContext {
 		@Override
 		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			if (parentWrapper == null) {
-				parentWrapper = super.getBackpackWrapper(player);
+				if (player.containerMenu instanceof BackpackContainer backpackContainer && matchesParentContext(backpackContainer.getBackpackContext())) {
+					parentWrapper = backpackContainer.getStorageWrapper();
+				} else {
+					parentWrapper = super.getBackpackWrapper(player);
+				}
 			}
 			return Optional.of(parentWrapper);
+		}
+
+		private boolean matchesParentContext(BackpackContext backpackContext) {
+			return backpackContext instanceof Item itemContext && itemContext.getType() == ContextType.ITEM_BACKPACK && itemContext.handlerName.equals(handlerName) && itemContext.identifier.equals(identifier) && itemContext.backpackSlotIndex == backpackSlotIndex;
 		}
 
 		@Override
@@ -280,7 +298,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			//noop
+			syncOpenBackpackClientInfo(player);
 		}
 
 		@Override
@@ -312,7 +330,13 @@ public abstract class BackpackContext {
 		@Override
 		public void onUpgradeChanged(Player player) {
 			if (!player.level().isClientSide) {
-				WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
+				WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).ifPresent(backpackBlockEntity -> {
+					backpackBlockEntity.refreshRenderState();
+					if (getType() == ContextType.BLOCK_BACKPACK && player instanceof ServerPlayer serverPlayer) {
+						IBackpackWrapper backpackWrapper = backpackBlockEntity.getBackpackWrapper();
+						SBPPacketHandler.INSTANCE.sendToClient(serverPlayer, new SyncClientInfoMessage(-1, backpackWrapper.getRenderInfo().getNbt().copy(), backpackWrapper.getColumnsTaken()));
+					}
+				});
 			}
 		}
 
@@ -387,9 +411,17 @@ public abstract class BackpackContext {
 		@Override
 		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			if (parentWrapper == null) {
-				parentWrapper = super.getBackpackWrapper(player);
+				if (player.containerMenu instanceof BackpackContainer backpackContainer && matchesParentContext(backpackContainer.getBackpackContext())) {
+					parentWrapper = backpackContainer.getStorageWrapper();
+				} else {
+					parentWrapper = super.getBackpackWrapper(player);
+				}
 			}
 			return Optional.of(parentWrapper);
+		}
+
+		private boolean matchesParentContext(BackpackContext backpackContext) {
+			return backpackContext instanceof Block blockContext && blockContext.getType() == ContextType.BLOCK_BACKPACK && blockContext.pos.equals(pos);
 		}
 
 		@Override
@@ -426,7 +458,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			//noop
+			syncOpenBackpackClientInfo(player);
 		}
 
 		@Override
@@ -489,6 +521,11 @@ public abstract class BackpackContext {
 			return super.getDisplayName(otherPlayer);
 		}
 
+		@Override
+		public void onUpgradeChanged(Player player) {
+			syncOpenBackpackClientInfo(player);
+		}
+
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer, Level level) {
 			int playerId = packetBuffer.readInt();
 			Player otherPlayer = (Player) level.getEntity(playerId);
@@ -517,14 +554,22 @@ public abstract class BackpackContext {
 		@Override
 		public Optional<IStorageWrapper> getParentBackpackWrapper(Player player) {
 			if (parentWrapper == null) {
-				parentWrapper = super.getBackpackWrapper(player);
+				if (player.containerMenu instanceof BackpackContainer backpackContainer && matchesParentContext(backpackContainer.getBackpackContext())) {
+					parentWrapper = backpackContainer.getStorageWrapper();
+				} else {
+					parentWrapper = super.getBackpackWrapper(player);
+				}
 			}
 			return Optional.of(parentWrapper);
 		}
 
+		private boolean matchesParentContext(BackpackContext backpackContext) {
+			return backpackContext instanceof AnotherPlayer anotherPlayerContext && anotherPlayerContext.getType() == ContextType.ANOTHER_PLAYER_BACKPACK && anotherPlayerContext.otherPlayer == otherPlayer && anotherPlayerContext.handlerName.equals(handlerName) && anotherPlayerContext.identifier.equals(identifier) && anotherPlayerContext.backpackSlotIndex == backpackSlotIndex;
+		}
+
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(otherPlayer).map(parent -> parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			return getParentBackpackWrapper(player).map(parent -> parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex).getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
@@ -559,7 +604,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			//noop
+			syncOpenBackpackClientInfo(player);
 		}
 
 		@Override

@@ -46,11 +46,13 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
-		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
-			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
-		});
+		if (msg.slotIndex >= 0) {
+			ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
+			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+				backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
+				backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
+			});
+		}
 		if (backpackContainer.canApplyClientInfo(msg.slotIndex)) {
 			backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
 		}
