@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherReleasePayload;
@@ -18,7 +19,9 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +54,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private final StorageScreenBase<?> screen;
 	private final BackpackContainer menu;
 	private final Map<UUID, LivingEntity> capturedMobRenderEntities = new HashMap<>();
+	private final Set<UUID> capturedMobRenderFailures = new HashSet<>();
 
 	public static Optional<MobCatcherInventoryControl> create(StorageScreenBase<?> screen) {
 		return screen.getMenu() instanceof BackpackContainer backpackContainer ? Optional.of(new MobCatcherInventoryControl(screen, backpackContainer)) : Optional.empty();
@@ -65,14 +69,15 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY) {
 		Optional<CapturedMob> hoveredMob = getHoveredCapturedMob(mouseX, mouseY);
 		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(getBackpackWrapper())) {
-			if (capturedMob.slot() >= menu.realInventorySlots.size()) {
+			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
+			if (renderBounds.isEmpty()) {
 				continue;
 			}
-			Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-			int x = slot.x;
-			int y = slot.y;
-			int width = capturedMob.width() * 18;
-			int height = capturedMob.height() * 18;
+			CapturedMobRenderBounds bounds = renderBounds.get();
+			int x = bounds.x();
+			int y = bounds.y();
+			int width = bounds.width();
+			int height = bounds.height();
 			renderCapturedMobArea(guiGraphics, x, y, capturedMob.width(), capturedMob.height());
 			getRenderEntity(capturedMob).ifPresent(entity -> {
 				int scale = getRenderScale(entity, width, height);
@@ -110,11 +115,12 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
 		int columns = MobCatcherStorage.getColumns(backpackWrapper);
 		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(backpackWrapper)) {
-			if (capturedMob.slot() >= menu.realInventorySlots.size() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
+			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
+			if (renderBounds.isEmpty() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
 				continue;
 			}
-			Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-			screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, slot.x - 1, slot.y - 1, capturedMob.width() * 18, capturedMob.height() * 18);
+			CapturedMobRenderBounds bounds = renderBounds.get();
+			screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, bounds.x() - 1, bounds.y() - 1, bounds.width(), bounds.height());
 		}
 	}
 
@@ -127,7 +133,12 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 		CapturedMob capturedMob = hoveredMob.get();
 		Optional<LivingEntity> entity = getRenderEntity(capturedMob);
-		List<Component> tooltipLines = List.of(Component.literal(getTooltipDisplayName(capturedMob, entity)), Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		List<Component> tooltipLines = new ArrayList<>();
+		tooltipLines.add(Component.literal(getTooltipDisplayName(capturedMob, entity)));
+		if (capturedMobRenderFailures.contains(capturedMob.id())) {
+			tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.entity_preview_failed").withStyle(ChatFormatting.RED));
+		}
+		tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		guiGraphics.renderTooltip(this.screen.getMinecraft().font, tooltipLines, Optional.of(new MobCatcherHealthTooltip(capturedMob.currentHealth(), capturedMob.maxHealth())), mouseX, mouseY);
 	}
 
@@ -225,36 +236,83 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 	private Optional<CapturedMob> getHoveredCapturedMob(double mouseX, double mouseY) {
 		return MobCatcherStorage.getCapturedMobs(getBackpackWrapper()).stream()
-				.filter(capturedMob -> capturedMob.slot() < menu.realInventorySlots.size())
-				.filter(capturedMob -> {
-					Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-					int x = slot.x + screen.getGuiLeft() - 1;
-					int y = slot.y + screen.getGuiTop() - 1;
-					int width = capturedMob.width() * 18;
-					int height = capturedMob.height() * 18;
-					return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
-				})
+				.filter(capturedMob -> isMouseOverVisibleCapturedMob(capturedMob, mouseX, mouseY))
 				.findFirst();
+	}
+
+	private boolean isMouseOverVisibleCapturedMob(CapturedMob capturedMob, double mouseX, double mouseY) {
+		int columns = MobCatcherStorage.getColumns(getBackpackWrapper());
+		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
+			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
+				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
+				if (slotIndex >= menu.realInventorySlots.size()) {
+					continue;
+				}
+
+				Slot slot = menu.realInventorySlots.get(slotIndex);
+				int x = slot.x + screen.getGuiLeft() - 1;
+				int y = slot.y + screen.getGuiTop() - 1;
+				if (isSlotVisible(slot) && mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private Optional<CapturedMobRenderBounds> getCapturedMobRenderBounds(CapturedMob capturedMob) {
+		int columns = MobCatcherStorage.getColumns(getBackpackWrapper());
+		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
+			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
+				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
+				if (slotIndex >= menu.realInventorySlots.size()) {
+					continue;
+				}
+
+				Slot slot = menu.realInventorySlots.get(slotIndex);
+				if (isSlotVisible(slot)) {
+					return Optional.of(new CapturedMobRenderBounds(slot.x - xOffset * 18, slot.y - yOffset * 18, capturedMob.width() * 18, capturedMob.height() * 18));
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private boolean isSlotVisible(Slot slot) {
+		return slot.x != StorageScreenBase.DISABLED_SLOT_X_POS && slot.y >= 0;
 	}
 
 	private IBackpackWrapper getBackpackWrapper() {
 		return menu.getStorageWrapper();
 	}
 
+	private record CapturedMobRenderBounds(int x, int y, int width, int height) {}
+
 	private Optional<LivingEntity> getRenderEntity(CapturedMob capturedMob) {
+		if (capturedMobRenderFailures.contains(capturedMob.id())) {
+			return Optional.empty();
+		}
+
 		LivingEntity cachedEntity = capturedMobRenderEntities.get(capturedMob.id());
 		if (cachedEntity != null) {
 			return Optional.of(cachedEntity);
 		}
-		Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(screen.getMinecraft().level));
-		if (entity.isEmpty()) {
+
+		try {
+			Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(screen.getMinecraft().level));
+			if (entity.isEmpty()) {
+				return Optional.empty();
+			}
+			if (!(entity.get() instanceof LivingEntity livingEntity)) {
+				return Optional.empty();
+			}
+			livingEntity.load(capturedMob.entityNbt());
+			capturedMobRenderEntities.put(capturedMob.id(), livingEntity);
+			return Optional.of(livingEntity);
+		} catch (RuntimeException e) {
+			capturedMobRenderFailures.add(capturedMob.id());
+			SophisticatedBackpacks.LOGGER.warn("Unable to create render entity for captured mob {} ({})", capturedMob.displayName(), capturedMob.entityType(), e);
 			return Optional.empty();
 		}
-		if (!(entity.get() instanceof LivingEntity livingEntity)) {
-			return Optional.empty();
-		}
-		livingEntity.load(capturedMob.entityNbt());
-		capturedMobRenderEntities.put(capturedMob.id(), livingEntity);
-		return Optional.of(livingEntity);
 	}
 }
