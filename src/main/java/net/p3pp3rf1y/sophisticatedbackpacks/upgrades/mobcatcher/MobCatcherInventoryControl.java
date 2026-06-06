@@ -15,18 +15,21 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherReleasePayload;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.UpgradeInventoryControlBase;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +61,11 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private final StorageScreenBase<?> screen;
 	private final BackpackContainer menu;
 	private final Map<UUID, LivingEntity> capturedMobRenderEntities = new HashMap<>();
+	private final Set<UUID> capturedMobRenderFailures = new HashSet<>();
+	private List<CapturedMob> cachedSlotRenderCapturedMobs = List.of();
+	private Set<Integer> cachedSlotRenderOccupiedSlots = Set.of();
+	private int cachedSlotRenderColumns = -1;
+	private int cachedSlotRenderInventorySlots = -1;
 
 	public static Optional<MobCatcherInventoryControl> create(StorageScreenBase<?> screen) {
 		return screen.getMenu() instanceof BackpackContainer backpackContainer ? Optional.of(new MobCatcherInventoryControl(screen, backpackContainer)) : Optional.empty();
@@ -70,16 +78,18 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 	@Override
 	public void extract(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-		Optional<CapturedMob> hoveredMob = getHoveredCapturedMob(mouseX, mouseY);
-		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(getBackpackWrapper())) {
-			if (capturedMob.slot() >= menu.realInventorySlots.size()) {
+		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(getBackpackWrapper());
+		Optional<CapturedMob> hoveredMob = getHoveredCapturedMob(capturedMobs, mouseX, mouseY);
+		for (CapturedMob capturedMob : capturedMobs) {
+			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
+			if (renderBounds.isEmpty()) {
 				continue;
 			}
-			Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-			int x = slot.x;
-			int y = slot.y;
-			int width = capturedMob.width() * 18;
-			int height = capturedMob.height() * 18;
+			CapturedMobRenderBounds bounds = renderBounds.get();
+			int x = bounds.x();
+			int y = bounds.y();
+			int width = bounds.width();
+			int height = bounds.height();
 			renderCapturedMobArea(guiGraphics, x, y, capturedMob.width(), capturedMob.height());
 			getRenderEntity(capturedMob).ifPresent(entity -> extractCapturedMobEntity(guiGraphics, entity, capturedMob, x, y, width, height));
 			if (hoveredMob.map(mob -> mob.id().equals(capturedMob.id())).orElse(false)) {
@@ -93,7 +103,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		if (button != 0) {
 			return false;
 		}
-		Optional<CapturedMob> clickedMob = getHoveredCapturedMob(mouseX, mouseY);
+		Optional<CapturedMob> clickedMob = getHoveredCapturedMob(MobCatcherStorage.getCapturedMobs(getBackpackWrapper()), mouseX, mouseY);
 		if (clickedMob.isEmpty()) {
 			return false;
 		}
@@ -104,7 +114,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	@Override
 	public boolean replacesSlotRender(int slot) {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
-		return MobCatcherStorage.getCapturedMobs(backpackWrapper).stream().anyMatch(capturedMob -> capturedMob.occupiesSlot(slot, MobCatcherStorage.getColumns(backpackWrapper)));
+		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(backpackWrapper);
+		return getSlotRenderOccupiedSlots(capturedMobs, MobCatcherStorage.getColumns(backpackWrapper), menu.getNumberOfStorageInventorySlots()).contains(slot);
 	}
 
 	@Override
@@ -112,24 +123,30 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
 		int columns = MobCatcherStorage.getColumns(backpackWrapper);
 		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(backpackWrapper)) {
-			if (capturedMob.slot() >= menu.realInventorySlots.size() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
+			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
+			if (renderBounds.isEmpty() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
 				continue;
 			}
-			Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-			guiGraphics.fill(slot.x - 1, slot.y - 1, slot.x - 1 + capturedMob.width() * 18, slot.y - 1 + capturedMob.height() * 18, StorageScreenBase.ERROR_SLOT_COLOR);
+			CapturedMobRenderBounds bounds = renderBounds.get();
+			guiGraphics.fill(bounds.x() - 1, bounds.y() - 1, bounds.x() - 1 + bounds.width(), bounds.y() - 1 + bounds.height(), StorageScreenBase.ERROR_SLOT_COLOR);
 		}
 	}
 
 	@Override
 	public void extractTooltip(StorageScreenBase<?> screen, GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-		Optional<CapturedMob> hoveredMob = getHoveredCapturedMob(mouseX, mouseY);
+		Optional<CapturedMob> hoveredMob = getHoveredCapturedMob(MobCatcherStorage.getCapturedMobs(getBackpackWrapper()), mouseX, mouseY);
 		if (hoveredMob.isEmpty()) {
 			return;
 		}
 
 		CapturedMob capturedMob = hoveredMob.get();
 		Optional<LivingEntity> entity = getRenderEntity(capturedMob);
-		List<Component> tooltipLines = List.of(Component.literal(getTooltipDisplayName(capturedMob, entity)), Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		List<Component> tooltipLines = new ArrayList<>();
+		tooltipLines.add(Component.literal(getTooltipDisplayName(capturedMob, entity)));
+		if (capturedMobRenderFailures.contains(capturedMob.id())) {
+			tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.entity_preview_failed").withStyle(ChatFormatting.RED));
+		}
+		tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 		GuiHelper.extractTooltip(screen, guiGraphics, ItemStack.EMPTY, tooltipLines, Optional.of(new MobCatcherHealthTooltip(capturedMob.currentHealth(), capturedMob.maxHealth())), mouseX, mouseY);
 	}
 
@@ -248,38 +265,109 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		return Math.max(8, (int) scale);
 	}
 
-	private Optional<CapturedMob> getHoveredCapturedMob(double mouseX, double mouseY) {
-		return MobCatcherStorage.getCapturedMobs(getBackpackWrapper()).stream()
-				.filter(capturedMob -> capturedMob.slot() < menu.realInventorySlots.size())
-				.filter(capturedMob -> {
-					Slot slot = menu.realInventorySlots.get(capturedMob.slot());
-					int x = slot.x + screen.getGuiLeft() - 1;
-					int y = slot.y + screen.getGuiTop() - 1;
-					int width = capturedMob.width() * 18;
-					int height = capturedMob.height() * 18;
-					return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
-				})
+	private Optional<CapturedMob> getHoveredCapturedMob(List<CapturedMob> capturedMobs, double mouseX, double mouseY) {
+		return capturedMobs.stream()
+				.filter(capturedMob -> isMouseOverVisibleCapturedMob(capturedMob, mouseX, mouseY))
 				.findFirst();
+	}
+
+	private Set<Integer> getSlotRenderOccupiedSlots(List<CapturedMob> capturedMobs, int columns, int inventorySlots) {
+		if (capturedMobs == cachedSlotRenderCapturedMobs && columns == cachedSlotRenderColumns && inventorySlots == cachedSlotRenderInventorySlots) {
+			return cachedSlotRenderOccupiedSlots;
+		}
+
+		Set<Integer> occupiedSlots = new HashSet<>();
+		for (CapturedMob capturedMob : capturedMobs) {
+			for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
+				for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
+					int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
+					if (slotIndex < inventorySlots) {
+						occupiedSlots.add(slotIndex);
+					}
+				}
+			}
+		}
+
+		cachedSlotRenderCapturedMobs = capturedMobs;
+		cachedSlotRenderColumns = columns;
+		cachedSlotRenderInventorySlots = inventorySlots;
+		cachedSlotRenderOccupiedSlots = Set.copyOf(occupiedSlots);
+		return cachedSlotRenderOccupiedSlots;
+	}
+
+	private boolean isMouseOverVisibleCapturedMob(CapturedMob capturedMob, double mouseX, double mouseY) {
+		int columns = MobCatcherStorage.getColumns(getBackpackWrapper());
+		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
+			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
+				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
+				if (slotIndex >= menu.realInventorySlots.size()) {
+					continue;
+				}
+
+				Slot slot = menu.realInventorySlots.get(slotIndex);
+				int x = slot.x + screen.getGuiLeft() - 1;
+				int y = slot.y + screen.getGuiTop() - 1;
+				if (isSlotVisible(slot) && mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private Optional<CapturedMobRenderBounds> getCapturedMobRenderBounds(CapturedMob capturedMob) {
+		int columns = MobCatcherStorage.getColumns(getBackpackWrapper());
+		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
+			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
+				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
+				if (slotIndex >= menu.realInventorySlots.size()) {
+					continue;
+				}
+
+				Slot slot = menu.realInventorySlots.get(slotIndex);
+				if (isSlotVisible(slot)) {
+					return Optional.of(new CapturedMobRenderBounds(slot.x - xOffset * 18, slot.y - yOffset * 18, capturedMob.width() * 18, capturedMob.height() * 18));
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private boolean isSlotVisible(Slot slot) {
+		return slot.x != StorageScreenBase.DISABLED_SLOT_X_POS && slot.y >= 0;
 	}
 
 	private IBackpackWrapper getBackpackWrapper() {
 		return menu.getStorageWrapper();
 	}
 
+	private record CapturedMobRenderBounds(int x, int y, int width, int height) {}
+
 	private Optional<LivingEntity> getRenderEntity(CapturedMob capturedMob) {
+		if (capturedMobRenderFailures.contains(capturedMob.id())) {
+			return Optional.empty();
+		}
+
 		LivingEntity cachedEntity = capturedMobRenderEntities.get(capturedMob.id());
 		if (cachedEntity != null) {
 			return Optional.of(cachedEntity);
 		}
-		Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(screen.getMinecraft().level, EntitySpawnReason.EVENT));
-		if (entity.isEmpty()) {
+
+		try {
+			Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(screen.getMinecraft().level, EntitySpawnReason.EVENT));
+			if (entity.isEmpty()) {
+				return Optional.empty();
+			}
+			if (!(entity.get() instanceof LivingEntity livingEntity)) {
+				return Optional.empty();
+			}
+			livingEntity.load(ValueIOHelper.inputFromCompoundTag(screen.getMinecraft().level.registryAccess(), capturedMob.entityNbt()));
+			capturedMobRenderEntities.put(capturedMob.id(), livingEntity);
+			return Optional.of(livingEntity);
+		} catch (RuntimeException e) {
+			capturedMobRenderFailures.add(capturedMob.id());
+			SophisticatedBackpacks.LOGGER.warn("Unable to create render entity for captured mob {} ({})", capturedMob.displayName(), capturedMob.entityType(), e);
 			return Optional.empty();
 		}
-		if (!(entity.get() instanceof LivingEntity livingEntity)) {
-			return Optional.empty();
-		}
-		livingEntity.load(ValueIOHelper.inputFromCompoundTag(screen.getMinecraft().level.registryAccess(), capturedMob.entityNbt()));
-		capturedMobRenderEntities.put(capturedMob.id(), livingEntity);
-		return Optional.of(livingEntity);
 	}
 }

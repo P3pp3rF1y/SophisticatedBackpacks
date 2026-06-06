@@ -39,12 +39,7 @@ public class MobCatcherStorage {
 	}
 
 	public static List<CapturedMob> getCapturedMobs(UUID backpackUuid) {
-		CompoundTag contentsNbt = getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(backpackUuid)).data();
-		List<CapturedMob> capturedMobs = new ArrayList<>();
-		for (Tag tag : contentsNbt.getListOrEmpty(CAPTURED_MOBS_TAG)) {
-			capturedMobs.add(deserialize((CompoundTag) tag));
-		}
-		return capturedMobs;
+		return getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(backpackUuid)).getCapturedMobs();
 	}
 
 	private static MobCatcherContentsData getCapturedMobsData(net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents contents) {
@@ -177,20 +172,23 @@ public class MobCatcherStorage {
 		if (contentsUuid.isEmpty()) {
 			return;
 		}
-		CompoundTag contentsNbt = getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(contentsUuid.get())).data();
-		if (capturedMobs.isEmpty()) {
-			contentsNbt.remove(CAPTURED_MOBS_TAG);
-		} else {
-			contentsNbt.put(CAPTURED_MOBS_TAG, serialize(capturedMobs));
-		}
+		getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(contentsUuid.get())).setCapturedMobs(capturedMobs);
 		BackpackStorage.get().setDirty();
 		attachSlotBlocking(backpackWrapper);
 	}
 
-	private static ListTag serialize(List<CapturedMob> capturedMobs) {
+	static ListTag serialize(List<CapturedMob> capturedMobs) {
 		ListTag listTag = new ListTag();
 		capturedMobs.stream().sorted(Comparator.comparingInt(CapturedMob::slot)).map(MobCatcherStorage::serialize).forEach(listTag::add);
 		return listTag;
+	}
+
+	static List<CapturedMob> deserializeCapturedMobs(CompoundTag contentsNbt) {
+		List<CapturedMob> capturedMobs = new ArrayList<>();
+		for (Tag tag : contentsNbt.getListOrEmpty(CAPTURED_MOBS_TAG)) {
+			capturedMobs.add(deserialize((CompoundTag) tag));
+		}
+		return List.copyOf(capturedMobs);
 	}
 
 	private static CompoundTag serialize(CapturedMob capturedMob) {
@@ -215,7 +213,7 @@ public class MobCatcherStorage {
 		return new CapturedMob(
 			UUID.fromString(tag.getStringOr(ID_TAG, new UUID(0, 0).toString())),
 			Identifier.parse(tag.getStringOr(ENTITY_TYPE_TAG, "minecraft:pig")),
-			tag.getCompoundOrEmpty(ENTITY_NBT_TAG),
+			tag.getCompoundOrEmpty(ENTITY_NBT_TAG).copy(),
 			tag.getInt(SLOT_TAG).orElse(0),
 			tag.getInt(WIDTH_TAG).orElse(1),
 			tag.getInt(HEIGHT_TAG).orElse(1),
