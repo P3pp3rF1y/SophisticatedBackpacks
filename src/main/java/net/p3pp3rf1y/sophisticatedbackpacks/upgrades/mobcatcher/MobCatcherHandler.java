@@ -34,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherCaptureEffectPayload;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 
 import java.util.List;
@@ -91,10 +92,17 @@ public class MobCatcherHandler {
 		CapturedMob capturedMob = new CapturedMob(UUID.randomUUID(), entityType, entityTag, slot.get(), footprint.width(), footprint.height(), slotCost, hostile, getCapturedMobDisplayName(entity),
 			(int) Math.ceil(entity.getHealth()), (int) Math.ceil(getEffectiveMaxHealth(entity)));
 		MobCatcherStorage.addCapturedMob(backpackWrapper, capturedMob);
+		PacketDistributor.sendToPlayersNear((ServerLevel) player.level(), null, entity.getX(), entity.getY(), entity.getZ(), 64,
+				new MobCatcherCaptureEffectPayload(entityType, entityTag, entity.position(), getCaptureEffectCollapsePosition(player, entity), entity.getYRot(), entity.getXRot()));
 		entity.discard();
 		syncCapturedMobs(player, backpackWrapper);
-		playMobCatcherSound(player, SoundEvents.ITEM_PICKUP, 0.7F, 0.7F);
 		return new CaptureResult(true, Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_captured", capturedMob.displayName()));
+	}
+
+	private static Vec3 getCaptureEffectCollapsePosition(ServerPlayer player, LivingEntity entity) {
+		Vec3 eyePosition = player.getEyePosition();
+		Vec3 lookPosition = eyePosition.add(player.getLookAngle().scale(player.entityInteractionRange() + 1D));
+		return entity.getBoundingBox().clip(eyePosition, lookPosition).orElse(entity.position().add(0D, entity.getBbHeight() * 0.5D, 0D));
 	}
 
 	private static Optional<Component> getEligibilityError(ServerPlayer player, LivingEntity entity, boolean advanced) {

@@ -122,13 +122,17 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	public void extractErrorOverlay(GuiGraphicsExtractor guiGraphics, Set<Integer> errorInventorySlots) {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
 		int columns = MobCatcherStorage.getColumns(backpackWrapper);
+		Optional<CapturedMobRenderBounds> visibleStorageBounds = getVisibleStorageBounds();
+		if (visibleStorageBounds.isEmpty()) {
+			return;
+		}
 		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(backpackWrapper)) {
 			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
 			if (renderBounds.isEmpty() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
 				continue;
 			}
-			CapturedMobRenderBounds bounds = renderBounds.get();
-			guiGraphics.fill(bounds.x() - 1, bounds.y() - 1, bounds.x() - 1 + bounds.width(), bounds.y() - 1 + bounds.height(), StorageScreenBase.ERROR_SLOT_COLOR);
+			getInteriorVisibleBounds(renderBounds.get(), visibleStorageBounds.get()).ifPresent(bounds ->
+					guiGraphics.fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), StorageScreenBase.ERROR_SLOT_COLOR));
 		}
 	}
 
@@ -331,6 +335,34 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 			}
 		}
 		return Optional.empty();
+	}
+
+	private Optional<CapturedMobRenderBounds> getVisibleStorageBounds() {
+		int left = Integer.MAX_VALUE;
+		int top = Integer.MAX_VALUE;
+		int right = Integer.MIN_VALUE;
+		int bottom = Integer.MIN_VALUE;
+		for (int slotIndex = 0; slotIndex < menu.getNumberOfStorageInventorySlots(); slotIndex++) {
+			Slot slot = menu.realInventorySlots.get(slotIndex);
+			if (!isSlotVisible(slot)) {
+				continue;
+			}
+			left = Math.min(left, slot.x);
+			top = Math.min(top, slot.y);
+			right = Math.max(right, slot.x + 16);
+			bottom = Math.max(bottom, slot.y + 16);
+		}
+		return left == Integer.MAX_VALUE ? Optional.empty() : Optional.of(new CapturedMobRenderBounds(left, top, right - left, bottom - top));
+	}
+
+	private Optional<CapturedMobRenderBounds> getInteriorVisibleBounds(CapturedMobRenderBounds capturedMobBounds, CapturedMobRenderBounds visibleStorageBounds) {
+		int visibleBottom = visibleStorageBounds.y() + visibleStorageBounds.height();
+		int capturedBottom = capturedMobBounds.y() + capturedMobBounds.height();
+		int left = Math.max(capturedMobBounds.x(), visibleStorageBounds.x());
+		int top = capturedMobBounds.y() < visibleStorageBounds.y() ? visibleStorageBounds.y() - 1 : capturedMobBounds.y();
+		int right = Math.min(capturedMobBounds.x() + capturedMobBounds.width() - 2, visibleStorageBounds.x() + visibleStorageBounds.width());
+		int bottom = capturedBottom > visibleBottom ? visibleBottom + 1 : capturedBottom - 2;
+		return right <= left || bottom <= top ? Optional.empty() : Optional.of(new CapturedMobRenderBounds(left, top, right - left, bottom - top));
 	}
 
 	private boolean isSlotVisible(Slot slot) {

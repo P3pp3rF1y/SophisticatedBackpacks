@@ -76,6 +76,8 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(ClientEventHandler::handleBlockPick);
 		eventBus.addListener(ClientEventHandler::onPlayerLoggingIn);
+		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
+		eventBus.addListener(ClientEventHandler::submitCustomGeometry);
 		eventBus.addListener(BackpackStorage::onClientWorldLoad);
 		eventBus.addListener(ClientEventHandler::onEntityTick);
 		eventBus.addListener(BackpackTemplateStorage::onClientWorldLoad);
@@ -134,7 +136,17 @@ public class ClientEventHandler {
 	}
 
 	private static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		MobCatcherCaptureEffectRenderer.clear();
 		ClientPacketDistributor.sendToServer(new RequestPlayerSettingsPayload());
+	}
+
+	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		MobCatcherCaptureEffectRenderer.clear();
+	}
+
+	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
+		float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		MobCatcherCaptureEffectRenderer.submit(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState);
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterLoaders event) {
