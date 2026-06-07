@@ -26,10 +26,14 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> impleme
 
 	@Override
 	public boolean keyPressed(KeyEvent event) {
-		if (getFocused() != null) {
+		if (isTextBoxFocused()) {
 			return super.keyPressed(event);
 		}
+
 		if (event.key() == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(event))) {
+			if (getFocused() != null && !clearFocusedWidget()) {
+				return super.keyPressed(event);
+			}
 			if (getMenu().isFirstLevelStorage() && (event.key() == 256 || mouseNotOverBackpack())) {
 				if (getMenu().getBackpackContext().wasOpenFromInventory()) {
 					getMinecraft().player.closeContainer();
