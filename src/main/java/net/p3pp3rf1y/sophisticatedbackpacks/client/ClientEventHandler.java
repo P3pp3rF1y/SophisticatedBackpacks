@@ -74,6 +74,8 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(ClientEventHandler::handleBlockPick);
 		eventBus.addListener(ClientEventHandler::onPlayerLoggingIn);
+		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
+		eventBus.addListener(ClientEventHandler::renderLevelStage);
 		eventBus.addListener(BackpackStorage::onClientWorldLoad);
 		eventBus.addListener(ClientEventHandler::onEntityTick);
 		eventBus.addListener(BackpackTemplateStorage::onClientWorldLoad);
@@ -127,7 +129,20 @@ public class ClientEventHandler {
 	}
 
 	private static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+		MobCatcherCaptureEffectRenderer.clear();
 		PacketDistributor.sendToServer(new RequestPlayerSettingsPayload());
+	}
+
+	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		MobCatcherCaptureEffectRenderer.clear();
+	}
+
+	private static void renderLevelStage(RenderLevelStageEvent event) {
+		if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+			return;
+		}
+
+		MobCatcherCaptureEffectRenderer.render(event.getPoseStack(), event.getPartialTick().getGameTimeDeltaPartialTick(false), event.getCamera().getPosition());
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterLoaders event) {
