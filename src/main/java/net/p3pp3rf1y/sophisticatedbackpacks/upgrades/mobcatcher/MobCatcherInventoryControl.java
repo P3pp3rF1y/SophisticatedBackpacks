@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,18 +18,10 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
+import java.util.*;
 
 public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private static final int CAPTURED_MOB_BACKGROUND_U = 29;
@@ -114,13 +106,17 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	public void renderErrorOverlay(GuiGraphics guiGraphics, Set<Integer> errorInventorySlots) {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
 		int columns = MobCatcherStorage.getColumns(backpackWrapper);
+		Optional<CapturedMobRenderBounds> visibleStorageBounds = getVisibleStorageBounds();
+		if (visibleStorageBounds.isEmpty()) {
+			return;
+		}
 		for (CapturedMob capturedMob : MobCatcherStorage.getCapturedMobs(backpackWrapper)) {
 			Optional<CapturedMobRenderBounds> renderBounds = getCapturedMobRenderBounds(capturedMob);
 			if (renderBounds.isEmpty() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
 				continue;
 			}
-			CapturedMobRenderBounds bounds = renderBounds.get();
-			screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, bounds.x() - 1, bounds.y() - 1, bounds.width(), bounds.height());
+			getInteriorVisibleBounds(renderBounds.get(), visibleStorageBounds.get()).ifPresent(bounds ->
+					screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, bounds.x(), bounds.y(), bounds.width(), bounds.height()));
 		}
 	}
 
@@ -276,6 +272,35 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 			}
 		}
 		return Optional.empty();
+	}
+
+	private Optional<CapturedMobRenderBounds> getVisibleStorageBounds() {
+		int left = Integer.MAX_VALUE;
+		int top = Integer.MAX_VALUE;
+		int right = Integer.MIN_VALUE;
+		int bottom = Integer.MIN_VALUE;
+		for (int slotIndex = 0; slotIndex < menu.getNumberOfStorageInventorySlots(); slotIndex++) {
+			Slot slot = menu.realInventorySlots.get(slotIndex);
+			if (!isSlotVisible(slot)) {
+				continue;
+			}
+
+			left = Math.min(left, slot.x);
+			top = Math.min(top, slot.y);
+			right = Math.max(right, slot.x + 16);
+			bottom = Math.max(bottom, slot.y + 16);
+		}
+		return right <= left || bottom <= top ? Optional.empty() : Optional.of(new CapturedMobRenderBounds(left, top, right - left, bottom - top));
+	}
+
+	private Optional<CapturedMobRenderBounds> getInteriorVisibleBounds(CapturedMobRenderBounds capturedMobBounds, CapturedMobRenderBounds visibleStorageBounds) {
+		int visibleBottom = visibleStorageBounds.y() + visibleStorageBounds.height();
+		int capturedBottom = capturedMobBounds.y() + capturedMobBounds.height();
+		int left = Math.max(capturedMobBounds.x(), visibleStorageBounds.x());
+		int top = capturedMobBounds.y() < visibleStorageBounds.y() ? visibleStorageBounds.y() - 1 : capturedMobBounds.y();
+		int right = Math.min(capturedMobBounds.x() + capturedMobBounds.width() - 2, visibleStorageBounds.x() + visibleStorageBounds.width());
+		int bottom = capturedBottom > visibleBottom ? visibleBottom + 1 : capturedBottom - 2;
+		return right <= left || bottom <= top ? Optional.empty() : Optional.of(new CapturedMobRenderBounds(left, top, right - left, bottom - top));
 	}
 
 	private boolean isSlotVisible(Slot slot) {
