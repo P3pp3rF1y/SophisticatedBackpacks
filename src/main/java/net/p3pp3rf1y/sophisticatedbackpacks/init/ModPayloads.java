@@ -25,6 +25,7 @@ public class ModPayloads {
 		registrar.playToServer(AnotherPlayerBackpackOpenPayload.TYPE, AnotherPlayerBackpackOpenPayload.STREAM_CODEC, AnotherPlayerBackpackOpenPayload::handlePayload);
 		registrar.playToServer(BlockPickPayload.TYPE, BlockPickPayload.STREAM_CODEC, BlockPickPayload::handlePayload);
 		registrar.playToServer(RequestPlayerSettingsPayload.TYPE, RequestPlayerSettingsPayload.STREAM_CODEC, RequestPlayerSettingsPayload::handlePayload);
+		registrar.playToClient(MobCatcherCaptureEffectPayload.TYPE, MobCatcherCaptureEffectPayload.STREAM_CODEC, MobCatcherCaptureEffectPayload::handlePayload);
 		registrar.playToServer(MobCatcherReleasePayload.TYPE, MobCatcherReleasePayload.STREAM_CODEC, MobCatcherReleasePayload::handlePayload);
 	}
 }
