@@ -15,10 +15,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -32,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackShapeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.MobCatcherCaptureEffectRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
@@ -57,7 +60,20 @@ public class ClientEventHandler {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
 		eventBus.addListener(ClientBackpackContentsTooltip::onWorldLoad);
 		eventBus.addListener(ClientEventHandler::handleBlockPick);
+		eventBus.addListener(ClientEventHandler::onPlayerLoggingOut);
+		eventBus.addListener(ClientEventHandler::renderLevelStage);
 		eventBus.addListener(BackpackStorage::onClientWorldLoad);
+	}
+
+	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+		MobCatcherCaptureEffectRenderer.clear();
+	}
+
+	private static void renderLevelStage(RenderLevelStageEvent event) {
+		if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+			return;
+		}
+		MobCatcherCaptureEffectRenderer.render(event.getPoseStack(), event.getPartialTick(), event.getCamera().getPosition());
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterGeometryLoaders event) {

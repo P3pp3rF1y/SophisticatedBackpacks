@@ -24,6 +24,7 @@ public class SBPPacketHandler extends PacketHandler {
 		registerMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::encode, SyncClientInfoMessage::decode, SyncClientInfoMessage::onMessage);
 		registerMessage(AnotherPlayerBackpackOpenMessage.class, AnotherPlayerBackpackOpenMessage::encode, AnotherPlayerBackpackOpenMessage::decode, AnotherPlayerBackpackOpenMessage::onMessage);
 		registerMessage(BlockPickMessage.class, BlockPickMessage::encode, BlockPickMessage::decode, BlockPickMessage::onMessage);
+		registerMessage(MobCatcherCaptureEffectMessage.class, MobCatcherCaptureEffectMessage::encode, MobCatcherCaptureEffectMessage::decode, MobCatcherCaptureEffectMessage::onMessage);
 		registerMessage(MobCatcherReleaseMessage.class, MobCatcherReleaseMessage::encode, MobCatcherReleaseMessage::decode, MobCatcherReleaseMessage::onMessage);
 	}
 }
