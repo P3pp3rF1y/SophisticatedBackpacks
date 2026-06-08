@@ -60,6 +60,12 @@ repositories {
         }
     }
     maven {
+        url "https://maven.theillusivec4.top/"
+        content {
+            includeGroup "top.theillusivec4.curios"
+        }
+    }
+    maven {
         url "https://maven.blamejared.com/"
         content {
             includeGroup "mezz.jei"
@@ -206,9 +212,9 @@ dependencies {
         localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
         localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
     }
-    compileOnly "curse.maven:curios-309927:${curios_cf_file_id}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     if (!isClientDataRun) {
-        localRuntime "curse.maven:curios-309927:${curios_cf_file_id}"
+        localRuntime "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     }
     compileOnly "net.blay09.mods:balm-neoforge:${balm_version}"
     if (!isClientDataRun) {
