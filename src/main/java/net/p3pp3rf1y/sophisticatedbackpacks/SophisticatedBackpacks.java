@@ -36,12 +36,14 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedBackpacks {
 	public static final String MOD_ID = "sophisticatedbackpacks";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	private static String networkProtocolVersion;
 
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
+		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
 		commonEventHandler.registerHandlers();
@@ -92,5 +94,9 @@ public class SophisticatedBackpacks {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	public static String getNetworkProtocolVersion() {
+		return networkProtocolVersion;
 	}
 }
