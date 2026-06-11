@@ -304,11 +304,11 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
 			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
 				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
-				if (slotIndex >= menu.realInventorySlots.size()) {
+				if (slotIndex >= menu.getNumberOfStorageInventorySlots()) {
 					continue;
 				}
 
-				Slot slot = menu.realInventorySlots.get(slotIndex);
+				Slot slot = menu.getSlot(slotIndex);
 				int x = slot.x + screen.getGuiLeft() - 1;
 				int y = slot.y + screen.getGuiTop() - 1;
 				if (isSlotVisible(slot) && mouseX >= x && mouseX < x + 18 && mouseY >= y && mouseY < y + 18) {
@@ -324,11 +324,11 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		for (int yOffset = 0; yOffset < capturedMob.height(); yOffset++) {
 			for (int xOffset = 0; xOffset < capturedMob.width(); xOffset++) {
 				int slotIndex = capturedMob.slot() + yOffset * columns + xOffset;
-				if (slotIndex >= menu.realInventorySlots.size()) {
+				if (slotIndex >= menu.getNumberOfStorageInventorySlots()) {
 					continue;
 				}
 
-				Slot slot = menu.realInventorySlots.get(slotIndex);
+				Slot slot = menu.getSlot(slotIndex);
 				if (isSlotVisible(slot)) {
 					return Optional.of(new CapturedMobRenderBounds(slot.x - xOffset * 18, slot.y - yOffset * 18, capturedMob.width() * 18, capturedMob.height() * 18));
 				}
@@ -343,7 +343,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		int right = Integer.MIN_VALUE;
 		int bottom = Integer.MIN_VALUE;
 		for (int slotIndex = 0; slotIndex < menu.getNumberOfStorageInventorySlots(); slotIndex++) {
-			Slot slot = menu.realInventorySlots.get(slotIndex);
+			Slot slot = menu.getSlot(slotIndex);
 			if (!isSlotVisible(slot)) {
 				continue;
 			}
