@@ -175,7 +175,6 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
 				storageWrapper.getSettingsHandler().reloadFrom(storage.getOrCreateBackpackContents(uuid).settings());
-				refreshInventorySlotsIfNeeded();
 				return true;
 			}
 			return false;
