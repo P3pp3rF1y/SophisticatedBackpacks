@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeCountLimitConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeGroup;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.alchemy.AlchemyUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.compacting.CompactingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.ICookingUpgrade;
@@ -73,7 +74,7 @@ public class Config {
 		public final BackpackConfig goldBackpack;
 		public final BackpackConfig diamondBackpack;
 		public final BackpackConfig netheriteBackpack;
-		public final FilteredUpgradeConfig compactingUpgrade;
+		public final CompactingUpgradeConfig compactingUpgrade;
 		public final FilteredUpgradeConfig advancedCompactingUpgrade;
 		public final FilteredUpgradeConfig depositUpgrade;
 		public final FilteredUpgradeConfig advancedDepositUpgrade;
@@ -137,6 +138,7 @@ public class Config {
 		private void clearCache() {
 			disallowedItems.initialized = false;
 			stackUpgrade.clearNonStackableItems();
+			compactingUpgrade.clearCache();
 			maxUpgradesPerStorage.clearCache();
 			nerfsConfig.cachedEffect = null;
 		}
@@ -155,7 +157,7 @@ public class Config {
 			diamondBackpack = new BackpackConfig(builder, "Diamond", 108, 5);
 			netheriteBackpack = new BackpackConfig(builder, "Netherite", 120, 7);
 
-			compactingUpgrade = new FilteredUpgradeConfig(builder, "Compacting Upgrade", "compactingUpgrade", 9, 3);
+			compactingUpgrade = new CompactingUpgradeConfig(builder, "Compacting Upgrade", "compactingUpgrade", 9, 3);
 			advancedCompactingUpgrade = new FilteredUpgradeConfig(builder, "Advanced Compacting Upgrade", "advancedCompactingUpgrade", 16, 4);
 			depositUpgrade = new FilteredUpgradeConfig(builder, "Deposit Upgrade", "depositUpgrade", 9, 3);
 			advancedDepositUpgrade = new FilteredUpgradeConfig(builder, "Advanced Deposit Upgrade", "advancedDepositUpgrade", 16, 4);
