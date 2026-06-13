@@ -58,6 +58,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nullable
 	private ItemStack backpack;
+	private int numberOfInventorySlots = -1;
+	private int numberOfUpgradeSlots = -1;
 	private Runnable backpackSaveHandler = () -> {
 	};
 	private Runnable inventorySlotChangeHandler = () -> {
@@ -177,15 +179,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private int getNumberOfInventorySlots() {
-		Integer inventorySlots = getBackpackStack().get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
-
-		if (inventorySlots != null) {
-			return inventorySlots;
+		if (numberOfInventorySlots < 0) {
+			cacheSlotNumbers();
 		}
-
-		int itemInventorySlots = ((BackpackItem) getBackpackStack().getItem()).getNumberOfSlots();
-		setNumberOfInventorySlots(itemInventorySlots);
-		return itemInventorySlots;
+		return numberOfInventorySlots;
 	}
 
 	@Override
@@ -195,6 +192,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
+		numberOfInventorySlots = itemInventorySlots;
 		getBackpackStack().set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, itemInventorySlots);
 	}
 
@@ -272,6 +270,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
+		cacheSlotNumbers();
 		if (renderDataHandler == null) {
 			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
 				renderDataHandler = new RenderDataHandler(Optional.ofNullable(backpack.get(ModCoreDataComponents.RENDER_DATA)).map(RenderData::copy).orElseGet(RenderData::new), renderData -> {
@@ -336,15 +335,35 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private int getNumberOfUpgradeSlots() {
-		Integer upgradeSlots = getBackpackStack().get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
-
-		if (upgradeSlots != null) {
-			return upgradeSlots;
+		if (numberOfUpgradeSlots < 0) {
+			cacheSlotNumbers();
 		}
+		return numberOfUpgradeSlots;
+	}
 
-		int itemUpgradeSlots = ((BackpackItem) getBackpackStack().getItem()).getNumberOfUpgradeSlots();
-		setNumberOfUpgradeSlots(itemUpgradeSlots);
-		return itemUpgradeSlots;
+	private void cacheSlotNumbers() {
+		ItemStack backpackStack = getBackpackStack();
+		BackpackItem backpackItem = (BackpackItem) backpackStack.getItem();
+		cacheNumberOfInventorySlots(backpackStack, backpackItem.getNumberOfSlots());
+		cacheNumberOfUpgradeSlots(backpackStack, backpackItem.getNumberOfUpgradeSlots());
+	}
+
+	private void cacheNumberOfInventorySlots(ItemStack backpackStack, int defaultNumberOfInventorySlots) {
+		Integer storedNumberOfInventorySlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
+		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots, defaultNumberOfInventorySlots);
+		numberOfInventorySlots = resolvedNumberOfInventorySlots;
+		if (storedNumberOfInventorySlots == null || storedNumberOfInventorySlots < resolvedNumberOfInventorySlots) {
+			backpackStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, resolvedNumberOfInventorySlots);
+		}
+	}
+
+	private void cacheNumberOfUpgradeSlots(ItemStack backpackStack, int defaultNumberOfUpgradeSlots) {
+		Integer storedNumberOfUpgradeSlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
+		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots, defaultNumberOfUpgradeSlots);
+		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
+		if (storedNumberOfUpgradeSlots == null || storedNumberOfUpgradeSlots < resolvedNumberOfUpgradeSlots) {
+			backpackStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, resolvedNumberOfUpgradeSlots);
+		}
 	}
 
 	@Override
@@ -645,6 +664,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
+		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		getBackpackStack().set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
 	}
 
