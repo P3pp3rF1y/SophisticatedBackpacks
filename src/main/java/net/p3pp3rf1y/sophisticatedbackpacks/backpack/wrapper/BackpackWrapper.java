@@ -58,6 +58,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String TEMPLATE_NAME_TAG = "templateName";
 
 	private final ItemStack backpack;
+	private int numberOfInventorySlots = -1;
+	private int numberOfUpgradeSlots = -1;
 	private Runnable backpackSaveHandler = () -> {
 	};
 	private Runnable inventorySlotChangeHandler = () -> {
@@ -95,6 +97,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	public BackpackWrapper(ItemStack backpack) {
 		this.backpack = backpack;
+		cacheSlotNumbers();
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
 
@@ -136,15 +139,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private int getNumberOfInventorySlots() {
-		Optional<Integer> inventorySlots = NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG);
-
-		if (inventorySlots.isPresent()) {
-			return inventorySlots.get();
+		if (numberOfInventorySlots < 0) {
+			cacheSlotNumbers();
 		}
-
-		int itemInventorySlots = ((BackpackItem) backpack.getItem()).getNumberOfSlots();
-		setNumberOfInventorySlots(itemInventorySlots);
-		return itemInventorySlots;
+		return numberOfInventorySlots;
 	}
 
 	@Override
@@ -154,6 +152,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
+		numberOfInventorySlots = itemInventorySlots;
 		NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, itemInventorySlots);
 	}
 
@@ -271,15 +270,34 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private int getNumberOfUpgradeSlots() {
-		Optional<Integer> upgradeSlots = NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG);
-
-		if (upgradeSlots.isPresent()) {
-			return upgradeSlots.get();
+		if (numberOfUpgradeSlots < 0) {
+			cacheSlotNumbers();
 		}
+		return numberOfUpgradeSlots;
+	}
 
-		int itemUpgradeSlots = ((BackpackItem) backpack.getItem()).getNumberOfUpgradeSlots();
-		setNumberOfUpgradeSlots(itemUpgradeSlots);
-		return itemUpgradeSlots;
+	private void cacheSlotNumbers() {
+		BackpackItem backpackItem = (BackpackItem) backpack.getItem();
+		cacheNumberOfInventorySlots(backpackItem.getNumberOfSlots());
+		cacheNumberOfUpgradeSlots(backpackItem.getNumberOfUpgradeSlots());
+	}
+
+	private void cacheNumberOfInventorySlots(int defaultNumberOfInventorySlots) {
+		Optional<Integer> storedNumberOfInventorySlots = NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG);
+		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots.orElse(defaultNumberOfInventorySlots), defaultNumberOfInventorySlots);
+		numberOfInventorySlots = resolvedNumberOfInventorySlots;
+		if (storedNumberOfInventorySlots.isEmpty() || storedNumberOfInventorySlots.get() < resolvedNumberOfInventorySlots) {
+			NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, resolvedNumberOfInventorySlots);
+		}
+	}
+
+	private void cacheNumberOfUpgradeSlots(int defaultNumberOfUpgradeSlots) {
+		Optional<Integer> storedNumberOfUpgradeSlots = NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG);
+		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots.orElse(defaultNumberOfUpgradeSlots), defaultNumberOfUpgradeSlots);
+		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
+		if (storedNumberOfUpgradeSlots.isEmpty() || storedNumberOfUpgradeSlots.get() < resolvedNumberOfUpgradeSlots) {
+			NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, resolvedNumberOfUpgradeSlots);
+		}
 	}
 
 	@Override
@@ -553,6 +571,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
+		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
 	}
 
