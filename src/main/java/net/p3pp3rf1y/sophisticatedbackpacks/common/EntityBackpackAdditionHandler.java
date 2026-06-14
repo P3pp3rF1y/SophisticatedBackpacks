@@ -347,7 +347,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void putJukeboxItemsInContainerAndRemoveStorageUuid(LivingDropsEvent event, ItemStack backpack) {
-		if (hasSpawnedJukeboxUpgrade(event.getEntity())) {
+		if (hasSpawnedJukeboxUpgrade(event.getEntity()) && backpack.getItem() instanceof BackpackItem) {
 			List<ItemStack> inventoryItems = new ArrayList<>();
 			IBackpackWrapper backpackwrapper = BackpackWrapper.fromStack(backpack);
 			backpackwrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
@@ -435,7 +435,13 @@ public class EntityBackpackAdditionHandler {
 		if (!hasSpawnedJukeboxUpgrade(livingEntity)) {
 			return;
 		}
-		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(livingEntity.getItemBySlot(EquipmentSlot.CHEST));
+		ItemStack backpack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
+		if (!(backpack.getItem() instanceof BackpackItem)) {
+			clearSpawnedBackpackData(livingEntity);
+			return;
+		}
+
+		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
 			if (wrapper.isPlaying()) {
 				wrapper.tick(livingEntity, entity.level(), entity.blockPosition());
