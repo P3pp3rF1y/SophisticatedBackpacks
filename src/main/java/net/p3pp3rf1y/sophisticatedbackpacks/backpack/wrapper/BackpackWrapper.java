@@ -107,6 +107,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public static IBackpackWrapper fromStack(ItemStack stack) {
+		if (!(stack.getItem() instanceof BackpackItem)) {
+			return Noop.INSTANCE;
+		}
+
 		if (!stack.has(ModCoreDataComponents.STORAGE_UUID)) {
 			return new BackpackWrapper(stack);
 		}

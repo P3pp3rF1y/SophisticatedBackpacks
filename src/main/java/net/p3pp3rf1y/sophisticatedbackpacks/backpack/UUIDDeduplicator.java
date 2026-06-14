@@ -35,7 +35,12 @@ public class UUIDDeduplicator {
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
-		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStack(newBackpackItemEntity.getItem());
+		ItemStack newBackpackStack = newBackpackItemEntity.getItem();
+		if (!(newBackpackStack.getItem() instanceof BackpackItem)) {
+			return;
+		}
+
+		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStack(newBackpackStack);
 		newBackpackWrapper.getContentsUuid().ifPresent(backpackId -> dedupeBackpackItemEntityInArea(newBackpackWrapper, newBackpackItemEntity, backpackId));
 	}
 
@@ -48,7 +53,12 @@ public class UUIDDeduplicator {
 	}
 
 	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
-		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStack(entity.getItem());
+		ItemStack entityStack = entity.getItem();
+		if (!(entityStack.getItem() instanceof BackpackItem)) {
+			return false;
+		}
+
+		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStack(entityStack);
 		return entityBackpackWrapper.getContentsUuid().map(backpackId -> {
 			if (backpackId.equals(newBackpackId)) {
 				dedupeBackpackWrappers(newBackpackWrapper, entityBackpackWrapper);
