@@ -396,6 +396,9 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void removeContentsUuid(ItemStack stack) {
+		if (!(stack.getItem() instanceof BackpackItem)) {
+			return;
+		}
 		BackpackWrapper.fromStack(stack).getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid));
 	}
 
