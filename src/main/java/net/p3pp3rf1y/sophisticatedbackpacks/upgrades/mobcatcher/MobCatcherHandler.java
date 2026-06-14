@@ -39,9 +39,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class MobCatcherHandler {
 	private MobCatcherHandler() {
@@ -115,8 +113,7 @@ public class MobCatcherHandler {
 		if (entity.isPassenger() || entity.isVehicle()) {
 			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_passengers_blocked"));
 		}
-		Identifier entityType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-		if (getConfiguredEntityTypes(Config.SERVER.mobCatcherUpgrade.entityBlockList.get()).contains(entityType)) {
+		if (Config.SERVER.mobCatcherUpgrade.matchesEntityBlockList(entity.getType())) {
 			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_blocklisted"));
 		}
 		if (entity instanceof OwnableEntity ownable && ownable.getOwnerReference() != null && !ownable.getOwnerReference().getUUID().equals(player.getUUID())) {
@@ -252,13 +249,10 @@ public class MobCatcherHandler {
 	}
 
 	public static boolean isHostile(LivingEntity entity) {
-		Identifier entityType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-		Set<Identifier> passiveOverrides = getConfiguredEntityTypes(Config.SERVER.mobCatcherUpgrade.passiveOverrides.get());
-		if (passiveOverrides.contains(entityType)) {
+		if (Config.SERVER.mobCatcherUpgrade.matchesPassiveOverrides(entity.getType())) {
 			return false;
 		}
-		Set<Identifier> hostileOverrides = getConfiguredEntityTypes(Config.SERVER.mobCatcherUpgrade.hostileOverrides.get());
-		return hostileOverrides.contains(entityType) || entity instanceof Enemy || entity.getType().getCategory() == MobCategory.MONSTER;
+		return Config.SERVER.mobCatcherUpgrade.matchesHostileOverrides(entity.getType()) || entity instanceof Enemy || entity.getType().getCategory() == MobCategory.MONSTER;
 	}
 
 	public static int getSlotCost(LivingEntity entity, boolean hostile) {
@@ -271,10 +265,6 @@ public class MobCatcherHandler {
 
 	static double getEffectiveMaxHealth(LivingEntity entity) {
 		return Math.max(1D, Math.max(Math.max(entity.getAttributeValue(Attributes.MAX_HEALTH), entity.getMaxHealth()), entity.getHealth()));
-	}
-
-	private static Set<Identifier> getConfiguredEntityTypes(List<? extends String> configuredEntityTypes) {
-		return configuredEntityTypes.stream().map(Identifier::parse).collect(Collectors.toSet());
 	}
 
 	private static CaptureResult fail(ServerPlayer player, Component message) {
