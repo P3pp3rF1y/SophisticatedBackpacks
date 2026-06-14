@@ -140,6 +140,7 @@ public class Config {
 			stackUpgrade.clearNonStackableItems();
 			compactingUpgrade.clearCache();
 			maxUpgradesPerStorage.clearCache();
+			mobCatcherUpgrade.clearCache();
 			nerfsConfig.cachedEffect = null;
 		}
 
