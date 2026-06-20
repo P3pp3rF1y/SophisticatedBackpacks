@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -342,23 +343,23 @@ public class Config {
 
 			private Map<EntityType<?>, ResourceKey<LootTable>> getDefaultEntityLootMapping() {
 				Map<EntityType<?>, ResourceKey<LootTable>> mapping = new LinkedHashMap<>();
-				mapping.put(EntityType.CREEPER, BuiltInLootTables.DESERT_PYRAMID);
-				mapping.put(EntityType.DROWNED, BuiltInLootTables.SHIPWRECK_TREASURE);
-				mapping.put(EntityType.ENDERMAN, BuiltInLootTables.END_CITY_TREASURE);
-				mapping.put(EntityType.EVOKER, BuiltInLootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.HUSK, BuiltInLootTables.DESERT_PYRAMID);
-				mapping.put(EntityType.PIGLIN, BuiltInLootTables.BASTION_BRIDGE);
-				mapping.put(EntityType.PIGLIN_BRUTE, BuiltInLootTables.BASTION_TREASURE);
-				mapping.put(EntityType.PILLAGER, BuiltInLootTables.PILLAGER_OUTPOST);
-				mapping.put(EntityType.SKELETON, BuiltInLootTables.SIMPLE_DUNGEON);
-				mapping.put(EntityType.STRAY, BuiltInLootTables.IGLOO_CHEST);
-				mapping.put(EntityType.VEX, BuiltInLootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.VINDICATOR, BuiltInLootTables.WOODLAND_MANSION);
-				mapping.put(EntityType.WITCH, BuiltInLootTables.BURIED_TREASURE);
-				mapping.put(EntityType.WITHER_SKELETON, BuiltInLootTables.NETHER_BRIDGE);
-				mapping.put(EntityType.ZOMBIE, BuiltInLootTables.SIMPLE_DUNGEON);
-				mapping.put(EntityType.ZOMBIE_VILLAGER, BuiltInLootTables.VILLAGE_ARMORER);
-				mapping.put(EntityType.ZOMBIFIED_PIGLIN, BuiltInLootTables.BASTION_OTHER);
+				mapping.put(EntityTypes.CREEPER, BuiltInLootTables.DESERT_PYRAMID);
+				mapping.put(EntityTypes.DROWNED, BuiltInLootTables.SHIPWRECK_TREASURE);
+				mapping.put(EntityTypes.ENDERMAN, BuiltInLootTables.END_CITY_TREASURE);
+				mapping.put(EntityTypes.EVOKER, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityTypes.HUSK, BuiltInLootTables.DESERT_PYRAMID);
+				mapping.put(EntityTypes.PIGLIN, BuiltInLootTables.BASTION_BRIDGE);
+				mapping.put(EntityTypes.PIGLIN_BRUTE, BuiltInLootTables.BASTION_TREASURE);
+				mapping.put(EntityTypes.PILLAGER, BuiltInLootTables.PILLAGER_OUTPOST);
+				mapping.put(EntityTypes.SKELETON, BuiltInLootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityTypes.STRAY, BuiltInLootTables.IGLOO_CHEST);
+				mapping.put(EntityTypes.VEX, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityTypes.VINDICATOR, BuiltInLootTables.WOODLAND_MANSION);
+				mapping.put(EntityTypes.WITCH, BuiltInLootTables.BURIED_TREASURE);
+				mapping.put(EntityTypes.WITHER_SKELETON, BuiltInLootTables.NETHER_BRIDGE);
+				mapping.put(EntityTypes.ZOMBIE, BuiltInLootTables.SIMPLE_DUNGEON);
+				mapping.put(EntityTypes.ZOMBIE_VILLAGER, BuiltInLootTables.VILLAGE_ARMORER);
+				mapping.put(EntityTypes.ZOMBIFIED_PIGLIN, BuiltInLootTables.BASTION_OTHER);
 				return mapping;
 			}
 		}

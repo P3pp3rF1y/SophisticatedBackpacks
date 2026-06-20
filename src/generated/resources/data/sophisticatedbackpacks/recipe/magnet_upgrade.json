@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedcore:upgrade_next_tier",
-  "category": "misc",
   "key": {
     "E": "#c:ender_pearls",
     "I": "#c:ingots/iron",

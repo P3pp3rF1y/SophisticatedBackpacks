@@ -394,6 +394,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 				return Optional.empty();
 			}
 			livingEntity.load(ValueIOHelper.inputFromCompoundTag(screen.getMinecraft().level.registryAccess(), capturedMob.entityNbt()));
+			livingEntity.setId(Math.floorMod(capturedMob.id().hashCode(), Integer.MAX_VALUE - 1) + 1);
 			capturedMobRenderEntities.put(capturedMob.id(), livingEntity);
 			return Optional.of(livingEntity);
 		} catch (RuntimeException e) {

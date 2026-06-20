@@ -6,7 +6,6 @@
     }
   ],
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "I": "#c:storage_blocks/iron",
     "S": "sophisticatedbackpacks:stack_upgrade_starter_tier"

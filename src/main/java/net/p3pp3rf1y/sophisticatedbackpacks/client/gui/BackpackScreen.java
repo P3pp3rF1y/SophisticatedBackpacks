@@ -37,7 +37,7 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> impleme
 			if (getMenu().isFirstLevelStorage() && (event.key() == 256 || mouseNotOverBackpack())) {
 				if (getMenu().getBackpackContext().wasOpenFromInventory()) {
 					getMinecraft().player.closeContainer();
-					getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+					getMinecraft().gui.setScreen(new InventoryScreen(getMinecraft().player));
 				} else {
 					onClose();
 				}

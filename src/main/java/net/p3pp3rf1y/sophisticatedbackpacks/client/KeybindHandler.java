@@ -162,7 +162,7 @@ public class KeybindHandler {
 			return false;
 		}
 
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = Minecraft.getInstance().gui.screen();
 		if (screen instanceof AbstractContainerScreen<?> containerScreen) {
 			Slot slot = containerScreen.getSlotUnderMouse();
 
@@ -199,7 +199,7 @@ public class KeybindHandler {
 
 		@Override
 		public boolean isActive() {
-			return !GUI.isActive() || Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>;
+			return !GUI.isActive() || Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?>;
 		}
 
 		@Override

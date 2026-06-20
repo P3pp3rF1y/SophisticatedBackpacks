@@ -6,7 +6,6 @@
     }
   ],
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "G": "#c:storage_blocks/gold",
     "S": "sophisticatedbackpacks:stack_upgrade_tier_1"

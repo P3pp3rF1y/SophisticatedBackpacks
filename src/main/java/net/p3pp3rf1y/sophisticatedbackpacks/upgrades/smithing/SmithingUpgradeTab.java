@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.Slot;
@@ -39,7 +39,7 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
-		armorStandPreview.entityType = EntityType.ARMOR_STAND;
+		armorStandPreview.entityType = EntityTypes.ARMOR_STAND;
 		armorStandPreview.showBasePlate = false;
 		armorStandPreview.showArms = true;
 		armorStandPreview.xRot = 25.0F;

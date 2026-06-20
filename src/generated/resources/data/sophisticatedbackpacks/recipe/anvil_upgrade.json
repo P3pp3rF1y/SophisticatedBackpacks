@@ -6,7 +6,6 @@
     }
   ],
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "A": "minecraft:anvil",
     "B": "sophisticatedbackpacks:upgrade_base",

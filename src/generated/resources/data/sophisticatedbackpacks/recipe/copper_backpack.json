@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedbackpacks:backpack_upgrade",
-  "category": "misc",
   "key": {
     "B": "sophisticatedbackpacks:backpack",
     "C": "#c:ingots/copper"

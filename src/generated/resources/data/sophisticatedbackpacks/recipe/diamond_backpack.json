@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedbackpacks:backpack_upgrade",
-  "category": "misc",
   "key": {
     "B": "sophisticatedbackpacks:gold_backpack",
     "D": "#c:gems/diamond"

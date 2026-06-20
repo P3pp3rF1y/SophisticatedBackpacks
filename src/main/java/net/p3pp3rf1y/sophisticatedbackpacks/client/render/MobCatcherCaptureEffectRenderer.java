@@ -63,6 +63,7 @@ public class MobCatcherCaptureEffectRenderer {
 			}
 
 			livingEntity.load(ValueIOHelper.inputFromCompoundTag(level.registryAccess(), entityNbt.copy()));
+			livingEntity.setId(Math.floorMod(livingEntity.getUUID().hashCode(), Integer.MAX_VALUE - 1) + 1);
 			livingEntity.snapTo(position.x, position.y, position.z, yRot, xRot);
 			livingEntity.xOld = position.x;
 			livingEntity.yOld = position.y;

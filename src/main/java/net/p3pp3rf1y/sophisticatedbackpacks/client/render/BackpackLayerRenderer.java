@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -87,7 +88,7 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	}
 
 	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
-		if (entityType == EntityType.WITHER_SKELETON) {
+		if (entityType == EntityTypes.WITHER_SKELETON) {
 			poseStack.scale(WITHER_SKELETON_SCALE, WITHER_SKELETON_SCALE, WITHER_SKELETON_SCALE);
 		}
 
@@ -99,18 +100,18 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
-		if (entityType == EntityType.WITHER_SKELETON) {
+		if (entityType == EntityTypes.WITHER_SKELETON) {
 			yOffset += WITHER_SKELETON_Y_OFFSET_ADJUSTMENT;
 		}
 
-		if (isBaby && entityType != EntityType.PLAYER) {
+		if (isBaby && entityType != EntityTypes.PLAYER) {
 			zOffset += BABY_BACKPACK_Z_OFFSET;
 			yOffset = BABY_BACKPACK_Y_OFFSET;
 		}
 
 		poseStack.translate(0, yOffset, zOffset);
 
-		if (entityType == EntityType.PLAYER) {
+		if (entityType == EntityTypes.PLAYER) {
 			return;
 		}
 

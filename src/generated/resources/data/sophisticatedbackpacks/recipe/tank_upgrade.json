@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedcore:upgrade_next_tier",
-  "category": "misc",
   "key": {
     "B": "sophisticatedbackpacks:upgrade_base",
     "G": "#c:glass_blocks"

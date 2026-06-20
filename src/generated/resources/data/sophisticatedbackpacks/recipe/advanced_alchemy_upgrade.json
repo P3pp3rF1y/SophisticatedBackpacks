@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedcore:upgrade_next_tier",
-  "category": "misc",
   "key": {
     "A": "sophisticatedbackpacks:alchemy_upgrade",
     "D": "#c:gems/diamond",

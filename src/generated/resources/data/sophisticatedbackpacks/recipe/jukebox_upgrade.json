@@ -6,7 +6,6 @@
     }
   ],
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "B": "sophisticatedbackpacks:upgrade_base",
     "I": "#c:ingots/iron",
