@@ -173,7 +173,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private boolean isBlockConnectionDisallowed(@Nullable Direction direction) {
-		return direction != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(direction)).getBlock());
+		return direction != null && level != null
+				&& Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(direction)).getBlock());
 	}
 
 	@Nullable
@@ -270,7 +271,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (level.isClientSide()) {
 			return;
 		}
-		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
+		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+				.forEach(upgrade -> upgrade.tick(null, level, blockPos));
 	}
 
 	@Override

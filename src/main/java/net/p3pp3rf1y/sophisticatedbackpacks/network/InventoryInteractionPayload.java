@@ -14,12 +14,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 public record InventoryInteractionPayload(BlockPos pos, Direction face) implements CustomPacketPayload {
 	public static final Type<InventoryInteractionPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("inventory_interaction"));
-	public static final StreamCodec<ByteBuf, InventoryInteractionPayload> STREAM_CODEC = StreamCodec.composite(
-			BlockPos.STREAM_CODEC,
-			InventoryInteractionPayload::pos,
-			Direction.STREAM_CODEC,
-			InventoryInteractionPayload::face,
-			InventoryInteractionPayload::new);
+	public static final StreamCodec<ByteBuf, InventoryInteractionPayload> STREAM_CODEC = StreamCodec.composite(BlockPos.STREAM_CODEC,
+			InventoryInteractionPayload::pos, Direction.STREAM_CODEC, InventoryInteractionPayload::face, InventoryInteractionPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

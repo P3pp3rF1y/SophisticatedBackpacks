@@ -19,7 +19,11 @@ import org.jspecify.annotations.Nullable;
 import java.util.function.Consumer;
 
 public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgradeWrapper, InceptionUpgradeItem>
-		implements IInventoryWrapperUpgrade, IUpgradeAccessModifier, IFluidHandlerWrapperUpgrade, IEnergyHandlerUpgradeWrapper {
+		implements
+			IInventoryWrapperUpgrade,
+			IUpgradeAccessModifier,
+			IFluidHandlerWrapperUpgrade,
+			IEnergyHandlerUpgradeWrapper {
 	private SubBackpacksHandler subBackpacksHandler = null;
 
 	public InceptionUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -52,7 +56,8 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	private void initSubBackpacksHandler() {
-		boolean cacheSubBackpackWrappers = !(storageWrapper instanceof BackpackWrapper backpackWrapper) || backpackWrapper.shouldCacheContainedBackpackWrappers();
+		boolean cacheSubBackpackWrappers = !(storageWrapper instanceof BackpackWrapper backpackWrapper)
+				|| backpackWrapper.shouldCacheContainedBackpackWrappers();
 		subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler(), cacheSubBackpackWrappers);
 	}
 

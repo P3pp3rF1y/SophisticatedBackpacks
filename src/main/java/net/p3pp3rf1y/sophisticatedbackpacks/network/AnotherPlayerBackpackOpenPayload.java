@@ -19,10 +19,8 @@ import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategoryData;
 
 public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements CustomPacketPayload {
 	public static final Type<AnotherPlayerBackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("another_player_backpack_open"));
-	public static final StreamCodec<ByteBuf, AnotherPlayerBackpackOpenPayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			AnotherPlayerBackpackOpenPayload::anotherPlayerId,
-			AnotherPlayerBackpackOpenPayload::new);
+	public static final StreamCodec<ByteBuf, AnotherPlayerBackpackOpenPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT,
+			AnotherPlayerBackpackOpenPayload::anotherPlayerId, AnotherPlayerBackpackOpenPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
@@ -40,7 +38,8 @@ public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements C
 				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 
 					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
-					player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()), backpackContext::toBuffer);
+					player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
+							backpackContext::toBuffer);
 				} else {
 					player.sendOverlayMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"));
 				}

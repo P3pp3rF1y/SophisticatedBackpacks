@@ -40,7 +40,6 @@ public class BackpackDyeRecipe extends StorageDyeRecipeBase {
 	protected void applyColors(ItemStack coloredStorage, List<DyeColor> mainDyes, List<DyeColor> trimDyes) {
 		IBackpackWrapper coloredWrapper = BackpackWrapper.fromStack(coloredStorage);
 		coloredWrapper.setColors(ColorHelper.calculateColor(coloredWrapper.getMainColor(), BackpackWrapper.DEFAULT_MAIN_COLOR, mainDyes),
-				ColorHelper.calculateColor(coloredWrapper.getAccentColor(), BackpackWrapper.DEFAULT_ACCENT_COLOR, trimDyes)
-		);
+				ColorHelper.calculateColor(coloredWrapper.getAccentColor(), BackpackWrapper.DEFAULT_ACCENT_COLOR, trimDyes));
 	}
 }

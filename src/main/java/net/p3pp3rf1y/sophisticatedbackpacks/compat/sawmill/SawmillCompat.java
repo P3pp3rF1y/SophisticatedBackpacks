@@ -23,23 +23,14 @@ public class SawmillCompat implements ICompat {
 	public void init(IEventBus modBus) {
 		modBus.addListener(this::registerContainers);
 
-/*
-		if (ModList.get().isLoaded(CompatModIds.JEI)) {
-			((Supplier<Runnable>) () -> () -> BackpackJeiPlugin.addAdditionalCatalystRegistrar(registration -> {
-				registration.addCraftingStation(JEIPlugin.WOODCUTTING_RECIPE_TYPE, new ItemStack(SAWMILL_UPGRADE.get()));
-			})).get().run();
-		}
-		if (ModList.get().isLoaded(CompatModIds.EMI)) {
-			((Supplier<Runnable>) () -> () -> BackpackEmiPlugin.addAdditionalWorkstations(registration -> {
-				registration.addWorkstation(EMIPlugin.WOODCUTTING_CATEGORY, SAWMILL_UPGRADE.get());
-			})).get().run();
-		}
-		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.getDist().isClient()) {
-			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
-				registration.addWorkstations(REIPlugin.WOODCUTTING_DISPLAY, SAWMILL_UPGRADE.get());
-			})).get().run();
-		}
-*/
+		/*
+		 * if (ModList.get().isLoaded(CompatModIds.JEI)) { ((Supplier<Runnable>) () -> () -> BackpackJeiPlugin.addAdditionalCatalystRegistrar(registration -> {
+		 * registration.addCraftingStation(JEIPlugin.WOODCUTTING_RECIPE_TYPE, new ItemStack(SAWMILL_UPGRADE.get())); })).get().run(); } if
+		 * (ModList.get().isLoaded(CompatModIds.EMI)) { ((Supplier<Runnable>) () -> () -> BackpackEmiPlugin.addAdditionalWorkstations(registration -> {
+		 * registration.addWorkstation(EMIPlugin.WOODCUTTING_CATEGORY, SAWMILL_UPGRADE.get()); })).get().run(); } if (ModList.get().isLoaded(CompatModIds.REI)
+		 * && FMLEnvironment.getDist().isClient()) { ((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
+		 * registration.addWorkstations(REIPlugin.WOODCUTTING_DISPLAY, SAWMILL_UPGRADE.get()); })).get().run(); }
+		 */
 	}
 
 	public void registerContainers(RegisterEvent event) {
@@ -55,6 +46,6 @@ public class SawmillCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

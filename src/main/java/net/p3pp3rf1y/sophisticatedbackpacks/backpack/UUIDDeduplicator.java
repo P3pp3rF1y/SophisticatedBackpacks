@@ -11,8 +11,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import java.util.UUID;
 
 /**
- * This class has logic for deduplicating backpack UUIDs because people duplicating backpack including its UUID seems to happen fairly regularly
- * as well as some mods also add enchants / legit ways to duplicate loot when mobs are killed which can again include backpack
+ * This class has logic for deduplicating backpack UUIDs because people duplicating backpack including its UUID seems to happen fairly regularly as well as some
+ * mods also add enchants / legit ways to duplicate loot when mobs are killed which can again include backpack
  */
 
 public class UUIDDeduplicator {
@@ -45,7 +45,8 @@ public class UUIDDeduplicator {
 	}
 
 	private static void dedupeBackpackItemEntityInArea(IBackpackWrapper newBackpackWrapper, ItemEntity newBackpackItemEntity, UUID backpackId) {
-		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10), Entity::isAlive)) {
+		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10),
+				Entity::isAlive)) {
 			if (entity != newBackpackItemEntity) {
 				checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity);
 			}

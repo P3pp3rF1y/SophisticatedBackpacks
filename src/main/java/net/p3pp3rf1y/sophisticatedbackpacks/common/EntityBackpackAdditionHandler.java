@@ -70,57 +70,41 @@ public class EntityBackpackAdditionHandler {
 	private EntityBackpackAdditionHandler() {
 	}
 
-	private static final List<WeightedElement<Item>> HELMET_CHANCES = List.of(
-			new WeightedElement<>(1, Items.NETHERITE_HELMET),
-			new WeightedElement<>(3, Items.DIAMOND_HELMET),
-			new WeightedElement<>(9, Items.GOLDEN_HELMET),
-			new WeightedElement<>(27, Items.IRON_HELMET),
-			new WeightedElement<>(81, Items.LEATHER_HELMET)
-	);
-	private static final List<WeightedElement<Item>> LEGGINGS_CHANCES = List.of(
-			new WeightedElement<>(1, Items.NETHERITE_LEGGINGS),
-			new WeightedElement<>(3, Items.DIAMOND_LEGGINGS),
-			new WeightedElement<>(9, Items.GOLDEN_LEGGINGS),
-			new WeightedElement<>(27, Items.IRON_LEGGINGS),
-			new WeightedElement<>(81, Items.LEATHER_LEGGINGS)
-	);
-	private static final List<WeightedElement<Item>> BOOTS_CHANCES = List.of(
-			new WeightedElement<>(1, Items.NETHERITE_BOOTS),
-			new WeightedElement<>(3, Items.DIAMOND_BOOTS),
-			new WeightedElement<>(9, Items.GOLDEN_BOOTS),
-			new WeightedElement<>(27, Items.IRON_BOOTS),
-			new WeightedElement<>(81, Items.LEATHER_BOOTS)
-	);
+	private static final List<WeightedElement<Item>> HELMET_CHANCES = List.of(new WeightedElement<>(1, Items.NETHERITE_HELMET),
+			new WeightedElement<>(3, Items.DIAMOND_HELMET), new WeightedElement<>(9, Items.GOLDEN_HELMET), new WeightedElement<>(27, Items.IRON_HELMET),
+			new WeightedElement<>(81, Items.LEATHER_HELMET));
+	private static final List<WeightedElement<Item>> LEGGINGS_CHANCES = List.of(new WeightedElement<>(1, Items.NETHERITE_LEGGINGS),
+			new WeightedElement<>(3, Items.DIAMOND_LEGGINGS), new WeightedElement<>(9, Items.GOLDEN_LEGGINGS), new WeightedElement<>(27, Items.IRON_LEGGINGS),
+			new WeightedElement<>(81, Items.LEATHER_LEGGINGS));
+	private static final List<WeightedElement<Item>> BOOTS_CHANCES = List.of(new WeightedElement<>(1, Items.NETHERITE_BOOTS),
+			new WeightedElement<>(3, Items.DIAMOND_BOOTS), new WeightedElement<>(9, Items.GOLDEN_BOOTS), new WeightedElement<>(27, Items.IRON_BOOTS),
+			new WeightedElement<>(81, Items.LEATHER_BOOTS));
 
-	private static final Map<Item, Float> dropChanceMultiplier = Map.of(
-			ModItems.BACKPACK.get(), 1F,
-			ModItems.COPPER_BACKPACK.get(), 1.25F,
-			ModItems.IRON_BACKPACK.get(), 1.5F,
-			ModItems.GOLD_BACKPACK.get(), 3F,
-			ModItems.DIAMOND_BACKPACK.get(), 4.5F,
-			ModItems.NETHERITE_BACKPACK.get(), 6F
-	);
+	private static final Map<Item, Float> dropChanceMultiplier = Map.of(ModItems.BACKPACK.get(), 1F, ModItems.COPPER_BACKPACK.get(), 1.25F,
+			ModItems.IRON_BACKPACK.get(), 1.5F, ModItems.GOLD_BACKPACK.get(), 3F, ModItems.DIAMOND_BACKPACK.get(), 4.5F, ModItems.NETHERITE_BACKPACK.get(), 6F);
 
 	private static final List<WeightedElement<BackpackAddition>> BACKPACK_CHANCES = List.of(
-			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.leatherWeight.getAsInt(), new BackpackAddition(ModItems.BACKPACK.get(), 0,
-					HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5))),
-			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.copperWeight.getAsInt(), new BackpackAddition(ModItems.COPPER_BACKPACK.get(), 1,
-					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(3, 5), BOOTS_CHANCES.subList(3, 5))),
-			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.ironWeight.getAsInt(), new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1,
-					HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4), BOOTS_CHANCES.subList(2, 4))),
-			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.goldWeight.getAsInt(), new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2,
-					HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3), BOOTS_CHANCES.subList(1, 3))),
-			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.diamondWeight.getAsInt(), new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3,
-					HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2), BOOTS_CHANCES.subList(0, 2))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.leatherWeight.getAsInt(),
+					new BackpackAddition(ModItems.BACKPACK.get(), 0, HELMET_CHANCES.subList(3, 5), LEGGINGS_CHANCES.subList(3, 5),
+							BOOTS_CHANCES.subList(3, 5))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.copperWeight.getAsInt(),
+					new BackpackAddition(ModItems.COPPER_BACKPACK.get(), 1, HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(3, 5),
+							BOOTS_CHANCES.subList(3, 5))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.ironWeight.getAsInt(),
+					new BackpackAddition(ModItems.IRON_BACKPACK.get(), 1, HELMET_CHANCES.subList(2, 4), LEGGINGS_CHANCES.subList(2, 4),
+							BOOTS_CHANCES.subList(2, 4))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.goldWeight.getAsInt(),
+					new BackpackAddition(ModItems.GOLD_BACKPACK.get(), 2, HELMET_CHANCES.subList(1, 3), LEGGINGS_CHANCES.subList(1, 3),
+							BOOTS_CHANCES.subList(1, 3))),
+			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.diamondWeight.getAsInt(),
+					new BackpackAddition(ModItems.DIAMOND_BACKPACK.get(), 3, HELMET_CHANCES.subList(0, 2), LEGGINGS_CHANCES.subList(0, 2),
+							BOOTS_CHANCES.subList(0, 2))),
 			new WeightedElement<>(Config.SERVER.entityBackpackAdditions.netheriteWeight.getAsInt(), new BackpackAddition(ModItems.NETHERITE_BACKPACK.get(), 4,
-					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1)))
-	);
+					HELMET_CHANCES.subList(0, 1), LEGGINGS_CHANCES.subList(0, 1), BOOTS_CHANCES.subList(0, 1))));
 
-	private static final Map<Integer, List<WeightedElement<BackpackAddition>>> DIFFICULTY_BACKPACK_CHANCES = Map.of(
-			0, BACKPACK_CHANCES,
-			1, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierMidDifficulty.getAsInt(), 6),
-			2, BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierHighDifficulty.getAsInt(), 6)
-	);
+	private static final Map<Integer, List<WeightedElement<BackpackAddition>>> DIFFICULTY_BACKPACK_CHANCES = Map.of(0, BACKPACK_CHANCES, 1,
+			BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierMidDifficulty.getAsInt(), 6), 2,
+			BACKPACK_CHANCES.subList(Config.SERVER.entityBackpackAdditions.minBackpackTierHighDifficulty.getAsInt(), 6));
 
 	static {
 		VanillaDiscHandler.setDiscBlockListGetter(Config.SERVER.entityBackpackAdditions.discBlockList);
@@ -155,7 +139,8 @@ public class EntityBackpackAdditionHandler {
 		int difficultyIndex = 0;
 		if (Config.SERVER.entityBackpackAdditions.localDifficultyEffectsBackpackSpawns.getAsBoolean()) {
 			float localDifficulty = level.getCurrentDifficultyAt(monster.blockPosition()).getEffectiveDifficulty();
-			difficultyIndex = Ints.constrainToRange((int) Math.floor(DIFFICULTY_BACKPACK_CHANCES.size() / MAX_LOCAL_DIFFICULTY * localDifficulty - 0.1f), 0, DIFFICULTY_BACKPACK_CHANCES.size() - 1);
+			difficultyIndex = Ints.constrainToRange((int) Math.floor(DIFFICULTY_BACKPACK_CHANCES.size() / MAX_LOCAL_DIFFICULTY * localDifficulty - 0.1f), 0,
+					DIFFICULTY_BACKPACK_CHANCES.size() - 1);
 		}
 
 		RandHelper.getRandomWeightedElement(rnd, DIFFICULTY_BACKPACK_CHANCES.get(difficultyIndex)).ifPresent(backpackAddition -> {
@@ -173,7 +158,8 @@ public class EntityBackpackAdditionHandler {
 		});
 	}
 
-	private static void equipArmorPiece(Monster monster, RandomSource rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot, ServerLevelAccessor level) {
+	private static void equipArmorPiece(Monster monster, RandomSource rnd, int minDifficulty, List<WeightedElement<Item>> armorChances, EquipmentSlot slot,
+			ServerLevelAccessor level) {
 		RandHelper.getRandomWeightedElement(rnd, armorChances).ifPresent(armorPiece -> {
 			if (armorPiece != Items.AIR) {
 				ItemStack armorStack = new ItemStack(armorPiece);
@@ -198,7 +184,7 @@ public class EntityBackpackAdditionHandler {
 			setLoot(monster, wrapper, level, (float) partialRolls / MAX_DIFFICULTY);
 		}
 		if (playMusicDisc) {
-			wrapper.getInventoryHandler(); //just to assign uuid and real upgrade handler
+			wrapper.getInventoryHandler(); // just to assign uuid and real upgrade handler
 			if (wrapper.getUpgradeHandler().size() > 0) {
 				setSpawnedJukeboxUpgrade(monster, true);
 				addJukeboxUpgradeAndRandomDisc(level.getRandom(), wrapper, rnd);
@@ -254,13 +240,9 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(
-			new ApplicableEffect(List.of(MobEffects.RESISTANCE, MobEffects.REGENERATION), 1),
-			new ApplicableEffect(MobEffects.FIRE_RESISTANCE),
-			new ApplicableEffect(MobEffects.ABSORPTION),
-			new ApplicableEffect(MobEffects.HEALTH_BOOST),
-			new ApplicableEffect(MobEffects.SPEED),
-			new ApplicableEffect(MobEffects.STRENGTH));
+	private static final List<ApplicableEffect> APPLICABLE_EFFECTS = List.of(new ApplicableEffect(List.of(MobEffects.RESISTANCE, MobEffects.REGENERATION), 1),
+			new ApplicableEffect(MobEffects.FIRE_RESISTANCE), new ApplicableEffect(MobEffects.ABSORPTION), new ApplicableEffect(MobEffects.HEALTH_BOOST),
+			new ApplicableEffect(MobEffects.SPEED), new ApplicableEffect(MobEffects.STRENGTH));
 
 	private static void setLoot(Monster monster, IBackpackWrapper backpackWrapper, LevelAccessor level, float lootFactor) {
 		MinecraftServer server = level.getServer();
@@ -275,16 +257,16 @@ public class EntityBackpackAdditionHandler {
 
 	private static void applyPotions(Monster monster, int difficulty, int minDifficulty, RandomSource rnd) {
 		if (Config.SERVER.entityBackpackAdditions.buffWithPotionEffects.get()) {
-			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2)
-					.forEach(applicableEffect -> {
-						int amplifier = Math.min(Math.max(minDifficulty, rnd.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
-						monster.addEffect(new MobEffectInstance(applicableEffect.getRandomEffect(rnd), 30 * 60 * 20, amplifier));
-					});
+			RandHelper.getNRandomElements(APPLICABLE_EFFECTS, difficulty + 2).forEach(applicableEffect -> {
+				int amplifier = Math.min(Math.max(minDifficulty, rnd.nextInt(difficulty + 1)), applicableEffect.getMaxAmplifier());
+				monster.addEffect(new MobEffectInstance(applicableEffect.getRandomEffect(rnd), 30 * 60 * 20, amplifier));
+			});
 		}
 	}
 
 	private static void addLoot(Monster monster, IBackpackWrapper backpackWrapper, float lootFactor) {
-		Config.SERVER.entityBackpackAdditions.getLootTableName(monster.getType()).ifPresent(lootTableName -> backpackWrapper.setLoot(lootTableName, lootFactor));
+		Config.SERVER.entityBackpackAdditions.getLootTableName(monster.getType())
+				.ifPresent(lootTableName -> backpackWrapper.setLoot(lootTableName, lootFactor));
 	}
 
 	static void handleBackpackDrop(LivingDropsEvent event) {
@@ -382,7 +364,8 @@ public class EntityBackpackAdditionHandler {
 		}
 	}
 
-	private static boolean shouldDropBackpack(LivingDropsEvent event, Config.Server.EntityBackpackAdditionsConfig additionsConfig, LivingEntity mob, ItemStack backpack) {
+	private static boolean shouldDropBackpack(LivingDropsEvent event, Config.Server.EntityBackpackAdditionsConfig additionsConfig, LivingEntity mob,
+			ItemStack backpack) {
 		if (!(event.getSource().getEntity() instanceof Player player)) {
 			return false;
 		}
@@ -390,8 +373,11 @@ public class EntityBackpackAdditionHandler {
 			return false;
 		}
 		float lootingChanceMultiplier = dropChanceMultiplier.getOrDefault(backpack.getItem(), 1F);
-		int lootingLevel = player.level().registryAccess().lookup(Registries.ENCHANTMENT).map(registry -> player.getMainHandItem().getEnchantmentLevel(registry.getOrThrow(Enchantments.LOOTING))).orElse(0);
-		return mob.level().getRandom().nextFloat() < (additionsConfig.backpackDropChance.get() + lootingLevel * additionsConfig.lootingChanceIncreasePerLevel.get()) * lootingChanceMultiplier;
+		int lootingLevel = player.level().registryAccess().lookup(Registries.ENCHANTMENT)
+				.map(registry -> player.getMainHandItem().getEnchantmentLevel(registry.getOrThrow(Enchantments.LOOTING))).orElse(0);
+		return mob.level().getRandom()
+				.nextFloat() < (additionsConfig.backpackDropChance.get() + lootingLevel * additionsConfig.lootingChanceIncreasePerLevel.get())
+						* lootingChanceMultiplier;
 	}
 
 	public static void removeBeneficialEffects(Creeper creeper) {
@@ -515,10 +501,8 @@ public class EntityBackpackAdditionHandler {
 		entity.getPersistentData().remove(ENTITY_DATA_TAG);
 	}
 
-	private record BackpackAddition(Item backpackItem, int minDifficulty,
-									List<WeightedElement<Item>> helmetChances,
-									List<WeightedElement<Item>> leggingsChances,
-									List<WeightedElement<Item>> bootsChances) {
+	private record BackpackAddition(Item backpackItem, int minDifficulty, List<WeightedElement<Item>> helmetChances,
+			List<WeightedElement<Item>> leggingsChances, List<WeightedElement<Item>> bootsChances) {
 		public List<WeightedElement<Item>> getHelmetChances() {
 			return helmetChances;
 		}

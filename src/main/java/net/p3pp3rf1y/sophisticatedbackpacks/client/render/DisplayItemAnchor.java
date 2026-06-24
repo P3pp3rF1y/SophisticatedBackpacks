@@ -7,89 +7,86 @@ import net.minecraft.core.Direction;
 import org.joml.Quaternionf;
 
 public final class DisplayItemAnchor {
-    public final double centerX;
-    public final double centerY;
-    public final double centerZ;
+	public final double centerX;
+	public final double centerY;
+	public final double centerZ;
 
-    public final float scale;
-    public final Quaternionf facingRotation;
-    public final float depthOffset;
+	public final float scale;
+	public final Quaternionf facingRotation;
+	public final float depthOffset;
 
-    private DisplayItemAnchor(double centerX, double centerY, double centerZ,
-							  float scale,
-							  Quaternionf facingRotation,
-							  float depthOffset) {
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.centerZ = centerZ;
-        this.scale = scale;
-        this.facingRotation = facingRotation;
-        this.depthOffset = depthOffset;
-    }
+	private DisplayItemAnchor(double centerX, double centerY, double centerZ, float scale, Quaternionf facingRotation, float depthOffset) {
+		this.centerX = centerX;
+		this.centerY = centerY;
+		this.centerZ = centerZ;
+		this.scale = scale;
+		this.facingRotation = facingRotation;
+		this.depthOffset = depthOffset;
+	}
 
-    public static DisplayItemAnchor fromQuad(BakedQuad quad) {
-        float minX = Float.POSITIVE_INFINITY;
-        float minY = Float.POSITIVE_INFINITY;
-        float minZ = Float.POSITIVE_INFINITY;
-        float maxX = Float.NEGATIVE_INFINITY;
-        float maxY = Float.NEGATIVE_INFINITY;
-        float maxZ = Float.NEGATIVE_INFINITY;
+	public static DisplayItemAnchor fromQuad(BakedQuad quad) {
+		float minX = Float.POSITIVE_INFINITY;
+		float minY = Float.POSITIVE_INFINITY;
+		float minZ = Float.POSITIVE_INFINITY;
+		float maxX = Float.NEGATIVE_INFINITY;
+		float maxY = Float.NEGATIVE_INFINITY;
+		float maxZ = Float.NEGATIVE_INFINITY;
 
-        for (int i = 0; i < 4; i++) {
-            float x = quad.position(i).x();
-            float y = quad.position(i).y();
-            float z = quad.position(i).z();
+		for (int i = 0; i < 4; i++) {
+			float x = quad.position(i).x();
+			float y = quad.position(i).y();
+			float z = quad.position(i).z();
 
-            minX = Math.min(minX, x);
-            minY = Math.min(minY, y);
-            minZ = Math.min(minZ, z);
-            maxX = Math.max(maxX, x);
-            maxY = Math.max(maxY, y);
-            maxZ = Math.max(maxZ, z);
-        }
+			minX = Math.min(minX, x);
+			minY = Math.min(minY, y);
+			minZ = Math.min(minZ, z);
+			maxX = Math.max(maxX, x);
+			maxY = Math.max(maxY, y);
+			maxZ = Math.max(maxZ, z);
+		}
 
-        double centerX = (minX + maxX) * 0.5;
-        double centerY = (minY + maxY) * 0.5;
-        double centerZ = (minZ + maxZ) * 0.5;
+		double centerX = (minX + maxX) * 0.5;
+		double centerY = (minY + maxY) * 0.5;
+		double centerZ = (minZ + maxZ) * 0.5;
 
-        Direction face = quad.direction();
+		Direction face = quad.direction();
 
-        float sizeU, sizeV;
-        switch (face.getAxis()) {
-            case X -> {
-                sizeU = (maxZ - minZ);
-                sizeV = (maxY - minY);
+		float sizeU, sizeV;
+		switch (face.getAxis()) {
+			case X -> {
+				sizeU = (maxZ - minZ);
+				sizeV = (maxY - minY);
 			}
-            case Y -> {
-                sizeU = (maxX - minX);
-                sizeV = (maxZ - minZ);
-            }
-            default -> {
-                sizeU = (maxX - minX);
-                sizeV = (maxY - minY);
-            }
-        }
+			case Y -> {
+				sizeU = (maxX - minX);
+				sizeV = (maxZ - minZ);
+			}
+			default -> {
+				sizeU = (maxX - minX);
+				sizeV = (maxY - minY);
+			}
+		}
 
-        float scale = Math.min(sizeU, sizeV);
+		float scale = Math.min(sizeU, sizeV);
 
 		Quaternionf facingRotation = switch (face) {
 			case NORTH -> Axis.YP.rotationDegrees(0f);
 			case SOUTH -> Axis.YP.rotationDegrees(180f);
-			case WEST  -> Axis.YP.rotationDegrees(-90f);
-			case EAST  -> Axis.YP.rotationDegrees(90f);
-			case UP    -> Axis.XP.rotationDegrees(-90f);
-			case DOWN  -> Axis.XP.rotationDegrees(90f);
+			case WEST -> Axis.YP.rotationDegrees(-90f);
+			case EAST -> Axis.YP.rotationDegrees(90f);
+			case UP -> Axis.XP.rotationDegrees(-90f);
+			case DOWN -> Axis.XP.rotationDegrees(90f);
 		};
 
-        float depthOffset = 0.0015f;
+		float depthOffset = 0.0015f;
 
-        return new DisplayItemAnchor(centerX, centerY, centerZ, scale, facingRotation, depthOffset);
-    }
+		return new DisplayItemAnchor(centerX, centerY, centerZ, scale, facingRotation, depthOffset);
+	}
 
-    public void applyTransform(PoseStack poseStack) {
-        poseStack.translate(centerX, centerY, centerZ);
-        poseStack.mulPose(facingRotation);
-        poseStack.translate(0.0, 0.0, depthOffset);
-        poseStack.scale(scale, scale, scale);
-    }
+	public void applyTransform(PoseStack poseStack) {
+		poseStack.translate(centerX, centerY, centerZ);
+		poseStack.mulPose(facingRotation);
+		poseStack.translate(0.0, 0.0, depthOffset);
+		poseStack.scale(scale, scale, scale);
+	}
 }

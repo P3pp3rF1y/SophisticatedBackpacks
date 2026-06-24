@@ -36,7 +36,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	private final ArmorStandRenderState armorStandPreview = new ArmorStandRenderState();
 
 	public SmithingUpgradeTab(SmithingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"),
+				BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
 		armorStandPreview.entityType = EntityType.ARMOR_STAND;
@@ -66,26 +67,27 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
 			ItemModelResolver itemmodelresolver = this.minecraft.getItemModelResolver();
 			switch (equippable != null ? equippable.slot() : null) {
-				case HEAD:
+				case HEAD :
 					if (HumanoidArmorLayer.shouldRender(stack, EquipmentSlot.HEAD)) {
 						this.armorStandPreview.headEquipment = stack.copy();
 					} else {
-						itemmodelresolver.updateForTopItem(this.armorStandPreview.headItem, stack, ItemDisplayContext.HEAD, (Level)null, (ItemOwner)null, 0);
+						itemmodelresolver.updateForTopItem(this.armorStandPreview.headItem, stack, ItemDisplayContext.HEAD, (Level) null, (ItemOwner) null, 0);
 					}
 					break;
-				case CHEST:
+				case CHEST :
 					this.armorStandPreview.chestEquipment = stack.copy();
 					break;
-				case LEGS:
+				case LEGS :
 					this.armorStandPreview.legsEquipment = stack.copy();
 					break;
-				case FEET:
+				case FEET :
 					this.armorStandPreview.feetEquipment = stack.copy();
 					break;
-				case null:
-				default:
+				case null :
+				default :
 					this.armorStandPreview.leftHandItemStack = stack.copy();
-					itemmodelresolver.updateForTopItem(this.armorStandPreview.leftHandItemState, stack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, (Level)null, (ItemOwner)null, 0);
+					itemmodelresolver.updateForTopItem(this.armorStandPreview.leftHandItemState, stack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, (Level) null,
+							(ItemOwner) null, 0);
 			}
 		}
 	}
@@ -137,7 +139,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			GuiHelper.blit(guiGraphics, arrowX, arrowY, RED_CROSS);
 		}
 
-		guiGraphics.entity(armorStandPreview, 25f, SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, getX(), getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10);
+		guiGraphics.entity(armorStandPreview, 25f, SmithingScreen.ARMOR_STAND_TRANSLATION, SmithingScreen.ARMOR_STAND_ANGLE, null, getX(),
+				getTopY() + 1 + 24 + 16, getX() + getWidth(), getY() + getHeight() - 10);
 	}
 
 	private int getArrowY(int inputSlotsY) {
@@ -189,7 +192,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean isHoveringEmptySlot(Slot slot, int mouseX, int mouseY) {
-		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop() && mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
+		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop()
+				&& mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
 	}
 
 	private void renderOnboardingTooltips(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
@@ -215,7 +219,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean hasRecipeError() {
-		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem() && !getContainer().getResultSlot().hasItem();
+		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem()
+				&& !getContainer().getResultSlot().hasItem();
 	}
 
 }

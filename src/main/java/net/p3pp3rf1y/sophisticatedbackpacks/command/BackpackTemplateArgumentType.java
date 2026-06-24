@@ -19,8 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 public class BackpackTemplateArgumentType implements ArgumentType<Identifier> {
-	private static final DynamicCommandExceptionType ERROR_INVALID =
-			new DynamicCommandExceptionType(BackpackTemplates.INVALID_CHARACTER::apply);
+	private static final DynamicCommandExceptionType ERROR_INVALID = new DynamicCommandExceptionType(BackpackTemplates.INVALID_CHARACTER::apply);
 
 	private final boolean includeDatapackTemplates;
 
@@ -53,10 +52,7 @@ public class BackpackTemplateArgumentType implements ArgumentType<Identifier> {
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (context.getSource() instanceof CommandSourceStack) {
 			return SharedSuggestionProvider.suggest(
-					BackpackTemplates.getTemplateNames(includeDatapackTemplates).stream()
-							.map(Identifier::toString)
-							.sorted(Comparator.naturalOrder())
-							.toList(),
+					BackpackTemplates.getTemplateNames(includeDatapackTemplates).stream().map(Identifier::toString).sorted(Comparator.naturalOrder()).toList(),
 					builder);
 		} else if (context.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
 			return sharedSuggestionProvider.customSuggestion(context);

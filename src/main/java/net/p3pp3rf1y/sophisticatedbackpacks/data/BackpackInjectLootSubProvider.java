@@ -30,7 +30,8 @@ public class BackpackInjectLootSubProvider implements LootTableSubProvider {
 	public static final ResourceKey<LootTable> SIMPLE_DUNGEON = createInjectLootTableRegistryKey(BuiltInLootTables.SIMPLE_DUNGEON);
 	public static final ResourceKey<LootTable> WOODLAND_MANSION = createInjectLootTableRegistryKey(BuiltInLootTables.WOODLAND_MANSION);
 	public static final ResourceKey<LootTable> SPAWN_BONUS_CHEST = createInjectLootTableRegistryKey(BuiltInLootTables.SPAWN_BONUS_CHEST);
-	public static final Set<ResourceKey<LootTable>> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE, SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION, SPAWN_BONUS_CHEST);
+	public static final Set<ResourceKey<LootTable>> ALL_TABLES = Set.of(ABANDONED_MINESHAFT, BASTION_TREASURE, DESERT_PYRAMID, END_CITY_TREASURE, NETHER_BRIDGE,
+			SHIPWRECK_TREASURE, SIMPLE_DUNGEON, WOODLAND_MANSION, SPAWN_BONUS_CHEST);
 
 	private static ResourceKey<LootTable> createInjectLootTableRegistryKey(ResourceKey<LootTable> vanillaLootTable) {
 		Identifier location = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, INJECT_FOLDER + vanillaLootTable.identifier().getPath());
@@ -42,43 +43,25 @@ public class BackpackInjectLootSubProvider implements LootTableSubProvider {
 
 	@Override
 	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> tables) {
-		tables.accept(SPAWN_BONUS_CHEST, getLootTable(0,
-				getItemLootEntry(ModItems.BACKPACK.get(), 100)));
-		tables.accept(SIMPLE_DUNGEON, getLootTable(90,
-				getItemLootEntry(ModItems.BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),
+		tables.accept(SPAWN_BONUS_CHEST, getLootTable(0, getItemLootEntry(ModItems.BACKPACK.get(), 100)));
+		tables.accept(SIMPLE_DUNGEON, getLootTable(90, getItemLootEntry(ModItems.BACKPACK.get(), 5), getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.PICKUP_UPGRADE.get(), 2)));
-		tables.accept(ABANDONED_MINESHAFT, getLootTable(84,
-				getItemLootEntry(ModItems.BACKPACK.get(), 7),
-				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
-				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
-		tables.accept(DESERT_PYRAMID, getLootTable(89,
-				getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
-				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
-		tables.accept(SHIPWRECK_TREASURE, getLootTable(92,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
+		tables.accept(ABANDONED_MINESHAFT,
+				getLootTable(84, getItemLootEntry(ModItems.BACKPACK.get(), 7), getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5),
+						getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3), getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
+						getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
+		tables.accept(DESERT_PYRAMID, getLootTable(89, getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 5), getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1), getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
+		tables.accept(SHIPWRECK_TREASURE, getLootTable(92, getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4), getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
 				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
-		tables.accept(WOODLAND_MANSION, getLootTable(92,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
+		tables.accept(WOODLAND_MANSION, getLootTable(92, getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4), getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
 				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
-		tables.accept(NETHER_BRIDGE, getLootTable(90,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 3),
+		tables.accept(NETHER_BRIDGE, getLootTable(90, getItemLootEntry(ModItems.IRON_BACKPACK.get(), 5), getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 3),
 				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
-		tables.accept(BASTION_TREASURE, getLootTable(90,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
+		tables.accept(BASTION_TREASURE, getLootTable(90, getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3), getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
 				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
-		tables.accept(END_CITY_TREASURE, getLootTable(90,
-				getItemLootEntry(ModItems.DIAMOND_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
+		tables.accept(END_CITY_TREASURE, getLootTable(90, getItemLootEntry(ModItems.DIAMOND_BACKPACK.get(), 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5), getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
 	}
 
 	private LootPoolEntryContainer.Builder<?> getItemLootEntry(Item item, int weight) {

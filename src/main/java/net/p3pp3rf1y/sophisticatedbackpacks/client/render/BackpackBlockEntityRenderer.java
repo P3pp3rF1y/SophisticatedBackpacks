@@ -5,16 +5,16 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.FluidModel;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -22,8 +22,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.client.fluid.FluidTintSource;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity, BackpackBlockEntityRenderer.BackpackRenderState> {
 	private final ItemModelResolver itemModelResolver;
 	@Nullable
-	private BakedQuad displayItemQuad = null; //TODO this will need to be multiple quads based on model shown
+	private BakedQuad displayItemQuad = null; // TODO this will need to be multiple quads based on model shown
 
 	public BackpackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 		this.itemModelResolver = context.itemModelResolver();
@@ -81,7 +81,8 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	}
 
 	@Override
-	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos,
+			ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
 		BlockEntityRenderer.super.extractRenderState(blockEntity, renderState, partialTick, cameraPos, crumblingOverlay);
 
 		BlockState state = blockEntity.getBlockState();
@@ -93,22 +94,19 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		RenderData.DisplayData displayData = renderDataHandler.getDisplayData();
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
-			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null, 0);
+			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null,
+					0);
 			renderState.displayItemRotation = displayItem.rotation();
 		} else {
 			renderState.displayItem = new ItemStackRenderState();
 			renderState.displayItemRotation = 0;
 		}
 
-		renderState.tanks = renderDataHandler.getTankRenderData().entrySet().stream()
-				.filter(entry -> entry.getValue().getFluid().isPresent())
-				.collect(Collectors.toMap(
-						Map.Entry::getKey,
-						entry -> {
-							FluidStack fluidStack = entry.getValue().getFluid().get();
-							return new BackpackRenderState.TankState(getStillSprite(fluidStack), getTintColor(fluidStack), entry.getValue().fillRatio());
-						}
-				));
+		renderState.tanks = renderDataHandler.getTankRenderData().entrySet().stream().filter(entry -> entry.getValue().getFluid().isPresent())
+				.collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+					FluidStack fluidStack = entry.getValue().getFluid().get();
+					return new BackpackRenderState.TankState(getStillSprite(fluidStack), getTintColor(fluidStack), entry.getValue().fillRatio());
+				}));
 		renderState.batteryChargeRatio = renderDataHandler.getBatteryRenderData().map(RenderData.BatteryRenderData::chargeRatio).orElse(0f);
 
 		renderState.showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
@@ -138,7 +136,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			return displayItemQuad;
 		}
 		if (Minecraft.getInstance().getModelManager().getItemModel(backpack.get(DataComponents.ITEM_MODEL)) instanceof BackpackItemModel backpackItemModel
-			&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
+				&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
 			displayItemQuad = backpackBlockModel.getDisplayItemQuad();
 		}
 		return null;
@@ -152,6 +150,8 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	private static int getTintColor(FluidStack fluidStack) {
 		FluidState fluidState = fluidStack.getFluid().defaultFluidState();
 		FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluidState);
-		return fluidModel.tintSource() instanceof FluidTintSource fluidTintSource ? fluidTintSource.colorAsStack(fluidStack) : fluidModel.tintSource() != null ? fluidModel.tintSource().color(fluidState.createLegacyBlock()) : -1;
+		return fluidModel.tintSource() instanceof FluidTintSource fluidTintSource
+				? fluidTintSource.colorAsStack(fluidStack)
+				: fluidModel.tintSource() != null ? fluidModel.tintSource().color(fluidState.createLegacyBlock()) : -1;
 	}
 }

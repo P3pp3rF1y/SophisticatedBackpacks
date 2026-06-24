@@ -33,12 +33,8 @@ import java.util.regex.Pattern;
 public class BackpackTemplates {
 	public static final Pattern EXPORT_TEMPLATE_NAMESPACE_PATTERN = Pattern.compile("[a-z0-9_\\-\\s]+");
 	public static final Pattern EXPORT_TEMPLATE_PATH_PATTERN = Pattern.compile("[a-z0-9/_\\-\\s]+");
-	public static final Function<Object, MutableComponent> INVALID_CHARACTER =
-			(invalid_character) ->
-					Component.translatable(
-							"commands.sophisticatedbackpacks.template.export.failure.invalid_characters",
-							invalid_character
-					).withStyle(ChatFormatting.RED);
+	public static final Function<Object, MutableComponent> INVALID_CHARACTER = (invalid_character) -> Component
+			.translatable("commands.sophisticatedbackpacks.template.export.failure.invalid_characters", invalid_character).withStyle(ChatFormatting.RED);
 
 	private BackpackTemplates() {
 	}
@@ -46,7 +42,8 @@ public class BackpackTemplates {
 	public static void setBackpackTemplate(Identifier templateName, IBackpackWrapper wrapper) {
 		Item backpackItem = wrapper.getBackpack().getItem();
 		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
-		backpackUuid.ifPresent(uuid -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem), BackpackStorage.get().getOrCreateBackpackContents(uuid).copy()));
+		backpackUuid.ifPresent(uuid -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem),
+				BackpackStorage.get().getOrCreateBackpackContents(uuid).copy()));
 	}
 
 	public static void setBackpackTemplate(Identifier templateName, Identifier backpackItemRegistryName, ContainerContents contents) {
@@ -105,7 +102,8 @@ public class BackpackTemplates {
 		String fileName = templateName.getPath();
 		Path exportPath = templatesDir.resolve(fileName + ".snbt");
 		try {
-			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(BackpackTemplate.CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, player.level().registryAccess()), backpackTemplate).getOrThrow()));
+			NbtToSnbt.writeSnbt(CachedOutput.NO_CACHE, exportPath, (new SnbtPrinterTagVisitor()).visit(
+					BackpackTemplate.CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, player.level().registryAccess()), backpackTemplate).getOrThrow()));
 		} catch (IOException e) {
 			SophisticatedCore.LOGGER.error("Error writing template export", e);
 			return;
@@ -113,10 +111,8 @@ public class BackpackTemplates {
 
 		DatapackSettingsTemplateManager.putTemplate(templateName.getNamespace(), fileName, backpackTemplate.contents().settings());
 
-		player.sendSystemMessage(
-				Component.translatable("commands.sophisticatedbackpacks.template.export.success",
-						serverLevel.getServer().getWorldPath(LevelResource.ROOT).relativize(exportPath).toString()), false
-		);
+		player.sendSystemMessage(Component.translatable("commands.sophisticatedbackpacks.template.export.success",
+				serverLevel.getServer().getWorldPath(LevelResource.ROOT).relativize(exportPath).toString()), false);
 	}
 
 	public static String findNonMatchingCharacters(Matcher matcher, String input) {

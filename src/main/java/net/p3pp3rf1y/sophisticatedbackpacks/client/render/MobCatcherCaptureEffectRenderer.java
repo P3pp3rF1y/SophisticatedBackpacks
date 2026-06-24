@@ -22,14 +22,13 @@ import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.util.Easing;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.jspecify.annotations.Nullable;
 
 public class MobCatcherCaptureEffectRenderer {
 	private static final int ANIMATION_DURATION_TICKS = 5;
@@ -57,7 +56,8 @@ public class MobCatcherCaptureEffectRenderer {
 		}
 
 		try {
-			Entity entity = BuiltInRegistries.ENTITY_TYPE.getOptional(entityTypeName).map(entityType -> entityType.create(level, EntitySpawnReason.EVENT)).orElse(null);
+			Entity entity = BuiltInRegistries.ENTITY_TYPE.getOptional(entityTypeName).map(entityType -> entityType.create(level, EntitySpawnReason.EVENT))
+					.orElse(null);
 			if (!(entity instanceof LivingEntity livingEntity)) {
 				return;
 			}
@@ -70,7 +70,8 @@ public class MobCatcherCaptureEffectRenderer {
 			livingEntity.yRotO = yRot;
 			livingEntity.xRotO = xRot;
 			pinYRotation(livingEntity, yRot);
-			CAPTURE_EFFECTS.add(new CaptureEffect(entityTypeName, livingEntity, collapsePosition, livingEntity.getBbWidth(), livingEntity.getBbHeight(), yRot, level.getGameTime()));
+			CAPTURE_EFFECTS.add(new CaptureEffect(entityTypeName, livingEntity, collapsePosition, livingEntity.getBbWidth(), livingEntity.getBbHeight(), yRot,
+					level.getGameTime()));
 		} catch (RuntimeException e) {
 			logRenderFailure(entityTypeName, e);
 			addNonRenderingEffect(entityTypeName, collapsePosition, level.getGameTime());
@@ -109,8 +110,8 @@ public class MobCatcherCaptureEffectRenderer {
 		CAPTURE_EFFECTS.add(new CaptureEffect(entityTypeName, null, collapsePosition, 1F, 1F, 0F, startTime));
 	}
 
-	private static void renderEffect(CaptureEffect effect, SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, CameraRenderState cameraRenderState,
-			EntityRenderDispatcher entityRenderDispatcher, float progress) {
+	private static void renderEffect(CaptureEffect effect, SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick,
+			CameraRenderState cameraRenderState, EntityRenderDispatcher entityRenderDispatcher, float progress) {
 		LivingEntity entity = effect.entity();
 		if (entity == null) {
 			return;
@@ -126,7 +127,8 @@ public class MobCatcherCaptureEffectRenderer {
 			Vec3 cameraPos = cameraRenderState.pos;
 			poseStack.translate(collapsePosition.x() - cameraPos.x(), collapsePosition.y() - cameraPos.y(), collapsePosition.z() - cameraPos.z());
 			poseStack.scale(scale, scale, scale);
-			poseStack.translate(entityPosition.x() - collapsePosition.x(), entityPosition.y() - collapsePosition.y(), entityPosition.z() - collapsePosition.z());
+			poseStack.translate(entityPosition.x() - collapsePosition.x(), entityPosition.y() - collapsePosition.y(),
+					entityPosition.z() - collapsePosition.z());
 			EntityRenderState renderState = entityRenderDispatcher.extractEntity(entity, partialTick);
 			renderState.shadowPieces.clear();
 			renderState.shadowRadius = 0F;
@@ -144,11 +146,13 @@ public class MobCatcherCaptureEffectRenderer {
 		RandomSource random = level.getRandom();
 		for (int i = 0; i < 10; i++) {
 			level.addParticle(ParticleTypes.POOF, center.x + randomOffset(random, effect.width()), center.y + randomOffset(random, effect.height()),
-					center.z + randomOffset(random, effect.width()), random.nextGaussian() * 0.03D, random.nextGaussian() * 0.03D, random.nextGaussian() * 0.03D);
+					center.z + randomOffset(random, effect.width()), random.nextGaussian() * 0.03D, random.nextGaussian() * 0.03D,
+					random.nextGaussian() * 0.03D);
 		}
 		for (int i = 0; i < 6; i++) {
 			level.addParticle(ParticleTypes.REVERSE_PORTAL, center.x + randomOffset(random, effect.width()), center.y + randomOffset(random, effect.height()),
-					center.z + randomOffset(random, effect.width()), random.nextGaussian() * 0.02D, random.nextGaussian() * 0.02D, random.nextGaussian() * 0.02D);
+					center.z + randomOffset(random, effect.width()), random.nextGaussian() * 0.02D, random.nextGaussian() * 0.02D,
+					random.nextGaussian() * 0.02D);
 		}
 
 		float pitch = POP_BASE_PITCH + (random.nextFloat() - 0.5F) * POP_PITCH_VARIATION;
@@ -185,7 +189,8 @@ public class MobCatcherCaptureEffectRenderer {
 		private final long startTime;
 		private boolean renderDisabled;
 
-		private CaptureEffect(Identifier entityType, @Nullable LivingEntity entity, Vec3 collapsePosition, float width, float height, float yRot, long startTime) {
+		private CaptureEffect(Identifier entityType, @Nullable LivingEntity entity, Vec3 collapsePosition, float width, float height, float yRot,
+				long startTime) {
 			this.entityType = entityType;
 			this.entity = entity;
 			this.collapsePosition = collapsePosition;

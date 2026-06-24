@@ -1,10 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -42,7 +40,8 @@ public class DyeRecipesMaker {
 				BackpackWrapper.fromStack(backpackOutput).setColors(color.getTextureDiffuseColor(), color.getTextureDiffuseColor());
 				variants.add(new DyeVariantPair(new ItemStack(dyeItem(color)), backpackOutput));
 			}
-			Identifier id = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "single_color_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
+			Identifier id = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID,
+					"single_color_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
 			recipes.add(new SingleColorDyeRecipeSpec(id, List.of(new ItemStack(backpackItem)), variants));
 		}
 		return recipes;
@@ -59,18 +58,18 @@ public class DyeRecipesMaker {
 			ingredients.add(Optional.of(Ingredient.of(dyeItem(DyeColor.BLACK))));
 
 			ItemStack backpackOutput = new ItemStack(backpackItem);
-			int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_MAIN_COLOR, List.of(
-					DyeColor.YELLOW, DyeColor.LIME
-			));
-			int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_ACCENT_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR, List.of(
-					DyeColor.BLUE, DyeColor.BLACK
-			));
+			int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_MAIN_COLOR,
+					List.of(DyeColor.YELLOW, DyeColor.LIME));
+			int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_ACCENT_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR,
+					List.of(DyeColor.BLUE, DyeColor.BLACK));
 
 			BackpackWrapper.fromStack(backpackOutput).setColors(clothColor, trimColor);
 
 			ShapedRecipePattern pattern = new ShapedRecipePattern(3, 2, ingredients, Optional.empty());
-			Identifier id = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "multiple_colors_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
-			recipes.add(new RecipeHolder<>(ClientRecipeHelper.recipeKey(id), new ShapedRecipe(new Recipe.CommonInfo(true), new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, ""), pattern, ItemStackTemplate.fromNonEmptyStack(backpackOutput))));
+			Identifier id = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID,
+					"multiple_colors_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
+			recipes.add(new RecipeHolder<>(ClientRecipeHelper.recipeKey(id), new ShapedRecipe(new Recipe.CommonInfo(true),
+					new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, ""), pattern, ItemStackTemplate.fromNonEmptyStack(backpackOutput))));
 		}
 	}
 
@@ -96,6 +95,7 @@ public class DyeRecipesMaker {
 	}
 
 	private static List<Item> getBackpackItems() {
-		return List.of(ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get(), ModItems.NETHERITE_BACKPACK.get());
+		return List.of(ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(),
+				ModItems.DIAMOND_BACKPACK.get(), ModItems.NETHERITE_BACKPACK.get());
 	}
 }

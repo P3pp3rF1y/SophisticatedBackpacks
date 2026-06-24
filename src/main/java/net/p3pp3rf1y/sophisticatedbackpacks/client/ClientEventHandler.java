@@ -60,7 +60,8 @@ public class ClientEventHandler {
 	}
 
 	private static final String BACKPACK_REG_NAME = "backpack";
-	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
+	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(
+			Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::onModelRegistry);
@@ -112,7 +113,8 @@ public class ClientEventHandler {
 		if (Minecraft.getInstance().isPaused() || livingEntity.level().getRandom().nextInt(32) != 0) {
 			return;
 		}
-		renderDataHandler.getUpgradeClientData().forEach((type, data) -> UpgradeClientRegistry.getUpgradeClientTickHandler(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
+		renderDataHandler.getUpgradeClientData().forEach((type, data) -> UpgradeClientRegistry.getUpgradeClientTickHandler(type)
+				.ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
 	}
 
 	private static Vector3f getBackpackMiddleFacePoint(LivingEntity livingEntity, Vector3f vector) {
@@ -125,14 +127,17 @@ public class ClientEventHandler {
 		return point;
 	}
 
-	private static <T extends IUpgradeClientData> void renderUpgrade(IUpgradeClientTickHandler<T> renderer, LivingEntity livingEntity, UpgradeClientDataType<?> type, IUpgradeClientData data) {
-		//noinspection unchecked
-		type.cast(data).ifPresent(clientData -> renderer.onClientTick(livingEntity.level(), livingEntity.level().getRandom(), vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) clientData));
+	private static <T extends IUpgradeClientData> void renderUpgrade(IUpgradeClientTickHandler<T> renderer, LivingEntity livingEntity,
+			UpgradeClientDataType<?> type, IUpgradeClientData data) {
+		// noinspection unchecked
+		type.cast(data).ifPresent(clientData -> renderer.onClientTick(livingEntity.level(), livingEntity.level().getRandom(),
+				vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) clientData));
 	}
 
 	private static void registerBackpackEntityRenderStateModifier(RegisterRenderStateModifiersEvent event) {
-		//noinspection unchecked
-		event.registerEntityModifier((Class<EntityRenderer<LivingEntity, LivingEntityRenderState>>) (Class<?>) LivingEntityRenderer.class, BackpackLayerRenderer.RENDER_STATE_MODIFIER);
+		// noinspection unchecked
+		event.registerEntityModifier((Class<EntityRenderer<LivingEntity, LivingEntityRenderState>>) (Class<?>) LivingEntityRenderer.class,
+				BackpackLayerRenderer.RENDER_STATE_MODIFIER);
 	}
 
 	private static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
@@ -146,7 +151,8 @@ public class ClientEventHandler {
 
 	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
 		float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		MobCatcherCaptureEffectRenderer.submit(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick, event.getLevelRenderState().cameraRenderState);
+		MobCatcherCaptureEffectRenderer.submit(event.getSubmitNodeCollector(), event.getPoseStack(), partialTick,
+				event.getLevelRenderState().cameraRenderState);
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterLoaders event) {
@@ -167,20 +173,22 @@ public class ClientEventHandler {
 		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), BackpackBlockEntityRenderer::new);
 	}
 
-	@SuppressWarnings("java:S3740") //explanation below
+	@SuppressWarnings("java:S3740") // explanation below
 	private static void registerBackpackLayer(ResourceManager resourceManager) {
 		EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 		Map<PlayerModelType, EntityRenderer<? extends Avatar, ?>> playerRenderers = renderManager.getPlayerRenderers();
 		for (EntityRenderer<? extends Avatar, ?> renderer : playerRenderers.values()) {
 			if (renderer instanceof LivingEntityRenderer<?, ?, ?> livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		}
 
 		renderManager.renderers.forEach((e, r) -> {
 			if (r instanceof LivingEntityRenderer<?, ?, ?> livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		});

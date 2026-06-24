@@ -81,10 +81,10 @@ public class MobCatcherStorage {
 
 	public static Optional<InventoryLayoutPart> getInventoryLayoutPart(IBackpackWrapper backpackWrapper, int slot, int columns, int targetColumns) {
 		InventoryHandler inventoryHandler = backpackWrapper.getInventoryHandler();
-		return getCapturedMobs(backpackWrapper).stream()
-			.filter(capturedMob -> capturedMob.slot() == slot)
-			.findFirst()
-			.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob), getTargetSlot(capturedMob, columns, targetColumns, inventoryHandler.size()), capturedMob.width(), capturedMob.height(), getOccupiedSlots(capturedMob, columns, inventoryHandler.size())));
+		return getCapturedMobs(backpackWrapper).stream().filter(capturedMob -> capturedMob.slot() == slot).findFirst()
+				.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob),
+						getTargetSlot(capturedMob, columns, targetColumns, inventoryHandler.size()), capturedMob.width(), capturedMob.height(),
+						getOccupiedSlots(capturedMob, columns, inventoryHandler.size())));
 	}
 
 	public static void applyInventoryLayout(IBackpackWrapper backpackWrapper, InventoryLayoutFitResult fitResult, int columns) {
@@ -98,7 +98,9 @@ public class MobCatcherStorage {
 			int fittedSlot = fitResult.fittedSlots().getOrDefault(getLayoutPartId(capturedMob), capturedMob.slot());
 			if (fittedSlot != capturedMob.slot()) {
 				changed = true;
-				capturedMobs.add(new CapturedMob(capturedMob.id(), capturedMob.entityType(), capturedMob.entityNbt(), fittedSlot, capturedMob.width(), capturedMob.height(), capturedMob.slotCost(), capturedMob.hostile(), capturedMob.displayName(), capturedMob.currentHealth(), capturedMob.maxHealth()));
+				capturedMobs.add(new CapturedMob(capturedMob.id(), capturedMob.entityType(), capturedMob.entityNbt(), fittedSlot, capturedMob.width(),
+						capturedMob.height(), capturedMob.slotCost(), capturedMob.hostile(), capturedMob.displayName(), capturedMob.currentHealth(),
+						capturedMob.maxHealth()));
 			} else {
 				capturedMobs.add(capturedMob);
 			}
@@ -127,11 +129,13 @@ public class MobCatcherStorage {
 		return Optional.empty();
 	}
 
-	private static boolean isRectangleEmpty(int slot, CapturedMobFootprint footprint, int columns, InventoryHandler inventoryHandler, List<CapturedMob> capturedMobs) {
+	private static boolean isRectangleEmpty(int slot, CapturedMobFootprint footprint, int columns, InventoryHandler inventoryHandler,
+			List<CapturedMob> capturedMobs) {
 		for (int y = 0; y < footprint.height(); y++) {
 			for (int x = 0; x < footprint.width(); x++) {
 				int checkedSlot = slot + y * columns + x;
-				if (checkedSlot >= inventoryHandler.size() || !inventoryHandler.isSlotAccessible(checkedSlot) || !inventoryHandler.getStackInSlot(checkedSlot).isEmpty()) {
+				if (checkedSlot >= inventoryHandler.size() || !inventoryHandler.isSlotAccessible(checkedSlot)
+						|| !inventoryHandler.getStackInSlot(checkedSlot).isEmpty()) {
 					return false;
 				}
 				for (CapturedMob capturedMob : capturedMobs) {
@@ -210,19 +214,10 @@ public class MobCatcherStorage {
 	private static CapturedMob deserialize(CompoundTag tag) {
 		int maxHealth = tag.getInt(MAX_HEALTH_TAG).orElse(1);
 		int currentHealth = tag.getInt(CURRENT_HEALTH_TAG).orElse(0);
-		return new CapturedMob(
-			UUID.fromString(tag.getStringOr(ID_TAG, new UUID(0, 0).toString())),
-			Identifier.parse(tag.getStringOr(ENTITY_TYPE_TAG, "minecraft:pig")),
-			tag.getCompoundOrEmpty(ENTITY_NBT_TAG).copy(),
-			tag.getInt(SLOT_TAG).orElse(0),
-			tag.getInt(WIDTH_TAG).orElse(1),
-			tag.getInt(HEIGHT_TAG).orElse(1),
-			tag.getInt(SLOT_COST_TAG).orElse(1),
-			tag.getBoolean(HOSTILE_TAG).orElse(false),
-			tag.getStringOr(DISPLAY_NAME_TAG, ""),
-			Math.max(0, currentHealth),
-			Math.max(1, maxHealth)
-		);
+		return new CapturedMob(UUID.fromString(tag.getStringOr(ID_TAG, new UUID(0, 0).toString())),
+				Identifier.parse(tag.getStringOr(ENTITY_TYPE_TAG, "minecraft:pig")), tag.getCompoundOrEmpty(ENTITY_NBT_TAG).copy(),
+				tag.getInt(SLOT_TAG).orElse(0), tag.getInt(WIDTH_TAG).orElse(1), tag.getInt(HEIGHT_TAG).orElse(1), tag.getInt(SLOT_COST_TAG).orElse(1),
+				tag.getBoolean(HOSTILE_TAG).orElse(false), tag.getStringOr(DISPLAY_NAME_TAG, ""), Math.max(0, currentHealth), Math.max(1, maxHealth));
 	}
 
 	public static CapturedMobFootprint getFootprint(LivingEntity entity, int slotCost) {
@@ -254,7 +249,8 @@ public class MobCatcherStorage {
 		return best;
 	}
 
-	private static boolean isBetterFootprint(double score, double aspectError, int overfill, int width, int height, double bestScore, double bestAspectError, int bestOverfill, CapturedMobFootprint best) {
+	private static boolean isBetterFootprint(double score, double aspectError, int overfill, int width, int height, double bestScore, double bestAspectError,
+			int bestOverfill, CapturedMobFootprint best) {
 		if (score < bestScore - 0.001D) {
 			return true;
 		}

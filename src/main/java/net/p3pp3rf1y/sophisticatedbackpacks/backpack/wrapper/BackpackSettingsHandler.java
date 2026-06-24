@@ -16,13 +16,17 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	public static final String SETTINGS_TAG = "settings";
 
 	public BackpackSettingsHandler(IStorageWrapper backpackWrapper, ContainerContents.SettingsData settingsData, Runnable markBackpackContentsDirty) {
-		super(settingsData, markBackpackContentsDirty, backpackWrapper::getInventoryHandler, backpackWrapper::getRenderDataHandler, SophisticatedBackpacks.MOD_ID);
+		super(settingsData, markBackpackContentsDirty, backpackWrapper::getInventoryHandler, backpackWrapper::getRenderDataHandler,
+				SophisticatedBackpacks.MOD_ID);
 	}
 
 	@Override
-	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderDataHandler> renderDataHandlerSupplier, ContainerContents.SettingsData settingsData) {
-		this.<ItemDisplaySettingsCategoryData, ItemDisplaySettingsCategory>addSettingsCategory(settingsData, ItemDisplaySettingsCategory.NAME, markContentsDirty, (data, save) ->
-				new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderDataHandlerSupplier, data, save, 1, () -> getTypeCategory(MemorySettingsCategory.class)), ItemDisplaySettingsCategoryData::new);
+	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderDataHandler> renderDataHandlerSupplier,
+			ContainerContents.SettingsData settingsData) {
+		this.<ItemDisplaySettingsCategoryData, ItemDisplaySettingsCategory>addSettingsCategory(settingsData, ItemDisplaySettingsCategory.NAME,
+				markContentsDirty, (data, save) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderDataHandlerSupplier, data, save, 1,
+						() -> getTypeCategory(MemorySettingsCategory.class)),
+				ItemDisplaySettingsCategoryData::new);
 	}
 
 	public void copyTo(SettingsHandler settingsHandler) {

@@ -58,7 +58,8 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	@Override
-	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable ItemOwner itemOwner, int seed) {
+	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext,
+			@Nullable ClientLevel clientLevel, @Nullable ItemOwner itemOwner, int seed) {
 		stackRenderState.appendModelIdentityElement(this);
 		final int[] tints = new int[this.tints.size()];
 		LivingEntity livingEntity = itemOwner != null ? itemOwner.asLivingEntity() : null;
@@ -87,7 +88,8 @@ public class BackpackItemModel implements ItemModel {
 		renderLayer.prepareQuadList().addAll(quads);
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		specialRenderer.displayItemQuad = this.displayItemQuad;
-		specialRenderer.setModelRenderParameters(renderLayer.tintLayers() == null ? ItemStackRenderState.LayerRenderState.EMPTY_TINTS : renderLayer.tintLayers().toIntArray(), quads);
+		specialRenderer.setModelRenderParameters(
+				renderLayer.tintLayers() == null ? ItemStackRenderState.LayerRenderState.EMPTY_TINTS : renderLayer.tintLayers().toIntArray(), quads);
 		RenderData.DisplayData displayData = BackpackWrapper.fromStack(stack).getRenderDataHandler().getDisplayData();
 
 		if (!displayData.displayItems().isEmpty()) {
@@ -151,10 +153,12 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	public record Unbaked(Identifier base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
-		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				Identifier.CODEC.fieldOf("base").forGetter(Unbaked::base),
-				ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints)
-		).apply(builder, Unbaked::new));
+		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder
+				.mapCodec(
+						builder -> builder
+								.group(Identifier.CODEC.fieldOf("base").forGetter(Unbaked::base),
+										ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
+								.apply(builder, Unbaked::new));
 
 		@Override
 		public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -201,17 +205,10 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
-			submitNodeCollector.submitItem(
-					poseStack,
-					ItemDisplayContext.NONE,
-					packedLight,
-					packedOverlay,
-					outlineColor,
-					this.tintLayers,
-					this.baseModel,
-					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
-			);
+		public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil,
+				int outlineColor) {
+			submitNodeCollector.submitItem(poseStack, ItemDisplayContext.NONE, packedLight, packedOverlay, outlineColor, this.tintLayers, this.baseModel,
+					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE);
 			if (displayItem != null) {
 				if (displayItemQuad == null) {
 					return;
@@ -224,7 +221,7 @@ public class BackpackItemModel implements ItemModel {
 
 		@Override
 		public void getExtents(Consumer<Vector3fc> consumer) {
-			//noop - not used in backpack item model as they are provided directly by itself
+			// noop - not used in backpack item model as they are provided directly by itself
 		}
 	}
 }

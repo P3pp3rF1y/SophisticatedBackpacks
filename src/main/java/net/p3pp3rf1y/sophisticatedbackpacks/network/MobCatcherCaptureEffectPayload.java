@@ -13,22 +13,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.MobCatcherCaptureEffec
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 
 public record MobCatcherCaptureEffectPayload(Identifier entityType, CompoundTag entityNbt, Vec3 position, Vec3 collapsePosition, float yRot,
-			float xRot) implements CustomPacketPayload {
+		float xRot) implements CustomPacketPayload {
 	public static final Type<MobCatcherCaptureEffectPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("mob_catcher_capture_effect"));
-	public static final StreamCodec<ByteBuf, MobCatcherCaptureEffectPayload> STREAM_CODEC = StreamCodec.composite(
-			Identifier.STREAM_CODEC,
-			MobCatcherCaptureEffectPayload::entityType,
-			ByteBufCodecs.COMPOUND_TAG,
-			MobCatcherCaptureEffectPayload::entityNbt,
-			StreamCodecHelper.VEC3,
-			MobCatcherCaptureEffectPayload::position,
-			StreamCodecHelper.VEC3,
-			MobCatcherCaptureEffectPayload::collapsePosition,
-			ByteBufCodecs.FLOAT,
-			MobCatcherCaptureEffectPayload::yRot,
-			ByteBufCodecs.FLOAT,
-			MobCatcherCaptureEffectPayload::xRot,
-			MobCatcherCaptureEffectPayload::new);
+	public static final StreamCodec<ByteBuf, MobCatcherCaptureEffectPayload> STREAM_CODEC = StreamCodec.composite(Identifier.STREAM_CODEC,
+			MobCatcherCaptureEffectPayload::entityType, ByteBufCodecs.COMPOUND_TAG, MobCatcherCaptureEffectPayload::entityNbt, StreamCodecHelper.VEC3,
+			MobCatcherCaptureEffectPayload::position, StreamCodecHelper.VEC3, MobCatcherCaptureEffectPayload::collapsePosition, ByteBufCodecs.FLOAT,
+			MobCatcherCaptureEffectPayload::yRot, ByteBufCodecs.FLOAT, MobCatcherCaptureEffectPayload::xRot, MobCatcherCaptureEffectPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
@@ -36,6 +26,7 @@ public record MobCatcherCaptureEffectPayload(Identifier entityType, CompoundTag 
 	}
 
 	public static void handlePayload(MobCatcherCaptureEffectPayload payload, IPayloadContext context) {
-		MobCatcherCaptureEffectRenderer.addEffect(payload.entityType, payload.entityNbt, payload.position, payload.collapsePosition, payload.yRot, payload.xRot);
+		MobCatcherCaptureEffectRenderer.addEffect(payload.entityType, payload.entityNbt, payload.position, payload.collapsePosition, payload.yRot,
+				payload.xRot);
 	}
 }
