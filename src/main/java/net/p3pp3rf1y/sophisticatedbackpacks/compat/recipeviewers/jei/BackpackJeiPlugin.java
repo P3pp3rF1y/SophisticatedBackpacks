@@ -46,7 +46,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @SuppressWarnings("unused")
 @JeiPlugin
 public class BackpackJeiPlugin implements IModPlugin {
-	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {};
+	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {
+	};
 	private IRecipeViewerDisplayCatalog catalog = null;
 
 	public static void addAdditionalCatalystRegistrar(Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar) {
@@ -60,8 +61,8 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getSubtypeInterpreters()
-				.forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
+		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item,
+				JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
 	@Override
@@ -69,9 +70,10 @@ public class BackpackJeiPlugin implements IModPlugin {
 		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<>() {
 			@Override
 			public List<Rect2i> getGuiExtraAreas(BackpackScreen gui) {
-				//noinspection ConstantValue
+				// noinspection ConstantValue
 				if (gui.getUpgradeSettingsControl() == null) {
-					return new ArrayList<>(); // when CarryOn cancels opening of the screen it doesn't seem to cancel the even going to JEI and then control is null here
+					return new ArrayList<>(); // when CarryOn cancels opening of the screen it doesn't seem to cancel the even going to JEI and then control is
+												// null here
 				}
 
 				List<Rect2i> ret = new ArrayList<>();
@@ -101,21 +103,24 @@ public class BackpackJeiPlugin implements IModPlugin {
 	@Override
 	public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
 		GroupedCraftingRecipeCategoryExtension.registerOnce(registration);
-		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> stack.getItem() instanceof BackpackItem, List.of(BackpackUpgradeRecipe.class));
-		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class, new SmithingSpecCategoryExtension<>(recipe -> getSmithingSpec(getCatalog(), recipe), stack -> stack.getItem() instanceof BackpackItem));
+		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> stack.getItem() instanceof BackpackItem,
+				List.of(BackpackUpgradeRecipe.class));
+		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class,
+				new SmithingSpecCategoryExtension<>(recipe -> getSmithingSpec(getCatalog(), recipe), stack -> stack.getItem() instanceof BackpackItem));
 	}
 
 	@Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(), BackpackJeiPlugin::canShowDyeUsagesFor, BackpackJeiPlugin::canShowDyeRecipesFor));
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING, new SmithingSpecRecipeManagerPlugin(this::getCatalog, BackpackRecipeViewerDisplays::needsSyntheticSmithingDisplay));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(),
+				BackpackJeiPlugin::canShowDyeUsagesFor, BackpackJeiPlugin::canShowDyeRecipesFor));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING,
+				new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING,
+				new SmithingSpecRecipeManagerPlugin(this::getCatalog, BackpackRecipeViewerDisplays::needsSyntheticSmithingDisplay));
 	}
 
 	private static boolean canShowDyeUsagesFor(ItemStack stack) {
-		return stack.getItem() instanceof BackpackItem
-				&& !stack.has(ModCoreDataComponents.MAIN_COLOR)
-				&& !stack.has(ModCoreDataComponents.ACCENT_COLOR)
+		return stack.getItem() instanceof BackpackItem && !stack.has(ModCoreDataComponents.MAIN_COLOR) && !stack.has(ModCoreDataComponents.ACCENT_COLOR)
 				&& !stack.has(ModCoreDataComponents.RENDER_DATA);
 	}
 
@@ -152,19 +157,17 @@ public class BackpackJeiPlugin implements IModPlugin {
 	}
 
 	private static SmithingDisplaySpec basicSmithingSpec(SmithingBackpackUpgradeRecipe recipe) {
-		List<SmithingDisplayVariant> variants = recipe.baseIngredient().items()
-				.map(ItemStack::new)
-				.filter(stack -> stack.getItem() instanceof BackpackItem)
-				.map(stack -> new SmithingDisplayVariant(stack, recipe.result().copy()))
-				.toList();
-		return new SmithingDisplaySpec(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "jei_smithing_fallback"), recipe.templateIngredient(), recipe.additionIngredient(), variants, variants,
+		List<SmithingDisplayVariant> variants = recipe.baseIngredient().items().map(ItemStack::new).filter(stack -> stack.getItem() instanceof BackpackItem)
+				.map(stack -> new SmithingDisplayVariant(stack, recipe.result().copy())).toList();
+		return new SmithingDisplaySpec(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "jei_smithing_fallback"),
+				recipe.templateIngredient(), recipe.additionIngredient(), variants, variants,
 				new SmithingSourceResultFocusBehavior((variant, stack) -> Optional.of(variant), (variant, stack) -> Optional.of(variant)));
 	}
 
 	private static boolean matchesSmithingRecipe(SmithingDisplaySpec spec, SmithingBackpackUpgradeRecipe recipe) {
-		return optionalIngredientsMatch(spec.template(), recipe.templateIngredient())
-				&& optionalIngredientsMatch(spec.addition(), recipe.additionIngredient())
-				&& spec.variants().stream().anyMatch(variant -> recipe.baseIngredient().test(variant.base()) && ItemStack.isSameItem(recipe.result(), variant.result()));
+		return optionalIngredientsMatch(spec.template(), recipe.templateIngredient()) && optionalIngredientsMatch(spec.addition(), recipe.additionIngredient())
+				&& spec.variants().stream()
+						.anyMatch(variant -> recipe.baseIngredient().test(variant.base()) && ItemStack.isSameItem(recipe.result(), variant.result()));
 	}
 
 	private static boolean optionalIngredientsMatch(Optional<Ingredient> first, Optional<Ingredient> second) {
@@ -198,28 +201,30 @@ public class BackpackJeiPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
-			@Override
-			public Class<BackpackContainer> getContainerClass() {
-				return BackpackContainer.class;
-			}
+		registration.addRecipeTransferHandler(
+				new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
+					@Override
+					public Class<BackpackContainer> getContainerClass() {
+						return BackpackContainer.class;
+					}
 
-			@Override
-			public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
-				return RecipeTypes.CRAFTING;
-			}
-		}, RecipeTypes.CRAFTING);
+					@Override
+					public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+						return RecipeTypes.CRAFTING;
+					}
+				}, RecipeTypes.CRAFTING);
 
-		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<SmithingRecipe>>(handlerHelper, stackHelper) {
-			@Override
-			public Class<BackpackContainer> getContainerClass() {
-				return BackpackContainer.class;
-			}
+		registration.addRecipeTransferHandler(
+				new JeiCraftingContainerRecipeTransferHandlerBase<BackpackContainer, RecipeHolder<SmithingRecipe>>(handlerHelper, stackHelper) {
+					@Override
+					public Class<BackpackContainer> getContainerClass() {
+						return BackpackContainer.class;
+					}
 
-			@Override
-			public IRecipeType<RecipeHolder<SmithingRecipe>> getRecipeType() {
-				return RecipeTypes.SMITHING;
-			}
-		}, RecipeTypes.SMITHING);
+					@Override
+					public IRecipeType<RecipeHolder<SmithingRecipe>> getRecipeType() {
+						return RecipeTypes.SMITHING;
+					}
+				}, RecipeTypes.SMITHING);
 	}
 }

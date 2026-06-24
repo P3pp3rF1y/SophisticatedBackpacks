@@ -14,10 +14,8 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 
 import java.util.UUID;
 
-public record BackpackSettingsPayload(UUID backpackUuid,
-									  ContainerContents.SettingsData settingsData,
-									  CompoundTag additionalContents,
-									  boolean includesAdditionalContents) implements CustomPacketPayload {
+public record BackpackSettingsPayload(UUID backpackUuid, ContainerContents.SettingsData settingsData, CompoundTag additionalContents,
+		boolean includesAdditionalContents) implements CustomPacketPayload {
 	public BackpackSettingsPayload(UUID backpackUuid, ContainerContents.SettingsData settingsData) {
 		this(backpackUuid, settingsData, new CompoundTag(), false);
 	}
@@ -27,15 +25,9 @@ public record BackpackSettingsPayload(UUID backpackUuid,
 	}
 
 	public static final Type<BackpackSettingsPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_settings"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackSettingsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			BackpackSettingsPayload::backpackUuid,
-			ContainerContents.SettingsData.STREAM_CODEC,
-			BackpackSettingsPayload::settingsData,
-			ByteBufCodecs.COMPOUND_TAG,
-			BackpackSettingsPayload::additionalContents,
-			ByteBufCodecs.BOOL,
-			BackpackSettingsPayload::includesAdditionalContents,
+	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackSettingsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			BackpackSettingsPayload::backpackUuid, ContainerContents.SettingsData.STREAM_CODEC, BackpackSettingsPayload::settingsData,
+			ByteBufCodecs.COMPOUND_TAG, BackpackSettingsPayload::additionalContents, ByteBufCodecs.BOOL, BackpackSettingsPayload::includesAdditionalContents,
 			BackpackSettingsPayload::new);
 
 	@Override
@@ -50,7 +42,8 @@ public record BackpackSettingsPayload(UUID backpackUuid,
 
 		BackpackStorage backpackStorage = BackpackStorage.get();
 		ContainerContents contents = backpackStorage.getOrCreateBackpackContents(payload.backpackUuid);
-		backpackStorage.setBackpackContents(payload.backpackUuid, new ContainerContents(contents.inventory(), contents.partitioner(), contents.upgrades(), payload.settingsData));
+		backpackStorage.setBackpackContents(payload.backpackUuid,
+				new ContainerContents(contents.inventory(), contents.partitioner(), contents.upgrades(), payload.settingsData));
 		if (payload.includesAdditionalContents) {
 			backpackStorage.setAdditionalContents(payload.backpackUuid, payload.additionalContents);
 		}

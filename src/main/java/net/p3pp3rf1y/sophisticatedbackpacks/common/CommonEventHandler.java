@@ -13,8 +13,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
@@ -141,8 +141,7 @@ public class CommonEventHandler {
 		ResourceLocation dimensionKey = event.getLevel().dimension().location();
 		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
 		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());
-		if ((!runSlownessLogic && !runDedupeLogic)
-				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.getLevel().getGameTime()) {
+		if ((!runSlownessLogic && !runDedupeLogic) || nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.getLevel().getGameTime()) {
 			return;
 		}
 		nextBackpackCheckTime.put(dimensionKey, event.getLevel().getGameTime() + BACKPACK_CHECK_COOLDOWN);
@@ -163,7 +162,8 @@ public class CommonEventHandler {
 			if (runSlownessLogic) {
 				int maxNumberOfBackpacks = Config.SERVER.nerfsConfig.maxNumberOfBackpacks.get();
 				if (allBackpacks.size() > maxNumberOfBackpacks) {
-					int numberOfSlownessLevels = Math.min(10, (int) Math.ceil((allBackpacks.size() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
+					int numberOfSlownessLevels = Math.min(10, (int) Math
+							.ceil((allBackpacks.size() - maxNumberOfBackpacks) * Config.SERVER.nerfsConfig.slownessLevelsPerAdditionalBackpack.get()));
 					Holder<MobEffect> effect = Config.SERVER.nerfsConfig.getEffect(event.getLevel().registryAccess());
 					player.addEffect(new MobEffectInstance(effect, BACKPACK_CHECK_COOLDOWN * 2, numberOfSlownessLevels - 1, false, false));
 				}
@@ -277,27 +277,27 @@ public class CommonEventHandler {
 		try (Transaction tx = Transaction.openRoot()) {
 			ItemResource resource = ItemResource.of(stack);
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
-						IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-						int pickedUpCount = InventoryHelper.runPickupOnPickupResponseUpgrades(level, wrapper.getUpgradeHandler(), resource, remainingCount.get(), tx);
-						remainingCount.addAndGet(-pickedUpCount);
-						if (pickedUpCount > 0) {
-							playPickupSound(level, player);
-							player.awardStat(Stats.ITEM_PICKED_UP.get(stack.getItem()), pickedUpCount);
-						}
-						return remainingCount.get() <= 0;
-					}
-					, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
-			);
+				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
+				int pickedUpCount = InventoryHelper.runPickupOnPickupResponseUpgrades(level, wrapper.getUpgradeHandler(), resource, remainingCount.get(), tx);
+				remainingCount.addAndGet(-pickedUpCount);
+				if (pickedUpCount > 0) {
+					playPickupSound(level, player);
+					player.awardStat(Stats.ITEM_PICKED_UP.get(stack.getItem()), pickedUpCount);
+				}
+				return remainingCount.get() <= 0;
+			}, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get());
 			if (remainingCount.get() < stack.getCount()) {
 				tx.commit();
 				itemEntity.setItem(resource.toStack(remainingCount.get()));
-				event.setCanPickup(TriState.FALSE); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
+				event.setCanPickup(TriState.FALSE); // cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be
+													// picked up by player
 			}
 		}
 	}
 
 	private static void playPickupSound(Level level, Player player) {
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F,
+				RandHelper.getRandomMinusOneToOne(level.random) * 1.4F + 2.0F);
 	}
 
 	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
@@ -307,12 +307,13 @@ public class CommonEventHandler {
 			return;
 		}
 
-		if (WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class)
-				.map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE)
-						.stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
+		if (WorldHelper
+				.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class).map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper()
+						.getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
 				.orElse(false)) {
 			event.setCanceled(true);
-			player.displayClientMessage(BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(
+					BackpackTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED), true);
 		}
 	}
 }

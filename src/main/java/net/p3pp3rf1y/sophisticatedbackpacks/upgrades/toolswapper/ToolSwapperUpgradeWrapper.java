@@ -47,6 +47,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.CoreFakePlayer;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,7 +58,11 @@ import java.util.function.Predicate;
 import static net.neoforged.neoforge.common.ItemAbilities.*;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
-		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
+		implements
+			IBlockClickResponseUpgrade,
+			IAttackEntityResponseUpgrade,
+			IBlockToolSwapUpgrade,
+			IEntityToolSwapUpgrade {
 
 	private final FilterLogic filterLogic;
 	@Nullable
@@ -86,7 +91,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && !mainHandItem.is(ItemTags.SWORDS)) || (!mainHandItem.has(DataComponents.WEAPON) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
+		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && !mainHandItem.is(ItemTags.SWORDS))
+				|| (!mainHandItem.has(DataComponents.WEAPON) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
 			return false;
 		}
 
@@ -139,7 +145,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		if (!tool.isEmpty()) {
 			try (Transaction tx = Transaction.openRoot()) {
 				ItemResource resource = ItemResource.of(tool);
-				if (backpackInventory.extract(selectedSlot.get(), resource, 1, tx) > 0 && backpackInventory.insert(ItemResource.of(mainHandItem), mainHandItem.getCount(), tx) > 0) {
+				if (backpackInventory.extract(selectedSlot.get(), resource, 1, tx) > 0
+						&& backpackInventory.insert(ItemResource.of(mainHandItem), mainHandItem.getCount(), tx) > 0) {
 					tx.commit();
 					player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack(1));
 					return true;
@@ -161,7 +168,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isGoodAtBreakingBlock(Player player, BlockPos pos, BlockState state, ItemStack stack) {
-		return (!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state)) && (stack.getDestroySpeed(state) > 1.5 || state.getDestroyProgress(player, player.level(), pos) >= 1.0f);
+		return (!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state))
+				&& (stack.getDestroySpeed(state) > 1.5 || state.getDestroyProgress(player, player.level(), pos) >= 1.0f);
 	}
 
 	@Override
@@ -210,7 +218,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		return false;
 	}
 
-	private void updateBestWeapons(AtomicReference<ItemStack> bestTool, AtomicDouble bestToolDamage, AtomicReference<ItemStack> bestSword, AtomicDouble bestSwordDamage, ItemStack stack) {
+	private void updateBestWeapons(AtomicReference<ItemStack> bestTool, AtomicDouble bestToolDamage, AtomicReference<ItemStack> bestSword,
+			AtomicDouble bestSwordDamage, ItemStack stack) {
 		AttributeInstance attribute = new AttributeInstance(Attributes.ATTACK_DAMAGE, a -> {
 		});
 		stack.forEachModifier(EquipmentSlot.MAINHAND, (att, m) -> {
@@ -243,7 +252,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		ItemStack swordCopy = sword.copy();
 		swordCopy.setCount(1);
 		try (Transaction tx = Transaction.openRoot()) {
-			if (backpackInventory.extract(ItemResource.of(sword), 1, tx) == 0 || backpackInventory.insert(ItemResource.of(mainHandItem), mainHandItem.getCount(), tx) == 0) {
+			if (backpackInventory.extract(ItemResource.of(sword), 1, tx) == 0
+					|| backpackInventory.insert(ItemResource.of(mainHandItem), mainHandItem.getCount(), tx) == 0) {
 				return false;
 			}
 			tx.commit();
@@ -384,7 +394,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	private boolean itemWorksOnBlock(Level level, BlockPos pos, BlockState blockState, Player player, ItemStack stack) {
 		for (ItemAbility action : BLOCK_MODIFICATION_ACTIONS) {
 			if (stack.canPerformAction(action) && blockState.getToolModifiedState(
-					new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)), action, true) != null) {
+					new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)),
+					action, true) != null) {
 				return true;
 			}
 		}

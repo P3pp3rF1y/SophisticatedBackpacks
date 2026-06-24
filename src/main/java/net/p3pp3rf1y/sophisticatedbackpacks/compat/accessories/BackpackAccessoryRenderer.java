@@ -15,12 +15,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 public class BackpackAccessoryRenderer implements AccessoryRenderer {
 	@Override
-	public <S extends LivingEntityRenderState> void render(AccessoryRenderState accessoryState, S entityState, EntityModel<S> model, PoseStack poseStack, SubmitNodeCollector collector) {
-		//noop - this is rendered by BackpackLayerRenderer
+	public <S extends LivingEntityRenderState> void render(AccessoryRenderState accessoryState, S entityState, EntityModel<S> model, PoseStack poseStack,
+			SubmitNodeCollector collector) {
+		// noop - this is rendered by BackpackLayerRenderer
 	}
 
 	@Override
-	public void extractRenderState(ItemStack stack, SlotPath path, AccessoriesStorageLookup storageLookup, LivingEntity entity, LivingEntityRenderState entityState, AccessoryRenderState accessoryState) {
+	public void extractRenderState(ItemStack stack, SlotPath path, AccessoriesStorageLookup storageLookup, LivingEntity entity,
+			LivingEntityRenderState entityState, AccessoryRenderState accessoryState) {
 		AccessoryRenderer.super.extractRenderState(stack, path, storageLookup, entity, entityState, accessoryState);
 		BackpackLayerRenderer.addBackpackRenderState(entityState, entity, new PlayerInventoryProvider.RenderInfo(stack, false));
 	}

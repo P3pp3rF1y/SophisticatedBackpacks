@@ -32,6 +32,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 
 import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity, BackpackBlockEntityRenderer.BackpackRenderState> {
 	private final ItemModelResolver itemModelResolver;
 	@Nullable
-	private BakedQuad displayItemQuad = null; //TODO this will need to be multiple quads based on model shown
+	private BakedQuad displayItemQuad = null; // TODO this will need to be multiple quads based on model shown
 
 	public BackpackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 		this.itemModelResolver = context.itemModelResolver();
@@ -81,7 +82,8 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	}
 
 	@Override
-	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+	public void extractRenderState(BackpackBlockEntity blockEntity, BackpackRenderState renderState, float partialTick, Vec3 cameraPos,
+			@Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
 		BlockEntityRenderer.super.extractRenderState(blockEntity, renderState, partialTick, cameraPos, crumblingOverlay);
 
 		BlockState state = blockEntity.getBlockState();
@@ -93,25 +95,22 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		RenderData.DisplayData displayData = renderDataHandler.getDisplayData();
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
-			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null, 0);
+			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null,
+					0);
 			renderState.displayItemRotation = displayItem.rotation();
 		} else {
 			renderState.displayItem = new ItemStackRenderState();
 			renderState.displayItemRotation = 0;
 		}
 
-		renderState.tanks = renderDataHandler.getTankRenderData().entrySet().stream()
-				.filter(entry -> entry.getValue().getFluid().isPresent())
-				.collect(Collectors.toMap(
-						Map.Entry::getKey,
-						entry -> {
-							FluidStack fluidStack = entry.getValue().getFluid().get();
-							IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-							ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
-							TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
-							return new BackpackRenderState.TankState(still, renderProperties.getTintColor(fluidStack), entry.getValue().fillRatio());
-						}
-				));
+		renderState.tanks = renderDataHandler.getTankRenderData().entrySet().stream().filter(entry -> entry.getValue().getFluid().isPresent())
+				.collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+					FluidStack fluidStack = entry.getValue().getFluid().get();
+					IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
+					ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
+					TextureAtlasSprite still = FluidSpriteCache.getSprite(texture);
+					return new BackpackRenderState.TankState(still, renderProperties.getTintColor(fluidStack), entry.getValue().fillRatio());
+				}));
 		renderState.batteryChargeRatio = renderDataHandler.getBatteryRenderData().map(RenderData.BatteryRenderData::chargeRatio).orElse(0f);
 
 		renderState.showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
@@ -141,7 +140,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			return displayItemQuad;
 		}
 		if (Minecraft.getInstance().getModelManager().getItemModel(backpack.get(DataComponents.ITEM_MODEL)) instanceof BackpackItemModel backpackItemModel
-			&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
+				&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
 			displayItemQuad = backpackBlockModel.getDisplayItemQuad();
 		}
 		return null;

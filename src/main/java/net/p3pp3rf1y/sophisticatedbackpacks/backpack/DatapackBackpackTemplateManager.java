@@ -51,15 +51,16 @@ public class DatapackBackpackTemplateManager {
 
 			resourceManager.listResources(DIRECTORY, fileName -> fileName.getPath().endsWith(SUFFIX)).forEach((resourcelocation, resource) -> {
 				String s = resourcelocation.getPath();
-				ResourceLocation resourceLocationWithoutSuffix = ResourceLocation.fromNamespaceAndPath(resourcelocation.getNamespace(), s.substring(i, s.length() - PATH_SUFFIX_LENGTH));
+				ResourceLocation resourceLocationWithoutSuffix = ResourceLocation.fromNamespaceAndPath(resourcelocation.getNamespace(),
+						s.substring(i, s.length() - PATH_SUFFIX_LENGTH));
 
-				try (
-						InputStream inputstream = resource.open();
-						Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
-				) {
+				try (InputStream inputstream = resource.open();
+						Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));) {
 					String fileContents = IOUtils.toString(reader);
 
-					BackpackTemplate template = BackpackTemplate.CODEC.decode(getRegistryLookup().createSerializationContext(NbtOps.INSTANCE), TagParser.parseCompoundFully(fileContents)).getOrThrow().getFirst();
+					BackpackTemplate template = BackpackTemplate.CODEC
+							.decode(getRegistryLookup().createSerializationContext(NbtOps.INSTANCE), TagParser.parseCompoundFully(fileContents)).getOrThrow()
+							.getFirst();
 					if (map.put(resourceLocationWithoutSuffix, template) != null) {
 						throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocationWithoutSuffix);
 					}

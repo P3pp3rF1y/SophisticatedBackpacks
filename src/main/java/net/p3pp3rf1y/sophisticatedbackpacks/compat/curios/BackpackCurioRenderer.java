@@ -13,7 +13,9 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 
 public class BackpackCurioRenderer implements ICurioRenderer {
 	@Override
-	public <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void render(ItemStack stack, SlotContext slotContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, S renderState, RenderLayerParent<S, M> renderLayerParent, EntityRendererProvider.Context context, float yRotation, float xRotation) {
+	public <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void render(ItemStack stack, SlotContext slotContext, PoseStack poseStack,
+			SubmitNodeCollector submitNodeCollector, int packedLight, S renderState, RenderLayerParent<S, M> renderLayerParent,
+			EntityRendererProvider.Context context, float yRotation, float xRotation) {
 		if (!stack.isEmpty()) {
 			poseStack.pushPose();
 			BackpackLayerRenderer.submitBackpack(renderLayerParent.getModel(), renderState, poseStack, submitNodeCollector, packedLight);

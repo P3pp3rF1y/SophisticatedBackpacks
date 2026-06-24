@@ -14,10 +14,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 public record BlockPickPayload(ItemStack filter) implements CustomPacketPayload {
 	public static final Type<BlockPickPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("block_pick"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPickPayload> STREAM_CODEC = StreamCodec.composite(
-			ItemStack.STREAM_CODEC,
-			BlockPickPayload::filter,
-			BlockPickPayload::new);
+	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPickPayload> STREAM_CODEC = StreamCodec.composite(ItemStack.STREAM_CODEC,
+			BlockPickPayload::filter, BlockPickPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

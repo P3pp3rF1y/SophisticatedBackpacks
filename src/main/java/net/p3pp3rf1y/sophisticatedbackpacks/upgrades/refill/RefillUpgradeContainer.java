@@ -14,7 +14,8 @@ public class RefillUpgradeContainer extends UpgradeContainerBase<RefillUpgradeWr
 	private static final String DATA_SET_TARGET_SLOT = "setTargetSlot";
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
-	public RefillUpgradeContainer(Player player, int containerId, RefillUpgradeWrapper wrapper, UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> type) {
+	public RefillUpgradeContainer(Player player, int containerId, RefillUpgradeWrapper wrapper,
+			UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 
 		filterLogicContainer = new FilterLogicContainer<>(() -> upgradeWrapper.getFilterLogic(), this, slots::add);

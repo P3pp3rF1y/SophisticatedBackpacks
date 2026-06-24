@@ -34,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,8 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	@Override
-	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable ItemOwner itemOwner, int seed) {
+	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext,
+			@Nullable ClientLevel clientLevel, @Nullable ItemOwner itemOwner, int seed) {
 		stackRenderState.appendModelIdentityElement(this);
 		final int[] tints = new int[this.tints.size()];
 		LivingEntity livingEntity = itemOwner != null ? itemOwner.asLivingEntity() : null;
@@ -152,10 +154,12 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	public record Unbaked(ResourceLocation base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
-		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
-				ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints)
-		).apply(builder, Unbaked::new));
+		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder
+				.mapCodec(
+						builder -> builder
+								.group(ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
+										ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
+								.apply(builder, Unbaked::new));
 
 		@Override
 		public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -204,18 +208,10 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
-			submitNodeCollector.submitItem(
-					poseStack,
-					displayContext,
-					packedLight,
-					packedOverlay,
-					outlineColor,
-					this.tintLayers,
-					this.baseModel,
-					Sheets.translucentItemSheet(),
-					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
-			);
+		public void submit(ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay,
+				boolean hasFoil, int outlineColor) {
+			submitNodeCollector.submitItem(poseStack, displayContext, packedLight, packedOverlay, outlineColor, this.tintLayers, this.baseModel,
+					Sheets.translucentItemSheet(), hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE);
 			if (displayItem != null) {
 				if (displayItemQuad == null) {
 					return;
@@ -228,7 +224,7 @@ public class BackpackItemModel implements ItemModel {
 
 		@Override
 		public void getExtents(Set<Vector3f> set) {
-			//noop - not used in backpack item model as they are provided directly by itself
+			// noop - not used in backpack item model as they are provided directly by itself
 		}
 	}
 }

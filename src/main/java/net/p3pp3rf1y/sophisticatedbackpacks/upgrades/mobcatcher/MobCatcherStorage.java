@@ -6,6 +6,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -15,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class MobCatcherStorage {
 	public static final String CAPTURED_MOBS_TAG = "capturedMobs";
@@ -79,10 +81,10 @@ public class MobCatcherStorage {
 
 	public static Optional<InventoryLayoutPart> getInventoryLayoutPart(IBackpackWrapper backpackWrapper, int slot, int columns, int targetColumns) {
 		InventoryHandler inventoryHandler = backpackWrapper.getInventoryHandler();
-		return getCapturedMobs(backpackWrapper).stream()
-			.filter(capturedMob -> capturedMob.slot() == slot)
-			.findFirst()
-			.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob), getTargetSlot(capturedMob, columns, targetColumns, inventoryHandler.size()), capturedMob.width(), capturedMob.height(), getOccupiedSlots(capturedMob, columns, inventoryHandler.size())));
+		return getCapturedMobs(backpackWrapper).stream().filter(capturedMob -> capturedMob.slot() == slot).findFirst()
+				.map(capturedMob -> new InventoryLayoutPart(getLayoutPartId(capturedMob),
+						getTargetSlot(capturedMob, columns, targetColumns, inventoryHandler.size()), capturedMob.width(), capturedMob.height(),
+						getOccupiedSlots(capturedMob, columns, inventoryHandler.size())));
 	}
 
 	public static void applyInventoryLayout(IBackpackWrapper backpackWrapper, InventoryLayoutFitResult fitResult, int columns) {
@@ -96,7 +98,9 @@ public class MobCatcherStorage {
 			int fittedSlot = fitResult.fittedSlots().getOrDefault(getLayoutPartId(capturedMob), capturedMob.slot());
 			if (fittedSlot != capturedMob.slot()) {
 				changed = true;
-				capturedMobs.add(new CapturedMob(capturedMob.id(), capturedMob.entityType(), capturedMob.entityNbt(), fittedSlot, capturedMob.width(), capturedMob.height(), capturedMob.slotCost(), capturedMob.hostile(), capturedMob.displayName(), capturedMob.currentHealth(), capturedMob.maxHealth()));
+				capturedMobs.add(new CapturedMob(capturedMob.id(), capturedMob.entityType(), capturedMob.entityNbt(), fittedSlot, capturedMob.width(),
+						capturedMob.height(), capturedMob.slotCost(), capturedMob.hostile(), capturedMob.displayName(), capturedMob.currentHealth(),
+						capturedMob.maxHealth()));
 			} else {
 				capturedMobs.add(capturedMob);
 			}
@@ -125,11 +129,13 @@ public class MobCatcherStorage {
 		return Optional.empty();
 	}
 
-	private static boolean isRectangleEmpty(int slot, CapturedMobFootprint footprint, int columns, InventoryHandler inventoryHandler, List<CapturedMob> capturedMobs) {
+	private static boolean isRectangleEmpty(int slot, CapturedMobFootprint footprint, int columns, InventoryHandler inventoryHandler,
+			List<CapturedMob> capturedMobs) {
 		for (int y = 0; y < footprint.height(); y++) {
 			for (int x = 0; x < footprint.width(); x++) {
 				int checkedSlot = slot + y * columns + x;
-				if (checkedSlot >= inventoryHandler.size() || !inventoryHandler.isSlotAccessible(checkedSlot) || !inventoryHandler.getStackInSlot(checkedSlot).isEmpty()) {
+				if (checkedSlot >= inventoryHandler.size() || !inventoryHandler.isSlotAccessible(checkedSlot)
+						|| !inventoryHandler.getStackInSlot(checkedSlot).isEmpty()) {
 					return false;
 				}
 				for (CapturedMob capturedMob : capturedMobs) {
@@ -159,7 +165,7 @@ public class MobCatcherStorage {
 		return getCapturedMobs(backpackWrapper).stream().filter(mob -> mob.id().equals(capturedMobId)).findFirst();
 	}
 
-	private static void updateCapturedMobs(IBackpackWrapper backpackWrapper, java.util.function.Consumer<List<CapturedMob>> updater) {
+	private static void updateCapturedMobs(IBackpackWrapper backpackWrapper, Consumer<List<CapturedMob>> updater) {
 		List<CapturedMob> capturedMobs = new ArrayList<>(getCapturedMobs(backpackWrapper));
 		updater.accept(capturedMobs);
 		saveCapturedMobs(backpackWrapper, capturedMobs);
@@ -205,19 +211,10 @@ public class MobCatcherStorage {
 	private static CapturedMob deserialize(CompoundTag tag) {
 		int maxHealth = tag.getIntOr(MAX_HEALTH_TAG, 1);
 		int currentHealth = tag.getIntOr(CURRENT_HEALTH_TAG, maxHealth);
-		return new CapturedMob(
-			UUID.fromString(tag.getString(ID_TAG).orElseThrow()),
-			ResourceLocation.parse(tag.getString(ENTITY_TYPE_TAG).orElse("minecraft:pig")),
-			tag.getCompound(ENTITY_NBT_TAG).orElse(new CompoundTag()),
-			tag.getIntOr(SLOT_TAG, 0),
-			tag.getIntOr(WIDTH_TAG, 1),
-			tag.getIntOr(HEIGHT_TAG, 1),
-			tag.getIntOr(SLOT_COST_TAG, 1),
-			tag.getBooleanOr(HOSTILE_TAG, false),
-			tag.getString(DISPLAY_NAME_TAG).orElse(""),
-			Math.max(0, currentHealth),
-			Math.max(1, maxHealth)
-		);
+		return new CapturedMob(UUID.fromString(tag.getString(ID_TAG).orElseThrow()),
+				ResourceLocation.parse(tag.getString(ENTITY_TYPE_TAG).orElse("minecraft:pig")), tag.getCompound(ENTITY_NBT_TAG).orElse(new CompoundTag()),
+				tag.getIntOr(SLOT_TAG, 0), tag.getIntOr(WIDTH_TAG, 1), tag.getIntOr(HEIGHT_TAG, 1), tag.getIntOr(SLOT_COST_TAG, 1),
+				tag.getBooleanOr(HOSTILE_TAG, false), tag.getString(DISPLAY_NAME_TAG).orElse(""), Math.max(0, currentHealth), Math.max(1, maxHealth));
 	}
 
 	public static CompoundTag saveEntityData(LivingEntity entity) {
@@ -257,7 +254,8 @@ public class MobCatcherStorage {
 		return best;
 	}
 
-	private static boolean isBetterFootprint(double score, double aspectError, int overfill, int width, int height, double bestScore, double bestAspectError, int bestOverfill, CapturedMobFootprint best) {
+	private static boolean isBetterFootprint(double score, double aspectError, int overfill, int width, int height, double bestScore, double bestAspectError,
+			int bestOverfill, CapturedMobFootprint best) {
 		if (score < bestScore - 0.001D) {
 			return true;
 		}
@@ -309,7 +307,7 @@ public class MobCatcherStorage {
 		return targetY * targetColumns + targetX;
 	}
 
-	public static Optional<net.minecraft.world.entity.EntityType<?>> getEntityType(CapturedMob capturedMob) {
+	public static Optional<EntityType<?>> getEntityType(CapturedMob capturedMob) {
 		return BuiltInRegistries.ENTITY_TYPE.getOptional(capturedMob.entityType());
 	}
 

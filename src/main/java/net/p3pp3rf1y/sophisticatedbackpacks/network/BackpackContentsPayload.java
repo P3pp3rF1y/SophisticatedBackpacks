@@ -11,17 +11,13 @@ import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsToolti
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 
-public record BackpackContentsPayload(UUID backpackUuid,
-									  @Nullable ContainerContents backpackContents) implements CustomPacketPayload {
+public record BackpackContentsPayload(UUID backpackUuid, @Nullable ContainerContents backpackContents) implements CustomPacketPayload {
 	public static final Type<BackpackContentsPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_contents"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			BackpackContentsPayload::backpackUuid,
-			ContainerContents.STREAM_CODEC,
-			BackpackContentsPayload::backpackContents,
-			BackpackContentsPayload::new);
+	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			BackpackContentsPayload::backpackUuid, ContainerContents.STREAM_CODEC, BackpackContentsPayload::backpackContents, BackpackContentsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

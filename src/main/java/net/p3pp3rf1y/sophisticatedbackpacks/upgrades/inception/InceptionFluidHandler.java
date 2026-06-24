@@ -7,6 +7,7 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -20,8 +21,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	protected int[] baseIndex;
 	protected int tankCount;
 
-	public InceptionFluidHandler(
-			@Nullable IStorageFluidHandler wrappedFluidHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionFluidHandler(@Nullable IStorageFluidHandler wrappedFluidHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedFluidHandler = wrappedFluidHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;

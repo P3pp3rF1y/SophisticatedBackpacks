@@ -34,15 +34,17 @@ public class CuriosCompat implements ICompat {
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
 			backpackCurioIdentifiers.clear();
-			backpackCurioIdentifiers.addAll(CuriosSlotTypes.getItemSlotTypes(ModItems.BACKPACK.get().getDefaultInstance(), FMLEnvironment.getDist() == Dist.CLIENT).keySet());
+			backpackCurioIdentifiers
+					.addAll(CuriosSlotTypes.getItemSlotTypes(ModItems.BACKPACK.get().getDefaultInstance(), FMLEnvironment.getDist() == Dist.CLIENT).keySet());
 			backpackCurioIdentifiers.add("curio");
 		}
 		return backpackCurioIdentifiers;
 	}
 
-	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
-		return CuriosApi.getCuriosInventory(livingEntity)
-				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler,
+			T defaultValue) {
+		return CuriosApi.getCuriosInventory(livingEntity).map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue))
+				.orElse(defaultValue);
 	}
 
 	private static boolean isVisible(LivingEntity livingEntity, String identifier, int slot) {

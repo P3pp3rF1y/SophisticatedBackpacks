@@ -38,33 +38,33 @@ public interface IBackpackWrapper extends IStorageWrapper {
 	void fillFromTemplate();
 
 	default void fillWithLootAndExtraItems(Level level, BlockPos pos) {
-		//noop
+		// noop
 	}
 
 	void setContentsUuid(UUID storageUuid);
 
 	default void removeContentsUuid() {
-		//noop by default
+		// noop by default
 	}
 
 	default void removeContentsUUIDTag() {
-		//noop
+		// noop
 	}
 
 	default void registerOnSlotsChangeListener(IntConsumer onSlotsChange) {
-		//noop
+		// noop
 	}
 
 	default void unregisterOnSlotsChangeListener() {
-		//noop
+		// noop
 	}
 
 	default void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
-		//noop
+		// noop
 	}
 
 	default void unregisterOnInventoryHandlerRefreshListener() {
-		//noop
+		// noop
 	}
 
 	default Optional<ResourceHandler<FluidResource>> getItemFluidHandler() {
@@ -84,7 +84,7 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public IBackpackWrapper setBackpackStack(ItemStack backpackStack) {
-			//nothing assigned here just return self
+			// nothing assigned here just return self
 			return this;
 		}
 
@@ -105,32 +105,32 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public void copyDataTo(IStorageWrapper otherStorageWrapper) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setTemplate(ResourceLocation templateName) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void fillFromTemplate() {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setContentsUuid(UUID storageUuid) {
-			//noop
+			// noop
 		}
 	}
 }

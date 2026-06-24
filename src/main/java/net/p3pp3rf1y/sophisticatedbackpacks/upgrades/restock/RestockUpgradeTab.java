@@ -14,7 +14,8 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer
 public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> {
 	protected ContentsFilterControl filterLogicControl;
 
-	protected RestockUpgradeTab(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen, Component tabLabel, Component closedTooltip) {
+	protected RestockUpgradeTab(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen,
+			Component tabLabel, Component closedTooltip) {
 		super(upgradeContainer, position, screen, tabLabel, closedTooltip);
 	}
 
@@ -24,18 +25,22 @@ public abstract class RestockUpgradeTab extends UpgradeSettingsTab<ContentsFilte
 	}
 
 	public static class Basic extends RestockUpgradeTab {
-		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
-			super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("restock"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("restock"));
+		public Basic(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen,
+				ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+			super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("restock"),
+					BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("restock"));
 			filterLogicControl = addHideableChild(new ContentsFilterControl.Basic(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
 					Config.SERVER.restockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 
 	public static class Advanced extends RestockUpgradeTab {
-		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen, ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
-			super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("advanced_restock"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_restock"));
-			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 24), getContainer().getFilterLogicContainer(),
-					Config.SERVER.advancedRestockUpgrade.slotsInRow.get(), contentsFilterButton));
+		public Advanced(ContentsFilteredUpgradeContainer<RestockUpgradeWrapper> upgradeContainer, Position position, StorageScreenBase<?> screen,
+				ButtonDefinition.Toggle<ContentsFilterType> contentsFilterButton) {
+			super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("advanced_restock"),
+					BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_restock"));
+			filterLogicControl = addHideableChild(new ContentsFilterControl.Advanced(screen, new Position(x + 3, y + 24),
+					getContainer().getFilterLogicContainer(), Config.SERVER.advancedRestockUpgrade.slotsInRow.get(), contentsFilterButton));
 		}
 	}
 }

@@ -10,9 +10,7 @@ import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 import java.util.Map;
 
 public enum ToolSwapMode implements StringRepresentable {
-	ANY("name"),
-	ONLY_TOOLS("onlyTools"),
-	NO_SWAP("noSwap");
+	ANY("name"), ONLY_TOOLS("onlyTools"), NO_SWAP("noSwap");
 
 	public static final Codec<ToolSwapMode> CODEC = StringRepresentable.fromEnum(ToolSwapMode::values);
 	public static final StreamCodec<FriendlyByteBuf, ToolSwapMode> STREAM_CODEC = NeoForgeStreamCodecs.enumCodec(ToolSwapMode.class);
@@ -37,7 +35,7 @@ public enum ToolSwapMode implements StringRepresentable {
 
 	static {
 		ImmutableMap.Builder<String, ToolSwapMode> builder = new ImmutableMap.Builder<>();
-		for (ToolSwapMode value : ToolSwapMode.values()) {
+		for (ToolSwapMode value : values()) {
 			builder.put(value.getSerializedName(), value);
 		}
 		NAME_VALUES = builder.build();

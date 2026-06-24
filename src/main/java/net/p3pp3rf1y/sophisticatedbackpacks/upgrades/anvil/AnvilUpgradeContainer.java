@@ -25,7 +25,8 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 	};
 	private boolean processingOnTakeLogic = false;
 
-	public AnvilUpgradeContainer(Player player, int upgradeContainerId, AnvilUpgradeWrapper upgradeWrapper, UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> type) {
+	public AnvilUpgradeContainer(Player player, int upgradeContainerId, AnvilUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		anvilMenuDelegate = new PersistableAnvilMenu(player.getInventory());
 
@@ -94,7 +95,10 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 	private class PersistableAnvilMenu extends AnvilMenu {
 
 		public PersistableAnvilMenu(Inventory playerInventory) {
-			super(0, playerInventory, playerInventory.player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
+			super(0, playerInventory,
+					playerInventory.player.level().isClientSide()
+							? ContainerLevelAccess.NULL
+							: ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
 			super.setItemName(upgradeWrapper.getItemName());
 		}
 

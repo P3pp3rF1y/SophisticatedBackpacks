@@ -16,7 +16,8 @@ import java.util.function.Supplier;
 
 public class ModBlocks {
 	private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SophisticatedBackpacks.MOD_ID);
-	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+			SophisticatedBackpacks.MOD_ID);
 
 	private ModBlocks() {
 	}
@@ -26,11 +27,13 @@ public class ModBlocks {
 	public static final Supplier<BackpackBlock> IRON_BACKPACK = BLOCKS.registerBlock("iron_backpack", BackpackBlock::new);
 	public static final Supplier<BackpackBlock> GOLD_BACKPACK = BLOCKS.registerBlock("gold_backpack", BackpackBlock::new);
 	public static final Supplier<BackpackBlock> DIAMOND_BACKPACK = BLOCKS.registerBlock("diamond_backpack", BackpackBlock::new);
-	public static final Supplier<BackpackBlock> NETHERITE_BACKPACK = BLOCKS.registerBlock("netherite_backpack", properties -> new BackpackBlock(1200, properties));
+	public static final Supplier<BackpackBlock> NETHERITE_BACKPACK = BLOCKS.registerBlock("netherite_backpack",
+			properties -> new BackpackBlock(1200, properties));
 
-	@SuppressWarnings("ConstantConditions") //no datafixer type needed
-	public static final Supplier<BlockEntityType<BackpackBlockEntity>> BACKPACK_TILE_TYPE = BLOCK_ENTITY_TYPES.register("backpack", () ->
-			new BlockEntityType<>(BackpackBlockEntity::new, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get()));
+	@SuppressWarnings("ConstantConditions") // no datafixer type needed
+	public static final Supplier<BlockEntityType<BackpackBlockEntity>> BACKPACK_TILE_TYPE = BLOCK_ENTITY_TYPES.register("backpack",
+			() -> new BlockEntityType<>(BackpackBlockEntity::new, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(),
+					DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get()));
 
 	public static void registerHandlers(IEventBus modBus) {
 		BLOCKS.register(modBus);

@@ -10,11 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class BackpackLootTableProvider extends LootTableProvider {
 	BackpackLootTableProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
-		super(packOutput, BackpackInjectLootSubProvider.ALL_TABLES,
-				List.of(
-						new SubProviderEntry(BackpackBlockLootSubProvider::new, LootContextParamSets.BLOCK),
-						new SubProviderEntry(BackpackInjectLootSubProvider::new, LootContextParamSets.CHEST)
-				), registries
-		);
+		super(packOutput, BackpackInjectLootSubProvider.ALL_TABLES, List.of(new SubProviderEntry(BackpackBlockLootSubProvider::new, LootContextParamSets.BLOCK),
+				new SubProviderEntry(BackpackInjectLootSubProvider::new, LootContextParamSets.CHEST)), registries);
 	}
 }

@@ -9,7 +9,8 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 public class BackpackInventoryHandler extends InventoryHandler {
-	public BackpackInventoryHandler(int numberOfInventorySlots, IStorageWrapper storageWrapper, ContainerContents containerContents, Runnable saveHandler, int slotLimit) {
+	public BackpackInventoryHandler(int numberOfInventorySlots, IStorageWrapper storageWrapper, ContainerContents containerContents, Runnable saveHandler,
+			int slotLimit) {
 		super(numberOfInventorySlots, storageWrapper, containerContents, saveHandler, slotLimit, Config.SERVER.stackUpgrade);
 	}
 
@@ -24,6 +25,7 @@ public class BackpackInventoryHandler extends InventoryHandler {
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemResource resource) {
-		return (resource.getItem() instanceof BackpackItem) && !BackpackWrapper.fromStack(resource.toStack()).getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
+		return (resource.getItem() instanceof BackpackItem)
+				&& !BackpackWrapper.fromStack(resource.toStack()).getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
 	}
 }
