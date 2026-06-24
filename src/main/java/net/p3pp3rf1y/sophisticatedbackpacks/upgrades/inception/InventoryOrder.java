@@ -10,16 +10,16 @@ import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 import java.util.Map;
 
 public enum InventoryOrder implements StringRepresentable {
-	MAIN_FIRST("main_first"),
-	INCEPTED_FIRST("incepted_first");
-
+	MAIN_FIRST("main_first"), INCEPTED_FIRST("incepted_first");
 
 	public static final Codec<InventoryOrder> CODEC = StringRepresentable.fromEnum(InventoryOrder::values);
 	public static final StreamCodec<FriendlyByteBuf, InventoryOrder> STREAM_CODEC = NeoForgeStreamCodecs.enumCodec(InventoryOrder.class);
 
 	private final String name;
 
-	InventoryOrder(String name) {this.name = name;}
+	InventoryOrder(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public String getSerializedName() {
@@ -35,7 +35,7 @@ public enum InventoryOrder implements StringRepresentable {
 
 	static {
 		ImmutableMap.Builder<String, InventoryOrder> builder = new ImmutableMap.Builder<>();
-		for (InventoryOrder value : InventoryOrder.values()) {
+		for (InventoryOrder value : values()) {
 			builder.put(value.getSerializedName(), value);
 		}
 		NAME_VALUES = builder.build();

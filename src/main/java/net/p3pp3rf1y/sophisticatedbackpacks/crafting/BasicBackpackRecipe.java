@@ -41,7 +41,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BasicBackpackRecipe> {
 		public Serializer() {
-			super(BasicBackpackRecipe::new, RecipeSerializer.SHAPED_RECIPE);
+			super(BasicBackpackRecipe::new, SHAPED_RECIPE);
 		}
 	}
 }

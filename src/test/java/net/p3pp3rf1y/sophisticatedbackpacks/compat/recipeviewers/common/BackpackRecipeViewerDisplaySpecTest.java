@@ -60,7 +60,8 @@ class BackpackRecipeViewerDisplaySpecTest {
 
 		assertEquals(2, recipes.size());
 		assertTrue(recipes.stream().anyMatch(recipe -> ItemStack.isSameItemSameComponents(tintedStack(ModItems.BACKPACK.get()), recipe.inputs().get(4))));
-		assertTrue(recipes.stream().anyMatch(recipe -> ItemStack.isSameItemSameComponents(tintedStack(ModItems.COPPER_BACKPACK.get()), recipe.inputs().get(4))));
+		assertTrue(
+				recipes.stream().anyMatch(recipe -> ItemStack.isSameItemSameComponents(tintedStack(ModItems.COPPER_BACKPACK.get()), recipe.inputs().get(4))));
 		assertTrue(recipes.stream().allMatch(recipe -> ItemStack.isSameItemSameComponents(tintedIronBackpack, recipe.firstOutput())));
 	}
 
@@ -73,8 +74,10 @@ class BackpackRecipeViewerDisplaySpecTest {
 		List<CraftingDisplayVariant> globalVariants = catalog.getGlobalCraftingDisplays().stream().flatMap(view -> view.variants().stream()).toList();
 
 		assertTrue(recipes.isEmpty());
-		assertTrue(globalVariants.stream().anyMatch(recipe -> ItemStack.isSameItem(new ItemStack(ModItems.BACKPACK.get()), recipe.inputs().get(4)) && ItemStack.isSameItem(ironBackpack, recipe.firstOutput())));
-		assertTrue(globalVariants.stream().anyMatch(recipe -> ItemStack.isSameItem(new ItemStack(ModItems.COPPER_BACKPACK.get()), recipe.inputs().get(4)) && ItemStack.isSameItem(ironBackpack, recipe.firstOutput())));
+		assertTrue(globalVariants.stream().anyMatch(recipe -> ItemStack.isSameItem(new ItemStack(ModItems.BACKPACK.get()), recipe.inputs().get(4))
+				&& ItemStack.isSameItem(ironBackpack, recipe.firstOutput())));
+		assertTrue(globalVariants.stream().anyMatch(recipe -> ItemStack.isSameItem(new ItemStack(ModItems.COPPER_BACKPACK.get()), recipe.inputs().get(4))
+				&& ItemStack.isSameItem(ironBackpack, recipe.firstOutput())));
 	}
 
 	@Test
@@ -124,7 +127,8 @@ class BackpackRecipeViewerDisplaySpecTest {
 
 		assertTrue(recipeHolder.value().baseIngredient().test(tintedStack(ModItems.DIAMOND_BACKPACK.get())));
 		assertFalse(recipeHolder.value().baseIngredient().test(tintedStack(ModItems.IRON_BACKPACK.get())));
-		assertSameStack(tintedNetheriteBackpack, recipeHolder.value().assemble(new SmithingRecipeInput(new ItemStack(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), tintedStack(ModItems.DIAMOND_BACKPACK.get()), new ItemStack(Items.NETHERITE_INGOT)), null));
+		assertSameStack(tintedNetheriteBackpack, recipeHolder.value().assemble(new SmithingRecipeInput(new ItemStack(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+				tintedStack(ModItems.DIAMOND_BACKPACK.get()), new ItemStack(Items.NETHERITE_INGOT)), null));
 	}
 
 	@Test
@@ -152,9 +156,7 @@ class BackpackRecipeViewerDisplaySpecTest {
 	@Test
 	void focusedHigherTierSingleColorDyeRecipeNarrowsDyeInputAndResult() {
 		SingleColorDyeRecipeSpec ironBackpackDyeSpec = createCatalog().getGroupedCraftingSpecs().stream()
-				.filter(spec -> spec.sourceStacks().stream().anyMatch(stack -> stack.is(ModItems.IRON_BACKPACK.get())))
-				.findFirst()
-				.orElseThrow();
+				.filter(spec -> spec.sourceStacks().stream().anyMatch(stack -> stack.is(ModItems.IRON_BACKPACK.get()))).findFirst().orElseThrow();
 		ItemStack redIronBackpack = new ItemStack(ModItems.IRON_BACKPACK.get());
 		BackpackItem.setColors(redIronBackpack, DyeColor.RED.getTextureDiffuseColor(), DyeColor.RED.getTextureDiffuseColor());
 		redIronBackpack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, 54);
@@ -189,7 +191,8 @@ class BackpackRecipeViewerDisplaySpecTest {
 		IRecipeViewerDisplayCatalog catalog = new RecipeViewerDisplayCatalog();
 		BackpackSubtypeInterpreter subtypeInterpreter = new BackpackSubtypeInterpreter();
 		IRecipeViewerDisplayContext context = stack -> stack.getItem() instanceof BackpackItem ? Optional.of(subtypeInterpreter) : Optional.empty();
-		try (TestRecipeResources.LoadedResources resources = TestRecipeResources.load(); MockedStatic<ClientRecipeHelper> clientRecipeHelper = Mockito.mockStatic(ClientRecipeHelper.class, Mockito.CALLS_REAL_METHODS)) {
+		try (TestRecipeResources.LoadedResources resources = TestRecipeResources.load();
+				MockedStatic<ClientRecipeHelper> clientRecipeHelper = Mockito.mockStatic(ClientRecipeHelper.class, Mockito.CALLS_REAL_METHODS)) {
 			mockClientRecipeHelper(clientRecipeHelper, resources);
 			BackpackRecipeViewerDisplays.register(catalog, context);
 		}
@@ -199,18 +202,22 @@ class BackpackRecipeViewerDisplaySpecTest {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static void mockClientRecipeHelper(MockedStatic<ClientRecipeHelper> clientRecipeHelper, TestRecipeResources.LoadedResources resources) {
 		RecipeManager recipeManager = resources.recipeManager();
-		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipeHoldersOfTypeIntoMultiple(Mockito.any(), Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
-			RecipeType recipeType = invocation.getArgument(0);
-			Class recipeClass = invocation.getArgument(1);
-			return ClientRecipeHelper.transformAllRecipeHoldersOfTypeIntoMultiple(recipeManager, recipeType, recipeClass, invocation.getArgument(2));
-		});
-		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipeHoldersOfType(Mockito.any(), Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
-			RecipeType recipeType = invocation.getArgument(0);
-			Class recipeClass = invocation.getArgument(1);
-			return ClientRecipeHelper.transformAllRecipeHoldersOfType(recipeManager, recipeType, recipeClass, invocation.getArgument(2));
-		});
-		clientRecipeHelper.when(() -> ClientRecipeHelper.assemble(Mockito.any(), Mockito.any())).thenAnswer(invocation -> assembleRecipe(invocation.getArgument(0), invocation.getArgument(1), resources.registryLookup()));
-		clientRecipeHelper.when(() -> ClientRecipeHelper.getResultItem(Mockito.any())).thenAnswer(invocation -> ClientRecipeHelper.getResultItem(invocation.getArgument(0), resources.registryLookup()));
+		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipeHoldersOfTypeIntoMultiple(Mockito.any(), Mockito.any(), Mockito.any()))
+				.thenAnswer(invocation -> {
+					RecipeType recipeType = invocation.getArgument(0);
+					Class recipeClass = invocation.getArgument(1);
+					return ClientRecipeHelper.transformAllRecipeHoldersOfTypeIntoMultiple(recipeManager, recipeType, recipeClass, invocation.getArgument(2));
+				});
+		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipeHoldersOfType(Mockito.any(), Mockito.any(), Mockito.any()))
+				.thenAnswer(invocation -> {
+					RecipeType recipeType = invocation.getArgument(0);
+					Class recipeClass = invocation.getArgument(1);
+					return ClientRecipeHelper.transformAllRecipeHoldersOfType(recipeManager, recipeType, recipeClass, invocation.getArgument(2));
+				});
+		clientRecipeHelper.when(() -> ClientRecipeHelper.assemble(Mockito.any(), Mockito.any()))
+				.thenAnswer(invocation -> assembleRecipe(invocation.getArgument(0), invocation.getArgument(1), resources.registryLookup()));
+		clientRecipeHelper.when(() -> ClientRecipeHelper.getResultItem(Mockito.any()))
+				.thenAnswer(invocation -> ClientRecipeHelper.getResultItem(invocation.getArgument(0), resources.registryLookup()));
 	}
 
 	private static ItemStack assembleRecipe(Recipe<CraftingInput> recipe, CraftingInput input, HolderLookup.Provider registryLookup) {
@@ -229,12 +236,16 @@ class BackpackRecipeViewerDisplaySpecTest {
 
 	private static List<RecipeHolder<?>> createRecipeHolders() {
 		return List.of(
-				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:backpack_to_iron_backpack")), backpackUpgradeRecipe(ModItems.BACKPACK.get(), ModItems.IRON_BACKPACK.get())),
-				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:copper_backpack_to_iron_backpack")), backpackUpgradeRecipe(ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get())),
-				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:iron_backpack_to_gold_backpack")), backpackUpgradeRecipe(ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get())),
-				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:gold_backpack_to_diamond_backpack")), backpackUpgradeRecipe(ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get())),
-				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:diamond_backpack_to_netherite_backpack")), smithingBackpackUpgradeRecipe())
-		);
+				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:backpack_to_iron_backpack")),
+						backpackUpgradeRecipe(ModItems.BACKPACK.get(), ModItems.IRON_BACKPACK.get())),
+				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:copper_backpack_to_iron_backpack")),
+						backpackUpgradeRecipe(ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get())),
+				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:iron_backpack_to_gold_backpack")),
+						backpackUpgradeRecipe(ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get())),
+				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:gold_backpack_to_diamond_backpack")),
+						backpackUpgradeRecipe(ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get())),
+				new RecipeHolder<>(ClientRecipeHelper.recipeKey(ResourceLocation.parse("test:diamond_backpack_to_netherite_backpack")),
+						smithingBackpackUpgradeRecipe()));
 	}
 
 	private static BackpackUpgradeRecipe backpackUpgradeRecipe(Item sourceItem, Item resultItem) {
@@ -242,11 +253,14 @@ class BackpackRecipeViewerDisplaySpecTest {
 		for (int i = 0; i < 9; i++) {
 			ingredients.add(i == 4 ? Optional.of(Ingredient.of(sourceItem)) : Optional.empty());
 		}
-		return new BackpackUpgradeRecipe(new ShapedRecipe("", CraftingBookCategory.MISC, new ShapedRecipePattern(3, 3, ingredients, Optional.empty()), new ItemStack(resultItem)));
+		return new BackpackUpgradeRecipe(
+				new ShapedRecipe("", CraftingBookCategory.MISC, new ShapedRecipePattern(3, 3, ingredients, Optional.empty()), new ItemStack(resultItem)));
 	}
 
 	private static SmithingBackpackUpgradeRecipe smithingBackpackUpgradeRecipe() {
-		return new SmithingBackpackUpgradeRecipe(Optional.of(Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)), Ingredient.of(ModItems.DIAMOND_BACKPACK.get()), Optional.of(Ingredient.of(Items.NETHERITE_INGOT)), new ItemStack(ModItems.NETHERITE_BACKPACK.get()));
+		return new SmithingBackpackUpgradeRecipe(Optional.of(Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)),
+				Ingredient.of(ModItems.DIAMOND_BACKPACK.get()), Optional.of(Ingredient.of(Items.NETHERITE_INGOT)),
+				new ItemStack(ModItems.NETHERITE_BACKPACK.get()));
 	}
 
 	private static List<CraftingDisplayVariant> getCraftingUsagesFor(IRecipeViewerDisplayCatalog catalog, ItemStack stack) {
@@ -288,13 +302,9 @@ class BackpackRecipeViewerDisplaySpecTest {
 				WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, WorldDataConfiguration.DEFAULT, false, false);
 				WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, 0);
 
-				return WorldLoader.load(
-						initConfig,
-						context -> new WorldLoader.DataLoadOutput<>(UnitCookie.INSTANCE, context.datapackDimensions()),
-						(resourceManager, resources, registries, cookie) -> new LoadedResources(resourceManager, resources, registries),
-						backgroundExecutor,
-						gameExecutor
-				).join();
+				return WorldLoader.load(initConfig, context -> new WorldLoader.DataLoadOutput<>(UnitCookie.INSTANCE, context.datapackDimensions()),
+						(resourceManager, resources, registries, cookie) -> new LoadedResources(resourceManager, resources, registries), backgroundExecutor,
+						gameExecutor).join();
 			} finally {
 				backgroundExecutor.shutdown();
 			}
@@ -304,7 +314,8 @@ class BackpackRecipeViewerDisplaySpecTest {
 			INSTANCE
 		}
 
-		private record LoadedResources(CloseableResourceManager resourceManager, ReloadableServerResources serverResources, LayeredRegistryAccess<RegistryLayer> registries) implements AutoCloseable {
+		private record LoadedResources(CloseableResourceManager resourceManager, ReloadableServerResources serverResources,
+				LayeredRegistryAccess<RegistryLayer> registries) implements AutoCloseable {
 			private RecipeManager recipeManager() {
 				return serverResources.getRecipeManager();
 			}

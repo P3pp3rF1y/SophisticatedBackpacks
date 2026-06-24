@@ -9,7 +9,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 public class InceptionUpgradeContainer extends UpgradeContainerBase<InceptionUpgradeWrapper, InceptionUpgradeContainer> {
 	private static final String DATA_INVENTORY_ORDER = "inventoryOrder";
 
-	public InceptionUpgradeContainer(Player player, int upgradeContainerId, InceptionUpgradeWrapper upgradeWrapper, UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> type) {
+	public InceptionUpgradeContainer(Player player, int upgradeContainerId, InceptionUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 	}
 

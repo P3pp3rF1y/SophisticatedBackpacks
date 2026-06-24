@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeContainer> {
-	private static final Component SCROLL_TOOLTIP = BackpackTranslationHelper.INSTANCE.translUpgrade("refill.scroll.tooltip").withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY);
+	private static final Component SCROLL_TOOLTIP = BackpackTranslationHelper.INSTANCE.translUpgrade("refill.scroll.tooltip").withStyle(ChatFormatting.ITALIC,
+			ChatFormatting.DARK_GRAY);
 	private final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 	private int slotBeingChanged = -1;
 	private RefillUpgradeWrapper.TargetSlot targetSlotBeingChanged = null;
@@ -43,7 +44,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 	}
 
 	protected RefillUpgradeTab(RefillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsInRow, String upgradeName) {
-		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade(upgradeName), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade(upgradeName),
+				BackpackTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
 
 		filterLogicControl = addHideableChild(new RefillFilterLogicControl(screen, slotsInRow));
 	}
@@ -101,7 +103,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		private final int slotsInRow;
 
 		public RefillFilterLogicControl(StorageScreenBase<?> screen, int slotsInRow) {
-			super(screen, new Position(RefillUpgradeTab.this.x + 3, RefillUpgradeTab.this.y + 24), RefillUpgradeTab.this.getContainer().getFilterLogicContainer(), slotsInRow);
+			super(screen, new Position(RefillUpgradeTab.this.x + 3, RefillUpgradeTab.this.y + 24),
+					RefillUpgradeTab.this.getContainer().getFilterLogicContainer(), slotsInRow);
 			this.slotsInRow = slotsInRow;
 		}
 
@@ -139,8 +142,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 					int slotIndex = slot.getSlotIndex();
 					RefillUpgradeWrapper.TargetSlot ts = getContainer().getTargetSlot(slotIndex);
 					RefillUpgradeWrapper.TargetSlot targetSlot = slotBeingChanged == slotIndex ? targetSlotBeingChanged : ts;
-					guiGraphics.drawString(font, targetSlot.getAcronym(),
-							getX() + (slotIndex % slotsInRow) * 18 + 10, getY() + (slotIndex / slotsInRow) * 18 + 2, DyeColor.GREEN.getTextColor());
+					guiGraphics.drawString(font, targetSlot.getAcronym(), getX() + (slotIndex % slotsInRow) * 18 + 10,
+							getY() + (slotIndex / slotsInRow) * 18 + 2, DyeColor.GREEN.getTextColor());
 				}
 			});
 
@@ -149,7 +152,8 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 		private void updateTooltip(RefillUpgradeWrapper.TargetSlot targetSlot) {
 			resetAdditionalTooltip();
-			additionalTooltip.add(BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.tooltip", targetSlot.getDescription()).withStyle(ChatFormatting.GRAY));
+			additionalTooltip.add(
+					BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.tooltip", targetSlot.getDescription()).withStyle(ChatFormatting.GRAY));
 			additionalTooltip.add(SCROLL_TOOLTIP);
 		}
 

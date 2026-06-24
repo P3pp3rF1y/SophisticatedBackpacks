@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Mob;
@@ -25,7 +25,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgradeWrapper, MobCatcherUpgradeItem> implements IUpgradeWrapper, ITickableUpgrade, IClientStorageContentsProvider, IInventoryLayoutContributor, IInventorySlotBlocker {
+public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgradeWrapper, MobCatcherUpgradeItem>
+		implements
+			IUpgradeWrapper,
+			ITickableUpgrade,
+			IClientStorageContentsProvider,
+			IInventoryLayoutContributor,
+			IInventorySlotBlocker {
 	private static final int MIN_AMBIENT_SOUND_DELAY = 220;
 	private static final int AMBIENT_SOUND_DELAY_VARIATION = 260;
 	private static final float MUFFLED_AMBIENT_VOLUME = 0.08F;
@@ -76,7 +82,9 @@ public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgra
 
 	@Override
 	public Optional<InventoryLayoutPart> getInventoryLayoutPart(int slot, int columns, int targetColumns) {
-		return storageWrapper instanceof IBackpackWrapper backpackWrapper ? MobCatcherStorage.getInventoryLayoutPart(backpackWrapper, slot, columns, targetColumns) : Optional.empty();
+		return storageWrapper instanceof IBackpackWrapper backpackWrapper
+				? MobCatcherStorage.getInventoryLayoutPart(backpackWrapper, slot, columns, targetColumns)
+				: Optional.empty();
 	}
 
 	@Override
@@ -119,11 +127,8 @@ public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgra
 	}
 
 	private Optional<SoundEvent> getAmbientSound(CapturedMob capturedMob, Level level) {
-		return MobCatcherStorage.getEntityType(capturedMob)
-				.map(entityType -> entityType.create(level, EntitySpawnReason.EVENT))
-				.filter(Mob.class::isInstance)
-				.map(Mob.class::cast)
-				.map(mob -> {
+		return MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(level, EntitySpawnReason.EVENT)).filter(Mob.class::isInstance)
+				.map(Mob.class::cast).map(mob -> {
 					mob.load(capturedMob.entityNbt());
 					return ((MobAccessor) mob).sophisticatedbackpacks$getAmbientSound();
 				});

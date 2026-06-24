@@ -34,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -55,7 +56,8 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	@Override
-	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
+	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext,
+			@Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
 		final int[] tints = new int[this.tints.size()];
 		for (int j = 0; j < tints.length; j++) {
 			tints[j] = this.tints.get(j).calculate(stack, clientLevel, livingEntity);
@@ -71,7 +73,7 @@ public class BackpackItemModel implements ItemModel {
 
 		setBackpackModelProperties(stack);
 
-		renderLayer.setExtents(extents); //TODO are these even required when specialRenderer actually does the rendering?
+		renderLayer.setExtents(extents); // TODO are these even required when specialRenderer actually does the rendering?
 		properties.applyToLayer(renderLayer, displayContext);
 		renderLayer.setUsesBlockLight(true);
 		List<BakedQuad> quads = baseModel.getQuads(displayContext);
@@ -116,10 +118,12 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	public record Unbaked(ResourceLocation base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
-		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
-				ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints)
-		).apply(builder, Unbaked::new));
+		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder
+				.mapCodec(
+						builder -> builder
+								.group(ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
+										ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
+								.apply(builder, Unbaked::new));
 
 		@Override
 		public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -133,7 +137,8 @@ public class BackpackItemModel implements ItemModel {
 				TextureSlots textureslots = resolved.getTopTextureSlots();
 				ModelBaker modelbaker = context.blockModelBaker();
 				ModelRenderProperties modelRenderProperties = ModelRenderProperties.fromResolvedModel(modelbaker, resolved, textureslots);
-				return new BackpackItemModel(base.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), modelRenderProperties, tints);
+				return new BackpackItemModel(base.bakeBlockStateModel(context.blockModelBaker(), resolved, BlockModelRotation.X0_Y0), modelRenderProperties,
+						tints);
 			}
 
 			ModelBaker modelbaker = context.blockModelBaker();
@@ -166,18 +171,10 @@ public class BackpackItemModel implements ItemModel {
 		}
 
 		@Override
-		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay, boolean hasFoil) {
-			ItemRenderer.renderItem(
-					displayContext,
-					poseStack,
-					buffer,
-					combinedLight,
-					packedOverlay,
-					tintLayers,
-					baseModel,
-					Sheets.translucentItemSheet(),
-					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
-			);
+		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay,
+				boolean hasFoil) {
+			ItemRenderer.renderItem(displayContext, poseStack, buffer, combinedLight, packedOverlay, tintLayers, baseModel, Sheets.translucentItemSheet(),
+					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE);
 			if (displayItem != null) {
 				if (displayItemQuad == null) {
 					return;

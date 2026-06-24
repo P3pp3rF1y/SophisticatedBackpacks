@@ -40,11 +40,12 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S1192")
-//don't complain about repeated config names if two upgrades happen to have the same setting
+// don't complain about repeated config names if two upgrades happen to have the same setting
 public class Config {
 
 	private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
@@ -129,13 +130,13 @@ public class Config {
 		}
 
 		@SuppressWarnings("unused")
-		//need the Event parameter for forge reflection to understand what event this listens to
+		// need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigReload(ModConfigEvent.Reloading event) {
 			clearCache();
 		}
 
 		@SuppressWarnings("unused")
-		//need the Event parameter for forge reflection to understand what event this listens to
+		// need the Event parameter for forge reflection to understand what event this listens to
 		public void onConfigLoad(ModConfigEvent.Loading event) {
 			clearCache();
 		}
@@ -201,18 +202,23 @@ public class Config {
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 			nerfsConfig = new NerfsConfig(builder);
 			maxUpgradesPerStorage = new MaxUgradesPerStorageConfig(builder,
-					Map.of(
-							StackUpgradeItem.UPGRADE_GROUP.name(), 3,
-							ICookingUpgrade.UPGRADE_GROUP.name(), 1,
-							JukeboxUpgradeItem.UPGRADE_GROUP.name(), 1
-					)
-			);
+					Map.of(StackUpgradeItem.UPGRADE_GROUP.name(), 3, ICookingUpgrade.UPGRADE_GROUP.name(), 1, JukeboxUpgradeItem.UPGRADE_GROUP.name(), 1));
 
-			itemFluidHandlerEnabled = builder.comment("Turns on/off item fluid handler of backpack in its item form. There are some dupe bugs caused by default fluid handling implementation that manifest when backpack is drained / filled in its item form in another mod's tank and the only way to prevent them is disallowing drain/fill in item form altogether").define("itemFluidHandlerEnabled", true);
-			allowOpeningOtherPlayerBackpacks = builder.comment("Determines whether player can right click on backpack that another player is wearing to open it. If off will turn off that capability for everyone and remove related settings from backpack.").define("allowOpeningOtherPlayerBackpacks", true);
-			itemDisplayDisabled = builder.comment("Allows disabling item display settings. Primarily in cases where custom backpack model doesn't support showing the item. (Requires game restart to take effect)").define("itemDisplayDisabled", false);
-			tickDedupeLogicDisabled = builder.comment("Allows disabling logic that dedupes backpacks with the same UUID in players' inventory. This is here to allow turning off the logic just in case it would be causing performance issues.").define("tickDedupeLogicDisabled", false);
-			canBePlacedInContainerItems = builder.comment("Determines if backpacks can be placed in container items (those that check for return value of canFitInsideContainerItems)").define("canBePlacedInContainerItems", false);
+			itemFluidHandlerEnabled = builder.comment(
+					"Turns on/off item fluid handler of backpack in its item form. There are some dupe bugs caused by default fluid handling implementation that manifest when backpack is drained / filled in its item form in another mod's tank and the only way to prevent them is disallowing drain/fill in item form altogether")
+					.define("itemFluidHandlerEnabled", true);
+			allowOpeningOtherPlayerBackpacks = builder.comment(
+					"Determines whether player can right click on backpack that another player is wearing to open it. If off will turn off that capability for everyone and remove related settings from backpack.")
+					.define("allowOpeningOtherPlayerBackpacks", true);
+			itemDisplayDisabled = builder.comment(
+					"Allows disabling item display settings. Primarily in cases where custom backpack model doesn't support showing the item. (Requires game restart to take effect)")
+					.define("itemDisplayDisabled", false);
+			tickDedupeLogicDisabled = builder.comment(
+					"Allows disabling logic that dedupes backpacks with the same UUID in players' inventory. This is here to allow turning off the logic just in case it would be causing performance issues.")
+					.define("tickDedupeLogicDisabled", false);
+			canBePlacedInContainerItems = builder
+					.comment("Determines if backpacks can be placed in container items (those that check for return value of canFitInsideContainerItems)")
+					.define("canBePlacedInContainerItems", false);
 
 			builder.pop();
 		}
@@ -229,11 +235,19 @@ public class Config {
 
 			public NerfsConfig(ModConfigSpec.Builder builder) {
 				builder.push("nerfs");
-				tooManyBackpacksSlowness = builder.comment("Determines if too many backpacks in player's inventory cause slowness to the player").define("tooManyBackpacksSlowness", false);
-				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness").defineInRange("maxNumberOfBackpacks", 3, 1, 27);
-				slownessLevelsPerAdditionalBackpack = builder.comment("Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)").defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
-				onlyWornBackpackTriggersUpgrades = builder.comment("Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.").define("onlyWornBackpackTriggersUpgrades", false);
-				nerfEffect = builder.comment("Effect that is applied to player when they have too many backpacks. Can be any effect including modded ones like overencumbered effect some mods have.").define("nerfEffect", "minecraft:slowness", s -> s instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
+				tooManyBackpacksSlowness = builder.comment("Determines if too many backpacks in player's inventory cause slowness to the player")
+						.define("tooManyBackpacksSlowness", false);
+				maxNumberOfBackpacks = builder.comment("Maximum number of backpacks in player's inventory that will not cause slowness")
+						.defineInRange("maxNumberOfBackpacks", 3, 1, 27);
+				slownessLevelsPerAdditionalBackpack = builder.comment(
+						"Ratio of slowness levels per every backpack above the maximum number allowed. (number of backpacks above the max gets multiplied by this number and ceiled)")
+						.defineInRange("slownessLevelsPerAdditionalBackpack", 1, 0.1, 5);
+				onlyWornBackpackTriggersUpgrades = builder.comment(
+						"Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.")
+						.define("onlyWornBackpackTriggersUpgrades", false);
+				nerfEffect = builder.comment(
+						"Effect that is applied to player when they have too many backpacks. Can be any effect including modded ones like overencumbered effect some mods have.")
+						.define("nerfEffect", "minecraft:slowness", s -> s instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 				builder.pop();
 			}
 
@@ -275,32 +289,49 @@ public class Config {
 				builder.comment("Settings for Spawning Entities with Backpack").push("entityBackpackAdditions");
 				chance = builder.comment("Chance of an entity spawning with Backpack").defineInRange("chance", 0.01, 0, 1);
 				addLoot = builder.comment("Turns on/off addition of loot into backpacks").define("addLoot", true);
-				buffWithPotionEffects = builder.comment("Turns on/off buffing the entity that wears backpack with potion effects. These are scaled based on how much loot is added.")
+				buffWithPotionEffects = builder
+						.comment("Turns on/off buffing the entity that wears backpack with potion effects. These are scaled based on how much loot is added.")
 						.define("buffWithPotionEffects", true);
-				buffHealth = builder.comment("Turns on/off buffing the entity that wears backpack with additional health. Health is scaled based on backpack tier the mob wears.")
+				buffHealth = builder.comment(
+						"Turns on/off buffing the entity that wears backpack with additional health. Health is scaled based on backpack tier the mob wears.")
 						.define("buffHealth", true);
-				equipWithArmor = builder.comment("Turns on/off equipping the entity that wears backpack with armor. What armor material and how enchanted it is scales based on backpack tier the mob wears.")
+				equipWithArmor = builder.comment(
+						"Turns on/off equipping the entity that wears backpack with armor. What armor material and how enchanted it is scales based on backpack tier the mob wears.")
 						.define("equipWithArmor", true);
-				entityLootTableList = builder.comment("Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
+				entityLootTableList = builder.comment(
+						"Map of entities that can spawn with backpack and related loot tables (if adding a loot is enabled) in format of \"EntityRegistryName|LootTableName\"")
 						.defineList("entityLootTableList", this::getDefaultEntityLootTableList, mapping -> ((String) mapping).matches(ENTITY_LOOT_MATCHER));
-				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities")
-						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
-				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
-				dropToFakePlayers = builder.comment("Determines whether backpack drops to fake players if killed by them in addition to real ones that it always drops to").define("dropToFakePlayers", false);
+				discBlockList = builder.comment("List of music discs that are not supposed to be played by entities").defineList("discBlockList",
+						this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
+				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.")
+						.define("playJukebox", true);
+				dropToFakePlayers = builder
+						.comment("Determines whether backpack drops to fake players if killed by them in addition to real ones that it always drops to")
+						.define("dropToFakePlayers", false);
 				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.5, 0, 1);
-				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack").defineInRange("lootingChanceIncreasePerLevel", 0.15, 0, 0.3);
-				leatherWeight = builder.comment("Weight of selecting a Leather Backpack when an entity spawns with a backpack").defineInRange("leatherWeight", 625, 0, 9999);
-				copperWeight = builder.comment("Weight of selecting a Copper Backpack when an entity spawns with a backpack").defineInRange("copperWeight", 250, 0, 9999);
-				ironWeight = builder.comment("Weight of selecting a Iron Backpack when an entity spawns with a backpack").defineInRange("ironWeight", 125, 0, 9999);
-				goldWeight = builder.comment("Weight of selecting a Gold Backpack when an entity spawns with a backpack").defineInRange("goldWeight", 25, 0, 9999);
-				diamondWeight = builder.comment("Weight of selecting a Diamond Backpack when an entity spawns with a backpack").defineInRange("diamondWeight", 5, 0, 9999);
-				netheriteWeight = builder.comment("Weight of selecting a Netherite Backpack when an entity spawns with a backpack").defineInRange("netheriteWeight", 1, 0, 9999);
-				minBackpackTierMidDifficulty = builder.comment("Minimum tier of backpack mobs are equipped with at mid local difficulty (above 1/3 of max, 0 is leather)")
+				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack")
+						.defineInRange("lootingChanceIncreasePerLevel", 0.15, 0, 0.3);
+				leatherWeight = builder.comment("Weight of selecting a Leather Backpack when an entity spawns with a backpack").defineInRange("leatherWeight",
+						625, 0, 9999);
+				copperWeight = builder.comment("Weight of selecting a Copper Backpack when an entity spawns with a backpack").defineInRange("copperWeight", 250,
+						0, 9999);
+				ironWeight = builder.comment("Weight of selecting a Iron Backpack when an entity spawns with a backpack").defineInRange("ironWeight", 125, 0,
+						9999);
+				goldWeight = builder.comment("Weight of selecting a Gold Backpack when an entity spawns with a backpack").defineInRange("goldWeight", 25, 0,
+						9999);
+				diamondWeight = builder.comment("Weight of selecting a Diamond Backpack when an entity spawns with a backpack").defineInRange("diamondWeight",
+						5, 0, 9999);
+				netheriteWeight = builder.comment("Weight of selecting a Netherite Backpack when an entity spawns with a backpack")
+						.defineInRange("netheriteWeight", 1, 0, 9999);
+				minBackpackTierMidDifficulty = builder
+						.comment("Minimum tier of backpack mobs are equipped with at mid local difficulty (above 1/3 of max, 0 is leather)")
 						.defineInRange("minBackpackTierMidDifficulty", 1, 0, 6);
-				minBackpackTierHighDifficulty = builder.comment("Minimum tier of backpack mobs are equipped with at high local difficulty (above 2/3 of max, 0 is leather)")
+				minBackpackTierHighDifficulty = builder
+						.comment("Minimum tier of backpack mobs are equipped with at high local difficulty (above 2/3 of max, 0 is leather)")
 						.defineInRange("minBackpackTierHighDifficulty", 2, 0, 6);
-				localDifficultyEffectsBackpackSpawns = builder.comment("If local difficulty is taken into consideration when determining the difficulty. If local difficulty is high enough then it will use difficulty settings above")
-								.define("localDifficultyEffectsBackpackSpawns", true);
+				localDifficultyEffectsBackpackSpawns = builder.comment(
+						"If local difficulty is taken into consideration when determining the difficulty. If local difficulty is high enough then it will use difficulty settings above")
+						.define("localDifficultyEffectsBackpackSpawns", true);
 				builder.pop();
 			}
 
@@ -328,8 +359,8 @@ public class Config {
 					String entityRegistryName = entityLoot[0];
 					String lootTableName = entityLoot[1];
 
-					BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(entityRegistryName))
-							.ifPresent(entityType -> entityLootTables.put(entityType, lootTableName.equals("null") ? null : ResourceLocation.parse(lootTableName)));
+					BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(entityRegistryName)).ifPresent(
+							entityType -> entityLootTables.put(entityType, lootTableName.equals("null") ? null : ResourceLocation.parse(lootTableName)));
 				}
 			}
 
@@ -341,7 +372,8 @@ public class Config {
 			}
 
 			private List<String> getDefaultEntityLootTableList() {
-				return getDefaultEntityLootMapping().entrySet().stream().map(e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getKey()) + "|" + e.getValue().location()).collect(Collectors.toList());
+				return getDefaultEntityLootMapping().entrySet().stream()
+						.map(e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getKey()) + "|" + e.getValue().location()).collect(Collectors.toList());
 			}
 
 			private Map<EntityType<?>, ResourceKey<LootTable>> getDefaultEntityLootMapping() {
@@ -373,9 +405,11 @@ public class Config {
 
 			public InceptionUpgradeConfig(ModConfigSpec.Builder builder) {
 				builder.comment("Inception Upgrade Settings").push("inceptionUpgrade");
-				upgradesUseInventoriesOfBackpacksInBackpack = builder.comment("Allows / Disallows backpack upgrades to work with inventories of Backpacks in the Backpack with Inception Upgrade")
+				upgradesUseInventoriesOfBackpacksInBackpack = builder
+						.comment("Allows / Disallows backpack upgrades to work with inventories of Backpacks in the Backpack with Inception Upgrade")
 						.define("upgradesUseInventoriesOfBackpacksInBackpack", true);
-				upgradesInContainedBackpacksAreFunctional = builder.comment("Allows / Disallows upgrades to be functional even when they are in Backpacks in the inventory of Backpack with Inception Upgrade")
+				upgradesInContainedBackpacksAreFunctional = builder.comment(
+						"Allows / Disallows upgrades to be functional even when they are in Backpacks in the inventory of Backpack with Inception Upgrade")
 						.define("upgradesInContainedBackpacksAreFunctional", true);
 				builder.pop();
 			}
@@ -387,7 +421,8 @@ public class Config {
 
 			public BackpackConfig(ModConfigSpec.Builder builder, String backpackPrefix, int inventorySlotCountDefault, int upgradeSlotCountDefault) {
 				builder.comment(backpackPrefix + " Backpack Settings").push(backpackPrefix.toLowerCase(Locale.ENGLISH) + "Backpack");
-				inventorySlotCount = builder.comment("Number of inventory slots in the backpack").defineInRange("inventorySlotCount", inventorySlotCountDefault, 1, 144);
+				inventorySlotCount = builder.comment("Number of inventory slots in the backpack").defineInRange("inventorySlotCount", inventorySlotCountDefault,
+						1, 144);
 				upgradeSlotCount = builder.comment("Number of upgrade slots in the backpack").defineInRange("upgradeSlotCount", upgradeSlotCountDefault, 0, 10);
 				builder.pop();
 			}
@@ -399,8 +434,10 @@ public class Config {
 			private Set<Block> noInteractionBlocksSet = null;
 
 			NoInteractionBlocks(ModConfigSpec.Builder builder) {
-				noInteractionBlocksList = builder.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"")
-						.defineListAllowEmpty("noInteractionBlocks", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
+				noInteractionBlocksList = builder
+						.comment("List of blocks that inventory interaction upgrades can't interact with - e.g. \"minecraft:shulker_box\"")
+						.defineListAllowEmpty("noInteractionBlocks", ArrayList::new, () -> "minecraft:shulker_box",
+								mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
@@ -433,9 +470,11 @@ public class Config {
 			private Set<Block> noConnnectionBlocksSet = null;
 
 			NoConnectionBlocks(ModConfigSpec.Builder builder) {
-				noConnectionBlocksList = builder.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
+				noConnectionBlocksList = builder
+						.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
 						.defineList("noConnectionBlocks", new ArrayList<>(), mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
-				allBlockConnectionsDisallowed = builder.comment("If true, disallows all blocks from connecting to backpacks").define("allBlockConnectionsDisallowed", false);
+				allBlockConnectionsDisallowed = builder.comment("If true, disallows all blocks from connecting to backpacks")
+						.define("allBlockConnectionsDisallowed", false);
 			}
 
 			public boolean isBlockConnectionDisallowed(Block block) {
@@ -472,8 +511,10 @@ public class Config {
 
 			DisallowedItems(ModConfigSpec.Builder builder) {
 				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"")
-						.defineListAllowEmpty("disallowedItems", ArrayList::new, () -> "minecraft:shulker_box", mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
-				containerItemsDisallowed = builder.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
+						.defineListAllowEmpty("disallowedItems", ArrayList::new, () -> "minecraft:shulker_box",
+								mapping -> mapping instanceof String str && str.matches(REGISTRY_NAME_MATCHER));
+				containerItemsDisallowed = builder
+						.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
 						.define("containerItemsDisallowed", false);
 			}
 
@@ -511,8 +552,9 @@ public class Config {
 			private Map<String, Integer> maxUpgradesPerStorage = null;
 
 			protected MaxUgradesPerStorageConfig(ModConfigSpec.Builder builder, Map<String, Integer> defaultUpgradesPerStorage) {
-				maxUpgradesPerStorageList = builder.comment("Maximum number of upgrades of type per backpack in format of \"UpgradeRegistryName[or UpgradeGroup]|MaxNumber\"")
-						.defineList("maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage), mapping -> ((String) mapping).matches(MAX_UPGRADES_MATCHER));
+				maxUpgradesPerStorageList = builder
+						.comment("Maximum number of upgrades of type per backpack in format of \"UpgradeRegistryName[or UpgradeGroup]|MaxNumber\"").defineList(
+								"maxUpgradesPerStorage", convertToList(defaultUpgradesPerStorage), mapping -> ((String) mapping).matches(MAX_UPGRADES_MATCHER));
 			}
 
 			private List<String> convertToList(Map<String, Integer> defaultUpgradesPerStorage) {

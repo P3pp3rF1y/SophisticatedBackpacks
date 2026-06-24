@@ -23,10 +23,12 @@ import java.util.List;
 public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgradeWrapper, SmithingUpgradeContainer> implements ICraftingContainer {
 	private static final String DATA_SHIFT_CLICK_INTO_STORAGE = "shiftClickIntoStorage";
 	private final Slot resultSlot;
-	private Runnable onResultChanged = () -> {};
+	private Runnable onResultChanged = () -> {
+	};
 
 	private final PersistableSmithingMenu smithingMenuDelegate;
-	public SmithingUpgradeContainer(Player player, int upgradeContainerId, SmithingUpgradeWrapper upgradeWrapper, UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> type) {
+	public SmithingUpgradeContainer(Player player, int upgradeContainerId, SmithingUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		smithingMenuDelegate = new PersistableSmithingMenu(player.getInventory());
 
@@ -100,7 +102,7 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 	@Override
 	public void setRecipeUsed(ResourceKey<Recipe<?>> recipeId) {
-		//noop - no longer required now that selected recipe isn't used by SmithingMenu anymore
+		// noop - no longer required now that selected recipe isn't used by SmithingMenu anymore
 	}
 
 	@Override
@@ -116,12 +118,15 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 	private class PersistableSmithingMenu extends SmithingMenu {
 
 		public PersistableSmithingMenu(Inventory playerInventory) {
-			super(0, playerInventory, playerInventory.player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
+			super(0, playerInventory,
+					playerInventory.player.level().isClientSide()
+							? ContainerLevelAccess.NULL
+							: ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
 		}
 
 		@Override
 		protected void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
-			for(final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
+			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
 				this.addSlot(new SlotSuppliedHandler(upgradeWrapper::getInventory, slotDefinition.slotIndex(), 0, 0) {
 					@Override
 					public void setChanged() {
@@ -159,7 +164,8 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 		@Override
 		protected void createResultSlot(ItemCombinerMenuSlotDefinition slotDefinition) {
-			this.addSlot(new Slot(this.resultSlots, slotDefinition.getResultSlot().slotIndex(), slotDefinition.getResultSlot().x(), slotDefinition.getResultSlot().y()) {
+			this.addSlot(new Slot(this.resultSlots, slotDefinition.getResultSlot().slotIndex(), slotDefinition.getResultSlot().x(),
+					slotDefinition.getResultSlot().y()) {
 				public boolean mayPlace(ItemStack stack) {
 					return false;
 				}

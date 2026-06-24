@@ -8,13 +8,13 @@ import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 
 public class RemoveNonPlayerCommand {
-	private RemoveNonPlayerCommand() {}
+	private RemoveNonPlayerCommand() {
+	}
 
 	@SuppressWarnings("java:S1452")
 	static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal("removeNonPlayer")
-				.then(Commands.argument("onlyWithEmptyInventory", BoolArgumentType.bool())
-						.executes(context -> removeNonPlayerBackpacks(context.getSource(), BoolArgumentType.getBool(context, "onlyWithEmptyInventory"))));
+		return Commands.literal("removeNonPlayer").then(Commands.argument("onlyWithEmptyInventory", BoolArgumentType.bool())
+				.executes(context -> removeNonPlayerBackpacks(context.getSource(), BoolArgumentType.getBool(context, "onlyWithEmptyInventory"))));
 	}
 
 	private static int removeNonPlayerBackpacks(CommandSourceStack source, boolean onlyWithEmptyInventory) {

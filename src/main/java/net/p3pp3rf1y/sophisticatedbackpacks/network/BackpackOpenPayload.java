@@ -20,14 +20,8 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 	private static final int CHEST_SLOT = 38;
 	private static final int OFFHAND_SLOT = 40;
 
-	public static final StreamCodec<ByteBuf, BackpackOpenPayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			BackpackOpenPayload::slotIndex,
-			ByteBufCodecs.STRING_UTF8,
-			BackpackOpenPayload::identifier,
-			ByteBufCodecs.STRING_UTF8,
-			BackpackOpenPayload::handlerName,
-			BackpackOpenPayload::new);
+	public static final StreamCodec<ByteBuf, BackpackOpenPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, BackpackOpenPayload::slotIndex,
+			ByteBufCodecs.STRING_UTF8, BackpackOpenPayload::identifier, ByteBufCodecs.STRING_UTF8, BackpackOpenPayload::handlerName, BackpackOpenPayload::new);
 
 	public BackpackOpenPayload() {
 		this(-1);
@@ -57,14 +51,18 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 				adjustedSlotIndex = 0;
 			}
 			BackpackContext.Item backpackContext = new BackpackContext.Item(payload.handlerName, payload.identifier, adjustedSlotIndex,
-					player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.getBackpackContext().wasOpenFromInventory()));
+					player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer
+							&& backpackContainer.getBackpackContext().wasOpenFromInventory()));
 			openBackpack(player, backpackContext);
 		} else if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 			BackpackContext backpackContext = backpackContainer.getBackpackContext();
 			if (payload.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(payload.slotIndex)) {
-				openBackpack(player, backpackContext.getSubBackpackContext(payload.slotIndex, BackpackWrapper.fromStack(backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(payload.slotIndex)).getContentsUuid().isEmpty()));
+				openBackpack(player,
+						backpackContext.getSubBackpackContext(payload.slotIndex,
+								BackpackWrapper.fromStack(backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(payload.slotIndex))
+										.getContentsUuid().isEmpty()));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
@@ -77,12 +75,15 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 	private static void findAndOpenFirstBackpack(Player player) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
-			player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName(), false), backpackContext::toBuffer);
+			player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName(), false),
+					backpackContext::toBuffer);
 			return true;
 		});
 	}
 
 	private static void openBackpack(Player player, BackpackContext backpackContext) {
-		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false), backpackContext::toBuffer);
+		player.openMenu(
+				new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false),
+				backpackContext::toBuffer);
 	}
 }

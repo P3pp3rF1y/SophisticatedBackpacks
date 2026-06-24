@@ -21,10 +21,8 @@ public class BackpackTintSources {
 	}
 
 	public record Main(int defaultColor) implements ItemTintSource {
-		public static final MapCodec<Main> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-				instance.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Main::defaultColor)
-				).apply(instance, Main::new)
-		);
+		public static final MapCodec<Main> MAP_CODEC = RecordCodecBuilder
+				.mapCodec(instance -> instance.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Main::defaultColor)).apply(instance, Main::new));
 
 		public Main(int defaultColor) {
 			this.defaultColor = ARGB.opaque(defaultColor);
@@ -42,10 +40,8 @@ public class BackpackTintSources {
 	}
 
 	public record Accent(int defaultColor) implements ItemTintSource {
-		public static final MapCodec<Accent> MAP_CODEC = RecordCodecBuilder.mapCodec(instance ->
-				instance.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Accent::defaultColor)
-				).apply(instance, Accent::new)
-		);
+		public static final MapCodec<Accent> MAP_CODEC = RecordCodecBuilder.mapCodec(
+				instance -> instance.group(ExtraCodecs.RGB_COLOR_CODEC.fieldOf("default").forGetter(Accent::defaultColor)).apply(instance, Accent::new));
 
 		public Accent(int defaultColor) {
 			this.defaultColor = ARGB.opaque(defaultColor);

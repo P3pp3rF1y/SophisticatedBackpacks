@@ -15,19 +15,19 @@ public class BackpackRecipeViewerDisplays {
 	public static void register(IRecipeViewerDisplayCatalog catalog, IRecipeViewerDisplayContext context) {
 		registerDyeRecipes(catalog, context);
 		catalog.addCraftingSpecExtensionRecipeClass(BackpackUpgradeRecipe.class);
-		BackpackTierUpgradeRecipesMaker.getGroupedShapedCraftingRecipes(context::getSubtypeInterpreter).stream()
-				.map(BackpackTierUpgradeDisplayRecipe::toSpec)
+		BackpackTierUpgradeRecipesMaker.getGroupedShapedCraftingRecipes(context::getSubtypeInterpreter).stream().map(BackpackTierUpgradeDisplayRecipe::toSpec)
 				.forEach(catalog::addCraftingSpec);
-		BackpackSmithingUpgradeRecipesMaker.getGroupedSmithingRecipes().stream()
-				.map(BackpackSmithingUpgradeDisplayRecipe::toSpec)
+		BackpackSmithingUpgradeRecipesMaker.getGroupedSmithingRecipes().stream().map(BackpackSmithingUpgradeDisplayRecipe::toSpec)
 				.forEach(catalog::addSmithingSpec);
 	}
 
 	public static void registerDyeRecipes(IRecipeViewerDisplayCatalog catalog, IRecipeViewerDisplayContext context) {
 		DyeRecipesMaker.getSingleColorRecipeSpecs().stream()
-				.map(spec -> new SingleColorDyeRecipeSpec(spec.id(), spec.sourceStacks(), spec.variantPairs(), (recipeResult, focusedOutput) -> context.getSubtypeInterpreter(focusedOutput)
-						.map(interpreter -> recipeResult.is(focusedOutput.getItem()) && interpreter.getComparableData(recipeResult).equals(interpreter.getComparableData(focusedOutput)))
-						.orElse(ItemStack.isSameItemSameComponents(recipeResult, focusedOutput))))
+				.map(spec -> new SingleColorDyeRecipeSpec(spec.id(), spec.sourceStacks(), spec.variantPairs(),
+						(recipeResult, focusedOutput) -> context.getSubtypeInterpreter(focusedOutput)
+								.map(interpreter -> recipeResult.is(focusedOutput.getItem())
+										&& interpreter.getComparableData(recipeResult).equals(interpreter.getComparableData(focusedOutput)))
+								.orElse(ItemStack.isSameItemSameComponents(recipeResult, focusedOutput))))
 				.forEach(catalog::addGroupedCraftingSpec);
 		DyeRecipesMaker.getMultipleColorsRecipes().forEach(catalog::addCraftingRecipe);
 	}

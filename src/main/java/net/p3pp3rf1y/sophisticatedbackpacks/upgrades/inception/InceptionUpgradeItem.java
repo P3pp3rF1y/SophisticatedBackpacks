@@ -17,7 +17,8 @@ import java.util.Set;
 
 public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrapper> {
 	public static final UpgradeType<InceptionUpgradeWrapper> TYPE = new UpgradeType<>(InceptionUpgradeWrapper::new);
-	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(InceptionUpgradeItem.class::isInstance, 0, BackpackTranslationHelper.INSTANCE.translError("add.inception_exists")));
+	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(
+			new UpgradeConflictDefinition(InceptionUpgradeItem.class::isInstance, 0, BackpackTranslationHelper.INSTANCE.translError("add.inception_exists")));
 
 	public InceptionUpgradeItem(Properties properties) {
 		super(Config.SERVER.maxUpgradesPerStorage, properties);
@@ -36,7 +37,8 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 		}
 
 		if (!firstLevelStorage) {
-			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("add.inception_sub_backpack"), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("add.inception_sub_backpack"), Collections.emptySet(),
+					Collections.emptySet(), Collections.emptySet());
 		}
 
 		Set<Integer> errorUpgradeSlots = new HashSet<>();
@@ -47,7 +49,8 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 		});
 
 		if (!errorUpgradeSlots.isEmpty()) {
-			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("add.inception_exists"), errorUpgradeSlots, Collections.emptySet(), Collections.emptySet());
+			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("add.inception_exists"), errorUpgradeSlots,
+					Collections.emptySet(), Collections.emptySet());
 		}
 
 		return UpgradeSlotChangeResult.success();
@@ -62,7 +65,8 @@ public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrappe
 	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IStorageWrapper storageWrapper, boolean isClientSide) {
 		Set<Integer> slots = InventoryHelper.getItemSlots(storageWrapper.getInventoryHandler(), stack -> stack.getItem() instanceof BackpackItem);
 		if (!slots.isEmpty()) {
-			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("remove.inception_sub_backpack"), Collections.emptySet(), slots, Collections.emptySet());
+			return UpgradeSlotChangeResult.fail(BackpackTranslationHelper.INSTANCE.translError("remove.inception_sub_backpack"), Collections.emptySet(), slots,
+					Collections.emptySet());
 		}
 		return UpgradeSlotChangeResult.success();
 	}

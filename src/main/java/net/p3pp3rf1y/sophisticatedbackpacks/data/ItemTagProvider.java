@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ItemTagProvider extends ItemTagsProvider {
-	public ItemTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTagProvider) {
+	public ItemTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider,
+			CompletableFuture<TagLookup<Block>> blockTagProvider) {
 		super(packOutput, lookupProvider, blockTagProvider, SophisticatedBackpacks.MOD_ID);
 	}
 

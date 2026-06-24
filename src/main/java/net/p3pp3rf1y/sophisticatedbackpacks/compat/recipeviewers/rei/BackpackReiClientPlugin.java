@@ -47,7 +47,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @SuppressWarnings("unused")
 @REIPluginClient
 public class BackpackReiClientPlugin implements REIClientPlugin {
-	private static Consumer<WorkstationRegistration> additionalWorkstations = registration -> {};
+	private static Consumer<WorkstationRegistration> additionalWorkstations = registration -> {
+	};
 	private IRecipeViewerDisplayCatalog catalog = null;
 	private boolean catalogCreatedWithoutServer = false;
 
@@ -116,24 +117,18 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerEntries(EntryRegistry registry) {
-		ModItems.ITEMS.getEntries().stream()
-				.map(holder -> holder.get())
-				.filter(BackpackItem.class::isInstance)
-				.map(BackpackItem.class::cast)
-				.forEach(backpackItem -> getCreativeVariants(backpackItem).stream()
-						.forEach(stack -> registry.addEntry(EntryStacks.of(stack.copy()))));
+		ModItems.ITEMS.getEntries().stream().map(holder -> holder.get()).filter(BackpackItem.class::isInstance).map(BackpackItem.class::cast)
+				.forEach(backpackItem -> getCreativeVariants(backpackItem).stream().forEach(stack -> registry.addEntry(EntryStacks.of(stack.copy()))));
 	}
 
 	@Override
 	public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
-		ModItems.ITEMS.getEntries().stream()
-				.map(holder -> holder.get())
-				.filter(BackpackItem.class::isInstance)
-				.map(BackpackItem.class::cast)
+		ModItems.ITEMS.getEntries().stream().map(holder -> holder.get()).filter(BackpackItem.class::isInstance).map(BackpackItem.class::cast)
 				.forEach(backpackItem -> {
 					List<ItemStack> variants = getCreativeVariants(backpackItem);
 					if (variants.size() > 1) {
-						registry.group(getCollapseId(backpackItem), backpackItem.getName(backpackItem.getDefaultInstance()), variants.stream().map(ItemStack::copy).map(EntryStacks::of).toList());
+						registry.group(getCollapseId(backpackItem), backpackItem.getName(backpackItem.getDefaultInstance()),
+								variants.stream().map(ItemStack::copy).map(EntryStacks::of).toList());
 					}
 				});
 	}
@@ -142,7 +137,8 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 	public void registerDisplays(DisplayRegistry registry) {
 		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(this::getCatalog, BackpackReiClientPlugin::canShowDyeRecipesFor));
 		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
-		registry.registerDisplayGenerator(BuiltinPlugin.SMITHING, new SmithingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registry.registerDisplayGenerator(BuiltinPlugin.SMITHING,
+				new SmithingSpecReiDisplayGenerator(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerVisibilityPredicate((category, display) -> {
 			if (display instanceof CraftingSpecReiDisplay) {
 				return EventResult.pass();
@@ -164,16 +160,13 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 	}
 
 	private static boolean canShowDyeRecipesFor(ItemStack stack) {
-		return stack.getItem() instanceof BackpackItem
-				&& !stack.has(ModCoreDataComponents.MAIN_COLOR)
-				&& !stack.has(ModCoreDataComponents.ACCENT_COLOR)
+		return stack.getItem() instanceof BackpackItem && !stack.has(ModCoreDataComponents.MAIN_COLOR) && !stack.has(ModCoreDataComponents.ACCENT_COLOR)
 				&& !stack.has(ModCoreDataComponents.RENDER_INFO_TAG);
 	}
 
 	private static boolean craftingDisplayReplaced(IRecipeViewerDisplayCatalog catalog, DefaultCraftingDisplay craftingDisplay) {
 		return craftingDisplay.getDisplayLocation()
-				.map(displayId -> catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(displayId)))
-				.orElse(false);
+				.map(displayId -> catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(displayId))).orElse(false);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

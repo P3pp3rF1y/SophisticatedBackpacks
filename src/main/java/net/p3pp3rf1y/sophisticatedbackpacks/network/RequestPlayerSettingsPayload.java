@@ -21,7 +21,8 @@ public record RequestPlayerSettingsPayload() implements CustomPacketPayload {
 		Player player = context.player();
 		String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
 		if (player instanceof ServerPlayer serverPlayer) {
-			PacketDistributor.sendToPlayer(serverPlayer, new SyncPlayerSettingsPayload(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+			PacketDistributor.sendToPlayer(serverPlayer,
+					new SyncPlayerSettingsPayload(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
 		}
 	}
 

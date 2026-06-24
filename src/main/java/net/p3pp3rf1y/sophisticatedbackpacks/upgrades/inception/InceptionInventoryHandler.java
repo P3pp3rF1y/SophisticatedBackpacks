@@ -20,7 +20,8 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	private final SubBackpacksHandler subBackpacksHandler;
 	private List<ITrackedContentsItemHandler> handlers;
 
-	public InceptionInventoryHandler(ITrackedContentsItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionInventoryHandler(ITrackedContentsItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder,
+			SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
@@ -109,7 +110,8 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	}
 
 	@Override
-	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot, Runnable onRemoveLastEmptySlot) {
+	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot,
+			Runnable onRemoveLastEmptySlot) {
 		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
 	}
 

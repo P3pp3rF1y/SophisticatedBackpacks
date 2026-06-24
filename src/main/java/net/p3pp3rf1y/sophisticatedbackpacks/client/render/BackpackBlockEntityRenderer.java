@@ -23,10 +23,11 @@ import javax.annotation.Nullable;
 
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	@Nullable
-	private BakedQuad displayItemQuad = null; //TODO this will need to be multiple quads based on model shown
+	private BakedQuad displayItemQuad = null; // TODO this will need to be multiple quads based on model shown
 
 	@Override
-	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Vec3 cameraPos) {
+	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
+			int combinedOverlay, Vec3 cameraPos) {
 		BlockState state = backpackBlockEntity.getBlockState();
 		Direction facing = state.getValue(BackpackBlock.FACING);
 		IBackpackWrapper backpackWrapper = backpackBlockEntity.getBackpackWrapper();
@@ -39,11 +40,13 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
 		poseStack.popPose();
-		renderItemDisplay(backpackBlockEntity.getBackpackWrapper().getBackpack(), poseStack, buffer, combinedLight, combinedOverlay, renderInfo, backpackBlockEntity.getLevel());
+		renderItemDisplay(backpackBlockEntity.getBackpackWrapper().getBackpack(), poseStack, buffer, combinedLight, combinedOverlay, renderInfo,
+				backpackBlockEntity.getLevel());
 		poseStack.popPose();
 	}
 
-	private void renderItemDisplay(ItemStack backpack, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo, @Nullable Level level) {
+	private void renderItemDisplay(ItemStack backpack, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay,
+			RenderInfo renderInfo, @Nullable Level level) {
 		renderInfo.getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
 			Minecraft minecraft = Minecraft.getInstance();
 			ItemRenderer itemRenderer = minecraft.getItemRenderer();
@@ -71,7 +74,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			return displayItemQuad;
 		}
 		if (Minecraft.getInstance().getModelManager().getItemModel(backpack.get(DataComponents.ITEM_MODEL)) instanceof BackpackItemModel backpackItemModel
-			&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
+				&& backpackItemModel.getBaseModel() instanceof BackpackBlockModel.BlockStateModel backpackBlockModel) {
 			displayItemQuad = backpackBlockModel.getDisplayItemQuad();
 		}
 		return null;
