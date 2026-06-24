@@ -10,12 +10,13 @@ public class DataGenerators {
 	}
 
 	public static void gatherData(GatherDataEvent.Client evt) {
-		evt.createBlockAndItemTags((packOutput1, completableFuture) -> new BlockTagsProvider(packOutput1, evt.getLookupProvider(), SophisticatedBackpacks.MOD_ID) {
-			@Override
-			protected void addTags(HolderLookup.Provider pProvider) {
-				//noop
-			}
-		}, ItemTagProvider::new);
+		evt.createBlockAndItemTags(
+				(packOutput1, completableFuture) -> new BlockTagsProvider(packOutput1, evt.getLookupProvider(), SophisticatedBackpacks.MOD_ID) {
+					@Override
+					protected void addTags(HolderLookup.Provider pProvider) {
+						// noop
+					}
+				}, ItemTagProvider::new);
 		evt.createProvider(BackpackLootTableProvider::new);
 		evt.createProvider(BackpackLootModifierProvider::new);
 		evt.createProvider(BackpackRecipeProvider.Runner::new);

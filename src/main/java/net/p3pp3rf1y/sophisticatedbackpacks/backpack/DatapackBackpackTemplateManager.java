@@ -17,7 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DatapackBackpackTemplateManager {
-	private DatapackBackpackTemplateManager() {}
+	private DatapackBackpackTemplateManager() {
+	}
 
 	private static final Map<ResourceLocation, CompoundTag> TEMPLATES = Maps.newTreeMap();
 
@@ -40,7 +41,8 @@ public class DatapackBackpackTemplateManager {
 		private static final String SUFFIX = ".snbt";
 		private static final int PATH_SUFFIX_LENGTH = SUFFIX.length();
 
-		private Loader() {}
+		private Loader() {
+		}
 
 		@Override
 		protected Map<ResourceLocation, CompoundTag> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
@@ -49,20 +51,18 @@ public class DatapackBackpackTemplateManager {
 
 			resourceManager.listResources(DIRECTORY, fileName -> fileName.getPath().endsWith(SUFFIX)).forEach((resourcelocation, resource) -> {
 				String s = resourcelocation.getPath();
-				ResourceLocation resourceLocationWithoutSuffix = ResourceLocation.fromNamespaceAndPath(resourcelocation.getNamespace(), s.substring(i, s.length() - PATH_SUFFIX_LENGTH));
+				ResourceLocation resourceLocationWithoutSuffix = ResourceLocation.fromNamespaceAndPath(resourcelocation.getNamespace(),
+						s.substring(i, s.length() - PATH_SUFFIX_LENGTH));
 
-				try (
-						InputStream inputstream = resource.open();
-						Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
-				) {
+				try (InputStream inputstream = resource.open();
+						Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));) {
 					String fileContents = IOUtils.toString(reader);
 
 					CompoundTag tag = TagParser.parseTag(fileContents);
 					if (map.put(resourceLocationWithoutSuffix, tag) != null) {
 						throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocationWithoutSuffix);
 					}
-				}
-				catch (IllegalArgumentException | IOException | CommandSyntaxException ex) {
+				} catch (IllegalArgumentException | IOException | CommandSyntaxException ex) {
 					SophisticatedBackpacks.LOGGER.error("Couldn't parse data file {} from {}", resourceLocationWithoutSuffix, resourcelocation, ex);
 				}
 			});

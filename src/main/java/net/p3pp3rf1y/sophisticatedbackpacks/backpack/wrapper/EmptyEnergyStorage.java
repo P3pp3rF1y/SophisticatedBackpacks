@@ -4,7 +4,8 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 
 public class EmptyEnergyStorage implements IEnergyStorage {
 	public static final EmptyEnergyStorage INSTANCE = new EmptyEnergyStorage();
-	private EmptyEnergyStorage() {}
+	private EmptyEnergyStorage() {
+	}
 
 	@Override
 	public int receiveEnergy(int maxReceive, boolean simulate) {

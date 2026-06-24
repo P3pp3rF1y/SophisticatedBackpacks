@@ -15,15 +15,16 @@ import java.util.Date;
 import java.util.List;
 
 public class ListCommand {
-	private ListCommand() {}
+	private ListCommand() {
+	}
 
 	@SuppressWarnings("java:S1452")
 	static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal("list")
-				.executes(context -> printBackpackList(new ArrayList<>(BackpackAccessLogger.getAllBackpackLogs()), context.getSource()))
+		return Commands.literal("list").executes(context -> printBackpackList(new ArrayList<>(BackpackAccessLogger.getAllBackpackLogs()), context.getSource()))
 				.then(Commands.argument("playerName", BackpackPlayerArgumentType.playerName())
-						.executes(context -> printBackpackList(new ArrayList<>(BackpackAccessLogger.getBackpackLogsForPlayer(context.getArgument("playerName", String.class))), context.getSource()))
-				);
+						.executes(context -> printBackpackList(
+								new ArrayList<>(BackpackAccessLogger.getBackpackLogsForPlayer(context.getArgument("playerName", String.class))),
+								context.getSource())));
 	}
 
 	private static int printBackpackList(List<AccessLogRecord> allLogs, CommandSourceStack source) {
@@ -33,11 +34,10 @@ public class ListCommand {
 		allLogs.forEach(alr -> {
 			MutableComponent message = Component.literal("");
 			message.append(Component.literal(alr.getBackpackName())
-					.withStyle(s ->
-							s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks give @p " + alr.getBackpackUuid()))
-									.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.getBackpackUuid().toString())))
-					)
-			);
+					.withStyle(s -> s.withColor(ChatFormatting.GREEN)
+							.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks give @p " + alr.getBackpackUuid()))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+									Component.translatable("chat.sophisticatedbackpacks.backpack_uuid.tooltip", alr.getBackpackUuid().toString())))));
 			message.append(Component.literal(", "));
 			MutableComponent clothColor = Component.translatable("commands.sophisticatedbackpacks.list.cloth_color");
 			clothColor.withStyle(clothColor.getStyle().withColor(TextColor.fromRgb(alr.getClothColor())));

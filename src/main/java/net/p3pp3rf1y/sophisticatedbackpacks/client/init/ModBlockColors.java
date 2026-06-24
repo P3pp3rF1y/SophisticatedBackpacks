@@ -8,7 +8,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
 
 public class ModBlockColors {
-	private ModBlockColors() {}
+	private ModBlockColors() {
+	}
 
 	public static void registerBlockColorHandlers(RegisterColorHandlersEvent.Block event) {
 		event.register((state, blockDisplayReader, pos, tintIndex) -> {

@@ -49,6 +49,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
@@ -64,7 +65,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 	}
 
 	@Override
-	public BakedModel bake(TextureSlots textureSlots, ModelBaker modelBaker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight, ItemTransforms itemTransforms, ContextMap contextMap) {
+	public BakedModel bake(TextureSlots textureSlots, ModelBaker modelBaker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight,
+			ItemTransforms itemTransforms, ContextMap contextMap) {
 		ImmutableMap.Builder<ModelPart, BakedModel> builder = ImmutableMap.builder();
 		modelParts.forEach((part, model) -> {
 			BakedModel bakedModel = model.bake(textureSlots, modelBaker, modelState, useAmbientOcclusion, usesBlockLight, itemTransforms, contextMap);
@@ -153,7 +155,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 
 		@Override
 		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData,
-										@Nullable RenderType renderType) {
+				@Nullable RenderType renderType) {
 			if (state != null) {
 				setPropertiesFromModelData(extraData);
 			}
@@ -186,7 +188,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private void addFront(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
-							  boolean battery, @Nullable RenderType renderType) {
+				boolean battery, @Nullable RenderType renderType) {
 			if (battery) {
 				if (batteryRenderInfo != null && batteryRenderInfo.getChargeRatio() != 0) {
 					float ratio = batteryRenderInfo.getChargeRatio();
@@ -205,8 +207,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			}
 		}
 
-		private List<BakedQuad> getBatteryChargeFromModel(@Nullable BlockState state, RandomSource rand, ModelData extraData,
-														  @Nullable RenderType renderType, float chargeRatio) {
+		private List<BakedQuad> getBatteryChargeFromModel(@Nullable BlockState state, RandomSource rand, ModelData extraData, @Nullable RenderType renderType,
+				float chargeRatio) {
 			BakedModel chargeModel = models.get(ModelPart.BATTERY_CHARGE);
 			if (chargeModel == null) {
 				return Collections.emptyList();
@@ -303,10 +305,11 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private void addRightSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
-								  boolean tankRight, @Nullable RenderType renderType) {
+				boolean tankRight, @Nullable RenderType renderType) {
 			if (tankRight) {
 				IRenderedTankUpgrade.TankRenderInfo rightTankRenderInfo = this.rightTankRenderInfo;
-				if (side == null && (renderType == null || renderType == RenderType.translucent()) && rightTankRenderInfo != null && rightTankRenderInfo.getFillRatio() != 0) {
+				if (side == null && (renderType == null || renderType == RenderType.translucent()) && rightTankRenderInfo != null
+						&& rightTankRenderInfo.getFillRatio() != 0) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedRightTankSteps != -1) {
 							FluidCacheKey cacheKey = getFluidCacheKey(fluid, cachedRightTankSteps, rightTankRenderInfo.getFillRatio());
@@ -315,7 +318,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 								return;
 							}
 						}
-						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.RIGHT_TANK_FLUID, fluid, rightTankRenderInfo.getFillRatio(), false);
+						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.RIGHT_TANK_FLUID, fluid,
+								rightTankRenderInfo.getFillRatio(), false);
 						rightTankFluidCache.put(getFluidCacheKey(fluid, cachedRightTankSteps, rightTankRenderInfo.getFillRatio()), fluidQuads);
 						ret.addAll(fluidQuads);
 					});
@@ -327,10 +331,11 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private void addLeftSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData extraData, List<BakedQuad> ret,
-								 boolean tankLeft, @Nullable RenderType renderType) {
+				boolean tankLeft, @Nullable RenderType renderType) {
 			if (tankLeft) {
 				IRenderedTankUpgrade.TankRenderInfo leftTankRenderInfo = this.leftTankRenderInfo;
-				if (side == null && (renderType == null || renderType == RenderType.translucent()) && leftTankRenderInfo != null && leftTankRenderInfo.getFillRatio() != 0) {
+				if (side == null && (renderType == null || renderType == RenderType.translucent()) && leftTankRenderInfo != null
+						&& leftTankRenderInfo.getFillRatio() != 0) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> {
 						if (cachedLeftTankSteps != -1) {
 							FluidCacheKey cacheKey = getFluidCacheKey(fluid, cachedLeftTankSteps, leftTankRenderInfo.getFillRatio());
@@ -339,7 +344,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 								return;
 							}
 						}
-						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.LEFT_TANK_FLUID, fluid, leftTankRenderInfo.getFillRatio(), true);
+						List<BakedQuad> fluidQuads = getTankFluidFromModel(state, rand, extraData, renderType, ModelPart.LEFT_TANK_FLUID, fluid,
+								leftTankRenderInfo.getFillRatio(), true);
 						leftTankFluidCache.put(getFluidCacheKey(fluid, cachedLeftTankSteps, leftTankRenderInfo.getFillRatio()), fluidQuads);
 						ret.addAll(fluidQuads);
 					});
@@ -359,7 +365,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private List<BakedQuad> getTankFluidFromModel(@Nullable BlockState state, RandomSource rand, ModelData extraData, @Nullable RenderType renderType,
-													  ModelPart fluidPart, FluidStack fluidStack, float ratio, boolean isLeft) {
+				ModelPart fluidPart, FluidStack fluidStack, float ratio, boolean isLeft) {
 
 			if (fluidStack == FluidStack.EMPTY || Mth.equal(ratio, 0f)) {
 				return Collections.emptyList();
@@ -378,8 +384,10 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			int steps = isLeft ? cachedLeftTankSteps : cachedRightTankSteps;
 			if (steps < 0) {
 				steps = computeStepsFromModelUV(src, Direction.Axis.Y);
-				if (isLeft) cachedLeftTankSteps = steps;
-				else cachedRightTankSteps = steps;
+				if (isLeft)
+					cachedLeftTankSteps = steps;
+				else
+					cachedRightTankSteps = steps;
 			}
 
 			AABB cached = isLeft ? leftTankFluidBounds : rightTankFluidBounds;
@@ -567,10 +575,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			return steps <= 0 ? 0f : (step / (float) steps);
 		}
 
-		private static List<BakedQuad> getAllQuads(BakedModel m,
-												   @Nullable BlockState state,
-												   RandomSource rand, ModelData extraData,
-												   @Nullable RenderType renderType) {
+		private static List<BakedQuad> getAllQuads(BakedModel m, @Nullable BlockState state, RandomSource rand, ModelData extraData,
+				@Nullable RenderType renderType) {
 			List<BakedQuad> all = m.getQuads(state, null, rand, extraData, renderType);
 			if (!all.isEmpty()) {
 				return all;
@@ -631,18 +637,14 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			Vert[] in = new Vert[4];
 			for (int i = 0; i < 4; i++) {
 				int base = i * stride;
-				in[i] = new Vert(
-						Float.intBitsToFloat(v[base]),
-						Float.intBitsToFloat(v[base + 1]),
-						Float.intBitsToFloat(v[base + 2]),
-						Float.intBitsToFloat(v[base + 4]),
-						Float.intBitsToFloat(v[base + 5])
-				);
+				in[i] = new Vert(Float.intBitsToFloat(v[base]), Float.intBitsToFloat(v[base + 1]), Float.intBitsToFloat(v[base + 2]),
+						Float.intBitsToFloat(v[base + 4]), Float.intBitsToFloat(v[base + 5]));
 			}
 
 			List<Vert> out = clipAgainstPlane(Arrays.asList(in), axis, cut, keepGreaterOrEqual);
 
-			if (out.isEmpty()) return null;
+			if (out.isEmpty())
+				return null;
 
 			while (out.size() < 4) {
 				out.add(out.get(out.size() - 1));
@@ -659,10 +661,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 
 			for (int i = 0; i < 4; i++) {
 				Vert p = out.get(i);
-				qb.addVertex(p.x, p.y, p.z)
-						.setColor(1f, 1f, 1f, 1f)
-						.setUv(p.u, p.v)
-						.setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(p.x, p.y, p.z).setColor(1f, 1f, 1f, 1f).setUv(p.u, p.v).setNormal(n.getX(), n.getY(), n.getZ());
 			}
 
 			return qb.bakeQuad();
@@ -719,13 +718,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			float t = denom == 0f ? 0f : (cut - ca) / denom;
 			t = Mth.clamp(t, 0f, 1f);
 
-			return new Vert(
-					Mth.lerp(t, a.x, b.x),
-					Mth.lerp(t, a.y, b.y),
-					Mth.lerp(t, a.z, b.z),
-					Mth.lerp(t, a.u, b.u),
-					Mth.lerp(t, a.v, b.v)
-			);
+			return new Vert(Mth.lerp(t, a.x, b.x), Mth.lerp(t, a.y, b.y), Mth.lerp(t, a.z, b.z), Mth.lerp(t, a.u, b.u), Mth.lerp(t, a.v, b.v));
 		}
 
 		private record Vert(float x, float y, float z, float u, float v) {
@@ -736,7 +729,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			float r = (argb >>> 16 & 0xFF) / 255f;
 			float g = (argb >>> 8 & 0xFF) / 255f;
 			float b = (argb & 0xFF) / 255f;
-			float[] cols = new float[]{a, r, g, b};
+			float[] cols = {a, r, g, b};
 			List<BakedQuad> out = new ArrayList<>(src.size());
 			for (BakedQuad q : src) {
 				out.add(respriteAndTintQuad(q, newSprite, cols));
@@ -772,11 +765,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 				int lightU = packedUv2 & 0xFFFF;
 				int lightV = (packedUv2 >>> 16) & 0xFFFF;
 
-				qb.addVertex(x, y, z)
-						.setColor(cols[1], cols[2], cols[3], cols[0])
-						.setUv(uNew, vNew)
-						.setUv2(lightU, lightV)
-						.setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x, y, z).setColor(cols[1], cols[2], cols[3], cols[0]).setUv(uNew, vNew).setUv2(lightU, lightV).setNormal(n.getX(), n.getY(),
+						n.getZ());
 
 				if (IQuadTransformer.UV1 >= 0) {
 					int packedUv1 = in[base + IQuadTransformer.UV1];
@@ -808,7 +798,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private static int computeStepsFromModelUV(List<BakedQuad> quads, Direction.Axis fillAxis) {
-			if (quads.isEmpty()) return 0;
+			if (quads.isEmpty())
+				return 0;
 
 			double bestModelSpan = -1;
 			double bestPixelSpan = -1;
@@ -852,26 +843,30 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 				}
 
 				double modelSpan = maxCoord - minCoord;
-				if (modelSpan <= 1e-6) continue;
+				if (modelSpan <= 1e-6)
+					continue;
 
 				TextureAtlasSprite s = q.getSprite();
 
 				double pixelSpan;
 				if (fillAxis == Direction.Axis.X) {
 					double denom = (s.getU1() - s.getU0());
-					if (Math.abs(denom) < 1e-9) continue;
+					if (Math.abs(denom) < 1e-9)
+						continue;
 					double uNormSpan = Math.abs(maxU - minU) / denom;
 					int texW = s.contents().width();
 					pixelSpan = uNormSpan * texW;
 				} else if (fillAxis == Direction.Axis.Y) {
 					double denom = (s.getV1() - s.getV0());
-					if (Math.abs(denom) < 1e-9) continue;
+					if (Math.abs(denom) < 1e-9)
+						continue;
 					double vNormSpan = Math.abs(maxV - minV) / denom;
 					int texH = s.contents().height();
 					pixelSpan = vNormSpan * texH;
 				} else {
 					double denom = (s.getU1() - s.getU0());
-					if (Math.abs(denom) < 1e-9) continue;
+					if (Math.abs(denom) < 1e-9)
+						continue;
 					double uNormSpan = Math.abs(maxU - minU) / denom;
 					int texW = s.contents().width();
 					pixelSpan = uNormSpan * texW;
@@ -883,7 +878,8 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 				}
 			}
 
-			if (bestPixelSpan <= 0) return 0;
+			if (bestPixelSpan <= 0)
+				return 0;
 
 			return Mth.clamp((int) Math.round(bestPixelSpan), 1, 64);
 		}
@@ -906,7 +902,7 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		@SuppressWarnings("java:S1874")
 		@Override
 		public TextureAtlasSprite getParticleIcon() {
-			//noinspection deprecation
+			// noinspection deprecation
 			return models.get(ModelPart.BASE).getParticleIcon();
 		}
 
@@ -956,7 +952,6 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		public BackpackBlockModel read(JsonObject modelContents, JsonDeserializationContext deserializationContext) {
 			ImmutableMap.Builder<ModelPart, UnbakedModel> builder = ImmutableMap.builder();
 
-
 			ItemTransforms itemTransforms = null;
 			if (modelContents.has("display")) {
 				JsonObject displayJson = GsonHelper.getAsJsonObject(modelContents, "display");
@@ -970,7 +965,6 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 			return new BackpackBlockModel(builder.build(), itemTransforms);
 		}
 
-
 		private TextureSlots.Data getTextureMap(JsonObject modelContents) {
 			if (modelContents.has("textures")) {
 				JsonObject texturesJson = GsonHelper.getAsJsonObject(modelContents, "textures");
@@ -981,22 +975,12 @@ public class BackpackBlockModel implements ExtendedUnbakedModel {
 		}
 
 		private void addPartModel(ImmutableMap.Builder<ModelPart, UnbakedModel> builder, ModelPart modelPart, TextureSlots.Data textures) {
-			builder.put(modelPart, new BlockModel(SophisticatedBackpacks.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)), Collections.emptyList(), textures, true, null, null));
+			builder.put(modelPart, new BlockModel(SophisticatedBackpacks.getRL("block/backpack_" + modelPart.name().toLowerCase(Locale.ENGLISH)),
+					Collections.emptyList(), textures, true, null, null));
 		}
 	}
 
 	private enum ModelPart {
-		BASE,
-		BATTERY,
-		FRONT_POUCH,
-		LEFT_POUCH,
-		LEFT_TANK,
-		RIGHT_POUCH,
-		RIGHT_TANK,
-		STRAPS,
-		LEFT_TANK_FLUID,
-		RIGHT_TANK_FLUID,
-		BATTERY_CHARGE,
-		DISPLAY_ITEM
+		BASE, BATTERY, FRONT_POUCH, LEFT_POUCH, LEFT_TANK, RIGHT_POUCH, RIGHT_TANK, STRAPS, LEFT_TANK_FLUID, RIGHT_TANK_FLUID, BATTERY_CHARGE, DISPLAY_ITEM
 	}
 }

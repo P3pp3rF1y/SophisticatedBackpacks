@@ -48,14 +48,11 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 	}
 
 	protected void generateBackpackBlockModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-		ModItems.ITEMS.getEntries()
-				.stream()
-				.filter(item -> item.get() instanceof BackpackItem)
-				.forEach(item -> {
-					ResourceKey<Item> key = BuiltInRegistries.ITEM.getResourceKey(item.get()).orElseThrow();
+		ModItems.ITEMS.getEntries().stream().filter(item -> item.get() instanceof BackpackItem).forEach(item -> {
+			ResourceKey<Item> key = BuiltInRegistries.ITEM.getResourceKey(item.get()).orElseThrow();
 
-					generateBackpackBlockAndItemModel(blockModels, itemModels, key, (BackpackItem) item.get());
-				});
+			generateBackpackBlockAndItemModel(blockModels, itemModels, key, (BackpackItem) item.get());
+		});
 	}
 
 	private void generateBackpackBlockAndItemModel(BlockModelGenerators blockModels, ItemModelGenerators itemModels, ResourceKey<Item> key, BackpackItem item) {
@@ -79,22 +76,24 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 					.transform(ItemDisplayContext.GROUND, transform -> transform.rotation(0, 0, 0).translation(0, 3, 0).scale(0.5f))
 					.transform(ItemDisplayContext.FIXED, transform -> transform.rotation(0, 0, 0).translation(0, 0, -2.25f).scale(0.75f))
 					.transform(BackpackBlockModel.WORN, transform -> transform.rotation(0, 0, 0).translation(0, 0, 0).scale(0.99f))
-					.customLoader(BackpackLoaderBuilder::new, loader -> {});
+					.customLoader(BackpackLoaderBuilder::new, loader -> {
+					});
 
 		} else {
 			modelTemplateBuilder.parent(SophisticatedBackpacks.getRL("backpack").withPrefix("block/"));
 		}
 
-		TexturedModel.Provider provider = TexturedModel.createDefault(b -> new TextureMapping()
-				.put(clipsSlot, SophisticatedBackpacks.getRL(clips).withPrefix("block/")),
-				modelTemplateBuilder.requiredTextureSlot(clipsSlot).build()
-		);
+		TexturedModel.Provider provider = TexturedModel.createDefault(
+				b -> new TextureMapping().put(clipsSlot, SophisticatedBackpacks.getRL(clips).withPrefix("block/")),
+				modelTemplateBuilder.requiredTextureSlot(clipsSlot).build());
 
 		Block block = item.getBackpackBlock();
 
 		ResourceLocation blockModel = provider.create(block, blockModels.modelOutput);
-		blockModels.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, blockModel)).with(BlockModelGenerators.createHorizontalFacingDispatch()));
-		blockModels.itemModelOutput.accept(item, new BackpackItemModel.Unbaked(blockModel, List.of(new BackpackTintSources.Main(BackpackWrapper.DEFAULT_MAIN_COLOR), new BackpackTintSources.Accent(BackpackWrapper.DEFAULT_ACCENT_COLOR))));
+		blockModels.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, blockModel))
+				.with(BlockModelGenerators.createHorizontalFacingDispatch()));
+		blockModels.itemModelOutput.accept(item, new BackpackItemModel.Unbaked(blockModel, List
+				.of(new BackpackTintSources.Main(BackpackWrapper.DEFAULT_MAIN_COLOR), new BackpackTintSources.Accent(BackpackWrapper.DEFAULT_ACCENT_COLOR))));
 		itemModels.createFlatItemModel(item, ModelTemplates.create(key.location().toString()));
 	}
 

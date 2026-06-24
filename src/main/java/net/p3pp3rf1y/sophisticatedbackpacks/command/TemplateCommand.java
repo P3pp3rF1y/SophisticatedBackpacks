@@ -33,50 +33,41 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class TemplateCommand {
-	private TemplateCommand() {}
+	private TemplateCommand() {
+	}
 
 	@SuppressWarnings("java:S1452")
 	static ArgumentBuilder<CommandSourceStack, ?> register(RegisterCommandsEvent event) {
-		return Commands.literal("template")
-				.then(DynamicCommand.register(event.getBuildContext()))
+		return Commands.literal("template").then(DynamicCommand.register(event.getBuildContext()))
 				.then(Commands.literal("list").executes(context -> templateDetailComponent(context.getSource())))
 				.then(Commands.literal("create")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
 								.executes(context -> createTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), false))
 								.then(Commands.argument("override", BoolArgumentType.bool())
-										.executes(context ->
-												createTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), BoolArgumentType.getBool(context, "override"))
-										)
-								)
-						)
-				)
+										.executes(context -> createTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"),
+												BoolArgumentType.getBool(context, "override"))))))
 				.then(Commands.literal("delete")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName(false))
-								.executes(context -> deleteTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName")))
-						)
-				)
+								.executes(context -> deleteTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName")))))
 				.then(Commands.literal("give")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
-								.executes(context -> giveBackpackFromTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), List.of(context.getSource().getPlayer())))
+								.executes(context -> giveBackpackFromTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"),
+										List.of(context.getSource().getPlayer())))
 								.then(Commands.argument("targets", EntityArgument.players())
-										.executes(context -> giveBackpackFromTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), EntityArgument.getPlayers(context, "targets")))
-								)
-						)
-				)
+										.executes(context -> giveBackpackFromTemplate(context.getSource(),
+												BackpackTemplateArgumentType.getId(context, "templateName"), EntityArgument.getPlayers(context, "targets"))))))
 				.then(Commands.literal("export")
 						.then(Commands.argument("templateName", BackpackTemplateArgumentType.templateName())
 								.executes(context -> exportTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), false))
-								.then(Commands.argument("delete", BoolArgumentType.bool())
-										.executes(context -> exportTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), true))
-								)
-						)
-				);
+								.then(Commands.argument("delete", BoolArgumentType.bool()).executes(
+										context -> exportTemplate(context.getSource(), BackpackTemplateArgumentType.getId(context, "templateName"), true)))));
 	}
 
 	private static int templateDetailComponent(CommandSourceStack source) {
 		source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.list.header"), false);
 		source.sendSuccess(() -> Component.literal("Datapack"), false);
-		DatapackBackpackTemplateManager.getBackpackTemplates().keySet().forEach(templateName -> source.sendSuccess(() -> templateDetailComponent(templateName, false), false));
+		DatapackBackpackTemplateManager.getBackpackTemplates().keySet()
+				.forEach(templateName -> source.sendSuccess(() -> templateDetailComponent(templateName, false), false));
 
 		source.sendSuccess(() -> Component.literal("Local"), false);
 		BackpackTemplates.getTemplateNames(false).forEach(templateName -> source.sendSuccess(() -> templateDetailComponent(templateName, true), false));
@@ -87,20 +78,23 @@ public class TemplateCommand {
 		MutableComponent message = Component.literal(templateName.toString());
 		message.append(Component.literal(", "));
 		message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.give")
-				.withStyle(s -> s.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template give " + templateName))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.give.tooltip", templateName.toString()))))
-		);
+				.withStyle(s -> s.withColor(ChatFormatting.GREEN)
+						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template give " + templateName))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+								Component.translatable("commands.sophisticatedbackpacks.template.list.give.tooltip", templateName.toString())))));
 		if (includeNonDatapackMessages) {
 			message.append(Component.literal(", "));
 			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.export")
-					.withStyle(s -> s.withColor(ChatFormatting.AQUA).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template export " + templateName))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.export.tooltip", templateName.toString()))))
-			);
+					.withStyle(s -> s.withColor(ChatFormatting.AQUA)
+							.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template export " + templateName))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+									Component.translatable("commands.sophisticatedbackpacks.template.list.export.tooltip", templateName.toString())))));
 			message.append(Component.literal(", "));
 			message.append(Component.translatable("commands.sophisticatedbackpacks.template.list.delete")
-					.withStyle(s -> s.withColor(ChatFormatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template delete " + templateName))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("commands.sophisticatedbackpacks.template.list.delete.tooltip", templateName.toString()))))
-			);
+					.withStyle(s -> s.withColor(ChatFormatting.RED)
+							.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sophisticatedbackpacks template delete " + templateName))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+									Component.translatable("commands.sophisticatedbackpacks.template.list.delete.tooltip", templateName.toString())))));
 		}
 		return message;
 	}
@@ -119,7 +113,8 @@ public class TemplateCommand {
 
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
-		if (backpackUuid.isEmpty() || (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {
+		if (backpackUuid.isEmpty()
+				|| (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
@@ -154,7 +149,9 @@ public class TemplateCommand {
 		players.forEach(p -> giveBackpackToPlayer(backpack.copy(), p));
 
 		if (players.size() == 1) {
-			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.give.backpack.success", players.iterator().next().getDisplayName()), true);
+			source.sendSuccess(
+					() -> Component.translatable("commands.sophisticatedbackpacks.template.give.backpack.success", players.iterator().next().getDisplayName()),
+					true);
 		} else {
 			source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.template.give.backpack.success", players.size()), true);
 		}
@@ -170,7 +167,8 @@ public class TemplateCommand {
 				itemEntity.makeFakeItem();
 			}
 
-			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
+			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F,
+					(RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
 			p.inventoryMenu.broadcastChanges();
 		} else {
 			ItemEntity itementity = p.drop(backpack, false);

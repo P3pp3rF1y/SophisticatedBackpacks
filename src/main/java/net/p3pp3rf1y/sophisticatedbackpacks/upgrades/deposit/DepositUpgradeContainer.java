@@ -8,10 +8,11 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 public class DepositUpgradeContainer extends UpgradeContainerBase<DepositUpgradeWrapper, DepositUpgradeContainer> {
 	private final DepositFilterLogicContainer filterLogicContainer;
 
-	public DepositUpgradeContainer(Player player, int containerId, DepositUpgradeWrapper wrapper, UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> type) {
+	public DepositUpgradeContainer(Player player, int containerId, DepositUpgradeWrapper wrapper,
+			UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> type) {
 		super(player, containerId, wrapper, type);
 
-		filterLogicContainer = new DepositFilterLogicContainer(() -> upgradeWrapper.getFilterLogic(), this, slots::add);
+		filterLogicContainer = new DepositFilterLogicContainer(upgradeWrapper::getFilterLogic, this, slots::add);
 	}
 
 	public DepositFilterLogicContainer getFilterLogicContainer() {

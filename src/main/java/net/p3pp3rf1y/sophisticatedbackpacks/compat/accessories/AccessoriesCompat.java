@@ -34,8 +34,8 @@ public class AccessoriesCompat implements ICompat {
 	@Override
 	public void setup() {
 		addPlayerInventoryHandlers();
-		ModItems.ITEMS.getEntries().stream().map(Holder::value).filter(BackpackItem.class::isInstance).forEach(item ->
-				AccessoryRegistry.register(item, NOT_EQUIPPABLE_FROM_USE_ACCESSORY));
+		ModItems.ITEMS.getEntries().stream().map(Holder::value).filter(BackpackItem.class::isInstance)
+				.forEach(item -> AccessoryRegistry.register(item, NOT_EQUIPPABLE_FROM_USE_ACCESSORY));
 		if (FMLEnvironment.dist.isClient()) {
 			AccessoriesCompatClient.registerRenderers();
 		}
@@ -54,37 +54,30 @@ public class AccessoriesCompat implements ICompat {
 			lastTagsRefresh = gameTime;
 			backpackAccessoriesSlotNames.clear();
 
-			backpackAccessoriesSlotNames.addAll(AccessoriesCapability.getOptionally(player)
-					.map(capability -> capability.getContainers().keySet()
-					).orElse(Collections.emptySet()));
+			backpackAccessoriesSlotNames
+					.addAll(AccessoriesCapability.getOptionally(player).map(capability -> capability.getContainers().keySet()).orElse(Collections.emptySet()));
 		}
 		return backpackAccessoriesSlotNames;
 	}
 
-	public static <T> T getFromAccessoriesStorage(LivingEntity livingEntity,
-												  String identifier,
-												  Function<AccessoriesContainer, T> getFromStorage,
-												  T defaultValue) {
-		return AccessoriesCapability.getOptionally(livingEntity)
-				.map(cap -> {
-					AccessoriesContainer containerObj = cap.getContainers().get(identifier);
-					if (!(containerObj instanceof AccessoriesContainer storage)) {
-						return defaultValue;
-					}
-					return getFromStorage.apply(storage);
-				})
-				.orElse(defaultValue);
+	public static <T> T getFromAccessoriesStorage(LivingEntity livingEntity, String identifier, Function<AccessoriesContainer, T> getFromStorage,
+			T defaultValue) {
+		return AccessoriesCapability.getOptionally(livingEntity).map(cap -> {
+			AccessoriesContainer containerObj = cap.getContainers().get(identifier);
+			if (!(containerObj instanceof AccessoriesContainer storage)) {
+				return defaultValue;
+			}
+			return getFromStorage.apply(storage);
+		}).orElse(defaultValue);
 	}
 
 	private static boolean isVisible(LivingEntity livingEntity, String identifier, int slot) {
-		return AccessoriesCapability.getOptionally(livingEntity)
-				.map(cap -> {
-					Object containerObj = cap.getContainers().get(identifier);
-					if (!(containerObj instanceof AccessoriesContainer storage)) {
-						return false;
-					}
-					return storage.shouldRender(slot);
-				})
-				.orElse(false);
+		return AccessoriesCapability.getOptionally(livingEntity).map(cap -> {
+			Object containerObj = cap.getContainers().get(identifier);
+			if (!(containerObj instanceof AccessoriesContainer storage)) {
+				return false;
+			}
+			return storage.shouldRender(slot);
+		}).orElse(false);
 	}
 }

@@ -12,10 +12,11 @@ public class SubtypeInterpreters {
 	private static final PropertyBasedSubtypeInterpreter backpackSubtypeInterpreter = new BackpackSubtypeInterpreter();
 
 	public static Map<Item, PropertyBasedSubtypeInterpreter> getSubtypeInterpreters() {
-		return new HashMap<>(){{
-			ModItems.ITEMS.getEntries().stream()
-					.filter(holder -> holder.get() instanceof BackpackItem)
-					.forEach(item -> put(item.get(), backpackSubtypeInterpreter));
-		}};
+		return new HashMap<>() {
+			{
+				ModItems.ITEMS.getEntries().stream().filter(holder -> holder.get() instanceof BackpackItem)
+						.forEach(item -> put(item.get(), backpackSubtypeInterpreter));
+			}
+		};
 	}
 }

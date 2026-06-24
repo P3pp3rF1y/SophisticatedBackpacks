@@ -41,6 +41,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -103,14 +104,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 
 		return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
-		/* TODO try to add uuid based caching in the future
-		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
-		if (uuid == null) {
-			return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
-		} else {
-			return StorageWrapperRepository.getStorageWrapper(uuid, IBackpackWrapper.class, BackpackWrapper::new);
-		}
-*/
+		/*
+		 * TODO try to add uuid based caching in the future UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID); if (uuid == null) { return
+		 * StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new); } else { return
+		 * StorageWrapperRepository.getStorageWrapper(uuid, IBackpackWrapper.class, BackpackWrapper::new); }
+		 */
 	}
 
 	public static Optional<IBackpackWrapper> fromExistingData(ItemStack stack) {
@@ -144,13 +142,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public InventoryHandler getInventoryHandler() {
 		InventoryHandler inventoryHandler = handler;
 		if (inventoryHandler == null) {
-			inventoryHandler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
-					this, getBackpackContentsNbt(), () -> {
-				markBackpackContentsDirty();
-				if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-					inventorySlotChangeHandler.run();
-				}
-			}, StackUpgradeItem.getInventorySlotLimit(this));
+			inventoryHandler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()), this,
+					getBackpackContentsNbt(), () -> {
+						markBackpackContentsDirty();
+						if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+							inventorySlotChangeHandler.run();
+						}
+					}, StackUpgradeItem.getInventorySlotLimit(this));
 			handler = inventoryHandler;
 			inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 			attachInventorySlotBlockers();
@@ -326,7 +324,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfInventorySlots(ItemStack backpackStack, int defaultNumberOfInventorySlots) {
 		Integer storedNumberOfInventorySlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
-		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots, defaultNumberOfInventorySlots);
+		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots,
+				defaultNumberOfInventorySlots);
 		numberOfInventorySlots = resolvedNumberOfInventorySlots;
 		if (storedNumberOfInventorySlots == null || storedNumberOfInventorySlots < resolvedNumberOfInventorySlots) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, resolvedNumberOfInventorySlots);
@@ -335,7 +334,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfUpgradeSlots(ItemStack backpackStack, int defaultNumberOfUpgradeSlots) {
 		Integer storedNumberOfUpgradeSlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
-		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots, defaultNumberOfUpgradeSlots);
+		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots,
+				defaultNumberOfUpgradeSlots);
 		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
 		if (storedNumberOfUpgradeSlots == null || storedNumberOfUpgradeSlots < resolvedNumberOfUpgradeSlots) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, resolvedNumberOfUpgradeSlots);
@@ -436,7 +436,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public ItemStack cloneBackpack() {
 		ItemStack clonedBackpack = cloneBackpack(this);
-		cloneSubbackpacks(BackpackWrapper.fromStack(clonedBackpack));
+		cloneSubbackpacks(fromStack(clonedBackpack));
 		return clonedBackpack;
 	}
 
@@ -446,14 +446,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 			if (!(stack.getItem() instanceof BackpackItem)) {
 				return;
 			}
-			inventoryHandler.setStackInSlot(slot, cloneBackpack(BackpackWrapper.fromStack(stack)));
+			inventoryHandler.setStackInSlot(slot, cloneBackpack(fromStack(stack)));
 		});
 	}
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
 		backpackCopy.remove(ModCoreDataComponents.STORAGE_UUID);
-		IBackpackWrapper wrapperCopy = BackpackWrapper.fromStack(backpackCopy);
+		IBackpackWrapper wrapperCopy = fromStack(backpackCopy);
 		originalWrapper.copyDataTo(wrapperCopy);
 		return wrapperCopy.getBackpack();
 	}
@@ -563,9 +563,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 		ItemStack backpackStack = getBackpackStack();
 		backpackStack.set(ModCoreDataComponents.STORAGE_UUID, storageUuid);
 		StorageWrapperRepository.setStorageWrapper(backpackStack, this);
-/* TODO add in the future
-		StorageWrapperRepository.migrateToUuid(this, backpack, storageUuid);
-*/
+		/*
+		 * TODO add in the future StorageWrapperRepository.migrateToUuid(this, backpack, storageUuid);
+		 */
 	}
 
 	@Override
@@ -701,7 +701,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 			this.container = container;
 			this.delegate = delegate;
 		}
-
 
 		@Override
 		public ItemStack getContainer() {

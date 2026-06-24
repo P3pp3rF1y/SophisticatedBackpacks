@@ -30,7 +30,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	private final ArmorStand armorStandPreview;
 
 	public SmithingUpgradeTab(SmithingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("smithing"),
+				BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
 		armorStandPreview = new ArmorStand(minecraft.level, 0.0, 0.0, 0.0);
@@ -170,7 +171,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean isHoveringEmptySlot(Slot slot, int mouseX, int mouseY) {
-		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop() && mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
+		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop()
+				&& mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
 	}
 
 	private void renderOnboardingTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -199,7 +201,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean hasRecipeError() {
-		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem() && !getContainer().getResultSlot().hasItem();
+		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem()
+				&& !getContainer().getResultSlot().hasItem();
 	}
 
 }

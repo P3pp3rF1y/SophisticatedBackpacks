@@ -33,7 +33,8 @@ public class BackpackUpgradeItemArgumentType extends ItemArgument {
 
 			@Override
 			public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
-				return provider.lookup(resourceKey).map(lookup -> lookup.filterElements(item -> new ItemStack((ItemLike) item).is(ModItems.BACKPACK_UPGRADE_TAG)));
+				return provider.lookup(resourceKey)
+						.map(lookup -> lookup.filterElements(item -> new ItemStack((ItemLike) item).is(ModItems.BACKPACK_UPGRADE_TAG)));
 			}
 		};
 	}

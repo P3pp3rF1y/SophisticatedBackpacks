@@ -120,7 +120,7 @@ public class Matchers {
 	}
 
 	public static Optional<Predicate<ItemStack>> getItemMatcher(JsonElement jsonElement) {
-		for (ItemMatcherFactory itemMatcherFactory : Matchers.ITEM_MATCHER_FACTORIES) {
+		for (ItemMatcherFactory itemMatcherFactory : ITEM_MATCHER_FACTORIES) {
 			if (itemMatcherFactory.appliesTo(jsonElement)) {
 				return itemMatcherFactory.getPredicate(jsonElement);
 			}

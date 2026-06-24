@@ -40,7 +40,7 @@ public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 
 	@Override
 	protected <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
-		//noinspection unchecked
+		// noinspection unchecked
 		return (ISettingsTabFactory<C, T>) SETTINGS_TAB_FACTORIES.get(name);
 	}
 

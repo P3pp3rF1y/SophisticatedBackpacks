@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -119,7 +120,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
-		RegistryHelper.getRegistryAccess().ifPresent(registryAccess -> setBackpack(ItemStack.parseOptional(registryAccess, nbt.getCompound(BACKPACK_DATA_TAG))));
+		RegistryHelper.getRegistryAccess()
+				.ifPresent(registryAccess -> setBackpack(ItemStack.parseOptional(registryAccess, nbt.getCompound(BACKPACK_DATA_TAG))));
 	}
 
 	@Override
@@ -176,7 +178,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private boolean isBlockConnectionDisallowed(@Nullable Direction direction) {
-		return direction != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(direction)).getBlock());
+		return direction != null && level != null
+				&& Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(direction)).getBlock());
 	}
 
 	@Nullable
@@ -275,7 +278,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (level.isClientSide) {
 			return;
 		}
-		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
+		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+				.forEach(upgrade -> upgrade.tick(null, level, blockPos));
 	}
 
 	@Override
