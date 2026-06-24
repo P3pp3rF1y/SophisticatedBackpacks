@@ -14,10 +14,12 @@ import java.util.List;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
 
 public class ModBlockColors {
-	private ModBlockColors() {}
+	private ModBlockColors() {
+	}
 
 	public static void registerBlockColorHandlers(RegisterColorHandlersEvent.BlockTintSources event) {
-		event.register(List.of(new MainColorTintSource(), new AccentColorTintSource()), BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		event.register(List.of(new MainColorTintSource(), new AccentColorTintSource()), BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(),
+				GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 
 	private abstract static class BackpackTintSource implements BlockTintSource {
@@ -28,9 +30,7 @@ public class ModBlockColors {
 
 		@Override
 		public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-			return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class)
-					.map(this::getColor)
-					.orElse(getDefaultColor());
+			return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(this::getColor).orElse(getDefaultColor());
 		}
 
 		protected abstract int getColor(BackpackBlockEntity backpackBlockEntity);

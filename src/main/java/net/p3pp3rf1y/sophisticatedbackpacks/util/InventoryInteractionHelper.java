@@ -34,12 +34,12 @@ public class InventoryInteractionHelper {
 		}
 
 		return CapabilityHelper.getFromItemHandler(level, pos, face,
-				itemHandler -> player.level().isClientSide() || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player),
-				false);
+				itemHandler -> player.level().isClientSide() || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player), false);
 	}
 
 	private static boolean tryRunningInteractionWrappers(ResourceHandler<ItemResource> itemHandler, IStorageWrapper wrapper, Player player) {
-		List<IItemResourceHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemResourceHandlerInteractionUpgrade.class);
+		List<IItemResourceHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler()
+				.getWrappersThatImplement(IItemResourceHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;
 		}

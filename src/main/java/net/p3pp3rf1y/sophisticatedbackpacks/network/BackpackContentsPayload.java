@@ -13,15 +13,10 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-public record BackpackContentsPayload(UUID backpackUuid,
-									  @Nullable ContainerContents backpackContents) implements CustomPacketPayload {
+public record BackpackContentsPayload(UUID backpackUuid, @Nullable ContainerContents backpackContents) implements CustomPacketPayload {
 	public static final Type<BackpackContentsPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("backpack_contents"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			BackpackContentsPayload::backpackUuid,
-			ContainerContents.STREAM_CODEC,
-			BackpackContentsPayload::backpackContents,
-			BackpackContentsPayload::new);
+	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			BackpackContentsPayload::backpackUuid, ContainerContents.STREAM_CODEC, BackpackContentsPayload::backpackContents, BackpackContentsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

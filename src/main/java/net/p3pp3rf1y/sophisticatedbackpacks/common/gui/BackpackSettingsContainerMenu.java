@@ -26,7 +26,8 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 		super(SETTINGS_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player));
 
 		this.backpackContext = backpackContext;
-		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK || backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
+		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK
+				|| backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
 			storageWrapper.onInit(player.level());
 		}
 	}
@@ -38,7 +39,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	@Override
 	protected <C extends ISettingsCategory<?, ?>, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
 		if (name.equals(MainSettingsCategory.NAME)) {
-			//noinspection unchecked
+			// noinspection unchecked
 			return (ISettingsContainerFactory<C, T>) MAIN_SETTINGS_CONTAINER_FACTORY_OVERRIDE;
 		}
 

@@ -17,7 +17,8 @@ public class PlayerInventoryHandler {
 	private final boolean accessibleByAnotherPlayer;
 	private final VisibleInWorldGetter visibleInWorldGetter;
 
-	public PlayerInventoryHandler(Function<Player, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownLayerRenderer, boolean accessibleByAnotherPlayer, VisibleInWorldGetter visibleInWorldGetter) {
+	public PlayerInventoryHandler(Function<Player, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter,
+			boolean visibleInGui, boolean ownLayerRenderer, boolean accessibleByAnotherPlayer, VisibleInWorldGetter visibleInWorldGetter) {
 		this.identifiersGetter = identifiersGetter;
 		this.slotCountGetter = slotCountGetter;
 		this.slotStackGetter = slotStackGetter;

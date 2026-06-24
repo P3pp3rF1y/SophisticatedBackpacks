@@ -16,11 +16,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.BATTERY;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.FACING;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.LEFT_TANK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_TANK;
-
 public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvider {
 	public static final ClientBackpackShapeProvider INSTANCE = new ClientBackpackShapeProvider();
 
@@ -43,7 +38,8 @@ public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvide
 		} catch (NullPointerException | IllegalArgumentException ex) {
 			if (!warnedRendererMissing) {
 				warnedRendererMissing = true;
-				SophisticatedBackpacks.LOGGER.warn("Backpack block models are not ready yet, using base model-derived shapes until client models are available");
+				SophisticatedBackpacks.LOGGER
+						.warn("Backpack block models are not ready yet, using base model-derived shapes until client models are available");
 			}
 			shapeCache = Map.of();
 			return;
@@ -51,14 +47,8 @@ public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvide
 		warnedRendererMissing = false;
 
 		Map<BlockState, VoxelShape> newShapes = new HashMap<>();
-		List<Supplier<? extends Block>> backpackBlocks = List.of(
-				ModBlocks.BACKPACK,
-				ModBlocks.COPPER_BACKPACK,
-				ModBlocks.IRON_BACKPACK,
-				ModBlocks.GOLD_BACKPACK,
-				ModBlocks.DIAMOND_BACKPACK,
-				ModBlocks.NETHERITE_BACKPACK
-		);
+		List<Supplier<? extends Block>> backpackBlocks = List.of(ModBlocks.BACKPACK, ModBlocks.COPPER_BACKPACK, ModBlocks.IRON_BACKPACK,
+				ModBlocks.GOLD_BACKPACK, ModBlocks.DIAMOND_BACKPACK, ModBlocks.NETHERITE_BACKPACK);
 		for (Supplier<? extends Block> backpackBlockSupplier : backpackBlocks) {
 			Block block = backpackBlockSupplier.get();
 			for (BlockState state : block.getStateDefinition().getPossibleStates()) {
@@ -77,7 +67,8 @@ public class ClientBackpackShapeProvider implements BackpackShapes.IShapeProvide
 	private VoxelShape getDefaultShapeWithWarning(BlockState state, Object model) {
 		Class<?> modelClass = model.getClass();
 		if (warnedModelTypes.add(modelClass)) {
-			SophisticatedBackpacks.LOGGER.warn("Backpack client model {} does not provide shape extraction, using base model-derived shape fallback", modelClass.getName());
+			SophisticatedBackpacks.LOGGER.warn("Backpack client model {} does not provide shape extraction, using base model-derived shape fallback",
+					modelClass.getName());
 		}
 		VoxelShape shape = BackpackShapes.getDefaultShapeProvider().getShape(state);
 		return shape.isEmpty() ? Shapes.block() : shape;

@@ -13,7 +13,8 @@ import java.util.function.Consumer;
 
 public class EverlastingUpgradeItem extends UpgradeItemBase<EverlastingUpgradeItem.Wrapper> {
 	public static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
-	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(EverlastingUpgradeItem.class::isInstance, 0, BackpackTranslationHelper.INSTANCE.translError("add.everlasting_exists")));
+	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(
+			EverlastingUpgradeItem.class::isInstance, 0, BackpackTranslationHelper.INSTANCE.translError("add.everlasting_exists")));
 
 	public EverlastingUpgradeItem(Properties properties) {
 		super(Config.SERVER.maxUpgradesPerStorage, properties);

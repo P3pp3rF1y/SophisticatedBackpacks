@@ -20,7 +20,8 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 	private int[] baseIndex;
 	private int totalSize;
 
-	public InceptionInventoryHandler(ITrackedContentsItemResourceHandler wrappedInventoryHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionInventoryHandler(ITrackedContentsItemResourceHandler wrappedInventoryHandler, InventoryOrder inventoryOrder,
+			SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
@@ -122,7 +123,8 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 	}
 
 	@Override
-	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot, Runnable onRemoveLastEmptySlot) {
+	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot,
+			Runnable onRemoveLastEmptySlot) {
 		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
 	}
 

@@ -27,19 +27,23 @@ import java.util.function.Supplier;
 
 public class ChippedCompat implements ICompat {
 
-	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.registerItem("chipped/botanist_workbench_upgrade",
+	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.registerItem(
+			"chipped/botanist_workbench_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> GLASSBLOWER_UPGRADE = ModItems.ITEMS.registerItem("chipped/glassblower_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> CARPENTERS_TABLE_UPGRADE = ModItems.ITEMS.registerItem("chipped/carpenters_table_upgrade",
+	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> CARPENTERS_TABLE_UPGRADE = ModItems.ITEMS.registerItem(
+			"chipped/carpenters_table_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> LOOM_TABLE_UPGRADE = ModItems.ITEMS.registerItem("chipped/loom_table_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> MASON_TABLE_UPGRADE = ModItems.ITEMS.registerItem("chipped/mason_table_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> ALCHEMY_BENCH_UPGRADE = ModItems.ITEMS.registerItem("chipped/alchemy_bench_upgrade",
+	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> ALCHEMY_BENCH_UPGRADE = ModItems.ITEMS.registerItem(
+			"chipped/alchemy_bench_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> TINKERING_TABLE_UPGRADE = ModItems.ITEMS.registerItem("chipped/tinkering_table_upgrade",
+	public static final DeferredHolder<Item, BlockTransformationUpgradeItem> TINKERING_TABLE_UPGRADE = ModItems.ITEMS.registerItem(
+			"chipped/tinkering_table_upgrade",
 			properties -> new BlockTransformationUpgradeItem(ModRecipeTypes.WORKBENCH, Config.SERVER.maxUpgradesPerStorage, properties));
 
 	@Override
@@ -58,15 +62,18 @@ public class ChippedCompat implements ICompat {
 			})).get().run();
 		}
 		if (ModList.get().isLoaded(CompatModIds.EMI)) {
-/*			((Supplier<Runnable>) () -> () -> BackpackEmiPlugin.addAdditionalWorkstations(registration -> {
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("botanist_workbench"), ModBlocks.BOTANIST_WORKBENCH.get(), BOTANIST_WORKBENCH_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("glassblower"), ModBlocks.GLASSBLOWER.get(), GLASSBLOWER_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("carpenters_table"), ModBlocks.CARPENTERS_TABLE.get(), CARPENTERS_TABLE_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("loom_table"), ModBlocks.LOOM_TABLE.get(), LOOM_TABLE_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("mason_table"), ModBlocks.MASON_TABLE.get(), MASON_TABLE_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("alchemy_bench"), ModBlocks.ALCHEMY_BENCH.get(), ALCHEMY_BENCH_UPGRADE.get());
-				registration.addWorkstation(SophisticatedBackpacks.getIdentifier("tinkering_table"), ModBlocks.TINKERING_TABLE.get(), TINKERING_TABLE_UPGRADE.get());
-			})).get().run();*/
+			/*
+			 * ((Supplier<Runnable>) () -> () -> BackpackEmiPlugin.addAdditionalWorkstations(registration -> {
+			 * registration.addWorkstation(SophisticatedBackpacks.getIdentifier("botanist_workbench"), ModBlocks.BOTANIST_WORKBENCH.get(),
+			 * BOTANIST_WORKBENCH_UPGRADE.get()); registration.addWorkstation(SophisticatedBackpacks.getIdentifier("glassblower"), ModBlocks.GLASSBLOWER.get(),
+			 * GLASSBLOWER_UPGRADE.get()); registration.addWorkstation(SophisticatedBackpacks.getIdentifier("carpenters_table"),
+			 * ModBlocks.CARPENTERS_TABLE.get(), CARPENTERS_TABLE_UPGRADE.get());
+			 * registration.addWorkstation(SophisticatedBackpacks.getIdentifier("loom_table"), ModBlocks.LOOM_TABLE.get(), LOOM_TABLE_UPGRADE.get());
+			 * registration.addWorkstation(SophisticatedBackpacks.getIdentifier("mason_table"), ModBlocks.MASON_TABLE.get(), MASON_TABLE_UPGRADE.get());
+			 * registration.addWorkstation(SophisticatedBackpacks.getIdentifier("alchemy_bench"), ModBlocks.ALCHEMY_BENCH.get(), ALCHEMY_BENCH_UPGRADE.get());
+			 * registration.addWorkstation(SophisticatedBackpacks.getIdentifier("tinkering_table"), ModBlocks.TINKERING_TABLE.get(),
+			 * TINKERING_TABLE_UPGRADE.get()); })).get().run();
+			 */
 		}
 		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.getDist().isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
@@ -95,7 +102,8 @@ public class ChippedCompat implements ICompat {
 	}
 
 	private void registerUpgradeContainer(DeferredHolder<Item, BlockTransformationUpgradeItem> item) {
-		UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType = new UpgradeContainerType<>(BlockTransformationUpgradeContainer::new);
+		UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType = new UpgradeContainerType<>(
+				BlockTransformationUpgradeContainer::new);
 		UpgradeContainerRegistry.register(item.getId(), containerType);
 		if (FMLEnvironment.getDist().isClient()) {
 			ChippedCompatClient.registerUpgradeTab(item.getId(), containerType);
@@ -104,6 +112,6 @@ public class ChippedCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

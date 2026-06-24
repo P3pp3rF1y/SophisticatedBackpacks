@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class BackpackUpgradeRecipe implements CraftingRecipe, IWrapperRecipe<ShapedRecipe> {
-	public static final RecipeSerializer<BackpackUpgradeRecipe> SERIALIZER = RecipeWrapperSerializer.create(BackpackUpgradeRecipe::new, ShapedRecipe.SERIALIZER);
+	public static final RecipeSerializer<BackpackUpgradeRecipe> SERIALIZER = RecipeWrapperSerializer.create(BackpackUpgradeRecipe::new,
+			ShapedRecipe.SERIALIZER);
 	private final ShapedRecipe compose;
 
 	public BackpackUpgradeRecipe(ShapedRecipe compose) {

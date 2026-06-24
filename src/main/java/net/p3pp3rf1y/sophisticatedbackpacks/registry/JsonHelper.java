@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class JsonHelper {
-	private JsonHelper() {}
+	private JsonHelper() {
+	}
 
 	public static <V> Set<V> setFromJson(JsonElement element, Function<JsonElement, V> getElement) {
 		return setFromJson(GsonHelper.convertToJsonArray(element, ""), getElement);

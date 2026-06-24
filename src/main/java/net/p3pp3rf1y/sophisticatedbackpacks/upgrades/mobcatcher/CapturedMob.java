@@ -5,8 +5,8 @@ import net.minecraft.resources.Identifier;
 
 import java.util.UUID;
 
-public record CapturedMob(UUID id, Identifier entityType, CompoundTag entityNbt, int slot, int width, int height, int slotCost, boolean hostile, String displayName,
-		int currentHealth, int maxHealth) {
+public record CapturedMob(UUID id, Identifier entityType, CompoundTag entityNbt, int slot, int width, int height, int slotCost, boolean hostile,
+		String displayName, int currentHealth, int maxHealth) {
 	public boolean occupiesSlot(int inventorySlot, int columns) {
 		int left = slot % columns;
 		int top = slot / columns;

@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrapper, DepositUpgradeItem>
-		implements IFilteredUpgrade, IItemResourceHandlerInteractionUpgrade {
+		implements
+			IFilteredUpgrade,
+			IItemResourceHandlerInteractionUpgrade {
 	private final DepositFilterLogic filterLogic;
 
 	public DepositUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -49,7 +51,8 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		try (Transaction tx = Transaction.openRoot()) {
-			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(handler, Collections.singletonList(filterLogic), Collections.emptyList());
+			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(handler, Collections.singletonList(filterLogic),
+					Collections.emptyList());
 			InventoryHelper.iterate(storageWrapper.getInventoryForUpgradeProcessing(), (index, resource, amount) -> {
 				if (resource.isEmpty()) {
 					return;

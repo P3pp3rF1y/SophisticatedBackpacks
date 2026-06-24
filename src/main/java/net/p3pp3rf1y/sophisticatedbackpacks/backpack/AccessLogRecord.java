@@ -7,16 +7,14 @@ import net.minecraft.resources.Identifier;
 
 import java.util.UUID;
 
-public record AccessLogRecord(Identifier backpackItemRegistryName, UUID backpackUuid, String playerName,
-							  String backpackName, int clothColor, int trimColor, long accessTime, int columnsTaken) {
+public record AccessLogRecord(Identifier backpackItemRegistryName, UUID backpackUuid, String playerName, String backpackName, int clothColor, int trimColor,
+		long accessTime, int columnsTaken) {
 	public static final Codec<AccessLogRecord> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Identifier.CODEC.fieldOf("backpackItemRegistryName").forGetter(AccessLogRecord::backpackItemRegistryName),
 			UUIDUtil.CODEC.fieldOf("backpackUuid").forGetter(AccessLogRecord::backpackUuid),
 			Codec.STRING.fieldOf("playerName").forGetter(AccessLogRecord::playerName),
 			Codec.STRING.fieldOf("backpackName").forGetter(AccessLogRecord::backpackName),
-			Codec.INT.fieldOf("clothColor").forGetter(AccessLogRecord::clothColor),
-			Codec.INT.fieldOf("trimColor").forGetter(AccessLogRecord::trimColor),
-			Codec.LONG.fieldOf("accessTime").forGetter(AccessLogRecord::accessTime),
-			Codec.INT.fieldOf("columnsTaken").forGetter(AccessLogRecord::columnsTaken)
-	).apply(instance, AccessLogRecord::new));
+			Codec.INT.fieldOf("clothColor").forGetter(AccessLogRecord::clothColor), Codec.INT.fieldOf("trimColor").forGetter(AccessLogRecord::trimColor),
+			Codec.LONG.fieldOf("accessTime").forGetter(AccessLogRecord::accessTime), Codec.INT.fieldOf("columnsTaken").forGetter(AccessLogRecord::columnsTaken))
+			.apply(instance, AccessLogRecord::new));
 }

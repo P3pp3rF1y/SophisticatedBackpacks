@@ -20,8 +20,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	protected int[] baseIndex;
 	protected int tankCount;
 
-	public InceptionFluidHandler(
-			@Nullable IStorageFluidHandler wrappedFluidHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionFluidHandler(@Nullable IStorageFluidHandler wrappedFluidHandler, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedFluidHandler = wrappedFluidHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;

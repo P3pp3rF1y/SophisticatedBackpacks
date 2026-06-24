@@ -48,7 +48,8 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 		}
 
 		FluidStack contents = getAllTanks().get(index).getContents();
-		if (contents.isEmpty()) return true;
+		if (contents.isEmpty())
+			return true;
 		return resource.matches(contents);
 	}
 
