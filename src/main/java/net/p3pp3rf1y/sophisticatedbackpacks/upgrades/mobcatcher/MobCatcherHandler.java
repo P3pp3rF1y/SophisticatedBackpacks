@@ -89,11 +89,12 @@ public class MobCatcherHandler {
 
 		CompoundTag entityTag = ValueIOHelper.collectOutputToTag(entity.registryAccess(), entity::saveWithoutId);
 		ResourceLocation entityType = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-		CapturedMob capturedMob = new CapturedMob(UUID.randomUUID(), entityType, entityTag, slot.get(), footprint.width(), footprint.height(), slotCost, hostile, getCapturedMobDisplayName(entity),
-			(int) Math.ceil(entity.getHealth()), (int) Math.ceil(getEffectiveMaxHealth(entity)));
+		CapturedMob capturedMob = new CapturedMob(UUID.randomUUID(), entityType, entityTag, slot.get(), footprint.width(), footprint.height(), slotCost,
+				hostile, getCapturedMobDisplayName(entity), (int) Math.ceil(entity.getHealth()), (int) Math.ceil(getEffectiveMaxHealth(entity)));
 		MobCatcherStorage.addCapturedMob(backpackWrapper, capturedMob);
 		PacketDistributor.sendToPlayersNear((ServerLevel) player.level(), null, entity.getX(), entity.getY(), entity.getZ(), 64,
-				new MobCatcherCaptureEffectPayload(entityType, entityTag, entity.position(), getCaptureEffectCollapsePosition(player, entity), entity.getYRot(), entity.getXRot()));
+				new MobCatcherCaptureEffectPayload(entityType, entityTag, entity.position(), getCaptureEffectCollapsePosition(player, entity), entity.getYRot(),
+						entity.getXRot()));
 		entity.discard();
 		syncCapturedMobs(player, backpackWrapper);
 		return new CaptureResult(true, Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_captured", capturedMob.displayName()));
@@ -201,7 +202,8 @@ public class MobCatcherHandler {
 		Vec3 normalizedLookDirection = horizontalLookDirection.normalize();
 		for (int distance = 1; distance <= 2; distance++) {
 			Vec3 candidatePosition = player.position().add(normalizedLookDirection.scale(distance));
-			Optional<Vec3> fallbackTarget = getValidReleasePosition(player, entity, BlockPos.containing(candidatePosition.x, player.getY(), candidatePosition.z));
+			Optional<Vec3> fallbackTarget = getValidReleasePosition(player, entity,
+					BlockPos.containing(candidatePosition.x, player.getY(), candidatePosition.z));
 			if (fallbackTarget.isPresent()) {
 				return fallbackTarget;
 			}
@@ -250,7 +252,8 @@ public class MobCatcherHandler {
 		if (Config.SERVER.mobCatcherUpgrade.matchesPassiveOverrides(entity.getType())) {
 			return false;
 		}
-		return Config.SERVER.mobCatcherUpgrade.matchesHostileOverrides(entity.getType()) || entity instanceof Enemy || entity.getType().getCategory() == MobCategory.MONSTER;
+		return Config.SERVER.mobCatcherUpgrade.matchesHostileOverrides(entity.getType()) || entity instanceof Enemy
+				|| entity.getType().getCategory() == MobCategory.MONSTER;
 	}
 
 	public static int getSlotCost(LivingEntity entity, boolean hostile) {

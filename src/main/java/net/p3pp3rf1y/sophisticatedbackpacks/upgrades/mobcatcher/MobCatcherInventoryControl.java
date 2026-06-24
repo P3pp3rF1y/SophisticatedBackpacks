@@ -1,9 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -22,6 +21,8 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,16 +33,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private static final int CAPTURED_MOB_BACKGROUND_U = 29;
 	private static final int CAPTURED_MOB_BACKGROUND_V = 30;
 	private static final int CAPTURED_MOB_BACKGROUND_WIDTH = 18;
 	private static final int CAPTURED_MOB_BACKGROUND_HEIGHT = 54;
 	private static final int CAPTURED_MOB_BACKGROUND_COLOR = 0xFF_2B2B2B;
-	private static final TextureBlitData RELEASE_BUTTON_FOREGROUND = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(12, 156), Dimension.SQUARE_12);
+	private static final TextureBlitData RELEASE_BUTTON_FOREGROUND = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(12, 156),
+			Dimension.SQUARE_12);
 	private static final float BODY_YAW_RANGE = 50F;
 	private static final float HEAD_STATIC_YAW_RANGE = 24F;
 	private static final float HEAD_IDLE_YAW_AMPLITUDE = 33F;
@@ -61,7 +60,9 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private final Set<UUID> capturedMobRenderFailures = new HashSet<>();
 
 	public static Optional<MobCatcherInventoryControl> create(StorageScreenBase<?> screen) {
-		return screen.getMenu() instanceof BackpackContainer backpackContainer ? Optional.of(new MobCatcherInventoryControl(screen, backpackContainer)) : Optional.empty();
+		return screen.getMenu() instanceof BackpackContainer backpackContainer
+				? Optional.of(new MobCatcherInventoryControl(screen, backpackContainer))
+				: Optional.empty();
 	}
 
 	private MobCatcherInventoryControl(StorageScreenBase<?> screen, BackpackContainer menu) {
@@ -86,8 +87,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 			getRenderEntity(capturedMob).ifPresent(entity -> {
 				int scale = getRenderScale(entity, width, height);
 				prepareEntityForRender(entity, capturedMob);
-				InventoryScreen.renderEntityInInventory(guiGraphics, x, y, x + width, y + height, scale,
-						ENTITY_RENDER_TRANSLATION, ENTITY_RENDER_ANGLE, ENTITY_CAMERA_ANGLE, entity);
+				InventoryScreen.renderEntityInInventory(guiGraphics, x, y, x + width, y + height, scale, ENTITY_RENDER_TRANSLATION, ENTITY_RENDER_ANGLE,
+						ENTITY_CAMERA_ANGLE, entity);
 			});
 			if (hoveredMob.map(mob -> mob.id().equals(capturedMob.id())).orElse(false)) {
 				renderReleaseHint(guiGraphics, x, y, width, height);
@@ -111,7 +112,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	@Override
 	public boolean replacesSlotRender(int slot) {
 		IBackpackWrapper backpackWrapper = getBackpackWrapper();
-		return MobCatcherStorage.getCapturedMobs(backpackWrapper).stream().anyMatch(capturedMob -> capturedMob.occupiesSlot(slot, MobCatcherStorage.getColumns(backpackWrapper)));
+		return MobCatcherStorage.getCapturedMobs(backpackWrapper).stream()
+				.anyMatch(capturedMob -> capturedMob.occupiesSlot(slot, MobCatcherStorage.getColumns(backpackWrapper)));
 	}
 
 	@Override
@@ -127,8 +129,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 			if (renderBounds.isEmpty() || errorInventorySlots.stream().noneMatch(slot -> capturedMob.occupiesSlot(slot, columns))) {
 				continue;
 			}
-			getInteriorVisibleBounds(renderBounds.get(), visibleStorageBounds.get()).ifPresent(bounds ->
-					screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, bounds.x(), bounds.y(), bounds.width(), bounds.height()));
+			getInteriorVisibleBounds(renderBounds.get(), visibleStorageBounds.get()).ifPresent(
+					bounds -> screen.renderOverlay(guiGraphics, StorageScreenBase.ERROR_SLOT_COLOR, bounds.x(), bounds.y(), bounds.width(), bounds.height()));
 		}
 	}
 
@@ -146,12 +148,16 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		if (capturedMobRenderFailures.contains(capturedMob.id())) {
 			tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.entity_preview_failed").withStyle(ChatFormatting.RED));
 		}
-		tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-		GuiHelper.renderTooltip(this.screen, guiGraphics, ItemStack.EMPTY, tooltipLines, Optional.of(new MobCatcherHealthTooltip(capturedMob.currentHealth(), capturedMob.maxHealth())), mouseX, mouseY);
+		tooltipLines
+				.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		GuiHelper.renderTooltip(this.screen, guiGraphics, ItemStack.EMPTY, tooltipLines,
+				Optional.of(new MobCatcherHealthTooltip(capturedMob.currentHealth(), capturedMob.maxHealth())), mouseX, mouseY);
 	}
 
 	private String getTooltipDisplayName(CapturedMob capturedMob, Optional<LivingEntity> entity) {
-		return entity.map(livingEntity -> livingEntity.hasCustomName() ? livingEntity.getCustomName().getString() : livingEntity.getType().getDescription().getString()).orElse(capturedMob.displayName());
+		return entity.map(
+				livingEntity -> livingEntity.hasCustomName() ? livingEntity.getCustomName().getString() : livingEntity.getType().getDescription().getString())
+				.orElse(capturedMob.displayName());
 	}
 
 	private void renderCapturedMobArea(GuiGraphics guiGraphics, int x, int y, int widthSlots, int heightSlots) {
@@ -159,7 +165,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		int backgroundY = y - 1;
 		int width = widthSlots * 18;
 		int height = heightSlots * 18;
-		GuiHelper.renderTiledControlBackground(guiGraphics, backgroundX, backgroundY, width, height, CAPTURED_MOB_BACKGROUND_U, CAPTURED_MOB_BACKGROUND_V, CAPTURED_MOB_BACKGROUND_WIDTH, CAPTURED_MOB_BACKGROUND_HEIGHT);
+		GuiHelper.renderTiledControlBackground(guiGraphics, backgroundX, backgroundY, width, height, CAPTURED_MOB_BACKGROUND_U, CAPTURED_MOB_BACKGROUND_V,
+				CAPTURED_MOB_BACKGROUND_WIDTH, CAPTURED_MOB_BACKGROUND_HEIGHT);
 		renderCapturedMobBackgroundGradient(guiGraphics, backgroundX + 1, backgroundY + 1, width - 2, height - 2);
 	}
 
@@ -183,8 +190,10 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private void prepareEntityForRender(LivingEntity entity, CapturedMob capturedMob) {
 		float renderTime = getRenderTime(capturedMob);
 		float bodyRot = 180F + (getUuidFloat(capturedMob.id(), 0) - 0.5F) * BODY_YAW_RANGE;
-		float headOffset = -HEAD_STATIC_YAW_RANGE / 2F + getUuidFloat(capturedMob.id(), 1) * HEAD_STATIC_YAW_RANGE + getIdlePoseOffset(capturedMob.id(), renderTime, 0, HEAD_IDLE_YAW_AMPLITUDE);
-		float pitch = -HEAD_STATIC_PITCH_RANGE / 2F + getUuidFloat(capturedMob.id(), 2) * HEAD_STATIC_PITCH_RANGE + getIdlePoseOffset(capturedMob.id(), renderTime, 1, HEAD_IDLE_PITCH_AMPLITUDE);
+		float headOffset = -HEAD_STATIC_YAW_RANGE / 2F + getUuidFloat(capturedMob.id(), 1) * HEAD_STATIC_YAW_RANGE
+				+ getIdlePoseOffset(capturedMob.id(), renderTime, 0, HEAD_IDLE_YAW_AMPLITUDE);
+		float pitch = -HEAD_STATIC_PITCH_RANGE / 2F + getUuidFloat(capturedMob.id(), 2) * HEAD_STATIC_PITCH_RANGE
+				+ getIdlePoseOffset(capturedMob.id(), renderTime, 1, HEAD_IDLE_PITCH_AMPLITUDE);
 		entity.tickCount = (int) renderTime;
 		entity.setYRot(bodyRot);
 		entity.yRotO = bodyRot;
@@ -240,8 +249,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 	private Optional<CapturedMob> getHoveredCapturedMob(double mouseX, double mouseY) {
 		return MobCatcherStorage.getCapturedMobs(getBackpackWrapper()).stream()
-				.filter(capturedMob -> isMouseOverVisibleCapturedMob(capturedMob, mouseX, mouseY))
-				.findFirst();
+				.filter(capturedMob -> isMouseOverVisibleCapturedMob(capturedMob, mouseX, mouseY)).findFirst();
 	}
 
 	private boolean isMouseOverVisibleCapturedMob(CapturedMob capturedMob, double mouseX, double mouseY) {
@@ -275,7 +283,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 				Slot slot = menu.getSlot(slotIndex);
 				if (isSlotVisible(slot)) {
-					return Optional.of(new CapturedMobRenderBounds(slot.x - xOffset * 18, slot.y - yOffset * 18, capturedMob.width() * 18, capturedMob.height() * 18));
+					return Optional
+							.of(new CapturedMobRenderBounds(slot.x - xOffset * 18, slot.y - yOffset * 18, capturedMob.width() * 18, capturedMob.height() * 18));
 				}
 			}
 		}
@@ -301,7 +310,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		return right <= left || bottom <= top ? Optional.empty() : Optional.of(new CapturedMobRenderBounds(left, top, right - left, bottom - top));
 	}
 
-	private Optional<CapturedMobRenderBounds> getInteriorVisibleBounds(CapturedMobRenderBounds capturedMobBounds, CapturedMobRenderBounds visibleStorageBounds) {
+	private Optional<CapturedMobRenderBounds> getInteriorVisibleBounds(CapturedMobRenderBounds capturedMobBounds,
+			CapturedMobRenderBounds visibleStorageBounds) {
 		int visibleBottom = visibleStorageBounds.y() + visibleStorageBounds.height();
 		int capturedBottom = capturedMobBounds.y() + capturedMobBounds.height();
 		int left = Math.max(capturedMobBounds.x(), visibleStorageBounds.x());
@@ -319,7 +329,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		return menu.getStorageWrapper();
 	}
 
-	private record CapturedMobRenderBounds(int x, int y, int width, int height) {}
+	private record CapturedMobRenderBounds(int x, int y, int width, int height) {
+	}
 
 	private Optional<LivingEntity> getRenderEntity(CapturedMob capturedMob) {
 		if (capturedMobRenderFailures.contains(capturedMob.id())) {
@@ -332,7 +343,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		}
 
 		try {
-			Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob).map(entityType -> entityType.create(screen.getMinecraft().level, EntitySpawnReason.LOAD));
+			Optional<Entity> entity = MobCatcherStorage.getEntityType(capturedMob)
+					.map(entityType -> entityType.create(screen.getMinecraft().level, EntitySpawnReason.LOAD));
 			if (entity.isEmpty()) {
 				return Optional.empty();
 			}
@@ -344,7 +356,8 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 			return Optional.of(livingEntity);
 		} catch (RuntimeException e) {
 			capturedMobRenderFailures.add(capturedMob.id());
-			SophisticatedBackpacks.LOGGER.warn("Unable to create render entity for captured mob {} ({})", capturedMob.displayName(), capturedMob.entityType(), e);
+			SophisticatedBackpacks.LOGGER.warn("Unable to create render entity for captured mob {} ({})", capturedMob.displayName(), capturedMob.entityType(),
+					e);
 			return Optional.empty();
 		}
 	}

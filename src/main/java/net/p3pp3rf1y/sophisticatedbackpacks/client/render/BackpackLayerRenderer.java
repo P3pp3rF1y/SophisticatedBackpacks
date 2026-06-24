@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+
 import java.util.function.BiConsumer;
 
 public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends EntityModel<S>> extends RenderLayer<S, M> {
@@ -67,12 +68,14 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		poseStack.popPose();
 	}
 
-	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void renderBackpack(M parentModel, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, @Nullable EntityType<?> entityType, boolean isBaby) {
+	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void renderBackpack(M parentModel, PoseStack poseStack,
+			MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, @Nullable EntityType<?> entityType, boolean isBaby) {
 		translateRotateAndScale(parentModel, entityType, isBaby, poseStack, wearsArmor);
 		itemRenderer.renderStatic(backpack, BackpackBlockModel.WORN, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, null, 0);
 	}
 
-	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
+	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel,
+			@Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			humanoidModel.body.translateAndRotate(poseStack);
 		}

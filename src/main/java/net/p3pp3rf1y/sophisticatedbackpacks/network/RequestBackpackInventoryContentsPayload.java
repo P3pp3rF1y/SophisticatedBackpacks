@@ -18,10 +18,8 @@ import java.util.UUID;
 
 public record RequestBackpackInventoryContentsPayload(UUID backpackUuid) implements CustomPacketPayload {
 	public static final Type<RequestBackpackInventoryContentsPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("request_backpack_inventory_contents"));
-	public static final StreamCodec<ByteBuf, RequestBackpackInventoryContentsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			RequestBackpackInventoryContentsPayload::backpackUuid,
-			RequestBackpackInventoryContentsPayload::new);
+	public static final StreamCodec<ByteBuf, RequestBackpackInventoryContentsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			RequestBackpackInventoryContentsPayload::backpackUuid, RequestBackpackInventoryContentsPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ICustomSmithingRecipe;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -103,13 +104,9 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	}
 
 	public List<RecipeDisplay> display() {
-		return List.of(new SmithingRecipeDisplay(
-				Ingredient.optionalIngredientToDisplay(template),
-				base.display(),
-				Ingredient.optionalIngredientToDisplay(addition),
-				new SlotDisplay.ItemStackSlotDisplay(result),
-				new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
-		));
+		return List.of(
+				new SmithingRecipeDisplay(Ingredient.optionalIngredientToDisplay(template), base.display(), Ingredient.optionalIngredientToDisplay(addition),
+						new SlotDisplay.ItemStackSlotDisplay(result), new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)));
 	}
 
 	@Override
@@ -118,16 +115,14 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<SmithingBackpackUpgradeRecipe> {
-		private static final MapCodec<SmithingBackpackUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				Ingredient.CODEC.optionalFieldOf("template").forGetter(recipe -> recipe.template),
-				Ingredient.CODEC.fieldOf("base").forGetter(recipe -> recipe.base),
-				Ingredient.CODEC.optionalFieldOf("addition").forGetter(recipe -> recipe.addition),
-				ItemStack.STRICT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result)
-		).apply(builder, SmithingBackpackUpgradeRecipe::new));
+		private static final MapCodec<SmithingBackpackUpgradeRecipe> CODEC = RecordCodecBuilder
+				.mapCodec(builder -> builder
+						.group(Ingredient.CODEC.optionalFieldOf("template").forGetter(recipe -> recipe.template),
+								Ingredient.CODEC.fieldOf("base").forGetter(recipe -> recipe.base),
+								Ingredient.CODEC.optionalFieldOf("addition").forGetter(recipe -> recipe.addition),
+								ItemStack.STRICT_CODEC.fieldOf("result").forGetter(recipe -> recipe.result))
+						.apply(builder, SmithingBackpackUpgradeRecipe::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingBackpackUpgradeRecipe> STREAM_CODEC;
-
-		public Serializer() {
-		}
 
 		public MapCodec<SmithingBackpackUpgradeRecipe> codec() {
 			return CODEC;
@@ -138,17 +133,9 @@ public class SmithingBackpackUpgradeRecipe implements ICustomSmithingRecipe {
 		}
 
 		static {
-			STREAM_CODEC = StreamCodec.composite(
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
-					recipe -> recipe.template,
-					Ingredient.CONTENTS_STREAM_CODEC,
-					recipe -> recipe.base,
-					Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
-					recipe -> recipe.addition,
-					ItemStack.STREAM_CODEC,
-					recipe -> recipe.result,
-					SmithingBackpackUpgradeRecipe::new
-			);
+			STREAM_CODEC = StreamCodec.composite(Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC, recipe -> recipe.template, Ingredient.CONTENTS_STREAM_CODEC,
+					recipe -> recipe.base, Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC, recipe -> recipe.addition, ItemStack.STREAM_CODEC,
+					recipe -> recipe.result, SmithingBackpackUpgradeRecipe::new);
 		}
 	}
 }

@@ -46,7 +46,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 @SuppressWarnings("unused")
 @REIPluginClient
 public class BackpackReiClientPlugin implements REIClientPlugin {
-	private static Consumer<WorkstationRegistration> additionalWorkstations = registration -> {};
+	private static Consumer<WorkstationRegistration> additionalWorkstations = registration -> {
+	};
 	public static void addAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
 		BackpackReiClientPlugin.additionalWorkstations = BackpackReiClientPlugin.additionalWorkstations.andThen(additionalWorkstations);
 	}
@@ -104,25 +105,19 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerEntries(EntryRegistry registry) {
-		ModItems.ITEMS.getEntries().stream()
-				.map(holder -> holder.get())
-				.filter(BackpackItem.class::isInstance)
-				.map(BackpackItem.class::cast)
-				.forEach(backpackItem -> getCreativeVariants(backpackItem).stream()
-						.filter(stack -> !registry.alreadyContain(EntryStacks.of(stack)))
+		ModItems.ITEMS.getEntries().stream().map(holder -> holder.get()).filter(BackpackItem.class::isInstance).map(BackpackItem.class::cast)
+				.forEach(backpackItem -> getCreativeVariants(backpackItem).stream().filter(stack -> !registry.alreadyContain(EntryStacks.of(stack)))
 						.forEach(stack -> registry.addEntry(EntryStacks.of(stack))));
 	}
 
 	@Override
 	public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
-		ModItems.ITEMS.getEntries().stream()
-				.map(holder -> holder.get())
-				.filter(BackpackItem.class::isInstance)
-				.map(BackpackItem.class::cast)
+		ModItems.ITEMS.getEntries().stream().map(holder -> holder.get()).filter(BackpackItem.class::isInstance).map(BackpackItem.class::cast)
 				.forEach(backpackItem -> {
 					List<ItemStack> variants = getCreativeVariants(backpackItem);
 					if (variants.size() > 1) {
-						registry.group(getCollapseId(backpackItem), backpackItem.getName(backpackItem.getDefaultInstance()), variants.stream().map(EntryStacks::of).toList());
+						registry.group(getCollapseId(backpackItem), backpackItem.getName(backpackItem.getDefaultInstance()),
+								variants.stream().map(EntryStacks::of).toList());
 					}
 				});
 	}
@@ -131,14 +126,16 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 	public void registerDisplays(DisplayRegistry registry) {
 		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
-		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(() -> catalog, BackpackReiClientPlugin::canShowDyeUsagesFor, BackpackReiClientPlugin::canShowDyeRecipesFor));
+		registry.registerGlobalDisplayGenerator(new GroupedCraftingReiDisplayGenerator(() -> catalog, BackpackReiClientPlugin::canShowDyeUsagesFor,
+				BackpackReiClientPlugin::canShowDyeRecipesFor));
 		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(() -> catalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerGlobalDisplayGenerator(new SmithingSpecReiDisplayGenerator(() -> catalog, stack -> stack.getItem() instanceof BackpackItem));
 		registry.registerVisibilityPredicate((category, display) -> {
 			if (display instanceof CraftingSpecReiDisplay) {
 				return EventResult.pass();
 			}
-			if (display instanceof DefaultCraftingDisplay && display.getDisplayLocation().isPresent() && catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(display.getDisplayLocation().get()))) {
+			if (display instanceof DefaultCraftingDisplay && display.getDisplayLocation().isPresent()
+					&& catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(display.getDisplayLocation().get()))) {
 				return EventResult.interruptFalse();
 			}
 			if (display instanceof DefaultSmithingDisplay smithingDisplay && smithingDisplay.getDisplayLocation().isPresent()) {
@@ -152,9 +149,7 @@ public class BackpackReiClientPlugin implements REIClientPlugin {
 	}
 
 	private static boolean canShowDyeUsagesFor(ItemStack stack) {
-		return stack.getItem() instanceof BackpackItem
-				&& !stack.has(ModCoreDataComponents.MAIN_COLOR)
-				&& !stack.has(ModCoreDataComponents.ACCENT_COLOR)
+		return stack.getItem() instanceof BackpackItem && !stack.has(ModCoreDataComponents.MAIN_COLOR) && !stack.has(ModCoreDataComponents.ACCENT_COLOR)
 				&& !stack.has(ModCoreDataComponents.RENDER_INFO_TAG);
 	}
 

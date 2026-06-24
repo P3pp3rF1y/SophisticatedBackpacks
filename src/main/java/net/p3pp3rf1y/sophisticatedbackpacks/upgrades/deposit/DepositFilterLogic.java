@@ -17,7 +17,8 @@ import java.util.function.Consumer;
 public class DepositFilterLogic extends FilterLogic {
 	private Set<ItemStackKey> inventoryFilterStacks = new HashSet<>();
 
-	public DepositFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount, DeferredHolder<DataComponentType<?>, DataComponentType<FilterAttributes>> contentsComponent) {
+	public DepositFilterLogic(ItemStack upgrade, Consumer<ItemStack> saveHandler, int filterSlotCount,
+			DeferredHolder<DataComponentType<?>, DataComponentType<FilterAttributes>> contentsComponent) {
 		super(upgrade, saveHandler, filterSlotCount, contentsComponent);
 	}
 
@@ -30,16 +31,16 @@ public class DepositFilterLogic extends FilterLogic {
 
 	public void setDepositFilterType(DepositFilterType depositFilterType) {
 		switch (depositFilterType) {
-			case ALLOW:
+			case ALLOW :
 				setFilterByInventory(false);
 				setAllowList(true);
 				break;
-			case BLOCK:
+			case BLOCK :
 				setFilterByInventory(false);
 				setAllowList(false);
 				break;
-			case INVENTORY:
-			default:
+			case INVENTORY :
+			default :
 				setFilterByInventory(true);
 				save();
 		}

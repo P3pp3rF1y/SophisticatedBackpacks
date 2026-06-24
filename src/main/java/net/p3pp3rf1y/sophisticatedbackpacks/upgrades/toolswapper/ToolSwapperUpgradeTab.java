@@ -19,34 +19,41 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicControl;
 import java.util.Map;
 
 public class ToolSwapperUpgradeTab extends UpgradeSettingsTab<ToolSwapperUpgradeContainer> {
-	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(
-			Map.of(
-					false, GuiHelper.getButtonStateData(new UV(48, 64), Dimension.SQUARE_16, new Position(1, 1),
-							Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon")), Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon.detail")).withStyle(ChatFormatting.GRAY)),
-					true, GuiHelper.getButtonStateData(new UV(32, 64), Dimension.SQUARE_16, new Position(1, 1),
-							Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon")), Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon.detail")).withStyle(ChatFormatting.GRAY))
-			));
+	public static final ButtonDefinition.Toggle<Boolean> SWAP_WEAPON = ButtonDefinitions.createToggleButtonDefinition(Map.of(false,
+			GuiHelper.getButtonStateData(new UV(48, 64), Dimension.SQUARE_16, new Position(1, 1),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon")),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_weapon.detail")).withStyle(ChatFormatting.GRAY)),
+			true,
+			GuiHelper.getButtonStateData(new UV(32, 64), Dimension.SQUARE_16, new Position(1, 1),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon")),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_weapon.detail")).withStyle(ChatFormatting.GRAY))));
 
-	public static final ButtonDefinition.Toggle<ToolSwapMode> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(
-			Map.of(
-					ToolSwapMode.NO_SWAP, GuiHelper.getButtonStateData(new UV(96, 64), Dimension.SQUARE_16, new Position(1, 1),
-							Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools")), Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools.detail")).withStyle(ChatFormatting.GRAY)),
-					ToolSwapMode.ONLY_TOOLS, GuiHelper.getButtonStateData(new UV(80, 64), Dimension.SQUARE_16, new Position(1, 1),
-							Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools")), Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools.detail")).withStyle(ChatFormatting.GRAY)),
-					ToolSwapMode.ANY, GuiHelper.getButtonStateData(new UV(64, 64), Dimension.SQUARE_16, new Position(1, 1),
-							Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_tools")), Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_tools.detail")).withStyle(ChatFormatting.GRAY))
-			));
+	public static final ButtonDefinition.Toggle<ToolSwapMode> SWAP_TOOLS = ButtonDefinitions.createToggleButtonDefinition(Map.of(ToolSwapMode.NO_SWAP,
+			GuiHelper.getButtonStateData(new UV(96, 64), Dimension.SQUARE_16, new Position(1, 1),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools")),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("do_not_swap_tools.detail")).withStyle(ChatFormatting.GRAY)),
+			ToolSwapMode.ONLY_TOOLS,
+			GuiHelper.getButtonStateData(new UV(80, 64), Dimension.SQUARE_16, new Position(1, 1),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools")),
+					Component
+							.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("only_swap_for_tools.detail")).withStyle(ChatFormatting.GRAY)),
+			ToolSwapMode.ANY,
+			GuiHelper.getButtonStateData(new UV(64, 64), Dimension.SQUARE_16, new Position(1, 1),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_tools")),
+					Component.translatable(BackpackTranslationHelper.INSTANCE.translUpgradeButton("swap_tools.detail")).withStyle(ChatFormatting.GRAY))));
 
 	protected final FilterLogicControl<FilterLogic, FilterLogicContainer<FilterLogic>> filterLogicControl;
 
 	public ToolSwapperUpgradeTab(ToolSwapperUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("advanced_tool_swapper"), BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_tool_swapper"));
-		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), SWAP_WEAPON, button -> getContainer().setSwapWeapon(!getContainer().shouldSwapWeapon()),
-				getContainer()::shouldSwapWeapon));
-		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), SWAP_TOOLS, button -> getContainer().setToolSwapMode(getContainer().getToolSwapMode().next()),
-				getContainer()::getToolSwapMode));
+		super(upgradeContainer, position, screen, BackpackTranslationHelper.INSTANCE.translUpgrade("advanced_tool_swapper"),
+				BackpackTranslationHelper.INSTANCE.translUpgradeTooltip("advanced_tool_swapper"));
+		addHideableChild(new ToggleButton<>(new Position(x + 3, y + 24), SWAP_WEAPON,
+				button -> getContainer().setSwapWeapon(!getContainer().shouldSwapWeapon()), getContainer()::shouldSwapWeapon));
+		addHideableChild(new ToggleButton<>(new Position(x + 21, y + 24), SWAP_TOOLS,
+				button -> getContainer().setToolSwapMode(getContainer().getToolSwapMode().next()), getContainer()::getToolSwapMode));
 
-		filterLogicControl = addHideableChild(new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 4));
+		filterLogicControl = addHideableChild(
+				new FilterLogicControl.Advanced(screen, new Position(x + 3, y + 44), getContainer().getFilterLogicContainer(), 4));
 	}
 
 	@Override

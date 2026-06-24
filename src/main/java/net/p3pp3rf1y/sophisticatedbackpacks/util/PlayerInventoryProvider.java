@@ -30,7 +30,8 @@ public class PlayerInventoryProvider {
 	}
 
 	private PlayerInventoryProvider() {
-		addPlayerInventoryHandler(MAIN_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> player.getInventory().getNonEquipmentItems().size(),
+		addPlayerInventoryHandler(MAIN_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER,
+				(player, identifier) -> player.getInventory().getNonEquipmentItems().size(),
 				(player, identifier, slot) -> player.getInventory().getNonEquipmentItems().get(slot), true, false, false, false);
 		addPlayerInventoryHandler(OFFHAND_INVENTORY, player -> PlayerInventoryHandler.SINGLE_IDENTIFIER, (player, identifier) -> 1,
 				(player, identifier, slot) -> player.getItemBySlot(EquipmentSlot.OFFHAND), false, false, false, false);
@@ -38,14 +39,20 @@ public class PlayerInventoryProvider {
 				(player, identifier, slot) -> player.getItemBySlot(EquipmentSlot.CHEST), false, true, false, true);
 	}
 
-	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
-		addPlayerInventoryHandler(name, identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, rendered, ownRenderer, accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter.DEFAULT);
+	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter,
+			PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer,
+			boolean accessibleByAnotherPlayer) {
+		addPlayerInventoryHandler(name, identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, rendered, ownRenderer, accessibleByAnotherPlayer,
+				PlayerInventoryHandler.VisibleInWorldGetter.DEFAULT);
 	}
 
-	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter, PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer, boolean accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter visibleInWorldGetter) {
+	public void addPlayerInventoryHandler(String name, Function<Player, Set<String>> identifiersGetter, PlayerInventoryHandler.SlotCountGetter slotCountGetter,
+			PlayerInventoryHandler.SlotStackGetter slotStackGetter, boolean visibleInGui, boolean rendered, boolean ownRenderer,
+			boolean accessibleByAnotherPlayer, PlayerInventoryHandler.VisibleInWorldGetter visibleInWorldGetter) {
 		Map<String, PlayerInventoryHandler> temp = new LinkedHashMap<>(playerInventoryHandlers);
 		playerInventoryHandlers.clear();
-		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer, accessibleByAnotherPlayer, visibleInWorldGetter));
+		playerInventoryHandlers.put(name, new PlayerInventoryHandler(identifiersGetter, slotCountGetter, slotStackGetter, visibleInGui, ownRenderer,
+				accessibleByAnotherPlayer, visibleInWorldGetter));
 		playerInventoryHandlers.putAll(temp);
 
 		if (rendered) {
@@ -69,7 +76,9 @@ public class PlayerInventoryProvider {
 					}
 					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
 					if (slotStack.getItem() instanceof BackpackItem) {
-						return forLayerRendering && invHandler.hasItsOwnLayerRenderer() ? Optional.empty() : Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
+						return forLayerRendering && invHandler.hasItsOwnLayerRenderer()
+								? Optional.empty()
+								: Optional.of(new RenderInfo(slotStack, handlerName.equals(ARMOR_INVENTORY)));
 					}
 				}
 			}

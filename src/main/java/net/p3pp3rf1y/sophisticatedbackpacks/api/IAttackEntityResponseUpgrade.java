@@ -9,7 +9,8 @@ public interface IAttackEntityResponseUpgrade {
 	/**
 	 * Gets called when a player attacks an entity
 	 *
-	 * @param player - player that's attacking entity
+	 * @param player
+	 *            - player that's attacking entity
 	 * @return true if the upgrade handled the attack and no follow up {@link IAttackEntityResponseUpgrade} should be called
 	 */
 	boolean onAttackEntity(Player player);

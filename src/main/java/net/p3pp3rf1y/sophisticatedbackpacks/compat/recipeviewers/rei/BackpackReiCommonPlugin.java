@@ -17,7 +17,6 @@ public class BackpackReiCommonPlugin implements REICommonPlugin {
 
 	@Override
 	public void registerItemComparators(ItemComparatorRegistry registry) {
-		getSubtypeInterpreters()
-				.forEach((item, subtypeInterpreter) -> registry.register(ReiSubtypeInterpreter.of(subtypeInterpreter), item));
+		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registry.register(ReiSubtypeInterpreter.of(subtypeInterpreter), item));
 	}
 }

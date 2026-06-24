@@ -64,6 +64,6 @@ public class SawmillCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

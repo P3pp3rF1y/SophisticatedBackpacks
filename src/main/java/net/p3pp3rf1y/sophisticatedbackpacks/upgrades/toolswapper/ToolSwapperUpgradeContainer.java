@@ -13,7 +13,8 @@ public class ToolSwapperUpgradeContainer extends UpgradeContainerBase<ToolSwappe
 	private static final String DATA_TOOL_SWAP_MODE = "toolSwapMode";
 	private final FilterLogicContainer<FilterLogic> filterLogicContainer;
 
-	public ToolSwapperUpgradeContainer(Player player, int upgradeContainerId, ToolSwapperUpgradeWrapper upgradeWrapper, UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> type) {
+	public ToolSwapperUpgradeContainer(Player player, int upgradeContainerId, ToolSwapperUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		filterLogicContainer = new FilterLogicContainer<>(upgradeWrapper::getFilterLogic, this, slots::add);
 

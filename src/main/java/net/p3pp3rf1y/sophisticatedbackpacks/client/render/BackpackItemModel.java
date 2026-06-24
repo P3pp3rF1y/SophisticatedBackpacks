@@ -34,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,8 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	@Override
-	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
+	public void update(ItemStackRenderState stackRenderState, ItemStack stack, ItemModelResolver itemModelResolver, ItemDisplayContext displayContext,
+			@Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int seed) {
 		stackRenderState.appendModelIdentityElement(this);
 		final int[] tints = new int[this.tints.size()];
 		for (int j = 0; j < tints.length; j++) {
@@ -117,7 +119,7 @@ public class BackpackItemModel implements ItemModel {
 					info.getFluid().ifPresent(fs -> {
 						stackRenderState.appendModelIdentityElement(fs.getFluid());
 						stackRenderState.appendModelIdentityElement(fs.getComponents());
-							});
+					});
 					stackRenderState.appendModelIdentityElement(info.getFillRatio());
 				} else {
 					backpackModel.tankRight = true;
@@ -145,10 +147,12 @@ public class BackpackItemModel implements ItemModel {
 	}
 
 	public record Unbaked(ResourceLocation base, List<ItemTintSource> tints) implements ItemModel.Unbaked {
-		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-				ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
-				ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints)
-		).apply(builder, Unbaked::new));
+		public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder
+				.mapCodec(
+						builder -> builder
+								.group(ResourceLocation.CODEC.fieldOf("base").forGetter(Unbaked::base),
+										ItemTintSources.CODEC.listOf().optionalFieldOf("tints", List.of()).forGetter(Unbaked::tints))
+								.apply(builder, Unbaked::new));
 
 		@Override
 		public MapCodec<? extends ItemModel.Unbaked> type() {
@@ -191,18 +195,10 @@ public class BackpackItemModel implements ItemModel {
 		private List<BakedQuad> baseModel;
 
 		@Override
-		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay, boolean hasFoil) {
-			ItemRenderer.renderItem(
-					displayContext,
-					poseStack,
-					buffer,
-					combinedLight,
-					packedOverlay,
-					tintLayers,
-					baseModel,
-					Sheets.translucentItemSheet(),
-					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE
-			);
+		public void render(ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int packedOverlay,
+				boolean hasFoil) {
+			ItemRenderer.renderItem(displayContext, poseStack, buffer, combinedLight, packedOverlay, tintLayers, baseModel, Sheets.translucentItemSheet(),
+					hasFoil ? ItemStackRenderState.FoilType.STANDARD : ItemStackRenderState.FoilType.NONE);
 			if (displayItem != null) {
 				if (displayItemQuad == null) {
 					return;
@@ -221,7 +217,7 @@ public class BackpackItemModel implements ItemModel {
 
 		@Override
 		public void getExtents(Set<Vector3f> set) {
-			//noop - not used in backpack item model as they are provided directly by itself
+			// noop - not used in backpack item model as they are provided directly by itself
 		}
 	}
 }

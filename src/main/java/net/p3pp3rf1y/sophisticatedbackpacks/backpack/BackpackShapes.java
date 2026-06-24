@@ -13,6 +13,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 
 import javax.annotation.Nullable;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -33,10 +34,9 @@ public class BackpackShapes {
 		VoxelShape getShape(BlockState state);
 	}
 
-	private static final IShapeProvider authoritativeShapeProvider =
-			new JsonModelShapeProvider(new CompositeModelJsonSource(ClasspathModelJsonSource.INSTANCE));
-	private static volatile IShapeProvider defaultShapeProvider =
-			authoritativeShapeProvider;
+	private static final IShapeProvider authoritativeShapeProvider = new JsonModelShapeProvider(
+			new CompositeModelJsonSource(ClasspathModelJsonSource.INSTANCE));
+	private static volatile IShapeProvider defaultShapeProvider = authoritativeShapeProvider;
 	private static volatile IShapeProvider shapeProvider = defaultShapeProvider;
 
 	public static void setShapeProvider(IShapeProvider provider) {
@@ -63,10 +63,7 @@ public class BackpackShapes {
 	}
 
 	static IShapeProvider createDefaultShapeProvider(ResourceManager resourceManager) {
-		return new JsonModelShapeProvider(new CompositeModelJsonSource(
-				new ResourceManagerModelJsonSource(resourceManager),
-				ClasspathModelJsonSource.INSTANCE
-		));
+		return new JsonModelShapeProvider(new CompositeModelJsonSource(new ResourceManagerModelJsonSource(resourceManager), ClasspathModelJsonSource.INSTANCE));
 	}
 
 	static synchronized void applyDefaultShapeProvider(IShapeProvider provider) {
@@ -194,16 +191,13 @@ public class BackpackShapes {
 
 		@Override
 		public JsonObject loadModelJson(ResourceLocation modelLocation) {
-			ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(
-					modelLocation.getNamespace(),
-					"models/" + modelLocation.getPath() + ".json"
-			);
+			ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(modelLocation.getNamespace(),
+					"models/" + modelLocation.getPath() + ".json");
 			Optional<Resource> resource = resourceManager.getResource(resourceLocation);
 			if (resource.isEmpty()) {
 				throw new IllegalStateException("Missing model resource " + resourceLocation);
 			}
-			try (InputStream stream = resource.get().open();
-				 InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+			try (InputStream stream = resource.get().open(); InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
 				return JsonParser.parseReader(reader).getAsJsonObject();
 			} catch (Exception e) {
 				throw new IllegalStateException("Failed to read model resource " + resourceLocation, e);
@@ -232,13 +226,11 @@ public class BackpackShapes {
 	}
 
 	private enum PartModel {
-		BASE(BackpackShapeHelper.Part.BASE, "block/backpack_base"),
-		BATTERY(BackpackShapeHelper.Part.BATTERY, "block/backpack_battery"),
-		FRONT_POUCH(BackpackShapeHelper.Part.FRONT_POUCH, "block/backpack_front_pouch"),
-		LEFT_POUCH(BackpackShapeHelper.Part.LEFT_POUCH, "block/backpack_left_pouch"),
-		LEFT_TANK(BackpackShapeHelper.Part.LEFT_TANK, "block/backpack_left_tank"),
-		RIGHT_POUCH(BackpackShapeHelper.Part.RIGHT_POUCH, "block/backpack_right_pouch"),
-		RIGHT_TANK(BackpackShapeHelper.Part.RIGHT_TANK, "block/backpack_right_tank");
+		BASE(BackpackShapeHelper.Part.BASE, "block/backpack_base"), BATTERY(BackpackShapeHelper.Part.BATTERY, "block/backpack_battery"), FRONT_POUCH(
+				BackpackShapeHelper.Part.FRONT_POUCH, "block/backpack_front_pouch"), LEFT_POUCH(BackpackShapeHelper.Part.LEFT_POUCH,
+						"block/backpack_left_pouch"), LEFT_TANK(BackpackShapeHelper.Part.LEFT_TANK, "block/backpack_left_tank"), RIGHT_POUCH(
+								BackpackShapeHelper.Part.RIGHT_POUCH,
+								"block/backpack_right_pouch"), RIGHT_TANK(BackpackShapeHelper.Part.RIGHT_TANK, "block/backpack_right_tank");
 
 		private final BackpackShapeHelper.Part part;
 		private final ResourceLocation modelLocation;
@@ -254,8 +246,6 @@ public class BackpackShapes {
 	}
 
 	private static final class StreamSupportHelper {
-		private StreamSupportHelper() {
-		}
 
 		private static Stream<VoxelShape> shapeStream(JsonObject modelJson) {
 			return modelJson.getAsJsonArray("elements").asList().stream().map(element -> {
@@ -276,11 +266,8 @@ public class BackpackShapes {
 			if (!json.has(key) || !json.get(key).isJsonArray() || json.getAsJsonArray(key).size() != 3) {
 				throw new IllegalStateException("Backpack shape model element is missing vec3: " + key);
 			}
-			return new double[]{
-					json.getAsJsonArray(key).get(0).getAsDouble(),
-					json.getAsJsonArray(key).get(1).getAsDouble(),
-					json.getAsJsonArray(key).get(2).getAsDouble()
-			};
+			return new double[]{json.getAsJsonArray(key).get(0).getAsDouble(), json.getAsJsonArray(key).get(1).getAsDouble(),
+					json.getAsJsonArray(key).get(2).getAsDouble()};
 		}
 	}
 }

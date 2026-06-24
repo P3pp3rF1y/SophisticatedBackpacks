@@ -13,15 +13,13 @@ import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsToolti
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 
 public record BackpackContentsPayload(UUID backpackUuid, @Nullable CompoundTag backpackContents) implements CustomPacketPayload {
 	public static final Type<BackpackContentsPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_contents"));
-	public static final StreamCodec<ByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			BackpackContentsPayload::backpackUuid,
-			StreamCodecHelper.ofNullable(ByteBufCodecs.COMPOUND_TAG),
-			BackpackContentsPayload::backpackContents,
+	public static final StreamCodec<ByteBuf, BackpackContentsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			BackpackContentsPayload::backpackUuid, StreamCodecHelper.ofNullable(ByteBufCodecs.COMPOUND_TAG), BackpackContentsPayload::backpackContents,
 			BackpackContentsPayload::new);
 
 	@Override

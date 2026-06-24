@@ -65,7 +65,8 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 
 	private void logIncorrectDependencies() {
 		for (DependentFile dependentFile : loadLater) {
-			SophisticatedBackpacks.LOGGER.error("Non existent or circular load after dependencies in {} - {}", dependentFile::getName, () -> String.join(",", dependentFile.getDependencies()));
+			SophisticatedBackpacks.LOGGER.error("Non existent or circular load after dependencies in {} - {}", dependentFile::getName,
+					() -> String.join(",", dependentFile.getDependencies()));
 		}
 	}
 
@@ -110,8 +111,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener<JsonElement
 		try {
 			loader.get().parse(json, modId);
 			SophisticatedBackpacks.LOGGER.debug("Finished loading registry data for {}", name);
-		}
-		catch (Exception exception) {
+		} catch (Exception exception) {
 			SophisticatedBackpacks.LOGGER.error("Caught exception while loading {} : {}", name, exception);
 		}
 	}

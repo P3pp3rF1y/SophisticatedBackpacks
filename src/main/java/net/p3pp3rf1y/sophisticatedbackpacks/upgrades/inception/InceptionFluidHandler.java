@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -24,8 +25,8 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	protected int tankCount;
 	private final ItemStack backpack;
 
-	public InceptionFluidHandler(
-			@Nullable IStorageFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionFluidHandler(@Nullable IStorageFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder,
+			SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedFluidHandler = wrappedFluidHandler;
 		this.backpack = backpack;
 		this.inventoryOrder = inventoryOrder;
@@ -43,7 +44,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedFluidHandler);
 		}
-		fluidHandlers = handlers.toArray(new IStorageFluidHandler[] {});
+		fluidHandlers = handlers.toArray(new IStorageFluidHandler[]{});
 		baseIndex = new int[fluidHandlers.length];
 		int index = 0;
 		for (int i = 0; i < fluidHandlers.length; i++) {
