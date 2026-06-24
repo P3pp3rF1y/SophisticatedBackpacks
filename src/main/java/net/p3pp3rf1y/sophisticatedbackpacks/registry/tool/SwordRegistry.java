@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 
 import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -82,30 +83,24 @@ public class SwordRegistry {
 		}
 
 		private void parseSwordMatcher(@Nullable String modId, JsonElement jsonElement) {
-			Matchers.getItemMatcher(jsonElement)
-					.ifPresent(swordMatcher -> {
-								if (modId != null) {
-									MOD_SWORD_MATCHERS.computeIfAbsent(modId, m -> new HashSet<>()).add(swordMatcher);
-								} else {
-									SWORD_MATCHERS.add(swordMatcher);
-								}
-							}
-					);
+			Matchers.getItemMatcher(jsonElement).ifPresent(swordMatcher -> {
+				if (modId != null) {
+					MOD_SWORD_MATCHERS.computeIfAbsent(modId, m -> new HashSet<>()).add(swordMatcher);
+				} else {
+					SWORD_MATCHERS.add(swordMatcher);
+				}
+			});
 		}
 
 		private void parseSword(String swordName) {
-			BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(swordName))
-					.ifPresentOrElse(
-							SWORD_ITEMS::add,
-							() -> {
-								String modId = swordName.split(":")[0];
-								if (!ModList.get().isLoaded(modId)) {
-									SophisticatedBackpacks.LOGGER.debug("Mod {} isn't loaded skipping load of sword {}", modId, swordName);
-								} else {
-									SophisticatedBackpacks.LOGGER.warn("Mod {} is loaded and yet sword {} doesn't exist in registry, skipping its load", modId, swordName);
-								}
-							}
-					);
+			BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(swordName)).ifPresentOrElse(SWORD_ITEMS::add, () -> {
+				String modId = swordName.split(":")[0];
+				if (!ModList.get().isLoaded(modId)) {
+					SophisticatedBackpacks.LOGGER.debug("Mod {} isn't loaded skipping load of sword {}", modId, swordName);
+				} else {
+					SophisticatedBackpacks.LOGGER.warn("Mod {} is loaded and yet sword {} doesn't exist in registry, skipping its load", modId, swordName);
+				}
+			});
 		}
 
 		@Override

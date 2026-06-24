@@ -9,13 +9,13 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-@SuppressWarnings("java:S2160") //no need to override equals, the default implementation is good
+@SuppressWarnings("java:S2160") // no need to override equals, the default implementation is good
 public class EverlastingBackpackItemEntity extends ItemEntity {
 	private boolean wasFloatingUp = false;
 
 	public EverlastingBackpackItemEntity(EntityType<? extends ItemEntity> type, Level level) {
 		super(type, level);
-		lifespan = Integer.MAX_VALUE; //set to not despawn
+		lifespan = Integer.MAX_VALUE; // set to not despawn
 	}
 
 	@Override
@@ -63,6 +63,6 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	protected void onBelowWorld() {
-		//do nothing as the only thing that vanilla does here is remove entity from world, but it can't for this
+		// do nothing as the only thing that vanilla does here is remove entity from world, but it can't for this
 	}
 }

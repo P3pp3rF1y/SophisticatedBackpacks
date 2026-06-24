@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class InceptionEnergyStorage implements IEnergyStorage {
 		if (wrappedEnergyStorage != null && inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			storages.add(wrappedEnergyStorage);
 		}
-		energyStorages = storages.toArray(new IEnergyStorage[] {});
+		energyStorages = storages.toArray(new IEnergyStorage[]{});
 	}
 
 	@Override

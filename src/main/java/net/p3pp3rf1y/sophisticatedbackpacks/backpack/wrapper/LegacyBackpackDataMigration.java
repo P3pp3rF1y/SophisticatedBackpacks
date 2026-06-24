@@ -33,7 +33,8 @@ public final class LegacyBackpackDataMigration {
 	private static final String RENDER_INFO_TAG = "renderInfo";
 	private static final String REAL_COUNT_TAG = "realCount";
 
-	private LegacyBackpackDataMigration() {}
+	private LegacyBackpackDataMigration() {
+	}
 
 	public static void normalizeLegacyData(ItemStack backpack) {
 		if (!backpack.has(ModCoreDataComponents.STORAGE_UUID)) {
@@ -176,7 +177,8 @@ public final class LegacyBackpackDataMigration {
 	}
 
 	public static Optional<Float> getLootPercentage(ItemStack backpack) {
-		return getLegacyCustomData(backpack).flatMap(tag -> tag.contains(LOOT_PERCENTAGE_TAG) ? Optional.of(tag.getFloat(LOOT_PERCENTAGE_TAG)) : Optional.empty());
+		return getLegacyCustomData(backpack)
+				.flatMap(tag -> tag.contains(LOOT_PERCENTAGE_TAG) ? Optional.of(tag.getFloat(LOOT_PERCENTAGE_TAG)) : Optional.empty());
 	}
 
 	public static Optional<ResourceLocation> getTemplateName(ItemStack backpack) {

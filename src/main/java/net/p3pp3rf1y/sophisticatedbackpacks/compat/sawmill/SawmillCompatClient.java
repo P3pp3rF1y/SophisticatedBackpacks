@@ -14,6 +14,8 @@ public class SawmillCompatClient {
 	}
 
 	public static void registerUpgradeTab(UpgradeContainerType<SawmillUpgradeItem.Wrapper, SawmillUpgradeContainer> containerType) {
-		UpgradeGuiManager.registerTab(containerType, (SawmillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> new SawmillUpgradeTab(upgradeContainer, position, screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET, SBPButtonDefinitions.REFILL_INPUT));
+		UpgradeGuiManager.registerTab(containerType,
+				(SawmillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> new SawmillUpgradeTab(upgradeContainer, position,
+						screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET, SBPButtonDefinitions.REFILL_INPUT));
 	}
 }

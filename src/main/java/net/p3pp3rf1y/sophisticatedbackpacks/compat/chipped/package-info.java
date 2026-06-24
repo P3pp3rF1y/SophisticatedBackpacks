@@ -1,6 +1,7 @@
 // Auto generated package-info by MCP
 
-@ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped;
 
 import net.minecraft.MethodsReturnNonnullByDefault;

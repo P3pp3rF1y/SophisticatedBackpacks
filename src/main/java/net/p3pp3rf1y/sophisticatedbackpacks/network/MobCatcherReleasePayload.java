@@ -13,10 +13,8 @@ import java.util.UUID;
 
 public record MobCatcherReleasePayload(UUID capturedMobId) implements CustomPacketPayload {
 	public static final Type<MobCatcherReleasePayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("mob_catcher_release"));
-	public static final StreamCodec<ByteBuf, MobCatcherReleasePayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			MobCatcherReleasePayload::capturedMobId,
-			MobCatcherReleasePayload::new);
+	public static final StreamCodec<ByteBuf, MobCatcherReleasePayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			MobCatcherReleasePayload::capturedMobId, MobCatcherReleasePayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

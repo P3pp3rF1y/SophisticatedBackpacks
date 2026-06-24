@@ -6,9 +6,7 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Map;
 
 public enum DepositFilterType implements StringRepresentable {
-	ALLOW("allow"),
-	BLOCK("block"),
-	INVENTORY("inventory");
+	ALLOW("allow"), BLOCK("block"), INVENTORY("inventory");
 
 	private final String name;
 

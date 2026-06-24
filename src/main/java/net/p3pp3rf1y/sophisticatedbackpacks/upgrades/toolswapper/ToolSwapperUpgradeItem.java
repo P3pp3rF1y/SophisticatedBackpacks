@@ -9,7 +9,8 @@ import java.util.List;
 
 public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWrapper> {
 	private static final UpgradeType<ToolSwapperUpgradeWrapper> TYPE = new UpgradeType<>(ToolSwapperUpgradeWrapper::new);
-	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(new UpgradeConflictDefinition(ToolSwapperUpgradeItem.class::isInstance, 0, SBPTranslationHelper.INSTANCE.translError("add.tool_swapper_exists")));
+	public static final List<UpgradeConflictDefinition> UPGRADE_CONFLICT_DEFINITIONS = List.of(
+			new UpgradeConflictDefinition(ToolSwapperUpgradeItem.class::isInstance, 0, SBPTranslationHelper.INSTANCE.translError("add.tool_swapper_exists")));
 	private final boolean hasSettingsTab;
 	private final boolean swapToolOnKeyPress;
 
