@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public class BackpackOpenMessage {
@@ -69,19 +70,19 @@ public class BackpackOpenMessage {
 				slotIndex = 0;
 			}
 			BackpackContext.Item backpackContext = new BackpackContext.Item(msg.handlerName, msg.identifier, slotIndex,
-					player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.getBackpackContext().wasOpenFromInventory()));
+					player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer
+							&& backpackContainer.getBackpackContext().wasOpenFromInventory()));
 			openBackpack(player, backpackContext);
 		} else if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 			BackpackContext backpackContext = backpackContainer.getBackpackContext();
 			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(msg.slotIndex)) {
-				openBackpack(player, backpackContext.getSubBackpackContext(msg.slotIndex,
-						backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(msg.slotIndex)
-								.getCapability(CapabilityBackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-								.map(backpackWrapper -> backpackWrapper.getContentsUuid().isEmpty())
-								.orElse(false)
-				));
+				openBackpack(player,
+						backpackContext.getSubBackpackContext(msg.slotIndex,
+								backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(msg.slotIndex)
+										.getCapability(CapabilityBackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+										.map(backpackWrapper -> backpackWrapper.getContentsUuid().isEmpty()).orElse(false)));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
@@ -101,7 +102,8 @@ public class BackpackOpenMessage {
 	}
 
 	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
-		NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
+		NetworkHooks.openScreen(player,
+				new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
 				backpackContext::toBuffer);
 	}
 }

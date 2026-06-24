@@ -18,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategory;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public class AnotherPlayerBackpackOpenMessage {
@@ -51,7 +52,8 @@ public class AnotherPlayerBackpackOpenMessage {
 				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 
 					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
-					NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
+					NetworkHooks.openScreen(player,
+							new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
 							backpackContext::toBuffer);
 				} else {
 					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
@@ -64,7 +66,8 @@ public class AnotherPlayerBackpackOpenMessage {
 	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {
 		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
 			MainSettingsCategory category = wrapper.getSettingsHandler().getGlobalSettingsCategory();
-			return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category, BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);
+			return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category,
+					BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);
 		}).orElse(false);
 	}
 }

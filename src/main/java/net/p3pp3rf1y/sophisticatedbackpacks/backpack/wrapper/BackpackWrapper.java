@@ -39,9 +39,11 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.*;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.function.IntConsumer;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class BackpackWrapper implements IBackpackWrapper {
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
@@ -124,13 +126,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public InventoryHandler getInventoryHandler() {
 		InventoryHandler inventoryHandler = handler;
 		if (inventoryHandler == null) {
-			inventoryHandler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()),
-					this, getBackpackContentsNbt(), () -> {
-				markBackpackContentsDirty();
-				if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-					inventorySlotChangeHandler.run();
-				}
-			}, StackUpgradeItem.getInventorySlotLimit(this));
+			inventoryHandler = new BackpackInventoryHandler(getNumberOfInventorySlots() - (getNumberOfSlotRows() * getColumnsTaken()), this,
+					getBackpackContentsNbt(), () -> {
+						markBackpackContentsDirty();
+						if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+							inventorySlotChangeHandler.run();
+						}
+					}, StackUpgradeItem.getInventorySlotLimit(this));
 			handler = inventoryHandler;
 			inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 			attachInventorySlotBlockers();
@@ -252,8 +254,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}) {
 					@Override
 					public boolean isItemValid(int slot, ItemStack stack) {
-						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
-						return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace()) || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
+						// noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
+						return super.isItemValid(slot, stack)
+								&& (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace())
+										|| stack.is(ModItems.BACKPACK_UPGRADE_TAG));
 					}
 				};
 			} else {
@@ -332,12 +336,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void migrateNbtTag(UUID newUuid, String key) {
-		NBTHelper.getCompound(backpack, key)
-				.ifPresent(nbt -> {
-					BackpackStorage.get().getOrCreateBackpackContents(newUuid).put(key, nbt);
-					markBackpackContentsDirty();
-					NBTHelper.removeTag(backpack, key);
-				});
+		NBTHelper.getCompound(backpack, key).ifPresent(nbt -> {
+			BackpackStorage.get().getOrCreateBackpackContents(newUuid).put(key, nbt);
+			markBackpackContentsDirty();
+			NBTHelper.removeTag(backpack, key);
+		});
 	}
 
 	@Override
@@ -426,12 +429,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
 		backpackCopy.removeTagKey(CONTENTS_UUID_TAG);
-		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(wrapperCopy -> {
-							originalWrapper.copyDataTo(wrapperCopy);
-							return wrapperCopy.getBackpack();
-						}
-				).orElse(ItemStack.EMPTY);
+		return backpackCopy.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapperCopy -> {
+			originalWrapper.copyDataTo(wrapperCopy);
+			return wrapperCopy.getBackpack();
+		}).orElse(ItemStack.EMPTY);
 	}
 
 	@Override

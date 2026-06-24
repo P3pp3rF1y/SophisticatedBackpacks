@@ -13,11 +13,14 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 
 public class BackpackAccessoryRenderer implements AccessoryRenderer {
 	@Override
-	public <M extends LivingEntity> void render(ItemStack stack, SlotReference reference, PoseStack poseStack, EntityModel<M> model, MultiBufferSource multiBufferSource, int light, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public <M extends LivingEntity> void render(ItemStack stack, SlotReference reference, PoseStack poseStack, EntityModel<M> model,
+			MultiBufferSource multiBufferSource, int light, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw,
+			float headPitch) {
 		if (!stack.isEmpty()) {
 			if (model instanceof HumanoidModel<?> parentModel) {
 				poseStack.pushPose();
-				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack, !reference.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
+				BackpackLayerRenderer.renderBackpack(parentModel, reference.entity(), poseStack, multiBufferSource, light, stack,
+						!reference.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 				poseStack.popPose();
 			}
 		}

@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +35,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ToolRegistry {
-	private ToolRegistry() {}
+	private ToolRegistry() {
+	}
 
 	private static final String TOOLS_PROPERTY = "tools";
 
@@ -59,7 +61,8 @@ public class ToolRegistry {
 		private final String name;
 		private final String objectJsonArrayName;
 
-		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, IForgeRegistry<V> registry, Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
+		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, IForgeRegistry<V> registry,
+				Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
 			this.objectMatcherFactories = objectMatcherFactories;
 			this.toolMapping = toolMapping;
 			this.registry = registry;
@@ -84,7 +87,8 @@ public class ToolRegistry {
 				JsonObject entry = jsonElement.getAsJsonObject();
 				parseEntry(entry);
 			}
-			toolMapping.getObjectTools().keySet().forEach(object -> RegistryHelper.getRegistryName(registry, object).ifPresent(rn -> modsWithMapping.add(rn.getNamespace())));
+			toolMapping.getObjectTools().keySet()
+					.forEach(object -> RegistryHelper.getRegistryName(registry, object).ifPresent(rn -> modsWithMapping.add(rn.getNamespace())));
 		}
 
 		@Override
@@ -100,7 +104,9 @@ public class ToolRegistry {
 				if (entry.size() == 2 && entry.has(objectJsonArrayName) && entry.has(TOOLS_PROPERTY)) {
 					parseFromArrays(GsonHelper.getAsJsonArray(entry, objectJsonArrayName), GsonHelper.getAsJsonArray(entry, TOOLS_PROPERTY));
 				} else {
-					SophisticatedBackpacks.LOGGER.error("Invalid block tools entry - needs to have either 1 array property with mod/entity name or \"{}\" and \"tools\" array properties {}", objectJsonArrayName, entry);
+					SophisticatedBackpacks.LOGGER.error(
+							"Invalid block tools entry - needs to have either 1 array property with mod/entity name or \"{}\" and \"tools\" array properties {}",
+							objectJsonArrayName, entry);
 				}
 			}
 		}
@@ -201,13 +207,15 @@ public class ToolRegistry {
 
 	public static class BlockToolsLoader extends ToolsLoaderBase<Block, BlockContext> {
 		public BlockToolsLoader() {
-			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, ForgeRegistries.BLOCKS, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
+			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, ForgeRegistries.BLOCKS,
+					rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
 		}
 	}
 
 	public static class EntityToolsLoader extends ToolsLoaderBase<EntityType<?>, Entity> {
 		public EntityToolsLoader() {
-			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITY_TYPES, rn -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getValue(rn)), "entity_tools", "entities");
+			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITY_TYPES,
+					rn -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getValue(rn)), "entity_tools", "entities");
 		}
 	}
 
@@ -288,10 +296,11 @@ public class ToolRegistry {
 		}
 
 		private boolean isNoMappingModAndNonStackableItemFromSameMod(ItemStack stack, V object) {
-			return RegistryHelper.getRegistryName(registry, object).map(rn ->
-					!rn.getNamespace().equals("minecraft")
-							&& !modsWithMapping.contains(rn.getNamespace()) && RegistryHelper.getRegistryName(ForgeRegistries.ITEMS, stack.getItem()).map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false)
-			).orElse(false) && stack.getMaxStackSize() == 1;
+			return RegistryHelper.getRegistryName(registry, object)
+					.map(rn -> !rn.getNamespace().equals("minecraft") && !modsWithMapping.contains(rn.getNamespace())
+							&& RegistryHelper.getRegistryName(ForgeRegistries.ITEMS, stack.getItem())
+									.map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false))
+					.orElse(false) && stack.getMaxStackSize() == 1;
 		}
 
 		private boolean tryToMatchAgainstObjectPredicateToolPredicates(ItemStack stack, C context) {

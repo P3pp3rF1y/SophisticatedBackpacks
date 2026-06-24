@@ -15,7 +15,7 @@ import java.util.UUID;
 public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipBase {
 	private final ItemStack backpack;
 
-	@SuppressWarnings("unused") //parameter needs to be there so that addListener logic would know which event this method listens to
+	@SuppressWarnings("unused") // parameter needs to be there so that addListener logic would know which event this method listens to
 	public static void onWorldLoad(LevelEvent.Load event) {
 		refreshContents();
 		lastRequestTime = 0;

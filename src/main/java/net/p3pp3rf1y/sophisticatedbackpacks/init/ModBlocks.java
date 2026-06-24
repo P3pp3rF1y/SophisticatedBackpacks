@@ -14,9 +14,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 
 public class ModBlocks {
 	private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, SophisticatedBackpacks.MOD_ID);
-	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES,
+			SophisticatedBackpacks.MOD_ID);
 
-	private ModBlocks() {}
+	private ModBlocks() {
+	}
 
 	public static final RegistryObject<BackpackBlock> BACKPACK = BLOCKS.register("backpack", BackpackBlock::new);
 	public static final RegistryObject<BackpackBlock> COPPER_BACKPACK = BLOCKS.register("copper_backpack", BackpackBlock::new);
@@ -25,10 +27,10 @@ public class ModBlocks {
 	public static final RegistryObject<BackpackBlock> DIAMOND_BACKPACK = BLOCKS.register("diamond_backpack", BackpackBlock::new);
 	public static final RegistryObject<BackpackBlock> NETHERITE_BACKPACK = BLOCKS.register("netherite_backpack", () -> new BackpackBlock(1200));
 
-	@SuppressWarnings("ConstantConditions") //no datafixer type needed
-	public static final RegistryObject<BlockEntityType<BackpackBlockEntity>> BACKPACK_TILE_TYPE = BLOCK_ENTITY_TYPES.register("backpack", () ->
-			BlockEntityType.Builder.of(BackpackBlockEntity::new, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get())
-					.build(null));
+	@SuppressWarnings("ConstantConditions") // no datafixer type needed
+	public static final RegistryObject<BlockEntityType<BackpackBlockEntity>> BACKPACK_TILE_TYPE = BLOCK_ENTITY_TYPES.register("backpack",
+			() -> BlockEntityType.Builder.of(BackpackBlockEntity::new, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(),
+					DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get()).build(null));
 
 	public static void registerHandlers(IEventBus modBus) {
 		BLOCKS.register(modBus);

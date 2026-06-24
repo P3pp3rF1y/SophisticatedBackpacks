@@ -5,6 +5,7 @@ import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 @SuppressWarnings("java:S1118")

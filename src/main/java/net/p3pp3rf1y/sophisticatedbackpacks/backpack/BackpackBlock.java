@@ -86,8 +86,10 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	public BackpackBlock(float explosionResistance) {
-		super(Properties.of().mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY));
-		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false).setValue(BATTERY, false).setValue(OPEN, false));
+		super(Properties.of().mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL)
+				.pushReaction(PushReaction.DESTROY));
+		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false)
+				.setValue(RIGHT_TANK, false).setValue(BATTERY, false).setValue(OPEN, false));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -99,7 +101,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@SuppressWarnings("deprecation")
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
-		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(t -> InventoryHelper.getAnalogOutputSignal(t.getBackpackWrapper().getInventoryForInputOutput())).orElse(0);
+		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class)
+				.map(t -> InventoryHelper.getAnalogOutputSignal(t.getBackpackWrapper().getInventoryForInputOutput())).orElse(0);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -137,7 +140,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private boolean hasEverlastingUpgrade(BlockGetter world, BlockPos pos) {
-		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> !te.getBackpackWrapper().getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class)
+				.map(te -> !te.getBackpackWrapper().getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -186,33 +190,37 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 
 		if (!heldItem.isEmpty() && heldItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
-			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class)
-					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
-							player.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(playerInventory -> {
-								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
-								if (resultOfEmptying.isSuccess()) {
-									player.setItemInHand(hand, resultOfEmptying.getResult());
-								} else {
-									FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
-									if (resultOfFilling.isSuccess()) {
-										player.setItemInHand(hand, resultOfFilling.getResult());
-									}
-								}
-							}));
+			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).flatMap(te -> te.getBackpackWrapper().getFluidHandler())
+					.ifPresent(backpackFluidHandler -> player.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(playerInventory -> {
+						FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory,
+								FluidType.BUCKET_VOLUME, player, true);
+						if (resultOfEmptying.isSuccess()) {
+							player.setItemInHand(hand, resultOfEmptying.getResult());
+						} else {
+							FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory,
+									FluidType.BUCKET_VOLUME, player, true);
+							if (resultOfFilling.isSuccess()) {
+								player.setItemInHand(hand, resultOfFilling.getResult());
+							}
+						}
+					}));
 			return InteractionResult.SUCCESS;
 		}
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
-		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext),
-				getBackpackDisplayName(level, pos)), backpackContext::toBuffer);
+		NetworkHooks.openScreen((ServerPlayer) player,
+				new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(level, pos)),
+				backpackContext::toBuffer);
 		level.gameEvent(player, GameEvent.CONTAINER_OPEN, pos);
 		return InteractionResult.SUCCESS;
 	}
 
 	private static boolean hasPermissionsToPickup(Player player, BlockPos pos) {
 		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(be -> {
-			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel()))) {
-				player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
+			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream()
+					.anyMatch(w -> !player.hasPermissions(w.getPermissionLevel()))) {
+				player.displayClientMessage(
+						SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_pickup").withStyle(ChatFormatting.RED), true);
 				return false;
 			}
 			return true;
@@ -221,11 +229,13 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private Component getBackpackDisplayName(Level world, BlockPos pos) {
 		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getHoverName();
-		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getHoverName()).orElse(defaultDisplayName);
+		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getHoverName())
+				.orElse(defaultDisplayName);
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand) {
-		ItemStack backpack = WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack()).orElse(ItemStack.EMPTY);
+		ItemStack backpack = WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack())
+				.orElse(ItemStack.EMPTY);
 		stopBackpackSounds(backpack, world, pos);
 
 		player.setItemInHand(hand, backpack.copy());
@@ -253,9 +263,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private static void stopBackpackSounds(ItemStack backpack, Level world, BlockPos pos) {
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
-				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid))
-		);
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid()
+				.ifPresent(uuid -> ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid)));
 	}
 
 	public static void playerInteract(PlayerInteractEvent.RightClickBlock event) {
@@ -326,12 +335,16 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-		return !pLevel.isClientSide ? createTickerHelper(pBlockEntityType, ModBlocks.BACKPACK_TILE_TYPE.get(), (level, blockPos, blockState, backpackBlockEntity) -> BackpackBlockEntity.serverTick(level, blockPos, backpackBlockEntity)) : null;
+		return !pLevel.isClientSide
+				? createTickerHelper(pBlockEntityType, ModBlocks.BACKPACK_TILE_TYPE.get(),
+						(level, blockPos, blockState, backpackBlockEntity) -> BackpackBlockEntity.serverTick(level, blockPos, backpackBlockEntity))
+				: null;
 	}
 
 	@Nullable
-	protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typePassedIn, BlockEntityType<E> typeExpected, BlockEntityTicker<? super E> blockEntityTicker) {
-		//noinspection unchecked
+	protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> typePassedIn,
+			BlockEntityType<E> typeExpected, BlockEntityTicker<? super E> blockEntityTicker) {
+		// noinspection unchecked
 		return typeExpected == typePassedIn ? (BlockEntityTicker<A>) blockEntityTicker : null;
 	}
 
@@ -348,7 +361,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		if (Minecraft.getInstance().isPaused()) {
 			return;
 		}
-		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, level, rand, pos, facing, type, data)));
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type)
+				.ifPresent(renderer -> renderUpgrade(renderer, level, rand, pos, facing, type, data)));
 	}
 
 	private static Vector3f getBackpackMiddleFacePoint(BlockPos pos, Direction facing, Vector3f vector) {
@@ -359,8 +373,9 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		return point;
 	}
 
-	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, Level level, RandomSource rand, BlockPos pos, Direction facing, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
-		//noinspection unchecked
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, Level level, RandomSource rand, BlockPos pos,
+			Direction facing, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		// noinspection unchecked
 		type.cast(data).ifPresent(renderData -> renderer.render(level, rand, vector -> getBackpackMiddleFacePoint(pos, facing, vector), (T) renderData));
 	}
 }

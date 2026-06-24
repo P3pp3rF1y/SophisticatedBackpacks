@@ -9,7 +9,8 @@ import net.minecraft.world.level.Level;
  */
 public interface IEntityToolSwapUpgrade {
 	/**
-	 * Just a simple flag whether the upgrade can actually process interactions. Used for different levels of the same upgrade where one level can and the other can't interact.
+	 * Just a simple flag whether the upgrade can actually process interactions. Used for different levels of the same upgrade where one level can and the other
+	 * can't interact.
 	 *
 	 * @return true if the onBlockInteract should be run otherwise false
 	 */
@@ -20,9 +21,12 @@ public interface IEntityToolSwapUpgrade {
 	/**
 	 * Called when player presses tool swap keybind over an entity
 	 *
-	 * @param world  World
-	 * @param entity Entity player is looking at
-	 * @param player Player that pressed the key
+	 * @param world
+	 *            World
+	 * @param entity
+	 *            Entity player is looking at
+	 * @param player
+	 *            Player that pressed the key
 	 * @return true if the keypress was handled by this upgrade and no other {@link IEntityToolSwapUpgrade} upgrades should process their logic
 	 */
 	boolean onEntityInteract(Level world, Entity entity, Player player);

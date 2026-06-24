@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -40,21 +41,18 @@ public class BlockToolSwapMessage {
 		}
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(backpackWrapper -> {
-							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
-									.forEach(upgrade -> {
-										if (!upgrade.canProcessBlockInteract() || result.get()) {
-											return;
-										}
-										anyUpgradeCanInteract.set(true);
-
-										result.set(upgrade.onBlockInteract(sender.level(), msg.pos, sender.level().getBlockState(msg.pos), sender));
-									});
-							return result.get();
+		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack
+				.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(backpackWrapper -> {
+					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class).forEach(upgrade -> {
+						if (!upgrade.canProcessBlockInteract() || result.get()) {
+							return;
 						}
-				).orElse(false)
-		);
+						anyUpgradeCanInteract.set(true);
+
+						result.set(upgrade.onBlockInteract(sender.level(), msg.pos, sender.level().getBlockState(msg.pos), sender));
+					});
+					return result.get();
+				}).orElse(false));
 
 		if (!anyUpgradeCanInteract.get()) {
 			sender.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);

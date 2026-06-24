@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public class BlockPickMessage {
@@ -35,8 +36,8 @@ public class BlockPickMessage {
 			return;
 		}
 
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(wrapper -> {
+		PlayerInventoryProvider.get().runOnBackpacks(player,
+				(backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
 					for (IBlockPickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockPickResponseUpgrade.class)) {
 						if (upgrade.pickBlock(player, msg.filter)) {
 							return true;

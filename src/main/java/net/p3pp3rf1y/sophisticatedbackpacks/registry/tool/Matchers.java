@@ -26,7 +26,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class Matchers {
-	private Matchers() {}
+	private Matchers() {
+	}
 
 	private static final List<ItemMatcherFactory> ITEM_MATCHER_FACTORIES = new ArrayList<>();
 	private static final List<IMatcherFactory<BlockContext>> BLOCK_MATCHER_FACTORIES = new ArrayList<>();
@@ -86,8 +87,8 @@ public class Matchers {
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("item_handler") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(),
-						blockContext.getPos()).map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()).orElse(false));
+				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(), blockContext.getPos())
+						.map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()).orElse(false));
 			}
 		});
 		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {

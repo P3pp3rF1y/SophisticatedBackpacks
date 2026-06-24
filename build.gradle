@@ -1,14 +1,17 @@
 plugins {
     id 'idea'
-    id "org.sonarqube" version "5.0.0.4638"
     id "maven-publish"
     id 'net.neoforged.gradle' version '[6.0.18,6.2)'
+    id "org.openrewrite.rewrite" version "7.35.0"
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
     id 'org.spongepowered.mixin' version '0.7.+'
     id "com.diffplug.spotless" version "7.0.4"
 }
+
+def sharedCodeQualityScript = file('../gradle/code-quality.gradle')
+apply from: sharedCodeQualityScript.exists() ? sharedCodeQualityScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/1.20.x/gradle/code-quality.gradle'
 
 idea {
     module {
@@ -25,7 +28,7 @@ spotless {
         target spotlessFiles == null ? "src/*/java/**/*.java" : spotlessFiles.toString().split(/\s*,\s*/).findAll { it.endsWith(".java") }
 
         eclipse().configFile "$projectDir/codeformat/eclipse-java-format.xml"
-        importOrder "", "javax", "java"
+        importOrder "", "javax", "java", "\\#"
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
@@ -292,13 +295,6 @@ publishing {
             artifactId = mod_id
             from(components.java)
         }
-    }
-}
-
-sonar {
-    properties {
-        property "sonar.organization", "p3pp3rf1y-github"
-        property "sonar.projectKey", "${sonar_project_key}"
     }
 }
 

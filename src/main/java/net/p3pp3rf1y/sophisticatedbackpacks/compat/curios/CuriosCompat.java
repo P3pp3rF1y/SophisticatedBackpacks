@@ -33,6 +33,7 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
@@ -65,9 +66,10 @@ public class CuriosCompat implements ICompat {
 		return backpackCurioIdentifiers;
 	}
 
-	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
-		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity)
-				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler,
+			T defaultValue) {
+		return CuriosApi.getCuriosHelper().getCuriosHandler(livingEntity).map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue))
+				.orElse(defaultValue);
 	}
 
 	private void sendImc(InterModEnqueueEvent evt) {

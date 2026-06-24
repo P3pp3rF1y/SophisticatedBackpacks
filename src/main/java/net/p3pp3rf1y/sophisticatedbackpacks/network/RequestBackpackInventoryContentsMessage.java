@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.function.Supplier;
 

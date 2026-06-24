@@ -32,27 +32,27 @@ public interface IBackpackWrapper extends IStorageWrapper {
 	void setContentsUuid(UUID storageUuid);
 
 	default void removeContentsUuid() {
-		//noop by default
+		// noop by default
 	}
 
 	default void removeContentsUUIDTag() {
-		//noop
+		// noop
 	}
 
 	default void registerOnSlotsChangeListener(IntConsumer onSlotsChange) {
-		//noop
+		// noop
 	}
 
 	default void unregisterOnSlotsChangeListener() {
-		//noop
+		// noop
 	}
 
 	default void registerOnInventoryHandlerRefreshListener(Runnable onInventoryHandlerRefresh) {
-		//noop
+		// noop
 	}
 
 	default void unregisterOnInventoryHandlerRefreshListener() {
-		//noop
+		// noop
 	}
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {
@@ -79,32 +79,32 @@ public interface IBackpackWrapper extends IStorageWrapper {
 
 		@Override
 		public void copyDataTo(IStorageWrapper otherStorageWrapper) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setTemplate(ResourceLocation templateName) {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void fillFromTemplate() {
-			//noop
+			// noop
 		}
 
 		@Override
 		public void setContentsUuid(UUID storageUuid) {
-			//noop
+			// noop
 		}
 	}
 }

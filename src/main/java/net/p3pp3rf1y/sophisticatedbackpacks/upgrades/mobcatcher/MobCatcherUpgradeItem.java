@@ -44,7 +44,10 @@ public class MobCatcherUpgradeItem extends UpgradeItemBase<MobCatcherUpgradeWrap
 			return new UpgradeSlotChangeResult.Success();
 		}
 		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(backpackWrapper);
-		return capturedMobs.isEmpty() ? new UpgradeSlotChangeResult.Success() : new UpgradeSlotChangeResult.Fail(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_contains_mobs"), getMobCatcherUpgradeSlots(backpackWrapper), getOccupiedCapturedMobSlots(backpackWrapper, capturedMobs), Set.of());
+		return capturedMobs.isEmpty()
+				? new UpgradeSlotChangeResult.Success()
+				: new UpgradeSlotChangeResult.Fail(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_contains_mobs"),
+						getMobCatcherUpgradeSlots(backpackWrapper), getOccupiedCapturedMobSlots(backpackWrapper, capturedMobs), Set.of());
 	}
 
 	@Override
@@ -56,7 +59,10 @@ public class MobCatcherUpgradeItem extends UpgradeItemBase<MobCatcherUpgradeWrap
 			return new UpgradeSlotChangeResult.Success();
 		}
 		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(backpackWrapper);
-		return MobCatcherStorage.canFitBasicTier(backpackWrapper, Config.SERVER.mobCatcherUpgrade.basicMaxSlotCost.get()) ? new UpgradeSlotChangeResult.Success() : new UpgradeSlotChangeResult.Fail(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_mobs_need_advanced"), Set.of(upgradeSlot), getOccupiedCapturedMobSlots(backpackWrapper, capturedMobs), Set.of());
+		return MobCatcherStorage.canFitBasicTier(backpackWrapper, Config.SERVER.mobCatcherUpgrade.basicMaxSlotCost.get())
+				? new UpgradeSlotChangeResult.Success()
+				: new UpgradeSlotChangeResult.Fail(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_mobs_need_advanced"),
+						Set.of(upgradeSlot), getOccupiedCapturedMobSlots(backpackWrapper, capturedMobs), Set.of());
 	}
 
 	private Set<Integer> getMobCatcherUpgradeSlots(IBackpackWrapper backpackWrapper) {

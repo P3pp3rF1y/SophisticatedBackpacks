@@ -14,7 +14,8 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 public class ModCompat {
-	private ModCompat() {}
+	private ModCompat() {
+	}
 
 	private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
 	private static final Map<String, ICompat> loadedCompats = new HashMap<>();
@@ -34,8 +35,7 @@ public class ModCompat {
 			if (ModList.get().isLoaded(entry.getKey())) {
 				try {
 					loadedCompats.put(entry.getKey(), entry.getValue().get().call());
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					SophisticatedBackpacks.LOGGER.error("Error instantiating compatibility ", e);
 				}
 			}

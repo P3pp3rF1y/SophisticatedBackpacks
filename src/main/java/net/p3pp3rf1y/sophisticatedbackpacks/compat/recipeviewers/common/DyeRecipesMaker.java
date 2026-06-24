@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public class DyeRecipesMaker {
-	private DyeRecipesMaker() {}
+	private DyeRecipesMaker() {
+	}
 
 	public static List<CraftingRecipe> getRecipes() {
 		return getRecipes(r -> r);
@@ -54,12 +55,10 @@ public class DyeRecipesMaker {
 		ingredients.add(Ingredient.of(DyeColor.BLACK.getTag()));
 
 		ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
-		int clothColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_MAIN_COLOR, BackpackItem.DEFAULT_MAIN_COLOR, List.of(
-				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
-		));
-		int trimColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_ACCENT_COLOR, BackpackItem.DEFAULT_ACCENT_COLOR, List.of(
-				DyeColor.BLUE, DyeColor.BLACK
-		));
+		int clothColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_MAIN_COLOR, BackpackItem.DEFAULT_MAIN_COLOR,
+				List.of(DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME));
+		int trimColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_ACCENT_COLOR, BackpackItem.DEFAULT_ACCENT_COLOR,
+				List.of(DyeColor.BLUE, DyeColor.BLACK));
 
 		BackpackItem.setColors(backpackOutput, clothColor, trimColor);
 
@@ -71,7 +70,8 @@ public class DyeRecipesMaker {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "single_color_" + color.getSerializedName());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
-			BackpackItem.setColors(backpackOutput, ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors()));
+			BackpackItem.setColors(backpackOutput, ColorHelper.getColor(color.getTextureDiffuseColors()),
+					ColorHelper.getColor(color.getTextureDiffuseColors()));
 			NonNullList<Ingredient> ingredients = NonNullList.create();
 			ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));
 			ingredients.add(Ingredient.of(color.getTag()));
@@ -106,21 +106,21 @@ public class DyeRecipesMaker {
 			ingredients.add(Ingredient.of(DyeColor.BLACK.getTag()));
 
 			ItemStack backpackOutput = new ItemStack(backpackItem);
-			int clothColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_MAIN_COLOR, BackpackItem.DEFAULT_MAIN_COLOR, List.of(
-					DyeColor.YELLOW, DyeColor.LIME
-			));
-			int trimColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_ACCENT_COLOR, BackpackItem.DEFAULT_ACCENT_COLOR, List.of(
-					DyeColor.BLUE, DyeColor.BLACK
-			));
+			int clothColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_MAIN_COLOR, BackpackItem.DEFAULT_MAIN_COLOR,
+					List.of(DyeColor.YELLOW, DyeColor.LIME));
+			int trimColor = ColorHelper.calculateColor(BackpackItem.DEFAULT_ACCENT_COLOR, BackpackItem.DEFAULT_ACCENT_COLOR,
+					List.of(DyeColor.BLUE, DyeColor.BLACK));
 
 			BackpackItem.setColors(backpackOutput, clothColor, trimColor);
 
-			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "multiple_colors_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
+			ResourceLocation id = new ResourceLocation(SophisticatedBackpacks.MOD_ID,
+					"multiple_colors_" + BuiltInRegistries.ITEM.getKey(backpackItem).getPath());
 			recipes.add(new ShapedRecipe(id, "", CraftingBookCategory.MISC, 3, 1, ingredients, backpackOutput));
 		}
 	}
 
 	private static List<Item> getBackpackItems() {
-		return List.of(ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get(), ModItems.NETHERITE_BACKPACK.get());
+		return List.of(ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(),
+				ModItems.DIAMOND_BACKPACK.get(), ModItems.NETHERITE_BACKPACK.get());
 	}
 }

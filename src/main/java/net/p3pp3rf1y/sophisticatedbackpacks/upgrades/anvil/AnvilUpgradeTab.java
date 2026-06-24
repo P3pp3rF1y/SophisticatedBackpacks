@@ -21,8 +21,10 @@ import java.util.List;
 
 public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 
-	public static final TextureBlitData EDIT_ITEM_NAME_BACKGROUND_DISABLED = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(28, 115), new Dimension(100, 16));
-	public static final TextureBlitData EDIT_ITEM_NAME_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(28, 99), new Dimension(100, 16));
+	public static final TextureBlitData EDIT_ITEM_NAME_BACKGROUND_DISABLED = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(28, 115),
+			new Dimension(100, 16));
+	public static final TextureBlitData EDIT_ITEM_NAME_BACKGROUND = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(28, 99),
+			new Dimension(100, 16));
 	public static final TextureBlitData PLUS_SIGN = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(113, 203), new Dimension(13, 13));
 	public static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(56, 221), new Dimension(14, 15));
 	public static final TextureBlitData RED_CROSS = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(113, 216), new Dimension(15, 15));
@@ -31,7 +33,8 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 	private ItemStack firstItemCache = ItemStack.EMPTY;
 
 	public AnvilUpgradeTab(AnvilUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("anvil"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("anvil"));
+		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("anvil"),
+				SBPTranslationHelper.INSTANCE.translUpgradeTooltip("anvil"));
 		openTabDimension = new Dimension(103, 92);
 		itemNameTextBox = new TextBox(new Position(x + 5, y + 25), new Dimension(90, 14)) {
 			@Override
@@ -106,7 +109,8 @@ public class AnvilUpgradeTab extends UpgradeSettingsTab<AnvilUpgradeContainer> {
 		Slot resultSlot = getContainer().getSlots().get(2);
 		int resultSlotX = resultSlot.x + screen.getGuiLeft();
 
-		GuiHelper.blit(guiGraphics, firstInputSlotX + 18 + (secondInputSlotX - (firstInputSlotX + 18)) / 2 - PLUS_SIGN.getWidth() / 2 - 1, inputSlotsY + 2, PLUS_SIGN);
+		GuiHelper.blit(guiGraphics, firstInputSlotX + 18 + (secondInputSlotX - (firstInputSlotX + 18)) / 2 - PLUS_SIGN.getWidth() / 2 - 1, inputSlotsY + 2,
+				PLUS_SIGN);
 		int arrowX = secondInputSlotX + 18 + (resultSlotX - (secondInputSlotX + 18)) / 2 - ARROW.getWidth() / 2 - 1;
 		int arrowY = inputSlotsY + 1;
 		GuiHelper.blit(guiGraphics, arrowX, arrowY, ARROW);

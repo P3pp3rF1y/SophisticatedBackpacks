@@ -41,12 +41,10 @@ public class SBLootModifierProvider extends GlobalLootModifierProvider {
 	}
 
 	public static class InjectLootModifier extends LootModifier {
-		public static final Codec<InjectLootModifier> CODEC = RecordCodecBuilder.create(inst -> LootModifier.codecStart(inst).and(
-				inst.group(
-						ResourceLocation.CODEC.fieldOf("loot_table").forGetter(m -> m.lootTable),
-						ResourceLocation.CODEC.fieldOf("loot_table_to_inject_into").forGetter(m -> m.lootTableToInjectInto)
-				)
-		).apply(inst, InjectLootModifier::new));
+		public static final Codec<InjectLootModifier> CODEC = RecordCodecBuilder.create(inst -> LootModifier.codecStart(inst)
+				.and(inst.group(ResourceLocation.CODEC.fieldOf("loot_table").forGetter(m -> m.lootTable),
+						ResourceLocation.CODEC.fieldOf("loot_table_to_inject_into").forGetter(m -> m.lootTableToInjectInto)))
+				.apply(inst, InjectLootModifier::new));
 		private final ResourceLocation lootTable;
 		private final ResourceLocation lootTableToInjectInto;
 
@@ -57,8 +55,8 @@ public class SBLootModifierProvider extends GlobalLootModifierProvider {
 		}
 
 		protected InjectLootModifier(ResourceLocation lootTable, ResourceLocation lootTableToInjectInto) {
-			this(new LootItemCondition[] {SBLootEnabledCondition.builder().build(),
-					LootTableIdCondition.builder(lootTableToInjectInto).build()}, lootTable, lootTableToInjectInto);
+			this(new LootItemCondition[]{SBLootEnabledCondition.builder().build(), LootTableIdCondition.builder(lootTableToInjectInto).build()}, lootTable,
+					lootTableToInjectInto);
 		}
 
 		@Override

@@ -38,7 +38,8 @@ import java.util.function.Supplier;
 
 public class ChippedCompat implements ICompat {
 
-	public static final RegistryObject<BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.register("chipped/botanist_workbench_upgrade",
+	public static final RegistryObject<BlockTransformationUpgradeItem> BOTANIST_WORKBENCH_UPGRADE = ModItems.ITEMS.register(
+			"chipped/botanist_workbench_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.BOTANIST_WORKBENCH, Config.SERVER.maxUpgradesPerStorage));
 	public static final RegistryObject<BlockTransformationUpgradeItem> GLASSBLOWER_UPGRADE = ModItems.ITEMS.register("chipped/glassblower_upgrade",
 			() -> new BlockTransformationUpgradeItem(ModRecipeTypes.GLASSBLOWER, Config.SERVER.maxUpgradesPerStorage));
@@ -71,7 +72,8 @@ public class ChippedCompat implements ICompat {
 		}
 		if (ModList.get().isLoaded(CompatModIds.EMI)) {
 			((Supplier<Runnable>) () -> () -> BackpackEmiPlugin.addAdditionalWorkstations(registration -> {
-				registration.addWorkstation(SophisticatedBackpacks.getRL("botanist_workbench"), ModBlocks.BOTANIST_WORKBENCH.get(), BOTANIST_WORKBENCH_UPGRADE.get());
+				registration.addWorkstation(SophisticatedBackpacks.getRL("botanist_workbench"), ModBlocks.BOTANIST_WORKBENCH.get(),
+						BOTANIST_WORKBENCH_UPGRADE.get());
 				registration.addWorkstation(SophisticatedBackpacks.getRL("glassblower"), ModBlocks.GLASSBLOWER.get(), GLASSBLOWER_UPGRADE.get());
 				registration.addWorkstation(SophisticatedBackpacks.getRL("carpenters_table"), ModBlocks.CARPENTERS_TABLE.get(), CARPENTERS_TABLE_UPGRADE.get());
 				registration.addWorkstation(SophisticatedBackpacks.getRL("loom_table"), ModBlocks.LOOM_TABLE.get(), LOOM_TABLE_UPGRADE.get());
@@ -82,13 +84,16 @@ public class ChippedCompat implements ICompat {
 		}
 		if (ModList.get().isLoaded(CompatModIds.REI) && FMLEnvironment.dist.isClient()) {
 			((Supplier<Runnable>) () -> () -> BackpackReiClientPlugin.addAdditionalWorkstations(registration -> {
-				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.BOTANIST_WORKBENCH.get())), BOTANIST_WORKBENCH_UPGRADE.get());
+				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.BOTANIST_WORKBENCH.get())),
+						BOTANIST_WORKBENCH_UPGRADE.get());
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.GLASSBLOWER.get())), GLASSBLOWER_UPGRADE.get());
-				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.CARPENTERS_TABLE.get())), CARPENTERS_TABLE_UPGRADE.get());
+				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.CARPENTERS_TABLE.get())),
+						CARPENTERS_TABLE_UPGRADE.get());
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.LOOM_TABLE.get())), LOOM_TABLE_UPGRADE.get());
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.MASON_TABLE.get())), MASON_TABLE_UPGRADE.get());
 				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.ALCHEMY_BENCH.get())), ALCHEMY_BENCH_UPGRADE.get());
-				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.TINKERING_TABLE.get())), TINKERING_TABLE_UPGRADE.get());
+				registration.addWorkstations(CategoryIdentifier.of(BuiltInRegistries.BLOCK.getKey(ModBlocks.TINKERING_TABLE.get())),
+						TINKERING_TABLE_UPGRADE.get());
 			})).get().run();
 		}
 	}
@@ -107,16 +112,19 @@ public class ChippedCompat implements ICompat {
 	}
 
 	private void registerUpgradeContainer(RegistryObject<BlockTransformationUpgradeItem> item) {
-		UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType = new UpgradeContainerType<>(BlockTransformationUpgradeContainer::new);
+		UpgradeContainerType<BlockTransformationUpgradeWrapper, BlockTransformationUpgradeContainer> containerType = new UpgradeContainerType<>(
+				BlockTransformationUpgradeContainer::new);
 		UpgradeContainerRegistry.register(item.getId(), containerType);
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> UpgradeGuiManager.registerTab(containerType, (BlockTransformationUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> {
-			String itemName = item.getId().getPath();
-			return new BlockTransformationUpgradeTab(upgradeContainer, position, screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET, SBPButtonDefinitions.REFILL_INPUT, itemName.replace('/', '_').substring(0, itemName.length() - "_upgrade".length()));
-		}));
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> UpgradeGuiManager.registerTab(containerType,
+				(BlockTransformationUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) -> {
+					String itemName = item.getId().getPath();
+					return new BlockTransformationUpgradeTab(upgradeContainer, position, screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET,
+							SBPButtonDefinitions.REFILL_INPUT, itemName.replace('/', '_').substring(0, itemName.length() - "_upgrade".length()));
+				}));
 	}
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

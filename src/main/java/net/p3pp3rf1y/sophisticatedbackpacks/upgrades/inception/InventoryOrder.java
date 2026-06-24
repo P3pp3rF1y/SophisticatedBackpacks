@@ -6,12 +6,13 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Map;
 
 public enum InventoryOrder implements StringRepresentable {
-	MAIN_FIRST("main_first"),
-	INCEPTED_FIRST("incepted_first");
+	MAIN_FIRST("main_first"), INCEPTED_FIRST("incepted_first");
 
 	private final String name;
 
-	InventoryOrder(String name) {this.name = name;}
+	InventoryOrder(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public String getSerializedName() {

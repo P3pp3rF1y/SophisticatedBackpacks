@@ -15,10 +15,15 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Consumer;
 
 public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgradeWrapper, InceptionUpgradeItem>
-		implements IInventoryWrapperUpgrade, IUpgradeAccessModifier, IFluidHandlerWrapperUpgrade, IEnergyStorageUpgradeWrapper {
+		implements
+			IInventoryWrapperUpgrade,
+			IUpgradeAccessModifier,
+			IFluidHandlerWrapperUpgrade,
+			IEnergyStorageUpgradeWrapper {
 	private SubBackpacksHandler subBackpacksHandler = null;
 
 	public InceptionUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {

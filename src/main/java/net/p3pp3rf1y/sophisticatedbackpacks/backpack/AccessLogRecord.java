@@ -15,7 +15,8 @@ public class AccessLogRecord {
 	private final long accessTime;
 	private final int columnsTaken;
 
-	public AccessLogRecord(ResourceLocation backpackItemRegistryName, UUID backpackUuid, String playerName, String backpackName, int clothColor, int trimColor, long accessTime, int columnsTaken) {
+	public AccessLogRecord(ResourceLocation backpackItemRegistryName, UUID backpackUuid, String playerName, String backpackName, int clothColor, int trimColor,
+			long accessTime, int columnsTaken) {
 		this.backpackItemRegistryName = backpackItemRegistryName;
 		this.backpackUuid = backpackUuid;
 		this.playerName = playerName;
@@ -72,15 +73,7 @@ public class AccessLogRecord {
 	}
 
 	public static AccessLogRecord deserializeFromNBT(CompoundTag nbt) {
-		return new AccessLogRecord(
-				new ResourceLocation(nbt.getString("backpackItemRegistryName")),
-				nbt.getUUID("backpackUuid"),
-				nbt.getString("playerName"),
-				nbt.getString("backpackName"),
-				nbt.getInt("clothColor"),
-				nbt.getInt("trimColor"),
-				nbt.getLong("accessTime"),
-				nbt.getInt("columnsTaken")
-		);
+		return new AccessLogRecord(new ResourceLocation(nbt.getString("backpackItemRegistryName")), nbt.getUUID("backpackUuid"), nbt.getString("playerName"),
+				nbt.getString("backpackName"), nbt.getInt("clothColor"), nbt.getInt("trimColor"), nbt.getLong("accessTime"), nbt.getInt("columnsTaken"));
 	}
 }

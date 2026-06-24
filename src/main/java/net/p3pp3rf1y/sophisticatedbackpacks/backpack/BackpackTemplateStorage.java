@@ -31,7 +31,7 @@ public class BackpackTemplateStorage extends SavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(BackpackTemplateStorage::load, BackpackTemplateStorage::new, SAVED_DATA_NAME);
 			}

@@ -35,6 +35,7 @@ class MobCatcherStorageTest {
 	}
 
 	private CapturedMob capturedMob(int slot, int width, int height) {
-		return new CapturedMob(new UUID(0, 1), new ResourceLocation("minecraft:pig"), new CompoundTag(), slot, width, height, width * height, false, "minecraft:pig", 10, 10);
+		return new CapturedMob(new UUID(0, 1), new ResourceLocation("minecraft:pig"), new CompoundTag(), slot, width, height, width * height, false,
+				"minecraft:pig", 10, 10);
 	}
 }

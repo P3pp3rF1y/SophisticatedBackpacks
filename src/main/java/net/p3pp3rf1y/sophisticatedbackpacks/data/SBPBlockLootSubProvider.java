@@ -34,10 +34,8 @@ public class SBPBlockLootSubProvider extends BlockLootSubProvider {
 
 	@Override
 	protected Iterable<Block> getKnownBlocks() {
-		return ForgeRegistries.BLOCKS.getEntries().stream()
-				.filter(e -> e.getKey().location().getNamespace().equals(SophisticatedBackpacks.MOD_ID))
-				.map(Map.Entry::getValue)
-				.toList();
+		return ForgeRegistries.BLOCKS.getEntries().stream().filter(e -> e.getKey().location().getNamespace().equals(SophisticatedBackpacks.MOD_ID))
+				.map(Map.Entry::getValue).toList();
 	}
 
 	private static LootTable.Builder dropBackpackWithContents(BackpackItem item) {

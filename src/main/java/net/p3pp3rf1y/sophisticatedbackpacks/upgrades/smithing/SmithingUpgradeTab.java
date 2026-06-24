@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.*;
 
 import java.util.List;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContainer> {
 
 	public static final TextureBlitData ARROW = new TextureBlitData(GuiHelper.GUI_CONTROLS, Dimension.SQUARE_256, new UV(56, 221), new Dimension(14, 15));
@@ -30,7 +31,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	private final ArmorStand armorStandPreview;
 
 	public SmithingUpgradeTab(SmithingUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen) {
-		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("smithing"), SBPTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
+		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade("smithing"),
+				SBPTranslationHelper.INSTANCE.translUpgradeTooltip("smithing"));
 		openTabDimension = new Dimension(103, 100);
 
 		armorStandPreview = new ArmorStand(minecraft.level, 0.0, 0.0, 0.0);
@@ -114,8 +116,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 			GuiHelper.blit(guiGraphics, arrowX, arrowY, RED_CROSS);
 		}
 
-		InventoryScreen.renderEntityInInventory(guiGraphics, getX() + getWidth() / 2, getTopY() + getHeight() - 10, 25,
-				SmithingScreen.ARMOR_STAND_ANGLE, null, armorStandPreview);
+		InventoryScreen.renderEntityInInventory(guiGraphics, getX() + getWidth() / 2, getTopY() + getHeight() - 10, 25, SmithingScreen.ARMOR_STAND_ANGLE, null,
+				armorStandPreview);
 	}
 
 	private int getArrowY(int inputSlotsY) {
@@ -167,7 +169,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean isHoveringEmptySlot(Slot slot, int mouseX, int mouseY) {
-		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop() && mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
+		return mouseX >= slot.x + screen.getGuiLeft() && mouseX < slot.x + screen.getGuiLeft() + 16 && mouseY >= slot.y + screen.getGuiTop()
+				&& mouseY < slot.y + screen.getGuiTop() + 16 && slot.getItem().isEmpty();
 	}
 
 	private void renderOnboardingTooltips(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -196,7 +199,8 @@ public class SmithingUpgradeTab extends UpgradeSettingsTab<SmithingUpgradeContai
 	}
 
 	private boolean hasRecipeError() {
-		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem() && !getContainer().getResultSlot().hasItem();
+		return getContainer().getTemplateSlot().hasItem() && getContainer().getBaseSlot().hasItem() && getContainer().getAdditionalSlot().hasItem()
+				&& !getContainer().getResultSlot().hasItem();
 	}
 
 }

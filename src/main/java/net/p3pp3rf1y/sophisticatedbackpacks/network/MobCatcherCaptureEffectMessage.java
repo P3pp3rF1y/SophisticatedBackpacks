@@ -22,12 +22,14 @@ public record MobCatcherCaptureEffectMessage(ResourceLocation entityType, Compou
 	public static MobCatcherCaptureEffectMessage decode(FriendlyByteBuf packetBuffer) {
 		ResourceLocation entityType = packetBuffer.readResourceLocation();
 		CompoundTag entityNbt = packetBuffer.readAnySizeNbt();
-		return new MobCatcherCaptureEffectMessage(entityType, entityNbt == null ? new CompoundTag() : entityNbt, readVec3(packetBuffer), readVec3(packetBuffer), packetBuffer.readFloat(), packetBuffer.readFloat());
+		return new MobCatcherCaptureEffectMessage(entityType, entityNbt == null ? new CompoundTag() : entityNbt, readVec3(packetBuffer), readVec3(packetBuffer),
+				packetBuffer.readFloat(), packetBuffer.readFloat());
 	}
 
 	public static void onMessage(MobCatcherCaptureEffectMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
 		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> MobCatcherCaptureEffectRenderer.addEffect(msg.entityType, msg.entityNbt, msg.position, msg.collapsePosition, msg.yRot, msg.xRot));
+		context.enqueueWork(
+				() -> MobCatcherCaptureEffectRenderer.addEffect(msg.entityType, msg.entityNbt, msg.position, msg.collapsePosition, msg.yRot, msg.xRot));
 		context.setPacketHandled(true);
 	}
 

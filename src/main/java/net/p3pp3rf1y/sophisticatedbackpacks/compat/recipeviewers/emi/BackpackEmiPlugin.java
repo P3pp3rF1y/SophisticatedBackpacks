@@ -23,10 +23,10 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.Prop
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.CraftingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.GroupedCraftingEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.SmithingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.GroupedCraftingEmiRecipe;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.SmithingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
 
 import java.util.Map;
@@ -37,7 +37,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.s
 
 @EmiEntrypoint
 public class BackpackEmiPlugin implements EmiPlugin {
-	private static Consumer<WorkstationRegistration> additionalWorkstations = registrar -> {};
+	private static Consumer<WorkstationRegistration> additionalWorkstations = registrar -> {
+	};
 	public static void addAdditionalWorkstations(Consumer<WorkstationRegistration> additionalWorkstations) {
 		BackpackEmiPlugin.additionalWorkstations = BackpackEmiPlugin.additionalWorkstations.andThen(additionalWorkstations);
 	}
@@ -78,7 +79,7 @@ public class BackpackEmiPlugin implements EmiPlugin {
 
 	private void registerGuiHandlers(EmiRegistry registry) {
 		registry.addExclusionArea(BackpackScreen.class, (screen, consumer) -> {
-			//noinspection ConstantValue
+			// noinspection ConstantValue
 			if (screen == null || screen.getUpgradeSettingsControl() == null) {
 				return;
 			}
@@ -102,23 +103,15 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() instanceof CraftingRecipe craftingRecipe && catalog.replacesCraftingRecipe(craftingRecipe));
-		catalog.getGroupedCraftingSpecs().stream()
-				.flatMap(spec -> spec.getAllDisplays().stream())
-				.flatMap(recipe -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(recipe).stream())
-				.forEach(registry::addRecipe);
-		catalog.getCraftingRecipes().stream()
-				.filter(recipe -> !catalog.replacesCraftingRecipe(recipe))
-				.map(EmiClientRecipeHelper::wrapSyntheticShapedRecipe)
+		catalog.getGroupedCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+				.flatMap(recipe -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(recipe).stream()).forEach(registry::addRecipe);
+		catalog.getCraftingRecipes().stream().filter(recipe -> !catalog.replacesCraftingRecipe(recipe)).map(EmiClientRecipeHelper::wrapSyntheticShapedRecipe)
 				.forEach(registry::addRecipe);
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() instanceof SmithingBackpackUpgradeRecipe);
 
-		catalog.getCraftingSpecs().stream()
-				.flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
-				.forEach(registry::addRecipe);
+		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
 
-		catalog.getSmithingSpecs().stream()
-				.flatMap(spec -> SmithingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
-				.forEach(registry::addRecipe);
+		catalog.getSmithingSpecs().stream().flatMap(spec -> SmithingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

@@ -27,16 +27,16 @@ public class DepositFilterLogic extends FilterLogic {
 
 	public void setDepositFilterType(DepositFilterType depositFilterType) {
 		switch (depositFilterType) {
-			case ALLOW:
+			case ALLOW :
 				setFilterByInventory(false);
 				setAllowList(true);
 				break;
-			case BLOCK:
+			case BLOCK :
 				setFilterByInventory(false);
 				setAllowList(false);
 				break;
-			case INVENTORY:
-			default:
+			case INVENTORY :
+			default :
 				setFilterByInventory(true);
 				save();
 		}

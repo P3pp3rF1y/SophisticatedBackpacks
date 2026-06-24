@@ -10,7 +10,8 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public interface IBlockToolSwapUpgrade {
 	/**
-	 * Just a simple flag whether the upgrade can actually process interactions. Used for different levels of the same upgrade where one level can and the other can't interact.
+	 * Just a simple flag whether the upgrade can actually process interactions. Used for different levels of the same upgrade where one level can and the other
+	 * can't interact.
 	 *
 	 * @return true if the onBlockInteract should be run otherwise false
 	 */
@@ -21,10 +22,14 @@ public interface IBlockToolSwapUpgrade {
 	/**
 	 * Called when player presses tool swap keybind over a block
 	 *
-	 * @param world      World
-	 * @param pos        Position of the block
-	 * @param blockState Its blockstate
-	 * @param player     Player that pressed the key
+	 * @param world
+	 *            World
+	 * @param pos
+	 *            Position of the block
+	 * @param blockState
+	 *            Its blockstate
+	 * @param player
+	 *            Player that pressed the key
 	 * @return true if the keypress was handled by this upgrade and no other {@link IBlockToolSwapUpgrade} upgrades should process their logic
 	 */
 	boolean onBlockInteract(Level world, BlockPos pos, BlockState blockState, Player player);

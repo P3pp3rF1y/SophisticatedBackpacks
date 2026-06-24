@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingRecipe recipe, int width, int height,
-											   NonNullList<Ingredient> ingredients, int backpackIngredientIndex, List<BackpackTierUpgradeVariantPair> variantPairs) {
+public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingRecipe recipe, int width, int height, NonNullList<Ingredient> ingredients,
+		int backpackIngredientIndex, List<BackpackTierUpgradeVariantPair> variantPairs) {
 	public Optional<BackpackTierUpgradeVariantPair> findBySource(ItemStack stack) {
 		return variantPairs.stream().filter(pair -> ItemStack.isSameItemSameTags(pair.source(), stack)).findFirst();
 	}
@@ -62,10 +62,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 
 	public CraftingDisplaySpec toSpec() {
 		List<CraftingDisplayVariant> displayVariants = variantPairs.stream().map(this::toVariant).toList();
-		List<CraftingDisplayVariant> globalVariants = variantPairs.stream()
-				.filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
-				.map(this::toVariant)
-				.toList();
+		List<CraftingDisplayVariant> globalVariants = variantPairs.stream().filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
+				.map(this::toVariant).toList();
 		return new CraftingDisplaySpec(id, false, width, height, ingredients, displayVariants, globalVariants, Set.of(recipe.getId()),
 				new SourceResultFocusBehavior(backpackIngredientIndex, this::focusSource, this::focusResult));
 	}
@@ -88,10 +86,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 		if (exactPair.isPresent()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameTags(source, pair.source())).map(this::toVariant);
 		}
-		return findBySourceItem(focusedInput)
-				.filter(pair -> ItemStack.isSameItemSameTags(source, pair.source()))
-				.map(pair -> withComponentsFromSource(pair, focusedInput))
-				.map(this::toVariant);
+		return findBySourceItem(focusedInput).filter(pair -> ItemStack.isSameItemSameTags(source, pair.source()))
+				.map(pair -> withComponentsFromSource(pair, focusedInput)).map(this::toVariant);
 	}
 
 	private Optional<CraftingDisplayVariant> focusResult(CraftingDisplayVariant variant, ItemStack focusedOutput) {
@@ -99,10 +95,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, CraftingReci
 		if (exactPair.isPresent() && !focusedOutput.hasTag()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameTags(variant.firstOutput(), pair.result())).map(this::toVariant);
 		}
-		return findByResultItem(focusedOutput)
-				.filter(pair -> ItemStack.isSameItemSameTags(variant.firstOutput(), pair.result()))
-				.map(pair -> withComponentsFromResult(pair, focusedOutput))
-				.map(this::toVariant);
+		return findByResultItem(focusedOutput).filter(pair -> ItemStack.isSameItemSameTags(variant.firstOutput(), pair.result()))
+				.map(pair -> withComponentsFromResult(pair, focusedOutput)).map(this::toVariant);
 	}
 
 	private static ItemStack getSource(CraftingDisplayVariant variant) {

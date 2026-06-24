@@ -5,10 +5,16 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.COPPER_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.DIAMOND_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.GOLD_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.IRON_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.NETHERITE_BACKPACK;
 
 public class ModItemColors {
-	private ModItemColors() {}
+	private ModItemColors() {
+	}
 
 	public static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
 		event.register((backpack, layer) -> {

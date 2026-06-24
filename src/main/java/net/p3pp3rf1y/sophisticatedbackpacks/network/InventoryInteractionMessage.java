@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public class InventoryInteractionMessage {

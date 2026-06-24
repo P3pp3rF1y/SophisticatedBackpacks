@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrapper, DepositUpgradeItem>
-		implements IFilteredUpgrade, IItemHandlerInteractionUpgrade {
+		implements
+			IFilteredUpgrade,
+			IItemHandlerInteractionUpgrade {
 	private final DepositFilterLogic filterLogic;
 
 	public DepositUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
@@ -46,8 +48,7 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		InventoryHelper.transfer(storageWrapper.getInventoryForUpgradeProcessing(),
-				new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()),
-				s -> transferredStacks.add(s.get()));
+				new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()), s -> transferredStacks.add(s.get()));
 
 		return transferredStacks;
 	}

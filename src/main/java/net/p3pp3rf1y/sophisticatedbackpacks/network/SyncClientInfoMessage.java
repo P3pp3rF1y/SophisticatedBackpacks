@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public class SyncClientInfoMessage implements ISplittableMessage {

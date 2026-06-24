@@ -38,11 +38,10 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 		ItemStack upgradedBackpack = result.copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.ifPresent(wrapper -> {
-						BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
-						wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
-					});
+			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
+				BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
+				wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
+			});
 		}
 		return upgradedBackpack;
 	}

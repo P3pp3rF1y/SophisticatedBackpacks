@@ -38,7 +38,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T entity, float limbSwing, float limbSwingAmount, float partialTicks,
+			float ageInTicks, float netHeadYaw, float headPitch) {
 		if (entity instanceof AbstractClientPlayer player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player).ifPresent(backpackRenderInfo -> {
 				poseStack.pushPose();
@@ -57,7 +58,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		}
 	}
 
-	public static <T extends LivingEntity, M extends EntityModel<T>> void renderBackpack(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor) {
+	public static <T extends LivingEntity, M extends EntityModel<T>> void renderBackpack(M parentModel, LivingEntity livingEntity, PoseStack poseStack,
+			MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor) {
 		translateRotateAndScale(parentModel, livingEntity, poseStack, wearsArmor);
 
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
@@ -66,7 +68,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		});
 	}
 
-	private static <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack poseStack, boolean wearsArmor) {
+	private static <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity,
+			PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			if (livingEntity.isBaby() && !(livingEntity instanceof Player)) {
 				poseStack.scale(BABY_BODY_SCALE, BABY_BODY_SCALE, BABY_BODY_SCALE);
@@ -93,7 +96,8 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		if (Minecraft.getInstance().isPaused() || livingEntity.level().random.nextInt(32) != 0) {
 			return;
 		}
-		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
+		renderInfo.getUpgradeRenderData().forEach(
+				(type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
 	}
 
 	private static Vector3f getBackpackMiddleFacePoint(LivingEntity livingEntity, Vector3f vector) {
@@ -105,8 +109,10 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 		return point;
 	}
 
-	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, LivingEntity livingEntity, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
-		//noinspection unchecked
-		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.level(), livingEntity.level().random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
+	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, LivingEntity livingEntity, UpgradeRenderDataType<?> type,
+			IUpgradeRenderData data) {
+		// noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.level(), livingEntity.level().random,
+				vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
 	}
 }

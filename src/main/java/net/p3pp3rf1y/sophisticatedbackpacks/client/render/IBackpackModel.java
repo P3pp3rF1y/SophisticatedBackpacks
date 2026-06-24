@@ -10,7 +10,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 
 public interface IBackpackModel {
-	<L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
+	<L extends LivingEntity, M extends EntityModel<L>> void render(M parentModel, LivingEntity livingEntity, PoseStack poseStack, MultiBufferSource buffer,
+			int packedLight, int clothColor, int borderColor, Item backpackItem, RenderInfo renderInfo);
 
 	void renderBatteryCharge(PoseStack matrixStack, MultiBufferSource buffer, int packedLight, float chargeRatio);
 
@@ -18,5 +19,6 @@ public interface IBackpackModel {
 
 	EquipmentSlot getRenderEquipmentSlot();
 
-	<L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, boolean wearsArmor);
+	<L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack matrixStack,
+			boolean wearsArmor);
 }

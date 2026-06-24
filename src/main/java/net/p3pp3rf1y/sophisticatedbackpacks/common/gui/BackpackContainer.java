@@ -37,18 +37,20 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	private final BackpackContext backpackContext;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
-		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player), backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
+		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player),
+				backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(),
+				backpackContext.shouldLockBackpackSlot(player));
 		this.backpackContext = backpackContext;
 
-		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK || backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
+		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK
+				|| backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
 			storageWrapper.onInit(player.level());
 		}
 
-		storageWrapper.getContentsUuid().ifPresent(backpackUuid ->
-		{
+		storageWrapper.getContentsUuid().ifPresent(backpackUuid -> {
 			ItemStack backpack = storageWrapper.getBackpack();
-			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(),
-					storageWrapper.getMainColor(), storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
+			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(), storageWrapper.getMainColor(),
+					storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 
 			if (!player.level().isClientSide()) {
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
@@ -91,7 +93,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
 			}
-			storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(settingsContents));
+			storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class)
+					.forEach(provider -> provider.addClientStorageContents(settingsContents));
 			if (!settingsContents.isEmpty()) {
 				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
@@ -197,7 +200,6 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected boolean shouldSlotItemBeDroppedFromStorage(Slot slot) {
-		return slot.getItem().getItem() instanceof BackpackItem &&
-				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItem());
+		return slot.getItem().getItem() instanceof BackpackItem && !storageWrapper.getInventoryHandler().isItemValid(0, slot.getItem());
 	}
 }

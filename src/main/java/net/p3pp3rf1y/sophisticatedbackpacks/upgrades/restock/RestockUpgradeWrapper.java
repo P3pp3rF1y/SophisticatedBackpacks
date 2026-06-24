@@ -19,12 +19,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrapper, RestockUpgradeItem>
-		implements IContentsFilteredUpgrade, IItemHandlerInteractionUpgrade {
+		implements
+			IContentsFilteredUpgrade,
+			IItemHandlerInteractionUpgrade {
 	private final ContentsFilterLogic filterLogic;
 
 	public RestockUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper::getInventoryHandler, backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class));
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper::getInventoryHandler,
+				backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class));
 	}
 
 	@Override

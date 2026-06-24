@@ -12,8 +12,8 @@ import java.util.function.Consumer;
 
 public class BackpackMainSettingsCategory extends MainSettingsCategory<BackpackMainSettingsCategory> {
 	public static final String SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG = "sophisticatedBackpackSettings";
-	public static final MainSetting<Boolean> ANOTHER_PLAYER_CAN_OPEN =
-			new MainSetting<>("anotherPlayerCanOpen", NBTHelper::getBoolean, CompoundTag::putBoolean, true);
+	public static final MainSetting<Boolean> ANOTHER_PLAYER_CAN_OPEN = new MainSetting<>("anotherPlayerCanOpen", NBTHelper::getBoolean, CompoundTag::putBoolean,
+			true);
 
 	public static final String NAME = "backpackGlobal";
 
@@ -32,7 +32,7 @@ public class BackpackMainSettingsCategory extends MainSettingsCategory<BackpackM
 		CompoundTag newData = event.getEntity().getPersistentData();
 
 		if (oldData.contains(SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG)) {
-			//noinspection ConstantConditions
+			// noinspection ConstantConditions
 			newData.put(SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG, oldData.get(SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG));
 		}
 	}

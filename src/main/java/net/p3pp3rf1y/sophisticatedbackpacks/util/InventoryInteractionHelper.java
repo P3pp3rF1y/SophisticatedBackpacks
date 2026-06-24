@@ -17,7 +17,8 @@ import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import java.util.List;
 
 public class InventoryInteractionHelper {
-	private InventoryInteractionHelper() {}
+	private InventoryInteractionHelper() {
+	}
 
 	public static boolean tryInventoryInteraction(UseOnContext context) {
 		Player player = context.getPlayer();
@@ -32,12 +33,13 @@ public class InventoryInteractionHelper {
 			return false;
 		}
 
-		return WorldHelper.getBlockEntity(world, pos)
-				.map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
-						.map(itemHandler -> player.level().isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))
-								.orElse(false)).orElse(false)
-				).orElse(false);
+		return WorldHelper
+				.getBlockEntity(world, pos).map(
+						te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
+								.map(itemHandler -> player.level().isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+										.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player)).orElse(false))
+								.orElse(false))
+				.orElse(false);
 	}
 
 	private static boolean tryRunningInteractionWrappers(IItemHandler itemHandler, IStorageWrapper wrapper, Player player) {

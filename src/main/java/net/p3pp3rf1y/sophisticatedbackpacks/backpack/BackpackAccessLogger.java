@@ -16,17 +16,20 @@ import java.util.UUID;
 public class BackpackAccessLogger {
 	private static final int REFRESH_INTERVAL_SECONDS = 30;
 
-	private BackpackAccessLogger() {}
+	private BackpackAccessLogger() {
+	}
 
 	private static long lastCacheRefresh = 0;
 	private static final Map<String, Set<AccessLogRecord>> playerLogCache = new HashMap<>();
 
-	public static void logPlayerAccess(Player player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor, int columnsTaken) {
+	public static void logPlayerAccess(Player player, Item backpackItem, UUID backpackUuid, String backpackName, int clothColor, int trimColor,
+			int columnsTaken) {
 		if (player.level().isClientSide) {
 			return;
 		}
-		//noinspection ConstantConditions - at this point the registry name of item exists for sure otherwise the player wouldn't be able to open the backpack
-		BackpackStorage.get().putAccessLog(new AccessLogRecord(ForgeRegistries.ITEMS.getKey(backpackItem), backpackUuid, player.getDisplayName().getString(), backpackName, clothColor, trimColor, Util.getEpochMillis(), columnsTaken));
+		// noinspection ConstantConditions - at this point the registry name of item exists for sure otherwise the player wouldn't be able to open the backpack
+		BackpackStorage.get().putAccessLog(new AccessLogRecord(ForgeRegistries.ITEMS.getKey(backpackItem), backpackUuid, player.getDisplayName().getString(),
+				backpackName, clothColor, trimColor, Util.getEpochMillis(), columnsTaken));
 	}
 
 	public static Set<String> getPlayerNames() {

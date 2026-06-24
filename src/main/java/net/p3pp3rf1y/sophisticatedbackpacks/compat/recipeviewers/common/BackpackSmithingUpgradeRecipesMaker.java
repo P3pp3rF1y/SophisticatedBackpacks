@@ -33,7 +33,8 @@ public class BackpackSmithingUpgradeRecipesMaker {
 			variantPairs.putIfAbsent(source.getItem() + String.valueOf(source.getTag()), new BackpackTierUpgradeVariantPair(source.copy(), result));
 		}
 		ResourceLocation id = recipe.getId().withPath(path -> "backpack_smithing_upgrade_grouped/" + path);
-		return new BackpackSmithingUpgradeDisplayRecipe(id, recipe, recipe.getTemplateIngredient(), recipe.getAdditionIngredient(), List.copyOf(variantPairs.values()));
+		return new BackpackSmithingUpgradeDisplayRecipe(id, recipe, recipe.getTemplateIngredient(), recipe.getAdditionIngredient(),
+				List.copyOf(variantPairs.values()));
 	}
 
 	private static List<ItemStack> getBackpackItems(SmithingBackpackUpgradeRecipe recipe) {
@@ -56,7 +57,8 @@ public class BackpackSmithingUpgradeRecipesMaker {
 			backpackItems.add(stack);
 		}
 		ItemStack stack = new ItemStack(item);
-		BackpackItem.setColors(stack, net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.YELLOW.getTextureDiffuseColors()), net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.LIME.getTextureDiffuseColors()));
+		BackpackItem.setColors(stack, net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.YELLOW.getTextureDiffuseColors()),
+				net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.LIME.getTextureDiffuseColors()));
 		backpackItems.add(stack);
 	}
 

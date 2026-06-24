@@ -36,8 +36,10 @@ import java.util.Optional;
 
 import static net.minecraftforge.client.settings.KeyConflictContext.GUI;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class KeybindHandler {
-	private KeybindHandler() {}
+	private KeybindHandler() {
+	}
 
 	private static final int KEY_B = 66;
 	private static final int KEY_C = 67;
@@ -58,15 +60,10 @@ public class KeybindHandler {
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_1 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
-	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(
-			0, BACKPACK_TOGGLE_UPGRADE_1,
-			1, BACKPACK_TOGGLE_UPGRADE_2,
-			2, BACKPACK_TOGGLE_UPGRADE_3,
-			3, BACKPACK_TOGGLE_UPGRADE_4,
-			4, BACKPACK_TOGGLE_UPGRADE_5
-	);
-	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"),
-			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(0, BACKPACK_TOGGLE_UPGRADE_1, 1, BACKPACK_TOGGLE_UPGRADE_2, 2,
+			BACKPACK_TOGGLE_UPGRADE_3, 3, BACKPACK_TOGGLE_UPGRADE_4, 4, BACKPACK_TOGGLE_UPGRADE_5);
+	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"), KeyConflictContext.IN_GAME,
+			InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
 			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_OPEN_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("open_backpack"),
@@ -146,7 +143,8 @@ public class KeybindHandler {
 		BlockHitResult blockraytraceresult = (BlockHitResult) rayTrace;
 		BlockPos pos = blockraytraceresult.getBlockPos();
 
-		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent()).orElse(false)) {
+		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent())
+				.orElse(false)) {
 			return;
 		}
 
@@ -183,7 +181,7 @@ public class KeybindHandler {
 	private static Optional<String> getPlayerInventoryHandlerName(int slotIndex) {
 		if (slotIndex == CHEST_SLOT_INDEX) {
 			return Optional.of(PlayerInventoryProvider.ARMOR_INVENTORY);
-		} else  if (slotIndex == OFFHAND_SLOT_INDEX) {
+		} else if (slotIndex == OFFHAND_SLOT_INDEX) {
 			return Optional.of(PlayerInventoryProvider.OFFHAND_INVENTORY);
 		} else if (slotIndex >= 0 && slotIndex < 36) {
 			return Optional.of(PlayerInventoryProvider.MAIN_INVENTORY);

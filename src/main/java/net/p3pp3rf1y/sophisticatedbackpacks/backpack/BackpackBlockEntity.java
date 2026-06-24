@@ -35,12 +35,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.OPEN;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
 	public static final String BACKPACK_DATA_TAG = "backpackData";
 	@Nullable
@@ -173,7 +176,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-		if (side != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(side)).getBlock())) {
+		if (side != null && level != null
+				&& Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(side)).getBlock())) {
 			return super.getCapability(cap, side);
 		}
 
@@ -182,17 +186,20 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 				return LazyOptional.of(() -> EmptyHandler.INSTANCE).cast();
 			}
 			if (itemHandlerCap == null) {
-				itemHandlerCap = LazyOptional.of(() -> new CachedFailedInsertInventoryHandler<>(() -> getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0));
+				itemHandlerCap = LazyOptional.of(() -> new CachedFailedInsertInventoryHandler<>(() -> getBackpackWrapper().getInventoryForInputOutput(),
+						() -> level != null ? level.getGameTime() : 0));
 			}
 			return itemHandlerCap.cast();
 		} else if (cap == ForgeCapabilities.FLUID_HANDLER) {
 			if (fluidHandlerCap == null) {
-				fluidHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
+				fluidHandlerCap = LazyOptional
+						.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
 			}
 			return fluidHandlerCap.cast();
 		} else if (cap == ForgeCapabilities.ENERGY) {
 			if (energyStorageCap == null) {
-				energyStorageCap = LazyOptional.of(() -> getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
+				energyStorageCap = LazyOptional
+						.of(() -> getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
 			}
 			return energyStorageCap.cast();
 		}
@@ -277,7 +284,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (level.isClientSide) {
 			return;
 		}
-		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(null, level, blockPos));
+		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+				.forEach(upgrade -> upgrade.tick(null, level, blockPos));
 	}
 
 	@Override

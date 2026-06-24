@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsToolti
 import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.function.Supplier;
 

@@ -9,8 +9,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
@@ -31,14 +31,15 @@ public class BackpackStorage extends SavedData {
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
 
-	private BackpackStorage() {}
+	private BackpackStorage() {
+	}
 
 	public static BackpackStorage get() {
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(BackpackStorage::load, BackpackStorage::new, SAVED_DATA_NAME);
 			}
@@ -120,7 +121,7 @@ public class BackpackStorage extends SavedData {
 		} else {
 			CompoundTag currentContents = backpackContents.get(backpackUuid);
 			for (String key : contents.getAllKeys()) {
-				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
+				// noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 				currentContents.put(key, contents.get(key));
 
 				if (key.equals(BackpackSettingsHandler.SETTINGS_TAG)) {
@@ -138,7 +139,8 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
+			if (!accessLogRecords.containsKey(entry.getKey())
+					&& (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}

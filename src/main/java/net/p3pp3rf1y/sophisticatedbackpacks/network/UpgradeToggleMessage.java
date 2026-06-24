@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
 
 import javax.annotation.Nullable;
+
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -45,7 +46,9 @@ public class UpgradeToggleMessage {
 					IUpgradeWrapper upgradeWrapper = slotWrappers.get(msg.upgradeSlot);
 					if (upgradeWrapper.canBeDisabled()) {
 						upgradeWrapper.setEnabled(!upgradeWrapper.isEnabled());
-						String translKey = upgradeWrapper.isEnabled() ? "gui.sophisticatedbackpacks.status.upgrade_switched_on" : "gui.sophisticatedbackpacks.status.upgrade_switched_off";
+						String translKey = upgradeWrapper.isEnabled()
+								? "gui.sophisticatedbackpacks.status.upgrade_switched_on"
+								: "gui.sophisticatedbackpacks.status.upgrade_switched_off";
 						player.displayClientMessage(Component.translatable(translKey, upgradeWrapper.getUpgradeStack().getHoverName()), true);
 					}
 				}

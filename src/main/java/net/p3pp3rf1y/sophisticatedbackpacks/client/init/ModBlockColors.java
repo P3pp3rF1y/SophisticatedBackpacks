@@ -5,10 +5,16 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.COPPER_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.DIAMOND_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.GOLD_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.IRON_BACKPACK;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.NETHERITE_BACKPACK;
 
 public class ModBlockColors {
-	private ModBlockColors() {}
+	private ModBlockColors() {
+	}
 
 	public static void registerBlockColorHandlers(RegisterColorHandlersEvent.Block event) {
 		event.register((state, blockDisplayReader, pos, tintIndex) -> {

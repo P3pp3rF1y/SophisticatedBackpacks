@@ -6,9 +6,7 @@ import net.minecraft.util.StringRepresentable;
 import java.util.Map;
 
 public enum ToolSwapMode implements StringRepresentable {
-	ANY("name"),
-	ONLY_TOOLS("onlyTools"),
-	NO_SWAP("noSwap");
+	ANY("name"), ONLY_TOOLS("onlyTools"), NO_SWAP("noSwap");
 
 	private final String name;
 

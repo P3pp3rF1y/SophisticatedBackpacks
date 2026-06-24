@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 
 import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +21,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class SwordRegistry {
-	private SwordRegistry() {}
+	private SwordRegistry() {
+	}
 
 	private static final Set<Item> SWORD_ITEMS = new HashSet<>();
 	private static final Map<String, Set<Predicate<ItemStack>>> MOD_SWORD_MATCHERS = new HashMap<>();
@@ -81,15 +83,13 @@ public class SwordRegistry {
 		}
 
 		private void parseSwordMatcher(@Nullable String modId, JsonElement jsonElement) {
-			Matchers.getItemMatcher(jsonElement)
-					.ifPresent(swordMatcher -> {
-								if (modId != null) {
-									MOD_SWORD_MATCHERS.computeIfAbsent(modId, m -> new HashSet<>()).add(swordMatcher);
-								} else {
-									SWORD_MATCHERS.add(swordMatcher);
-								}
-							}
-					);
+			Matchers.getItemMatcher(jsonElement).ifPresent(swordMatcher -> {
+				if (modId != null) {
+					MOD_SWORD_MATCHERS.computeIfAbsent(modId, m -> new HashSet<>()).add(swordMatcher);
+				} else {
+					SWORD_MATCHERS.add(swordMatcher);
+				}
+			});
 		}
 
 		private void parseSword(String swordName) {

@@ -31,7 +31,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.SmithingDisplaySpec;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.*;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
@@ -45,10 +44,11 @@ import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "PMD.UnnecessaryImport"})
 @JeiPlugin
 public class BackpackJeiPlugin implements IModPlugin {
-	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {};
+	private static Consumer<IRecipeCatalystRegistration> additionalCatalystRegistrar = registration -> {
+	};
 	private IRecipeViewerDisplayCatalog catalog = null;
 
 	public BackpackJeiPlugin() {
@@ -66,8 +66,8 @@ public class BackpackJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getSubtypeInterpreters()
-				.forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
+		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item,
+				JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
 	@Override
@@ -75,9 +75,10 @@ public class BackpackJeiPlugin implements IModPlugin {
 		registration.addGuiContainerHandler(BackpackScreen.class, new IGuiContainerHandler<>() {
 			@Override
 			public List<Rect2i> getGuiExtraAreas(BackpackScreen gui) {
-				//noinspection ConstantValue
+				// noinspection ConstantValue
 				if (gui.getUpgradeSettingsControl() == null) {
-					return new ArrayList<>(); // when CarryOn cancels opening of the screen it doesn't seem to cancel the even going to JEI and then control is null here
+					return new ArrayList<>(); // when CarryOn cancels opening of the screen it doesn't seem to cancel the even going to JEI and then control is
+												// null here
 				}
 
 				List<Rect2i> ret = new ArrayList<>();
@@ -109,20 +110,23 @@ public class BackpackJeiPlugin implements IModPlugin {
 	public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
 		GroupedCraftingRecipeCategoryExtension.registerOnce(registration);
 		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> stack.getItem() instanceof BackpackItem);
-		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class,
-				new SmithingSpecCategoryExtension<>(recipe -> getCatalog().getSmithingDisplaySpecReplacing(recipe).orElseThrow(), stack -> stack.getItem() instanceof BackpackItem));
+		registration.getSmithingCategory().addExtension(SmithingBackpackUpgradeRecipe.class, new SmithingSpecCategoryExtension<>(
+				recipe -> getCatalog().getSmithingDisplaySpecReplacing(recipe).orElseThrow(), stack -> stack.getItem() instanceof BackpackItem));
 	}
 
 	@Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(), BackpackJeiPlugin::canShowDyeUsagesFor, BackpackJeiPlugin::canShowDyeRecipesFor));
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
-		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING, new SmithingSpecRecipeManagerPlugin(this::getCatalog, BackpackRecipeViewerDisplays::needsSyntheticSmithingDisplay));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING, new GroupedCraftingRecipeManagerPlugin(() -> getCatalog().getGroupedCraftingSpecs(),
+				BackpackJeiPlugin::canShowDyeUsagesFor, BackpackJeiPlugin::canShowDyeRecipesFor));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.CRAFTING,
+				new CraftingDisplayCatalogRecipeManagerPlugin(this::getCatalog, stack -> stack.getItem() instanceof BackpackItem));
+		registration.addTypedRecipeManagerPlugin(RecipeTypes.SMITHING,
+				new SmithingSpecRecipeManagerPlugin(this::getCatalog, BackpackRecipeViewerDisplays::needsSyntheticSmithingDisplay));
 	}
 
 	private static boolean canShowDyeUsagesFor(ItemStack stack) {
-		return stack.getItem() instanceof BackpackItem
-				&& (!stack.hasTag() || stack.getTag() == null || !stack.getTag().contains("clothColor") && !stack.getTag().contains("borderColor") && !stack.getTag().contains("renderInfo"));
+		return stack.getItem() instanceof BackpackItem && (!stack.hasTag() || stack.getTag() == null
+				|| !stack.getTag().contains("clothColor") && !stack.getTag().contains("borderColor") && !stack.getTag().contains("renderInfo"));
 	}
 
 	private IRecipeViewerDisplayCatalog getCatalog() {

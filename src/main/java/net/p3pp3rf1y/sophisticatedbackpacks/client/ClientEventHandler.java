@@ -32,8 +32,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackShapeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackShapeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.MobCatcherCaptureEffectRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
@@ -44,10 +44,12 @@ import java.util.Map;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY;
 
 public class ClientEventHandler {
-	private ClientEventHandler() {}
+	private ClientEventHandler() {
+	}
 
 	private static final String BACKPACK_REG_NAME = "backpack";
-	public static final ItemDisplayContext WORN = ItemDisplayContext.create("SOPHISTICATEDBACKPACKS_WORN", SophisticatedBackpacks.getRL("worn"), ItemDisplayContext.FIXED);
+	public static final ItemDisplayContext WORN = ItemDisplayContext.create("SOPHISTICATEDBACKPACKS_WORN", SophisticatedBackpacks.getRL("worn"),
+			ItemDisplayContext.FIXED);
 
 	public static void registerHandlers() {
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -94,19 +96,21 @@ public class ClientEventHandler {
 		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
 	}
 
-	@SuppressWarnings("java:S3740") //explanation below
+	@SuppressWarnings("java:S3740") // explanation below
 	private static void registerBackpackLayer() {
 		EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 		Map<String, EntityRenderer<? extends Player>> skinMap = renderManager.getSkinMap();
 		for (EntityRenderer<? extends Player> renderer : skinMap.values()) {
 			if (renderer instanceof LivingEntityRenderer livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		}
 		renderManager.renderers.forEach((e, r) -> {
 			if (r instanceof LivingEntityRenderer livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		});
@@ -120,7 +124,7 @@ public class ClientEventHandler {
 		}
 		HitResult target = mc.hitResult;
 		Level level = player.level();
-		BlockPos pos = ((BlockHitResult)target).getBlockPos();
+		BlockPos pos = ((BlockHitResult) target).getBlockPos();
 		BlockState state = level.getBlockState(pos);
 
 		if (state.isAir()) {

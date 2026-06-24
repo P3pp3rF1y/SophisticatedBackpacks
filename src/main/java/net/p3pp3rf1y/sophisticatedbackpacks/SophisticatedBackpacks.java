@@ -41,7 +41,7 @@ public class SophisticatedBackpacks {
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
 
-	@SuppressWarnings("java:S1118") //needs to be public for mod to work
+	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedBackpacks() {
 		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

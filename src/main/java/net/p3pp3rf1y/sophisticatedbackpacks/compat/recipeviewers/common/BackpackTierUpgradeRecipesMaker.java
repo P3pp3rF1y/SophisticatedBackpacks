@@ -21,11 +21,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class BackpackTierUpgradeRecipesMaker {
 	private BackpackTierUpgradeRecipesMaker() {
 	}
 
-	public static <T extends PropertyBasedSubtypeInterpreter> List<BackpackTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(Function<ItemStack, Optional<T>> subtypeInterpreterGetter) {
+	public static <T extends PropertyBasedSubtypeInterpreter> List<BackpackTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(
+			Function<ItemStack, Optional<T>> subtypeInterpreterGetter) {
 		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, BackpackUpgradeRecipe.class, recipe -> {
 			BackpackTierUpgradeDisplayRecipe displayRecipe = createDisplayRecipe(recipe, subtypeInterpreterGetter);
 			return List.of(displayRecipe);
@@ -47,8 +49,10 @@ public class BackpackTierUpgradeRecipesMaker {
 		ResourceLocation id = recipe.getId().withPath(path -> "backpack_tier_upgrade_grouped/" + path);
 		int width = recipe instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getWidth() : 0;
 		int height = recipe instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getHeight() : 0;
-		CraftingRecipe displayRecipe = new ShapedRecipe(recipe.getId(), "", CraftingBookCategory.MISC, width, height, ingredientsCopy, ClientRecipeHelper.getResultItem(recipe));
-		return new BackpackTierUpgradeDisplayRecipe(id, displayRecipe, width, height, ingredientsCopy, backpackIngredientIndex, List.copyOf(variantPairs.values()));
+		CraftingRecipe displayRecipe = new ShapedRecipe(recipe.getId(), "", CraftingBookCategory.MISC, width, height, ingredientsCopy,
+				ClientRecipeHelper.getResultItem(recipe));
+		return new BackpackTierUpgradeDisplayRecipe(id, displayRecipe, width, height, ingredientsCopy, backpackIngredientIndex,
+				List.copyOf(variantPairs.values()));
 	}
 
 	private static CraftingContainer createCraftingInventory() {
@@ -81,7 +85,8 @@ public class BackpackTierUpgradeRecipesMaker {
 		throw new IllegalStateException("Backpack tier upgrade recipe missing backpack ingredient");
 	}
 
-	private static void populateCraftingInventory(NonNullList<Ingredient> ingredients, CraftingContainer craftingInventory, int backpackIngredientIndex, ItemStack backpackItem) {
+	private static void populateCraftingInventory(NonNullList<Ingredient> ingredients, CraftingContainer craftingInventory, int backpackIngredientIndex,
+			ItemStack backpackItem) {
 		for (int i = 0; i < ingredients.size(); i++) {
 			if (i == backpackIngredientIndex) {
 				craftingInventory.setItem(i, backpackItem.copy());
@@ -93,10 +98,12 @@ public class BackpackTierUpgradeRecipesMaker {
 		}
 	}
 
-	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(BackpackTierUpgradeVariantPair pair, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
-		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source())).orElse(pair.source().toString())
-				+ "->"
-				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result())).orElse(pair.result().toString());
+	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(BackpackTierUpgradeVariantPair pair,
+			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source()))
+				.orElse(pair.source().toString()) + "->"
+				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result()))
+						.orElse(pair.result().toString());
 	}
 
 	private static List<ItemStack> getBackpackItems(CraftingRecipe recipe) {
@@ -124,7 +131,8 @@ public class BackpackTierUpgradeRecipesMaker {
 			backpackItems.add(stack);
 		}
 		ItemStack stack = new ItemStack(item);
-		BackpackItem.setColors(stack, net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.YELLOW.getTextureDiffuseColors()), net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.LIME.getTextureDiffuseColors()));
+		BackpackItem.setColors(stack, net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.YELLOW.getTextureDiffuseColors()),
+				net.p3pp3rf1y.sophisticatedcore.util.ColorHelper.getColor(DyeColor.LIME.getTextureDiffuseColors()));
 		backpackItems.add(stack);
 	}
 }
