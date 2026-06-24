@@ -16,9 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public record BlockToolSwapPayload(BlockPos pos) implements CustomPacketPayload {
 	public static final Type<BlockToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("block_tool_swap"));
-	public static final StreamCodec<ByteBuf, BlockToolSwapPayload> STREAM_CODEC = StreamCodec.composite(
-			BlockPos.STREAM_CODEC,
-			BlockToolSwapPayload::pos,
+	public static final StreamCodec<ByteBuf, BlockToolSwapPayload> STREAM_CODEC = StreamCodec.composite(BlockPos.STREAM_CODEC, BlockToolSwapPayload::pos,
 			BlockToolSwapPayload::new);
 
 	@Override
@@ -31,18 +29,16 @@ public record BlockToolSwapPayload(BlockPos pos) implements CustomPacketPayload 
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-					BackpackWrapper.fromStack(backpack).getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
-							.forEach(upgrade -> {
-								if (!upgrade.canProcessBlockInteract() || result.get()) {
-									return;
-								}
-								anyUpgradeCanInteract.set(true);
-
-								result.set(upgrade.onBlockInteract(player.level(), payload.pos, player.level().getBlockState(payload.pos), player));
-							});
-					return result.get();
+			BackpackWrapper.fromStack(backpack).getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class).forEach(upgrade -> {
+				if (!upgrade.canProcessBlockInteract() || result.get()) {
+					return;
 				}
-		);
+				anyUpgradeCanInteract.set(true);
+
+				result.set(upgrade.onBlockInteract(player.level(), payload.pos, player.level().getBlockState(payload.pos), player));
+			});
+			return result.get();
+		});
 
 		if (!anyUpgradeCanInteract.get()) {
 			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);

@@ -16,9 +16,7 @@ import java.util.Map;
 
 public record UpgradeTogglePayload(int upgradeSlot) implements CustomPacketPayload {
 	public static final Type<UpgradeTogglePayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("upgrade_toggle"));
-	public static final StreamCodec<ByteBuf, UpgradeTogglePayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			UpgradeTogglePayload::upgradeSlot,
+	public static final StreamCodec<ByteBuf, UpgradeTogglePayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, UpgradeTogglePayload::upgradeSlot,
 			UpgradeTogglePayload::new);
 
 	@Override
@@ -34,7 +32,9 @@ public record UpgradeTogglePayload(int upgradeSlot) implements CustomPacketPaylo
 				IUpgradeWrapper upgradeWrapper = slotWrappers.get(payload.upgradeSlot);
 				if (upgradeWrapper.canBeDisabled()) {
 					upgradeWrapper.setEnabled(!upgradeWrapper.isEnabled());
-					String translKey = upgradeWrapper.isEnabled() ? "gui.sophisticatedbackpacks.status.upgrade_switched_on" : "gui.sophisticatedbackpacks.status.upgrade_switched_off";
+					String translKey = upgradeWrapper.isEnabled()
+							? "gui.sophisticatedbackpacks.status.upgrade_switched_on"
+							: "gui.sophisticatedbackpacks.status.upgrade_switched_off";
 					player.displayClientMessage(Component.translatable(translKey, upgradeWrapper.getUpgradeStack().getHoverName()), true);
 				}
 			}

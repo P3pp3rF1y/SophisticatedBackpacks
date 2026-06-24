@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<SmithingRecipe> recipeHolder, Optional<Ingredient> template, Optional<Ingredient> addition,
-												  List<BackpackTierUpgradeVariantPair> variantPairs) {
+public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<SmithingRecipe> recipeHolder, Optional<Ingredient> template,
+		Optional<Ingredient> addition, List<BackpackTierUpgradeVariantPair> variantPairs) {
 
 	public Optional<BackpackTierUpgradeVariantPair> findBySource(ItemStack stack) {
 		return variantPairs.stream().filter(pair -> ItemStack.isSameItemSameComponents(pair.source(), stack)).findFirst();
@@ -78,10 +78,8 @@ public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<S
 
 	public SmithingDisplaySpec toSpec() {
 		List<SmithingDisplayVariant> displayVariants = variantPairs.stream().map(pair -> new SmithingDisplayVariant(pair.source(), pair.result())).toList();
-		List<SmithingDisplayVariant> globalVariants = variantPairs.stream()
-				.filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
-				.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()))
-				.toList();
+		List<SmithingDisplayVariant> globalVariants = variantPairs.stream().filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
+				.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result())).toList();
 		return new SmithingDisplaySpec(id, template, addition, displayVariants, globalVariants, Set.of(recipeHolder.value()),
 				new SmithingSourceResultFocusBehavior(this::focusSource, this::focusResult));
 	}
@@ -94,22 +92,20 @@ public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<S
 	private Optional<SmithingDisplayVariant> focusSource(SmithingDisplayVariant variant, ItemStack focusedInput) {
 		Optional<BackpackTierUpgradeVariantPair> exactPair = findBySource(focusedInput);
 		if (exactPair.isPresent()) {
-			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.base(), pair.source())).map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
+			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.base(), pair.source()))
+					.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
 		}
-		return findBySourceItem(focusedInput)
-				.filter(pair -> ItemStack.isSameItemSameComponents(variant.base(), pair.source()))
-				.map(pair -> withComponentsFromSource(pair, focusedInput))
-				.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
+		return findBySourceItem(focusedInput).filter(pair -> ItemStack.isSameItemSameComponents(variant.base(), pair.source()))
+				.map(pair -> withComponentsFromSource(pair, focusedInput)).map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
 	}
 
 	private Optional<SmithingDisplayVariant> focusResult(SmithingDisplayVariant variant, ItemStack focusedOutput) {
 		Optional<BackpackTierUpgradeVariantPair> exactPair = findByResult(focusedOutput);
 		if (exactPair.isPresent()) {
-			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.result(), pair.result())).map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
+			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.result(), pair.result()))
+					.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
 		}
-		return findByResultItem(focusedOutput)
-				.filter(pair -> ItemStack.isSameItemSameComponents(variant.result(), pair.result()))
-				.map(pair -> withComponentsFromResult(pair, focusedOutput))
-				.map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
+		return findByResultItem(focusedOutput).filter(pair -> ItemStack.isSameItemSameComponents(variant.result(), pair.result()))
+				.map(pair -> withComponentsFromResult(pair, focusedOutput)).map(pair -> new SmithingDisplayVariant(pair.source(), pair.result()));
 	}
 }

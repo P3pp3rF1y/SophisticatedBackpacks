@@ -16,7 +16,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ModDataComponents {
-	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			SophisticatedBackpacks.MOD_ID);
 
 	public static final Supplier<DataComponentType<Identifier>> LOOT_TABLE = DATA_COMPONENT_TYPES.register("loot_table",
 			() -> new DataComponentType.Builder<Identifier>().persistent(Identifier.CODEC).networkSynchronized(Identifier.STREAM_CODEC).build());
@@ -37,7 +38,8 @@ public class ModDataComponents {
 			() -> new DataComponentType.Builder<InventoryOrder>().persistent(InventoryOrder.CODEC).networkSynchronized(InventoryOrder.STREAM_CODEC).build());
 
 	public static final Supplier<DataComponentType<Map<Integer, RefillUpgradeWrapper.TargetSlot>>> TARGET_SLOTS = DATA_COMPONENT_TYPES.register("target_slots",
-			() -> new DataComponentType.Builder<Map<Integer, RefillUpgradeWrapper.TargetSlot>>().persistent(RefillUpgradeWrapper.TARGET_SLOTS_CODEC).networkSynchronized(RefillUpgradeWrapper.TARGET_SLOTS_STREAM_CODEC).build());
+			() -> new DataComponentType.Builder<Map<Integer, RefillUpgradeWrapper.TargetSlot>>().persistent(RefillUpgradeWrapper.TARGET_SLOTS_CODEC)
+					.networkSynchronized(RefillUpgradeWrapper.TARGET_SLOTS_STREAM_CODEC).build());
 
 	public static final Supplier<DataComponentType<Boolean>> SHOULD_SWAP_WEAPON = DATA_COMPONENT_TYPES.register("should_swap_weapon",
 			() -> new DataComponentType.Builder<Boolean>().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());

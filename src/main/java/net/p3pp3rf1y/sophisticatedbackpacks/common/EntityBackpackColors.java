@@ -96,5 +96,6 @@ public class EntityBackpackColors {
 		return ENTITY_COLORS.getOrDefault(entityType, new BackpackColors(BackpackWrapper.DEFAULT_MAIN_COLOR, BackpackWrapper.DEFAULT_ACCENT_COLOR));
 	}
 
-	public record BackpackColors(int main, int accent) {}
+	public record BackpackColors(int main, int accent) {
+	}
 }

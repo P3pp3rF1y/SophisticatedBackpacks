@@ -38,52 +38,41 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DynamicCommand {
-	static final Cache<String, DynamicTemplate> DYNAMIC_CACHE = CacheBuilder.newBuilder()
-			.expireAfterAccess(5, TimeUnit.MINUTES)
-			.build();
+	static final Cache<String, DynamicTemplate> DYNAMIC_CACHE = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
 
 	static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext commandBuildContext) {
 		return Commands.literal("dynamic")
 				.then(Commands.literal("begin")
 						.then(Commands.argument("templateName", StringArgumentType.word())
 								.then(Commands.argument("backpackItem", BackpackItemArgumentType.item(commandBuildContext))
-										.executes(context -> beginNewDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackItemArgumentType.getItem(context, "backpackItem")))
-								)
+										.executes(context -> beginNewDynamic(context.getSource(), context.getArgument("templateName", String.class),
+												BackpackItemArgumentType.getItem(context, "backpackItem"))))
 								.then(Commands.argument("baseTemplateName", BackpackTemplateArgumentType.templateName())
-										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class), BackpackTemplateArgumentType.getId(context, "baseTemplateName")))
-								)
-						)
-				)
+										.executes(context -> beginBasedDynamic(context.getSource(), context.getArgument("templateName", String.class),
+												BackpackTemplateArgumentType.getId(context, "baseTemplateName"))))))
 				.then(Commands.literal("addItem")
 						.then(Commands.argument("templateName", StringArgumentType.word())
 								.then(Commands.argument("slot", IntegerArgumentType.integer())
 										.then(Commands.argument("item", ItemArgument.item(commandBuildContext))
-												.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), IntegerArgumentType.getInteger(context, "slot"), ItemArgument.getItem(context, "item"), 1, false))
+												.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class),
+														IntegerArgumentType.getInteger(context, "slot"), ItemArgument.getItem(context, "item"), 1, false))
 												.then(Commands.argument("count", IntegerArgumentType.integer(1))
-														.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), IntegerArgumentType.getInteger(context, "slot"), ItemArgument.getItem(context, "item"), IntegerArgumentType.getInteger(context, "count"), false))
-												)
-										)
-								)
+														.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class),
+																IntegerArgumentType.getInteger(context, "slot"), ItemArgument.getItem(context, "item"),
+																IntegerArgumentType.getInteger(context, "count"), false)))))
 								.then(Commands.argument("item", ItemArgument.item(commandBuildContext))
-										.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1, ItemArgument.getItem(context, "item"), 1, false))
+										.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1,
+												ItemArgument.getItem(context, "item"), 1, false))
 										.then(Commands.argument("count", IntegerArgumentType.integer(1))
-												.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1, ItemArgument.getItem(context, "item"), IntegerArgumentType.getInteger(context, "count"), false))
-										)
-								)
-						)
-				)
+												.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1,
+														ItemArgument.getItem(context, "item"), IntegerArgumentType.getInteger(context, "count"), false))))))
 				.then(Commands.literal("addUpgrade")
 						.then(Commands.argument("templateName", StringArgumentType.word())
 								.then(Commands.argument("item", BackpackUpgradeItemArgumentType.item(commandBuildContext))
-										.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1, ItemArgument.getItem(context, "item"), 1, true))
-								)
-						)
-				)
-				.then(Commands.literal("end")
-						.then(Commands.argument("templateName", StringArgumentType.word())
-								.executes(context -> endDynamic(context.getSource(), context.getArgument("templateName", String.class)))
-						)
-				);
+										.executes(context -> addDynamic(context.getSource(), context.getArgument("templateName", String.class), -1,
+												ItemArgument.getItem(context, "item"), 1, true)))))
+				.then(Commands.literal("end").then(Commands.argument("templateName", StringArgumentType.word())
+						.executes(context -> endDynamic(context.getSource(), context.getArgument("templateName", String.class)))));
 	}
 
 	private static int beginNewDynamic(CommandSourceStack source, String templateName, ItemInput backpackItem) throws CommandSyntaxException {
@@ -120,7 +109,8 @@ public class DynamicCommand {
 		return 0;
 	}
 
-	private static int addDynamic(CommandSourceStack source, String templateName, int slot, ItemInput item, int count, boolean upgrade) throws CommandSyntaxException {
+	private static int addDynamic(CommandSourceStack source, String templateName, int slot, ItemInput item, int count, boolean upgrade)
+			throws CommandSyntaxException {
 		DynamicTemplate template = DYNAMIC_CACHE.getIfPresent(templateName);
 		if (template == null) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.templateNotInUse", templateName));
@@ -141,7 +131,8 @@ public class DynamicCommand {
 				template.itemsForInventoryHandler.add(stack);
 			} else {
 				inventory.setStackInSlot(slot, stack);
-				source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.add.success", templateName, stack.getDisplayName()), false);
+				source.sendSuccess(() -> Component.translatable("commands.sophisticatedbackpacks.dynamic.add.success", templateName, stack.getDisplayName()),
+						false);
 				return 0;
 			}
 		}
@@ -167,13 +158,15 @@ public class DynamicCommand {
 		if (!remainingItems.isEmpty()) {
 			// List all items that could not be added
 			for (ItemStack remaining : remainingItems) {
-				source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.end.addRemainingItemsFailed", remaining.getCount(), remaining.getDisplayName()));
+				source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.dynamic.end.addRemainingItemsFailed", remaining.getCount(),
+						remaining.getDisplayName()));
 			}
 		}
 
 		// Check if backpack wrapper is empty
 		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
-		if (backpackUuid.isEmpty() || (ResourceHandlerUtil.isEmpty(wrapper.getInventoryHandler()) && ResourceHandlerUtil.isEmpty(wrapper.getUpgradeHandler()))) {
+		if (backpackUuid.isEmpty()
+				|| (ResourceHandlerUtil.isEmpty(wrapper.getInventoryHandler()) && ResourceHandlerUtil.isEmpty(wrapper.getUpgradeHandler()))) {
 			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.backpackempty"));
 			return 3;
 		}
@@ -201,7 +194,8 @@ public class DynamicCommand {
 				itemEntity.makeFakeItem();
 			}
 
-			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, (RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
+			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F,
+					(RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
 			p.inventoryMenu.broadcastChanges();
 		} else {
 			ItemEntity itementity = p.drop(backpack, false);
@@ -222,7 +216,6 @@ public class DynamicCommand {
 		level.addFreshEntity(itemEntity);
 	}
 
-	private record DynamicTemplate(ItemStack backpack, List<ItemStack> itemsForInventoryHandler,
-								   List<ItemStack> itemsForUpgradeHandler) {
+	private record DynamicTemplate(ItemStack backpack, List<ItemStack> itemsForInventoryHandler, List<ItemStack> itemsForUpgradeHandler) {
 	}
 }

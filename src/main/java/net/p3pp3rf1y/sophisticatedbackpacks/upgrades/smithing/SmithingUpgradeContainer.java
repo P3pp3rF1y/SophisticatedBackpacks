@@ -29,7 +29,8 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 	private final PersistableSmithingMenu smithingMenuDelegate;
 
-	public SmithingUpgradeContainer(Player player, int upgradeContainerId, SmithingUpgradeWrapper upgradeWrapper, UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> type) {
+	public SmithingUpgradeContainer(Player player, int upgradeContainerId, SmithingUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		smithingMenuDelegate = new PersistableSmithingMenu(player.getInventory());
 
@@ -103,7 +104,7 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 	@Override
 	public void setRecipeUsed(ResourceKey<Recipe<?>> recipeId) {
-		//noop - no longer required now that selected recipe isn't used by SmithingMenu anymore
+		// noop - no longer required now that selected recipe isn't used by SmithingMenu anymore
 	}
 
 	@Override
@@ -119,7 +120,10 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 	private class PersistableSmithingMenu extends SmithingMenu {
 
 		public PersistableSmithingMenu(Inventory playerInventory) {
-			super(0, playerInventory, playerInventory.player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
+			super(0, playerInventory,
+					playerInventory.player.level().isClientSide()
+							? ContainerLevelAccess.NULL
+							: ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
 		}
 
 		@Override
@@ -162,7 +166,8 @@ public class SmithingUpgradeContainer extends UpgradeContainerBase<SmithingUpgra
 
 		@Override
 		protected void createResultSlot(ItemCombinerMenuSlotDefinition slotDefinition) {
-			this.addSlot(new Slot(this.resultSlots, slotDefinition.getResultSlot().slotIndex(), slotDefinition.getResultSlot().x(), slotDefinition.getResultSlot().y()) {
+			this.addSlot(new Slot(this.resultSlots, slotDefinition.getResultSlot().slotIndex(), slotDefinition.getResultSlot().x(),
+					slotDefinition.getResultSlot().y()) {
 				public boolean mayPlace(ItemStack stack) {
 					return false;
 				}

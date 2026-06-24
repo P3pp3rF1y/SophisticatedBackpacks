@@ -18,8 +18,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackAdditionalContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
@@ -36,18 +36,20 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	private final BackpackContext backpackContext;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
-		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player), backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
+		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player),
+				backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(),
+				backpackContext.shouldLockBackpackSlot(player));
 		this.backpackContext = backpackContext;
 
-		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK || backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
+		if (!player.level().isClientSide() && (backpackContext.getType() == BackpackContext.ContextType.ITEM_BACKPACK
+				|| backpackContext.getType() == BackpackContext.ContextType.ITEM_SUB_BACKPACK)) {
 			storageWrapper.onInit(player.level());
 		}
 
-		storageWrapper.getContentsUuid().ifPresent(backpackUuid ->
-		{
+		storageWrapper.getContentsUuid().ifPresent(backpackUuid -> {
 			ItemStack backpack = storageWrapper.getBackpack();
-			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(),
-					storageWrapper.getMainColor(), storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
+			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(), storageWrapper.getMainColor(),
+					storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 
 			if (!player.level().isClientSide()) {
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
@@ -88,7 +90,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			if (player instanceof ServerPlayer serverPlayer) {
 				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, storageWrapper.getSettingsHandler().getSettingsData()));
 				CompoundTag additionalContents = new CompoundTag();
-				storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class).forEach(provider -> provider.addClientStorageContents(additionalContents));
+				storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class)
+						.forEach(provider -> provider.addClientStorageContents(additionalContents));
 				if (!additionalContents.isEmpty()) {
 					PacketDistributor.sendToPlayer(serverPlayer, new BackpackAdditionalContentsPayload(uuid, additionalContents));
 				}
@@ -183,7 +186,6 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected boolean shouldSlotItemBeDroppedFromStorage(Slot slot) {
-		return slot.getItem().getItem() instanceof BackpackItem &&
-				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItem());
+		return slot.getItem().getItem() instanceof BackpackItem && !storageWrapper.getInventoryHandler().isItemValid(0, slot.getItem());
 	}
 }

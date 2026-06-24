@@ -18,9 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public record EntityToolSwapPayload(int entityId) implements CustomPacketPayload {
 	public static final Type<EntityToolSwapPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("entity_tool_swap"));
-	public static final StreamCodec<ByteBuf, EntityToolSwapPayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			EntityToolSwapPayload::entityId,
+	public static final StreamCodec<ByteBuf, EntityToolSwapPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT, EntityToolSwapPayload::entityId,
 			EntityToolSwapPayload::new);
 
 	@Override
@@ -40,19 +38,16 @@ public record EntityToolSwapPayload(int entityId) implements CustomPacketPayload
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-					BackpackWrapper.fromStack(backpack)
-							.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
-							.forEach(upgrade -> {
-								if (!upgrade.canProcessEntityInteract() || result.get()) {
-									return;
-								}
-								anyUpgradeCanInteract.set(true);
-
-								result.set(upgrade.onEntityInteract(level, entity, player));
-							});
-					return result.get();
+			BackpackWrapper.fromStack(backpack).getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class).forEach(upgrade -> {
+				if (!upgrade.canProcessEntityInteract() || result.get()) {
+					return;
 				}
-		);
+				anyUpgradeCanInteract.set(true);
+
+				result.set(upgrade.onEntityInteract(level, entity, player));
+			});
+			return result.get();
+		});
 
 		if (!anyUpgradeCanInteract.get()) {
 			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_tool_swap_upgrade_present"), true);

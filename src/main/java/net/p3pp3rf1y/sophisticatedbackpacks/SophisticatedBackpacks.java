@@ -9,9 +9,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -40,7 +40,7 @@ public class SophisticatedBackpacks {
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
 
-	@SuppressWarnings("java:S1118") //needs to be public for mod to work
+	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedBackpacks(IEventBus modBus, Dist dist, ModContainer container) {
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);

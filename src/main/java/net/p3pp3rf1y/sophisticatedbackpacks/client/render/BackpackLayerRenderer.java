@@ -32,8 +32,8 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 	private static final ContextKey<EntityType<?>> ENTITY_TYPE = new ContextKey<>(SophisticatedBackpacks.getIdentifier("entity_type"));
 	public static final BiConsumer<LivingEntity, LivingEntityRenderState> RENDER_STATE_MODIFIER = (livingEntity, entityRenderState) -> {
 		if (livingEntity instanceof Player player) {
-			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo ->
-					addBackpackRenderState(entityRenderState, player, backpackRenderInfo));
+			PlayerInventoryProvider.get().getBackpackFromRendered(player, false)
+					.ifPresent(backpackRenderInfo -> addBackpackRenderState(entityRenderState, player, backpackRenderInfo));
 		} else {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
@@ -43,8 +43,10 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		entityRenderState.setRenderData(ENTITY_TYPE, livingEntity.getType());
 	};
 
-	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
-		addBackpackRenderState(entityRenderState, livingEntity, backpackRenderInfo.getBackpack(), !backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
+	public static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity,
+			PlayerInventoryProvider.RenderInfo backpackRenderInfo) {
+		addBackpackRenderState(entityRenderState, livingEntity, backpackRenderInfo.getBackpack(),
+				!backpackRenderInfo.isArmorSlot() && !livingEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 	}
 
 	private static void addBackpackRenderState(LivingEntityRenderState entityRenderState, LivingEntity livingEntity, ItemStack backpack, boolean wearsArmor) {
@@ -67,7 +69,8 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		poseStack.popPose();
 	}
 
-	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void submitBackpack(M parentModel, S entityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+	public static <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void submitBackpack(M parentModel, S entityRenderState,
+			PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		ItemStackRenderState renderData = entityRenderState.getRenderData(BACKPACK);
 		if (renderData == null) {
 			return;
@@ -81,7 +84,8 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 		renderData.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, 0);
 	}
 
-	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel, @Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
+	private static <S extends EntityRenderState, M extends EntityModel<? super S>> void translateRotateAndScale(M parentModel,
+			@Nullable EntityType<?> entityType, boolean isBaby, PoseStack poseStack, boolean wearsArmor) {
 		if (parentModel instanceof HumanoidModel<?> humanoidModel) {
 			humanoidModel.body.translateAndRotate(poseStack);
 		}

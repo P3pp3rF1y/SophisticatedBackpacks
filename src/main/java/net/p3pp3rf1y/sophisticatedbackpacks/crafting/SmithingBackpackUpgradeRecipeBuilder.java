@@ -52,11 +52,13 @@ public class SmithingBackpackUpgradeRecipeBuilder {
 	public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> id) {
 		ensureValid(id);
 
-		Advancement.Builder advancement$builder = recipeOutput.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(AdvancementRequirements.Strategy.OR);
+		Advancement.Builder advancement$builder = recipeOutput.advancement().addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id))
+				.rewards(AdvancementRewards.Builder.recipe(id)).requirements(AdvancementRequirements.Strategy.OR);
 		Objects.requireNonNull(advancement$builder);
 		criteria.forEach(advancement$builder::addCriterion);
 
-		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(Optional.of(template), base, Optional.of(addition), new ItemStack(result)), advancement$builder.build(id.identifier().withPrefix("recipes/" + category.getFolderName() + "/")));
+		recipeOutput.accept(id, new SmithingBackpackUpgradeRecipe(Optional.of(template), base, Optional.of(addition), new ItemStack(result)),
+				advancement$builder.build(id.identifier().withPrefix("recipes/" + category.getFolderName() + "/")));
 	}
 
 	private void ensureValid(ResourceKey<Recipe<?>> recipe) {

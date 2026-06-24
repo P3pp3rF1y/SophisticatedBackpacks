@@ -23,15 +23,16 @@ public class BackpackTierUpgradeRecipesMaker {
 	private BackpackTierUpgradeRecipesMaker() {
 	}
 
-	public static <T extends PropertyBasedSubtypeInterpreter> List<BackpackTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(Function<ItemStack, Optional<T>> subtypeInterpreterGetter) {
+	public static <T extends PropertyBasedSubtypeInterpreter> List<BackpackTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(
+			Function<ItemStack, Optional<T>> subtypeInterpreterGetter) {
 		return ClientRecipeHelper.transformAllRecipeHoldersOfTypeIntoMultiple(RecipeType.CRAFTING, BackpackUpgradeRecipe.class, recipeHolder -> {
 			BackpackTierUpgradeDisplayRecipe displayRecipe = createDisplayRecipe(recipeHolder, subtypeInterpreterGetter);
 			return List.of(displayRecipe);
 		});
 	}
 
-	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> BackpackTierUpgradeDisplayRecipe createDisplayRecipe(RecipeHolder<T> recipeHolder,
-			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> BackpackTierUpgradeDisplayRecipe createDisplayRecipe(
+			RecipeHolder<T> recipeHolder, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
 		T recipe = recipeHolder.value();
 		CraftingContainer craftingInventory = createCraftingInventory();
 		List<Optional<Ingredient>> recipeIngredients = new ArrayList<>(RecipeHelper.getIngredients(recipe));
@@ -50,7 +51,8 @@ public class BackpackTierUpgradeRecipesMaker {
 		List<Optional<Ingredient>> shapedIngredients = ingredientsCopy.stream().map(Optional::of).toList();
 		RecipeHolder<CraftingRecipe> displayRecipeHolder = new RecipeHolder<>(recipeHolder.id(), new ShapedRecipe("", CraftingBookCategory.MISC,
 				new ShapedRecipePattern(width, height, shapedIngredients, Optional.empty()), ClientRecipeHelper.getResultItem(recipe)));
-		return new BackpackTierUpgradeDisplayRecipe(id, displayRecipeHolder, width, height, ingredientsCopy, backpackIngredientIndex, List.copyOf(variantPairs.values()));
+		return new BackpackTierUpgradeDisplayRecipe(id, displayRecipeHolder, width, height, ingredientsCopy, backpackIngredientIndex,
+				List.copyOf(variantPairs.values()));
 	}
 
 	private static NonNullList<Ingredient> getIngredients(CraftingRecipe recipe) {
@@ -89,7 +91,8 @@ public class BackpackTierUpgradeRecipesMaker {
 		throw new IllegalStateException("Backpack tier upgrade recipe missing backpack ingredient");
 	}
 
-	private static void populateCraftingInventory(List<Optional<Ingredient>> ingredients, CraftingContainer craftingInventory, int backpackIngredientIndex, ItemStack backpackItem) {
+	private static void populateCraftingInventory(List<Optional<Ingredient>> ingredients, CraftingContainer craftingInventory, int backpackIngredientIndex,
+			ItemStack backpackItem) {
 		for (int i = 0; i < ingredients.size(); i++) {
 			if (i == backpackIngredientIndex) {
 				craftingInventory.setItem(i, backpackItem.copy());
@@ -100,10 +103,12 @@ public class BackpackTierUpgradeRecipesMaker {
 		}
 	}
 
-	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(BackpackTierUpgradeVariantPair pair, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
-		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source())).orElse(pair.source().toString())
-				+ "->"
-				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result())).orElse(pair.result().toString());
+	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(BackpackTierUpgradeVariantPair pair,
+			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source()))
+				.orElse(pair.source().toString()) + "->"
+				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result()))
+						.orElse(pair.result().toString());
 	}
 
 	private static List<ItemStack> getBackpackItems(CraftingRecipe recipe) {

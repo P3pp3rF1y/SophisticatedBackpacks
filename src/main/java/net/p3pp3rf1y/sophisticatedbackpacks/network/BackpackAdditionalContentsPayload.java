@@ -15,11 +15,8 @@ import java.util.UUID;
 
 public record BackpackAdditionalContentsPayload(UUID backpackUuid, CompoundTag additionalContents) implements CustomPacketPayload {
 	public static final Type<BackpackAdditionalContentsPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("backpack_additional_contents"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackAdditionalContentsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			BackpackAdditionalContentsPayload::backpackUuid,
-			ByteBufCodecs.COMPOUND_TAG,
-			BackpackAdditionalContentsPayload::additionalContents,
+	public static final StreamCodec<RegistryFriendlyByteBuf, BackpackAdditionalContentsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			BackpackAdditionalContentsPayload::backpackUuid, ByteBufCodecs.COMPOUND_TAG, BackpackAdditionalContentsPayload::additionalContents,
 			BackpackAdditionalContentsPayload::new);
 
 	@Override

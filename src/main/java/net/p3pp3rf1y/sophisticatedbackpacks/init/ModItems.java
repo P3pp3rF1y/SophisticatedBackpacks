@@ -133,25 +133,35 @@ public class ModItems {
 	}
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(), SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTION_TYPES = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<LootItemConditionType> LOOT_CONDITION_TYPES = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE.identifier(), SophisticatedBackpacks.MOD_ID);
-	public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(NeoForgeRegistries.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(),
+			SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTION_TYPES = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE.identifier(),
+			SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<LootItemConditionType> LOOT_CONDITION_TYPES = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE.identifier(),
+			SophisticatedBackpacks.MOD_ID);
+	public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister
+			.create(NeoForgeRegistries.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.MOD_ID);
 	private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(BuiltInRegistries.MENU, SophisticatedBackpacks.MOD_ID);
 	private static final DeferredRegister.Entities ENTITY_TYPES = DeferredRegister.createEntities(SophisticatedBackpacks.MOD_ID);
 
 	public static final DeferredHolder<Item, BackpackItem> BACKPACK = ITEMS.registerItem("backpack",
-			properties -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK, properties));
+			properties -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get,
+					ModBlocks.BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> COPPER_BACKPACK = ITEMS.registerItem("copper_backpack",
-			properties -> new BackpackItem(Config.SERVER.copperBackpack.inventorySlotCount::get, Config.SERVER.copperBackpack.upgradeSlotCount::get, ModBlocks.COPPER_BACKPACK, properties));
+			properties -> new BackpackItem(Config.SERVER.copperBackpack.inventorySlotCount::get, Config.SERVER.copperBackpack.upgradeSlotCount::get,
+					ModBlocks.COPPER_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> IRON_BACKPACK = ITEMS.registerItem("iron_backpack",
-			properties -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get, ModBlocks.IRON_BACKPACK, properties));
+			properties -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get,
+					ModBlocks.IRON_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> GOLD_BACKPACK = ITEMS.registerItem("gold_backpack",
-			properties -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get, ModBlocks.GOLD_BACKPACK, properties));
+			properties -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get,
+					ModBlocks.GOLD_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> DIAMOND_BACKPACK = ITEMS.registerItem("diamond_backpack",
-			properties -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get, ModBlocks.DIAMOND_BACKPACK, properties));
+			properties -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get,
+					ModBlocks.DIAMOND_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> NETHERITE_BACKPACK = ITEMS.registerItem("netherite_backpack",
-			properties -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant, properties));
+			properties -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get,
+					ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant, properties));
 
 	public static final Identifier BACKPACK_UPGRADE_TAG_NAME = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "upgrade");
 
@@ -166,17 +176,21 @@ public class ModItems {
 	public static final DeferredHolder<Item, FilterUpgradeItem> ADVANCED_FILTER_UPGRADE = ITEMS.registerItem("advanced_filter_upgrade",
 			properties -> new FilterUpgradeItem(Config.SERVER.advancedFilterUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE = ITEMS.registerItem("magnet_upgrade",
-			properties -> new MagnetUpgradeItem(Config.SERVER.magnetUpgrade.magnetRange::get, Config.SERVER.magnetUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties));
+			properties -> new MagnetUpgradeItem(Config.SERVER.magnetUpgrade.magnetRange::get, Config.SERVER.magnetUpgrade.filterSlots::get,
+					Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, MagnetUpgradeItem> ADVANCED_MAGNET_UPGRADE = ITEMS.registerItem("advanced_magnet_upgrade",
-			properties -> new MagnetUpgradeItem(Config.SERVER.advancedMagnetUpgrade.magnetRange::get, Config.SERVER.advancedMagnetUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties));
+			properties -> new MagnetUpgradeItem(Config.SERVER.advancedMagnetUpgrade.magnetRange::get, Config.SERVER.advancedMagnetUpgrade.filterSlots::get,
+					Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, FeedingUpgradeItem> FEEDING_UPGRADE = ITEMS.registerItem("feeding_upgrade",
 			properties -> new FeedingUpgradeItem(Config.SERVER.feedingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, FeedingUpgradeItem> ADVANCED_FEEDING_UPGRADE = ITEMS.registerItem("advanced_feeding_upgrade",
 			properties -> new FeedingUpgradeItem(Config.SERVER.advancedFeedingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, CompactingUpgradeItem> COMPACTING_UPGRADE = ITEMS.registerItem("compacting_upgrade",
-			properties -> new CompactingUpgradeItem(false, Config.SERVER.compactingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties, Config.SERVER.compactingUpgrade::getCompactingResult));
+			properties -> new CompactingUpgradeItem(false, Config.SERVER.compactingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties,
+					Config.SERVER.compactingUpgrade::getCompactingResult));
 	public static final DeferredHolder<Item, CompactingUpgradeItem> ADVANCED_COMPACTING_UPGRADE = ITEMS.registerItem("advanced_compacting_upgrade",
-			properties -> new CompactingUpgradeItem(true, Config.SERVER.advancedCompactingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage, properties, Config.SERVER.compactingUpgrade::getCompactingResult));
+			properties -> new CompactingUpgradeItem(true, Config.SERVER.advancedCompactingUpgrade.filterSlots::get, Config.SERVER.maxUpgradesPerStorage,
+					properties, Config.SERVER.compactingUpgrade::getCompactingResult));
 	public static final DeferredHolder<Item, VoidUpgradeItem> VOID_UPGRADE = ITEMS.registerItem("void_upgrade",
 			properties -> new VoidUpgradeItem(Config.SERVER.voidUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, VoidUpgradeItem> ADVANCED_VOID_UPGRADE = ITEMS.registerItem("advanced_void_upgrade",
@@ -193,8 +207,7 @@ public class ModItems {
 			properties -> new RefillUpgradeItem(Config.SERVER.refillUpgrade.filterSlots::get, false, false, properties));
 	public static final DeferredHolder<Item, RefillUpgradeItem> ADVANCED_REFILL_UPGRADE = ITEMS.registerItem("advanced_refill_upgrade",
 			properties -> new RefillUpgradeItem(Config.SERVER.advancedRefillUpgrade.filterSlots::get, true, true, properties));
-	public static final DeferredHolder<Item, InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.registerItem("inception_upgrade",
-			InceptionUpgradeItem::new);
+	public static final DeferredHolder<Item, InceptionUpgradeItem> INCEPTION_UPGRADE = ITEMS.registerItem("inception_upgrade", InceptionUpgradeItem::new);
 	public static final DeferredHolder<Item, EverlastingUpgradeItem> EVERLASTING_UPGRADE = ITEMS.registerItem("everlasting_upgrade",
 			EverlastingUpgradeItem::new);
 	public static final DeferredHolder<Item, MobCatcherUpgradeItem> MOB_CATCHER_UPGRADE = ITEMS.registerItem("mob_catcher_upgrade",
@@ -213,51 +226,66 @@ public class ModItems {
 			properties -> new BlastingUpgradeItem(Config.SERVER.blastingUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, AutoBlastingUpgradeItem> AUTO_BLASTING_UPGRADE = ITEMS.registerItem("auto_blasting_upgrade",
 			properties -> new AutoBlastingUpgradeItem(Config.SERVER.autoBlastingUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, CraftingUpgradeItem> CRAFTING_UPGRADE = ITEMS.registerItem("crafting_upgrade", properties -> new CraftingUpgradeItem(Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StonecutterUpgradeItem> STONECUTTER_UPGRADE = ITEMS.registerItem("stonecutter_upgrade", properties -> new StonecutterUpgradeItem(Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_STARTER_TIER = ITEMS.registerItem("stack_upgrade_starter_tier", properties ->
-			new StackUpgradeItem(1.5D, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_1 = ITEMS.registerItem("stack_upgrade_tier_1", properties ->
-			new StackUpgradeItem(2, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_2 = ITEMS.registerItem("stack_upgrade_tier_2", properties ->
-			new StackUpgradeItem(4, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_3 = ITEMS.registerItem("stack_upgrade_tier_3", properties ->
-			new StackUpgradeItem(8, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_4 = ITEMS.registerItem("stack_upgrade_tier_4", properties ->
-			new StackUpgradeItem(16, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_1 = ITEMS.registerItem("stack_downgrade_tier_1", properties ->
-			new StackUpgradeItem(0.125, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_2 = ITEMS.registerItem("stack_downgrade_tier_2", properties ->
-			new StackUpgradeItem(0.0625, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_3 = ITEMS.registerItem("stack_downgrade_tier_3", properties ->
-			new StackUpgradeItem(0.03125, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_OMEGA_TIER = ITEMS.registerItem("stack_upgrade_omega_tier", properties ->
-			new StackUpgradeItem(Integer.MAX_VALUE, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, JukeboxUpgradeItem> JUKEBOX_UPGRADE = ITEMS.registerItem("jukebox_upgrade", properties -> new JukeboxUpgradeItem(Config.SERVER.maxUpgradesPerStorage, () -> 1, () -> 1, properties));
-	public static final DeferredHolder<Item, JukeboxUpgradeItem> ADVANCED_JUKEBOX_UPGRADE = ITEMS.registerItem("advanced_jukebox_upgrade", properties -> new JukeboxUpgradeItem(Config.SERVER.maxUpgradesPerStorage, Config.SERVER.advancedJukeboxUpgrade.numberOfSlots, Config.SERVER.advancedJukeboxUpgrade.slotsInRow, properties));
+	public static final DeferredHolder<Item, CraftingUpgradeItem> CRAFTING_UPGRADE = ITEMS.registerItem("crafting_upgrade",
+			properties -> new CraftingUpgradeItem(Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StonecutterUpgradeItem> STONECUTTER_UPGRADE = ITEMS.registerItem("stonecutter_upgrade",
+			properties -> new StonecutterUpgradeItem(Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_STARTER_TIER = ITEMS.registerItem("stack_upgrade_starter_tier",
+			properties -> new StackUpgradeItem(1.5D, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_1 = ITEMS.registerItem("stack_upgrade_tier_1",
+			properties -> new StackUpgradeItem(2, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_2 = ITEMS.registerItem("stack_upgrade_tier_2",
+			properties -> new StackUpgradeItem(4, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_3 = ITEMS.registerItem("stack_upgrade_tier_3",
+			properties -> new StackUpgradeItem(8, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_TIER_4 = ITEMS.registerItem("stack_upgrade_tier_4",
+			properties -> new StackUpgradeItem(16, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_1 = ITEMS.registerItem("stack_downgrade_tier_1",
+			properties -> new StackUpgradeItem(0.125, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_2 = ITEMS.registerItem("stack_downgrade_tier_2",
+			properties -> new StackUpgradeItem(0.0625, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_DOWNGRADE_TIER_3 = ITEMS.registerItem("stack_downgrade_tier_3",
+			properties -> new StackUpgradeItem(0.03125, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, StackUpgradeItem> STACK_UPGRADE_OMEGA_TIER = ITEMS.registerItem("stack_upgrade_omega_tier",
+			properties -> new StackUpgradeItem(Integer.MAX_VALUE, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, JukeboxUpgradeItem> JUKEBOX_UPGRADE = ITEMS.registerItem("jukebox_upgrade",
+			properties -> new JukeboxUpgradeItem(Config.SERVER.maxUpgradesPerStorage, () -> 1, () -> 1, properties));
+	public static final DeferredHolder<Item, JukeboxUpgradeItem> ADVANCED_JUKEBOX_UPGRADE = ITEMS.registerItem("advanced_jukebox_upgrade",
+			properties -> new JukeboxUpgradeItem(Config.SERVER.maxUpgradesPerStorage, Config.SERVER.advancedJukeboxUpgrade.numberOfSlots,
+					Config.SERVER.advancedJukeboxUpgrade.slotsInRow, properties));
 	public static final DeferredHolder<Item, ToolSwapperUpgradeItem> TOOL_SWAPPER_UPGRADE = ITEMS.registerItem("tool_swapper_upgrade",
 			properties -> new ToolSwapperUpgradeItem(false, false, properties));
 	public static final DeferredHolder<Item, ToolSwapperUpgradeItem> ADVANCED_TOOL_SWAPPER_UPGRADE = ITEMS.registerItem("advanced_tool_swapper_upgrade",
 			properties -> new ToolSwapperUpgradeItem(true, true, properties));
-	public static final DeferredHolder<Item, TankUpgradeItem> TANK_UPGRADE = ITEMS.registerItem("tank_upgrade", properties -> new TankUpgradeItem(Config.SERVER.tankUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.registerItem("battery_upgrade", properties -> new BatteryUpgradeItem(Config.SERVER.batteryUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, PumpUpgradeItem> PUMP_UPGRADE = ITEMS.registerItem("pump_upgrade", properties -> new PumpUpgradeItem(false, false, true, Config.SERVER.pumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.registerItem("advanced_pump_upgrade", properties -> new PumpUpgradeItem(true, false, true, Config.SERVER.pumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.registerItem("xp_pump_upgrade", properties -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, TankUpgradeItem> TANK_UPGRADE = ITEMS.registerItem("tank_upgrade",
+			properties -> new TankUpgradeItem(Config.SERVER.tankUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.registerItem("battery_upgrade",
+			properties -> new BatteryUpgradeItem(Config.SERVER.batteryUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, PumpUpgradeItem> PUMP_UPGRADE = ITEMS.registerItem("pump_upgrade",
+			properties -> new PumpUpgradeItem(false, false, true, Config.SERVER.pumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.registerItem("advanced_pump_upgrade",
+			properties -> new PumpUpgradeItem(true, false, true, Config.SERVER.pumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, XpPumpUpgradeItem> XP_PUMP_UPGRADE = ITEMS.registerItem("xp_pump_upgrade",
+			properties -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade, Config.SERVER.maxUpgradesPerStorage, properties));
 	public static final DeferredHolder<Item, AnvilUpgradeItem> ANVIL_UPGRADE = ITEMS.registerItem("anvil_upgrade", AnvilUpgradeItem::new);
 	public static final DeferredHolder<Item, SmithingUpgradeItem> SMITHING_UPGRADE = ITEMS.registerItem("smithing_upgrade", SmithingUpgradeItem::new);
-	public static final DeferredHolder<Item, InfinityUpgradeItem> INFINITY_UPGRADE = ITEMS.registerItem("infinity_upgrade", properties -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, true, properties));
-	public static final DeferredHolder<Item, InfinityUpgradeItem> SURVIVAL_INFINITY_UPGRADE = ITEMS.registerItem("survival_infinity_upgrade", properties -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, false, properties));
-	public static final DeferredHolder<Item, AlchemyUpgradeItem> ALCHEMY_UPGRADE = ITEMS.registerItem("alchemy_upgrade", properties -> new AlchemyUpgradeItem(Config.SERVER.alchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
-	public static final DeferredHolder<Item, AlchemyUpgradeItem> ADVANCED_ALCHEMY_UPGRADE = ITEMS.registerItem("advanced_alchemy_upgrade", properties -> new AlchemyUpgradeItem(Config.SERVER.advancedAlchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, InfinityUpgradeItem> INFINITY_UPGRADE = ITEMS.registerItem("infinity_upgrade",
+			properties -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, true, properties));
+	public static final DeferredHolder<Item, InfinityUpgradeItem> SURVIVAL_INFINITY_UPGRADE = ITEMS.registerItem("survival_infinity_upgrade",
+			properties -> new InfinityUpgradeItem(Config.SERVER.maxUpgradesPerStorage, false, properties));
+	public static final DeferredHolder<Item, AlchemyUpgradeItem> ALCHEMY_UPGRADE = ITEMS.registerItem("alchemy_upgrade",
+			properties -> new AlchemyUpgradeItem(Config.SERVER.alchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
+	public static final DeferredHolder<Item, AlchemyUpgradeItem> ADVANCED_ALCHEMY_UPGRADE = ITEMS.registerItem("advanced_alchemy_upgrade",
+			properties -> new AlchemyUpgradeItem(Config.SERVER.advancedAlchemyUpgrade.filterSlots, Config.SERVER.maxUpgradesPerStorage, properties));
 
 	public static final Supplier<ItemBase> UPGRADE_BASE = ITEMS.registerItem("upgrade_base", properties -> new ItemBase(properties.stacksTo(16)));
 
-	public static final Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("main", () ->
-			CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BACKPACK.get()))
-					.title(Component.translatable("itemGroup.sophisticatedbackpacks"))
-					.displayItems((featureFlags, output) -> ITEMS.getEntries().stream().filter(i -> i.get() instanceof ItemBase).forEach(i -> ((ItemBase) i.get()).addCreativeTabItems(output::accept)))
-					.build());
+	public static final Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS
+			.register(
+					"main", () -> CreativeModeTab.builder().icon(() -> new ItemStack(BACKPACK.get()))
+							.title(Component.translatable("itemGroup.sophisticatedbackpacks")).displayItems((featureFlags, output) -> ITEMS.getEntries()
+									.stream().filter(i -> i.get() instanceof ItemBase).forEach(i -> ((ItemBase) i.get()).addCreativeTabItems(output::accept)))
+							.build());
 
 	public static final Supplier<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = MENU_TYPES.register("backpack",
 			() -> IMenuTypeExtension.create(BackpackContainer::fromBuffer));
@@ -266,21 +294,30 @@ public class ModItems {
 			() -> IMenuTypeExtension.create(BackpackSettingsContainerMenu::fromBuffer));
 
 	public static final Supplier<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITY_TYPES.registerEntityType(
-			"everlasting_backpack_item", EverlastingBackpackItemEntity::new, MobCategory.MISC, builder -> builder.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20)
-	);
+			"everlasting_backpack_item", EverlastingBackpackItemEntity::new, MobCategory.MISC,
+			builder -> builder.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20));
 
-	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER,
+			SophisticatedBackpacks.MOD_ID);
 
-	public static final Supplier<CustomRecipe.Serializer<BackpackDyeRecipe>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye", () -> new CustomRecipe.Serializer<>(BackpackDyeRecipe::new));
-	public static final Supplier<RecipeSerializer<BackpackUpgradeRecipe>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
-	public static final Supplier<RecipeSerializer<SmithingBackpackUpgradeRecipe>> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
-	public static final Supplier<RecipeSerializer<BasicBackpackRecipe>> BASIC_BACKPACK_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("basic_backpack", BasicBackpackRecipe.Serializer::new);
+	public static final Supplier<CustomRecipe.Serializer<BackpackDyeRecipe>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye",
+			() -> new CustomRecipe.Serializer<>(BackpackDyeRecipe::new));
+	public static final Supplier<RecipeSerializer<BackpackUpgradeRecipe>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade",
+			BackpackUpgradeRecipe.Serializer::new);
+	public static final Supplier<RecipeSerializer<SmithingBackpackUpgradeRecipe>> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS
+			.register("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
+	public static final Supplier<RecipeSerializer<BasicBackpackRecipe>> BASIC_BACKPACK_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("basic_backpack",
+			BasicBackpackRecipe.Serializer::new);
 
-	public static final Supplier<LootItemFunctionType<CopyBackpackDataFunction>> COPY_BACKPACK_DATA = LOOT_FUNCTION_TYPES.register("copy_backpack_data", () -> new LootItemFunctionType<>(CopyBackpackDataFunction.CODEC));
-	public static final Supplier<LootItemConditionType> LOOT_ENABLED_CONDITION = LOOT_CONDITION_TYPES.register("loot_enabled", () -> new LootItemConditionType(BackpackLootEnabledCondition.CODEC));
-	public static final Supplier<MapCodec<BackpackLootModifierProvider.InjectLootModifier>> INJECT_LOOT = LOOT_MODIFIERS.register("inject_loot", () -> BackpackLootModifierProvider.InjectLootModifier.CODEC);
+	public static final Supplier<LootItemFunctionType<CopyBackpackDataFunction>> COPY_BACKPACK_DATA = LOOT_FUNCTION_TYPES.register("copy_backpack_data",
+			() -> new LootItemFunctionType<>(CopyBackpackDataFunction.CODEC));
+	public static final Supplier<LootItemConditionType> LOOT_ENABLED_CONDITION = LOOT_CONDITION_TYPES.register("loot_enabled",
+			() -> new LootItemConditionType(BackpackLootEnabledCondition.CODEC));
+	public static final Supplier<MapCodec<BackpackLootModifierProvider.InjectLootModifier>> INJECT_LOOT = LOOT_MODIFIERS.register("inject_loot",
+			() -> BackpackLootModifierProvider.InjectLootModifier.CODEC);
 
-	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SophisticatedBackpacks.MOD_ID);
+	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES,
+			SophisticatedBackpacks.MOD_ID);
 
 	public static void registerHandlers(IEventBus modBus) {
 		ITEMS.register(modBus);
@@ -300,43 +337,76 @@ public class ModItems {
 		}
 	}
 
-	public static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
-	public static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_ADVANCED_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
-	public static final UpgradeContainerType<MagnetUpgradeWrapper, MagnetUpgradeContainer> MAGNET_BASIC_TYPE = new UpgradeContainerType<>(MagnetUpgradeContainer::new);
-	public static final UpgradeContainerType<MagnetUpgradeWrapper, MagnetUpgradeContainer> MAGNET_ADVANCED_TYPE = new UpgradeContainerType<>(MagnetUpgradeContainer::new);
-	public static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> FEEDING_TYPE = new UpgradeContainerType<>(FeedingUpgradeContainer::new);
-	public static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> ADVANCED_FEEDING_TYPE = new UpgradeContainerType<>(FeedingUpgradeContainer::new);
-	public static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
-	public static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> ADVANCED_COMPACTING_TYPE = new UpgradeContainerType<>(CompactingUpgradeContainer::new);
+	public static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_BASIC_TYPE = new UpgradeContainerType<>(
+			ContentsFilteredUpgradeContainer::new);
+	public static final UpgradeContainerType<PickupUpgradeWrapper, ContentsFilteredUpgradeContainer<PickupUpgradeWrapper>> PICKUP_ADVANCED_TYPE = new UpgradeContainerType<>(
+			ContentsFilteredUpgradeContainer::new);
+	public static final UpgradeContainerType<MagnetUpgradeWrapper, MagnetUpgradeContainer> MAGNET_BASIC_TYPE = new UpgradeContainerType<>(
+			MagnetUpgradeContainer::new);
+	public static final UpgradeContainerType<MagnetUpgradeWrapper, MagnetUpgradeContainer> MAGNET_ADVANCED_TYPE = new UpgradeContainerType<>(
+			MagnetUpgradeContainer::new);
+	public static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> FEEDING_TYPE = new UpgradeContainerType<>(
+			FeedingUpgradeContainer::new);
+	public static final UpgradeContainerType<FeedingUpgradeWrapper, FeedingUpgradeContainer> ADVANCED_FEEDING_TYPE = new UpgradeContainerType<>(
+			FeedingUpgradeContainer::new);
+	public static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> COMPACTING_TYPE = new UpgradeContainerType<>(
+			CompactingUpgradeContainer::new);
+	public static final UpgradeContainerType<CompactingUpgradeWrapper, CompactingUpgradeContainer> ADVANCED_COMPACTING_TYPE = new UpgradeContainerType<>(
+			CompactingUpgradeContainer::new);
 	public static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> VOID_TYPE = new UpgradeContainerType<>(VoidUpgradeContainer::new);
-	public static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> ADVANCED_VOID_TYPE = new UpgradeContainerType<>(VoidUpgradeContainer::new);
-	public static final UpgradeContainerType<RestockUpgradeWrapper, ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> RESTOCK_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
-	public static final UpgradeContainerType<RestockUpgradeWrapper, ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> ADVANCED_RESTOCK_TYPE = new UpgradeContainerType<>(ContentsFilteredUpgradeContainer::new);
-	public static final UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> DEPOSIT_TYPE = new UpgradeContainerType<>(DepositUpgradeContainer::new);
-	public static final UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> ADVANCED_DEPOSIT_TYPE = new UpgradeContainerType<>(DepositUpgradeContainer::new);
-	public static final UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> REFILL_TYPE = new UpgradeContainerType<>(RefillUpgradeContainer::new);
-	public static final UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> ADVANCED_REFILL_TYPE = new UpgradeContainerType<>(RefillUpgradeContainer::new);
-	public static final UpgradeContainerType<CookingUpgradeWrapper.SmeltingUpgradeWrapper, CookingUpgradeContainer<SmeltingRecipe, CookingUpgradeWrapper.SmeltingUpgradeWrapper>> SMELTING_TYPE = new UpgradeContainerType<>(CookingUpgradeContainer::new);
-	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoSmeltingUpgradeWrapper, AutoCookingUpgradeContainer<SmeltingRecipe, AutoCookingUpgradeWrapper.AutoSmeltingUpgradeWrapper>> AUTO_SMELTING_TYPE = new UpgradeContainerType<>(AutoCookingUpgradeContainer::new);
-	public static final UpgradeContainerType<CookingUpgradeWrapper.SmokingUpgradeWrapper, CookingUpgradeContainer<SmokingRecipe, CookingUpgradeWrapper.SmokingUpgradeWrapper>> SMOKING_TYPE = new UpgradeContainerType<>(CookingUpgradeContainer::new);
-	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoSmokingUpgradeWrapper, AutoCookingUpgradeContainer<SmokingRecipe, AutoCookingUpgradeWrapper.AutoSmokingUpgradeWrapper>> AUTO_SMOKING_TYPE = new UpgradeContainerType<>(AutoCookingUpgradeContainer::new);
-	public static final UpgradeContainerType<CookingUpgradeWrapper.BlastingUpgradeWrapper, CookingUpgradeContainer<BlastingRecipe, CookingUpgradeWrapper.BlastingUpgradeWrapper>> BLASTING_TYPE = new UpgradeContainerType<>(CookingUpgradeContainer::new);
-	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoBlastingUpgradeWrapper, AutoCookingUpgradeContainer<BlastingRecipe, AutoCookingUpgradeWrapper.AutoBlastingUpgradeWrapper>> AUTO_BLASTING_TYPE = new UpgradeContainerType<>(AutoCookingUpgradeContainer::new);
-	public static final UpgradeContainerType<CraftingUpgradeWrapper, CraftingUpgradeContainer> CRAFTING_TYPE = new UpgradeContainerType<>(CraftingUpgradeContainer::new);
-	public static final UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> INCEPTION_TYPE = new UpgradeContainerType<>(InceptionUpgradeContainer::new);
-	public static final UpgradeContainerType<StonecutterUpgradeItem.Wrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(StonecutterUpgradeContainer::new);
-	public static final UpgradeContainerType<JukeboxUpgradeWrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
-	public static final UpgradeContainerType<JukeboxUpgradeWrapper, JukeboxUpgradeContainer> ADVANCED_JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
-	public static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(ToolSwapperUpgradeContainer::new);
+	public static final UpgradeContainerType<VoidUpgradeWrapper, VoidUpgradeContainer> ADVANCED_VOID_TYPE = new UpgradeContainerType<>(
+			VoidUpgradeContainer::new);
+	public static final UpgradeContainerType<RestockUpgradeWrapper, ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> RESTOCK_TYPE = new UpgradeContainerType<>(
+			ContentsFilteredUpgradeContainer::new);
+	public static final UpgradeContainerType<RestockUpgradeWrapper, ContentsFilteredUpgradeContainer<RestockUpgradeWrapper>> ADVANCED_RESTOCK_TYPE = new UpgradeContainerType<>(
+			ContentsFilteredUpgradeContainer::new);
+	public static final UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> DEPOSIT_TYPE = new UpgradeContainerType<>(
+			DepositUpgradeContainer::new);
+	public static final UpgradeContainerType<DepositUpgradeWrapper, DepositUpgradeContainer> ADVANCED_DEPOSIT_TYPE = new UpgradeContainerType<>(
+			DepositUpgradeContainer::new);
+	public static final UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> REFILL_TYPE = new UpgradeContainerType<>(
+			RefillUpgradeContainer::new);
+	public static final UpgradeContainerType<RefillUpgradeWrapper, RefillUpgradeContainer> ADVANCED_REFILL_TYPE = new UpgradeContainerType<>(
+			RefillUpgradeContainer::new);
+	public static final UpgradeContainerType<CookingUpgradeWrapper.SmeltingUpgradeWrapper, CookingUpgradeContainer<SmeltingRecipe, CookingUpgradeWrapper.SmeltingUpgradeWrapper>> SMELTING_TYPE = new UpgradeContainerType<>(
+			CookingUpgradeContainer::new);
+	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoSmeltingUpgradeWrapper, AutoCookingUpgradeContainer<SmeltingRecipe, AutoCookingUpgradeWrapper.AutoSmeltingUpgradeWrapper>> AUTO_SMELTING_TYPE = new UpgradeContainerType<>(
+			AutoCookingUpgradeContainer::new);
+	public static final UpgradeContainerType<CookingUpgradeWrapper.SmokingUpgradeWrapper, CookingUpgradeContainer<SmokingRecipe, CookingUpgradeWrapper.SmokingUpgradeWrapper>> SMOKING_TYPE = new UpgradeContainerType<>(
+			CookingUpgradeContainer::new);
+	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoSmokingUpgradeWrapper, AutoCookingUpgradeContainer<SmokingRecipe, AutoCookingUpgradeWrapper.AutoSmokingUpgradeWrapper>> AUTO_SMOKING_TYPE = new UpgradeContainerType<>(
+			AutoCookingUpgradeContainer::new);
+	public static final UpgradeContainerType<CookingUpgradeWrapper.BlastingUpgradeWrapper, CookingUpgradeContainer<BlastingRecipe, CookingUpgradeWrapper.BlastingUpgradeWrapper>> BLASTING_TYPE = new UpgradeContainerType<>(
+			CookingUpgradeContainer::new);
+	public static final UpgradeContainerType<AutoCookingUpgradeWrapper.AutoBlastingUpgradeWrapper, AutoCookingUpgradeContainer<BlastingRecipe, AutoCookingUpgradeWrapper.AutoBlastingUpgradeWrapper>> AUTO_BLASTING_TYPE = new UpgradeContainerType<>(
+			AutoCookingUpgradeContainer::new);
+	public static final UpgradeContainerType<CraftingUpgradeWrapper, CraftingUpgradeContainer> CRAFTING_TYPE = new UpgradeContainerType<>(
+			CraftingUpgradeContainer::new);
+	public static final UpgradeContainerType<InceptionUpgradeWrapper, InceptionUpgradeContainer> INCEPTION_TYPE = new UpgradeContainerType<>(
+			InceptionUpgradeContainer::new);
+	public static final UpgradeContainerType<StonecutterUpgradeItem.Wrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(
+			StonecutterUpgradeContainer::new);
+	public static final UpgradeContainerType<JukeboxUpgradeWrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(
+			JukeboxUpgradeContainer::new);
+	public static final UpgradeContainerType<JukeboxUpgradeWrapper, JukeboxUpgradeContainer> ADVANCED_JUKEBOX_TYPE = new UpgradeContainerType<>(
+			JukeboxUpgradeContainer::new);
+	public static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(
+			ToolSwapperUpgradeContainer::new);
 	public static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
-	public static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(BatteryUpgradeContainer::new);
+	public static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(
+			BatteryUpgradeContainer::new);
 	public static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
-	public static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
-	public static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(XpPumpUpgradeContainer::new);
+	public static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(
+			PumpUpgradeContainer::new);
+	public static final UpgradeContainerType<XpPumpUpgradeWrapper, XpPumpUpgradeContainer> XP_PUMP_TYPE = new UpgradeContainerType<>(
+			XpPumpUpgradeContainer::new);
 	public static final UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> ANVIL_TYPE = new UpgradeContainerType<>(AnvilUpgradeContainer::new);
-	public static final UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> SMITHING_TYPE = new UpgradeContainerType<>(SmithingUpgradeContainer::new);
-	public static final UpgradeContainerType<AlchemyUpgradeWrapper, AlchemyUpgradeContainer> ALCHEMY_TYPE = new UpgradeContainerType<>(AlchemyUpgradeContainer::new);
-	public static final UpgradeContainerType<AlchemyUpgradeWrapper, AlchemyUpgradeContainer> ADVANCED_ALCHEMY_TYPE = new UpgradeContainerType<>(AlchemyUpgradeContainer::new);
+	public static final UpgradeContainerType<SmithingUpgradeWrapper, SmithingUpgradeContainer> SMITHING_TYPE = new UpgradeContainerType<>(
+			SmithingUpgradeContainer::new);
+	public static final UpgradeContainerType<AlchemyUpgradeWrapper, AlchemyUpgradeContainer> ALCHEMY_TYPE = new UpgradeContainerType<>(
+			AlchemyUpgradeContainer::new);
+	public static final UpgradeContainerType<AlchemyUpgradeWrapper, AlchemyUpgradeContainer> ADVANCED_ALCHEMY_TYPE = new UpgradeContainerType<>(
+			AlchemyUpgradeContainer::new);
 
 	public static void registerContainers(RegisterEvent event) {
 		if (!event.getRegistryKey().equals(Registries.MENU)) {
@@ -404,18 +474,16 @@ public class ModItems {
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerItem(Capabilities.Item.ITEM, (stack, itemAccess) -> {
-					return stack.has(ModCoreDataComponents.STORAGE_UUID) ? BackpackWrapper.getItemInventoryHandler(itemAccess) : EmptyResourceHandler.instance();
-				},
-				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+			return stack.has(ModCoreDataComponents.STORAGE_UUID) ? BackpackWrapper.getItemInventoryHandler(itemAccess) : EmptyResourceHandler.instance();
+		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.Fluid.ITEM, (stack, itemAccess) -> {
-					if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
-						return null;
-					}
-					return BackpackWrapper.fromStack(stack).getItemFluidHandler(itemAccess).orElse(null);
-				},
-				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
-		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyHandler().orElse(null),
-				BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+			if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
+				return null;
+			}
+			return BackpackWrapper.fromStack(stack).getItemFluidHandler(itemAccess).orElse(null);
+		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyHandler().orElse(null), BACKPACK.get(),
+				COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 
 	private static class BackpackCauldronInteraction implements CauldronInteraction {
@@ -449,7 +517,8 @@ public class ModItems {
 				BlockPos blockpos = source.pos().relative(dispenserDirection);
 				Direction against = source.level().isEmptyBlock(blockpos.below()) ? dispenserDirection.getOpposite() : Direction.UP;
 
-				setSuccess(backpackItem.tryPlace(null, dispenserDirection.getAxis() == Direction.Axis.Y ? Direction.NORTH : dispenserDirection.getOpposite(), new DirectionalPlaceContext(source.level(), blockpos, dispenserDirection, stack, against)).consumesAction());
+				setSuccess(backpackItem.tryPlace(null, dispenserDirection.getAxis() == Direction.Axis.Y ? Direction.NORTH : dispenserDirection.getOpposite(),
+						new DirectionalPlaceContext(source.level(), blockpos, dispenserDirection, stack, against)).consumesAction());
 			}
 
 			return stack;

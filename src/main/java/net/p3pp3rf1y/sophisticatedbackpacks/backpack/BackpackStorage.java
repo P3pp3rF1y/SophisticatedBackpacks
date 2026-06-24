@@ -22,37 +22,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 //TODO after 1.22 remove support for legacy UUID deserialization via strings
 public class BackpackStorage extends SavedData {
 	private static final SavedDataType<BackpackStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID, BackpackStorage::new,
-			RecordCodecBuilder.create(
-					builder -> builder.group(
-							Codec.unboundedMap(
-									CodecHelper.STRING_ENCODED_UUID,
-									ContainerContents.CODEC
-							).fieldOf("backpackContents").forGetter(storage -> storage.backpackContents),
-							Codec.unboundedMap(
-									CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC
-							).fieldOf("accessLogRecords").forGetter(storage -> storage.accessLogRecords),
-							Codec.unboundedMap(
-									CodecHelper.STRING_ENCODED_UUID,
-									CompoundTag.CODEC
-							).optionalFieldOf("additionalBackpackContents", Map.of()).forGetter(storage -> storage.additionalBackpackContents)
-					).apply(builder, BackpackStorage::new)
-			));
+			RecordCodecBuilder.create(builder -> builder.group(
+					Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC).fieldOf("backpackContents")
+							.forGetter(storage -> storage.backpackContents),
+					Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC).fieldOf("accessLogRecords")
+							.forGetter(storage -> storage.accessLogRecords),
+					Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, CompoundTag.CODEC).optionalFieldOf("additionalBackpackContents", Map.of())
+							.forGetter(storage -> storage.additionalBackpackContents))
+					.apply(builder, BackpackStorage::new)));
 
 	private final Map<UUID, ContainerContents> backpackContents = new HashMap<>();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
 	private final Map<UUID, CompoundTag> additionalBackpackContents = new HashMap<>();
 
-	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords, Map<UUID, CompoundTag> additionalBackpackContents) {
+	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords,
+			Map<UUID, CompoundTag> additionalBackpackContents) {
 		this.accessLogRecords.putAll(accessLogRecords);
 		this.additionalBackpackContents.putAll(additionalBackpackContents);
-		backpackContents.forEach(
-				(uuid, contents) -> {
-					if (isPlayerBackpackOrNotEmpty(this, uuid, contents)) {
-						this.backpackContents.put(uuid, contents);
-					}
-				}
-		);
+		backpackContents.forEach((uuid, contents) -> {
+			if (isPlayerBackpackOrNotEmpty(this, uuid, contents)) {
+				this.backpackContents.put(uuid, contents);
+			}
+		});
 	}
 
 	private BackpackStorage() {
@@ -63,7 +55,7 @@ public class BackpackStorage extends SavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}
@@ -132,7 +124,8 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
+			if (!accessLogRecords.containsKey(entry.getKey())
+					&& (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}

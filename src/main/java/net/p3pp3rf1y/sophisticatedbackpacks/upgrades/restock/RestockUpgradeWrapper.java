@@ -22,14 +22,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrapper, RestockUpgradeItem>
-		implements IContentsFilteredUpgrade, IItemResourceHandlerInteractionUpgrade {
+		implements
+			IContentsFilteredUpgrade,
+			IItemResourceHandlerInteractionUpgrade {
 	private final ContentsFilterLogic filterLogic;
 
 	public RestockUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
-		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(),
-				backpackWrapper::getInventoryHandler, backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class),
-				ModCoreDataComponents.FILTER_ATTRIBUTES);
+		filterLogic = new ContentsFilterLogic(upgrade, upgradeSaveHandler, upgradeItem.getFilterSlotCount(), backpackWrapper::getInventoryHandler,
+				backpackWrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class), ModCoreDataComponents.FILTER_ATTRIBUTES);
 	}
 
 	@Override
@@ -50,7 +51,8 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 		List<ItemStack> transferredStacks = new ArrayList<>();
 
 		try (Transaction tx = Transaction.openRoot()) {
-			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(), Collections.singletonList(filterLogic), Collections.emptyList());
+			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(),
+					Collections.singletonList(filterLogic), Collections.emptyList());
 			InventoryHelper.iterate(handler, (index, resource, amount) -> {
 				int moved = filteredTarget.insert(resource, amount, tx);
 				if (moved > 0) {

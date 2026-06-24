@@ -19,14 +19,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BackpackTemplateStorage extends SavedData {
-	private static final SavedDataType<BackpackTemplateStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID + "_backpack_templates", BackpackTemplateStorage::new,
+	private static final SavedDataType<BackpackTemplateStorage> TYPE = new SavedDataType<>(SophisticatedBackpacks.MOD_ID + "_backpack_templates",
+			BackpackTemplateStorage::new,
 			RecordCodecBuilder.create(builder -> builder.group(
-					Codec.unboundedMap(
-							Identifier.CODEC,
-							BackpackTemplate.CODEC
-					).fieldOf("backpackTemplates").forGetter(storage -> storage.backpackTemplates)
-			).apply(builder, BackpackTemplateStorage::new))
-	);
+					Codec.unboundedMap(Identifier.CODEC, BackpackTemplate.CODEC).fieldOf("backpackTemplates").forGetter(storage -> storage.backpackTemplates))
+					.apply(builder, BackpackTemplateStorage::new)));
 
 	private static final BackpackTemplateStorage clientStorageCopy = new BackpackTemplateStorage();
 	private final Map<Identifier, BackpackTemplate> backpackTemplates = new HashMap<>();
@@ -43,7 +40,7 @@ public class BackpackTemplateStorage extends SavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}

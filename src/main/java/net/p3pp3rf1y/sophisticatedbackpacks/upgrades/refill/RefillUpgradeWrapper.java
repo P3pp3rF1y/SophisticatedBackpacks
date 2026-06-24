@@ -38,6 +38,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import org.jspecify.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,12 +46,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrapper, RefillUpgradeItem>
-		implements IFilteredUpgrade, ITickableUpgrade, IBlockPickResponseUpgrade {
+		implements
+			IFilteredUpgrade,
+			ITickableUpgrade,
+			IBlockPickResponseUpgrade {
 	private static final int REFILL_RANGE = 3;
 	private static final int COOLDOWN = 5;
 
 	public static final Codec<Map<Integer, TargetSlot>> TARGET_SLOTS_CODEC = Codec.unboundedMap(CodecHelper.STRING_ENCODED_INT, TargetSlot.CODEC);
-	public static final StreamCodec<FriendlyByteBuf, Map<Integer, TargetSlot>> TARGET_SLOTS_STREAM_CODEC = StreamCodecHelper.ofMap(ByteBufCodecs.INT, TargetSlot.STREAM_CODEC, HashMap::new);
+	public static final StreamCodec<FriendlyByteBuf, Map<Integer, TargetSlot>> TARGET_SLOTS_STREAM_CODEC = StreamCodecHelper.ofMap(ByteBufCodecs.INT,
+			TargetSlot.STREAM_CODEC, HashMap::new);
 
 	private final Map<Integer, TargetSlot> targetSlots;
 
@@ -112,12 +117,13 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	private void refillItemFor(Entity entity) {
-		CapabilityHelper.runOnItemHandler(entity, playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filterResource, amount) -> {
-			if (filterResource.isEmpty()) {
-				return;
-			}
-			tryRefillFilter(entity, playerInvHandler, filterResource, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
-		}));
+		CapabilityHelper.runOnItemHandler(entity,
+				playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filterResource, amount) -> {
+					if (filterResource.isEmpty()) {
+						return;
+					}
+					tryRefillFilter(entity, playerInvHandler, filterResource, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
+				}));
 	}
 
 	private void tryRefillFilter(@Nonnull Entity entity, ResourceHandler<ItemResource> playerInvHandler, ItemResource filter, TargetSlot targetSlot) {
@@ -181,10 +187,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 				player.getInventory().setSelectedItem(filter.copyWithCount(pulled));
 				return true;
 			} else {
-				player.displayClientMessage(
-						net.minecraft.network.chat.Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"),
-						true
-				);
+				player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"), true);
 				return false;
 			}
 		}
@@ -214,42 +217,206 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 	}
 
 	public enum TargetSlot implements StringRepresentable {
-		ANY("any", BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any"), BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any.tooltip").withStyle(ChatFormatting.DARK_GREEN),
+		ANY("any", BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any"),
+				BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.any.tooltip").withStyle(ChatFormatting.DARK_GREEN),
 				(player, playerInvHandler, filter) -> InventoryHelper.getCountMissingInHandler(playerInvHandler, filter, filter.getMaxStackSize()),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillAnywhereInInventory(playerInvHandler, resourceToAdd, amountToAdd)),
-		MAIN_HAND("main_hand", BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.main_hand"), BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.main_hand.tooltip").withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getMainHandItem(), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(player::getMainHandItem, resourceToAdd, amountToAdd, stack -> player.setItemInHand(InteractionHand.MAIN_HAND, stack))),
-		OFF_HAND("off_hand", BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.off_hand"), BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.off_hand.tooltip").withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getOffhandItem(), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(player::getOffhandItem, resourceToAdd, amountToAdd, stack -> player.setItemInHand(InteractionHand.OFF_HAND, stack))),
-		TOOLBAR_1("toolbar_1", Component.literal("1"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 1).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(0), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(0), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(0, stack))),
-		TOOLBAR_2("toolbar_2", Component.literal("2"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 2).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(1), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(1), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(1, stack))),
-		TOOLBAR_3("toolbar_3", Component.literal("3"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 3).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(2), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(2), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(2, stack))),
-		TOOLBAR_4("toolbar_4", Component.literal("4"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 4).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(3), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(3), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(3, stack))),
-		TOOLBAR_5("toolbar_5", Component.literal("5"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 5).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(4), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(4), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(4, stack))),
-		TOOLBAR_6("toolbar_6", Component.literal("6"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 6).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(5), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(5), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(5, stack))),
-		TOOLBAR_7("toolbar_7", Component.literal("7"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 7).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(6), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(6), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(6, stack))),
-		TOOLBAR_8("toolbar_8", Component.literal("8"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 8).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(7), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(7), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(7, stack))),
-		TOOLBAR_9("toolbar_9", Component.literal("9"), BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 9).withStyle(ChatFormatting.DARK_GREEN),
-				(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(8), filter),
-				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(() -> player.getInventory().getItem(8), resourceToAdd, amountToAdd, stack -> player.getInventory().setItem(8, stack)));
+				(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillAnywhereInInventory(playerInvHandler, resourceToAdd, amountToAdd)), MAIN_HAND(
+						"main_hand", BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.main_hand"),
+						BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.main_hand.tooltip").withStyle(ChatFormatting.DARK_GREEN),
+						(player, playerInvHandler, filter) -> getMissingCount(player.getMainHandItem(), filter),
+						(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(player::getMainHandItem, resourceToAdd, amountToAdd,
+								stack -> player.setItemInHand(InteractionHand.MAIN_HAND, stack))), OFF_HAND("off_hand",
+										BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.off_hand"),
+										BackpackTranslationHelper.INSTANCE.translUpgrade("refill.target_slot.off_hand.tooltip")
+												.withStyle(ChatFormatting.DARK_GREEN),
+										(player, playerInvHandler, filter) -> getMissingCount(player.getOffhandItem(), filter),
+										(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(player::getOffhandItem, resourceToAdd, amountToAdd,
+												stack -> player.setItemInHand(InteractionHand.OFF_HAND, stack))), TOOLBAR_1(
+														"toolbar_1", Component.literal("1"),
+														BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 1)
+																.withStyle(ChatFormatting.DARK_GREEN),
+														(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(0), filter),
+														(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(
+																() -> player.getInventory().getItem(0), resourceToAdd, amountToAdd,
+																stack -> player.getInventory().setItem(0, stack))), TOOLBAR_2("toolbar_2",
+																		Component.literal("2"),
+																		BackpackTranslationHelper.INSTANCE.translUpgrade(Constants.HOTBAR_TRANSL, 2)
+																				.withStyle(ChatFormatting.DARK_GREEN),
+																		(player, playerInvHandler, filter) -> getMissingCount(player.getInventory().getItem(1),
+																				filter),
+																		(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(
+																				() -> player.getInventory().getItem(1), resourceToAdd, amountToAdd,
+																				stack -> player.getInventory().setItem(1, stack))), TOOLBAR_3("toolbar_3",
+																						Component.literal("3"),
+																						BackpackTranslationHelper.INSTANCE
+																								.translUpgrade(Constants.HOTBAR_TRANSL, 3)
+																								.withStyle(ChatFormatting.DARK_GREEN),
+																						(player, playerInvHandler, filter) -> getMissingCount(
+																								player.getInventory().getItem(2), filter),
+																						(player, playerInvHandler, resourceToAdd, amountToAdd) -> refillSlot(
+																								() -> player.getInventory().getItem(2), resourceToAdd,
+																								amountToAdd,
+																								stack -> player.getInventory().setItem(2, stack))), TOOLBAR_4(
+																										"toolbar_4", Component.literal("4"),
+																										BackpackTranslationHelper.INSTANCE
+																												.translUpgrade(Constants.HOTBAR_TRANSL, 4)
+																												.withStyle(ChatFormatting.DARK_GREEN),
+																										(player, playerInvHandler, filter) -> getMissingCount(
+																												player.getInventory().getItem(3), filter),
+																										(player, playerInvHandler, resourceToAdd,
+																												amountToAdd) -> refillSlot(
+																														() -> player.getInventory().getItem(3),
+																														resourceToAdd, amountToAdd,
+																														stack -> player.getInventory()
+																																.setItem(3, stack))), TOOLBAR_5(
+																																		"toolbar_5",
+																																		Component.literal("5"),
+																																		BackpackTranslationHelper.INSTANCE
+																																				.translUpgrade(
+																																						Constants.HOTBAR_TRANSL,
+																																						5)
+																																				.withStyle(
+																																						ChatFormatting.DARK_GREEN),
+																																		(player, playerInvHandler,
+																																				filter) -> getMissingCount(
+																																						player.getInventory()
+																																								.getItem(
+																																										4),
+																																						filter),
+																																		(player, playerInvHandler,
+																																				resourceToAdd,
+																																				amountToAdd) -> refillSlot(
+																																						() -> player
+																																								.getInventory()
+																																								.getItem(
+																																										4),
+																																						resourceToAdd,
+																																						amountToAdd,
+																																						stack -> player
+																																								.getInventory()
+																																								.setItem(
+																																										4,
+																																										stack))), TOOLBAR_6(
+																																												"toolbar_6",
+																																												Component
+																																														.literal(
+																																																"6"),
+																																												BackpackTranslationHelper.INSTANCE
+																																														.translUpgrade(
+																																																Constants.HOTBAR_TRANSL,
+																																																6)
+																																														.withStyle(
+																																																ChatFormatting.DARK_GREEN),
+																																												(player, playerInvHandler,
+																																														filter) -> getMissingCount(
+																																																player.getInventory()
+																																																		.getItem(
+																																																				5),
+																																																filter),
+																																												(player, playerInvHandler,
+																																														resourceToAdd,
+																																														amountToAdd) -> refillSlot(
+																																																() -> player
+																																																		.getInventory()
+																																																		.getItem(
+																																																				5),
+																																																resourceToAdd,
+																																																amountToAdd,
+																																																stack -> player
+																																																		.getInventory()
+																																																		.setItem(
+																																																				5,
+																																																				stack))), TOOLBAR_7(
+																																																						"toolbar_7",
+																																																						Component
+																																																								.literal(
+																																																										"7"),
+																																																						BackpackTranslationHelper.INSTANCE
+																																																								.translUpgrade(
+																																																										Constants.HOTBAR_TRANSL,
+																																																										7)
+																																																								.withStyle(
+																																																										ChatFormatting.DARK_GREEN),
+																																																						(player, playerInvHandler,
+																																																								filter) -> getMissingCount(
+																																																										player.getInventory()
+																																																												.getItem(
+																																																														6),
+																																																										filter),
+																																																						(player, playerInvHandler,
+																																																								resourceToAdd,
+																																																								amountToAdd) -> refillSlot(
+																																																										() -> player
+																																																												.getInventory()
+																																																												.getItem(
+																																																														6),
+																																																										resourceToAdd,
+																																																										amountToAdd,
+																																																										stack -> player
+																																																												.getInventory()
+																																																												.setItem(
+																																																														6,
+																																																														stack))), TOOLBAR_8(
+																																																																"toolbar_8",
+																																																																Component
+																																																																		.literal(
+																																																																				"8"),
+																																																																BackpackTranslationHelper.INSTANCE
+																																																																		.translUpgrade(
+																																																																				Constants.HOTBAR_TRANSL,
+																																																																				8)
+																																																																		.withStyle(
+																																																																				ChatFormatting.DARK_GREEN),
+																																																																(player, playerInvHandler,
+																																																																		filter) -> getMissingCount(
+																																																																				player.getInventory()
+																																																																						.getItem(
+																																																																								7),
+																																																																				filter),
+																																																																(player, playerInvHandler,
+																																																																		resourceToAdd,
+																																																																		amountToAdd) -> refillSlot(
+																																																																				() -> player
+																																																																						.getInventory()
+																																																																						.getItem(
+																																																																								7),
+																																																																				resourceToAdd,
+																																																																				amountToAdd,
+																																																																				stack -> player
+																																																																						.getInventory()
+																																																																						.setItem(
+																																																																								7,
+																																																																								stack))), TOOLBAR_9(
+																																																																										"toolbar_9",
+																																																																										Component
+																																																																												.literal(
+																																																																														"9"),
+																																																																										BackpackTranslationHelper.INSTANCE
+																																																																												.translUpgrade(
+																																																																														Constants.HOTBAR_TRANSL,
+																																																																														9)
+																																																																												.withStyle(
+																																																																														ChatFormatting.DARK_GREEN),
+																																																																										(player, playerInvHandler,
+																																																																												filter) -> getMissingCount(
+																																																																														player.getInventory()
+																																																																																.getItem(
+																																																																																		8),
+																																																																														filter),
+																																																																										(player, playerInvHandler,
+																																																																												resourceToAdd,
+																																																																												amountToAdd) -> refillSlot(
+																																																																														() -> player
+																																																																																.getInventory()
+																																																																																.getItem(
+																																																																																		8),
+																																																																														resourceToAdd,
+																																																																														amountToAdd,
+																																																																														stack -> player
+																																																																																.getInventory()
+																																																																																.setItem(
+																																																																																		8,
+																																																																																		stack)));
 
 		private final String name;
 
@@ -287,7 +454,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 		static {
 			ImmutableMap.Builder<String, TargetSlot> builder = new ImmutableMap.Builder<>();
-			for (TargetSlot value : TargetSlot.values()) {
+			for (TargetSlot value : values()) {
 				builder.put(value.getSerializedName(), value);
 			}
 			NAME_VALUES = builder.build();
