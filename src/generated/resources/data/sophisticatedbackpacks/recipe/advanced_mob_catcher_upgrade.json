@@ -8,24 +8,12 @@
   "type": "sophisticatedcore:upgrade_next_tier",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:mob_catcher_upgrade"
-    },
-    "D": {
-      "tag": "c:gems/diamond"
-    },
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "G": {
-      "tag": "c:ingots/gold"
-    },
-    "H": {
-      "item": "minecraft:wither_skeleton_skull"
-    },
-    "S": {
-      "item": "minecraft:soul_sand"
-    }
+    "B": "sophisticatedbackpacks:mob_catcher_upgrade",
+    "D": "#c:gems/diamond",
+    "E": "minecraft:ender_eye",
+    "G": "#c:ingots/gold",
+    "H": "minecraft:wither_skeleton_skull",
+    "S": "minecraft:soul_sand"
   },
   "pattern": [
     "HDE",
