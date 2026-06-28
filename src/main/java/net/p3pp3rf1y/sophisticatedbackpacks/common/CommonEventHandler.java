@@ -47,6 +47,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -87,6 +88,7 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onPlayerChangedDimension);
 		eventBus.addListener(this::onPlayerRespawn);
 		eventBus.addListener(this::onWorldTick);
+		eventBus.addListener(BackpackStorage::onWorldLoad);
 		eventBus.addListener(this::interactWithEntity);
 		eventBus.addListener(this::handleBreakBackpackWithInfinityUpgrade);
 		eventBus.addListener(this::handleEverlastingInvulnerability);
