@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
@@ -28,11 +29,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherCaptureEffectPayload;
@@ -76,13 +79,13 @@ public class MobCatcherHandler {
 		int slotCost = getSlotCost(entity, hostile);
 		int maxSlotCost = advanced ? Config.SERVER.mobCatcherUpgrade.advancedMaxSlotCost.get() : Config.SERVER.mobCatcherUpgrade.basicMaxSlotCost.get();
 		if (slotCost > maxSlotCost) {
-			return fail(player, Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_too_large", slotCost, maxSlotCost));
+			return fail(player, SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_too_large", slotCost, maxSlotCost));
 		}
 
 		CapturedMobFootprint footprint = MobCatcherStorage.getFootprint(entity, slotCost);
 		Optional<Integer> slot = MobCatcherStorage.findEmptyRectangle(backpackWrapper, footprint);
 		if (slot.isEmpty()) {
-			return fail(player, Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_no_space", footprint.width(), footprint.height()));
+			return fail(player, SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_no_space", footprint.width(), footprint.height()));
 		}
 
 		CompoundTag entityTag = new CompoundTag();
@@ -95,7 +98,7 @@ public class MobCatcherHandler {
 				entityType, entityTag, entity.position(), getCaptureEffectCollapsePosition(player, entity), entity.getYRot(), entity.getXRot()));
 		entity.discard();
 		syncCapturedMobs(player, backpackWrapper);
-		return new CaptureResult(true, Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_captured", capturedMob.displayName()));
+		return new CaptureResult(true, SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_captured", capturedMob.displayName()));
 	}
 
 	private static Vec3 getCaptureEffectCollapsePosition(ServerPlayer player, LivingEntity entity) {
@@ -106,25 +109,28 @@ public class MobCatcherHandler {
 
 	private static Optional<Component> getEligibilityError(ServerPlayer player, LivingEntity entity, boolean advanced) {
 		if (entity instanceof Player) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_players_blocked"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_players_blocked"));
 		}
 		if (entity instanceof EnderDragon || entity instanceof WitherBoss) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_boss_blocked"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_boss_blocked"));
+		}
+		if (entity.getType().is(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED)) {
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_blocklisted"));
 		}
 		if (entity.isPassenger() || entity.isVehicle()) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_passengers_blocked"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_passengers_blocked"));
 		}
 		if (Config.SERVER.mobCatcherUpgrade.matchesEntityBlockList(entity.getType())) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_blocklisted"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_blocklisted"));
 		}
 		if (entity instanceof OwnableEntity ownable && ownable.getOwnerUUID() != null && !ownable.getOwnerUUID().equals(player.getUUID())) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_not_owner"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_not_owner"));
 		}
-		if (Boolean.TRUE.equals(Config.SERVER.mobCatcherUpgrade.disallowInventoryEntities.get()) && entity instanceof net.minecraft.world.Container) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_inventory_blocked"));
+		if (Config.SERVER.mobCatcherUpgrade.disallowInventoryEntities.get() && entity instanceof Container) {
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_inventory_blocked"));
 		}
 		if (!advanced && isHostile(entity)) {
-			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_hostile_needs_advanced"));
+			return Optional.of(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_hostile_needs_advanced"));
 		}
 		return Optional.empty();
 	}
@@ -140,25 +146,25 @@ public class MobCatcherHandler {
 		}
 		Optional<Entity> entity = createEntity(player.serverLevel(), capturedMob.get());
 		if (entity.isEmpty() || !(entity.get() instanceof LivingEntity livingEntity)) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_release_failed"), true);
+			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_release_failed"), true);
 			return;
 		}
 
 		Optional<Vec3> target = getReleasePosition(player, livingEntity);
 		if (target.isEmpty()) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_no_release_space"), true);
+			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_no_release_space"), true);
 			playMobCatcherSound(player, SoundEvents.NOTE_BLOCK_BASS.value(), 0.7F, 0.8F);
 			return;
 		}
 
 		livingEntity.moveTo(target.get().x, target.get().y, target.get().z, player.getYRot(), 0);
 		if (!player.serverLevel().addFreshEntity(livingEntity)) {
-			player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_release_failed"), true);
+			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_release_failed"), true);
 			return;
 		}
 		MobCatcherStorage.removeCapturedMob(backpackWrapper, capturedMobId);
 		syncCapturedMobs(player, backpackWrapper);
-		player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_released", capturedMob.get().displayName()), true);
+		player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("mob_catcher_released", capturedMob.get().displayName()), true);
 		playMobCatcherSound(player, SoundEvents.ITEM_PICKUP, 0.7F, 1.2F);
 	}
 
