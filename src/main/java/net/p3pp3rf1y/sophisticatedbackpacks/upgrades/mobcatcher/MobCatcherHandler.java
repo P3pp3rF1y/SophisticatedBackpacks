@@ -29,6 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -112,6 +113,9 @@ public class MobCatcherHandler {
 		}
 		if (entity instanceof EnderDragon || entity instanceof WitherBoss) {
 			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_boss_blocked"));
+		}
+		if (entity.getType().is(Tags.EntityTypes.CAPTURING_NOT_SUPPORTED)) {
+			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_blocklisted"));
 		}
 		if (entity.isPassenger() || entity.isVehicle()) {
 			return Optional.of(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_passengers_blocked"));
