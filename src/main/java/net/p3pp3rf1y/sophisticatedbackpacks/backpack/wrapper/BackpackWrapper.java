@@ -678,6 +678,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		getBackpackStack().remove(ModDataComponents.LOOT_TABLE);
 		getBackpackStack().remove(ModDataComponents.LOOT_FACTOR);
+		LegacyBackpackDataMigration.removeLegacyLootData(getBackpackStack());
+		backpackSaveHandler.run();
 
 		List<ItemStack> loot = new ArrayList<>();
 		while (lootFactor > 0) {
