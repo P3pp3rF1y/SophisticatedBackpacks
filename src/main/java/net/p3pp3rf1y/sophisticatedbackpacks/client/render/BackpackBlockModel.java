@@ -408,10 +408,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			}
 
 			float stepRatio = stepToRatio(step, steps);
+			boolean lighterThanAir = fluidStack.getFluid().getFluidType().isLighterThanAir();
 
-			double cut = max.minY + (max.maxY - max.minY) * stepRatio;
+			double cut = lighterThanAir ? max.maxY - (max.maxY - max.minY) * stepRatio : max.minY + (max.maxY - max.minY) * stepRatio;
 
-			List<BakedQuad> sliced = sliceQuadsAxis(src, Direction.Axis.Y, cut, false).getAll();
+			List<BakedQuad> sliced = sliceQuadsAxis(src, Direction.Axis.Y, cut, lighterThanAir).getAll();
 			if (sliced.isEmpty()) {
 				return QuadCollection.EMPTY;
 			}
@@ -423,17 +424,17 @@ public class BackpackBlockModel implements UnbakedModel {
 
 			QuadCollection.Builder builder = respriteAndTintQuads(sliced, newSprite, argb);
 
-			BakedQuad top = buildFluidTopQuad((float) cut, max, src, newSprite, argb);
-			if (top != null) {
-				builder.addUnculledFace(top);
+			BakedQuad level = buildFluidLevelQuad((float) cut, max, src, newSprite, argb, lighterThanAir ? Direction.DOWN : Direction.UP);
+			if (level != null) {
+				builder.addUnculledFace(level);
 			}
 
 			return builder.build();
 		}
 
 		@Nullable
-		private static BakedQuad buildFluidTopQuad(float y, AABB max, List<BakedQuad> src, TextureAtlasSprite sprite, int argb) {
-			if (y <= (float) max.minY + 1e-6f) {
+		private static BakedQuad buildFluidLevelQuad(float y, AABB max, List<BakedQuad> src, TextureAtlasSprite sprite, int argb, Direction direction) {
+			if (direction == Direction.UP && y <= (float) max.minY + 1e-6f || direction == Direction.DOWN && y >= (float) max.maxY - 1e-6f) {
 				return null;
 			}
 
@@ -452,8 +453,8 @@ public class BackpackBlockModel implements UnbakedModel {
 				pxPerUnitZ = pxPerUnitX;
 			}
 
-			double widthX = (max.maxX - max.minX);
-			double depthZ = (max.maxZ - max.minZ);
+			double widthX = max.maxX - max.minX;
+			double depthZ = max.maxZ - max.minZ;
 
 			double uPixels = widthX * pxPerUnitX;
 			double vPixels = depthZ * pxPerUnitZ;
@@ -466,26 +467,33 @@ public class BackpackBlockModel implements UnbakedModel {
 
 			float u0 = sprite.getU0();
 			float v0 = sprite.getV0();
-			float du = (float) ((uPixels / sw) * (sprite.getU1() - sprite.getU0()));
-			float dv = (float) ((vPixels / sh) * (sprite.getV1() - sprite.getV0()));
+			float du = (float) (uPixels / sw * (sprite.getU1() - sprite.getU0()));
+			float dv = (float) (vPixels / sh * (sprite.getV1() - sprite.getV0()));
 			float u1 = u0 + du;
 			float v1 = v0 + dv;
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
 			qb.setSprite(sprite);
-			qb.setDirection(Direction.UP);
+			qb.setDirection(direction);
 			qb.setTintIndex(-1);
-			Vec3i n = Direction.UP.getUnitVec3i();
+			Vec3i n = direction.getUnitVec3i();
 
 			float x0 = (float) max.minX;
 			float x1 = (float) max.maxX;
 			float z0 = (float) max.minZ;
 			float z1 = (float) max.maxZ;
 
-			qb.addVertex(x0, y, z0).setColor(r, g, b, a).setUv(u0, v0).setNormal(n.getX(), n.getY(), n.getZ());
-			qb.addVertex(x0, y, z1).setColor(r, g, b, a).setUv(u0, v1).setNormal(n.getX(), n.getY(), n.getZ());
-			qb.addVertex(x1, y, z1).setColor(r, g, b, a).setUv(u1, v1).setNormal(n.getX(), n.getY(), n.getZ());
-			qb.addVertex(x1, y, z0).setColor(r, g, b, a).setUv(u1, v0).setNormal(n.getX(), n.getY(), n.getZ());
+			if (direction == Direction.DOWN) {
+				qb.addVertex(x1, y, z0).setColor(r, g, b, a).setUv(u1, v0).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x1, y, z1).setColor(r, g, b, a).setUv(u1, v1).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x0, y, z1).setColor(r, g, b, a).setUv(u0, v1).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x0, y, z0).setColor(r, g, b, a).setUv(u0, v0).setNormal(n.getX(), n.getY(), n.getZ());
+			} else {
+				qb.addVertex(x0, y, z0).setColor(r, g, b, a).setUv(u0, v0).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x0, y, z1).setColor(r, g, b, a).setUv(u0, v1).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x1, y, z1).setColor(r, g, b, a).setUv(u1, v1).setNormal(n.getX(), n.getY(), n.getZ());
+				qb.addVertex(x1, y, z0).setColor(r, g, b, a).setUv(u1, v0).setNormal(n.getX(), n.getY(), n.getZ());
+			}
 
 			return qb.bakeQuad();
 		}
@@ -533,7 +541,7 @@ public class BackpackBlockModel implements UnbakedModel {
 					continue;
 				}
 
-				double uDen = (s.getU1() - s.getU0());
+				double uDen = s.getU1() - s.getU0();
 				if (Math.abs(uDen) < 1e-9) {
 					continue;
 				}
@@ -566,7 +574,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private static float stepToRatio(int step, int steps) {
-			return steps <= 0 ? 0f : (step / (float) steps);
+			return steps <= 0 ? 0f : step / (float) steps;
 		}
 
 		@Nullable
@@ -672,7 +680,7 @@ public class BackpackBlockModel implements UnbakedModel {
 				case Z -> p.z;
 			};
 			float eps = 1e-6f;
-			return keepGE ? (c + eps >= cut) : (c <= cut + eps);
+			return keepGE ? c + eps >= cut : c <= cut + eps;
 		}
 
 		private static Vert intersect(Vert a, Vert b, Direction.Axis axis, float cut) {
@@ -687,7 +695,7 @@ public class BackpackBlockModel implements UnbakedModel {
 				case Z -> b.z;
 			};
 
-			float denom = (cb - ca);
+			float denom = cb - ca;
 			float t = denom == 0f ? 0f : (cut - ca) / denom;
 			t = Mth.clamp(t, 0f, 1f);
 
@@ -743,7 +751,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private static float remapU(TextureAtlasSprite oldS, TextureAtlasSprite newS, float u) {
-			float denom = (oldS.getU1() - oldS.getU0());
+			float denom = oldS.getU1() - oldS.getU0();
 			if (denom == 0f) {
 				return newS.getU0();
 			}
@@ -752,7 +760,7 @@ public class BackpackBlockModel implements UnbakedModel {
 		}
 
 		private static float remapV(TextureAtlasSprite oldS, TextureAtlasSprite newS, float v) {
-			float denom = (oldS.getV1() - oldS.getV0());
+			float denom = oldS.getV1() - oldS.getV0();
 			if (denom == 0f) {
 				return newS.getV0();
 			}
@@ -810,21 +818,21 @@ public class BackpackBlockModel implements UnbakedModel {
 
 				double pixelSpan;
 				if (fillAxis == Direction.Axis.X) {
-					double denom = (s.getU1() - s.getU0());
+					double denom = s.getU1() - s.getU0();
 					if (Math.abs(denom) < 1e-9)
 						continue;
 					double uNormSpan = Math.abs(maxU - minU) / denom;
 					int texW = s.contents().width();
 					pixelSpan = uNormSpan * texW;
 				} else if (fillAxis == Direction.Axis.Y) {
-					double denom = (s.getV1() - s.getV0());
+					double denom = s.getV1() - s.getV0();
 					if (Math.abs(denom) < 1e-9)
 						continue;
 					double vNormSpan = Math.abs(maxV - minV) / denom;
 					int texH = s.contents().height();
 					pixelSpan = vNormSpan * texH;
 				} else {
-					double denom = (s.getU1() - s.getU0());
+					double denom = s.getU1() - s.getU0();
 					if (Math.abs(denom) < 1e-9)
 						continue;
 					double uNormSpan = Math.abs(maxU - minU) / denom;
