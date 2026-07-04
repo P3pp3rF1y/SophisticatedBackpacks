@@ -13,8 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.SavedDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -121,9 +121,10 @@ public class BackpackStorage extends SavedData {
 	}
 
 	private static void readLegacyAccessLogs(CompoundTag nbt, Map<UUID, AccessLogRecord> accessLogRecords) {
-		nbt.getListOrEmpty("accessLogRecords").compoundStream().forEach(accessLogTag -> AccessLogRecord.CODEC.parse(NbtOps.INSTANCE, accessLogTag)
-				.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack access log: {}", error))
-				.ifPresent(accessLogRecord -> accessLogRecords.put(accessLogRecord.backpackUuid(), accessLogRecord)));
+		nbt.getListOrEmpty("accessLogRecords").compoundStream()
+				.forEach(accessLogTag -> AccessLogRecord.CODEC.parse(NbtOps.INSTANCE, accessLogTag)
+						.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack access log: {}", error))
+						.ifPresent(accessLogRecord -> accessLogRecords.put(accessLogRecord.backpackUuid(), accessLogRecord)));
 	}
 
 	private static void readLegacyBackpackContents(CompoundTag nbt, Map<UUID, ContainerContents> backpackContents) {
