@@ -40,7 +40,7 @@ public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<S
 	private static BackpackTierUpgradeVariantPair withComponentsFromSource(BackpackTierUpgradeVariantPair pair, ItemStack sourceStack) {
 		ItemStack source = pair.source().copy();
 		copyRenderComponents(sourceStack, source);
-		setSlotNumbers(source);
+		copySlotComponents(sourceStack, source);
 		ItemStack result = pair.result().copy();
 		copyRenderComponents(sourceStack, result);
 		setSlotNumbers(result);
@@ -66,6 +66,11 @@ public record BackpackSmithingUpgradeDisplayRecipe(Identifier id, RecipeHolder<S
 		copyComponent(from, to, ModCoreDataComponents.MAIN_COLOR);
 		copyComponent(from, to, ModCoreDataComponents.ACCENT_COLOR);
 		copyComponent(from, to, ModCoreDataComponents.RENDER_DATA);
+	}
+
+	private static void copySlotComponents(ItemStack from, ItemStack to) {
+		copyComponent(from, to, ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
+		copyComponent(from, to, ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
 	}
 
 	private static <T> void copyComponent(ItemStack from, ItemStack to, Supplier<DataComponentType<T>> componentSupplier) {
