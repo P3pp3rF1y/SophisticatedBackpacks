@@ -55,7 +55,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		DisplayItemAnchor.fromQuad(renderState.displayItemQuad).applyTransform(poseStack);
+		DisplayItemAnchor.fromQuad(renderState.displayItemQuad).applyTransform(poseStack, renderState.displayItemZOffset);
 		poseStack.mulPose(Axis.ZP.rotationDegrees(renderState.displayItemRotation));
 		renderState.displayItem.submit(poseStack, submitNodeCollector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
@@ -97,9 +97,11 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			itemModelResolver.updateForTopItem(renderState.displayItem, displayItem.createItemStack(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null,
 					0);
 			renderState.displayItemRotation = displayItem.rotation();
+			renderState.displayItemZOffset = displayItem.zOffset();
 		} else {
 			renderState.displayItem = new ItemStackRenderState();
 			renderState.displayItemRotation = 0;
+			renderState.displayItemZOffset = 0;
 		}
 
 		renderState.tanks = renderDataHandler.getTankRenderData().entrySet().stream().filter(entry -> entry.getValue().getFluid().isPresent())
@@ -119,6 +121,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		public ItemStackRenderState displayItem = new ItemStackRenderState();
 		public Direction facing = Direction.NORTH;
 		public int displayItemRotation = 0;
+		public int displayItemZOffset = 0;
 		public Map<TankPosition, TankState> tanks = new HashMap<>();
 		public float batteryChargeRatio = 0f;
 		public boolean showLeftTank = false;
