@@ -57,7 +57,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 				poseStack.translate(0.5, 0, 0.5);
 				poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
-				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, level, 0);
 
