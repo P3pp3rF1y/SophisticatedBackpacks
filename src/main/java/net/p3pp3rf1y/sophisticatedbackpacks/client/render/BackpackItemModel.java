@@ -179,7 +179,7 @@ public class BackpackItemModel implements ItemModel {
 				if (displayItemQuad == null) {
 					return;
 				}
-				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack, displayItem.getZOffset());
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				ItemRenderer itemRenderer = minecraft.getItemRenderer();
 				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, packedOverlay, poseStack, buffer, minecraft.level, 0);

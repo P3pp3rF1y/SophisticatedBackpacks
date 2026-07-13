@@ -36,7 +36,7 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderInfo> renderInfoSupplier,
 			CompoundTag settingsNbt) {
 		addSettingsCategory(settingsNbt, ItemDisplaySettingsCategory.NAME, markContentsDirty,
-				(categoryNbt, saveNbt) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderInfoSupplier, categoryNbt, saveNbt, 1,
+				(categoryNbt, saveNbt) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderInfoSupplier, categoryNbt, saveNbt, 1, true,
 						() -> getTypeCategory(MemorySettingsCategory.class)));
 	}
 
