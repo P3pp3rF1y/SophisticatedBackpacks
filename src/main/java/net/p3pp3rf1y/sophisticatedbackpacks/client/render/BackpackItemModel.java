@@ -98,9 +98,11 @@ public class BackpackItemModel implements ItemModel {
 			stackRenderState.appendModelIdentityElement(displayStack.getItem());
 			stackRenderState.appendModelIdentityElement(displayStack.getComponents());
 			stackRenderState.appendModelIdentityElement(displayItem.rotation());
+			stackRenderState.appendModelIdentityElement(displayItem.zOffset());
 			specialRenderer.displayItem = new ItemStackRenderState();
 			itemModelResolver.updateForTopItem(specialRenderer.displayItem, displayStack, ItemDisplayContext.FIXED, clientLevel, null, 0);
 			specialRenderer.displayItemRotation = displayItem.rotation();
+			specialRenderer.displayItemZOffset = displayItem.zOffset();
 		}
 
 		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack));
@@ -196,6 +198,7 @@ public class BackpackItemModel implements ItemModel {
 		@Nullable
 		public ItemStackRenderState displayItem = null;
 		public float displayItemRotation = 0f;
+		public int displayItemZOffset = 0;
 		@Nullable
 		public BakedQuad displayItemQuad = null;
 		private int[] tintLayers;
@@ -215,7 +218,7 @@ public class BackpackItemModel implements ItemModel {
 				if (displayItemQuad == null) {
 					return;
 				}
-				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack, displayItemZOffset);
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItemRotation));
 				displayItem.submit(poseStack, submitNodeCollector, packedLight, packedOverlay, outlineColor);
 			}
