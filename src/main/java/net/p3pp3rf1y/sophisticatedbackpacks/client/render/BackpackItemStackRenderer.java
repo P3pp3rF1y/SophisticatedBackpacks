@@ -39,7 +39,7 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 					return;
 				}
 				poseStack.pushPose();
-				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, minecraft.level,
 						0);
