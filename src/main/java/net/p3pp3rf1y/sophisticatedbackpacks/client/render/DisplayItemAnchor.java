@@ -8,6 +8,8 @@ import net.neoforged.neoforge.client.model.IQuadTransformer;
 import org.joml.Quaternionf;
 
 public final class DisplayItemAnchor {
+	private static final double DISPLAY_ITEM_PIXEL_SIZE_DIVISOR = 15.95D;
+
 	public final double centerX;
 	public final double centerY;
 	public final double centerZ;
@@ -89,9 +91,13 @@ public final class DisplayItemAnchor {
 	}
 
 	public void applyTransform(PoseStack poseStack) {
+		applyTransform(poseStack, 0);
+	}
+
+	public void applyTransform(PoseStack poseStack, int zOffset) {
 		poseStack.translate(centerX, centerY, centerZ);
 		poseStack.mulPose(facingRotation);
-		poseStack.translate(0.0, 0.0, depthOffset);
+		poseStack.translate(0.0, 0.0, depthOffset - zOffset * scale / DISPLAY_ITEM_PIXEL_SIZE_DIVISOR);
 		poseStack.scale(scale, scale, scale);
 	}
 }
