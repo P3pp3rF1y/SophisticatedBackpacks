@@ -23,9 +23,9 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	@Override
 	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderDataHandler> renderDataHandlerSupplier,
 			ContainerContents.SettingsData settingsData) {
-		this.<ItemDisplaySettingsCategoryData, ItemDisplaySettingsCategory>addSettingsCategory(settingsData, ItemDisplaySettingsCategory.NAME,
-				markContentsDirty, (data, save) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderDataHandlerSupplier, data, save, 1,
-						true, () -> getTypeCategory(MemorySettingsCategory.class)),
+		this.<ItemDisplaySettingsCategoryData, ItemDisplaySettingsCategory>addSettingsCategory(
+				settingsData, ItemDisplaySettingsCategory.NAME, markContentsDirty, (data, save) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier,
+						renderDataHandlerSupplier, data, save, 1, true, () -> getTypeCategory(MemorySettingsCategory.class)),
 				ItemDisplaySettingsCategoryData::new);
 	}
 

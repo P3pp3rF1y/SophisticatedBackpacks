@@ -11,11 +11,14 @@ import java.util.Optional;
 public final class BackpackItemDisplaySettingsPreviewProvider implements IItemDisplaySettingsPreviewProvider {
 	public static final BackpackItemDisplaySettingsPreviewProvider INSTANCE = new BackpackItemDisplaySettingsPreviewProvider();
 
-	private BackpackItemDisplaySettingsPreviewProvider() {}
+	private BackpackItemDisplaySettingsPreviewProvider() {
+	}
 
 	@Override
 	public Optional<ItemStack> getItemDisplaySettingsPreviewStack(SettingsScreen screen, ItemDisplaySettingsContainer container, int selectedSlot) {
-		return screen.getMenu().getStorageWrapper() instanceof IBackpackWrapper backpackWrapper ? Optional.of(backpackWrapper.getBackpack().copy()) : Optional.empty();
+		return screen.getMenu().getStorageWrapper() instanceof IBackpackWrapper backpackWrapper
+				? Optional.of(backpackWrapper.getBackpack().copy())
+				: Optional.empty();
 	}
 
 	@Override
