@@ -49,37 +49,47 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 		totalSize = index;
 	}
 
+	private void refreshSubBackpacks() {
+		subBackpacksHandler.refresh();
+	}
+
 	@Override
 	public void setStackInSlot(int slot, ItemStack stack) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(slot);
 		getHandlerFromIndex(handlerIndex).setStackInSlot(getSlotFromIndex(slot, handlerIndex), stack);
 	}
 
 	@Override
 	public int size() {
+		refreshSubBackpacks();
 		return totalSize;
 	}
 
 	@Override
 	public ItemResource getResource(int i) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(i);
 		return getHandlerFromIndex(handlerIndex).getResource(getSlotFromIndex(i, handlerIndex));
 	}
 
 	@Override
 	public long getAmountAsLong(int i) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(i);
 		return getHandlerFromIndex(handlerIndex).getAmountAsLong(getSlotFromIndex(i, handlerIndex));
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int slot) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(slot);
 		return getHandlerFromIndex(handlerIndex).getStackInSlot(getSlotFromIndex(slot, handlerIndex));
 	}
 
 	@Override
 	public int insert(ItemResource resource, int amount, TransactionContext transaction) {
+		refreshSubBackpacks();
 		int inserted = 0;
 		for (ITrackedContentsItemResourceHandler handler : handlers) {
 			int r = handler.insert(resource, amount - inserted, transaction);
@@ -93,30 +103,35 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 
 	@Override
 	public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(index);
 		return getHandlerFromIndex(handlerIndex).insert(getSlotFromIndex(index, handlerIndex), resource, amount, tx);
 	}
 
 	@Override
 	public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(index);
 		return getHandlerFromIndex(handlerIndex).extract(getSlotFromIndex(index, handlerIndex), resource, amount, tx);
 	}
 
 	@Override
 	public long getCapacityAsLong(int index, ItemResource resource) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(index);
 		return getHandlerFromIndex(handlerIndex).getCapacityAsLong(getSlotFromIndex(index, handlerIndex), resource);
 	}
 
 	@Override
 	public boolean isValid(int index, ItemResource resource) {
+		refreshSubBackpacks();
 		int handlerIndex = getHandlerIndex(index);
 		return getHandlerFromIndex(handlerIndex).isValid(getSlotFromIndex(index, handlerIndex), resource);
 	}
 
 	@Override
 	public Set<ItemStackKey> getTrackedStacks() {
+		refreshSubBackpacks();
 		Set<ItemStackKey> ret = new HashSet<>();
 		handlers.forEach(h -> ret.addAll(h.getTrackedStacks()));
 		return ret;
@@ -125,21 +140,25 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 	@Override
 	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot,
 			Runnable onRemoveLastEmptySlot) {
+		refreshSubBackpacks();
 		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
 	}
 
 	@Override
 	public void unregisterStackKeyListeners() {
+		refreshSubBackpacks();
 		handlers.forEach(ITrackedContentsItemResourceHandler::unregisterStackKeyListeners);
 	}
 
 	@Override
 	public boolean hasEmptySlots() {
+		refreshSubBackpacks();
 		return handlers.stream().anyMatch(ITrackedContentsItemResourceHandler::hasEmptySlots);
 	}
 
 	@Override
 	public int getInternalSlotLimit(int slot) {
+		refreshSubBackpacks();
 		int index = getHandlerIndex(slot);
 		ITrackedContentsItemResourceHandler handler = getHandlerFromIndex(index);
 		int localSlot = getSlotFromIndex(slot, index);
@@ -175,6 +194,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 
 	@Override
 	public boolean isInsertBlocked() {
+		refreshSubBackpacks();
 		return handlers.stream().allMatch(ITrackedContentsItemResourceHandler::isInsertBlocked);
 	}
 }
