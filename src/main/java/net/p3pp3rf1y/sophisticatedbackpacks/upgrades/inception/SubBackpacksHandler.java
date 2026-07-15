@@ -5,6 +5,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -15,6 +16,7 @@ public class SubBackpacksHandler {
 	private final InventoryHandler inventoryHandler;
 	private final Set<Consumer<Collection<IStorageWrapper>>> refreshListeners = new HashSet<>();
 	private final Set<Consumer<Collection<IStorageWrapper>>> beforeRefreshListeners = new HashSet<>();
+	private long lastWrapperCacheChangeCounter;
 
 	public SubBackpacksHandler(InventoryHandler inventoryHandler) {
 		this.inventoryHandler = inventoryHandler;
@@ -29,6 +31,24 @@ public class SubBackpacksHandler {
 
 	public Collection<IStorageWrapper> getSubBackpacks() {
 		return subBackpacks.values();
+	}
+
+	public void refresh() {
+		long wrapperCacheChangeCounter = StorageWrapperRepository.getWrapperCacheChangeCounter();
+		if (lastWrapperCacheChangeCounter == wrapperCacheChangeCounter) {
+			return;
+		}
+
+		Map<Integer, IStorageWrapper> refreshedSubBackpacks = getSubBackpacksFromInventory();
+		lastWrapperCacheChangeCounter = StorageWrapperRepository.getWrapperCacheChangeCounter();
+		if (subBackpacks.equals(refreshedSubBackpacks)) {
+			return;
+		}
+
+		notifyBeforeRefresh();
+		subBackpacks.clear();
+		subBackpacks.putAll(refreshedSubBackpacks);
+		notifyAfterRefresh();
 	}
 
 	private void onContentsChanged(int slot) {
@@ -70,13 +90,21 @@ public class SubBackpacksHandler {
 
 	private void refreshSubBackpacks() {
 		subBackpacks.clear();
+		subBackpacks.putAll(getSubBackpacksFromInventory());
+		lastWrapperCacheChangeCounter = StorageWrapperRepository.getWrapperCacheChangeCounter();
+	}
+
+	private Map<Integer, IStorageWrapper> getSubBackpacksFromInventory() {
+		Map<Integer, IStorageWrapper> refreshedSubBackpacks = new LinkedHashMap<>();
 
 		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {
 			ItemStack slotStack = inventoryHandler.getStackInSlot(slot);
 			if (slotStack.getItem() instanceof BackpackItem) {
-				subBackpacks.put(slot, BackpackWrapper.fromStack(slotStack));
+				refreshedSubBackpacks.put(slot, BackpackWrapper.fromStack(slotStack));
 			}
 		}
+
+		return refreshedSubBackpacks;
 	}
 
 	public void addBeforeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {

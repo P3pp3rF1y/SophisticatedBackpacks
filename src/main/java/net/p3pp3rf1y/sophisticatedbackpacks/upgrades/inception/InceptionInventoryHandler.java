@@ -54,43 +54,55 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		};
 	}
 
+	private void refreshSubBackpacks() {
+		subBackpacksHandler.refresh();
+	}
+
 	@Override
 	public void setStackInSlot(int slot, ItemStack stack) {
+		refreshSubBackpacks();
 		combinedInventories.setStackInSlot(slot, stack);
 	}
 
 	@Override
 	public int getSlots() {
+		refreshSubBackpacks();
 		return combinedInventories.getSlots();
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int slot) {
+		refreshSubBackpacks();
 		return combinedInventories.getStackInSlot(slot);
 	}
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		refreshSubBackpacks();
 		return combinedInventories.insertItem(slot, stack, simulate);
 	}
 
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
+		refreshSubBackpacks();
 		return combinedInventories.extractItem(slot, amount, simulate);
 	}
 
 	@Override
 	public int getSlotLimit(int slot) {
+		refreshSubBackpacks();
 		return combinedInventories.getSlotLimit(slot);
 	}
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
+		refreshSubBackpacks();
 		return combinedInventories.isItemValid(slot, stack);
 	}
 
 	@Override
 	public ItemStack insertItem(ItemStack stack, boolean simulate) {
+		refreshSubBackpacks();
 		ItemStack remainingStack = stack;
 		for (IItemHandlerSimpleInserter handler : handlers) {
 			remainingStack = handler.insertItem(remainingStack, simulate);
@@ -104,6 +116,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 
 	@Override
 	public Set<ItemStackKey> getTrackedStacks() {
+		refreshSubBackpacks();
 		Set<ItemStackKey> ret = new HashSet<>();
 		handlers.forEach(h -> ret.addAll(h.getTrackedStacks()));
 		return ret;
@@ -112,26 +125,31 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	@Override
 	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot,
 			Runnable onRemoveLastEmptySlot) {
+		refreshSubBackpacks();
 		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
 	}
 
 	@Override
 	public void unregisterStackKeyListeners() {
+		refreshSubBackpacks();
 		handlers.forEach(ITrackedContentsItemHandler::unregisterStackKeyListeners);
 	}
 
 	@Override
 	public boolean hasEmptySlots() {
+		refreshSubBackpacks();
 		return handlers.stream().anyMatch(ITrackedContentsItemHandler::hasEmptySlots);
 	}
 
 	@Override
 	public boolean isInsertBlocked() {
+		refreshSubBackpacks();
 		return handlers.stream().allMatch(ITrackedContentsItemHandler::isInsertBlocked);
 	}
 
 	@Override
 	public ItemStack extractItem(ItemStack stack, boolean simulate) {
+		refreshSubBackpacks();
 		ItemStack remaining = stack;
 		for (ITrackedContentsItemHandler handler : handlers) {
 			ItemStack extracted = handler.extractItem(remaining, simulate);

@@ -34,6 +34,7 @@ public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
 
 	@Override
 	public <T> List<T> getWrappersThatImplement(Class<T> upgradeClass) {
+		subBackpacksHandler.refresh();
 		// noinspection unchecked
 		return (List<T>) interfaceWrappers.computeIfAbsent(upgradeClass, this::collectListOfWrappersThatImplement);
 	}
