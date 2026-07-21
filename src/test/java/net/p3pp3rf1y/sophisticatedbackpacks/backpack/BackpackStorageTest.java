@@ -1,16 +1,90 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.SharedConstants;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BackpackStorageTest {
+	private static final RegistryAccess REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+	private static final HolderLookup.RegistryLookup<Enchantment> ENCHANTMENT_LOOKUP = new HolderLookup.RegistryLookup<>() {
+		private final Holder.Reference<Enchantment> sharpness = Holder.Reference.createStandAlone(this, Enchantments.SHARPNESS);
+
+		@Override
+		public ResourceKey<? extends Registry<? extends Enchantment>> key() {
+			return Registries.ENCHANTMENT;
+		}
+
+		@Override
+		public Lifecycle registryLifecycle() {
+			return Lifecycle.stable();
+		}
+
+		@Override
+		public Optional<Holder.Reference<Enchantment>> get(ResourceKey<Enchantment> key) {
+			return key.equals(Enchantments.SHARPNESS) ? Optional.of(sharpness) : Optional.empty();
+		}
+
+		@Override
+		public Stream<Holder.Reference<Enchantment>> listElements() {
+			return Stream.of(sharpness);
+		}
+
+		@Override
+		public Optional<HolderSet.Named<Enchantment>> get(TagKey<Enchantment> tag) {
+			return Optional.empty();
+		}
+
+		@Override
+		public Stream<HolderSet.Named<Enchantment>> listTags() {
+			return Stream.empty();
+		}
+	};
+
+	@BeforeAll
+	static void setup() {
+		SharedConstants.tryDetectVersion();
+		Bootstrap.bootStrap();
+		Bootstrap.validate();
+		bindTestComponents(Items.DIAMOND_SWORD);
+	}
+
+	private static void bindTestComponents(Item... items) {
+		DataComponentMap components = DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build();
+		for (Item item : items) {
+			item.builtInRegistryHolder().bindComponents(components);
+		}
+	}
+
 	@Test
 	void legacyBackpackStorageListsDeserializeToCurrentStorage() {
 		UUID backpackUuid = new UUID(1, 2);
@@ -23,6 +97,50 @@ class BackpackStorageTest {
 		assertEquals(1, storage.getAccessLogs().size());
 		assertEquals("Player", storage.getAccessLogs().get(backpackUuid).playerName());
 		assertEquals(2, storage.getOrCreateBackpackContents(backpackUuid).inventory().stacks().size());
+	}
+
+	@Test
+	void legacyBackpackStorageKeepsEnchantedItems() {
+		UUID backpackUuid = new UUID(1, 2);
+		CompoundTag legacyStorage = new CompoundTag();
+		CompoundTag backpackContents = new CompoundTag();
+		CompoundTag contents = enchantedContents();
+		backpackContents.put(backpackUuid.toString(), contents);
+		legacyStorage.put("backpackContents", backpackContents);
+		legacyStorage.put("accessLogRecords", new CompoundTag());
+
+		RegistryOps<Tag> ops = registryOps();
+		BackpackStorage storage = BackpackStorage.deserialize(legacyStorage, ops).orElseThrow();
+
+		assertEquals(Items.DIAMOND_SWORD, storage.getOrCreateBackpackContents(backpackUuid).inventory().stacks().get(0).getItem());
+	}
+
+	private static CompoundTag enchantedContents() {
+		CompoundTag contents = (CompoundTag) ContainerContents.CODEC.encodeStart(registryOps(), new ContainerContents()).getOrThrow();
+		CompoundTag stack = new CompoundTag();
+		stack.putString("id", "minecraft:diamond_sword");
+		stack.putInt("count", 1);
+		CompoundTag enchantments = new CompoundTag();
+		enchantments.putInt("minecraft:sharpness", 5);
+		CompoundTag components = new CompoundTag();
+		components.put("minecraft:enchantments", enchantments);
+		stack.put("components", components);
+		ListTag stacks = new ListTag();
+		stacks.add(stack);
+		contents.getCompound("inventory").orElseThrow().put("stacks", stacks);
+		return contents;
+	}
+
+	private static RegistryOps<Tag> registryOps() {
+		return RegistryOps.create(NbtOps.INSTANCE, BackpackStorageTest::lookupRegistry);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Optional<RegistryOps.RegistryInfo<T>> lookupRegistry(ResourceKey<? extends Registry<? extends T>> registryKey) {
+		if (registryKey.equals(Registries.ENCHANTMENT)) {
+			return Optional.of((RegistryOps.RegistryInfo<T>) RegistryOps.RegistryInfo.fromRegistryLookup(ENCHANTMENT_LOOKUP));
+		}
+		return REGISTRY_ACCESS.lookup(registryKey).map(RegistryOps.RegistryInfo::fromRegistryLookup);
 	}
 
 	private static ListTag legacyAccessLogs(UUID backpackUuid) {
