@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.UUIDUtil;
@@ -8,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -30,14 +32,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO after 1.22 remove support for legacy UUID deserialization via strings
 public class BackpackStorage extends SavedData {
-	private static final Codec<BackpackStorage> CODEC = Codec.withAlternative(
-			RecordCodecBuilder.create(builder -> builder.group(
-					Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC).fieldOf("backpackContents")
-							.forGetter(storage -> storage.backpackContents),
-					Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC).fieldOf("accessLogRecords")
-							.forGetter(storage -> storage.accessLogRecords))
-					.apply(builder, BackpackStorage::new)),
-			CompoundTag.CODEC, BackpackStorage::legacyDeserialize);
+	private static final Codec<BackpackStorage> CURRENT_CODEC = RecordCodecBuilder.create(builder -> builder.group(
+			Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC).fieldOf("backpackContents")
+					.forGetter(storage -> storage.backpackContents),
+			Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC).fieldOf("accessLogRecords")
+					.forGetter(storage -> storage.accessLogRecords))
+			.apply(builder, BackpackStorage::new));
+	private static final Codec<BackpackStorage> CODEC = Codec.withAlternative(CURRENT_CODEC, CompoundTag.CODEC, BackpackStorage::legacyDeserialize);
 	private static final SavedDataType<BackpackStorage> TYPE = new SavedDataType<>(
 			Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "backpack_storage"), BackpackStorage::new, CODEC);
 
@@ -91,12 +92,16 @@ public class BackpackStorage extends SavedData {
 
 		try {
 			CompoundTag tag = storage.readTagFromDisk(legacyDataFile, null, SharedConstants.getCurrentVersion().dataVersion().version());
-			return tag.getCompound("data").flatMap(data -> CODEC.parse(NbtOps.INSTANCE, data)
-					.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack storage: {}", error)));
+			RegistryOps<Tag> ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+			return tag.getCompound("data").flatMap(data -> deserialize(data, ops));
 		} catch (IOException e) {
 			SophisticatedBackpacks.LOGGER.error("Failed to read legacy backpack storage from {}", legacyDataFile, e);
 			return Optional.empty();
 		}
+	}
+
+	static Optional<BackpackStorage> deserialize(CompoundTag data, DynamicOps<Tag> ops) {
+		return CURRENT_CODEC.parse(ops, data).result().or(() -> Optional.of(legacyDeserialize(data, ops)));
 	}
 
 	public static void onWorldLoad(LevelEvent.Load evt) {
@@ -112,31 +117,35 @@ public class BackpackStorage extends SavedData {
 	}
 
 	static BackpackStorage legacyDeserialize(CompoundTag nbt) {
+		return legacyDeserialize(nbt, NbtOps.INSTANCE);
+	}
+
+	private static BackpackStorage legacyDeserialize(CompoundTag nbt, DynamicOps<Tag> ops) {
 		Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
-		readLegacyAccessLogs(nbt, accessLogRecords);
+		readLegacyAccessLogs(nbt, accessLogRecords, ops);
 
 		Map<UUID, ContainerContents> backpackContents = new HashMap<>();
-		readLegacyBackpackContents(nbt, backpackContents);
+		readLegacyBackpackContents(nbt, backpackContents, ops);
 		return new BackpackStorage(backpackContents, accessLogRecords);
 	}
 
-	private static void readLegacyAccessLogs(CompoundTag nbt, Map<UUID, AccessLogRecord> accessLogRecords) {
+	private static void readLegacyAccessLogs(CompoundTag nbt, Map<UUID, AccessLogRecord> accessLogRecords, DynamicOps<Tag> ops) {
 		nbt.getListOrEmpty("accessLogRecords").compoundStream()
-				.forEach(accessLogTag -> AccessLogRecord.CODEC.parse(NbtOps.INSTANCE, accessLogTag)
+				.forEach(accessLogTag -> AccessLogRecord.CODEC.parse(ops, accessLogTag)
 						.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack access log: {}", error))
 						.ifPresent(accessLogRecord -> accessLogRecords.put(accessLogRecord.backpackUuid(), accessLogRecord)));
 	}
 
-	private static void readLegacyBackpackContents(CompoundTag nbt, Map<UUID, ContainerContents> backpackContents) {
+	private static void readLegacyBackpackContents(CompoundTag nbt, Map<UUID, ContainerContents> backpackContents, DynamicOps<Tag> ops) {
 		nbt.getListOrEmpty("backpackContents").compoundStream().forEach(uuidContentsPair -> {
 			Tag uuidTag = uuidContentsPair.get("uuid");
 			if (uuidTag == null) {
 				return;
 			}
 
-			uuidContentsPair.getCompound("contents").ifPresent(contentsTag -> UUIDUtil.CODEC.parse(NbtOps.INSTANCE, uuidTag)
+			uuidContentsPair.getCompound("contents").ifPresent(contentsTag -> UUIDUtil.CODEC.parse(ops, uuidTag)
 					.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack uuid: {}", error))
-					.ifPresent(uuid -> ContainerContents.CODEC.parse(NbtOps.INSTANCE, contentsTag)
+					.ifPresent(uuid -> ContainerContents.CODEC.parse(ops, contentsTag)
 							.resultOrPartial(error -> SophisticatedBackpacks.LOGGER.error("Failed to parse legacy backpack contents for {}: {}", uuid, error))
 							.ifPresent(contents -> backpackContents.put(uuid, contents))));
 		});
