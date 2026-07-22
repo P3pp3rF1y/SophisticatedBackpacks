@@ -4,10 +4,11 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapperAccessor;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InceptionWrapperAccessor implements IUpgradeWrapperAccessor {
-	private final Map<Class<?>, List<?>> interfaceWrappers = new HashMap<>();
-	private final Map<Class<?>, List<?>> mainBackpackInterfaceWrappers = new HashMap<>();
+	private final Map<Class<?>, List<?>> interfaceWrappers = new ConcurrentHashMap<>();
+	private final Map<Class<?>, List<?>> mainBackpackInterfaceWrappers = new ConcurrentHashMap<>();
 	private final IStorageWrapper backpackWrapper;
 	private final SubBackpacksHandler subBackpacksHandler;
 
