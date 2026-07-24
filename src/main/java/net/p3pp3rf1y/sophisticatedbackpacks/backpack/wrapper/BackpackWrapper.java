@@ -416,8 +416,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void sort() {
 		Set<Integer> slotIndexesExcludedFromSort = new HashSet<>();
 		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(NoSortSettingsCategory.class).getNoSortSlots());
-		slotIndexesExcludedFromSort.addAll(getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).getSlotIndexes());
-		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), slotIndexesExcludedFromSort);
+		MemorySettingsCategory memorySettings = getSettingsHandler().getTypeCategory(MemorySettingsCategory.class);
+		InventorySorter.sortHandler(getInventoryHandler(), getComparator(), slotIndexesExcludedFromSort, memorySettings.getSlotIndexes(),
+				memorySettings::matchesFilter);
 	}
 
 	private Comparator<Map.Entry<ItemStackKey, Integer>> getComparator() {
