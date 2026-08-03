@@ -98,7 +98,7 @@ public class CommonEventHandler {
 
 	private final Map<Identifier, Long> nextBackpackCheckTime = new HashMap<>();
 
-	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
+	private void interactWithEntity(PlayerInteractEvent.EntityInteract event) {
 		if (event.getTarget() instanceof LivingEntity livingEntity && event.getEntity().isShiftKeyDown()) {
 			InteractionResult result = MobCatcherHandler.tryCapture(event.getEntity(), event.getHand(), livingEntity);
 			if (result != InteractionResult.PASS) {
@@ -115,7 +115,7 @@ public class CommonEventHandler {
 		Player sourcePlayer = event.getEntity();
 		Vec3 targetPlayerViewVector = Vec3.directionFromRotation(new Vec2(targetPlayer.getXRot(), targetPlayer.yBodyRot));
 
-		Vec3 hitVector = event.getLocalPos();
+		Vec3 hitVector = event.getLocation();
 		Vec3 vec31 = sourcePlayer.position().vectorTo(targetPlayer.position()).normalize();
 		vec31 = new Vec3(vec31.x, 0.0D, vec31.z);
 		boolean isPointingAtBody = hitVector.y >= 0.9D && hitVector.y < 1.6D;
