@@ -27,6 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.data.SophisticatedModelProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConversionItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 	protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
 		List<Item> flatItems = new ArrayList<>();
 
-		addItemClasses(flatItems, List.of(UpgradeItemBase.class));
+		addItemClasses(flatItems, List.of(UpgradeItemBase.class, StackUpgradeConversionItem.class));
 		flatItems.add(ModItems.UPGRADE_BASE.get());
 		flatItems.forEach(item -> itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM));
 

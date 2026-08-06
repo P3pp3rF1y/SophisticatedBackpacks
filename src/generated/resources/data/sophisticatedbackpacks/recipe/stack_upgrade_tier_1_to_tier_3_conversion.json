@@ -1,0 +1,22 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_tier_1_to_tier_3_conversion"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": "#c:storage_blocks/diamond",
+    "S": "sophisticatedbackpacks:stack_upgrade_tier_1_to_tier_2_conversion"
+  },
+  "pattern": [
+    "DDD",
+    "DSD",
+    "DDD"
+  ],
+  "result": {
+    "id": "sophisticatedbackpacks:stack_upgrade_tier_1_to_tier_3_conversion"
+  }
+}
