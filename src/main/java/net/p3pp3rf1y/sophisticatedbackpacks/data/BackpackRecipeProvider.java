@@ -205,6 +205,43 @@ public class BackpackRecipeProvider extends RecipeProvider {
 				.define('S', ModItems.STACK_UPGRADE_TIER_3.get()).define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
 				.unlockedBy("has_stack_upgrade_tier_3", has(ModItems.STACK_UPGRADE_TIER_3.get())).save(output);
 
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_1_CONVERSION.get()).pattern(" I ").pattern("ILI").pattern(" I ")
+				.define('L', Items.LEATHER).define('I', Tags.Items.STORAGE_BLOCKS_IRON)
+				.unlockedBy("has_stack_upgrade_starter_tier", has(ModItems.STACK_UPGRADE_STARTER_TIER.get())).save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_2_CONVERSION.get()).pattern("GGG").pattern("GSG").pattern("GGG")
+				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_1_CONVERSION.get()).define('G', Tags.Items.STORAGE_BLOCKS_GOLD)
+				.unlockedBy("has_stack_upgrade_starter_tier_to_tier_1_conversion", has(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_1_CONVERSION.get()))
+				.save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_3_CONVERSION.get()).pattern("DDD").pattern("DSD").pattern("DDD")
+				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_2_CONVERSION.get()).define('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
+				.unlockedBy("has_stack_upgrade_starter_tier_to_tier_2_conversion", has(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_2_CONVERSION.get()))
+				.save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_4_CONVERSION.get()).pattern("NNN").pattern("NSN").pattern("NNN")
+				.define('S', ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_3_CONVERSION.get()).define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
+				.unlockedBy("has_stack_upgrade_starter_tier_to_tier_3_conversion", has(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_3_CONVERSION.get()))
+				.save(output);
+
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_1_TO_TIER_2_CONVERSION.get()).pattern("GGG").pattern("GLG").pattern("GGG")
+				.define('L', Items.LEATHER).define('G', Tags.Items.STORAGE_BLOCKS_GOLD)
+				.unlockedBy("has_stack_upgrade_tier_1", has(ModItems.STACK_UPGRADE_TIER_1.get())).save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_1_TO_TIER_3_CONVERSION.get()).pattern("DDD").pattern("DSD").pattern("DDD")
+				.define('S', ModItems.STACK_UPGRADE_TIER_1_TO_TIER_2_CONVERSION.get()).define('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
+				.unlockedBy("has_stack_upgrade_tier_1_to_tier_2_conversion", has(ModItems.STACK_UPGRADE_TIER_1_TO_TIER_2_CONVERSION.get())).save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_1_TO_TIER_4_CONVERSION.get()).pattern("NNN").pattern("NSN").pattern("NNN")
+				.define('S', ModItems.STACK_UPGRADE_TIER_1_TO_TIER_3_CONVERSION.get()).define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
+				.unlockedBy("has_stack_upgrade_tier_1_to_tier_3_conversion", has(ModItems.STACK_UPGRADE_TIER_1_TO_TIER_3_CONVERSION.get())).save(output);
+
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_2_TO_TIER_3_CONVERSION.get()).pattern("DDD").pattern("DLD").pattern("DDD")
+				.define('L', Items.LEATHER).define('D', Tags.Items.STORAGE_BLOCKS_DIAMOND)
+				.unlockedBy("has_stack_upgrade_tier_2", has(ModItems.STACK_UPGRADE_TIER_2.get())).save(output);
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_2_TO_TIER_4_CONVERSION.get()).pattern("NNN").pattern("NSN").pattern("NNN")
+				.define('S', ModItems.STACK_UPGRADE_TIER_2_TO_TIER_3_CONVERSION.get()).define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
+				.unlockedBy("has_stack_upgrade_tier_2_to_tier_3_conversion", has(ModItems.STACK_UPGRADE_TIER_2_TO_TIER_3_CONVERSION.get())).save(output);
+
+		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_TIER_3_TO_TIER_4_CONVERSION.get()).pattern("NNN").pattern("NLN").pattern("NNN")
+				.define('L', Items.LEATHER).define('N', Tags.Items.STORAGE_BLOCKS_NETHERITE)
+				.unlockedBy("has_stack_upgrade_tier_3", has(ModItems.STACK_UPGRADE_TIER_3.get())).save(output);
+
 		ShapeBasedRecipeBuilder.shaped(items, ModItems.STACK_UPGRADE_OMEGA_TIER.get()).pattern("SSS").pattern("SSS").pattern("SSS")
 				.define('S', ModItems.STACK_UPGRADE_TIER_4.get()).unlockedBy("has_stack_upgrade_tier_4", has(ModItems.STACK_UPGRADE_TIER_4.get())).save(output);
 

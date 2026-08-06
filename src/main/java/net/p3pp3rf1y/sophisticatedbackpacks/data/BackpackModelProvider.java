@@ -41,6 +41,16 @@ public class BackpackModelProvider extends SophisticatedModelProvider {
 
 		addItemClasses(flatItems, List.of(UpgradeItemBase.class));
 		flatItems.add(ModItems.UPGRADE_BASE.get());
+		flatItems.add(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_1_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_2_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_3_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_STARTER_TIER_TO_TIER_4_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_1_TO_TIER_2_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_1_TO_TIER_3_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_1_TO_TIER_4_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_2_TO_TIER_3_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_2_TO_TIER_4_CONVERSION.get());
+		flatItems.add(ModItems.STACK_UPGRADE_TIER_3_TO_TIER_4_CONVERSION.get());
 		flatItems.forEach(item -> itemModels.generateFlatItem(item, ModelTemplates.FLAT_ITEM));
 
 		generateBackpackBlockModels(blockModels, itemModels);
