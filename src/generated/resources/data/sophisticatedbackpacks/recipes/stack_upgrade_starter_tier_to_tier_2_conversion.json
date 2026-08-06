@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_2_conversion"
+    }
+  ],
+  "key": {
+    "G": {
+      "tag": "forge:storage_blocks/gold"
+    },
+    "S": {
+      "item": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_1_conversion"
+    }
+  },
+  "pattern": [
+    "GGG",
+    "GSG",
+    "GGG"
+  ],
+  "result": {
+    "item": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_2_conversion"
+  }
+}

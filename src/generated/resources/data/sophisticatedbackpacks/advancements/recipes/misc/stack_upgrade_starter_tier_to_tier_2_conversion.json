@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_stack_upgrade_starter_tier_to_tier_1_conversion": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_1_conversion"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_2_conversion"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_stack_upgrade_starter_tier_to_tier_1_conversion",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_2_conversion"
+    ]
+  },
+  "sends_telemetry_event": true
+}

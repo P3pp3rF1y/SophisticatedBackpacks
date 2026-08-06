@@ -55,6 +55,25 @@ if (gradle.startParameter.taskNames.any { it in backpacksRunDataTaskNames }) {
 
 repositories {
     mavenCentral()
+    // ForgeGradle's manual downloader cannot follow ModMaven's HTML redirect and caches it as a JAR.
+    // Keep the authoritative Forge artifacts ahead of ModMaven.
+    maven {
+        name = "NeoForged"
+        url = "https://maven.neoforged.net/releases"
+        content {
+            includeGroup "net.neoforged"
+            includeGroup "net.minecraftforge"
+            includeGroup "de.oceanlabs.mcp"
+        }
+    }
+    // Minecraft's libraries are not on Maven Central. Avoid ModMaven's HTML redirect for these JARs.
+    maven {
+        name = "MinecraftLibraries"
+        url = "https://libraries.minecraft.net"
+        content {
+            includeGroup "com.mojang"
+        }
+    }
     maven { url = "https://modmaven.dev/" }
     maven { url "https://maven.theillusivec4.top/" }
     maven {
