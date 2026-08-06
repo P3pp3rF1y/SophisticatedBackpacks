@@ -1,0 +1,21 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_tier_3_to_tier_4_conversion"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "L": "minecraft:leather",
+    "N": "#c:storage_blocks/netherite"
+  },
+  "pattern": [
+    "NNN",
+    "NLN",
+    "NNN"
+  ],
+  "result": {
+    "id": "sophisticatedbackpacks:stack_upgrade_tier_3_to_tier_4_conversion"
+  }
+}
