@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "sophisticatedbackpacks:item/stack_upgrade_tier_2_to_tier_3_conversion"
+  }
+}
