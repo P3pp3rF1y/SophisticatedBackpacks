@@ -11,8 +11,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import java.util.UUID;
 
 /**
- * This class has logic for deduplicating backpack UUIDs because people duplicating backpack including its UUID seems to happen fairly regularly
- * as well as some mods also add enchants / legit ways to duplicate loot when mobs are killed which can again include backpack
+ * This class has logic for deduplicating backpack UUIDs because people duplicating backpack including its UUID seems to happen fairly regularly as well as some
+ * mods also add enchants / legit ways to duplicate loot when mobs are killed which can again include backpack
  */
 
 public class UUIDDeduplicator {
@@ -35,12 +35,18 @@ public class UUIDDeduplicator {
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
-		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStack(newBackpackItemEntity.getItem());
+		ItemStack newBackpackStack = newBackpackItemEntity.getItem();
+		if (!(newBackpackStack.getItem() instanceof BackpackItem)) {
+			return;
+		}
+
+		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStack(newBackpackStack);
 		newBackpackWrapper.getContentsUuid().ifPresent(backpackId -> dedupeBackpackItemEntityInArea(newBackpackWrapper, newBackpackItemEntity, backpackId));
 	}
 
 	private static void dedupeBackpackItemEntityInArea(IBackpackWrapper newBackpackWrapper, ItemEntity newBackpackItemEntity, UUID backpackId) {
-		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10), Entity::isAlive)) {
+		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10),
+				Entity::isAlive)) {
 			if (entity != newBackpackItemEntity) {
 				checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity);
 			}
@@ -48,7 +54,12 @@ public class UUIDDeduplicator {
 	}
 
 	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
-		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStack(entity.getItem());
+		ItemStack entityStack = entity.getItem();
+		if (!(entityStack.getItem() instanceof BackpackItem)) {
+			return false;
+		}
+
+		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStack(entityStack);
 		return entityBackpackWrapper.getContentsUuid().map(backpackId -> {
 			if (backpackId.equals(newBackpackId)) {
 				dedupeBackpackWrappers(newBackpackWrapper, entityBackpackWrapper);

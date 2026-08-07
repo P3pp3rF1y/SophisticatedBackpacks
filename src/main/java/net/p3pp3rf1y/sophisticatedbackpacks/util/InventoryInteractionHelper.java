@@ -33,8 +33,7 @@ public class InventoryInteractionHelper {
 		}
 
 		return CapabilityHelper.getFromItemHandler(level, pos, face,
-				itemHandler -> player.level().isClientSide || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player),
-				false);
+				itemHandler -> player.level().isClientSide || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player), false);
 	}
 
 	private static boolean tryRunningInteractionWrappers(IItemHandler itemHandler, IStorageWrapper wrapper, Player player) {

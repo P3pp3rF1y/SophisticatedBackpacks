@@ -14,7 +14,8 @@ import java.util.function.Function;
 public class SmithingBackpackUpgradeRecipeBuilder extends SmithingTransformRecipeBuilder {
 	private final Function<SmithingTransformRecipe, ? extends SmithingTransformRecipe> factory;
 
-	public SmithingBackpackUpgradeRecipeBuilder(Function<SmithingTransformRecipe, ? extends SmithingTransformRecipe> factory, Ingredient template, Ingredient base, Ingredient addition, Item result) {
+	public SmithingBackpackUpgradeRecipeBuilder(Function<SmithingTransformRecipe, ? extends SmithingTransformRecipe> factory, Ingredient template,
+			Ingredient base, Ingredient addition, Item result) {
 		super(template, base, addition, RecipeCategory.MISC, result);
 		this.factory = factory;
 	}

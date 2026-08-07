@@ -35,7 +35,8 @@ public class BackpackSmithingUpgradeRecipesMaker {
 			variantPairs.putIfAbsent(source.getItem() + source.getComponents().toString(), new BackpackTierUpgradeVariantPair(source.copy(), result));
 		}
 		ResourceLocation id = recipeHolder.id().withPath(path -> "backpack_smithing_upgrade_grouped/" + path);
-		return new BackpackSmithingUpgradeDisplayRecipe(id, new RecipeHolder<>(recipeHolder.id(), recipe), recipe.getTemplateIngredient(), recipe.getAdditionIngredient(), List.copyOf(variantPairs.values()));
+		return new BackpackSmithingUpgradeDisplayRecipe(id, new RecipeHolder<>(recipeHolder.id(), recipe), recipe.getTemplateIngredient(),
+				recipe.getAdditionIngredient(), List.copyOf(variantPairs.values()));
 	}
 
 	private static List<ItemStack> getBackpackItems(SmithingBackpackUpgradeRecipe recipe) {

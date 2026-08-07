@@ -37,7 +37,7 @@ public class BackpackStorage extends SavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(new Factory<>(BackpackStorage::new, BackpackStorage::load), SAVED_DATA_NAME);
 			}
@@ -75,7 +75,8 @@ public class BackpackStorage extends SavedData {
 		if (storage.accessLogRecords.containsKey(backpackUuid)) {
 			return true;
 		}
-		return hasItems(contentsNbt, InventoryHandler.INVENTORY_TAG) || hasItems(contentsNbt, UpgradeHandler.UPGRADE_INVENTORY_TAG) || hasOtherBackpackData(contentsNbt);
+		return hasItems(contentsNbt, InventoryHandler.INVENTORY_TAG) || hasItems(contentsNbt, UpgradeHandler.UPGRADE_INVENTORY_TAG)
+				|| hasOtherBackpackData(contentsNbt);
 	}
 
 	private static boolean hasItems(CompoundTag contentsNbt, String inventoryTag) {
@@ -88,7 +89,8 @@ public class BackpackStorage extends SavedData {
 	}
 
 	private static boolean hasOtherBackpackData(CompoundTag contentsNbt) {
-		return contentsNbt.getAllKeys().stream().anyMatch(key -> !key.equals(InventoryHandler.INVENTORY_TAG) && !key.equals(UpgradeHandler.UPGRADE_INVENTORY_TAG));
+		return contentsNbt.getAllKeys().stream()
+				.anyMatch(key -> !key.equals(InventoryHandler.INVENTORY_TAG) && !key.equals(UpgradeHandler.UPGRADE_INVENTORY_TAG));
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public class BackpackStorage extends SavedData {
 		} else {
 			CompoundTag currentContents = backpackContents.get(backpackUuid);
 			for (String key : contents.getAllKeys()) {
-				//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
+				// noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 				currentContents.put(key, contents.get(key));
 
 				if (key.equals(BackpackSettingsHandler.SETTINGS_TAG)) {
@@ -160,7 +162,8 @@ public class BackpackStorage extends SavedData {
 	public int removeNonPlayerBackpackContents(boolean onlyWithEmptyInventory) {
 		AtomicInteger numberRemoved = new AtomicInteger(0);
 		backpackContents.entrySet().removeIf(entry -> {
-			if (!accessLogRecords.containsKey(entry.getKey()) && (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
+			if (!accessLogRecords.containsKey(entry.getKey())
+					&& (!onlyWithEmptyInventory || !isPlayerBackpackOrNotEmpty(this, entry.getKey(), entry.getValue()))) {
 				numberRemoved.incrementAndGet();
 				return true;
 			}

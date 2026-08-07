@@ -22,7 +22,8 @@ import javax.annotation.Nullable;
 
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	@Override
-	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
+			int combinedOverlay) {
 		BlockState state = backpackBlockEntity.getBlockState();
 		Direction facing = state.getValue(BackpackBlock.FACING);
 		IBackpackWrapper backpackWrapper = backpackBlockEntity.getBackpackWrapper();
@@ -35,11 +36,13 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
 		poseStack.popPose();
-		renderItemDisplay(backpackBlockEntity.getBackpackWrapper().getBackpack(), poseStack, buffer, combinedLight, combinedOverlay, renderInfo, backpackBlockEntity.getLevel());
+		renderItemDisplay(backpackBlockEntity.getBackpackWrapper().getBackpack(), poseStack, buffer, combinedLight, combinedOverlay, renderInfo,
+				backpackBlockEntity.getLevel());
 		poseStack.popPose();
 	}
 
-	private void renderItemDisplay(ItemStack backpack, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo, @Nullable Level level) {
+	private void renderItemDisplay(ItemStack backpack, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay,
+			RenderInfo renderInfo, @Nullable Level level) {
 		renderInfo.getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
 			Minecraft minecraft = Minecraft.getInstance();
 			ItemRenderer itemRenderer = minecraft.getItemRenderer();
@@ -54,7 +57,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 				poseStack.translate(0.5, 0, 0.5);
 				poseStack.mulPose(Axis.YP.rotationDegrees(180));
 
-				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
 				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, level, 0);
 

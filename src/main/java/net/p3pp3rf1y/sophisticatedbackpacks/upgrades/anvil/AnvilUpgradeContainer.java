@@ -20,9 +20,11 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 	private final Slot resultSlot;
 
 	private final PersistableAnvilMenu anvilMenuDelegate;
-	private Runnable nameChangeListener = () -> {};
+	private Runnable nameChangeListener = () -> {
+	};
 	private boolean processingOnTakeLogic = false;
-	public AnvilUpgradeContainer(Player player, int upgradeContainerId, AnvilUpgradeWrapper upgradeWrapper, UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> type) {
+	public AnvilUpgradeContainer(Player player, int upgradeContainerId, AnvilUpgradeWrapper upgradeWrapper,
+			UpgradeContainerType<AnvilUpgradeWrapper, AnvilUpgradeContainer> type) {
 		super(player, upgradeContainerId, upgradeWrapper, type);
 		anvilMenuDelegate = new PersistableAnvilMenu(new Inventory(player));
 
@@ -94,14 +96,17 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 	private class PersistableAnvilMenu extends AnvilMenu {
 
 		public PersistableAnvilMenu(Inventory playerInventory) {
-			super(0, playerInventory, playerInventory.player.level().isClientSide() ? ContainerLevelAccess.NULL : ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
+			super(0, playerInventory,
+					playerInventory.player.level().isClientSide()
+							? ContainerLevelAccess.NULL
+							: ContainerLevelAccess.create(playerInventory.player.level(), playerInventory.player.blockPosition()));
 			super.setItemName(upgradeWrapper.getItemName());
 		}
 
 		@Override
 		protected void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
-			for(final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
-				this.addSlot(new SlotSuppliedHandler(() -> upgradeWrapper.getInventory(), slotDefinition.slotIndex(), 0, 0) {
+			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
+				this.addSlot(new SlotSuppliedHandler(upgradeWrapper::getInventory, slotDefinition.slotIndex(), 0, 0) {
 					@Override
 					public void setChanged() {
 						super.setChanged();

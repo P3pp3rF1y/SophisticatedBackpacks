@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common;
 
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder<CraftingRecipe> recipeHolder, int width, int height,
-											   NonNullList<Ingredient> ingredients, int backpackIngredientIndex, List<BackpackTierUpgradeVariantPair> variantPairs) {
+		NonNullList<Ingredient> ingredients, int backpackIngredientIndex, List<BackpackTierUpgradeVariantPair> variantPairs) {
 	public Optional<BackpackTierUpgradeVariantPair> findBySource(ItemStack stack) {
 		return variantPairs.stream().filter(pair -> ItemStack.isSameItemSameComponents(pair.source(), stack)).findFirst();
 	}
@@ -41,7 +41,7 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 	private static BackpackTierUpgradeVariantPair withComponentsFromSource(BackpackTierUpgradeVariantPair pair, ItemStack sourceStack) {
 		ItemStack source = pair.source().copy();
 		copyRenderComponents(sourceStack, source);
-		setSlotNumbers(source);
+		copySlotComponents(sourceStack, source);
 		ItemStack result = pair.result().copy();
 		copyRenderComponents(sourceStack, result);
 		setSlotNumbers(result);
@@ -69,6 +69,11 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 		copyComponent(from, to, ModCoreDataComponents.RENDER_INFO_TAG);
 	}
 
+	private static void copySlotComponents(ItemStack from, ItemStack to) {
+		copyComponent(from, to, ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
+		copyComponent(from, to, ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
+	}
+
 	private static <T> void copyComponent(ItemStack from, ItemStack to, Supplier<DataComponentType<T>> componentSupplier) {
 		DataComponentType<T> component = componentSupplier.get();
 		T value = from.get(component);
@@ -79,10 +84,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 
 	public CraftingDisplaySpec toSpec() {
 		List<CraftingDisplayVariant> displayVariants = variantPairs.stream().map(this::toVariant).toList();
-		List<CraftingDisplayVariant> globalVariants = variantPairs.stream()
-				.filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
-				.map(this::toVariant)
-				.toList();
+		List<CraftingDisplayVariant> globalVariants = variantPairs.stream().filter(pair -> isUntinted(pair.source()) && isUntinted(pair.result()))
+				.map(this::toVariant).toList();
 		return new CraftingDisplaySpec(id, false, width, height, ingredients, displayVariants, globalVariants, Set.of(recipeHolder.id()),
 				new SourceResultFocusBehavior(backpackIngredientIndex, this::focusSource, this::focusResult));
 	}
@@ -105,10 +108,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 		if (exactPair.isPresent()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(source, pair.source())).map(this::toVariant);
 		}
-		return findBySourceItem(focusedInput)
-				.filter(pair -> ItemStack.isSameItemSameComponents(source, pair.source()))
-				.map(pair -> withComponentsFromSource(pair, focusedInput))
-				.map(this::toVariant);
+		return findBySourceItem(focusedInput).filter(pair -> ItemStack.isSameItemSameComponents(source, pair.source()))
+				.map(pair -> withComponentsFromSource(pair, focusedInput)).map(this::toVariant);
 	}
 
 	private Optional<CraftingDisplayVariant> focusResult(CraftingDisplayVariant variant, ItemStack focusedOutput) {
@@ -116,10 +117,8 @@ public record BackpackTierUpgradeDisplayRecipe(ResourceLocation id, RecipeHolder
 		if (exactPair.isPresent() && focusedOutput.getComponentsPatch().isEmpty()) {
 			return exactPair.filter(pair -> ItemStack.isSameItemSameComponents(variant.firstOutput(), pair.result())).map(this::toVariant);
 		}
-		return findByResultItem(focusedOutput)
-				.filter(pair -> ItemStack.isSameItemSameComponents(variant.firstOutput(), pair.result()))
-				.map(pair -> withComponentsFromResult(pair, focusedOutput))
-				.map(this::toVariant);
+		return findByResultItem(focusedOutput).filter(pair -> ItemStack.isSameItemSameComponents(variant.firstOutput(), pair.result()))
+				.map(pair -> withComponentsFromResult(pair, focusedOutput)).map(this::toVariant);
 	}
 
 	private static ItemStack getSource(CraftingDisplayVariant variant) {

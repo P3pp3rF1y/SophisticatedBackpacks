@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
 
 import javax.annotation.Nonnull;
+
 import java.util.List;
 
 public class BackpackFluidHandler implements IStorageFluidHandler {
@@ -58,7 +59,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 			if (filled == resource.getAmount()) {
 				return resource.getAmount();
 			}
-			toFill = new FluidStack(toFill.getFluid(), resource.getAmount() - filled);
+			toFill = resource.copyWithAmount(resource.getAmount() - filled);
 		}
 
 		return filled;
@@ -107,7 +108,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 			}
 		}
 
-		return drained == 0 ? FluidStack.EMPTY : new FluidStack(resource.getFluid(), drained);
+		return drained == 0 ? FluidStack.EMPTY : resource.copyWithAmount(drained);
 	}
 
 	@Override

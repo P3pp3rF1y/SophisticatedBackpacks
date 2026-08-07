@@ -35,15 +35,17 @@ public class CuriosCompat implements ICompat {
 		if (lastTagsRefresh + TAGS_REFRESH_COOLDOWN < gameTime) {
 			lastTagsRefresh = gameTime;
 			backpackCurioIdentifiers.clear();
-			backpackCurioIdentifiers.addAll(CuriosApi.getItemStackSlots(ModItems.BACKPACK.get().getDefaultInstance(), FMLLoader.getDist() == Dist.CLIENT).keySet());
+			backpackCurioIdentifiers
+					.addAll(CuriosApi.getItemStackSlots(ModItems.BACKPACK.get().getDefaultInstance(), FMLLoader.getDist() == Dist.CLIENT).keySet());
 			backpackCurioIdentifiers.add("curio");
 		}
 		return backpackCurioIdentifiers;
 	}
 
-	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler, T defaultValue) {
-		return CuriosApi.getCuriosInventory(livingEntity)
-				.map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue)).orElse(defaultValue);
+	public static <T> T getFromCuriosSlotStackHandler(LivingEntity livingEntity, String identifier, Function<ICurioStacksHandler, T> getFromHandler,
+			T defaultValue) {
+		return CuriosApi.getCuriosInventory(livingEntity).map(h -> h.getStacksHandler(identifier).map(getFromHandler).orElse(defaultValue))
+				.orElse(defaultValue);
 	}
 
 	@Override

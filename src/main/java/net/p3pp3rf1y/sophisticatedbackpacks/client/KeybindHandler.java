@@ -58,15 +58,10 @@ public class KeybindHandler {
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_1 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_1"),
 			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
-	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(
-			0, BACKPACK_TOGGLE_UPGRADE_1,
-			1, BACKPACK_TOGGLE_UPGRADE_2,
-			2, BACKPACK_TOGGLE_UPGRADE_3,
-			3, BACKPACK_TOGGLE_UPGRADE_4,
-			4, BACKPACK_TOGGLE_UPGRADE_5
-	);
-	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"),
-			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(0, BACKPACK_TOGGLE_UPGRADE_1, 1, BACKPACK_TOGGLE_UPGRADE_2, 2,
+			BACKPACK_TOGGLE_UPGRADE_3, 3, BACKPACK_TOGGLE_UPGRADE_4, 4, BACKPACK_TOGGLE_UPGRADE_5);
+	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"), KeyConflictContext.IN_GAME,
+			InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
 			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_OPEN_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("open_backpack"),

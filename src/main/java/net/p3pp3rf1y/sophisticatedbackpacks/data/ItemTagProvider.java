@@ -13,11 +13,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 
 import javax.annotation.Nullable;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ItemTagProvider extends ItemTagsProvider {
-	public ItemTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTagProvider, @Nullable ExistingFileHelper existingFileHelper) {
+	public ItemTagProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTagProvider,
+			@Nullable ExistingFileHelper existingFileHelper) {
 		super(packOutput, lookupProvider, blockTagProvider, SophisticatedBackpacks.MOD_ID, existingFileHelper);
 	}
 

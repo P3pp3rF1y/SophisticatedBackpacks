@@ -46,7 +46,8 @@ public class ClientEventHandler {
 	}
 
 	private static final String BACKPACK_REG_NAME = "backpack";
-	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
+	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(
+			ResourceLocation.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, BACKPACK_REG_NAME), "main");
 
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::onModelRegistry);
@@ -80,7 +81,8 @@ public class ClientEventHandler {
 			return;
 		}
 
-		MobCatcherCaptureEffectRenderer.render(event.getPoseStack(), event.getPartialTick().getGameTimeDeltaPartialTick(false), event.getCamera().getPosition());
+		MobCatcherCaptureEffectRenderer.render(event.getPoseStack(), event.getPartialTick().getGameTimeDeltaPartialTick(false),
+				event.getCamera().getPosition());
 	}
 
 	private static void onModelRegistry(ModelEvent.RegisterGeometryLoaders event) {
@@ -101,20 +103,22 @@ public class ClientEventHandler {
 		event.registerBlockEntityRenderer(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
 	}
 
-	@SuppressWarnings("java:S3740") //explanation below
+	@SuppressWarnings("java:S3740") // explanation below
 	private static void registerBackpackLayer() {
 		EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 		Map<PlayerSkin.Model, EntityRenderer<? extends Player>> skinMap = renderManager.getSkinMap();
 		for (EntityRenderer<? extends Player> renderer : skinMap.values()) {
 			if (renderer instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		}
 
 		renderManager.renderers.forEach((e, r) -> {
 			if (r instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
-				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
+				// noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to
+				// be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		});
@@ -146,12 +150,14 @@ public class ClientEventHandler {
 
 	private static void registerBackpackClientExtension(RegisterClientExtensionsEvent event) {
 		event.registerItem(new IClientItemExtensions() {
-			private final Lazy<BlockEntityWithoutLevelRenderer> ister = Lazy.of(() -> new BackpackItemStackRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+			private final Lazy<BlockEntityWithoutLevelRenderer> ister = Lazy.of(
+					() -> new BackpackItemStackRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
 
 			@Override
 			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
 				return ister.get();
 			}
-		}, ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get(), ModItems.NETHERITE_BACKPACK.get());
+		}, ModItems.BACKPACK.get(), ModItems.COPPER_BACKPACK.get(), ModItems.IRON_BACKPACK.get(), ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get(),
+				ModItems.NETHERITE_BACKPACK.get());
 	}
 }

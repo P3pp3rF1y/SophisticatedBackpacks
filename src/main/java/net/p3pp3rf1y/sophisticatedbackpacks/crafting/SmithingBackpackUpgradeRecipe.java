@@ -73,7 +73,7 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 
 	public static class Serializer extends RecipeWrapperSerializer<SmithingTransformRecipe, SmithingBackpackUpgradeRecipe> {
 		public Serializer() {
-			super(SmithingBackpackUpgradeRecipe::new, RecipeSerializer.SMITHING_TRANSFORM);
+			super(SmithingBackpackUpgradeRecipe::new, SMITHING_TRANSFORM);
 		}
 	}
 }

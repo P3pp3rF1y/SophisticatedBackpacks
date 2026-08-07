@@ -32,10 +32,17 @@ public final class LegacyBackpackDataMigration {
 	private static final String TEMPLATE_NAME_TAG = "templateName";
 	private static final String RENDER_INFO_TAG = "renderInfo";
 	private static final String REAL_COUNT_TAG = "realCount";
+	private static final String[] NORMALIZED_LEGACY_TAGS = {CLOTH_COLOR_TAG, BORDER_COLOR_TAG, OPEN_TAB_ID_TAG, SORT_BY_TAG, CONTENTS_UUID_TAG,
+			INVENTORY_SLOTS_TAG, UPGRADE_SLOTS_TAG, LOOT_TABLE_NAME_TAG, LOOT_PERCENTAGE_TAG, COLUMNS_TAKEN_TAG, TEMPLATE_NAME_TAG, RENDER_INFO_TAG};
 
-	private LegacyBackpackDataMigration() {}
+	private LegacyBackpackDataMigration() {
+	}
 
 	public static void normalizeLegacyData(ItemStack backpack) {
+		if (!backpack.has(DataComponents.CUSTOM_DATA)) {
+			return;
+		}
+
 		if (!backpack.has(ModCoreDataComponents.STORAGE_UUID)) {
 			getContentsUuid(backpack).ifPresent(uuid -> backpack.set(ModCoreDataComponents.STORAGE_UUID, uuid));
 		}
@@ -60,20 +67,51 @@ public final class LegacyBackpackDataMigration {
 		if (!backpack.has(ModDataComponents.COLUMNS_TAKEN)) {
 			getColumnsTaken(backpack).ifPresent(columnsTaken -> backpack.set(ModDataComponents.COLUMNS_TAKEN, columnsTaken));
 		}
+		Optional<ResourceLocation> legacyLootTable = getLootTableName(backpack);
+		Optional<Float> legacyLootPercentage = getLootPercentage(backpack);
 		if (!backpack.has(ModDataComponents.LOOT_TABLE)) {
-			getLootTableName(backpack).ifPresent(lootTable -> backpack.set(ModDataComponents.LOOT_TABLE, lootTable));
+			legacyLootTable.ifPresent(lootTable -> backpack.set(ModDataComponents.LOOT_TABLE, lootTable));
 		}
 		if (!backpack.has(ModDataComponents.LOOT_FACTOR)) {
-			getLootPercentage(backpack).ifPresent(lootPercentage -> backpack.set(ModDataComponents.LOOT_FACTOR, lootPercentage));
+			legacyLootPercentage.ifPresent(lootPercentage -> backpack.set(ModDataComponents.LOOT_FACTOR, lootPercentage));
 		}
 		if (!backpack.has(ModDataComponents.TEMPLATE_NAME)) {
 			getTemplateName(backpack).ifPresent(templateName -> backpack.set(ModDataComponents.TEMPLATE_NAME, templateName));
 		}
+		if (!backpack.has(ModCoreDataComponents.RENDER_INFO_TAG)) {
+			getRenderInfo(backpack).ifPresent(renderInfo -> backpack.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(renderInfo)));
+		}
+		removeNormalizedLegacyData(backpack);
 	}
 
 	public static void migrateBackpackContents(ItemStack backpack, UUID newUuid) {
 		migrateNbtTag(backpack, newUuid, InventoryHandler.INVENTORY_TAG);
 		migrateNbtTag(backpack, newUuid, UpgradeHandler.UPGRADE_INVENTORY_TAG);
+	}
+
+	private static void removeNormalizedLegacyData(ItemStack backpack) {
+		removeLegacyData(backpack, NORMALIZED_LEGACY_TAGS);
+	}
+
+	public static void removeLegacyLootData(ItemStack backpack) {
+		removeLegacyData(backpack, LOOT_TABLE_NAME_TAG, LOOT_PERCENTAGE_TAG);
+	}
+
+	private static void removeLegacyData(ItemStack backpack, String... keys) {
+		if (!backpack.has(DataComponents.CUSTOM_DATA)) {
+			return;
+		}
+
+		CustomData.update(DataComponents.CUSTOM_DATA, backpack, customData -> {
+			for (String key : keys) {
+				customData.remove(key);
+			}
+		});
+
+		CustomData customData = backpack.get(DataComponents.CUSTOM_DATA);
+		if (customData != null && customData.copyTag().isEmpty()) {
+			backpack.remove(DataComponents.CUSTOM_DATA);
+		}
 	}
 
 	public static void normalizeLegacyBackpackContents(CompoundTag contentsNbt) {
@@ -176,7 +214,8 @@ public final class LegacyBackpackDataMigration {
 	}
 
 	public static Optional<Float> getLootPercentage(ItemStack backpack) {
-		return getLegacyCustomData(backpack).flatMap(tag -> tag.contains(LOOT_PERCENTAGE_TAG) ? Optional.of(tag.getFloat(LOOT_PERCENTAGE_TAG)) : Optional.empty());
+		return getLegacyCustomData(backpack)
+				.flatMap(tag -> tag.contains(LOOT_PERCENTAGE_TAG) ? Optional.of(tag.getFloat(LOOT_PERCENTAGE_TAG)) : Optional.empty());
 	}
 
 	public static Optional<ResourceLocation> getTemplateName(ItemStack backpack) {

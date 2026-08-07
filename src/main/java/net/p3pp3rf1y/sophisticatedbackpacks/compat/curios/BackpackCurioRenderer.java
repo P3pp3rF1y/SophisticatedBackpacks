@@ -14,11 +14,14 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 
 public class BackpackCurioRenderer implements ICurioRenderer {
 	@Override
-	public <T extends LivingEntity, M extends EntityModel<T>> void render(ItemStack stack, SlotContext slotContext, PoseStack matrixStack, RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+	public <T extends LivingEntity, M extends EntityModel<T>> void render(ItemStack stack, SlotContext slotContext, PoseStack matrixStack,
+			RenderLayerParent<T, M> renderLayerParent, MultiBufferSource renderTypeBuffer, int light, float limbSwing, float limbSwingAmount,
+			float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if (!stack.isEmpty()) {
 			if (renderLayerParent.getModel() instanceof HumanoidModel<?> parentModel) {
 				matrixStack.pushPose();
-				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack, !slotContext.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
+				BackpackLayerRenderer.renderBackpack(parentModel, slotContext.entity(), matrixStack, renderTypeBuffer, light, stack,
+						!slotContext.entity().getItemBySlot(EquipmentSlot.CHEST).isEmpty());
 				matrixStack.popPose();
 			}
 		}

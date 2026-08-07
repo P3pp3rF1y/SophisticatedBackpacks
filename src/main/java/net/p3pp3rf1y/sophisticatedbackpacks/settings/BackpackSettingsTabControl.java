@@ -23,9 +23,9 @@ public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 	static {
 		ImmutableMap.Builder<String, ISettingsTabFactory<?, ?>> builder = new ImmutableMap.Builder<>();
 		addFactory(builder, BackpackMainSettingsCategory.NAME, BackpackMainSettingsTab::new);
+		addFactory(builder, ItemDisplaySettingsCategory.NAME, ItemDisplaySettingsTab::new);
 		addFactory(builder, NoSortSettingsCategory.NAME, NoSortSettingsTab::new);
 		addFactory(builder, MemorySettingsCategory.NAME, MemorySettingsTab::new);
-		addFactory(builder, ItemDisplaySettingsCategory.NAME, ItemDisplaySettingsTab::new);
 		SETTINGS_TAB_FACTORIES = builder.build();
 	}
 
@@ -40,7 +40,7 @@ public class BackpackSettingsTabControl extends StorageSettingsTabControlBase {
 
 	@Override
 	protected <C extends SettingsContainerBase<?>, T extends SettingsTab<C>> ISettingsTabFactory<C, T> getSettingsTabFactory(String name) {
-		//noinspection unchecked
+		// noinspection unchecked
 		return (ISettingsTabFactory<C, T>) SETTINGS_TAB_FACTORIES.get(name);
 	}
 

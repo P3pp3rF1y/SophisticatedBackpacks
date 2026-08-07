@@ -22,7 +22,7 @@ public class BackpackSettingsHandler extends SettingsHandler {
 
 	public void copyTo(SettingsHandler settingsHandler) {
 		if (contentsNbt.contains(SETTINGS_TAG)) {
-			//noinspection ConstantConditions - checking for whether tag exists just one line up
+			// noinspection ConstantConditions - checking for whether tag exists just one line up
 			settingsHandler.getNbt().put(SETTINGS_TAG, contentsNbt.get(SETTINGS_TAG));
 		}
 	}
@@ -33,9 +33,11 @@ public class BackpackSettingsHandler extends SettingsHandler {
 	}
 
 	@Override
-	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderInfo> renderInfoSupplier, CompoundTag settingsNbt) {
-		addSettingsCategory(settingsNbt, ItemDisplaySettingsCategory.NAME, markContentsDirty, (categoryNbt, saveNbt) ->
-				new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderInfoSupplier, categoryNbt, saveNbt, 1, () -> getTypeCategory(MemorySettingsCategory.class)));
+	protected void addItemDisplayCategory(Supplier<InventoryHandler> inventoryHandlerSupplier, Supplier<RenderInfo> renderInfoSupplier,
+			CompoundTag settingsNbt) {
+		addSettingsCategory(settingsNbt, ItemDisplaySettingsCategory.NAME, markContentsDirty,
+				(categoryNbt, saveNbt) -> new ItemDisplaySettingsCategory(inventoryHandlerSupplier, renderInfoSupplier, categoryNbt, saveNbt, 1, true,
+						() -> getTypeCategory(MemorySettingsCategory.class)));
 	}
 
 	@Override

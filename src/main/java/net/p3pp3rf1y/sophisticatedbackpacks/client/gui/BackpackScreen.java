@@ -29,8 +29,9 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> impleme
 			return super.keyPressed(keyCode, scanCode, modifiers);
 		}
 
-		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
-			if (getFocused() != null && !clearFocusedWidget()) {
+		boolean backpackKeyPressed = KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode));
+		if (keyCode == 256 || backpackKeyPressed) {
+			if (keyCode != 256 && backpackKeyPressed && getFocused() != null && !clearFocusedWidget()) {
 				return super.keyPressed(keyCode, scanCode, modifiers);
 			}
 			if (getMenu().isFirstLevelStorage() && (keyCode == 256 || mouseNotOverBackpack())) {

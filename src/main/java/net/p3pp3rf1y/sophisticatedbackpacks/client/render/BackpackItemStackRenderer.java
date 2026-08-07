@@ -23,7 +23,8 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 	}
 
 	@Override
-	public void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+	public void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight,
+			int combinedOverlay) {
 		ItemRenderer itemRenderer = minecraft.getItemRenderer();
 		BakedModel model = itemRenderer.getModel(stack, null, minecraft.player, 0);
 		model.getRenderPasses(stack, true).forEach(bakedModel -> bakedModel.getRenderTypes(stack, true).forEach(renderType -> {
@@ -38,9 +39,10 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 					return;
 				}
 				poseStack.pushPose();
-				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack);
+				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
 				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
-				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, minecraft.level, 0);
+				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, minecraft.level,
+						0);
 				poseStack.popPose();
 			}
 		});

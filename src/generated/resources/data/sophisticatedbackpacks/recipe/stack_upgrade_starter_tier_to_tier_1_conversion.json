@@ -1,0 +1,27 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_1_conversion"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:storage_blocks/iron"
+    },
+    "L": {
+      "item": "minecraft:leather"
+    }
+  },
+  "pattern": [
+    " I ",
+    "ILI",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "sophisticatedbackpacks:stack_upgrade_starter_tier_to_tier_1_conversion"
+  }
+}

@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.IShearable;
-import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import net.neoforged.neoforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -48,6 +47,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.CoreFakePlayer;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,16 +59,19 @@ import java.util.function.Predicate;
 import static net.neoforged.neoforge.common.ItemAbilities.*;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
-		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
+		implements
+			IBlockClickResponseUpgrade,
+			IAttackEntityResponseUpgrade,
+			IBlockToolSwapUpgrade,
+			IEntityToolSwapUpgrade {
 
-	private static final LoadingCache<ItemStack, Boolean> isToolCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES).build(
-			new CacheLoader<>() {
+	private static final LoadingCache<ItemStack, Boolean> isToolCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
+			.build(new CacheLoader<>() {
 				@Override
 				public Boolean load(ItemStack key) {
 					return canPerformToolAction(key);
 				}
-			}
-	);
+			});
 
 	private final FilterLogic filterLogic;
 	@Nullable
@@ -97,7 +100,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player)) || (!isSword(mainHandItem, player) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
+		if (mainHandItem.getItem() instanceof BackpackItem || (toolSwapMode == ToolSwapMode.ONLY_TOOLS && isSword(mainHandItem, player))
+				|| (!isSword(mainHandItem, player) && isNotTool(mainHandItem)) || !filterLogic.matchesFilter(mainHandItem)) {
 			return false;
 		}
 
@@ -156,7 +160,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		return false;
 	}
 
-	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemStack mainHandItem, ItemStack tool, int selectedSlot) {
+	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemStack mainHandItem, ItemStack tool,
+			int selectedSlot) {
 		return (backpackInventory.insertItem(mainHandItem, true).isEmpty())
 				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
 	}
@@ -172,7 +177,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isGoodAtBreakingBlock(Player player, BlockPos pos, BlockState state, ItemStack stack) {
-		return (!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state)) && (stack.getDestroySpeed(state) > 1.5 || state.getDestroyProgress(player, player.level(), pos) >= 1.0f);
+		return (!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state))
+				&& (stack.getDestroySpeed(state) > 1.5 || state.getDestroyProgress(player, player.level(), pos) >= 1.0f);
 	}
 
 	@Override
@@ -199,9 +205,9 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private static boolean canPerformToolAction(ItemStack stack) {
-		return canPerformAnyAction(stack, ItemAbilities.DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, ItemAbilities.DEFAULT_HOE_ACTIONS)
-				|| canPerformAnyAction(stack, ItemAbilities.DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, ItemAbilities.DEFAULT_SHOVEL_ACTIONS)
-				|| canPerformAnyAction(stack, ItemAbilities.DEFAULT_SHEARS_ACTIONS);
+		return canPerformAnyAction(stack, DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, DEFAULT_HOE_ACTIONS)
+				|| canPerformAnyAction(stack, DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, DEFAULT_SHOVEL_ACTIONS)
+				|| canPerformAnyAction(stack, DEFAULT_SHEARS_ACTIONS);
 	}
 
 	private static boolean canPerformAnyAction(ItemStack stack, Set<ItemAbility> toolActions) {
@@ -219,7 +225,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		AttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
-		if (!stack.isEmpty() && stack.canPerformAction(ItemAbilities.SWORD_SWEEP)) {
+		if (!stack.isEmpty() && stack.canPerformAction(SWORD_SWEEP)) {
 			return attackDamage != null && attackDamage.getModifier(Item.BASE_ATTACK_DAMAGE_ID) != null;
 		}
 		return false;
@@ -248,7 +254,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		return false;
 	}
 
-	private void updateBestWeapons(AtomicReference<ItemStack> bestAxe, AtomicDouble bestAxeDamage, AtomicReference<ItemStack> bestSword, AtomicDouble bestSwordDamage, ItemStack stack) {
+	private void updateBestWeapons(AtomicReference<ItemStack> bestAxe, AtomicDouble bestAxeDamage, AtomicReference<ItemStack> bestSword,
+			AtomicDouble bestSwordDamage, ItemStack stack) {
 		AttributeInstance attribute = new AttributeInstance(Attributes.ATTACK_DAMAGE, a -> {
 		});
 		stack.forEachModifier(EquipmentSlot.MAINHAND, (att, m) -> {
@@ -260,12 +267,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		});
 
 		double damageValue = attribute.getValue();
-		if (stack.canPerformAction(ItemAbilities.AXE_DIG)) {
+		if (stack.canPerformAction(AXE_DIG)) {
 			if (damageValue > bestAxeDamage.get()) {
 				bestAxe.set(stack);
 				bestAxeDamage.set(damageValue);
 			}
-		} else if ((SwordRegistry.isSword(stack) || stack.canPerformAction(ItemAbilities.SWORD_SWEEP)) && damageValue > bestSwordDamage.get()) {
+		} else if ((SwordRegistry.isSword(stack) || stack.canPerformAction(SWORD_SWEEP)) && damageValue > bestSwordDamage.get()) {
 			bestSword.set(stack);
 			bestSwordDamage.set(damageValue);
 		}
@@ -417,7 +424,8 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	private boolean itemWorksOnBlock(Level level, BlockPos pos, BlockState blockState, Player player, ItemStack stack) {
 		for (ItemAbility action : BLOCK_MODIFICATION_ACTIONS) {
 			if (stack.canPerformAction(action) && blockState.getToolModifiedState(
-					new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)), action, true) != null) {
+					new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)),
+					action, true) != null) {
 				return true;
 			}
 		}

@@ -14,13 +14,7 @@ public final class BackpackShapeHelper {
 	}
 
 	public enum Part {
-		BASE,
-		BATTERY,
-		FRONT_POUCH,
-		LEFT_POUCH,
-		LEFT_TANK,
-		RIGHT_POUCH,
-		RIGHT_TANK
+		BASE, BATTERY, FRONT_POUCH, LEFT_POUCH, LEFT_TANK, RIGHT_POUCH, RIGHT_TANK
 	}
 
 	public record ShapeKey(Direction direction, boolean leftTank, boolean rightTank, boolean battery) {
@@ -30,12 +24,8 @@ public final class BackpackShapeHelper {
 	}
 
 	public static VoxelShape composeAndRotate(ShapeKey key, Function<Part, VoxelShape> partLookup) {
-		VoxelShape composed = or(Stream.of(
-				partLookup.apply(Part.BASE),
-				partLookup.apply(key.leftTank ? Part.LEFT_TANK : Part.LEFT_POUCH),
-				partLookup.apply(key.rightTank ? Part.RIGHT_TANK : Part.RIGHT_POUCH),
-				partLookup.apply(key.battery ? Part.BATTERY : Part.FRONT_POUCH)
-		));
+		VoxelShape composed = or(Stream.of(partLookup.apply(Part.BASE), partLookup.apply(key.leftTank ? Part.LEFT_TANK : Part.LEFT_POUCH),
+				partLookup.apply(key.rightTank ? Part.RIGHT_TANK : Part.RIGHT_POUCH), partLookup.apply(key.battery ? Part.BATTERY : Part.FRONT_POUCH)));
 		return rotateHorizontalFromNorth(composed, key.direction).optimize();
 	}
 
@@ -50,8 +40,7 @@ public final class BackpackShapeHelper {
 	}
 
 	public static VoxelShape or(Stream<VoxelShape> shapes) {
-		return shapes.reduce((v1, v2) -> Shapes.joinUnoptimized(v1, v2, BooleanOp.OR))
-				.orElse(Shapes.empty());
+		return shapes.reduce((v1, v2) -> Shapes.joinUnoptimized(v1, v2, BooleanOp.OR)).orElse(Shapes.empty());
 	}
 
 	private static VoxelShape rotateShape(VoxelShape shape, DoubleLineFunction rotate) {
