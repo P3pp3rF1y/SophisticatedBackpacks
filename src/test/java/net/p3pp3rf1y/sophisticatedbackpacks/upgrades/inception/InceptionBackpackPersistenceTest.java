@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -80,6 +81,33 @@ class InceptionBackpackPersistenceTest {
 	}
 
 	@Test
+	void getInventoryForUpgradeProcessingPersistsUuidOfNewNestedBackpack() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				StorageWrapperRepository.clearCache();
+
+				IBackpackWrapper outerBackpack = createBackpack();
+				ItemStack inceptionUpgrade = new ItemStack(ModItems.INCEPTION_UPGRADE.get());
+				inceptionUpgrade.set(ModDataComponents.INVENTORY_ORDER, InventoryOrder.INCEPTED_FIRST);
+				outerBackpack.getUpgradeHandler().setStackInSlot(0, inceptionUpgrade);
+				ItemStack innerBackpackStack = new ItemStack(ModItems.BACKPACK.get());
+				outerBackpack.getInventoryHandler().setStackInSlot(0, innerBackpackStack);
+
+				outerBackpack.getInventoryForUpgradeProcessing();
+				UUID innerContentsUuid = BackpackWrapper.fromStack(innerBackpackStack).getContentsUuid().orElseThrow();
+				storageUuids.add(innerContentsUuid);
+				ItemStack savedOuterBackpackStack = copyItemStack(outerBackpack.getBackpack());
+				StorageWrapperRepository.clearCache();
+				IBackpackWrapper reloadedOuterBackpack = BackpackWrapper.fromStack(savedOuterBackpackStack);
+
+				ItemStack persistedInnerBackpackStack = reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0);
+				assertEquals(innerContentsUuid, BackpackWrapper.fromStack(persistedInnerBackpackStack).getContentsUuid().orElseThrow());
+			}
+		});
+	}
+
+	@Test
 	void nestedBackpackItemRemovalStaysPersistedAfterInceptionCacheExpiryAndNestedInventoryExtraction() throws Throwable {
 		runOnServerThread(() -> {
 			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
@@ -128,11 +156,42 @@ class InceptionBackpackPersistenceTest {
 		});
 	}
 
+	@Test
+	void saveInitializedSubBackpacksPersistsUuidAllocatedBeforeHandlerCreation() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				StorageWrapperRepository.clearCache();
+
+				IBackpackWrapper outerBackpack = createBackpack();
+				ItemStack innerBackpackStack = new ItemStack(ModItems.BACKPACK.get());
+				outerBackpack.getInventoryHandler().setStackInSlot(0, innerBackpackStack);
+				BackpackWrapper.fromStack(innerBackpackStack).getInventoryHandler();
+				UUID innerContentsUuid = BackpackWrapper.fromStack(innerBackpackStack).getContentsUuid().orElseThrow();
+				storageUuids.add(innerContentsUuid);
+				SubBackpacksHandler subBackpacksHandler = new SubBackpacksHandler(outerBackpack.getInventoryHandler());
+
+				subBackpacksHandler.saveInitializedSubBackpacks();
+				ItemStack savedOuterBackpackStack = copyItemStack(outerBackpack.getBackpack());
+				StorageWrapperRepository.clearCache();
+				IBackpackWrapper reloadedOuterBackpack = BackpackWrapper.fromStack(savedOuterBackpackStack);
+
+				ItemStack persistedInnerBackpackStack = reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0);
+				assertEquals(innerContentsUuid, BackpackWrapper.fromStack(persistedInnerBackpackStack).getContentsUuid().orElseThrow());
+			}
+		});
+	}
+
 	private IBackpackWrapper createBackpack() {
 		IBackpackWrapper backpack = BackpackWrapper.fromStack(new ItemStack(ModItems.BACKPACK.get()));
 		backpack.getInventoryHandler();
 		storageUuids.add(backpack.getContentsUuid().orElseThrow());
 		return backpack;
+	}
+
+	private static ItemStack copyItemStack(ItemStack stack) {
+		return CodecHelper.OVERSIZED_ITEM_STACK_CODEC.parse(NBT_OPS, CodecHelper.OVERSIZED_ITEM_STACK_CODEC.encodeStart(NBT_OPS, stack).getOrThrow())
+				.getOrThrow();
 	}
 
 	private RefillUpgradeWrapper getRefillWrapper(IBackpackWrapper backpack) {
@@ -167,6 +226,7 @@ class InceptionBackpackPersistenceTest {
 		assertEquals(expectedCount, actualCount);
 	}
 
+	// BackpackStorage and the parent-slot save callback use the thread group to select server behavior.
 	private static void runOnServerThread(ThrowingRunnable runnable) throws Throwable {
 		AtomicReference<Throwable> thrown = new AtomicReference<>();
 		Thread thread = new Thread(SidedThreadGroups.SERVER, () -> {
