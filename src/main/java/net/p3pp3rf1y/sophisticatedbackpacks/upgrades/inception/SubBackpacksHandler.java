@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
@@ -31,6 +32,19 @@ public class SubBackpacksHandler {
 
 	public Collection<IStorageWrapper> getSubBackpacks() {
 		return subBackpacks.values();
+	}
+
+	public void saveInitializedSubBackpacks() {
+		List<Integer> initializedSlots = subBackpacks.entrySet().stream().filter(entry -> entry.getValue().getContentsUuid().isPresent()).map(Map.Entry::getKey)
+				.toList();
+		if (initializedSlots.isEmpty()) {
+			return;
+		}
+
+		for (int slot : initializedSlots) {
+			inventoryHandler.setStackInSlot(slot, ((IBackpackWrapper) subBackpacks.get(slot)).getBackpack());
+		}
+		inventoryHandler.saveInventory();
 	}
 
 	public void refresh() {

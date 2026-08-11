@@ -36,6 +36,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 			handlers.add(wrappedInventoryHandler);
 		}
 		subBackpacksHandler.getSubBackpacks().forEach(sbp -> handlers.add(sbp.getInventoryForInputOutput()));
+		subBackpacksHandler.saveInitializedSubBackpacks();
 		if (inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			handlers.add(wrappedInventoryHandler);
 		}
