@@ -8,6 +8,9 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidType;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeWrapper;
 
 import javax.annotation.Nonnull;
 
@@ -52,17 +55,17 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public int fill(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
-		int filled = 0;
-		FluidStack toFill = resource;
-		for (TankUpgradeWrapper tank : getAllTanks()) {
-			filled += tank.fill(toFill, action, ignoreInOutLimit);
-			if (filled == resource.getAmount()) {
-				return resource.getAmount();
-			}
-			toFill = new FluidStack(toFill, resource.getAmount() - filled);
+		if (shouldVoid(resource, VoidType.ALWAYS)) {
+			return resource.getAmount();
 		}
 
-		return filled;
+		if (shouldVoid(resource, VoidType.SLOT_OVERFLOW)) {
+			fillOneTank(resource, action, ignoreInOutLimit);
+			return resource.getAmount();
+		}
+
+		int filled = fillAllTanks(resource, action, ignoreInOutLimit);
+		return filled == resource.getAmount() || !shouldVoid(resource, VoidType.STORAGE_OVERFLOW) ? filled : resource.getAmount();
 
 	}
 
@@ -135,6 +138,42 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	private boolean isInvalidTank(int tank) {
 		return tank < 0 || tank >= getTanks();
+	}
+
+	private int fillOneTank(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			if (tank.getContents().isFluidEqual(resource)) {
+				return tank.fill(resource, action, ignoreInOutLimit);
+			}
+		}
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			if (tank.getContents().isEmpty()) {
+				return tank.fill(resource, action, ignoreInOutLimit);
+			}
+		}
+		return 0;
+	}
+
+	private int fillAllTanks(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
+		int filled = 0;
+		FluidStack toFill = resource;
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			filled += tank.fill(toFill, action, ignoreInOutLimit);
+			if (filled == resource.getAmount()) {
+				return resource.getAmount();
+			}
+			toFill = new FluidStack(toFill, resource.getAmount() - filled);
+		}
+		return filled;
+	}
+
+	private boolean shouldVoid(FluidStack fluid, VoidType voidType) {
+		for (VoidUpgradeWrapper voidUpgrade : backpackWrapper.getUpgradeHandler().getTypeWrappers(VoidUpgradeItem.TYPE)) {
+			if (voidUpgrade.shouldVoidFluid(fluid, voidType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
