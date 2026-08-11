@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -35,6 +36,19 @@ public class SubBackpacksHandler {
 
 	public Collection<IStorageWrapper> getSubBackpacks() {
 		return subBackpacks.values();
+	}
+
+	public void saveInitializedSubBackpacks() {
+		List<Integer> initializedSlots = subBackpacks.entrySet().stream().filter(entry -> entry.getValue().getContentsUuid().isPresent()).map(Map.Entry::getKey)
+				.toList();
+		if (initializedSlots.isEmpty()) {
+			return;
+		}
+
+		for (int slot : initializedSlots) {
+			inventoryHandler.setStackInSlot(slot, ((IBackpackWrapper) subBackpacks.get(slot)).getBackpack());
+		}
+		inventoryHandler.saveInventory();
 	}
 
 	private void onContentsChanged(int slot) {
