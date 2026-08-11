@@ -7,6 +7,9 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidType;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeWrapper;
 
 import java.util.List;
 
@@ -55,16 +58,17 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public int insert(int index, FluidResource resource, int amount, TransactionContext tx, boolean ignoreInOutLimit) {
-		int filled = 0;
-		int toFill = amount;
-		for (TankUpgradeWrapper tank : getAllTanks()) {
-			filled += tank.insert(resource, toFill, tx, ignoreInOutLimit);
-			if (filled >= amount) {
-				return amount;
-			}
-			toFill = amount - filled;
+		if (shouldVoid(resource, VoidType.ALWAYS)) {
+			return amount;
 		}
-		return filled;
+
+		if (shouldVoid(resource, VoidType.SLOT_OVERFLOW)) {
+			insertOneTank(resource, amount, tx, ignoreInOutLimit);
+			return amount;
+		}
+
+		int inserted = insertAllTanks(resource, amount, tx, ignoreInOutLimit);
+		return inserted == amount || !shouldVoid(resource, VoidType.STORAGE_OVERFLOW) ? inserted : amount;
 	}
 
 	@Override
@@ -83,5 +87,39 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	private boolean isInvalidTank(int tank) {
 		return tank < 0 || tank >= size();
+	}
+
+	private int insertOneTank(FluidResource resource, int amount, TransactionContext tx, boolean ignoreInOutLimit) {
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			if (resource.matches(tank.getContents())) {
+				return tank.insert(resource, amount, tx, ignoreInOutLimit);
+			}
+		}
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			if (tank.getContents().isEmpty()) {
+				return tank.insert(resource, amount, tx, ignoreInOutLimit);
+			}
+		}
+		return 0;
+	}
+
+	private int insertAllTanks(FluidResource resource, int amount, TransactionContext tx, boolean ignoreInOutLimit) {
+		int inserted = 0;
+		for (TankUpgradeWrapper tank : getAllTanks()) {
+			inserted += tank.insert(resource, amount - inserted, tx, ignoreInOutLimit);
+			if (inserted == amount) {
+				return amount;
+			}
+		}
+		return inserted;
+	}
+
+	private boolean shouldVoid(FluidResource resource, VoidType voidType) {
+		for (VoidUpgradeWrapper voidUpgrade : backpackWrapper.getUpgradeHandler().getTypeWrappers(VoidUpgradeItem.TYPE)) {
+			if (voidUpgrade.shouldVoidFluid(resource, voidType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
