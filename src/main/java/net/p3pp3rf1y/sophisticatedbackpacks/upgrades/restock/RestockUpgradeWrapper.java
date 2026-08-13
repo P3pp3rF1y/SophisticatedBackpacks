@@ -54,10 +54,31 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(),
 					Collections.singletonList(filterLogic), Collections.emptyList());
 			InventoryHelper.iterate(handler, (index, resource, amount) -> {
-				int moved = filteredTarget.insert(resource, amount, tx);
-				if (moved > 0) {
-					handler.extract(index, resource, moved, tx);
-					transferredStacks.add(resource.toStack(moved));
+				if (!filterLogic.matchesFilter(resource)) {
+					return;
+				}
+
+				int amountToMove;
+				try (Transaction probeTx = Transaction.open(tx)) {
+					amountToMove = filteredTarget.insert(resource, amount, probeTx);
+				}
+				if (amountToMove <= 0) {
+					return;
+				}
+
+				try (Transaction transferTx = Transaction.open(tx)) {
+					int extracted = handler.extract(index, resource, amountToMove, transferTx);
+					if (extracted <= 0) {
+						return;
+					}
+
+					int inserted = filteredTarget.insert(resource, extracted, transferTx);
+					if (inserted != extracted) {
+						return;
+					}
+
+					transferTx.commit();
+					transferredStacks.add(resource.toStack(extracted));
 				}
 			});
 			if (!transferredStacks.isEmpty()) {
