@@ -48,23 +48,52 @@ public class RestockUpgradeWrapper extends UpgradeWrapperBase<RestockUpgradeWrap
 	}
 
 	public List<ItemStack> restockFromHandler(ResourceHandler<ItemResource> handler) {
+		List<ExtractableSlot> extractableSlots = getExtractableSlots(handler);
+		if (extractableSlots.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		List<ItemStack> transferredStacks = new ArrayList<>();
+		boolean transferFailed = false;
 
 		try (Transaction tx = Transaction.openRoot()) {
 			FilteredItemHandler<ResourceHandler<ItemResource>> filteredTarget = new FilteredItemHandler<>(storageWrapper.getInventoryForUpgradeProcessing(),
 					Collections.singletonList(filterLogic), Collections.emptyList());
-			InventoryHelper.iterate(handler, (index, resource, amount) -> {
-				int moved = filteredTarget.insert(resource, amount, tx);
+			for (ExtractableSlot extractableSlot : extractableSlots) {
+				int moved = filteredTarget.insert(extractableSlot.resource(), extractableSlot.amount(), tx);
 				if (moved > 0) {
-					handler.extract(index, resource, moved, tx);
-					transferredStacks.add(resource.toStack(moved));
+					int extracted = handler.extract(extractableSlot.index(), extractableSlot.resource(), moved, tx);
+					if (extracted != moved) {
+						transferFailed = true;
+						break;
+					}
+					transferredStacks.add(extractableSlot.resource().toStack(moved));
 				}
-			});
-			if (!transferredStacks.isEmpty()) {
+			}
+			if (!transferFailed && !transferredStacks.isEmpty()) {
 				tx.commit();
 			}
 		}
 
-		return transferredStacks;
+		return transferFailed ? Collections.emptyList() : transferredStacks;
+	}
+
+	private List<ExtractableSlot> getExtractableSlots(ResourceHandler<ItemResource> handler) {
+		List<ExtractableSlot> extractableSlots = new ArrayList<>();
+		try (Transaction tx = Transaction.openRoot()) {
+			InventoryHelper.iterate(handler, (index, resource, amount) -> {
+				if (resource.isEmpty()) {
+					return;
+				}
+				int extracted = handler.extract(index, resource, amount, tx);
+				if (extracted > 0) {
+					extractableSlots.add(new ExtractableSlot(index, resource, extracted));
+				}
+			});
+		}
+		return extractableSlots;
+	}
+
+	private record ExtractableSlot(int index, ItemResource resource, int amount) {
 	}
 }
