@@ -103,7 +103,7 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 		@Override
 		protected void createInputSlots(ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition) {
 			for (final ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition : itemCombinerMenuSlotDefinition.getSlots()) {
-				this.addSlot(new SlotSuppliedHandler(upgradeWrapper::getInventory, slotDefinition.slotIndex(), 0, 0) {
+				this.addSlot(new SlotSuppliedHandler(() -> upgradeWrapper.getInventory(), slotDefinition.slotIndex(), 0, 0) {
 					@Override
 					public void setChanged() {
 						super.setChanged();
