@@ -41,6 +41,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.transfer.EmptyResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -507,7 +508,8 @@ public class ModItems {
 			if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
 				return null;
 			}
-			return BackpackWrapper.fromStack(stack).getItemFluidHandler(itemAccess).orElse(null);
+			ItemAccess access = itemAccess == null ? ItemAccess.forStack(stack) : itemAccess;
+			return BackpackWrapper.fromStack(stack).getItemFluidHandler(access).orElse(null);
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyHandler().orElse(null), BACKPACK.get(),
 				COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
