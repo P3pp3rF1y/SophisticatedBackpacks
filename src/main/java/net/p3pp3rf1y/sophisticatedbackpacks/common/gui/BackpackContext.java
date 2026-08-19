@@ -394,8 +394,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity
-					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
+			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity && player.isWithinBlockInteractionRange(pos, 4.0F);
 		}
 
 		@Override
@@ -527,7 +526,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.distanceTo(otherPlayer) < 8;
+			return otherPlayer.isAlive() && player.isWithinEntityInteractionRange(otherPlayer, 4.0F);
 		}
 
 		@Override
