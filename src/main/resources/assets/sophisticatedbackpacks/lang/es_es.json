@@ -94,7 +94,7 @@
   "item.sophisticatedbackpacks.stack_upgrade_tier_2_to_tier_4_conversion": "Conversión de mejora de stack: nivel 2 a nivel 4",
   "item.sophisticatedbackpacks.stack_upgrade_tier_3_to_tier_4_conversion": "Conversión de mejora de stack: nivel 3 a nivel 4",
   "item.sophisticatedbackpacks.stack_upgrade_omega_tier": "Mejora de stack nivel omega",
-  "item.sophisticatedbackpacks.stack_upgrade_omega_tier.tooltip": "Multiplica los stacks por slot por el valor máximo (×33.554.431)",
+  "item.sophisticatedbackpacks.stack_upgrade_omega_tier.tooltip": "Multiplica los stacks por slot por el valor máximo (×33.554.431)",
   "item.sophisticatedbackpacks.stack_downgrade_tier_1": "Degradación de stack nivel 1",
   "item.sophisticatedbackpacks.stack_downgrade_tier_1.tooltip": "Divide el número de stacks que pueden caber en un slot por 8",
   "item.sophisticatedbackpacks.stack_downgrade_tier_2": "Degradación de stack nivel 2",
