@@ -34,8 +34,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.BackpackTintSources;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.*;
@@ -96,14 +96,14 @@ public class ClientEventHandler {
 		if (entity instanceof Player player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderInfo -> {
 				ItemStack backpack = backpackRenderInfo.getBackpack();
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-				clientTickUpgrades(player, wrapper.getRenderInfo());
+				if (BackpackItem.shouldRenderUpgradeActivity(backpack)) {
+					clientTickUpgrades(player, BackpackRenderInfo.fromPhysicalStack(backpack));
+				}
 			});
 		} else if (entity instanceof LivingEntity livingEntity) {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
-			if (chestStack.getItem() instanceof BackpackItem) {
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(chestStack);
-				clientTickUpgrades(livingEntity, wrapper.getRenderInfo());
+			if (chestStack.getItem() instanceof BackpackItem && BackpackItem.shouldRenderUpgradeActivity(chestStack)) {
+				clientTickUpgrades(livingEntity, BackpackRenderInfo.fromPhysicalStack(chestStack));
 			}
 		}
 	}
@@ -145,6 +145,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
+		ClientLinkedStorageBackpackContents.clear();
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent.AfterBlockEntities event) {

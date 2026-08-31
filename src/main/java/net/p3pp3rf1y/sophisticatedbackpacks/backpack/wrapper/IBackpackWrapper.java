@@ -8,13 +8,17 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
-public interface IBackpackWrapper extends IStorageWrapper {
+public interface IBackpackWrapper extends IStorageWrapper, ILinkedStorageEndpointProvider {
 
 	IBackpackWrapper setBackpackStack(ItemStack backpackStack);
 
@@ -22,6 +26,18 @@ public interface IBackpackWrapper extends IStorageWrapper {
 	BackpackSettingsHandler getSettingsHandler();
 
 	ItemStack getBackpack();
+
+	@Override
+	default Optional<LinkedStorageEndpointData> getLinkedStorageEndpoint() {
+		return Optional.ofNullable(getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT));
+	}
+
+	@Override
+	default Optional<LinkedStorageEndpointRole> getLinkedStorageEndpointRole() {
+		return getLinkedStorageEndpoint().map(endpoint -> Boolean.TRUE.equals(getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT))
+				? LinkedStorageEndpointRole.PRIMARY
+				: LinkedStorageEndpointRole.SECONDARY);
+	}
 
 	ItemStack cloneBackpack();
 

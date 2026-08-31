@@ -11,11 +11,17 @@ import java.util.function.Supplier;
 
 public class BackpackRenderInfo extends RenderInfo {
 	private final ItemStack backpack;
+	private static final Runnable NOOP_SAVE_HANDLER = () -> {
+	};
 
 	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getSaveHandler) {
 		super(getSaveHandler);
 		this.backpack = backpack;
 		deserialize();
+	}
+
+	public static BackpackRenderInfo fromPhysicalStack(ItemStack backpack) {
+		return new BackpackRenderInfo(backpack, () -> NOOP_SAVE_HANDLER);
 	}
 
 	@Override

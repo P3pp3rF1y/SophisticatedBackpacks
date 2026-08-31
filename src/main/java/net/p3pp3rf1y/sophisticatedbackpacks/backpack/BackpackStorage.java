@@ -78,6 +78,10 @@ public class BackpackStorage extends SavedData {
 		});
 	}
 
+	public Optional<CompoundTag> getBackpackContents(UUID backpackUuid) {
+		return Optional.ofNullable(backpackContents.get(backpackUuid));
+	}
+
 	public void putAccessLog(AccessLogRecord alr) {
 		accessLogRecords.put(alr.backpackUuid(), alr);
 		setDirty();

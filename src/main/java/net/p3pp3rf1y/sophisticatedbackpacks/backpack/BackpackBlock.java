@@ -45,7 +45,10 @@ import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
@@ -56,6 +59,10 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeClientTickHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeClientRegistry;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeClientData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeClientDataType;
@@ -184,7 +191,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 
 		player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(level, pos)),
-				backpackContext::toBuffer);
+				buffer -> backpackContext.toBuffer(buffer, player));
 		level.gameEvent(player, GameEvent.CONTAINER_OPEN, pos);
 		return InteractionResult.SUCCESS;
 	}
@@ -228,8 +235,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private Component getBackpackDisplayName(Level level, BlockPos pos) {
 		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getHoverName();
-		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(be -> be.getBackpackWrapper().getBackpack().getHoverName())
-				.orElse(defaultDisplayName);
+		return WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).map(be -> be.getBackpackWrapper().getDisplayName()).orElse(defaultDisplayName);
 	}
 
 	private static void putInPlayersHandAndRemove(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
@@ -253,6 +259,13 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private static void stopBackpackSounds(ItemStack backpack, Level level, BlockPos pos) {
+		if (LinkedStorageStackLifecycle.classifyEndpoint(backpack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			LinkedStorageEndpointData endpoint = backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+			if (level instanceof ServerLevel serverLevel && LinkedStorageJukeboxPlaybackAnchors.isPrimaryEndpoint(serverLevel, backpack)) {
+				ServerStorageSoundHandler.stopPlayingDisc(level, Vec3.atCenterOf(pos), endpoint.groupId());
+			}
+			return;
+		}
 		BackpackWrapper.fromStack(backpack).getContentsUuid().ifPresent(uuid -> ServerStorageSoundHandler.stopPlayingDisc(level, Vec3.atCenterOf(pos), uuid));
 	}
 
@@ -299,8 +312,16 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Override
 	protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier) {
 		super.entityInside(state, level, pos, entity, effectApplier);
-		if (!level.isClientSide && entity instanceof ItemEntity itemEntity) {
-			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).ifPresent(be -> tryToPickup(level, itemEntity, be.getBackpackWrapper()));
+		if (level instanceof ServerLevel serverLevel && entity instanceof ItemEntity itemEntity) {
+			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).ifPresent(be -> {
+				IBackpackWrapper backpackWrapper = be.getBackpackWrapper();
+				if (LinkedStorageStackLifecycle.classifyEndpoint(backpackWrapper.getBackpack()) == LinkedStorageEndpointStackState.ENDPOINT) {
+					BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, backpackWrapper.getBackpack())
+							.ifPresent(wrapper -> tryToPickup(level, itemEntity, wrapper));
+				} else {
+					tryToPickup(level, itemEntity, backpackWrapper);
+				}
+			});
 		}
 	}
 
@@ -339,8 +360,10 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Override
 	public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
 		WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).ifPresent(be -> {
-			RenderInfo renderInfo = be.getBackpackWrapper().getRenderInfo();
-			renderUpgrades(level, rand, pos, state.getValue(FACING), renderInfo);
+			ItemStack backpack = be.getBackpackWrapper().getBackpack();
+			if (BackpackItem.shouldRenderUpgradeActivity(backpack)) {
+				renderUpgrades(level, rand, pos, state.getValue(FACING), be.getBackpackWrapper().getRenderInfo());
+			}
 		});
 
 	}

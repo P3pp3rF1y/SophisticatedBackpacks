@@ -24,9 +24,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.CodecHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
@@ -179,6 +181,41 @@ class InceptionBackpackPersistenceTest {
 
 				ItemStack persistedInnerBackpackStack = reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0);
 				assertEquals(innerContentsUuid, BackpackWrapper.fromStack(persistedInnerBackpackStack).getContentsUuid().orElseThrow());
+			}
+		});
+	}
+
+	@Test
+	void saveInitializedSubBackpacksPreservesLinkedEndpointStackAndPersistsOrdinaryBackpack() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				StorageWrapperRepository.clearCache();
+
+				IBackpackWrapper outerBackpack = createBackpack();
+				ItemStack ordinaryBackpack = new ItemStack(ModItems.BACKPACK.get());
+				ItemStack linkedEndpoint = new ItemStack(ModItems.BACKPACK.get());
+				outerBackpack.getInventoryHandler().setStackInSlot(0, ordinaryBackpack);
+				outerBackpack.getInventoryHandler().setStackInSlot(1, linkedEndpoint);
+				BackpackWrapper.fromStack(ordinaryBackpack).getInventoryHandler();
+				BackpackWrapper.fromStack(linkedEndpoint).getInventoryHandler();
+				UUID ordinaryContentsUuid = BackpackWrapper.fromStack(ordinaryBackpack).getContentsUuid().orElseThrow();
+				storageUuids.add(ordinaryContentsUuid);
+				storageUuids.add(BackpackWrapper.fromStack(linkedEndpoint).getContentsUuid().orElseThrow());
+				SubBackpacksHandler subBackpacksHandler = new SubBackpacksHandler(outerBackpack.getInventoryHandler());
+				linkedEndpoint.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(UUID.randomUUID(), UUID.randomUUID()));
+
+				subBackpacksHandler.saveInitializedSubBackpacks();
+
+				assertSame(linkedEndpoint, outerBackpack.getInventoryHandler().getStackInSlot(1));
+				assertEquals(linkedEndpoint.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT),
+						outerBackpack.getInventoryHandler().getStackInSlot(1).get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT));
+				ItemStack savedOuterBackpackStack = copyItemStack(outerBackpack.getBackpack());
+				StorageWrapperRepository.clearCache();
+				IBackpackWrapper reloadedOuterBackpack = BackpackWrapper.fromStack(savedOuterBackpackStack);
+
+				assertEquals(ordinaryContentsUuid,
+						BackpackWrapper.fromStack(reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0)).getContentsUuid().orElseThrow());
 			}
 		});
 	}

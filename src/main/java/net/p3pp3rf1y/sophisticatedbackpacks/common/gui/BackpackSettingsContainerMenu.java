@@ -8,11 +8,20 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.LinkedStorageBackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+
+import java.util.Optional;
+import java.util.UUID;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
@@ -41,6 +50,16 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	@Override
 	public void detectSettingsChangeAndReload() {
 		if (player.level().isClientSide) {
+			Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
+			if (linkedStorageGroupId.isPresent() && ClientLinkedStorageBackpackContents.removeUpdatedGroup(linkedStorageGroupId.get())) {
+				ILinkedStorageContentsBinding contents = ClientLinkedStorageBackpackContents.getBinding(linkedStorageGroupId.get())
+						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + linkedStorageGroupId.get()));
+				storageWrapper.getSettingsHandler().reloadFrom(contents.contents());
+				return;
+			}
+			if (linkedStorageGroupId.isPresent()) {
+				return;
+			}
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				BackpackStorage storage = BackpackStorage.get();
 				if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
@@ -64,6 +83,12 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 
 		if (lastSettingsNbt == null || !lastSettingsNbt.equals(storageWrapper.getSettingsHandler().getNbt())) {
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
+			Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
+			if (player instanceof ServerPlayer serverPlayer && linkedStorageGroupId.isPresent()) {
+				UUID groupId = linkedStorageGroupId.get();
+				PacketDistributor.sendToPlayer(serverPlayer, LinkedStorageBackpackContentsPayload.createSnapshot(serverPlayer.level(), groupId));
+				return;
+			}
 
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				CompoundTag settingsContents = new CompoundTag();
@@ -81,5 +106,19 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	@Override
 	public BackpackContext getBackpackContext() {
 		return backpackContext;
+	}
+
+	@Override
+	public void removed(Player player) {
+		super.removed(player);
+		if (backpackContext.getType() != BackpackContext.ContextType.BLOCK_BACKPACK
+				&& storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+			linkedStorageBackpackWrapper.close();
+		}
+	}
+
+	private Optional<UUID> getLinkedStorageGroupId() {
+		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		return Optional.ofNullable(endpoint).map(LinkedStorageEndpointData::groupId);
 	}
 }
