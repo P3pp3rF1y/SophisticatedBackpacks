@@ -29,6 +29,8 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.*;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
@@ -53,6 +55,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Nullable
 	private ItemStack backpack;
+	private final IBackpackContentsSource contentsSource;
 	private int numberOfInventorySlots = -1;
 	private int numberOfUpgradeSlots = -1;
 	private Runnable backpackSaveHandler = () -> {
@@ -92,11 +95,27 @@ public class BackpackWrapper implements IBackpackWrapper {
 	};
 
 	public BackpackWrapper(ItemStack backpackStack) {
+		this(backpackStack, null);
+	}
+
+	BackpackWrapper(ItemStack backpackStack, @Nullable IBackpackContentsSource contentsSource) {
+		this.contentsSource = contentsSource == null ? new BackpackStorageContentsSource() : contentsSource;
 		setBackpackStack(backpackStack);
 	}
 
 	public static IBackpackWrapper fromStack(ItemStack stack) {
 		if (!(stack.getItem() instanceof BackpackItem)) {
+			return Noop.INSTANCE;
+		}
+		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			// Bare server integrations use the canonical host; client paths deliberately remain non-authoritative.
+			Optional<IBackpackWrapper> canonicalHost = BackpackLinkedStorageResolver.resolveServerCanonicalHost(stack);
+			if (canonicalHost.isPresent()) {
+				return canonicalHost.get();
+			}
+			if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+				throw new IllegalStateException("Failed to resolve linked backpack endpoint");
+			}
 			return Noop.INSTANCE;
 		}
 
@@ -180,11 +199,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private CompoundTag getBackpackContentsNbt() {
-		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
+		return contentsSource.getContents();
+	}
+
+	CompoundTag copyContentsForLinkedStorage() {
+		return getBackpackContentsNbt().copy();
 	}
 
 	private void markBackpackContentsDirty() {
-		BackpackStorage.get().setDirty();
+		contentsSource.markDirty();
 	}
 
 	@Override
@@ -244,7 +267,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
-		LegacyBackpackDataMigration.normalizeLegacyData(backpack);
+		if (contentsSource.usesLegacyBackpackDataMigration()) {
+			LegacyBackpackDataMigration.normalizeLegacyData(backpack);
+		}
 		cacheSlotNumbers();
 		if (renderInfo == null) {
 			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
@@ -252,6 +277,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 		renderInfoValidationPending = true;
 		return this;
+	}
+
+	protected final void replaceBackpackStack(ItemStack backpack) {
+		renderInfo = null;
+		setBackpackStack(backpack);
 	}
 
 	@Override
@@ -322,8 +352,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfInventorySlots(ItemStack backpackStack, int defaultNumberOfInventorySlots) {
 		Integer storedNumberOfInventorySlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
-		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots,
-				defaultNumberOfInventorySlots);
+		int resolvedNumberOfInventorySlots = contentsSource.usesCanonicalSlotNumbers() && storedNumberOfInventorySlots != null
+				? storedNumberOfInventorySlots
+				: Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots, defaultNumberOfInventorySlots);
 		numberOfInventorySlots = resolvedNumberOfInventorySlots;
 		if (storedNumberOfInventorySlots == null || storedNumberOfInventorySlots < resolvedNumberOfInventorySlots) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, resolvedNumberOfInventorySlots);
@@ -332,8 +363,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfUpgradeSlots(ItemStack backpackStack, int defaultNumberOfUpgradeSlots) {
 		Integer storedNumberOfUpgradeSlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
-		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots,
-				defaultNumberOfUpgradeSlots);
+		int resolvedNumberOfUpgradeSlots = contentsSource.usesCanonicalSlotNumbers() && storedNumberOfUpgradeSlots != null
+				? storedNumberOfUpgradeSlots
+				: Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots, defaultNumberOfUpgradeSlots);
 		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
 		if (storedNumberOfUpgradeSlots == null || storedNumberOfUpgradeSlots < resolvedNumberOfUpgradeSlots) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, resolvedNumberOfUpgradeSlots);
@@ -342,6 +374,22 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<UUID> getContentsUuid() {
+		return contentsSource.getContentsUuid();
+	}
+
+	private UUID getOrCreateContentsUuid() {
+		Optional<UUID> contentsUuid = getBackpackContentsUuid();
+		if (contentsUuid.isPresent()) {
+			return contentsUuid.get();
+		}
+		clearDummyHandlers();
+		UUID newUuid = UUID.randomUUID();
+		setContentsUuid(newUuid);
+		LegacyBackpackDataMigration.migrateBackpackContents(getBackpackStack(), newUuid);
+		return newUuid;
+	}
+
+	private Optional<UUID> getBackpackContentsUuid() {
 		ItemStack backpackStack = getBackpackStack();
 		UUID contentsUuid = backpackStack.get(ModCoreDataComponents.STORAGE_UUID);
 		if (contentsUuid != null) {
@@ -352,18 +400,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 			setContentsUuid(legacyContentsUuid);
 			return legacyContentsUuid;
 		});
-	}
-
-	private UUID getOrCreateContentsUuid() {
-		Optional<UUID> contentsUuid = getContentsUuid();
-		if (contentsUuid.isPresent()) {
-			return contentsUuid.get();
-		}
-		clearDummyHandlers();
-		UUID newUuid = UUID.randomUUID();
-		setContentsUuid(newUuid);
-		LegacyBackpackDataMigration.migrateBackpackContents(getBackpackStack(), newUuid);
-		return newUuid;
 	}
 
 	private void clearDummyHandlers() {
@@ -393,10 +429,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return Optional.of(openTabId);
 		}
 
-		return LegacyBackpackDataMigration.getOpenTabId(backpackStack).map(legacyOpenTabId -> {
+		return contentsSource.usesLegacyBackpackDataMigration() ? LegacyBackpackDataMigration.getOpenTabId(backpackStack).map(legacyOpenTabId -> {
 			backpackStack.set(ModCoreDataComponents.OPEN_TAB_ID, legacyOpenTabId);
 			return legacyOpenTabId;
-		});
+		}) : Optional.empty();
 	}
 
 	@Override
@@ -414,7 +450,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setColors(int mainColor, int accentColor) {
 		ItemStack backpackStack = getBackpackStack();
-		BackpackItem.setColors(backpackStack, mainColor, accentColor);
+		if (contentsSource.usesLegacyBackpackDataMigration()) {
+			BackpackItem.setColors(backpackStack, mainColor, accentColor);
+		} else {
+			backpackStack.set(ModCoreDataComponents.MAIN_COLOR, (mainColor & 0xFF_000000) == 0 ? mainColor | 0xFF_000000 : mainColor);
+			backpackStack.set(ModCoreDataComponents.ACCENT_COLOR, (accentColor & 0xFF_000000) == 0 ? accentColor | 0xFF_000000 : accentColor);
+		}
 		backpackSaveHandler.run();
 	}
 
@@ -432,10 +473,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return sortBy;
 		}
 
-		return LegacyBackpackDataMigration.getSortBy(backpackStack).map(legacySortBy -> {
+		return (contentsSource.usesLegacyBackpackDataMigration() ? LegacyBackpackDataMigration.getSortBy(backpackStack).map(legacySortBy -> {
 			backpackStack.set(ModCoreDataComponents.SORT_BY, legacySortBy);
 			return legacySortBy;
-		}).orElse(SortBy.NAME);
+		}) : Optional.<SortBy>empty()).orElse(SortBy.NAME);
 	}
 
 	@Override
@@ -562,7 +603,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void fillWithLoot(Level level, BlockPos pos, @Nullable Player player) {
 		ItemStack backpackStack = getBackpackStack();
 		ResourceLocation lootTable = backpackStack.get(ModDataComponents.LOOT_TABLE);
-		if (lootTable == null) {
+		if (lootTable == null && contentsSource.usesLegacyBackpackDataMigration()) {
 			lootTable = LegacyBackpackDataMigration.getLootTableName(backpackStack).orElse(null);
 			if (lootTable != null) {
 				backpackStack.set(ModDataComponents.LOOT_TABLE, lootTable);
@@ -580,7 +621,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void fillFromTemplate() {
 		ItemStack backpack = getBackpackStack();
 		ResourceLocation templateName = backpack.get(ModDataComponents.TEMPLATE_NAME);
-		if (templateName == null) {
+		if (templateName == null && contentsSource.usesLegacyBackpackDataMigration()) {
 			templateName = LegacyBackpackDataMigration.getTemplateName(backpack).orElse(null);
 			if (templateName != null) {
 				backpack.set(ModDataComponents.TEMPLATE_NAME, templateName);
@@ -596,7 +637,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 
 		CompoundTag backpackContent = templateData.get().getCompound("backpackContents").copy();
-		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), backpackContent);
+		contentsSource.setContents(backpackContent);
 		backpack.remove(ModDataComponents.TEMPLATE_NAME);
 	}
 
@@ -663,10 +704,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return columnsTaken;
 		}
 
-		return LegacyBackpackDataMigration.getColumnsTaken(backpackStack).map(legacyColumnsTaken -> {
+		return (contentsSource.usesLegacyBackpackDataMigration() ? LegacyBackpackDataMigration.getColumnsTaken(backpackStack).map(legacyColumnsTaken -> {
 			backpackStack.set(ModDataComponents.COLUMNS_TAKEN, legacyColumnsTaken);
 			return legacyColumnsTaken;
-		}).orElse(0);
+		}) : Optional.<Integer>empty()).orElse(0);
 	}
 
 	private void fillWithLootFromTable(Level level, BlockPos pos, ResourceLocation lootTable, @Nullable Player player) {
@@ -679,7 +720,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		getBackpackStack().remove(ModDataComponents.LOOT_TABLE);
 		getBackpackStack().remove(ModDataComponents.LOOT_FACTOR);
-		LegacyBackpackDataMigration.removeLegacyLootData(getBackpackStack());
+		if (contentsSource.usesLegacyBackpackDataMigration()) {
+			LegacyBackpackDataMigration.removeLegacyLootData(getBackpackStack());
+		}
 		backpackSaveHandler.run();
 
 		List<ItemStack> loot = new ArrayList<>();
@@ -720,6 +763,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void onContentsNbtUpdated() {
 		handler = null;
 		upgradeHandler = null;
+		settingsHandler = null;
 		refreshInventoryForUpgradeProcessing();
 		onInventoryHandlerRefresh.run();
 	}
@@ -802,6 +846,33 @@ public class BackpackWrapper implements IBackpackWrapper {
 		@Override
 		public FluidStack drain(int maxDrain, FluidAction action) {
 			return delegate.drain(maxDrain, action);
+		}
+	}
+
+	private class BackpackStorageContentsSource implements IBackpackContentsSource {
+		@Override
+		public CompoundTag getContents() {
+			return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
+		}
+
+		@Override
+		public void setContents(CompoundTag contents) {
+			BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), contents);
+		}
+
+		@Override
+		public void markDirty() {
+			BackpackStorage.get().setDirty();
+		}
+
+		@Override
+		public Optional<UUID> getContentsUuid() {
+			return getBackpackContentsUuid();
+		}
+
+		@Override
+		public boolean usesLegacyBackpackDataMigration() {
+			return true;
 		}
 	}
 }

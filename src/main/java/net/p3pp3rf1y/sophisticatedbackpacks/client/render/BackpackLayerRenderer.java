@@ -16,8 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
@@ -61,9 +60,10 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 	public static <T extends LivingEntity, M extends EntityModel<T>> void renderBackpack(M parentModel, LivingEntity livingEntity, PoseStack poseStack,
 			MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor) {
 		translateRotateAndScale(parentModel, livingEntity, poseStack, wearsArmor);
-		IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
 		itemRenderer.renderStatic(backpack, BackpackDynamicModel.WORN, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, livingEntity.level(), 0);
-		renderUpgrades(livingEntity, wrapper.getRenderInfo());
+		if (BackpackItem.shouldRenderUpgradeActivity(backpack)) {
+			renderUpgrades(livingEntity, BackpackRenderInfo.fromPhysicalStack(backpack));
+		}
 	}
 
 	private static <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity,

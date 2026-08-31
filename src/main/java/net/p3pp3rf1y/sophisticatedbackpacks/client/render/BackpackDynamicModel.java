@@ -47,8 +47,7 @@ import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeHelper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
@@ -1107,8 +1106,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			backpackModel.leftTankRenderInfo = null;
 			backpackModel.battery = false;
 			backpackModel.batteryRenderInfo = null;
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-			RenderInfo renderInfo = backpackWrapper.getRenderInfo();
+			RenderInfo renderInfo = BackpackRenderInfo.fromPhysicalStack(stack);
 			Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
 			tankRenderInfos.forEach((pos, info) -> {
 				if (pos == TankPosition.LEFT) {

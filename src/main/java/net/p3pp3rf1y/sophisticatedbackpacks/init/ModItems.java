@@ -43,6 +43,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -493,17 +494,21 @@ public class ModItems {
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerItem(Capabilities.ItemHandler.ITEM, (stack, v) -> {
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
+			IBackpackWrapper backpackWrapper = getCapabilityWrapper(stack);
 			return backpackWrapper.getContentsUuid().isEmpty() ? EmptyItemHandler.INSTANCE : backpackWrapper.getInventoryForInputOutput();
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.FluidHandler.ITEM, (stack, v) -> {
-			if (Boolean.FALSE.equals(Config.SERVER.itemFluidHandlerEnabled.get())) {
+			if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
 				return null;
 			}
-			return BackpackWrapper.fromStack(stack).getItemFluidHandler().orElse(null);
+			return getCapabilityWrapper(stack).getItemFluidHandler().orElse(null);
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
-		event.registerItem(Capabilities.EnergyStorage.ITEM, (stack, v) -> BackpackWrapper.fromStack(stack).getEnergyStorage().orElse(null), BACKPACK.get(),
+		event.registerItem(Capabilities.EnergyStorage.ITEM, (stack, v) -> getCapabilityWrapper(stack).getEnergyStorage().orElse(null), BACKPACK.get(),
 				COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+	}
+
+	private static IBackpackWrapper getCapabilityWrapper(ItemStack stack) {
+		return BackpackLinkedStorageResolver.resolveServerCanonicalHost(stack).orElseGet(() -> BackpackWrapper.fromStack(stack));
 	}
 
 	private static class BackpackCauldronInteraction implements CauldronInteraction {
