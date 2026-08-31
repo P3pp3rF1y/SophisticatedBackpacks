@@ -56,6 +56,14 @@ public class BackpackStorage extends SavedData {
 		return clientStorageCopy;
 	}
 
+	public static BackpackStorage get(ServerLevel level) {
+		ServerLevel overworld = level.getServer().getLevel(Level.OVERWORLD);
+		if (overworld == null) {
+			throw new IllegalStateException("Backpack storage requires an Overworld");
+		}
+		return overworld.getDataStorage().computeIfAbsent(TYPE);
+	}
+
 	private static boolean isPlayerBackpackOrNotEmpty(BackpackStorage storage, UUID backpackUuid, CompoundTag contentsNbt) {
 		if (storage.accessLogRecords.containsKey(backpackUuid)) {
 			return true;
@@ -76,6 +84,10 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new CompoundTag();
 		});
+	}
+
+	public Optional<CompoundTag> getBackpackContents(UUID backpackUuid) {
+		return Optional.ofNullable(backpackContents.get(backpackUuid));
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {

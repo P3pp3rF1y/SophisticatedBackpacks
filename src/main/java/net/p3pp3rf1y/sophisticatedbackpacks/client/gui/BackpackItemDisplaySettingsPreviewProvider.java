@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.IItemDisplaySettingsPreviewProvider;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsContainer;
@@ -16,9 +17,14 @@ public final class BackpackItemDisplaySettingsPreviewProvider implements IItemDi
 
 	@Override
 	public Optional<ItemStack> getItemDisplaySettingsPreviewStack(SettingsScreen screen, ItemDisplaySettingsContainer container, int selectedSlot) {
-		return screen.getMenu().getStorageWrapper() instanceof IBackpackWrapper backpackWrapper
-				? Optional.of(backpackWrapper.getBackpack().copy())
-				: Optional.empty();
+		if (!(screen.getMenu().getStorageWrapper() instanceof IBackpackWrapper backpackWrapper)) {
+			return Optional.empty();
+		}
+		if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedBackpack) {
+			// The client settings controls mutate the canonical host before the server's projection returns.
+			linkedBackpack.refreshPhysicalProjection();
+		}
+		return Optional.of(backpackWrapper.getBackpack().copy());
 	}
 
 	@Override

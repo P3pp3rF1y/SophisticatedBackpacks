@@ -32,14 +32,15 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
+		if (!backpackContainer.canApplyClientInfo(payload.slotIndex)) {
+			return;
+		}
 		if (payload.slotIndex >= 0) {
 			ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
 			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
 			backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
 		}
-		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
-			backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
-		}
+		backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
 	}
 }
