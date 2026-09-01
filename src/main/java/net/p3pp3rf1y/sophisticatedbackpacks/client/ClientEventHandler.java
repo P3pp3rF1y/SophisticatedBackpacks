@@ -97,13 +97,13 @@ public class ClientEventHandler {
 		if (entity instanceof Player player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderData -> {
 				ItemStack backpack = backpackRenderData.getBackpack();
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
+				IBackpackWrapper wrapper = BackpackWrapper.fromStackNoCache(backpack);
 				clientTickUpgrades(player, wrapper.getRenderDataHandler());
 			});
 		} else if (entity instanceof LivingEntity livingEntity) {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(chestStack);
+				IBackpackWrapper wrapper = BackpackWrapper.fromStackNoCache(chestStack);
 				clientTickUpgrades(livingEntity, wrapper.getRenderDataHandler());
 			}
 		}

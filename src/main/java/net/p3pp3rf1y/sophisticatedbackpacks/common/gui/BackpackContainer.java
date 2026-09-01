@@ -16,24 +16,32 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackAdditionalContentsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.LinkedStorageBackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
 
-public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements ISyncedContainer {
+public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements IContextAwareContainer, ISyncedContainer {
 	private final BackpackContext backpackContext;
+	private boolean openingSettings;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
 		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player),
@@ -88,6 +96,12 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
 			if (player instanceof ServerPlayer serverPlayer) {
+				Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
+				if (linkedStorageGroupId.isPresent()) {
+					PacketDistributor.sendToPlayer(serverPlayer,
+							LinkedStorageBackpackContentsPayload.createSnapshot(serverPlayer.level(), linkedStorageGroupId.get()));
+					return;
+				}
 				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, storageWrapper.getSettingsHandler().getSettingsData()));
 				CompoundTag additionalContents = new CompoundTag();
 				storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class)
@@ -105,11 +119,14 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public void syncClientInfo(RenderData data, int columnsTaken) {
+		boolean columnsChanged = storageWrapper.getColumnsTaken() != columnsTaken;
 		storageWrapper.getRenderDataHandler().reloadFrom(data);
 		storageWrapper.setColumnsTaken(columnsTaken, false);
-		storageWrapper.onContentsUpdated();
-		refreshAllSlots();
-		onUpgradesChanged();
+		if (columnsChanged) {
+			storageWrapper.onContentsUpdated();
+			refreshAllSlots();
+			onUpgradesChanged();
+		}
 	}
 
 	public boolean canApplyClientInfo(int slotIndex) {
@@ -141,6 +158,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}
 
 		super.removed(player);
+		if (!openingSettings && storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper
+				&& (backpackContext.getType() != BackpackContext.ContextType.BLOCK_BACKPACK || backpackContext.getBackpackWrapper(player) != storageWrapper)) {
+			linkedStorageBackpackWrapper.close();
+		}
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
@@ -157,13 +178,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
+		openingSettings = true;
 		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
 				Component.translatable(BackpackTranslationHelper.INSTANCE.translGui("settings.title")), false), backpackContext::toBuffer);
 	}
 
 	@Override
 	protected boolean storageItemHasChanged() {
-		return backpackContext.getBackpackWrapper(player) != storageWrapper;
+		IBackpackWrapper currentStorageWrapper = backpackContext.getBackpackWrapper(player);
+		return currentStorageWrapper != storageWrapper && (backpackContext.getType() != BackpackContext.ContextType.BLOCK_BACKPACK
+				|| currentStorageWrapper.getBackpack() != storageWrapper.getBackpack());
 	}
 
 	@Override
@@ -174,6 +198,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	public boolean detectSettingsChangeAndReload() {
+		Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
+		if (linkedStorageGroupId.isPresent()) {
+			if (player.level().isClientSide() && ClientLinkedStorageBackpackContents.removeUpdatedGroup(linkedStorageGroupId.get())) {
+				ILinkedStorageContentsBinding contents = ClientLinkedStorageBackpackContents.getBinding(linkedStorageGroupId.get())
+						.orElseThrow(() -> new IllegalStateException("Updated linked Backpack group has no snapshot: " + linkedStorageGroupId.get()));
+				storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
+				return true;
+			}
+			return false;
+		}
 		return storageWrapper.getContentsUuid().map(uuid -> {
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {
@@ -182,6 +216,11 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			}
 			return false;
 		}).orElse(false);
+	}
+
+	private Optional<UUID> getLinkedStorageGroupId() {
+		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		return Optional.ofNullable(endpoint).map(LinkedStorageEndpointData::groupId);
 	}
 
 	@Override

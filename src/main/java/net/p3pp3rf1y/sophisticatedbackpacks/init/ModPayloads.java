@@ -15,7 +15,11 @@ public class ModPayloads {
 		registrar.playToServer(UpgradeTogglePayload.TYPE, UpgradeTogglePayload.STREAM_CODEC, UpgradeTogglePayload::handlePayload);
 		registrar.playToServer(RequestBackpackInventoryContentsPayload.TYPE, RequestBackpackInventoryContentsPayload.STREAM_CODEC,
 				RequestBackpackInventoryContentsPayload::handlePayload);
+		registrar.playToServer(RequestLinkedStorageBackpackContentsPayload.TYPE, RequestLinkedStorageBackpackContentsPayload.STREAM_CODEC,
+				RequestLinkedStorageBackpackContentsPayload::handlePayload);
 		registrar.playToClient(BackpackContentsPayload.TYPE, BackpackContentsPayload.STREAM_CODEC, BackpackContentsPayload::handlePayload);
+		registrar.playToClient(LinkedStorageBackpackContentsPayload.TYPE, LinkedStorageBackpackContentsPayload.STREAM_CODEC,
+				LinkedStorageBackpackContentsPayload::handlePayload);
 		registrar.playToClient(BackpackAdditionalContentsPayload.TYPE, BackpackAdditionalContentsPayload.STREAM_CODEC,
 				BackpackAdditionalContentsPayload::handlePayload);
 		registrar.playToClient(BackpackSettingsPayload.TYPE, BackpackSettingsPayload.STREAM_CODEC, BackpackSettingsPayload::handlePayload);

@@ -10,7 +10,7 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemResourceHandlerInteractionUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
 
@@ -34,7 +34,9 @@ public class InventoryInteractionHelper {
 		}
 
 		return CapabilityHelper.getFromItemHandler(level, pos, face,
-				itemHandler -> player.level().isClientSide() || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player), false);
+				itemHandler -> player.level().isClientSide()
+						|| tryRunningInteractionWrappers(itemHandler, BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(level, backpack), player),
+				false);
 	}
 
 	private static boolean tryRunningInteractionWrappers(ResourceHandler<ItemResource> itemHandler, IStorageWrapper wrapper, Player player) {

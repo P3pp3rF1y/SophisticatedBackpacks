@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import org.jspecify.annotations.Nullable;
@@ -28,7 +29,7 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, in
 
 	public static void handlePayload(SyncClientInfoPayload payload, IPayloadContext context) {
 		Player player = context.player();
-		if (payload.data == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
+		if (payload.data == null || !(player.containerMenu instanceof BackpackContainer) && !(player.containerMenu instanceof BackpackSettingsContainerMenu)) {
 			return;
 		}
 		if (payload.slotIndex >= 0) {
@@ -37,8 +38,10 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, in
 			backpackWrapper.getRenderDataHandler().reloadFrom(payload.data);
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
 		}
-		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
+		if (player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.canApplyClientInfo(payload.slotIndex)) {
 			backpackContainer.syncClientInfo(payload.data, payload.columnsTaken);
+		} else if (player.containerMenu instanceof BackpackSettingsContainerMenu backpackSettingsContainer && payload.slotIndex == -1) {
+			backpackSettingsContainer.syncClientInfo(payload.data, payload.columnsTaken);
 		}
 	}
 }

@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapper;
 
@@ -27,7 +27,8 @@ public record UpgradeTogglePayload(int upgradeSlot) implements CustomPacketPaylo
 	public static void handlePayload(UpgradeTogglePayload payload, IPayloadContext context) {
 		Player player = context.player();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-			Map<Integer, IUpgradeWrapper> slotWrappers = BackpackWrapper.fromStack(backpack).getUpgradeHandler().getSlotWrappers();
+			Map<Integer, IUpgradeWrapper> slotWrappers = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.level(), backpack)
+					.getUpgradeHandler().getSlotWrappers();
 			if (slotWrappers.containsKey(payload.upgradeSlot)) {
 				IUpgradeWrapper upgradeWrapper = slotWrappers.get(payload.upgradeSlot);
 				if (upgradeWrapper.canBeDisabled()) {
