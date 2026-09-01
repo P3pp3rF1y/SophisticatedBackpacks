@@ -33,13 +33,23 @@ public class BackpackStorage extends SavedData {
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
-				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				// noinspection ConstantConditions - by this time overworld is loaded
-				DimensionDataStorage storage = overworld.getDataStorage();
-				return storage.computeIfAbsent(new Factory<>(BackpackStorage::new, BackpackStorage::load), SAVED_DATA_NAME);
+				return get(server);
 			}
 		}
 		return clientStorageCopy;
+	}
+
+	public static BackpackStorage get(ServerLevel level) {
+		return get(level.getServer());
+	}
+
+	private static BackpackStorage get(MinecraftServer server) {
+		ServerLevel overworld = server.getLevel(Level.OVERWORLD);
+		if (overworld == null) {
+			throw new IllegalStateException("Backpack storage requires an Overworld");
+		}
+		DimensionDataStorage storage = overworld.getDataStorage();
+		return storage.computeIfAbsent(new Factory<>(BackpackStorage::new, BackpackStorage::load), SAVED_DATA_NAME);
 	}
 
 	public static BackpackStorage load(CompoundTag nbt, HolderLookup.Provider registries) {
@@ -112,6 +122,10 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new CompoundTag();
 		});
+	}
+
+	public Optional<CompoundTag> getBackpackContents(UUID backpackUuid) {
+		return Optional.ofNullable(backpackContents.get(backpackUuid));
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {

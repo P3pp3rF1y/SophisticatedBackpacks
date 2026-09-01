@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
 
@@ -33,7 +33,9 @@ public class InventoryInteractionHelper {
 		}
 
 		return CapabilityHelper.getFromItemHandler(level, pos, face,
-				itemHandler -> player.level().isClientSide || tryRunningInteractionWrappers(itemHandler, BackpackWrapper.fromStack(backpack), player), false);
+				itemHandler -> player.level().isClientSide
+						|| tryRunningInteractionWrappers(itemHandler, BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(level, backpack), player),
+				false);
 	}
 
 	private static boolean tryRunningInteractionWrappers(IItemHandler itemHandler, IStorageWrapper wrapper, Player player) {

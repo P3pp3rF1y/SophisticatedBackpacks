@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -32,14 +33,19 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 		if (payload.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
+		if (!backpackContainer.canApplyClientInfo(payload.slotIndex)) {
+			return;
+		}
 		if (payload.slotIndex >= 0) {
+			if (payload.slotIndex >= player.getInventory().items.size()) {
+				return;
+			}
 			ItemStack backpack = player.getInventory().items.get(payload.slotIndex);
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
+			IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolve(player.level(), backpack)
+					.orElseGet(() -> BackpackWrapper.fromStack(backpack));
 			backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
 		}
-		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
-			backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
-		}
+		backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
 	}
 }

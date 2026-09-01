@@ -21,8 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackRenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
@@ -67,7 +66,7 @@ public class BackpackItemModel implements ItemModel {
 		renderLayer.setupBlockModel(baseModel, renderType);
 
 		specialRenderer.setModelRenderParameters(tintLayers, baseModel, renderType);
-		specialRenderer.displayItem = BackpackWrapper.fromStack(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().orElse(null);
+		specialRenderer.displayItem = BackpackRenderInfo.fromPhysicalStack(stack).getItemDisplayRenderInfo().getDisplayItem().orElse(null);
 
 		renderLayer.setupSpecialModel(specialRenderer, specialRenderer.extractArgument(stack), baseModel);
 	}
@@ -80,8 +79,7 @@ public class BackpackItemModel implements ItemModel {
 			backpackModel.leftTankRenderInfo = null;
 			backpackModel.battery = false;
 			backpackModel.batteryRenderInfo = null;
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-			RenderInfo renderInfo = backpackWrapper.getRenderInfo();
+			RenderInfo renderInfo = BackpackRenderInfo.fromPhysicalStack(stack);
 			Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
 			tankRenderInfos.forEach((pos, info) -> {
 				if (pos == TankPosition.LEFT) {
