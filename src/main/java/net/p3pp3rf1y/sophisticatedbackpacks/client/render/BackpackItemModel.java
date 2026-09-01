@@ -90,7 +90,7 @@ public class BackpackItemModel implements ItemModel {
 		specialRenderer.displayItemQuad = this.displayItemQuad;
 		specialRenderer.setModelRenderParameters(
 				renderLayer.tintLayers() == null ? ItemStackRenderState.LayerRenderState.EMPTY_TINTS : renderLayer.tintLayers().toIntArray(), quads);
-		RenderData.DisplayData displayData = BackpackWrapper.fromStack(stack).getRenderDataHandler().getDisplayData();
+		RenderData.DisplayData displayData = BackpackWrapper.fromStackNoCache(stack).getRenderDataHandler().getDisplayData();
 
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
@@ -116,7 +116,7 @@ public class BackpackItemModel implements ItemModel {
 			backpackModel.leftTankRenderData = null;
 			backpackModel.battery = false;
 			backpackModel.batteryRenderData = null;
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
+			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStackNoCache(stack);
 			RenderDataHandler renderDataHandler = backpackWrapper.getRenderDataHandler();
 			Map<TankPosition, RenderData.TankRenderData> tankRenderData = renderDataHandler.getTankRenderData();
 			tankRenderData.forEach((pos, info) -> {

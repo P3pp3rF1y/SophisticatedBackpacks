@@ -17,9 +17,12 @@ import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeReloadListener;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientLinkedStorageTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientMobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.BackpackCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
@@ -31,6 +34,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherConten
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAdapters;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,6 +60,7 @@ public class SophisticatedBackpacks {
 		}
 		commonEventHandler.registerHandlers(modBus);
 		ModCompat.register();
+		LinkedStorageEndpointAdapters.register(new BackpackLinkedStorageEndpointAdapter());
 		if (dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers(modBus);
 			modBus.addListener(KeybindHandler::registerKeyMappings);
@@ -74,6 +80,7 @@ public class SophisticatedBackpacks {
 	private static void setup(FMLCommonSetupEvent event) {
 		event.enqueueWork(ModItems::registerDispenseBehavior);
 		event.enqueueWork(ModItems::registerCauldronInteractions);
+		event.enqueueWork(() -> LinkedStorageHostFactories.register(BackpackLinkedStorageHostWrapper.FACTORY_ID, BackpackLinkedStorageHostWrapper::create));
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {
@@ -82,6 +89,7 @@ public class SophisticatedBackpacks {
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
 		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
+		event.register(BackpackItem.LinkedStorageTooltip.class, ClientLinkedStorageTooltip::new);
 		event.register(MobCatcherHealthTooltip.class, ClientMobCatcherHealthTooltip::new);
 	}
 
