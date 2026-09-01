@@ -22,6 +22,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.util.CodecHelper;
 
+import javax.annotation.Nullable;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -140,6 +142,11 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new ContainerContents();
 		});
+	}
+
+	@Nullable
+	public ContainerContents getBackpackContents(UUID backpackUuid) {
+		return backpackContents.get(backpackUuid);
 	}
 
 	public CompoundTag getOrCreateAdditionalContents(UUID backpackUuid) {

@@ -6,6 +6,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -21,12 +24,26 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -41,11 +58,45 @@ import java.util.Optional;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
+public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, ILinkedStorageBlockEndpoint {
 	public static final String BACKPACK_DATA = "backpackData";
+	private static final BackpackLinkedStorageEndpointAdapter STACK_ENDPOINT_ADAPTER = new BackpackLinkedStorageEndpointAdapter();
+	private static final ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> BLOCK_ENDPOINT_ADAPTER = new ILinkedStorageEndpointAdapter<>() {
+		@Override
+		public ResourceLocation factoryId() {
+			return STACK_ENDPOINT_ADAPTER.factoryId();
+		}
+
+		@Override
+		public Compatibility getCompatibility(ServerLevel level, ILinkedStorageBlockEndpoint endpoint, LinkedStorageHostDescriptor hostDescriptor) {
+			return STACK_ENDPOINT_ADAPTER.getCompatibility(level, ((BackpackBlockEntity) endpoint).backpackWrapper.getBackpack(), hostDescriptor);
+		}
+
+		@Override
+		public LinkedStorageHostDescriptor createHostDescriptor(ServerLevel level, ILinkedStorageBlockEndpoint endpoint) {
+			return STACK_ENDPOINT_ADAPTER.createHostDescriptor(level, ((BackpackBlockEntity) endpoint).backpackWrapper.getBackpack());
+		}
+
+		@Override
+		public ContainerContents copyCanonicalContents(ServerLevel level, ILinkedStorageBlockEndpoint endpoint) {
+			return STACK_ENDPOINT_ADAPTER.copyCanonicalContents(level, ((BackpackBlockEntity) endpoint).backpackWrapper.getBackpack());
+		}
+
+		@Override
+		public void bindEndpoint(ServerLevel level, ILinkedStorageBlockEndpoint endpoint, LinkedStorageEndpointData endpointData) {
+			STACK_ENDPOINT_ADAPTER.bindEndpoint(level, ((BackpackBlockEntity) endpoint).backpackWrapper.getBackpack(), endpointData);
+		}
+
+		@Override
+		public void onEndpointLinked(ServerLevel level, ILinkedStorageBlockEndpoint endpoint) {
+			((BackpackBlockEntity) endpoint).onLinkedStorageEndpointLinked();
+		}
+	};
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
+	@Nullable
+	private ItemStack pendingLoadedBackpack;
 	private boolean updateBlockRender = true;
 
 	private boolean chunkBeingUnloaded = false;
@@ -83,27 +134,56 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
 	}
 
+	@Override
+	public void setLevel(Level level) {
+		super.setLevel(level);
+		if (pendingLoadedBackpack != null) {
+			ItemStack loadedBackpack = pendingLoadedBackpack;
+			pendingLoadedBackpack = null;
+			setBackpack(loadedBackpack);
+		}
+	}
+
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = BackpackWrapper.fromStack(backpack);
+		if (level instanceof ServerLevel serverLevel) {
+			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
+		}
+		closeLinkedStorageSubscription();
+		backpackWrapper = level == null
+				? BackpackWrapper.fromStack(backpack)
+				: level.isClientSide() ? new BackpackWrapper(backpack) : BackpackLinkedStorageResolver.resolveOrCreate(level, backpack);
 		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
 		backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateHandlers);
+		if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+			linkedStorageBackpackWrapper.setCanonicalContentsChangedHandler(this::refreshLinkedRenderState);
+		}
 		backpackWrapper.getRenderDataHandler().setRenderUpdateChangeListener(renderInfo -> {
 			updateBlockRender = true;
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		if (level != null && !level.isClientSide()) {
 			backpackWrapper.onInit(level);
+			LinkedStorageJukeboxPlaybackAnchors.refreshBlockAnchor((ServerLevel) level, worldPosition, backpackWrapper.getBackpack());
+			if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+				linkedStorageBackpackWrapper.refreshPhysicalProjection();
+				refreshLinkedRenderState();
+			}
 		}
 	}
 
 	@Override
 	public void loadAdditional(ValueInput in) {
 		super.loadAdditional(in);
-		setBackpackFrom(in);
+		ItemStack loadedBackpack = in.read(BACKPACK_DATA, ItemStack.CODEC).orElse(ItemStack.EMPTY);
+		if (level == null) {
+			pendingLoadedBackpack = loadedBackpack;
+		} else {
+			setBackpack(loadedBackpack);
+		}
 		loadControllerPos(in);
 
 		if (level != null && !level.isClientSide()) {
@@ -117,6 +197,13 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void onLoad() {
 		super.onLoad();
+		if (pendingLoadedBackpack != null) {
+			ItemStack loadedBackpack = pendingLoadedBackpack;
+			pendingLoadedBackpack = null;
+			setBackpack(loadedBackpack);
+		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
+			setBackpack(backpackWrapper.getBackpack());
+		}
 		registerWithControllerOnLoad();
 	}
 
@@ -163,6 +250,51 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
+	}
+
+	@Nullable
+	public LinkedStorageEndpointData getLinkedStorageEndpointData() {
+		return backpackWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+	}
+
+	@Override
+	public ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> getLinkedStorageBlockEndpointAdapter() {
+		return BLOCK_ENDPOINT_ADAPTER;
+	}
+
+	private void onLinkedStorageEndpointLinked() {
+		closeMenusForThisBlock();
+		setBackpack(backpackWrapper.getBackpack());
+		refreshRenderState();
+	}
+
+	private void closeMenusForThisBlock() {
+		if (!(level instanceof ServerLevel serverLevel)) {
+			return;
+		}
+		for (ServerPlayer player : serverLevel.getServer().getPlayerList().getPlayers()) {
+			if (player.level() == serverLevel && player.containerMenu instanceof IContextAwareContainer contextAwareContainer
+					&& contextAwareContainer.getBackpackContext() instanceof BackpackContext.Block context
+					&& context.getBackpackPosition(player).equals(worldPosition)) {
+				player.closeContainer();
+			}
+		}
+	}
+
+	private void refreshLinkedRenderState() {
+		// Facade projection deserializes directly into the physical carrier, bypassing its render listener.
+		updateBlockRender = true;
+		setChanged();
+		if (level != null && !level.isClientSide()) {
+			refreshRenderState();
+		}
+		WorldHelper.notifyBlockUpdate(this);
+	}
+
+	private void closeLinkedStorageSubscription() {
+		if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+			linkedStorageBackpackWrapper.close();
+		}
 	}
 
 	private void invalidateHandlers() {
@@ -272,6 +404,13 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (level.isClientSide()) {
 			return;
 		}
+		if (level instanceof ServerLevel serverLevel && LinkedStorageStackLifecycle
+				.classifyEndpoint(backpackBlockEntity.backpackWrapper.getBackpack()) == LinkedStorageEndpointStackState.ENDPOINT) {
+			BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, backpackBlockEntity.backpackWrapper.getBackpack())
+					.ifPresent(backpackWrapper -> backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+							.forEach(upgrade -> upgrade.tick(null, level, blockPos)));
+			return;
+		}
 		backpackBlockEntity.backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
 				.forEach(upgrade -> upgrade.tick(null, level, blockPos));
 	}
@@ -332,6 +471,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void onChunkUnloaded() {
 		super.onChunkUnloaded();
 		chunkBeingUnloaded = true;
+		if (level instanceof ServerLevel serverLevel) {
+			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
+		}
+		closeLinkedStorageSubscription();
 	}
 
 	@Override
@@ -339,6 +482,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (!chunkBeingUnloaded && level != null) {
 			removeFromController();
 		}
+		if (level instanceof ServerLevel serverLevel) {
+			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
+		}
+		closeLinkedStorageSubscription();
 		super.setRemoved();
 	}
 

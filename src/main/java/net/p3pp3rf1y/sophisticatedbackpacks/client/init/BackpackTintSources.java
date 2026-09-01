@@ -30,7 +30,7 @@ public class BackpackTintSources {
 
 		@Override
 		public int calculate(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
-			return BackpackWrapper.fromStack(itemStack).getMainColor();
+			return BackpackWrapper.fromStackNoCache(itemStack).getMainColor();
 		}
 
 		@Override
@@ -49,7 +49,7 @@ public class BackpackTintSources {
 
 		@Override
 		public int calculate(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
-			return BackpackWrapper.fromStack(itemStack).getAccentColor();
+			return BackpackWrapper.fromStackNoCache(itemStack).getAccentColor();
 		}
 
 		@Override

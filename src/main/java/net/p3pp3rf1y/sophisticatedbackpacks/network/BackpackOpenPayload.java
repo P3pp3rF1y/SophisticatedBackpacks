@@ -6,6 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
@@ -14,6 +15,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 
 public record BackpackOpenPayload(int slotIndex, String identifier, String handlerName) implements CustomPacketPayload {
 	public static final Type<BackpackOpenPayload> TYPE = new Type<>(SophisticatedBackpacks.getRL("backpack_open"));
@@ -59,10 +62,11 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 			if (payload.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(payload.slotIndex)) {
+				ItemStack nestedBackpack = backpackContext.getBackpackWrapper(player).getInventoryHandler().getInternalStack(payload.slotIndex);
 				openBackpack(player,
 						backpackContext.getSubBackpackContext(payload.slotIndex,
-								BackpackWrapper.fromStack(backpackContext.getBackpackWrapper(player).getInventoryHandler().getInternalStack(payload.slotIndex))
-										.getContentsUuid().isEmpty()));
+								LinkedStorageStackLifecycle.classifyEndpoint(nestedBackpack) == LinkedStorageEndpointStackState.ENDPOINT
+										|| BackpackWrapper.fromStack(nestedBackpack).getContentsUuid().isEmpty()));
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
@@ -75,8 +79,9 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 	private static void findAndOpenFirstBackpack(Player player) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
-			player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName(), false),
-					backpackContext::toBuffer);
+			player.openMenu(
+					new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false),
+					buffer -> backpackContext.toBuffer(buffer, player));
 			return true;
 		});
 	}
@@ -84,6 +89,6 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 	private static void openBackpack(Player player, BackpackContext backpackContext) {
 		player.openMenu(
 				new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false),
-				backpackContext::toBuffer);
+				buffer -> backpackContext.toBuffer(buffer, player));
 	}
 }

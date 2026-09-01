@@ -187,7 +187,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 
 		player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(level, pos)),
-				backpackContext::toBuffer);
+				buffer -> backpackContext.toBuffer(buffer, player));
 		level.gameEvent(player, GameEvent.CONTAINER_OPEN, pos);
 		return InteractionResult.SUCCESS;
 	}

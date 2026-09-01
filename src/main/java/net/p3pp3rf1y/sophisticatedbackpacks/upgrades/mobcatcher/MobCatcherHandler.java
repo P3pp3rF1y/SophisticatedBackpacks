@@ -35,7 +35,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
@@ -55,7 +55,7 @@ public class MobCatcherHandler {
 			return InteractionResult.PASS;
 		}
 
-		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.level(), stack);
 		Optional<MobCatcherUpgradeWrapper> upgradeWrapper = getBestUpgrade(backpackWrapper);
 		if (upgradeWrapper.isEmpty()) {
 			return InteractionResult.PASS;
@@ -140,7 +140,8 @@ public class MobCatcherHandler {
 		if (!(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
-		IBackpackWrapper backpackWrapper = backpackContainer.getBackpackContext().getBackpackWrapper(player);
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.level(),
+				backpackContainer.getBackpackContext().getBackpackWrapper(player).getBackpack());
 		Optional<CapturedMob> capturedMob = MobCatcherStorage.getCapturedMob(backpackWrapper, capturedMobId);
 		if (capturedMob.isEmpty()) {
 			return;
