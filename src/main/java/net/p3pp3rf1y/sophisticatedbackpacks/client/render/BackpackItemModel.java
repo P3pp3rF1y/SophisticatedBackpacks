@@ -24,10 +24,8 @@ import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import org.joml.Matrix4fc;
 import org.joml.Vector3fc;
@@ -90,7 +88,7 @@ public class BackpackItemModel implements ItemModel {
 		specialRenderer.displayItemQuad = this.displayItemQuad;
 		specialRenderer.setModelRenderParameters(
 				renderLayer.tintLayers() == null ? ItemStackRenderState.LayerRenderState.EMPTY_TINTS : renderLayer.tintLayers().toIntArray(), quads);
-		RenderData.DisplayData displayData = BackpackWrapper.fromStack(stack).getRenderDataHandler().getDisplayData();
+		RenderData.DisplayData displayData = stack.getOrDefault(ModCoreDataComponents.RENDER_DATA, RenderData.EMPTY).display();
 
 		if (!displayData.displayItems().isEmpty()) {
 			RenderData.DisplayItemData displayItem = displayData.displayItems().getFirst();
@@ -116,9 +114,8 @@ public class BackpackItemModel implements ItemModel {
 			backpackModel.leftTankRenderData = null;
 			backpackModel.battery = false;
 			backpackModel.batteryRenderData = null;
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
-			RenderDataHandler renderDataHandler = backpackWrapper.getRenderDataHandler();
-			Map<TankPosition, RenderData.TankRenderData> tankRenderData = renderDataHandler.getTankRenderData();
+			RenderData renderData = stack.getOrDefault(ModCoreDataComponents.RENDER_DATA, RenderData.EMPTY);
+			Map<TankPosition, RenderData.TankRenderData> tankRenderData = renderData.tanks();
 			tankRenderData.forEach((pos, info) -> {
 				if (pos == TankPosition.LEFT) {
 					backpackModel.tankLeft = true;
@@ -141,7 +138,7 @@ public class BackpackItemModel implements ItemModel {
 				}
 			});
 
-			renderDataHandler.getBatteryRenderData().ifPresent(batteryRenderData -> {
+			renderData.battery().ifPresent(batteryRenderData -> {
 				backpackModel.battery = true;
 				backpackModel.batteryRenderData = batteryRenderData;
 				stackRenderState.appendModelIdentityElement("battery");

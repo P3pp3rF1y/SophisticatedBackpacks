@@ -36,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.BackpackTintSources;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -97,14 +98,22 @@ public class ClientEventHandler {
 		if (entity instanceof Player player) {
 			PlayerInventoryProvider.get().getBackpackFromRendered(player, false).ifPresent(backpackRenderData -> {
 				ItemStack backpack = backpackRenderData.getBackpack();
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(backpack);
-				clientTickUpgrades(player, wrapper.getRenderDataHandler());
+				if (BackpackItem.shouldRenderUpgradeActivity(backpack)) {
+					IBackpackWrapper wrapper = BackpackItem.getLinkedStorageEndpointRole(backpack).isPresent()
+							? new BackpackWrapper(backpack)
+							: BackpackWrapper.fromStack(backpack);
+					clientTickUpgrades(player, wrapper.getRenderDataHandler());
+				}
 			});
 		} else if (entity instanceof LivingEntity livingEntity) {
 			ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 			if (chestStack.getItem() instanceof BackpackItem) {
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(chestStack);
-				clientTickUpgrades(livingEntity, wrapper.getRenderDataHandler());
+				if (BackpackItem.shouldRenderUpgradeActivity(chestStack)) {
+					IBackpackWrapper wrapper = BackpackItem.getLinkedStorageEndpointRole(chestStack).isPresent()
+							? new BackpackWrapper(chestStack)
+							: BackpackWrapper.fromStack(chestStack);
+					clientTickUpgrades(livingEntity, wrapper.getRenderDataHandler());
+				}
 			}
 		}
 	}
@@ -147,6 +156,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
+		ClientLinkedStorageBackpackContents.clear();
 	}
 
 	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {

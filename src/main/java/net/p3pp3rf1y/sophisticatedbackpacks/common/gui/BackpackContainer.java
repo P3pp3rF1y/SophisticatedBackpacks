@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,13 +17,16 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackAdditionalContentsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -30,8 +34,9 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
 
-public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements ISyncedContainer {
+public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements IContextAwareContainer, ISyncedContainer {
 	private final BackpackContext backpackContext;
+	private boolean openingSettings;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
 		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player),
@@ -88,6 +93,12 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
 			if (player instanceof ServerPlayer serverPlayer) {
 				PacketDistributor.sendToPlayer(serverPlayer, new BackpackSettingsPayload(uuid, settingsData));
+				CompoundTag additionalContents = new CompoundTag();
+				storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class)
+						.forEach(provider -> provider.addClientStorageContents(additionalContents));
+				if (!additionalContents.isEmpty()) {
+					PacketDistributor.sendToPlayer(serverPlayer, new BackpackAdditionalContentsPayload(uuid, additionalContents));
+				}
 			}
 		});
 	}
@@ -134,6 +145,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}
 
 		super.removed(player);
+		if (!openingSettings && storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper
+				&& (backpackContext.getType() != BackpackContext.ContextType.BLOCK_BACKPACK || backpackContext.getBackpackWrapper(player) != storageWrapper)) {
+			linkedStorageBackpackWrapper.close();
+		}
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
@@ -150,6 +165,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
+		openingSettings = true;
 		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
 				Component.translatable(BackpackTranslationHelper.INSTANCE.translGui("settings.title")), false), backpackContext::toBuffer);
 	}

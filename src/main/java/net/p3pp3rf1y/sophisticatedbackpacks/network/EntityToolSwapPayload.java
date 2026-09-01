@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,14 +38,15 @@ public record EntityToolSwapPayload(int entityId) implements CustomPacketPayload
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-			BackpackWrapper.fromStack(backpack).getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class).forEach(upgrade -> {
-				if (!upgrade.canProcessEntityInteract() || result.get()) {
-					return;
-				}
-				anyUpgradeCanInteract.set(true);
+			BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(level, backpack).getUpgradeHandler()
+					.getWrappersThatImplement(IEntityToolSwapUpgrade.class).forEach(upgrade -> {
+						if (!upgrade.canProcessEntityInteract() || result.get()) {
+							return;
+						}
+						anyUpgradeCanInteract.set(true);
 
-				result.set(upgrade.onEntityInteract(level, entity, player));
-			});
+						result.set(upgrade.onEntityInteract(level, entity, player));
+					});
 			return result.get();
 		});
 

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import org.jspecify.annotations.Nullable;
 
 public class BackpackTintSources {
@@ -29,7 +29,7 @@ public class BackpackTintSources {
 
 		@Override
 		public int calculate(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
-			return BackpackWrapper.fromStack(itemStack).getMainColor();
+			return BackpackItem.getMainColor(itemStack);
 		}
 
 		@Override
@@ -48,7 +48,7 @@ public class BackpackTintSources {
 
 		@Override
 		public int calculate(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
-			return BackpackWrapper.fromStack(itemStack).getAccentColor();
+			return BackpackItem.getAccentColor(itemStack);
 		}
 
 		@Override

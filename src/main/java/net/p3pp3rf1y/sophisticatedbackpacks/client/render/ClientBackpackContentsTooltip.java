@@ -1,18 +1,26 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestLinkedStorageBackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 
 import java.util.UUID;
 
 public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipBase {
+	private static final int ROLE_HEADER_HEIGHT = 18;
 	private final ItemStack backpack;
 
 	@SuppressWarnings("unused")
@@ -24,15 +32,49 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 
 	@Override
 	public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
-		extractTooltip(BackpackWrapper.fromStack(backpack), font, x, y, guiGraphics);
+		BackpackItem.getLinkedStorageEndpointRole(backpack).ifPresent(role -> ClientLinkedStorageTooltip.renderRole(font, x, y, guiGraphics, role,
+				backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT).groupId()));
+		extractTooltip(getBackpackWrapper(), font, x, y + getRoleHeaderHeight(), guiGraphics);
+	}
+
+	@Override
+	public int getWidth(Font font) {
+		return Math.max(super.getWidth(font), BackpackItem.getLinkedStorageEndpointRole(backpack).map(
+				role -> 16 + font.width(ClientLinkedStorageTooltip.getDescription(role, backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT).groupId())))
+				.orElse(0));
+	}
+
+	@Override
+	public int getHeight(Font font) {
+		return super.getHeight(font) + getRoleHeaderHeight();
 	}
 
 	public ClientBackpackContentsTooltip(BackpackItem.BackpackContentsTooltip tooltip) {
 		backpack = tooltip.getBackpack();
 	}
 
+	private IBackpackWrapper getBackpackWrapper() {
+		if (BackpackItem.getLinkedStorageEndpointRole(backpack).isPresent()) {
+			LinkedStorageEndpointData endpoint = backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+			if (ClientLinkedStorageBackpackContents.requestGroupName(endpoint.groupId())) {
+				ClientPacketDistributor.sendToServer(new RequestLinkedStorageBackpackContentsPayload(endpoint.groupId(), -1L));
+			}
+			return BackpackLinkedStorageResolver.resolve(Minecraft.getInstance().level, backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
+		}
+		return BackpackWrapper.fromStack(backpack);
+	}
+
+	private int getRoleHeaderHeight() {
+		return BackpackItem.getLinkedStorageEndpointRole(backpack).isPresent() ? ROLE_HEADER_HEIGHT : 0;
+	}
+
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		ClientPacketDistributor.sendToServer(new RequestBackpackInventoryContentsPayload(uuid));
+		if (BackpackItem.getLinkedStorageEndpointRole(backpack).isPresent()) {
+			ClientPacketDistributor
+					.sendToServer(new RequestLinkedStorageBackpackContentsPayload(uuid, ClientLinkedStorageBackpackContents.getRevision(uuid).orElse(-1L)));
+		} else {
+			ClientPacketDistributor.sendToServer(new RequestBackpackInventoryContentsPayload(uuid));
+		}
 	}
 }

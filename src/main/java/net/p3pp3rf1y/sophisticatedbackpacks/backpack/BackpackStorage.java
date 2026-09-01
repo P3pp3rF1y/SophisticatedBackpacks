@@ -36,7 +36,9 @@ public class BackpackStorage extends SavedData {
 			Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC).fieldOf("backpackContents")
 					.forGetter(storage -> storage.backpackContents),
 			Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, AccessLogRecord.CODEC).fieldOf("accessLogRecords")
-					.forGetter(storage -> storage.accessLogRecords))
+					.forGetter(storage -> storage.accessLogRecords),
+			Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, CompoundTag.CODEC).optionalFieldOf("additionalBackpackContents", Map.of())
+					.forGetter(storage -> storage.additionalBackpackContents))
 			.apply(builder, BackpackStorage::new));
 	private static final Codec<BackpackStorage> CODEC = Codec.withAlternative(CURRENT_CODEC, CompoundTag.CODEC, BackpackStorage::legacyDeserialize);
 	private static final SavedDataType<BackpackStorage> TYPE = new SavedDataType<>(
@@ -45,9 +47,12 @@ public class BackpackStorage extends SavedData {
 	private final Map<UUID, ContainerContents> backpackContents = new HashMap<>();
 	private static final BackpackStorage clientStorageCopy = new BackpackStorage();
 	private final Map<UUID, AccessLogRecord> accessLogRecords = new HashMap<>();
+	private final Map<UUID, CompoundTag> additionalBackpackContents = new HashMap<>();
 
-	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords) {
+	private BackpackStorage(Map<UUID, ContainerContents> backpackContents, Map<UUID, AccessLogRecord> accessLogRecords,
+			Map<UUID, CompoundTag> additionalBackpackContents) {
 		this.accessLogRecords.putAll(accessLogRecords);
+		this.additionalBackpackContents.putAll(additionalBackpackContents);
 		backpackContents.forEach((uuid, contents) -> {
 			if (isPlayerBackpackOrNotEmpty(this, uuid, contents)) {
 				this.backpackContents.put(uuid, contents);
@@ -126,7 +131,7 @@ public class BackpackStorage extends SavedData {
 
 		Map<UUID, ContainerContents> backpackContents = new HashMap<>();
 		readLegacyBackpackContents(nbt, backpackContents, ops);
-		return new BackpackStorage(backpackContents, accessLogRecords);
+		return new BackpackStorage(backpackContents, accessLogRecords, Map.of());
 	}
 
 	private static void readLegacyAccessLogs(CompoundTag nbt, Map<UUID, AccessLogRecord> accessLogRecords, DynamicOps<Tag> ops) {
@@ -155,7 +160,7 @@ public class BackpackStorage extends SavedData {
 		if (storage.accessLogRecords.containsKey(backpackUuid)) {
 			return true;
 		}
-		return !contents.inventory().stacks().isEmpty();
+		return !contents.inventory().stacks().isEmpty() || !storage.additionalBackpackContents.getOrDefault(backpackUuid, new CompoundTag()).isEmpty();
 	}
 
 	public ContainerContents getOrCreateBackpackContents(UUID backpackUuid) {
@@ -163,6 +168,21 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new ContainerContents();
 		});
+	}
+
+	public CompoundTag getOrCreateAdditionalBackpackContents(UUID backpackUuid) {
+		return additionalBackpackContents.computeIfAbsent(backpackUuid, uuid -> {
+			setDirty();
+			return new CompoundTag();
+		});
+	}
+
+	public void setAdditionalBackpackContents(UUID backpackUuid, CompoundTag contents) {
+		CompoundTag currentContents = getOrCreateAdditionalBackpackContents(backpackUuid);
+		for (String key : contents.keySet()) {
+			currentContents.put(key, contents.get(key));
+		}
+		setDirty();
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {
@@ -221,6 +241,7 @@ public class BackpackStorage extends SavedData {
 		if (evt.getLevel().isClientSide()) {
 			clientStorageCopy.backpackContents.clear();
 			clientStorageCopy.accessLogRecords.clear();
+			clientStorageCopy.additionalBackpackContents.clear();
 		}
 	}
 }
