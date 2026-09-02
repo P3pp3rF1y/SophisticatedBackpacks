@@ -7,12 +7,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -34,14 +36,23 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 	}
 
 	@Override
+	public boolean matches(Container inv, Level level) {
+		return super.matches(inv, level) && getBackpack(inv).map(backpack -> BackpackUpgradeRecipe.canUpgrade(backpack, level)).orElse(false);
+	}
+
+	@Override
 	public ItemStack assemble(Container inv, RegistryAccess registryAccess) {
 		ItemStack upgradedBackpack = result.copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
-				BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
-				wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
-			});
+			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
+			if (LinkedStorageStackData.getEndpoint(upgradedBackpack) != null) {
+				upgradedBackpack.getOrCreateTag().putInt("inventorySlots", backpackItem.getNumberOfSlots());
+				upgradedBackpack.getOrCreateTag().putInt("upgradeSlots", backpackItem.getNumberOfUpgradeSlots());
+			} else {
+				upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+						.ifPresent(wrapper -> wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots()));
+			}
 		}
 		return upgradedBackpack;
 	}

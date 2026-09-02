@@ -7,6 +7,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -45,10 +47,17 @@ public class SubBackpacksHandler {
 			return;
 		}
 
+		boolean savedOrdinaryBackpack = false;
 		for (int slot : initializedSlots) {
+			if (LinkedStorageStackLifecycle.classifyEndpoint(inventoryHandler.getStackInSlot(slot)) == LinkedStorageEndpointStackState.ENDPOINT) {
+				continue;
+			}
 			inventoryHandler.setStackInSlot(slot, ((IBackpackWrapper) subBackpacks.get(slot)).getBackpack());
+			savedOrdinaryBackpack = true;
 		}
-		inventoryHandler.saveInventory();
+		if (savedOrdinaryBackpack) {
+			inventoryHandler.saveInventory();
+		}
 	}
 
 	private void onContentsChanged(int slot) {

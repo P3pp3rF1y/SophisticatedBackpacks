@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class BackpackRenderInfo extends RenderInfo {
-	private static final String RENDER_INFO_TAG = "renderInfo";
+	static final String RENDER_INFO_TAG = "renderInfo";
 	private final ItemStack backpack;
 
 	public BackpackRenderInfo(ItemStack backpack, Supplier<Runnable> getSaveHandler) {

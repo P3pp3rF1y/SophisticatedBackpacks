@@ -6,7 +6,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
@@ -47,15 +49,18 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
+		if (!backpackContainer.canApplyClientInfo(msg.slotIndex)) {
+			return;
+		}
 		if (msg.slotIndex >= 0) {
+			if (msg.slotIndex >= player.getInventory().items.size()) {
+				return;
+			}
 			ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-				backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
-				backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
-			});
+			IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolve(player.level(), backpack).orElseGet(() -> new BackpackWrapper(backpack));
+			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
+			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		}
-		if (backpackContainer.canApplyClientInfo(msg.slotIndex)) {
-			backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
-		}
+		backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
 	}
 }

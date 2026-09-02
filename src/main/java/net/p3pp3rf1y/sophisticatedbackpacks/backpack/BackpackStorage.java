@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,6 +46,11 @@ public class BackpackStorage extends SavedData {
 			}
 		}
 		return clientStorageCopy;
+	}
+
+	public static BackpackStorage get(ServerLevel level) {
+		DimensionDataStorage storage = level.getServer().overworld().getDataStorage();
+		return storage.computeIfAbsent(BackpackStorage::load, BackpackStorage::new, SAVED_DATA_NAME);
 	}
 
 	public static BackpackStorage load(CompoundTag nbt) {
@@ -102,6 +108,10 @@ public class BackpackStorage extends SavedData {
 			setDirty();
 			return new CompoundTag();
 		});
+	}
+
+	public Optional<CompoundTag> getBackpackContents(UUID backpackUuid) {
+		return Optional.ofNullable(backpackContents.get(backpackUuid));
 	}
 
 	public void putAccessLog(AccessLogRecord alr) {

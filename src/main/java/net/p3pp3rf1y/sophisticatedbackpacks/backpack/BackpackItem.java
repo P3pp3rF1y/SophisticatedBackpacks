@@ -46,16 +46,24 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullLazy;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestLinkedStorageBackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
@@ -63,6 +71,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -75,6 +89,7 @@ import javax.annotation.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -121,6 +136,17 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		return tag != null && tag.contains(BORDER_COLOR_TAG) ? tag.getInt(BORDER_COLOR_TAG) : DEFAULT_ACCENT_COLOR;
 	}
 
+	public static Optional<LinkedStorageEndpointRole> getLinkedStorageEndpointRole(ItemStack backpackStack) {
+		if (LinkedStorageStackLifecycle.classifyEndpoint(backpackStack) != LinkedStorageEndpointStackState.ENDPOINT) {
+			return Optional.empty();
+		}
+		return Optional.of(LinkedStorageStackData.isPrimaryEndpoint(backpackStack) ? LinkedStorageEndpointRole.PRIMARY : LinkedStorageEndpointRole.SECONDARY);
+	}
+
+	public static boolean shouldRenderUpgradeActivity(ItemStack backpackStack) {
+		return getLinkedStorageEndpointRole(backpackStack).map(role -> role == LinkedStorageEndpointRole.PRIMARY).orElse(true);
+	}
+
 	@Override
 	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
 		consumer.accept(new IClientItemExtensions() {
@@ -161,9 +187,23 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Override
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
+		if (worldIn != null && worldIn.isClientSide && endpoint != null) {
+			long revision = ClientLinkedStorageBackpackContents.getRevision(endpoint.groupId()).orElse(-1L);
+			SBPPacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageBackpackContentsMessage(endpoint.groupId(), revision));
+		}
 		if (flagIn == TooltipFlag.ADVANCED) {
-			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY))));
+			LinkedStorageEndpointData advancedEndpoint = LinkedStorageStackData.getEndpoint(stack);
+			if (advancedEndpoint != null) {
+				tooltip.add(Component
+						.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".linked_storage_group", advancedEndpoint.groupId().toString())
+						.withStyle(ChatFormatting.DARK_GRAY));
+				tooltip.add(Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".linked_storage_endpoint",
+						advancedEndpoint.endpointId().toString()).withStyle(ChatFormatting.DARK_GRAY));
+			} else {
+				stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
+						w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY))));
+			}
 		}
 		if (!Screen.hasShiftDown()) {
 			tooltip.add(Component
@@ -178,6 +218,16 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		AtomicReference<TooltipComponent> ret = new AtomicReference<>(null);
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			Minecraft mc = Minecraft.getInstance();
+			Optional<LinkedStorageEndpointRole> linkedStorageRole = getLinkedStorageEndpointRole(stack);
+			if (linkedStorageRole.isPresent() && !Screen.hasShiftDown() && (mc.player == null || mc.player.containerMenu.getCarried().isEmpty())) {
+				LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
+				if (ClientLinkedStorageBackpackContents.getGroupName(endpoint.groupId()).isEmpty()
+						&& ClientLinkedStorageBackpackContents.requestGroupName(endpoint.groupId())) {
+					SBPPacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageBackpackContentsMessage(endpoint.groupId(), -1L));
+				}
+				ret.set(new LinkedStorageTooltip(linkedStorageRole.get(), endpoint.groupId()));
+				return;
+			}
 			if (Screen.hasShiftDown() || (mc.player != null && !mc.player.containerMenu.getCarried().isEmpty())) {
 				ret.set(new BackpackContentsTooltip(stack));
 			}
@@ -190,9 +240,9 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		return true;
 	}
 
-	private boolean hasEverlastingUpgrade(ItemStack stack) {
-		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+	private boolean hasEverlastingUpgrade(Level level, ItemStack stack) {
+		return !BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(level, stack).getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE)
+				.isEmpty();
 	}
 
 	@Nullable
@@ -204,7 +254,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 		UUIDDeduplicator.dedupeBackpackItemEntityInArea(itemEntity);
 
-		return hasEverlastingUpgrade(itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
+		return hasEverlastingUpgrade(world, itemstack) ? createEverlastingBackpack(world, (ItemEntity) entity, itemstack) : null;
 	}
 
 	@Nullable
@@ -253,6 +303,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 		Level world = blockItemUseContext.getLevel();
 		BlockPos pos = blockItemUseContext.getClickedPos();
+		ItemStack backpack = blockItemUseContext.getItemInHand();
+		boolean creativeLinkedPlacement = player != null && player.isCreative() && world instanceof ServerLevel
+				&& LinkedStorageStackLifecycle.classifyEndpoint(backpack) == LinkedStorageEndpointStackState.ENDPOINT;
+		ItemStack placedBackpack = creativeLinkedPlacement ? ItemStack.EMPTY : getBackpackCopy(player, backpack);
 
 		FluidState fluidstate = blockItemUseContext.getLevel().getFluidState(pos);
 		BlockState placementState = blockSupplier.get().defaultBlockState().setValue(BackpackBlock.FACING, direction).setValue(WATERLOGGED,
@@ -262,22 +316,22 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		}
 
 		if (world.setBlockAndUpdate(pos, placementState)) {
-			ItemStack backpack = blockItemUseContext.getItemInHand();
-			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).ifPresent(te -> {
-				te.setBackpack(getBackpackCopy(player, backpack));
-				te.refreshRenderState();
-
-				te.tryToAddToController();
-			});
+			BackpackBlockEntity backpackBlockEntity = WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).orElseThrow();
+			if (creativeLinkedPlacement) {
+				placedBackpack = LinkedStorageService.createSecondaryEndpointCopy((ServerLevel) world, backpack).orElseThrow();
+			}
+			backpackBlockEntity.setBackpack(placedBackpack);
+			backpackBlockEntity.refreshRenderState();
+			backpackBlockEntity.tryToAddToController();
 
 			if (!world.isClientSide) {
-				stopBackpackSounds(backpack, world, pos);
+				stopBackpackSounds(placedBackpack, world, pos);
 			}
 
 			SoundType soundtype = placementState.getSoundType(world, pos, player);
 			world.playSound(player, pos, soundtype.getPlaceSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 			if (player == null || !player.isCreative()) {
-				backpack.shrink(1);
+				blockItemUseContext.getItemInHand().shrink(1);
 			}
 
 			return InteractionResult.SUCCESS;
@@ -286,6 +340,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	private static void stopBackpackSounds(ItemStack backpack, Level world, BlockPos pos) {
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(backpack);
+		if (endpoint != null) {
+			if (world instanceof ServerLevel serverLevel && LinkedStorageJukeboxPlaybackAnchors.isPrimaryEndpoint(serverLevel, backpack)) {
+				ServerStorageSoundHandler.stopPlayingDisc(serverLevel, Vec3.atCenterOf(pos), endpoint.groupId());
+			}
+			return;
+		}
 		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid()
 				.ifPresent(uuid -> ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid)));
 	}
@@ -293,6 +354,11 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	private ItemStack getBackpackCopy(@Nullable Player player, ItemStack backpack) {
 		if (player == null || !player.isCreative()) {
 			return backpack.copy();
+		}
+		if (LinkedStorageStackLifecycle.classifyEndpoint(backpack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			ItemStack copy = backpack.copy();
+			LinkedStorageStackLifecycle.clear(copy);
+			return copy;
 		}
 		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(IBackpackWrapper::cloneBackpack)
 				.orElse(new ItemStack(ModItems.BACKPACK.get()));
@@ -313,8 +379,8 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			String handlerName = hand == InteractionHand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : 0;
 			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);
-			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getHoverName()),
-					context::toBuffer);
+			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, context), context.getDisplayName(player)),
+					buffer -> context.toBuffer(buffer, player));
 		}
 		return InteractionResultHolder.success(stack);
 	}
@@ -323,6 +389,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
 		return new ICapabilityProvider() {
 			private IStorageWrapper wrapper = null;
+			private boolean wrapperForLinkedEndpoint = false;
 
 			@Nonnull
 			@Override
@@ -345,8 +412,18 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			}
 
 			private void initWrapper() {
-				if (wrapper == null) {
-					wrapper = new BackpackWrapper(stack);
+				boolean linkedEndpoint = LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT;
+				if (wrapper == null || wrapperForLinkedEndpoint != linkedEndpoint) {
+					if (wrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+						linkedStorageBackpackWrapper.close();
+					}
+					wrapperForLinkedEndpoint = linkedEndpoint;
+					if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER && ServerLifecycleHooks.getCurrentServer() != null) {
+						wrapper = BackpackLinkedStorageResolver.resolveOrCreate(ServerLifecycleHooks.getCurrentServer().overworld(), stack);
+					} else {
+						// Client-side click prediction must not mutate the integrated server's canonical linked host.
+						wrapper = linkedEndpoint ? IBackpackWrapper.Noop.INSTANCE : new BackpackWrapper(stack);
+					}
 				}
 			}
 		};
@@ -355,6 +432,16 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
 		if (player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
+			return;
+		}
+		if (level instanceof ServerLevel serverLevel && LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, stack).ifPresent(backpackWrapper -> {
+				if (player instanceof ServerPlayer serverPlayer) {
+					LinkedStorageJukeboxPlaybackAnchors.refreshPlayerAnchor(serverPlayer, stack);
+				}
+				backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()));
+			});
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -370,8 +457,26 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
-		if (!(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying()
-				|| (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
+		if (!(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying()) {
+			return;
+		}
+		if (level instanceof ServerLevel serverLevel && LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			if (BackpackLinkedStorageResolver.synchronizeRenderProjection(serverLevel, stack)) {
+				player.inventoryMenu.broadcastChanges();
+			}
+			BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, stack).ifPresent(backpackWrapper -> {
+				if (player instanceof ServerPlayer serverPlayer) {
+					LinkedStorageJukeboxPlaybackAnchors.refreshPlayerAnchor(serverPlayer, stack);
+				}
+				if (!Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() || itemSlot <= -1) {
+					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+							.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()));
+				}
+			});
+			super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
+			return;
+		}
+		if (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1) {
 			return;
 		}
 		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
@@ -449,6 +554,9 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		public ItemStack getBackpack() {
 			return backpack;
 		}
+	}
+
+	public record LinkedStorageTooltip(LinkedStorageEndpointRole role, @Nullable UUID groupId) implements TooltipComponent {
 	}
 
 	@Override

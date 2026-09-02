@@ -51,8 +51,8 @@ import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import net.minecraftforge.fluids.FluidStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
@@ -1131,22 +1131,20 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			backpackModel.leftTankRenderInfo = null;
 			backpackModel.battery = false;
 			backpackModel.batteryRenderInfo = null;
-			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-				RenderInfo renderInfo = backpackWrapper.getRenderInfo();
-				Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
-				tankRenderInfos.forEach((pos, info) -> {
-					if (pos == TankPosition.LEFT) {
-						backpackModel.tankLeft = true;
-						backpackModel.leftTankRenderInfo = info;
-					} else {
-						backpackModel.tankRight = true;
-						backpackModel.rightTankRenderInfo = info;
-					}
-				});
-				renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
-					backpackModel.battery = true;
-					backpackModel.batteryRenderInfo = batteryRenderInfo;
-				});
+			RenderInfo renderInfo = new BackpackWrapper(stack).getRenderInfo();
+			Map<TankPosition, IRenderedTankUpgrade.TankRenderInfo> tankRenderInfos = renderInfo.getTankRenderInfos();
+			tankRenderInfos.forEach((pos, info) -> {
+				if (pos == TankPosition.LEFT) {
+					backpackModel.tankLeft = true;
+					backpackModel.leftTankRenderInfo = info;
+				} else {
+					backpackModel.tankRight = true;
+					backpackModel.rightTankRenderInfo = info;
+				}
+			});
+			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
+				backpackModel.battery = true;
+				backpackModel.batteryRenderInfo = batteryRenderInfo;
 			});
 
 			return backpackModel;

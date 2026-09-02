@@ -54,7 +54,7 @@ public class AnotherPlayerBackpackOpenMessage {
 					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
 					NetworkHooks.openScreen(player,
 							new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
-							backpackContext::toBuffer);
+							buffer -> backpackContext.toBuffer(buffer, player));
 				} else {
 					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
 				}

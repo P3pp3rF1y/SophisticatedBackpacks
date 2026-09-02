@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 
 public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 	private final Minecraft minecraft = Minecraft.getInstance();
@@ -30,21 +30,19 @@ public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
 			itemRenderer.renderModelLists(bakedModel, stack, combinedLight, combinedOverlay, poseStack, buffer.getBuffer(renderType));
 		}));
 
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
-			backpackWrapper.getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
-				if (model instanceof BackpackDynamicModel.BackpackBakedModel backpackModel) {
-					BakedQuad anchorQuad = backpackModel.getDisplayItemQuad();
-					if (anchorQuad == null) {
-						return;
-					}
-					poseStack.pushPose();
-					DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
-					poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
-					itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer,
-							minecraft.level, 0);
-					poseStack.popPose();
+		new BackpackWrapper(stack).getRenderInfo().getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
+			if (model instanceof BackpackDynamicModel.BackpackBakedModel backpackModel) {
+				BakedQuad anchorQuad = backpackModel.getDisplayItemQuad();
+				if (anchorQuad == null) {
+					return;
 				}
-			});
+				poseStack.pushPose();
+				DisplayItemAnchor.fromQuad(anchorQuad).applyTransform(poseStack, displayItem.getZOffset());
+				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItem.getRotation()));
+				itemRenderer.renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, minecraft.level,
+						0);
+				poseStack.popPose();
+			}
 		});
 
 	}

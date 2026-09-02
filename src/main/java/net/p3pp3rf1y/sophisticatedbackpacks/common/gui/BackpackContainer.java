@@ -18,13 +18,18 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.LinkedStorageBackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
@@ -33,7 +38,7 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
 
-public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements ISyncedContainer {
+public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper> implements ISyncedContainer, IContextAwareContainer {
 	private final BackpackContext backpackContext;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
@@ -88,6 +93,12 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}
 
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
+			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
+			if (endpoint != null) {
+				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
+						LinkedStorageBackpackContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
+				return;
+			}
 			CompoundTag settingsContents = new CompoundTag();
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
@@ -102,11 +113,14 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public void syncClientInfo(CompoundTag renderInfoNbt, int columnsTaken) {
+		boolean columnsChanged = storageWrapper.getColumnsTaken() != columnsTaken;
 		storageWrapper.getRenderInfo().deserializeFrom(renderInfoNbt);
 		storageWrapper.setColumnsTaken(columnsTaken, false);
-		storageWrapper.onContentsNbtUpdated();
-		refreshAllSlots();
-		onUpgradesChanged();
+		if (columnsChanged) {
+			storageWrapper.onContentsNbtUpdated();
+			refreshAllSlots();
+			onUpgradesChanged();
+		}
 	}
 
 	public boolean canApplyClientInfo(int slotIndex) {
@@ -143,6 +157,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}
 
 		super.removed(player);
+		backpackContext.releaseBackpackWrapper();
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
@@ -159,8 +174,9 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
+		backpackContext.handoffBackpackWrapper();
 		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
-				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), backpackContext::toBuffer);
+				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), buffer -> backpackContext.toBuffer(buffer, player));
 	}
 
 	@Override
@@ -175,8 +191,21 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public class BackpackUpgradeSlot extends StorageUpgradeSlot {
+		private int columnsTaken;
+
 		public BackpackUpgradeSlot(UpgradeHandler upgradeHandler, int slotIndex) {
 			super(upgradeHandler, slotIndex);
+			columnsTaken = getColumnsTaken(getItem());
+		}
+
+		@Override
+		public void setChanged() {
+			int previousColumnsTaken = columnsTaken;
+			super.setChanged();
+			columnsTaken = getColumnsTaken(getItem());
+			if (!player.level().isClientSide && columnsTaken != previousColumnsTaken) {
+				BackpackContainer.this.updateColumnsTaken(columnsTaken - previousColumnsTaken);
+			}
 		}
 
 		@Override
@@ -184,10 +213,23 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			super.onUpgradeChanged();
 			backpackContext.onUpgradeChanged(player);
 		}
+
+		private static int getColumnsTaken(ItemStack upgradeStack) {
+			return upgradeStack.getItem() instanceof IUpgradeItem<?> upgradeItem ? upgradeItem.getInventoryColumnsTaken() : 0;
+		}
 	}
 
 	@Override
 	public boolean detectSettingsChangeAndReload() {
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
+		if (endpoint != null) {
+			if (player.level().isClientSide && ClientLinkedStorageBackpackContents.removeUpdatedGroup(endpoint.groupId())) {
+				storageWrapper.getSettingsHandler().reloadFrom(ClientLinkedStorageBackpackContents.getBinding(endpoint.groupId())
+						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId())).getContents());
+				return true;
+			}
+			return false;
+		}
 		return storageWrapper.getContentsUuid().map(uuid -> {
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {

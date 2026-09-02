@@ -7,6 +7,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -78,11 +79,13 @@ public class BackpackOpenMessage {
 			if (msg.slotIndex == -1) {
 				openBackpack(player, backpackContext.getParentBackpackContext());
 			} else if (backpackContainer.isStorageInventorySlot(msg.slotIndex)) {
-				openBackpack(player,
-						backpackContext.getSubBackpackContext(msg.slotIndex,
-								backpackContext.getBackpackWrapper(player).getInventoryHandler().getSlotStack(msg.slotIndex)
-										.getCapability(CapabilityBackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
-										.map(backpackWrapper -> backpackWrapper.getContentsUuid().isEmpty()).orElse(false)));
+				IBackpackWrapper parentWrapper = backpackContext.getBackpackWrapper(player);
+				BackpackContext subBackpackContext = backpackContext.getSubBackpackContext(msg.slotIndex,
+						parentWrapper.getInventoryHandler().getSlotStack(msg.slotIndex).getCapability(CapabilityBackpackWrapper.BACKPACK_WRAPPER_CAPABILITY)
+								.map(backpackWrapper -> backpackWrapper.getContentsUuid().isEmpty()).orElse(false));
+				backpackContext.handoffBackpackWrapper();
+				subBackpackContext.setParentBackpackWrapper(parentWrapper);
+				openBackpack(player, subBackpackContext);
 			}
 		} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 			BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
@@ -96,7 +99,7 @@ public class BackpackOpenMessage {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
 			NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
-					backpackContext::toBuffer);
+					buffer -> backpackContext.toBuffer(buffer, player));
 			return true;
 		});
 	}
@@ -104,6 +107,6 @@ public class BackpackOpenMessage {
 	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
 		NetworkHooks.openScreen(player,
 				new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
-				backpackContext::toBuffer);
+				buffer -> backpackContext.toBuffer(buffer, player));
 	}
 }

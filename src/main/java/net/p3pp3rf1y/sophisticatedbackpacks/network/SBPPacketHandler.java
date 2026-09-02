@@ -22,6 +22,10 @@ public class SBPPacketHandler extends PacketHandler {
 				RequestBackpackInventoryContentsMessage::decode, RequestBackpackInventoryContentsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::encode, BackpackContentsMessage::decode, BackpackContentsMessage::onMessage,
 				NetworkDirection.PLAY_TO_CLIENT);
+		registerMessage(RequestLinkedStorageBackpackContentsMessage.class, RequestLinkedStorageBackpackContentsMessage::encode,
+				RequestLinkedStorageBackpackContentsMessage::decode, RequestLinkedStorageBackpackContentsMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
+		registerMessage(LinkedStorageBackpackContentsMessage.class, LinkedStorageBackpackContentsMessage::encode, LinkedStorageBackpackContentsMessage::decode,
+				LinkedStorageBackpackContentsMessage::onMessage, NetworkDirection.PLAY_TO_CLIENT);
 		registerMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::encode, InventoryInteractionMessage::decode,
 				InventoryInteractionMessage::onMessage, NetworkDirection.PLAY_TO_SERVER);
 		registerMessage(BlockToolSwapMessage.class, BlockToolSwapMessage::encode, BlockToolSwapMessage::decode, BlockToolSwapMessage::onMessage,

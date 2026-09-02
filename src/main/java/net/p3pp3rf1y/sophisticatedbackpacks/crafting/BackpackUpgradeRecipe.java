@@ -6,11 +6,15 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -38,13 +42,32 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	}
 
 	@Override
+	public boolean matches(CraftingContainer inv, Level level) {
+		return super.matches(inv, level) && getBackpack(inv).map(backpack -> canUpgrade(backpack, level)).orElse(false);
+	}
+
+	static boolean canUpgrade(ItemStack backpack, Level level) {
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(backpack);
+		if (endpoint == null) {
+			return true;
+		}
+		return level instanceof net.minecraft.server.level.ServerLevel serverLevel
+				? LinkedStorageGroupsSavedData.get(serverLevel).manager().isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId())
+				: LinkedStorageStackData.isPrimaryEndpoint(backpack);
+	}
+
+	@Override
 	public ItemStack assemble(CraftingContainer inv, RegistryAccess registryAccess) {
 		ItemStack upgradedBackpack = super.assemble(inv, registryAccess);
 		getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-		upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> {
-			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
-			wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
-		});
+		BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
+		if (LinkedStorageStackData.getEndpoint(upgradedBackpack) != null) {
+			upgradedBackpack.getOrCreateTag().putInt("inventorySlots", backpackItem.getNumberOfSlots());
+			upgradedBackpack.getOrCreateTag().putInt("upgradeSlots", backpackItem.getNumberOfUpgradeSlots());
+		} else {
+			upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+					.ifPresent(wrapper -> wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots()));
+		}
 
 		return upgradedBackpack;
 	}

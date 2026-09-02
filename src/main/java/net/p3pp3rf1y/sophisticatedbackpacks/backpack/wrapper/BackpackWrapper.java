@@ -59,7 +59,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static final String COLUMNS_TAKEN_TAG = "columnsTaken";
 	private static final String TEMPLATE_NAME_TAG = "templateName";
 
-	private final ItemStack backpack;
+	private ItemStack backpack;
+	private final IBackpackContentsSource contentsSource;
 	private int numberOfInventorySlots = -1;
 	private int numberOfUpgradeSlots = -1;
 	private Runnable backpackSaveHandler = () -> {
@@ -84,7 +85,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Nullable
 	private IEnergyStorage energyStorage = null;
 
-	private final BackpackRenderInfo renderInfo;
+	private BackpackRenderInfo renderInfo;
 	private boolean renderInfoValidationPending = true;
 
 	private IntConsumer onSlotsChange = diff -> {
@@ -98,7 +99,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 	};
 
 	public BackpackWrapper(ItemStack backpack) {
+		this(backpack, null);
+	}
+
+	BackpackWrapper(ItemStack backpack, @Nullable IBackpackContentsSource contentsSource) {
 		this.backpack = backpack;
+		this.contentsSource = contentsSource == null ? new BackpackStorageContentsSource() : contentsSource;
 		cacheSlotNumbers();
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
@@ -159,11 +165,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private CompoundTag getBackpackContentsNbt() {
-		return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
+		return contentsSource.getContents();
+	}
+
+	CompoundTag copyContentsForLinkedStorage() {
+		return getBackpackContentsNbt().copy();
 	}
 
 	private void markBackpackContentsDirty() {
-		BackpackStorage.get().setDirty();
+		contentsSource.markDirty();
 	}
 
 	@Override
@@ -306,7 +316,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<UUID> getContentsUuid() {
-		return NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+		return contentsSource.getContentsUuid();
 	}
 
 	private UUID getOrCreateContentsUuid() {
@@ -633,5 +643,33 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public Component getDisplayName() {
 		return getBackpack().getHoverName();
+	}
+
+	protected final void replaceBackpackStack(ItemStack backpack) {
+		this.backpack = backpack;
+		cacheSlotNumbers();
+		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
+	}
+
+	private class BackpackStorageContentsSource implements IBackpackContentsSource {
+		@Override
+		public CompoundTag getContents() {
+			return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());
+		}
+
+		@Override
+		public void setContents(CompoundTag contents) {
+			BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), contents);
+		}
+
+		@Override
+		public void markDirty() {
+			BackpackStorage.get().setDirty();
+		}
+
+		@Override
+		public Optional<UUID> getContentsUuid() {
+			return NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+		}
 	}
 }
