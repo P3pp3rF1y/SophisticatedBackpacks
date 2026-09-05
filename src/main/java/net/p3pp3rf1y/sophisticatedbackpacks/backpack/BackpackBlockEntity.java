@@ -207,6 +207,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
 			setBackpack(backpackWrapper.getBackpack());
 		}
+		// Loading defers the backpack stack until onLoad, after loadAdditional already rebuilt the block with default colors.
+		if (level != null && level.isClientSide()) {
+			WorldHelper.notifyBlockUpdate(this);
+		}
 		registerWithControllerOnLoad();
 	}
 
