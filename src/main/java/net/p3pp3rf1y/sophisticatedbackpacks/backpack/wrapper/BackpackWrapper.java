@@ -269,7 +269,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return this;
 	}
 
-	protected final void replaceBackpackStack(ItemStack backpack) {
+	public final void replaceBackpackStack(ItemStack backpack) {
 		renderInfo = null;
 		setBackpackStack(backpack);
 	}
