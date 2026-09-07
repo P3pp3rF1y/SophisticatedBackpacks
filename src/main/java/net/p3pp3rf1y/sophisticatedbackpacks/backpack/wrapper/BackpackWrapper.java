@@ -310,6 +310,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return this;
 	}
 
+	public final void replaceBackpackStack(ItemStack backpack) {
+		renderDataHandler = null;
+		setBackpackStack(backpack);
+	}
+
 	@Override
 	public BackpackSettingsHandler getSettingsHandler() {
 		if (settingsHandler == null) {
