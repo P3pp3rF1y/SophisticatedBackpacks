@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -59,8 +60,8 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	@Override
 	public void handlePacket(CompoundTag data) {
 		super.handlePacket(data);
-		if (!player.level().isClientSide() && storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-			linkedStorageBackpackWrapper.synchronizePhysicalProjection();
+		if (player.level() instanceof ServerLevel serverLevel && storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+			linkedStorageBackpackWrapper.synchronizePhysicalProjection(serverLevel);
 		}
 	}
 

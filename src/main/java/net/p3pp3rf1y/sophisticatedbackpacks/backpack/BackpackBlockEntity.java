@@ -169,7 +169,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			backpackWrapper.onInit(level);
 			LinkedStorageJukeboxPlaybackAnchors.refreshBlockAnchor((ServerLevel) level, worldPosition, backpackWrapper.getBackpack());
 			if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-				linkedStorageBackpackWrapper.refreshPhysicalProjection();
+				linkedStorageBackpackWrapper.synchronizePhysicalProjection((ServerLevel) level);
 				refreshLinkedRenderState();
 			}
 		}
