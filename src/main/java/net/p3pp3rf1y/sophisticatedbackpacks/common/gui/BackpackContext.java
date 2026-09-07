@@ -67,7 +67,10 @@ public abstract class BackpackContext {
 	public void toBuffer(FriendlyByteBuf buffer, Player player) {
 		getType().toBuffer(buffer);
 		addToBuffer(buffer);
-		IBackpackWrapper backpackWrapper = getBackpackWrapper(player);
+		writeLinkedStorageSnapshot(buffer, player, getBackpackWrapper(player));
+	}
+
+	public static void writeLinkedStorageSnapshot(FriendlyByteBuf buffer, Player player, IBackpackWrapper backpackWrapper) {
 		LinkedStorageEndpointData endpoint = backpackWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 		Optional<LinkedStorageSnapshot> snapshot = endpoint == null ? Optional.empty() : getLinkedStorageSnapshot(player, endpoint);
 		buffer.writeBoolean(snapshot.isPresent());
@@ -145,6 +148,11 @@ public abstract class BackpackContext {
 			case ANOTHER_PLAYER_BACKPACK -> AnotherPlayer.fromBuffer(buffer, level);
 			case ANOTHER_PLAYER_SUB_BACKPACK -> AnotherPlayerSubBackpack.fromBuffer(buffer, level);
 		};
+		readLinkedStorageSnapshot(buffer);
+		return context;
+	}
+
+	public static void readLinkedStorageSnapshot(FriendlyByteBuf buffer) {
 		if (buffer.readBoolean()) {
 			UUID groupId = buffer.readUUID();
 			long revision = buffer.readVarLong();
@@ -153,7 +161,6 @@ public abstract class BackpackContext {
 			ClientLinkedStorageBackpackContents.installSnapshot(groupId, revision, contents, groupName,
 					new ClientLinkedStorageBackpackContents.StorageSize(buffer.readVarInt(), buffer.readVarInt()), buffer.readVarInt());
 		}
-		return context;
 	}
 
 	public boolean wasOpenFromInventory() {

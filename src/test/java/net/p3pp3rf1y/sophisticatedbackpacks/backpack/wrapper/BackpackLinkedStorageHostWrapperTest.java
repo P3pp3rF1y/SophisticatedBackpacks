@@ -336,6 +336,18 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
+	void endpointRenderDataChangesArePromotedToCanonicalHost() {
+		TestContentsBinding contents = new TestContentsBinding();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
+		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+
+		facade.getRenderInfo().setTankRenderInfo(TankPosition.LEFT, new IRenderedTankUpgrade.TankRenderInfo());
+
+		assertTrue(host.getRenderInfo().getTankRenderInfos().containsKey(TankPosition.LEFT));
+		assertEquals(1, contents.renderDirtyCount);
+	}
+
+	@Test
 	void onCanonicalContentsChangedProjectsItemDisplayRenderDataToPhysicalFacade() {
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);

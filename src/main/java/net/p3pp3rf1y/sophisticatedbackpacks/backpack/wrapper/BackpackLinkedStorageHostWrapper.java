@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -43,6 +44,18 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 
 	private void configureRenderInfo() {
 		getRenderInfo().setRenderDataChangeListener(contents::markRenderDirty);
+	}
+
+	public boolean synchronizeEndpointRenderInfo(CompoundTag renderInfo) {
+		if (getRenderInfo().getNbt().equals(renderInfo)) {
+			return false;
+		}
+
+		getBackpack().set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(renderInfo.copy()));
+		replaceBackpackStack(getBackpack());
+		configureRenderInfo();
+		contents.markRenderDirty();
+		return true;
 	}
 
 	@Override
