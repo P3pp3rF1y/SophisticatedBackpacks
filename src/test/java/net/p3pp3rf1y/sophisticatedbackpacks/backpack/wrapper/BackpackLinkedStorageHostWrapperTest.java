@@ -369,6 +369,18 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
+	void endpointRenderDataChangesArePromotedToCanonicalHost() {
+		TestContentsBinding contents = new TestContentsBinding();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
+		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+
+		facade.getRenderInfo().setTankRenderInfo(TankPosition.LEFT, new IRenderedTankUpgrade.TankRenderInfo());
+
+		assertTrue(host.getRenderInfo().getTankRenderInfos().containsKey(TankPosition.LEFT));
+		assertEquals(1, contents.renderDirtyCount);
+	}
+
+	@Test
 	void onCanonicalContentsChangedProjectsItemDisplayRenderDataToPhysicalFacade() {
 		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
 			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
