@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -12,11 +13,17 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
+import javax.annotation.Nullable;
+
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.IntConsumer;
@@ -40,10 +47,12 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	};
 	private IntConsumer slotsChangeListener = diff -> {
 	};
+	private boolean synchronizingPhysicalProjection = false;
 
 	public LinkedStorageBackpackWrapper(BackpackWrapper physicalBackpack, IBackpackWrapper canonicalHost) {
 		this.physicalBackpack = physicalBackpack;
 		this.canonicalHost = canonicalHost;
+		physicalBackpack.getRenderInfo().setRenderUpdateChangeListener(renderInfo -> synchronizeCanonicalRenderInfo());
 	}
 
 	void setGroupChangeSubscription(Runnable unsubscribe) {
@@ -70,12 +79,55 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		CompoundTag canonicalRenderInfo = canonicalHost.getRenderInfo().getNbt();
 		if (!canonicalRenderInfo.equals(NBTHelper.getCompound(physicalBackpack.getBackpack(), BackpackRenderInfo.RENDER_INFO_TAG).orElse(null))) {
 			if (!physicalBackpack.getRenderInfo().getNbt().equals(canonicalRenderInfo)) {
-				physicalBackpack.getRenderInfo().deserializeFrom(canonicalRenderInfo.copy());
+				synchronizingPhysicalProjection = true;
+				try {
+					physicalBackpack.getRenderInfo().deserializeFrom(canonicalRenderInfo.copy());
+				} finally {
+					synchronizingPhysicalProjection = false;
+				}
 			}
 			NBTHelper.setCompoundNBT(physicalBackpack.getBackpack(), BackpackRenderInfo.RENDER_INFO_TAG, canonicalRenderInfo.copy());
 			return true;
 		}
 		return false;
+	}
+
+	private void synchronizeCanonicalRenderInfo() {
+		if (synchronizingPhysicalProjection) {
+			return;
+		}
+
+		CompoundTag physicalRenderInfo = physicalBackpack.getRenderInfo().getNbt();
+		if (canonicalHost instanceof BackpackLinkedStorageHostWrapper backpackHost) {
+			backpackHost.synchronizeEndpointRenderInfo(physicalRenderInfo);
+		}
+	}
+
+	public void replacePhysicalBackpackStack(ItemStack backpackStack) {
+		physicalBackpack.replaceBackpackStack(backpackStack);
+		physicalBackpack.getRenderInfo().setRenderUpdateChangeListener(renderInfo -> synchronizeCanonicalRenderInfo());
+	}
+
+	public boolean hasEndpoint(@Nullable LinkedStorageEndpointData endpoint) {
+		return LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack()) != null
+				&& Objects.equals(LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack()), endpoint);
+	}
+
+	public boolean synchronizePhysicalProjection(ServerLevel level) {
+		boolean columnsChanged = synchronizeColumnsTaken();
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack());
+		if (endpoint == null) {
+			return columnsChanged;
+		}
+
+		long renderRevision = LinkedStorageGroupsSavedData.get(level).manager().getRenderRevision(endpoint.groupId());
+		if (LinkedStorageStackData.getRenderRevision(physicalBackpack.getBackpack()) == renderRevision) {
+			return columnsChanged;
+		}
+
+		boolean renderChanged = refreshPhysicalProjection();
+		LinkedStorageStackData.setRenderRevision(physicalBackpack.getBackpack(), renderRevision);
+		return columnsChanged || renderChanged;
 	}
 
 	private boolean synchronizeColumnsTaken() {

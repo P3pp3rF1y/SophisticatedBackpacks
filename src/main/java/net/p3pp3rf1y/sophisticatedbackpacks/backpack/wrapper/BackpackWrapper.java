@@ -645,7 +645,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return getBackpack().getHoverName();
 	}
 
-	protected final void replaceBackpackStack(ItemStack backpack) {
+	public final void replaceBackpackStack(ItemStack backpack) {
 		this.backpack = backpack;
 		cacheSlotNumbers();
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);

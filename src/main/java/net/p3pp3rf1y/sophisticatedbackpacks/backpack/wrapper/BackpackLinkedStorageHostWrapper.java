@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBindi
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.IJukeboxPlaybackLocationProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxPlaybackLocation;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +32,18 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 			contents.setColumnsTaken(super.getColumnsTaken());
 		}
 		getRenderInfo().setRenderUpdateChangeListener(renderInfo -> contents.markRenderDirty());
+	}
+
+	public boolean synchronizeEndpointRenderInfo(CompoundTag renderInfo) {
+		if (getRenderInfo().getNbt().equals(renderInfo)) {
+			return false;
+		}
+
+		NBTHelper.setCompoundNBT(getBackpack(), BackpackRenderInfo.RENDER_INFO_TAG, renderInfo.copy());
+		replaceBackpackStack(getBackpack());
+		getRenderInfo().setRenderUpdateChangeListener(updatedRenderInfo -> contents.markRenderDirty());
+		contents.markRenderDirty();
+		return true;
 	}
 
 	private static ItemStack requireBackpack(ItemStack stack) {
