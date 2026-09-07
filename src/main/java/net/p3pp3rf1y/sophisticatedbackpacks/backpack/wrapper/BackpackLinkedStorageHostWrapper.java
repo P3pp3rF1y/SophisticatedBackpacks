@@ -12,6 +12,7 @@ import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.IJukeboxPlaybackLocationProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxPlaybackLocation;
 
@@ -46,6 +47,17 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 
 	private void configureRenderInfo() {
 		getRenderDataHandler().setRenderUpdateChangeListener(renderData -> contents.markRenderDirty());
+	}
+
+	public boolean synchronizeEndpointRenderData(RenderData renderData) {
+		if (getRenderDataHandler().getData().equals(renderData)) {
+			return false;
+		}
+		getBackpack().set(ModCoreDataComponents.RENDER_DATA, renderData.copy());
+		replaceBackpackStack(getBackpack());
+		configureRenderInfo();
+		contents.markRenderDirty();
+		return true;
 	}
 
 	@Override
@@ -104,7 +116,7 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 
 	@Override
 	public void onVirtualCarrierChanged(CompoundTag virtualCarrier) {
-		setBackpackStack(ItemStack.CODEC.parse(NbtOps.INSTANCE, virtualCarrier).getOrThrow());
+		replaceBackpackStack(ItemStack.CODEC.parse(NbtOps.INSTANCE, virtualCarrier).getOrThrow());
 		configureRenderInfo();
 		onContentsUpdated();
 	}
