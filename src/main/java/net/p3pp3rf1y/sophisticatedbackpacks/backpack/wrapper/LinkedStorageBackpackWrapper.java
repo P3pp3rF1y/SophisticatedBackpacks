@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -19,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -47,11 +49,13 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	};
 	private Runnable groupChangeSubscription = () -> {
 	};
+	private boolean synchronizingPhysicalProjection = false;
 
 	public LinkedStorageBackpackWrapper(BackpackWrapper physicalBackpack, IBackpackWrapper canonicalHost) {
 		this.physicalBackpack = physicalBackpack;
 		this.canonicalHost = canonicalHost;
 		endpoint = physicalBackpack.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		physicalBackpack.getRenderInfo().setRenderDataChangeListener(this::synchronizeCanonicalRenderInfo);
 	}
 
 	@Override
@@ -159,6 +163,17 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		return physicalBackpack.getRenderInfo();
 	}
 
+	private void synchronizeCanonicalRenderInfo() {
+		if (synchronizingPhysicalProjection) {
+			return;
+		}
+
+		CompoundTag physicalRenderInfo = physicalBackpack.getRenderInfo().getNbt();
+		if (canonicalHost instanceof BackpackLinkedStorageHostWrapper backpackHost) {
+			backpackHost.synchronizeEndpointRenderInfo(physicalRenderInfo);
+		}
+	}
+
 	@Override
 	public void setColumnsTaken(int columnsTaken, boolean hasChanged) {
 		canonicalHost.setColumnsTaken(columnsTaken, false);
@@ -227,6 +242,10 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	public IBackpackWrapper setBackpackStack(ItemStack backpackStack) {
 		physicalBackpack.setBackpackStack(backpackStack);
 		return this;
+	}
+
+	public void replacePhysicalBackpackStack(ItemStack backpackStack) {
+		physicalBackpack.replaceBackpackStack(backpackStack);
 	}
 
 	public boolean hasEndpoint(@Nullable LinkedStorageEndpointData endpoint) {
@@ -357,12 +376,34 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		CustomData physicalRenderInfo = physicalBackpack.getBackpack().get(ModCoreDataComponents.RENDER_INFO_TAG);
 		if (physicalRenderInfo == null || !Objects.equals(physicalRenderInfo.copyTag(), canonicalRenderInfo)) {
 			if (!physicalBackpack.getRenderInfo().getNbt().equals(canonicalRenderInfo)) {
-				physicalBackpack.getRenderInfo().deserializeFrom(canonicalRenderInfo.copy());
+				synchronizingPhysicalProjection = true;
+				try {
+					physicalBackpack.getRenderInfo().deserializeFrom(canonicalRenderInfo.copy());
+				} finally {
+					synchronizingPhysicalProjection = false;
+				}
 			}
 			physicalBackpack.getBackpack().set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(canonicalRenderInfo.copy()));
 			return true;
 		}
 		return false;
+	}
+
+	public boolean synchronizePhysicalProjection(ServerLevel level) {
+		boolean columnsChanged = synchronizeColumnsTaken();
+		if (endpoint == null) {
+			return columnsChanged;
+		}
+
+		long renderRevision = LinkedStorageGroupsSavedData.get(level).manager().getRenderRevision(endpoint.groupId());
+		ItemStack physicalStack = physicalBackpack.getBackpack();
+		if (physicalStack.getOrDefault(ModCoreDataComponents.LINKED_STORAGE_RENDER_REVISION, -1L) == renderRevision) {
+			return columnsChanged;
+		}
+
+		boolean renderChanged = refreshPhysicalProjection();
+		physicalStack.set(ModCoreDataComponents.LINKED_STORAGE_RENDER_REVISION, renderRevision);
+		return columnsChanged || renderChanged;
 	}
 
 	private boolean synchronizeColumnsTaken() {
