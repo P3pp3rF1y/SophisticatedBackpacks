@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
@@ -89,7 +90,7 @@ public final class BackpackLinkedStorageResolver {
 							.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack primary endpoint"))
 					: IBackpackWrapper.Noop.INSTANCE;
 		}
-		return new BackpackWrapper(stack);
+		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElseGet(() -> new BackpackWrapper(stack));
 	}
 
 	public static boolean synchronizeRenderProjection(ServerLevel level, ItemStack stack) {
