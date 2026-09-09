@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -12,14 +13,18 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
@@ -106,6 +111,32 @@ class InceptionBackpackPersistenceTest {
 
 				ItemStack persistedInnerBackpackStack = reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0);
 				assertEquals(innerContentsUuid, BackpackWrapper.fromStack(persistedInnerBackpackStack).getContentsUuid().orElseThrow());
+			}
+		});
+	}
+
+	@Test
+	void externalItemHandlerReentryDuringInceptionInitializationUsesBaseInventory() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				StorageWrapperRepository.clearCache();
+
+				ReentrantBackpackBlockEntity blockEntity = new ReentrantBackpackBlockEntity();
+				IBackpackWrapper initialBackpack = createBackpack();
+				blockEntity.setBackpack(initialBackpack.getBackpack());
+				blockEntity.setLevel(Mockito.mock(Level.class));
+				IBackpackWrapper outerBackpack = blockEntity.getBackpackWrapper();
+				outerBackpack.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				ItemStack innerBackpackStack = new ItemStack(ModItems.BACKPACK.get());
+				outerBackpack.getInventoryHandler().setStackInSlot(0, innerBackpackStack);
+				IItemHandler externalItemHandler = blockEntity.getExternalItemHandler(null);
+				blockEntity.reenterExternalHandlerOnSetChanged = true;
+
+				assertTrue(externalItemHandler.getSlots() > 0);
+				assertTrue(blockEntity.reentrantSetChangedCount > 0);
+				UUID innerContentsUuid = BackpackWrapper.fromStack(innerBackpackStack).getContentsUuid().orElseThrow();
+				storageUuids.add(innerContentsUuid);
 			}
 		});
 	}
@@ -230,6 +261,24 @@ class InceptionBackpackPersistenceTest {
 	private static ItemStack copyItemStack(ItemStack stack) {
 		return CodecHelper.OVERSIZED_ITEM_STACK_CODEC.parse(NBT_OPS, CodecHelper.OVERSIZED_ITEM_STACK_CODEC.encodeStart(NBT_OPS, stack).getOrThrow())
 				.getOrThrow();
+	}
+
+	private static class ReentrantBackpackBlockEntity extends BackpackBlockEntity {
+		private boolean reenterExternalHandlerOnSetChanged;
+		private int reentrantSetChangedCount;
+
+		private ReentrantBackpackBlockEntity() {
+			super(BlockPos.ZERO, ModBlocks.BACKPACK.get().defaultBlockState());
+		}
+
+		@Override
+		public void setChanged() {
+			super.setChanged();
+			if (reenterExternalHandlerOnSetChanged) {
+				reentrantSetChangedCount++;
+				getExternalItemHandler(null).getSlots();
+			}
+		}
 	}
 
 	private RefillUpgradeWrapper getRefillWrapper(IBackpackWrapper backpack) {
