@@ -16,7 +16,9 @@ public class InventoryModificationHandler {
 
 	public ITrackedContentsItemResourceHandler getModifiedInventoryHandler() {
 		if (modifiedInventoryHandler == null) {
-			initializeWrappedInventory(backpackWrapper.getInventoryHandler());
+			ITrackedContentsItemResourceHandler inventoryHandler = backpackWrapper.getInventoryHandler();
+			modifiedInventoryHandler = inventoryHandler;
+			initializeWrappedInventory(inventoryHandler);
 		}
 		return modifiedInventoryHandler;
 	}
