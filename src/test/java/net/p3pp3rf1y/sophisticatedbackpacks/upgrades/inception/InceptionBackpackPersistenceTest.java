@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
@@ -11,16 +12,20 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
@@ -49,6 +54,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InceptionBackpackPersistenceTest {
 	private static final RegistryAccess REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
@@ -112,6 +118,32 @@ class InceptionBackpackPersistenceTest {
 
 				ItemStack persistedInnerBackpackStack = reloadedOuterBackpack.getInventoryHandler().getStackInSlot(0);
 				assertEquals(innerContentsUuid, BackpackWrapper.fromStack(persistedInnerBackpackStack).getContentsUuid().orElseThrow());
+			}
+		});
+	}
+
+	@Test
+	void externalItemHandlerReentryDuringInceptionInitializationUsesBaseInventory() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				StorageWrapperRepository.clearCache();
+
+				ReentrantBackpackBlockEntity blockEntity = new ReentrantBackpackBlockEntity();
+				IBackpackWrapper initialBackpack = createBackpack();
+				blockEntity.setBackpack(initialBackpack.getBackpack());
+				blockEntity.setLevel(Mockito.mock(Level.class));
+				IBackpackWrapper outerBackpack = blockEntity.getBackpackWrapper();
+				outerBackpack.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				ItemStack innerBackpackStack = new ItemStack(ModItems.BACKPACK.get());
+				outerBackpack.getInventoryHandler().setStackInSlot(0, innerBackpackStack);
+				blockEntity.reenterExternalHandlerOnSetChanged = true;
+				ResourceHandler<ItemResource> externalItemHandler = blockEntity.getExternalItemHandler(null);
+
+				assertTrue(externalItemHandler.size() > 0);
+				assertTrue(blockEntity.reentrantSetChangedCount > 0);
+				UUID innerContentsUuid = BackpackWrapper.fromStack(innerBackpackStack).getContentsUuid().orElseThrow();
+				storageUuids.add(innerContentsUuid);
 			}
 		});
 	}
@@ -200,6 +232,24 @@ class InceptionBackpackPersistenceTest {
 				.parse(REGISTRY_ACCESS.createSerializationContext(NbtOps.INSTANCE),
 						CodecHelper.OVERSIZED_ITEM_STACK_CODEC.encodeStart(REGISTRY_ACCESS.createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow())
 				.getOrThrow();
+	}
+
+	private static class ReentrantBackpackBlockEntity extends BackpackBlockEntity {
+		private boolean reenterExternalHandlerOnSetChanged;
+		private int reentrantSetChangedCount;
+
+		private ReentrantBackpackBlockEntity() {
+			super(BlockPos.ZERO, ModBlocks.BACKPACK.get().defaultBlockState());
+		}
+
+		@Override
+		public void setChanged() {
+			super.setChanged();
+			if (reenterExternalHandlerOnSetChanged) {
+				reentrantSetChangedCount++;
+				getExternalItemHandler(null).size();
+			}
+		}
 	}
 
 	private RefillUpgradeWrapper getRefillWrapper(IBackpackWrapper backpack) {
