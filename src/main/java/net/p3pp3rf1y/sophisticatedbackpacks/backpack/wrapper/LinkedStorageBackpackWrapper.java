@@ -14,7 +14,6 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
@@ -23,14 +22,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import javax.annotation.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
 public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
-	private BackpackWrapper physicalBackpack;
+	private final BackpackWrapper physicalBackpack;
 	private final IBackpackWrapper canonicalHost;
+	@Nullable
+	private final LinkedStorageEndpointData endpoint;
 	private Runnable unsubscribe = () -> {
 	};
 	private Runnable inventorySlotChangeHandler = () -> {
@@ -52,6 +52,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	public LinkedStorageBackpackWrapper(BackpackWrapper physicalBackpack, IBackpackWrapper canonicalHost) {
 		this.physicalBackpack = physicalBackpack;
 		this.canonicalHost = canonicalHost;
+		endpoint = LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack());
 		physicalBackpack.getRenderInfo().setRenderUpdateChangeListener(renderInfo -> synchronizeCanonicalRenderInfo());
 	}
 
@@ -63,16 +64,15 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		unsubscribe = () -> {
 		};
 	}
-	void onCanonicalContentsChanged(LinkedStorageGroupManager.GroupChange change) {
-		if (change.projectionChanged()) {
-			synchronizeColumnsTaken();
-			refreshPhysicalProjection();
-			canonicalContentsChangedHandler.run();
-		}
+	void onCanonicalContentsChanged() {
+		boolean physicalProjectionChanged = synchronizeColumnsTaken() | refreshPhysicalProjection();
 		inventorySlotChangeHandler.run();
 		upgradeCachesInvalidatedHandler.run();
 		inventoryRefreshHandler.run();
 		inventoryInputOutputRefreshHandler.run();
+		if (physicalProjectionChanged) {
+			canonicalContentsChangedHandler.run();
+		}
 	}
 
 	public boolean refreshPhysicalProjection() {
@@ -105,12 +105,10 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 
 	public void replacePhysicalBackpackStack(ItemStack backpackStack) {
 		physicalBackpack.replaceBackpackStack(backpackStack);
-		physicalBackpack.getRenderInfo().setRenderUpdateChangeListener(renderInfo -> synchronizeCanonicalRenderInfo());
 	}
 
 	public boolean hasEndpoint(@Nullable LinkedStorageEndpointData endpoint) {
-		return LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack()) != null
-				&& Objects.equals(LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack()), endpoint);
+		return this.endpoint != null && this.endpoint.equals(endpoint);
 	}
 
 	public boolean synchronizePhysicalProjection(ServerLevel level) {
@@ -142,18 +140,6 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	public void setCanonicalContentsChangedHandler(Runnable handler) {
 		canonicalContentsChangedHandler = handler;
 	}
-	public boolean rebindPhysicalBackpack(ItemStack backpack) {
-		if (physicalBackpack.getBackpack() == backpack) {
-			return false;
-		}
-
-		physicalBackpack = new BackpackWrapper(backpack);
-		physicalBackpack.setContentsChangeHandler(contentsChangeHandler);
-		physicalBackpack.setInventorySlotChangeHandler(inventorySlotChangeHandler);
-		physicalBackpack.registerOnSlotsChangeListener(slotsChangeListener);
-		return synchronizeColumnsTaken() || refreshPhysicalProjection();
-	}
-
 	@Override
 	public void setContentsChangeHandler(Runnable handler) {
 		contentsChangeHandler = handler;

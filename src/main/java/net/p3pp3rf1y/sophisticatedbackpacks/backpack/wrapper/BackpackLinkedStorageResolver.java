@@ -5,6 +5,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
@@ -25,18 +27,20 @@ public final class BackpackLinkedStorageResolver {
 		}
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
 		if (!(level instanceof ServerLevel serverLevel)) {
-			return ClientLinkedStorageBackpackContents.getBinding(endpoint.groupId()).map(contents -> {
-				ItemStack carrier = stack.copy();
-				LinkedStorageStackLifecycle.clear(carrier);
-				carrier.removeTagKey(BackpackWrapper.CONTENTS_UUID_TAG);
-				ClientLinkedStorageBackpackContents.getStorageSize(endpoint.groupId()).ifPresent(storageSize -> {
-					carrier.getOrCreateTag().putInt("inventorySlots", storageSize.inventorySlots());
-					carrier.getOrCreateTag().putInt("upgradeSlots", storageSize.upgradeSlots());
-				});
-				ClientLinkedStorageBackpackContents.getColumnsTaken(endpoint.groupId())
-						.ifPresent(columnsTaken -> carrier.getOrCreateTag().putInt("columnsTaken", columnsTaken));
-				return new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), new BackpackLinkedStorageHostWrapper(contents, carrier));
-			});
+			Optional<ILinkedStorageContents> contents = ClientLinkedStorageContents.getContents(endpoint.groupId());
+			if (contents.isEmpty()) {
+				return Optional.empty();
+			}
+			ItemStack carrier = stack.copy();
+			LinkedStorageStackLifecycle.clear(carrier);
+			carrier.removeTagKey(BackpackWrapper.CONTENTS_UUID_TAG);
+			ClientLinkedStorageContents.getInventorySlots(endpoint.groupId())
+					.ifPresent(inventorySlots -> carrier.getOrCreateTag().putInt("inventorySlots", inventorySlots));
+			ClientLinkedStorageContents.getUpgradeSlots(endpoint.groupId())
+					.ifPresent(upgradeSlots -> carrier.getOrCreateTag().putInt("upgradeSlots", upgradeSlots));
+			ClientLinkedStorageContents.getColumnsTaken(endpoint.groupId())
+					.ifPresent(columnsTaken -> carrier.getOrCreateTag().putInt("columnsTaken", columnsTaken));
+			return Optional.of(new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), new BackpackLinkedStorageHostWrapper(contents.get(), carrier)));
 		}
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(serverLevel).manager();
 		if (!manager.isEndpointMember(endpoint.groupId(), endpoint.endpointId())) {
@@ -53,7 +57,12 @@ public final class BackpackLinkedStorageResolver {
 	}
 
 	public static IBackpackWrapper resolveOrCreate(Level level, ItemStack stack) {
-		return resolve(level, stack).orElseGet(() -> new BackpackWrapper(stack));
+		return resolve(level, stack).orElseGet(() -> {
+			if (!level.isClientSide && LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
+				throw new IllegalStateException("Failed to resolve linked backpack endpoint");
+			}
+			return new BackpackWrapper(stack);
+		});
 	}
 
 	public static Optional<IBackpackWrapper> resolveCanonicalHost(ServerLevel level, ItemStack stack) {
@@ -63,9 +72,14 @@ public final class BackpackLinkedStorageResolver {
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
 		if (!manager.isEndpointMember(endpoint.groupId(), endpoint.endpointId())) {
-			return Optional.empty();
+			throw new IllegalStateException("Linked backpack endpoint is not registered in its group");
 		}
-		return manager.resolveVirtualHost(endpoint.groupId()).filter(IBackpackWrapper.class::isInstance).map(IBackpackWrapper.class::cast);
+		ILinkedStorageVirtualHost virtualHost = manager.resolveVirtualHost(endpoint.groupId())
+				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack host for group " + endpoint.groupId()));
+		if (!(virtualHost instanceof IBackpackWrapper backpackHost)) {
+			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a backpack host");
+		}
+		return Optional.of(backpackHost);
 	}
 
 	public static Optional<IBackpackWrapper> resolvePrimaryCanonicalHost(ServerLevel level, ItemStack stack) {
@@ -99,16 +113,16 @@ public final class BackpackLinkedStorageResolver {
 		}
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		return resolveCanonicalHost(level, stack).map(host -> {
+		long renderRevision = manager.getRenderRevision(endpoint.groupId());
+		if (LinkedStorageStackData.getRenderRevision(stack) == renderRevision) {
+			return false;
+		}
+		return manager.resolveVirtualHost(endpoint, false).filter(IBackpackWrapper.class::isInstance).map(IBackpackWrapper.class::cast).map(host -> {
 			boolean projectionChanged = false;
 			BackpackWrapper physicalBackpack = new BackpackWrapper(stack);
 			if (physicalBackpack.getColumnsTaken() != host.getColumnsTaken()) {
 				physicalBackpack.setColumnsTaken(host.getColumnsTaken(), false);
 				projectionChanged = true;
-			}
-			long revision = manager.getRenderRevision(endpoint.groupId());
-			if (LinkedStorageStackData.getRenderRevision(stack) == revision) {
-				return projectionChanged;
 			}
 			CompoundTag renderInfo = host.getRenderInfo().getNbt();
 			CompoundTag tag = stack.getOrCreateTag();
@@ -116,9 +130,9 @@ public final class BackpackLinkedStorageResolver {
 				tag.put("renderInfo", renderInfo.copy());
 				projectionChanged = true;
 			}
-			LinkedStorageStackData.setRenderRevision(stack, revision);
+			LinkedStorageStackData.setRenderRevision(stack, renderRevision);
 			return projectionChanged;
-		}).orElse(false);
+		}).orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack render host"));
 	}
 
 	public static boolean hasSameEndpoint(ItemStack first, ItemStack second) {

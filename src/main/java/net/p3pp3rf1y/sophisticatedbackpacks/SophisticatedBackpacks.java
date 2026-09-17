@@ -17,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeReloadListener;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAccessProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
@@ -32,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHealthTooltip;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAccessProviders;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAdapters;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import org.apache.logging.log4j.LogManager;
@@ -74,6 +76,7 @@ public class SophisticatedBackpacks {
 	private static void setup(FMLCommonSetupEvent event) {
 		SBPPacketHandler.INSTANCE.init();
 		LinkedStorageEndpointAdapters.register(new BackpackLinkedStorageEndpointAdapter());
+		LinkedStorageEndpointAccessProviders.register(new BackpackLinkedStorageEndpointAccessProvider());
 		LinkedStorageHostFactories.register(BackpackLinkedStorageHostWrapper.FACTORY_ID, BackpackLinkedStorageHostWrapper::create);
 		ModCompat.compatsSetup();
 		event.enqueueWork(ModItems::registerDispenseBehavior);

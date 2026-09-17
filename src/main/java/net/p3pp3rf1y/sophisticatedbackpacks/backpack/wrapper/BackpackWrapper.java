@@ -610,6 +610,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void onContentsNbtUpdated() {
 		handler = null;
 		upgradeHandler = null;
+		settingsHandler = null;
 		refreshInventoryForUpgradeProcessing();
 		onInventoryHandlerRefresh.run();
 	}

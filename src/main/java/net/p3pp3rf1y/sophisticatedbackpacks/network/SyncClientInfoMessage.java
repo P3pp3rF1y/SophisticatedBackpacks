@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStora
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 
 import javax.annotation.Nullable;
@@ -46,9 +47,17 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 
 	private static void handleMessage(SyncClientInfoMessage msg) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
+		if (player == null || msg.renderInfoNbt == null) {
 			return;
 		}
+		if (player.containerMenu instanceof BackpackContainer backpackContainer) {
+			handleBackpackContainerMessage(player, backpackContainer, msg);
+		} else if (msg.slotIndex == -1 && player.containerMenu instanceof BackpackSettingsContainerMenu settingsContainer) {
+			settingsContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
+		}
+	}
+
+	private static void handleBackpackContainerMessage(LocalPlayer player, BackpackContainer backpackContainer, SyncClientInfoMessage msg) {
 		if (!backpackContainer.canApplyClientInfo(msg.slotIndex)) {
 			return;
 		}

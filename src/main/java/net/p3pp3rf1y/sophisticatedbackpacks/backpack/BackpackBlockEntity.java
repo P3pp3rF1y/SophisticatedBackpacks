@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
+import net.p3pp3rf1y.sophisticatedcore.controller.ControllerStorageKey;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.CachedFailedInsertInventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
@@ -101,6 +102,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			BackpackBlockEntity blockEntity = (BackpackBlockEntity) endpoint;
 			blockEntity.closeMenusForThisBlock();
 			blockEntity.setBackpack(blockEntity.getBackpackWrapper().getBackpack());
+			blockEntity.reregisterWithController();
 			blockEntity.refreshRenderState();
 		}
 	};
@@ -143,15 +145,13 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
 		}
 		if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper
-				&& BackpackLinkedStorageResolver.hasSameEndpoint(backpackWrapper.getBackpack(), backpack)) {
-			boolean projectionChanged = linkedStorageBackpackWrapper.rebindPhysicalBackpack(backpack);
+				&& linkedStorageBackpackWrapper.hasEndpoint(LinkedStorageStackData.getEndpoint(backpack))) {
+			linkedStorageBackpackWrapper.replacePhysicalBackpackStack(backpack);
 			if (level instanceof ServerLevel serverLevel) {
 				backpackWrapper.onInit(level);
 				LinkedStorageJukeboxPlaybackAnchors.refreshBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
 			}
-			if (projectionChanged) {
-				refreshLinkedRenderState();
-			}
+			refreshLinkedRenderState();
 			return;
 		}
 		closeLinkedStorageSubscription();
@@ -433,6 +433,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public BlockPos getStorageBlockPos() {
 		return getBlockPos();
+	}
+
+	@Override
+	public ControllerStorageKey getControllerStorageKey() {
+		LinkedStorageEndpointData endpoint = getLinkedStorageEndpointData();
+		return endpoint == null
+				? IControllableStorage.super.getControllerStorageKey()
+				: new ControllerStorageKey(getControlledStorageBlockPos(), endpoint.groupId());
 	}
 
 	@Override

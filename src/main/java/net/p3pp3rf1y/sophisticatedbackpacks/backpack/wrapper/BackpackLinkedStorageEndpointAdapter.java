@@ -32,6 +32,11 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	}
 
 	@Override
+	public boolean isCompatible(ServerLevel level, ItemStack stack, LinkedStorageHostDescriptor hostDescriptor) {
+		return getCompatibility(level, stack, hostDescriptor) == Compatibility.COMPATIBLE;
+	}
+
+	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack stack, LinkedStorageHostDescriptor hostDescriptor) {
 		return new BackpackWrapper(stack).getContentsUuid().flatMap(BackpackStorage.get(level)::getBackpackContents)
 				.map(BackpackLinkedStorageEndpointAdapter::hasItems).filter(Boolean::booleanValue).map(value -> Compatibility.HAS_CONTENTS)
@@ -63,7 +68,12 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	public void bindEndpoint(ServerLevel level, ItemStack stack, LinkedStorageEndpointData endpoint) {
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
 		ItemStack primaryCarrier = ItemStack.of(manager.getHostDescriptor(endpoint.groupId()).orElseThrow().virtualCarrier());
-		new BackpackWrapper(stack).removeContentsUuid();
+		BackpackWrapper wrapper = new BackpackWrapper(stack);
+		int columnsTaken = wrapper.getColumnsTaken();
+		wrapper.removeContentsUuid();
+		if (manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId())) {
+			manager.resolveContents(endpoint.groupId()).orElseThrow().setColumnsTaken(columnsTaken);
+		}
 		copySlotSizes(stack, primaryCarrier);
 		LinkedStorageStackData.setEndpoint(stack, endpoint);
 		LinkedStorageStackData.setPrimaryEndpoint(stack, manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId()));

@@ -27,7 +27,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
@@ -39,6 +38,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.MobCatcherCaptureEffec
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 
 import java.util.Map;
 
@@ -70,7 +70,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent event) {

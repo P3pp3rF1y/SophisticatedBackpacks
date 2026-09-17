@@ -7,17 +7,18 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.LinkedStorageBackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageContentsMessage;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
@@ -48,14 +49,10 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 		if (player.level().isClientSide) {
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 			if (endpoint != null) {
-				if (ClientLinkedStorageBackpackContents.removeUpdatedGroup(endpoint.groupId())) {
-					storageWrapper.getSettingsHandler()
-							.reloadFrom(ClientLinkedStorageBackpackContents.getBinding(endpoint.groupId())
-									.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()))
-									.getContents());
-					if (storageWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-						linkedStorageBackpackWrapper.refreshPhysicalProjection();
-					}
+				if (ClientLinkedStorageContents.removeUpdatedGroup(endpoint.groupId())) {
+					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(endpoint.groupId())
+							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()));
+					storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
 				}
 				return;
 			}
@@ -75,6 +72,15 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 		sendBackpackSettingsToClient();
 	}
 
+	public void syncClientInfo(CompoundTag renderInfoNbt, int columnsTaken) {
+		boolean columnsChanged = storageWrapper.getColumnsTaken() != columnsTaken;
+		storageWrapper.getRenderInfo().deserializeFrom(renderInfoNbt);
+		storageWrapper.setColumnsTaken(columnsTaken, false);
+		if (columnsChanged) {
+			storageWrapper.onContentsNbtUpdated();
+		}
+	}
+
 	private void sendBackpackSettingsToClient() {
 		if (player.level().isClientSide) {
 			return;
@@ -84,8 +90,8 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 			if (endpoint != null) {
-				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
-						LinkedStorageBackpackContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
+				PacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
+						LinkedStorageContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
 				return;
 			}
 

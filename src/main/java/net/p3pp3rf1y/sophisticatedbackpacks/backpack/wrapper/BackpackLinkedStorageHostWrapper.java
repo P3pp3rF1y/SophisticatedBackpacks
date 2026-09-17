@@ -7,8 +7,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSnapshotProfile;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.IJukeboxPlaybackLocationProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxPlaybackLocation;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -18,19 +19,15 @@ import java.util.UUID;
 
 public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements ILinkedStorageVirtualHost, IJukeboxPlaybackLocationProvider {
 	public static final ResourceLocation FACTORY_ID = SophisticatedBackpacks.getRL("backpack");
-	private final ILinkedStorageContentsBinding contents;
+	private final ILinkedStorageContents contents;
 
-	public static BackpackLinkedStorageHostWrapper create(ILinkedStorageContentsBinding contents, CompoundTag virtualCarrier) {
+	public static BackpackLinkedStorageHostWrapper create(ILinkedStorageContents contents, CompoundTag virtualCarrier) {
 		return new BackpackLinkedStorageHostWrapper(contents, ItemStack.of(virtualCarrier));
 	}
 
-	public BackpackLinkedStorageHostWrapper(ILinkedStorageContentsBinding contents, ItemStack virtualCarrier) {
+	public BackpackLinkedStorageHostWrapper(ILinkedStorageContents contents, ItemStack virtualCarrier) {
 		super(requireBackpack(virtualCarrier), new ContentsSource(contents));
 		this.contents = contents;
-		if (contents.getColumnsTaken() == 0 && super.getColumnsTaken() > 0) {
-			// The virtual carrier retains the primary Backpack's layout when the group is created.
-			contents.setColumnsTaken(super.getColumnsTaken());
-		}
 		getRenderInfo().setRenderUpdateChangeListener(renderInfo -> contents.markRenderDirty());
 	}
 
@@ -106,11 +103,17 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	}
 
 	@Override
+	public Optional<LinkedStorageSnapshotProfile> getLinkedStorageSnapshotProfile() {
+		return Optional
+				.of(new LinkedStorageSnapshotProfile(getDisplayName(), getInventoryHandler().getSlots(), getUpgradeHandler().getSlots(), getColumnsTaken()));
+	}
+
+	@Override
 	public Optional<JukeboxPlaybackLocation> getJukeboxPlaybackLocation(ServerLevel initiatingLevel) {
 		return LinkedStorageJukeboxPlaybackAnchors.getPlaybackLocation(initiatingLevel, contents.groupId());
 	}
 
-	private record ContentsSource(ILinkedStorageContentsBinding contents) implements IBackpackContentsSource {
+	private record ContentsSource(ILinkedStorageContents contents) implements IBackpackContentsSource {
 		@Override
 		public CompoundTag getContents() {
 			return contents.getContents();

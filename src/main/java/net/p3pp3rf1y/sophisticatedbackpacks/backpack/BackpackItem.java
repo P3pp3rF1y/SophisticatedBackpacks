@@ -54,7 +54,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
@@ -62,8 +61,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRende
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestLinkedStorageBackpackContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
@@ -71,12 +68,15 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.network.RequestLinkedStorageContentsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -188,9 +188,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
-		if (worldIn != null && worldIn.isClientSide && endpoint != null) {
-			long revision = ClientLinkedStorageBackpackContents.getRevision(endpoint.groupId()).orElse(-1L);
-			SBPPacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageBackpackContentsMessage(endpoint.groupId(), revision));
+		if (worldIn != null && worldIn.isClientSide && endpoint != null
+				&& ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), worldIn.getGameTime())) {
+			long revision = ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L);
+			PacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageContentsMessage(endpoint.groupId(), revision));
 		}
 		if (flagIn == TooltipFlag.ADVANCED) {
 			LinkedStorageEndpointData advancedEndpoint = LinkedStorageStackData.getEndpoint(stack);
@@ -221,9 +222,9 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			Optional<LinkedStorageEndpointRole> linkedStorageRole = getLinkedStorageEndpointRole(stack);
 			if (linkedStorageRole.isPresent() && !Screen.hasShiftDown() && (mc.player == null || mc.player.containerMenu.getCarried().isEmpty())) {
 				LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
-				if (ClientLinkedStorageBackpackContents.getGroupName(endpoint.groupId()).isEmpty()
-						&& ClientLinkedStorageBackpackContents.requestGroupName(endpoint.groupId())) {
-					SBPPacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageBackpackContentsMessage(endpoint.groupId(), -1L));
+				if (mc.player != null && ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), mc.player.level().getGameTime())) {
+					PacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageContentsMessage(endpoint.groupId(),
+							ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L)));
 				}
 				ret.set(new LinkedStorageTooltip(linkedStorageRole.get(), endpoint.groupId()));
 				return;

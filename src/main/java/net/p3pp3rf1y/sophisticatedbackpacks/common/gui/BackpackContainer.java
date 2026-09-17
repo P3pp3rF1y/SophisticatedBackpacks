@@ -18,16 +18,18 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.LinkedStorageBackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageContentsMessage;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -57,7 +59,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(), storageWrapper.getMainColor(),
 					storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 
-			if (!player.level().isClientSide()) {
+			if (!player.level().isClientSide() && LinkedStorageStackData.getEndpoint(backpack) == null) {
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
 			}
 		});
@@ -95,8 +97,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		storageWrapper.getContentsUuid().ifPresent(uuid -> {
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 			if (endpoint != null) {
-				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
-						LinkedStorageBackpackContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
+				PacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
+						LinkedStorageContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
 				return;
 			}
 			CompoundTag settingsContents = new CompoundTag();
@@ -223,9 +225,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	public boolean detectSettingsChangeAndReload() {
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 		if (endpoint != null) {
-			if (player.level().isClientSide && ClientLinkedStorageBackpackContents.removeUpdatedGroup(endpoint.groupId())) {
-				storageWrapper.getSettingsHandler().reloadFrom(ClientLinkedStorageBackpackContents.getBinding(endpoint.groupId())
-						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId())).getContents());
+			if (player.level().isClientSide && ClientLinkedStorageContents.removeUpdatedGroup(endpoint.groupId())) {
+				ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(endpoint.groupId())
+						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()));
+				storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
 				return true;
 			}
 			return false;
