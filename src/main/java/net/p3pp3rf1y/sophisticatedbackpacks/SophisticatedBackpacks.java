@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapeReloadListener;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAccessProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
@@ -34,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherConten
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAccessProviders;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAdapters;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import org.apache.logging.log4j.LogManager;
@@ -80,7 +82,10 @@ public class SophisticatedBackpacks {
 	private static void setup(FMLCommonSetupEvent event) {
 		event.enqueueWork(ModItems::registerDispenseBehavior);
 		event.enqueueWork(ModItems::registerCauldronInteractions);
-		event.enqueueWork(() -> LinkedStorageHostFactories.register(BackpackLinkedStorageHostWrapper.FACTORY_ID, BackpackLinkedStorageHostWrapper::create));
+		event.enqueueWork(() -> {
+			LinkedStorageHostFactories.register(BackpackLinkedStorageHostWrapper.FACTORY_ID, BackpackLinkedStorageHostWrapper::create);
+			LinkedStorageEndpointAccessProviders.register(new BackpackLinkedStorageEndpointAccessProvider());
+		});
 	}
 
 	private static void clientSetup(FMLClientSetupEvent event) {

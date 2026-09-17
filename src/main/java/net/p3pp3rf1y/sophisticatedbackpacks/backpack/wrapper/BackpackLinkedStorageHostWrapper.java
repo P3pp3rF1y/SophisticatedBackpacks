@@ -10,8 +10,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSnapshotProfile;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.IJukeboxPlaybackLocationProvider;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxPlaybackLocation;
@@ -21,13 +22,13 @@ import java.util.UUID;
 
 public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements ILinkedStorageVirtualHost, IJukeboxPlaybackLocationProvider {
 	public static final Identifier FACTORY_ID = SophisticatedBackpacks.getIdentifier("backpack");
-	private final ILinkedStorageContentsBinding contents;
+	private final ILinkedStorageContents contents;
 
-	public static BackpackLinkedStorageHostWrapper create(ILinkedStorageContentsBinding contents, CompoundTag virtualCarrier) {
+	public static BackpackLinkedStorageHostWrapper create(ILinkedStorageContents contents, CompoundTag virtualCarrier) {
 		return new BackpackLinkedStorageHostWrapper(contents, ItemStack.CODEC.parse(NbtOps.INSTANCE, virtualCarrier).getOrThrow());
 	}
 
-	public BackpackLinkedStorageHostWrapper(ILinkedStorageContentsBinding contents, ItemStack virtualCarrier) {
+	public BackpackLinkedStorageHostWrapper(ILinkedStorageContents contents, ItemStack virtualCarrier) {
 		super(requireBackpackVirtualCarrier(virtualCarrier), new LinkedStorageBackpackContentsSource(contents));
 		this.contents = contents;
 		BackpackItem backpackItem = (BackpackItem) getBackpack().getItem();
@@ -132,14 +133,20 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	}
 
 	@Override
+	public Optional<LinkedStorageSnapshotProfile> getLinkedStorageSnapshotProfile() {
+		return Optional.of(new LinkedStorageSnapshotProfile(getDisplayName(), getInventoryHandler().size() + getColumnsTaken() * getNumberOfSlotRows(),
+				getUpgradeHandler().size(), getColumnsTaken()));
+	}
+
+	@Override
 	public Optional<JukeboxPlaybackLocation> getJukeboxPlaybackLocation(ServerLevel initiatingLevel) {
 		return LinkedStorageJukeboxPlaybackAnchors.getPlaybackLocation(initiatingLevel, contents.groupId());
 	}
 
 	private static class LinkedStorageBackpackContentsSource implements IBackpackContentsSource {
-		private final ILinkedStorageContentsBinding contents;
+		private final ILinkedStorageContents contents;
 
-		private LinkedStorageBackpackContentsSource(ILinkedStorageContentsBinding contents) {
+		private LinkedStorageBackpackContentsSource(ILinkedStorageContents contents) {
 			this.contents = contents;
 		}
 

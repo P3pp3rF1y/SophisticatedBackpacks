@@ -24,7 +24,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageContentsPayload;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
@@ -86,6 +91,11 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	protected void sendStorageSettingsToClient() {
 		if (player.level().isClientSide()) {
+			return;
+		}
+		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		if (player instanceof ServerPlayer serverPlayer && endpoint != null) {
+			PacketDistributor.sendToPlayer(serverPlayer, LinkedStorageContentsPayload.createSnapshot(serverPlayer.level(), endpoint.groupId()));
 			return;
 		}
 
@@ -166,8 +176,10 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			return;
 		}
 		openingSettings = true;
-		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
-				Component.translatable(BackpackTranslationHelper.INSTANCE.translGui("settings.title")), false), backpackContext::toBuffer);
+		player.openMenu(
+				new SophisticatedMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
+						Component.translatable(BackpackTranslationHelper.INSTANCE.translGui("settings.title")), false),
+				buffer -> backpackContext.toBuffer(buffer, player));
 	}
 
 	@Override
@@ -183,6 +195,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	public boolean detectSettingsChangeAndReload() {
+		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		if (endpoint != null) {
+			if (ClientLinkedStorageContents.removeUpdatedGroup(endpoint.groupId())) {
+				ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(endpoint.groupId())
+						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()));
+				storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
+				return true;
+			}
+			return false;
+		}
 		return storageWrapper.getContentsUuid().map(uuid -> {
 			BackpackStorage storage = BackpackStorage.get();
 			if (storage.removeUpdatedBackpackSettingsFlag(uuid)) {

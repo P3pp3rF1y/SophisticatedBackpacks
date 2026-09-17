@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageItemEndpointAdapter;
@@ -42,14 +43,15 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack endpoint, LinkedStorageHostDescriptor hostDescriptor) {
 		UUID storageId = endpoint.get(ModCoreDataComponents.STORAGE_UUID);
-		return storageId != null && BackpackStorage.get().getOrCreateBackpackContents(storageId) != null
-				&& hasIncompatibleBackpackData(BackpackStorage.get().getOrCreateBackpackContents(storageId))
+		return storageId != null
+				&& BackpackStorage.get().getBackpackContents(storageId).map(BackpackLinkedStorageEndpointAdapter::hasIncompatibleBackpackData).orElse(false)
 						? Compatibility.HAS_CONTENTS
 						: Compatibility.COMPATIBLE;
 	}
 
 	private static boolean hasIncompatibleBackpackData(ContainerContents contents) {
-		return !contents.inventory().stacks().isEmpty() || !contents.upgrades().stacks().isEmpty();
+		return contents.inventory().stacks().stream().anyMatch(stack -> !stack.isEmpty())
+				|| contents.upgrades().stacks().stream().anyMatch(stack -> !stack.isEmpty());
 	}
 
 	@Override
@@ -75,6 +77,9 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 		// Resolve all canonical state before detaching the ordinary backend so a failed preparation preserves the source Backpack.
 		BackpackWrapper wrapper = new BackpackWrapper(stack);
 		wrapper.removeContentsUuid();
+		if (primaryEndpoint) {
+			manager.resolveContents(endpoint.groupId()).orElseThrow().setColumnsTaken(stack.getOrDefault(ModDataComponents.COLUMNS_TAKEN, 0));
+		}
 		copySlotSizes(stack, primaryCarrier);
 		stack.set(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT, primaryEndpoint);
 		stack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, endpoint);

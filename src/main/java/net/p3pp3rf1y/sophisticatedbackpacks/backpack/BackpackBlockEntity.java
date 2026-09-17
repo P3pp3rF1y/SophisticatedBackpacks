@@ -35,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
+import net.p3pp3rf1y.sophisticatedcore.controller.ControllerStorageKey;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
@@ -137,11 +138,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void setLevel(Level level) {
 		super.setLevel(level);
-		if (pendingLoadedBackpack != null) {
-			ItemStack loadedBackpack = pendingLoadedBackpack;
-			pendingLoadedBackpack = null;
-			setBackpack(loadedBackpack);
-		}
 	}
 
 	public void setBackpack(ItemStack backpack) {
@@ -181,20 +177,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void loadAdditional(ValueInput in) {
 		super.loadAdditional(in);
 		ItemStack loadedBackpack = in.read(BACKPACK_DATA, ItemStack.CODEC).orElse(ItemStack.EMPTY);
-		// This target may deserialize after onLoad, so resolve immediately once a level is attached.
-		if (level == null) {
-			pendingLoadedBackpack = loadedBackpack;
-		} else {
-			setBackpack(loadedBackpack);
-		}
+		pendingLoadedBackpack = loadedBackpack;
 		loadControllerPos(in);
-
-		if (level != null && !level.isClientSide()) {
-			removeControllerPos();
-			tryToAddToController();
-		}
-
-		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	@Override
@@ -278,6 +262,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private void onLinkedStorageEndpointLinked() {
 		closeMenusForThisBlock();
 		setBackpack(backpackWrapper.getBackpack());
+		reregisterWithController();
 		refreshRenderState();
 	}
 
@@ -462,6 +447,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public BlockPos getStorageBlockPos() {
 		return getBlockPos();
+	}
+
+	@Override
+	public ControllerStorageKey getControllerStorageKey() {
+		LinkedStorageEndpointData endpoint = getLinkedStorageEndpointData();
+		return endpoint == null
+				? IControllableStorage.super.getControllerStorageKey()
+				: new ControllerStorageKey(getControlledStorageBlockPos(), endpoint.groupId());
 	}
 
 	@Override
