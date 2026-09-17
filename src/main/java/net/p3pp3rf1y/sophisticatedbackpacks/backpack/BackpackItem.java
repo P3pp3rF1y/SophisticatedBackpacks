@@ -52,11 +52,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.*;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -65,7 +61,6 @@ import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -321,8 +316,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot) {
-		if (level.isClientSide || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying()
-				|| (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null)) {
+		if (level.isClientSide || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying()) {
 			return;
 		}
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
@@ -333,10 +327,15 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				if (player instanceof ServerPlayer serverPlayer) {
 					LinkedStorageJukeboxPlaybackAnchors.refreshPlayerAnchor(serverPlayer, stack);
 				}
-				backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()));
+				if (!Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() || slot != null) {
+					backpackWrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
+							.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()));
+				}
 			});
 			super.inventoryTick(stack, level, entity, slot);
+			return;
+		}
+		if (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null) {
 			return;
 		}
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
