@@ -18,7 +18,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoPayload;
@@ -26,7 +25,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
@@ -90,7 +90,7 @@ public abstract class BackpackContext {
 		if (!(virtualHost instanceof IBackpackWrapper host)) {
 			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a backpack host");
 		}
-		ILinkedStorageContentsBinding contents = manager.resolveContents(endpoint.groupId())
+		ILinkedStorageContents contents = manager.resolveContents(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack contents for group " + endpoint.groupId()));
 		return Optional.of(new LinkedStorageSnapshot(endpoint.groupId(), manager.getRevision(endpoint.groupId()), contents.contents().copy(),
 				host.getDisplayName(), getBaseInventorySlots(host), host.getUpgradeHandler().getSlots(), host.getColumnsTaken()));
@@ -158,8 +158,7 @@ public abstract class BackpackContext {
 			long revision = buffer.readVarLong();
 			CompoundTag contents = Objects.requireNonNull(buffer.readNbt());
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
-			ClientLinkedStorageBackpackContents.installSnapshot(groupId, revision, contents, groupName,
-					new ClientLinkedStorageBackpackContents.StorageSize(buffer.readVarInt(), buffer.readVarInt()), buffer.readVarInt());
+			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
 		}
 	}
 
@@ -483,7 +482,7 @@ public abstract class BackpackContext {
 			return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(backpackBlockEntity -> {
 				ItemStack backpack = backpackBlockEntity.getBackpackWrapper().getBackpack();
 				LinkedStorageEndpointData endpoint = backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
-				if (player.level().isClientSide && endpoint != null && ClientLinkedStorageBackpackContents.getStorageSize(endpoint.groupId()).isPresent()) {
+				if (player.level().isClientSide && endpoint != null && ClientLinkedStorageContents.getInventorySlots(endpoint.groupId()).isPresent()) {
 					// The block facade can predate the menu buffer; rebuild it after the authoritative storage size is available.
 					return BackpackLinkedStorageResolver.resolveOrCreate(player.level(), backpack);
 				}

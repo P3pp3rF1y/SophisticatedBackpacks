@@ -52,7 +52,8 @@ import net.p3pp3rf1y.sophisticatedcore.api.IDiscHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
@@ -267,6 +268,22 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
+	void hasEndpointRetainsFacadeEndpointIdentityWhenPhysicalStackChanges() {
+		UUID groupId = UUID.randomUUID();
+		LinkedStorageEndpointData originalEndpoint = new LinkedStorageEndpointData(groupId, UUID.randomUUID());
+		LinkedStorageEndpointData replacementEndpoint = new LinkedStorageEndpointData(groupId, UUID.randomUUID());
+		ItemStack physicalStack = new ItemStack(ModItems.BACKPACK.get());
+		physicalStack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, originalEndpoint);
+		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(physicalStack),
+				new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), new ItemStack(ModItems.BACKPACK.get())));
+
+		physicalStack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, replacementEndpoint);
+
+		assertTrue(facade.hasEndpoint(originalEndpoint));
+		assertFalse(facade.hasEndpoint(replacementEndpoint));
+	}
+
+	@Test
 	void setColumnsTakenProjectsCanonicalColumnsToEveryLinkedFacade() {
 		TestContentsBinding contents = new TestContentsBinding();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
@@ -425,53 +442,45 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
-	void installSnapshotReplacesRootsAndRejectsOlderRevisions() {
+	void updateContentsReplacesRoots() {
 		UUID groupId = UUID.randomUUID();
-		CompoundTag staleContents = new CompoundTag();
-		staleContents.putString("stale", "value");
 		CompoundTag currentContents = new CompoundTag();
 		currentContents.putString("current", "value");
 
-		ClientLinkedStorageBackpackContents.clear();
-		assertTrue(ClientLinkedStorageBackpackContents.getBinding(groupId).isEmpty());
-		assertTrue(ClientLinkedStorageBackpackContents.installSnapshot(groupId, 2, currentContents, Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 0));
-		assertFalse(ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, staleContents, Component.literal("Stale Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(27, 3), 0));
+		ClientLinkedStorageContents.clear();
+		assertTrue(ClientLinkedStorageContents.getContents(groupId).isEmpty());
+		ClientLinkedStorageContents.updateContents(groupId, 2, currentContents, Component.literal("Main Backpack"), 36, 4, 0);
 
-		CompoundTag syncedContents = ClientLinkedStorageBackpackContents.getBinding(groupId).orElseThrow().contents();
-		assertFalse(syncedContents.contains("stale"));
+		CompoundTag syncedContents = ClientLinkedStorageContents.getContents(groupId).orElseThrow().contents();
 		assertEquals("value", syncedContents.getString("current"));
-		assertEquals("Main Backpack", ClientLinkedStorageBackpackContents.getGroupName(groupId).orElseThrow().getString());
-		ClientLinkedStorageBackpackContents.clear();
+		assertEquals("Main Backpack", ClientLinkedStorageContents.getGroupName(groupId).orElseThrow().getString());
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
-	void getBindingRetainsLastSnapshotAfterCacheClear() {
+	void getContentsRetainsLastUpdateAfterCacheClear() {
 		UUID groupId = UUID.randomUUID();
 		CompoundTag contents = new CompoundTag();
 		contents.putString("current", "value");
 
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, contents, Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 2);
-		ILinkedStorageContentsBinding binding = ClientLinkedStorageBackpackContents.getBinding(groupId).orElseThrow();
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, contents, Component.literal("Main Backpack"), 36, 4, 2);
+		ILinkedStorageContents linkedContents = ClientLinkedStorageContents.getContents(groupId).orElseThrow();
+		ClientLinkedStorageContents.clear();
 
-		assertEquals("value", binding.contents().getString("current"));
-		assertEquals(2, binding.getColumnsTaken());
+		assertEquals("value", linkedContents.contents().getString("current"));
+		assertEquals(2, linkedContents.getColumnsTaken());
 	}
 
 	@Test
 	void getGroupNameSharesClientGroupNameAcrossEndpointTooltips() {
 		UUID groupId = UUID.randomUUID();
 
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, new CompoundTag(), Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 0);
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, new CompoundTag(), Component.literal("Main Backpack"), 36, 4, 0);
 
-		assertEquals("Main Backpack", ClientLinkedStorageBackpackContents.getGroupName(groupId).orElseThrow().getString());
-		ClientLinkedStorageBackpackContents.clear();
+		assertEquals("Main Backpack", ClientLinkedStorageContents.getGroupName(groupId).orElseThrow().getString());
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
@@ -761,17 +770,15 @@ class BackpackLinkedStorageHostWrapperTest {
 		UUID groupId = UUID.randomUUID();
 		ItemStack secondary = new ItemStack(ModItems.GOLD_BACKPACK.get());
 		secondary.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, new CompoundTag(), Component.empty(),
-				new ClientLinkedStorageBackpackContents.StorageSize(ModItems.BACKPACK.get().getNumberOfSlots(),
-						ModItems.BACKPACK.get().getNumberOfUpgradeSlots()),
-				2);
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, new CompoundTag(), Component.empty(), ModItems.BACKPACK.get().getNumberOfSlots(),
+				ModItems.BACKPACK.get().getNumberOfUpgradeSlots(), 2);
 
 		IBackpackWrapper resolved = BackpackLinkedStorageResolver.resolve(Mockito.mock(Level.class), secondary).orElseThrow();
 
 		assertEquals(ModItems.BACKPACK.get().getNumberOfSlots() - 2 * resolved.getNumberOfSlotRows(), resolved.getInventoryHandler().getSlots());
 		assertEquals(ModItems.BACKPACK.get().getNumberOfUpgradeSlots(), resolved.getUpgradeHandler().getSlots());
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
@@ -1019,7 +1026,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		return root;
 	}
 
-	private static class TestContentsBinding implements ILinkedStorageContentsBinding {
+	private static class TestContentsBinding implements ILinkedStorageContents {
 		private final UUID groupId;
 		private CompoundTag contents = new CompoundTag();
 		private int dirtyCount;
