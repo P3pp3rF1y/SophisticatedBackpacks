@@ -10,7 +10,8 @@ import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
@@ -30,18 +31,18 @@ public final class BackpackLinkedStorageResolver {
 		}
 		LinkedStorageEndpointData endpoint = stack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 		if (!(level instanceof ServerLevel serverLevel)) {
-			Optional<ILinkedStorageContentsBinding> contents = ClientLinkedStorageBackpackContents.getBinding(endpoint.groupId());
+			Optional<ILinkedStorageContents> contents = ClientLinkedStorageContents.getContents(endpoint.groupId());
 			if (contents.isEmpty()) {
 				return Optional.empty();
 			}
 			ItemStack virtualCarrier = stack.copy();
 			LinkedStorageStackLifecycle.clear(virtualCarrier);
 			virtualCarrier.remove(ModCoreDataComponents.STORAGE_UUID);
-			ClientLinkedStorageBackpackContents.getStorageSize(endpoint.groupId()).ifPresent(storageSize -> {
-				virtualCarrier.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, storageSize.inventorySlots());
-				virtualCarrier.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, storageSize.upgradeSlots());
-			});
-			ClientLinkedStorageBackpackContents.getColumnsTaken(endpoint.groupId())
+			ClientLinkedStorageContents.getInventorySlots(endpoint.groupId())
+					.ifPresent(inventorySlots -> virtualCarrier.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, inventorySlots));
+			ClientLinkedStorageContents.getUpgradeSlots(endpoint.groupId())
+					.ifPresent(upgradeSlots -> virtualCarrier.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, upgradeSlots));
+			ClientLinkedStorageContents.getColumnsTaken(endpoint.groupId())
 					.ifPresent(columnsTaken -> virtualCarrier.set(ModDataComponents.COLUMNS_TAKEN, columnsTaken));
 			return Optional
 					.of(new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), new BackpackLinkedStorageHostWrapper(contents.get(), virtualCarrier)));

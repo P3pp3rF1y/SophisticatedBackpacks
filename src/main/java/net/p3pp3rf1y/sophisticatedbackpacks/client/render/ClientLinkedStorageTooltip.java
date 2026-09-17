@@ -5,9 +5,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.LinkedStorageEndpointRoleRenderer;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
 
 import javax.annotation.Nullable;
@@ -51,7 +51,7 @@ public class ClientLinkedStorageTooltip implements ClientTooltipComponent {
 		if (groupId == null) {
 			return roleDescription;
 		}
-		return ClientLinkedStorageBackpackContents.getGroupName(groupId).filter(groupName -> !groupName.getString().isEmpty())
+		return ClientLinkedStorageContents.getGroupName(groupId).filter(groupName -> !groupName.getString().isEmpty())
 				.<Component>map(groupName -> TranslationHelper.INSTANCE.translTooltip(
 						role == LinkedStorageEndpointRole.PRIMARY ? "linked_storage.primary_named" : "linked_storage.secondary_named", roleDescription,
 						groupName))

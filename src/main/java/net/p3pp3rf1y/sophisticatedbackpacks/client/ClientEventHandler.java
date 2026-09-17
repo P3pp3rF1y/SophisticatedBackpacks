@@ -29,7 +29,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.*;
@@ -37,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestPlayerSettingsPayload;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 
 import java.util.Map;
 
@@ -75,7 +75,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent event) {
