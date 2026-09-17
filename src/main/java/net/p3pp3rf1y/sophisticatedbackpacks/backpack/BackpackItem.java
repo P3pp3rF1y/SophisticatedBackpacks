@@ -51,6 +51,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.crafting.EnderLinkerEndpointRecipe;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
@@ -112,12 +113,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	public static Optional<LinkedStorageEndpointRole> getLinkedStorageEndpointRole(ItemStack backpackStack) {
-		if (LinkedStorageStackLifecycle.classifyEndpoint(backpackStack) != LinkedStorageEndpointStackState.ENDPOINT) {
-			return Optional.empty();
-		}
-		return Optional.of(Boolean.TRUE.equals(backpackStack.get(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT))
-				? LinkedStorageEndpointRole.PRIMARY
-				: LinkedStorageEndpointRole.SECONDARY);
+		return LinkedStorageStackLifecycle.getEndpointRole(backpackStack);
 	}
 
 	public static boolean shouldRenderUpgradeActivity(ItemStack backpackStack) {
@@ -317,6 +313,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 					buffer -> context.toBuffer(buffer, player));
 		}
 		return InteractionResult.SUCCESS.heldItemTransformedTo(stack);
+	}
+
+	@Override
+	public void onCraftedBy(ItemStack stack, Player player) {
+		if (player.level() instanceof ServerLevel) {
+			EnderLinkerEndpointRecipe.issueCraftClaim(player, stack);
+		}
 	}
 
 	@Override
