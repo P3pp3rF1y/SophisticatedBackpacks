@@ -115,12 +115,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	public static Optional<LinkedStorageEndpointRole> getLinkedStorageEndpointRole(ItemStack backpackStack) {
-		if (LinkedStorageStackLifecycle.classifyEndpoint(backpackStack) != LinkedStorageEndpointStackState.ENDPOINT) {
-			return Optional.empty();
-		}
-		return Optional.of(Boolean.TRUE.equals(backpackStack.get(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT))
-				? LinkedStorageEndpointRole.PRIMARY
-				: LinkedStorageEndpointRole.SECONDARY);
+		return LinkedStorageStackLifecycle.getEndpointRole(backpackStack);
 	}
 
 	public static boolean shouldRenderUpgradeActivity(ItemStack backpackStack) {

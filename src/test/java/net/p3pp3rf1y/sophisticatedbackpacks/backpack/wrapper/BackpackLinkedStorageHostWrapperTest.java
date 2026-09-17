@@ -38,6 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -57,7 +58,8 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContentsBinding;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
@@ -121,7 +123,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void getInventoryHandlerStoresVirtualHostMutationsOnlyInBinding() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		ItemStack virtualCarrier = new ItemStack(ModItems.BACKPACK.get());
 
 		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS);
@@ -145,7 +147,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void onLinkedStorageContentsChangedRebindsAllContentHandlers() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
 		InventoryHandler inventory = host.getInventoryHandler();
 		BackpackSettingsHandler settings = host.getSettingsHandler();
@@ -161,12 +163,12 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void constructorRejectsNonBackpackVirtualCarrier() {
-		assertThrows(IllegalArgumentException.class, () -> new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(Items.STICK)));
+		assertThrows(IllegalArgumentException.class, () -> new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(Items.STICK)));
 	}
 
 	@Test
 	void linkedStorageBackpackWrapperDelegatesGroupStateAndRetainsPhysicalState() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		ItemStack physicalStack = new ItemStack(ModItems.BACKPACK.get());
 		physicalStack.set(DataComponents.CUSTOM_NAME, Component.literal("Secondary Backpack"));
 		BackpackWrapper physicalBackpack = new BackpackWrapper(physicalStack);
@@ -209,7 +211,7 @@ class BackpackLinkedStorageHostWrapperTest {
 			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
 			ItemStack primary = new ItemStack(ModItems.BACKPACK.get());
 			primary.set(DataComponents.CUSTOM_NAME, Component.literal("Original Primary"));
-			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), primary);
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), primary);
 			LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 			ItemStack renamedPrimary = new ItemStack(ModItems.GOLD_BACKPACK.get());
 			renamedPrimary.set(DataComponents.CUSTOM_NAME, Component.literal("Renamed Primary"));
@@ -222,7 +224,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void onCanonicalContentsChangedKeepsFacadeRefreshCallbacksLocal() {
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper first = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		LinkedStorageBackpackWrapper second = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		int[] firstCallbacks = {0};
@@ -243,7 +245,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void onCanonicalContentsChangedSkipsProjectionHandlerForOrdinaryContentsMove() {
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		int[] projectionCallbacks = {0};
 		facade.refreshPhysicalProjection();
@@ -259,7 +261,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void setColumnsTakenProjectsCanonicalColumnsToEveryLinkedFacade() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper primary = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		LinkedStorageBackpackWrapper secondary = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.GOLD_BACKPACK.get())), host);
@@ -288,7 +290,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		ItemStack physicalStack = new ItemStack(ModItems.BACKPACK.get());
 		physicalStack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(physicalStack),
-				new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), new ItemStack(ModItems.BACKPACK.get())));
+				new BackpackLinkedStorageHostWrapper(new TestContents(groupId), new ItemStack(ModItems.BACKPACK.get())));
 
 		ItemStack clone = facade.cloneBackpack();
 
@@ -315,7 +317,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void onCanonicalContentsChangedProjectsRenderDataToPhysicalFacade() {
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		host.getRenderDataHandler().setBatteryRenderData(new RenderData.BatteryRenderData(0.5F));
 		int[] notifications = {0};
@@ -329,7 +331,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void endpointRenderDataChangesArePromotedToCanonicalHost() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 
@@ -343,7 +345,7 @@ class BackpackLinkedStorageHostWrapperTest {
 	void onCanonicalContentsChangedProjectsItemDisplayRenderDataToPhysicalFacade() {
 		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
 			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
-			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 			LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 			int[] projectionCallbacks = {0};
 			host.getInventoryHandler().setStackInSlot(0, new ItemStack(Items.DIAMOND));
@@ -361,7 +363,7 @@ class BackpackLinkedStorageHostWrapperTest {
 	void fromPhysicalStackReadsProjectedEndpointDisplayDataWithoutResolvingContents() {
 		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
 			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
-			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 			LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 			host.getInventoryHandler().setStackInSlot(0, new ItemStack(Items.DIAMOND));
 			host.getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class).selectSlot(0);
@@ -373,7 +375,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void fromPhysicalStackReadsProjectedEndpointTankDataWithoutResolvingContents() {
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get()));
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
 		int[] projectionCallbacks = {0};
 		host.getRenderDataHandler().setTankRenderData(TankPosition.LEFT, new RenderData.TankRenderData(net.neoforged.neoforge.fluids.FluidStack.EMPTY, 0.5F));
@@ -387,7 +389,7 @@ class BackpackLinkedStorageHostWrapperTest {
 	@Test
 	void closeUnsubscribesGroupListenerOnce() {
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())),
-				new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get())));
+				new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get())));
 		int[] unsubscribes = {0};
 		facade.setGroupChangeSubscription(() -> unsubscribes[0]++);
 
@@ -404,7 +406,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		ItemStack endpointBackpack = new ItemStack(ModItems.BACKPACK.get());
 		endpointBackpack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, originalEndpoint);
 		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(endpointBackpack),
-				new BackpackLinkedStorageHostWrapper(new TestContentsBinding(), new ItemStack(ModItems.BACKPACK.get())));
+				new BackpackLinkedStorageHostWrapper(new TestContents(), new ItemStack(ModItems.BACKPACK.get())));
 
 		endpointBackpack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, replacementEndpoint);
 
@@ -417,7 +419,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		UUID groupId = UUID.randomUUID();
 		ItemStack endpoint = new ItemStack(ModItems.BACKPACK.get());
 		endpoint.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(groupId), new ItemStack(ModItems.BACKPACK.get()));
 		host.getRenderDataHandler().setBatteryRenderData(new RenderData.BatteryRenderData(0.25F));
 		ServerLevel level = Mockito.mock(ServerLevel.class);
 		LinkedStorageGroupsSavedData savedData = Mockito.mock(LinkedStorageGroupsSavedData.class);
@@ -443,7 +445,7 @@ class BackpackLinkedStorageHostWrapperTest {
 
 	@Test
 	void getRenderDataHandlerMarksCanonicalBindingRenderDirtyWhenStateChanges() {
-		TestContentsBinding contents = new TestContentsBinding();
+		TestContents contents = new TestContents();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
 
 		host.getRenderDataHandler().setBatteryRenderData(new RenderData.BatteryRenderData(0.5F));
@@ -453,52 +455,45 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
-	void installSnapshotReplacesRootsAndRejectsOlderRevisions() {
+	void updateContentsReplacesRoots() {
 		UUID groupId = UUID.randomUUID();
-		ContainerContents staleContents = new ContainerContents();
-		staleContents.inventory().stacks().add(new ItemStack(Items.DIRT));
 		ContainerContents currentContents = new ContainerContents();
 		currentContents.inventory().stacks().add(new ItemStack(Items.DIAMOND));
 
-		ClientLinkedStorageBackpackContents.clear();
-		assertTrue(ClientLinkedStorageBackpackContents.getBinding(groupId).isEmpty());
-		assertTrue(ClientLinkedStorageBackpackContents.installSnapshot(groupId, 2, currentContents, Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 0));
-		assertFalse(ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, staleContents, Component.literal("Stale Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(27, 3), 0));
+		ClientLinkedStorageContents.clear();
+		assertTrue(ClientLinkedStorageContents.getContents(groupId).isEmpty());
+		ClientLinkedStorageContents.updateContents(groupId, 2, currentContents, Component.literal("Main Backpack"), 36, 4, 0);
 
-		ContainerContents syncedContents = ClientLinkedStorageBackpackContents.getBinding(groupId).orElseThrow().contents();
+		ContainerContents syncedContents = ClientLinkedStorageContents.getContents(groupId).orElseThrow().contents();
 		assertTrue(syncedContents.inventory().stacks().getFirst().is(Items.DIAMOND));
-		assertEquals("Main Backpack", ClientLinkedStorageBackpackContents.getGroupName(groupId).orElseThrow().getString());
-		ClientLinkedStorageBackpackContents.clear();
+		assertEquals("Main Backpack", ClientLinkedStorageContents.getGroupName(groupId).orElseThrow().getString());
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
-	void getBindingRetainsLastSnapshotAfterCacheClear() {
+	void getContentsRetainsLastUpdateAfterCacheClear() {
 		UUID groupId = UUID.randomUUID();
 		ContainerContents contents = new ContainerContents();
 		contents.inventory().stacks().add(new ItemStack(Items.DIAMOND));
 
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, contents, Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 2);
-		ILinkedStorageContentsBinding binding = ClientLinkedStorageBackpackContents.getBinding(groupId).orElseThrow();
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, contents, Component.literal("Main Backpack"), 36, 4, 2);
+		ILinkedStorageContents linkedContents = ClientLinkedStorageContents.getContents(groupId).orElseThrow();
+		ClientLinkedStorageContents.clear();
 
-		assertTrue(binding.contents().inventory().stacks().getFirst().is(Items.DIAMOND));
-		assertEquals(2, binding.getColumnsTaken());
+		assertTrue(linkedContents.contents().inventory().stacks().getFirst().is(Items.DIAMOND));
+		assertEquals(2, linkedContents.getColumnsTaken());
 	}
 
 	@Test
 	void getGroupNameSharesClientGroupNameAcrossEndpointTooltips() {
 		UUID groupId = UUID.randomUUID();
 
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, new ContainerContents(), Component.literal("Main Backpack"),
-				new ClientLinkedStorageBackpackContents.StorageSize(36, 4), 0);
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, new ContainerContents(), Component.literal("Main Backpack"), 36, 4, 0);
 
-		assertEquals("Main Backpack", ClientLinkedStorageBackpackContents.getGroupName(groupId).orElseThrow().getString());
-		ClientLinkedStorageBackpackContents.clear();
+		assertEquals("Main Backpack", ClientLinkedStorageContents.getGroupName(groupId).orElseThrow().getString());
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
@@ -588,7 +583,7 @@ class BackpackLinkedStorageHostWrapperTest {
 				UUID contentsId = UUID.randomUUID();
 				ItemStack endpoint = new ItemStack(ModItems.BACKPACK.get());
 				endpoint.set(ModCoreDataComponents.STORAGE_UUID, contentsId);
-				Mockito.when(storage.getOrCreateBackpackContents(contentsId)).thenReturn(contents);
+				Mockito.when(storage.getBackpackContents(contentsId)).thenReturn(Optional.of(contents));
 
 				assertFalse(adapter.isCompatible(level, endpoint, descriptor));
 				assertEquals(ILinkedStorageEndpointAdapter.Compatibility.HAS_CONTENTS, adapter.getCompatibility(level, endpoint, descriptor));
@@ -598,14 +593,14 @@ class BackpackLinkedStorageHostWrapperTest {
 			assertTrue(adapter.isCompatible(level, emptyEndpoint, descriptor));
 			UUID emptyContentsId = UUID.randomUUID();
 			emptyEndpoint.set(ModCoreDataComponents.STORAGE_UUID, emptyContentsId);
-			Mockito.when(storage.getOrCreateBackpackContents(emptyContentsId)).thenReturn(emptyRoot);
+			Mockito.when(storage.getBackpackContents(emptyContentsId)).thenReturn(Optional.of(emptyRoot));
 
 			assertTrue(adapter.isCompatible(level, emptyEndpoint, descriptor));
 			for (ContainerContents contents : List.of(settingsRoot, partitionerRoot)) {
 				UUID contentsId = UUID.randomUUID();
 				ItemStack endpoint = new ItemStack(ModItems.BACKPACK.get());
 				endpoint.set(ModCoreDataComponents.STORAGE_UUID, contentsId);
-				Mockito.when(storage.getOrCreateBackpackContents(contentsId)).thenReturn(contents);
+				Mockito.when(storage.getBackpackContents(contentsId)).thenReturn(Optional.of(contents));
 
 				assertTrue(adapter.isCompatible(level, endpoint, descriptor));
 			}
@@ -629,11 +624,33 @@ class BackpackLinkedStorageHostWrapperTest {
 
 		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class, Mockito.CALLS_REAL_METHODS)) {
 			backpackStorage.when(BackpackStorage::get).thenReturn(storage);
-			Mockito.when(storage.getOrCreateBackpackContents(contentsId)).thenReturn(allocatedEmptyContents);
+			Mockito.when(storage.getBackpackContents(contentsId)).thenReturn(Optional.of(allocatedEmptyContents));
 
 			assertTrue(adapter.isCompatible(level, endpoint, descriptor));
 			assertEquals(ILinkedStorageEndpointAdapter.Compatibility.COMPATIBLE, adapter.getCompatibility(level, endpoint, descriptor));
 		}
+	}
+
+	@Test
+	void getCompatibilityTreatsUnknownStorageUuidAsEmptyWithoutCreatingOrDirtyingStorage() {
+		ServerLevel level = Mockito.mock(ServerLevel.class);
+		LevelEvent.Load loadEvent = Mockito.mock(LevelEvent.Load.class);
+		Level clientLevel = Mockito.mock(Level.class);
+		Mockito.when(loadEvent.getLevel()).thenReturn(clientLevel);
+		Mockito.when(clientLevel.isClientSide()).thenReturn(true);
+		BackpackStorage.onClientWorldLoad(loadEvent);
+		BackpackStorage storage = BackpackStorage.get();
+		storage.setDirty(false);
+		BackpackLinkedStorageEndpointAdapter adapter = new BackpackLinkedStorageEndpointAdapter();
+		ItemStack endpoint = new ItemStack(ModItems.BACKPACK.get());
+		UUID unknownStorageId = UUID.randomUUID();
+		endpoint.set(ModCoreDataComponents.STORAGE_UUID, unknownStorageId);
+
+		assertEquals(ILinkedStorageEndpointAdapter.Compatibility.COMPATIBLE,
+				adapter.getCompatibility(level, endpoint, new LinkedStorageHostDescriptor(adapter.factoryId(), new CompoundTag())));
+
+		assertTrue(storage.getBackpackContents(unknownStorageId).isEmpty());
+		assertFalse(storage.isDirty());
 	}
 
 	@Test
@@ -662,7 +679,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		assertEquals(primary.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS), secondary.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS));
 		ItemStack clientVirtualCarrier = secondary.copy();
 		clientVirtualCarrier.remove(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
-		BackpackLinkedStorageHostWrapper clientHost = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), clientVirtualCarrier);
+		BackpackLinkedStorageHostWrapper clientHost = new BackpackLinkedStorageHostWrapper(new TestContents(groupId), clientVirtualCarrier);
 		assertEquals(primary.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS), clientHost.getInventoryHandler().size());
 	}
 
@@ -675,7 +692,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		ServerLevel level = Mockito.mock(ServerLevel.class);
 		LinkedStorageGroupsSavedData savedData = Mockito.mock(LinkedStorageGroupsSavedData.class);
 		LinkedStorageGroupManager manager = Mockito.mock(LinkedStorageGroupManager.class);
-		TestContentsBinding canonicalContents = new TestContentsBinding(groupId);
+		TestContents canonicalContents = new TestContents(groupId);
 		LinkedStorageHostDescriptor descriptor = new LinkedStorageHostDescriptor(adapter.factoryId(), serialize(new ItemStack(ModItems.BACKPACK.get())));
 
 		Mockito.when(level.registryAccess()).thenReturn(REGISTRY_ACCESS);
@@ -771,7 +788,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		UUID groupId = UUID.randomUUID();
 		ItemStack physicalStack = new ItemStack(ModItems.BACKPACK.get());
 		physicalStack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(groupId), new ItemStack(ModItems.BACKPACK.get()));
 		ServerLevel level = Mockito.mock(ServerLevel.class);
 		LinkedStorageGroupsSavedData savedData = Mockito.mock(LinkedStorageGroupsSavedData.class);
 		LinkedStorageGroupManager manager = Mockito.mock(LinkedStorageGroupManager.class);
@@ -802,7 +819,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		UUID endpointId = UUID.randomUUID();
 		ItemStack secondaryStack = new ItemStack(ModItems.BACKPACK.get());
 		secondaryStack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, endpointId));
-		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContentsBinding(groupId), new ItemStack(ModItems.BACKPACK.get()));
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(groupId), new ItemStack(ModItems.BACKPACK.get()));
 		ServerLevel level = Mockito.mock(ServerLevel.class);
 		LinkedStorageGroupsSavedData savedData = Mockito.mock(LinkedStorageGroupsSavedData.class);
 		LinkedStorageGroupManager manager = Mockito.mock(LinkedStorageGroupManager.class);
@@ -825,17 +842,15 @@ class BackpackLinkedStorageHostWrapperTest {
 		UUID groupId = UUID.randomUUID();
 		ItemStack secondary = new ItemStack(ModItems.GOLD_BACKPACK.get());
 		secondary.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
-		ClientLinkedStorageBackpackContents.clear();
-		ClientLinkedStorageBackpackContents.installSnapshot(groupId, 1, new ContainerContents(), Component.empty(),
-				new ClientLinkedStorageBackpackContents.StorageSize(ModItems.BACKPACK.get().getNumberOfSlots(),
-						ModItems.BACKPACK.get().getNumberOfUpgradeSlots()),
-				2);
+		ClientLinkedStorageContents.clear();
+		ClientLinkedStorageContents.updateContents(groupId, 1, new ContainerContents(), Component.empty(), ModItems.BACKPACK.get().getNumberOfSlots(),
+				ModItems.BACKPACK.get().getNumberOfUpgradeSlots(), 2);
 
 		IBackpackWrapper resolved = BackpackLinkedStorageResolver.resolve(Mockito.mock(Level.class), secondary).orElseThrow();
 
 		assertEquals(ModItems.BACKPACK.get().getNumberOfSlots() - 2 * resolved.getNumberOfSlotRows(), resolved.getInventoryHandler().size());
 		assertEquals(ModItems.BACKPACK.get().getNumberOfUpgradeSlots(), resolved.getUpgradeHandler().size());
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	@Test
@@ -1082,18 +1097,18 @@ class BackpackLinkedStorageHostWrapperTest {
 		}
 	}
 
-	private static class TestContentsBinding implements ILinkedStorageContentsBinding {
+	private static class TestContents implements ILinkedStorageContents {
 		private final UUID groupId;
 		private ContainerContents contents = new ContainerContents();
 		private int dirtyCount;
 		private int renderDirtyCount;
 		private int columnsTaken;
 
-		private TestContentsBinding() {
+		private TestContents() {
 			this(UUID.randomUUID());
 		}
 
-		private TestContentsBinding(UUID groupId) {
+		private TestContents(UUID groupId) {
 			this.groupId = groupId;
 		}
 

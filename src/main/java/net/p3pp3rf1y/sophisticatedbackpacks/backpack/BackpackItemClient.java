@@ -4,11 +4,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestLinkedStorageBackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.RequestLinkedStorageContentsPayload;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -20,9 +20,9 @@ public class BackpackItemClient {
 		Optional<LinkedStorageEndpointRole> linkedStorageRole = BackpackItem.getLinkedStorageEndpointRole(stack);
 		if (linkedStorageRole.isPresent()) {
 			LinkedStorageEndpointData endpoint = stack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
-			if (ClientLinkedStorageBackpackContents.getGroupName(endpoint.groupId()).isEmpty()
-					&& ClientLinkedStorageBackpackContents.requestGroupName(endpoint.groupId())) {
-				ClientPacketDistributor.sendToServer(new RequestLinkedStorageBackpackContentsPayload(endpoint.groupId(), -1L));
+			if (mc.player != null && ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), mc.player.level().getGameTime())) {
+				ClientPacketDistributor.sendToServer(
+						new RequestLinkedStorageContentsPayload(endpoint.groupId(), ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L)));
 			}
 			if (!mc.hasShiftDown() && (mc.player == null || mc.player.containerMenu.getCarried().isEmpty())) {
 				return new BackpackItem.LinkedStorageTooltip(linkedStorageRole.get(), endpoint.groupId());

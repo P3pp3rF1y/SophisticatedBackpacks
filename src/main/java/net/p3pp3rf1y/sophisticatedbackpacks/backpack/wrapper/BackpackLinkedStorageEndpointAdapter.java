@@ -43,8 +43,8 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack endpoint, LinkedStorageHostDescriptor hostDescriptor) {
 		UUID storageId = endpoint.get(ModCoreDataComponents.STORAGE_UUID);
-		return storageId != null && BackpackStorage.get().getOrCreateBackpackContents(storageId) != null
-				&& hasIncompatibleBackpackData(BackpackStorage.get().getOrCreateBackpackContents(storageId))
+		return storageId != null
+				&& BackpackStorage.get().getBackpackContents(storageId).map(BackpackLinkedStorageEndpointAdapter::hasIncompatibleBackpackData).orElse(false)
 						? Compatibility.HAS_CONTENTS
 						: Compatibility.COMPATIBLE;
 	}

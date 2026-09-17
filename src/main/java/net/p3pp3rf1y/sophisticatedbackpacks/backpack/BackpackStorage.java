@@ -170,6 +170,10 @@ public class BackpackStorage extends SavedData {
 		});
 	}
 
+	public Optional<ContainerContents> getBackpackContents(UUID backpackUuid) {
+		return Optional.ofNullable(backpackContents.get(backpackUuid));
+	}
+
 	public CompoundTag getOrCreateAdditionalBackpackContents(UUID backpackUuid) {
 		return additionalBackpackContents.computeIfAbsent(backpackUuid, uuid -> {
 			setDirty();

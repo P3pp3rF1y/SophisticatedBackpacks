@@ -35,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
+import net.p3pp3rf1y.sophisticatedcore.controller.ControllerStorageKey;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
@@ -171,7 +172,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			backpackWrapper.onInit(level);
 			LinkedStorageJukeboxPlaybackAnchors.refreshBlockAnchor((ServerLevel) level, worldPosition, backpackWrapper.getBackpack());
 			if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-				linkedStorageBackpackWrapper.synchronizePhysicalProjection((ServerLevel) level);
+				linkedStorageBackpackWrapper.refreshPhysicalProjection();
 				refreshLinkedRenderState();
 			}
 		}
@@ -188,11 +189,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			setBackpack(loadedBackpack);
 		}
 		loadControllerPos(in);
-
-		if (level != null && !level.isClientSide()) {
-			removeControllerPos();
-			tryToAddToController();
-		}
 
 		WorldHelper.notifyBlockUpdate(this);
 	}
@@ -278,6 +274,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private void onLinkedStorageEndpointLinked() {
 		closeMenusForThisBlock();
 		setBackpack(backpackWrapper.getBackpack());
+		reregisterWithController();
 		refreshRenderState();
 	}
 
@@ -462,6 +459,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public BlockPos getStorageBlockPos() {
 		return getBlockPos();
+	}
+
+	@Override
+	public ControllerStorageKey getControllerStorageKey() {
+		LinkedStorageEndpointData endpoint = getLinkedStorageEndpointData();
+		return endpoint == null
+				? IControllableStorage.super.getControllerStorageKey()
+				: new ControllerStorageKey(getControlledStorageBlockPos(), endpoint.groupId());
 	}
 
 	@Override
