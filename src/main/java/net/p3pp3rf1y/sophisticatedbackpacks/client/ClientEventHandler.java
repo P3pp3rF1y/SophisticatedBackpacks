@@ -36,7 +36,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackShapes;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.ClientLinkedStorageBackpackContents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.BackpackTintSources;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
@@ -47,6 +46,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestPlayerSettingsPayload
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeClientTickHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeClientRegistry;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeClientData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeClientDataType;
@@ -148,7 +148,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
-		ClientLinkedStorageBackpackContents.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent.AfterEntities event) {
