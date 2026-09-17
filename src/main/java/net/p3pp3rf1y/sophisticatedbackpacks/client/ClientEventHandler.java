@@ -46,6 +46,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestPlayerSettingsPayload
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeClientTickHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeClientRegistry;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeClientData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderDataHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeClientDataType;
@@ -147,6 +148,7 @@ public class ClientEventHandler {
 
 	private static void onPlayerLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
 		MobCatcherCaptureEffectRenderer.clear();
+		ClientLinkedStorageContents.clear();
 	}
 
 	private static void renderLevelStage(RenderLevelStageEvent.AfterEntities event) {

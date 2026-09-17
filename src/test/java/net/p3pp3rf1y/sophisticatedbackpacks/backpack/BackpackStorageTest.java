@@ -2,12 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -29,7 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BackpackStorageTest {
 	private static final RegistryAccess REGISTRY_ACCESS = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
@@ -98,6 +93,15 @@ class BackpackStorageTest {
 		BackpackStorage storage = BackpackStorage.deserialize(legacyStorage, registryOps()).orElseThrow();
 
 		assertEquals(Items.DIAMOND_SWORD, storage.getOrCreateBackpackContents(backpackUuid).inventory().stacks().get(0).getItem());
+	}
+
+	@Test
+	void nonCreatingLookupLeavesUnknownStorageAbsentAndClean() {
+		BackpackStorage storage = BackpackStorage.legacyDeserialize(new CompoundTag());
+		UUID unknownStorageId = UUID.randomUUID();
+
+		assertTrue(storage.getBackpackContents(unknownStorageId).isEmpty());
+		assertFalse(storage.isDirty());
 	}
 
 	private static ListTag enchantedLegacyBackpackContents(UUID backpackUuid) {

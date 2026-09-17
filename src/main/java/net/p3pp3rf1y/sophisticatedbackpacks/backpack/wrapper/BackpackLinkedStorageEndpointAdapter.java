@@ -14,13 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageItemEndpointAdapter;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.*;
 
 import java.util.UUID;
 
@@ -43,8 +37,8 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack endpoint, LinkedStorageHostDescriptor hostDescriptor) {
 		UUID storageId = endpoint.get(ModCoreDataComponents.STORAGE_UUID);
-		return storageId != null && BackpackStorage.get().getOrCreateBackpackContents(storageId) != null
-				&& hasIncompatibleBackpackData(BackpackStorage.get().getOrCreateBackpackContents(storageId))
+		return storageId != null
+				&& BackpackStorage.get().getBackpackContents(storageId).map(BackpackLinkedStorageEndpointAdapter::hasIncompatibleBackpackData).orElse(false)
 						? Compatibility.HAS_CONTENTS
 						: Compatibility.COMPATIBLE;
 	}
