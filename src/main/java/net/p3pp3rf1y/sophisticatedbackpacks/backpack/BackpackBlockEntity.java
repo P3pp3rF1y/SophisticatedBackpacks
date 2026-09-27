@@ -210,7 +210,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void writeBackpack(ValueOutput out) {
-		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
+		ItemStack backpackCopy = (pendingLoadedBackpack == null ? backpackWrapper.getBackpack() : pendingLoadedBackpack).copy();
 		out.store(BACKPACK_DATA, ItemStack.CODEC, backpackCopy);
 	}
 
