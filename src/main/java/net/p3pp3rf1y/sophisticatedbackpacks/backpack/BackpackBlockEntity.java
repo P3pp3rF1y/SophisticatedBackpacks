@@ -135,16 +135,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
 	}
 
-	@Override
-	public void setLevel(Level level) {
-		super.setLevel(level);
-		if (pendingLoadedBackpack != null) {
-			ItemStack loadedBackpack = pendingLoadedBackpack;
-			pendingLoadedBackpack = null;
-			setBackpack(loadedBackpack);
-		}
-	}
-
 	public void setBackpack(ItemStack backpack) {
 		if (level instanceof ServerLevel serverLevel) {
 			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
@@ -181,13 +171,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void loadAdditional(ValueInput in) {
 		super.loadAdditional(in);
-		ItemStack loadedBackpack = in.read(BACKPACK_DATA, ItemStack.CODEC).orElse(ItemStack.EMPTY);
-		// This target may deserialize after onLoad, so resolve immediately once a level is attached.
-		if (level == null) {
-			pendingLoadedBackpack = loadedBackpack;
-		} else {
-			setBackpack(loadedBackpack);
-		}
+		pendingLoadedBackpack = in.read(BACKPACK_DATA, ItemStack.CODEC).orElse(ItemStack.EMPTY);
 		loadControllerPos(in);
 
 		WorldHelper.notifyBlockUpdate(this);
@@ -222,7 +206,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void writeBackpack(ValueOutput out) {
-		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
+		ItemStack backpackCopy = (pendingLoadedBackpack == null ? backpackWrapper.getBackpack() : pendingLoadedBackpack).copy();
 		out.store(BACKPACK_DATA, ItemStack.CODEC, backpackCopy);
 	}
 
