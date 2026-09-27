@@ -64,6 +64,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
+	@Nullable
+	private ItemStack pendingLoadedBackpack;
 	private boolean updateBlockRender = true;
 
 	private boolean chunkBeingUnloaded = false;
@@ -209,7 +211,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
-		setBackpackFromNbt(tag);
+		pendingLoadedBackpack = getBackpackFromNbt(tag);
 		loadControllerPos(tag);
 
 		if (level != null && !level.isClientSide()) {
@@ -223,11 +225,22 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void onLoad() {
 		super.onLoad();
+		if (pendingLoadedBackpack != null) {
+			ItemStack loadedBackpack = pendingLoadedBackpack;
+			pendingLoadedBackpack = null;
+			setBackpack(loadedBackpack);
+		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
+			setBackpack(backpackWrapper.getBackpack());
+		}
 		registerWithControllerOnLoad();
 	}
 
 	private void setBackpackFromNbt(CompoundTag nbt) {
-		setBackpack(ItemStack.of(nbt.getCompound(BACKPACK_DATA_TAG)));
+		setBackpack(getBackpackFromNbt(nbt));
+	}
+
+	private ItemStack getBackpackFromNbt(CompoundTag nbt) {
+		return ItemStack.of(nbt.getCompound(BACKPACK_DATA_TAG));
 	}
 
 	@Override
@@ -238,7 +251,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void writeBackpack(CompoundTag ret) {
-		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
+		ItemStack backpackCopy = (pendingLoadedBackpack == null ? backpackWrapper.getBackpack() : pendingLoadedBackpack).copy();
 		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
 		ret.put(BACKPACK_DATA_TAG, backpackCopy.save(new CompoundTag()));
 	}
