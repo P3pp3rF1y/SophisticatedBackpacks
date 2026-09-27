@@ -272,7 +272,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void writeBackpack(CompoundTag ret, HolderLookup.Provider registries) {
-		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
+		ItemStack backpackCopy = (pendingLoadedBackpack == null ? backpackWrapper.getBackpack() : pendingLoadedBackpack).copy();
 		ret.put(BACKPACK_DATA_TAG, backpackCopy.save(registries));
 	}
 
