@@ -211,7 +211,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
-		pendingLoadedBackpack = getBackpackFromNbt(tag);
+		ItemStack loadedBackpack = getBackpackFromNbt(tag);
+		if (level != null && level.isClientSide()) {
+			// Chunk update tags can be loaded after onLoad on the client.
+			pendingLoadedBackpack = null;
+			setBackpack(loadedBackpack);
+		} else {
+			pendingLoadedBackpack = loadedBackpack;
+		}
 		loadControllerPos(tag);
 
 		if (level != null && !level.isClientSide()) {
@@ -231,6 +238,9 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			setBackpack(loadedBackpack);
 		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
 			setBackpack(backpackWrapper.getBackpack());
+		}
+		if (level != null && level.isClientSide()) {
+			WorldHelper.notifyBlockUpdate(this);
 		}
 		registerWithControllerOnLoad();
 	}
