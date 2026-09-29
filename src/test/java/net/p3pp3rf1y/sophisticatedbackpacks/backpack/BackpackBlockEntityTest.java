@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BackpackBlockEntityTest {
@@ -27,7 +28,7 @@ class BackpackBlockEntityTest {
 	}
 
 	@Test
-	void saveAdditionalPreservesPendingLoadedBackpack() {
+	void loadAdditionalPreservesPendingBackpackAndTints() {
 		ItemStack backpack = new ItemStack(ModItems.NETHERITE_BACKPACK.get());
 		backpack.set(ModCoreDataComponents.MAIN_COLOR, 0xFF112233);
 		backpack.set(ModCoreDataComponents.ACCENT_COLOR, 0xFF445566);
@@ -37,6 +38,8 @@ class BackpackBlockEntityTest {
 		BackpackBlockEntity blockEntity = new BackpackBlockEntity(BlockPos.ZERO, ModBlocks.BACKPACK.get().defaultBlockState());
 
 		blockEntity.loadAdditional(loadedTag, REGISTRY_ACCESS);
+		assertEquals(0xFF112233, blockEntity.getMainColor());
+		assertEquals(0xFF445566, blockEntity.getAccentColor());
 		CompoundTag savedTag = blockEntity.saveCustomOnly(REGISTRY_ACCESS);
 		ItemStack savedBackpack = ItemStack.parseOptional(REGISTRY_ACCESS, savedTag.getCompound(BackpackBlockEntity.BACKPACK_DATA_TAG));
 
