@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BackpackBlockEntityTest {
@@ -28,7 +29,7 @@ class BackpackBlockEntityTest {
 	}
 
 	@Test
-	void saveWithoutMetadataPreservesPendingLoadedBackpack() throws ReflectiveOperationException {
+	void loadPreservesPendingBackpackAndTints() throws ReflectiveOperationException {
 		ItemStack backpack = new ItemStack(testBackpack);
 		BackpackItem.setColors(backpack, 0xFF112233, 0xFF445566);
 		backpack.getOrCreateTag().putUUID(BackpackWrapper.CONTENTS_UUID_TAG, UUID.randomUUID());
@@ -37,6 +38,8 @@ class BackpackBlockEntityTest {
 		BackpackBlockEntity blockEntity = uninitializedBackpackBlockEntity();
 
 		blockEntity.load(loadedTag);
+		assertEquals(0xFF112233, blockEntity.getMainColor());
+		assertEquals(0xFF445566, blockEntity.getAccentColor());
 		CompoundTag savedTag = blockEntity.saveWithoutMetadata();
 		ItemStack savedBackpack = ItemStack.of(savedTag.getCompound(BackpackBlockEntity.BACKPACK_DATA_TAG));
 

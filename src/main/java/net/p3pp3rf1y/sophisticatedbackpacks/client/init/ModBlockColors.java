@@ -22,8 +22,7 @@ public class ModBlockColors {
 				return -1;
 			}
 			return WorldHelper.getBlockEntity(blockDisplayReader, pos, BackpackBlockEntity.class)
-					.map(te -> tintIndex == 0 ? te.getBackpackWrapper().getMainColor() : te.getBackpackWrapper().getAccentColor())
-					.orElse(getDefaultColor(tintIndex));
+					.map(te -> tintIndex == 0 ? te.getMainColor() : te.getAccentColor()).orElse(getDefaultColor(tintIndex));
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 

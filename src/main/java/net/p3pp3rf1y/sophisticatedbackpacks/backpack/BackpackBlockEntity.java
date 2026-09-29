@@ -149,6 +149,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper
 				&& linkedStorageBackpackWrapper.hasEndpoint(LinkedStorageStackData.getEndpoint(backpack))) {
 			linkedStorageBackpackWrapper.replacePhysicalBackpackStack(backpack);
+			pendingLoadedBackpack = null;
 			if (level instanceof ServerLevel serverLevel) {
 				backpackWrapper.onInit(level);
 				LinkedStorageJukeboxPlaybackAnchors.refreshBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
@@ -158,6 +159,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		}
 		closeLinkedStorageSubscription();
 		backpackWrapper = level == null || level.isClientSide ? new BackpackWrapper(backpack) : BackpackLinkedStorageResolver.resolveOrCreate(level, backpack);
+		pendingLoadedBackpack = null;
 		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
 			WorldHelper.notifyBlockUpdate(this);
@@ -233,9 +235,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void onLoad() {
 		super.onLoad();
 		if (pendingLoadedBackpack != null) {
-			ItemStack loadedBackpack = pendingLoadedBackpack;
-			pendingLoadedBackpack = null;
-			setBackpack(loadedBackpack);
+			setBackpack(pendingLoadedBackpack);
 		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
 			setBackpack(backpackWrapper.getBackpack());
 		}
@@ -297,6 +297,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
+	}
+
+	public int getMainColor() {
+		return pendingLoadedBackpack == null ? backpackWrapper.getMainColor() : BackpackItem.getMainColor(pendingLoadedBackpack);
+	}
+
+	public int getAccentColor() {
+		return pendingLoadedBackpack == null ? backpackWrapper.getAccentColor() : BackpackItem.getAccentColor(pendingLoadedBackpack);
 	}
 
 	@Nullable
