@@ -41,7 +41,7 @@ public class ModBlockColors {
 	private static class MainColorTintSource extends BackpackTintSource {
 		@Override
 		protected int getColor(BackpackBlockEntity backpackBlockEntity) {
-			return backpackBlockEntity.getBackpackWrapper().getMainColor();
+			return backpackBlockEntity.getMainColor();
 		}
 
 		@Override
@@ -53,7 +53,7 @@ public class ModBlockColors {
 	private static class AccentColorTintSource extends BackpackTintSource {
 		@Override
 		protected int getColor(BackpackBlockEntity backpackBlockEntity) {
-			return backpackBlockEntity.getBackpackWrapper().getAccentColor();
+			return backpackBlockEntity.getAccentColor();
 		}
 
 		@Override
