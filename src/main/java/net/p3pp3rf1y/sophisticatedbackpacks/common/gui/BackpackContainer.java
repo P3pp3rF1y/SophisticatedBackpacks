@@ -204,7 +204,9 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			if (player.level().isClientSide() && ClientLinkedStorageContents.removeUpdatedGroup(linkedStorageGroupId.get())) {
 				ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(linkedStorageGroupId.get())
 						.orElseThrow(() -> new IllegalStateException("Updated linked Backpack group has no snapshot: " + linkedStorageGroupId.get()));
+				storageWrapper.onContentsUpdated();
 				storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
+				refreshAllSlots();
 				return true;
 			}
 			return false;
