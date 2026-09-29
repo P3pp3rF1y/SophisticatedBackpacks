@@ -162,7 +162,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(buffer, playerInventory.player.level()));
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(buffer, playerInventory.player));
 	}
 
 	public BackpackContext getBackpackContext() {

@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
@@ -78,7 +79,7 @@ public abstract class BackpackContext {
 		LinkedStorageEndpointData endpoint = backpackWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 		Optional<LinkedStorageSnapshot> snapshot = endpoint == null ? Optional.empty() : getLinkedStorageSnapshot(player, endpoint);
 		buffer.writeBoolean(snapshot.isPresent());
-		snapshot.ifPresent(value -> writeLinkedStorageSnapshot(buffer, value));
+		snapshot.ifPresent(value -> writeLinkedStorageSnapshot(buffer, player, value));
 	}
 
 	private static Optional<LinkedStorageSnapshot> getLinkedStorageSnapshot(Player player, LinkedStorageEndpointData endpoint) {
@@ -104,10 +105,11 @@ public abstract class BackpackContext {
 		return host.getInventoryHandler().size() + host.getColumnsTaken() * host.getNumberOfSlotRows();
 	}
 
-	private static void writeLinkedStorageSnapshot(FriendlyByteBuf buffer, LinkedStorageSnapshot snapshot) {
+	private static void writeLinkedStorageSnapshot(FriendlyByteBuf buffer, Player player, LinkedStorageSnapshot snapshot) {
 		buffer.writeUUID(snapshot.groupId());
 		buffer.writeVarLong(snapshot.revision());
-		FriendlyByteBuf.writeNbt(buffer, (CompoundTag) ContainerContents.CODEC.encodeStart(NbtOps.INSTANCE, snapshot.contents()).getOrThrow());
+		FriendlyByteBuf.writeNbt(buffer, (CompoundTag) ContainerContents.CODEC
+				.encodeStart(player.registryAccess().createSerializationContext(NbtOps.INSTANCE), snapshot.contents()).getOrThrow());
 		ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.encode(buffer, snapshot.groupName());
 		buffer.writeVarInt(snapshot.inventorySlots());
 		buffer.writeVarInt(snapshot.upgradeSlots());
@@ -155,25 +157,26 @@ public abstract class BackpackContext {
 		return Optional.of(player);
 	}
 
-	public static BackpackContext fromBuffer(FriendlyByteBuf buffer, Level level) {
+	public static BackpackContext fromBuffer(FriendlyByteBuf buffer, Player player) {
 		ContextType type = ContextType.fromBuffer(buffer);
 		BackpackContext context = switch (type) {
 			case BLOCK_BACKPACK -> Block.fromBuffer(buffer);
 			case BLOCK_SUB_BACKPACK -> BlockSubBackpack.fromBuffer(buffer);
 			case ITEM_SUB_BACKPACK -> ItemSubBackpack.fromBuffer(buffer);
 			case ITEM_BACKPACK -> Item.fromBuffer(buffer);
-			case ANOTHER_PLAYER_BACKPACK -> AnotherPlayer.fromBuffer(buffer, level);
-			case ANOTHER_PLAYER_SUB_BACKPACK -> AnotherPlayerSubBackpack.fromBuffer(buffer, level);
+			case ANOTHER_PLAYER_BACKPACK -> AnotherPlayer.fromBuffer(buffer, player.level());
+			case ANOTHER_PLAYER_SUB_BACKPACK -> AnotherPlayerSubBackpack.fromBuffer(buffer, player.level());
 		};
-		readLinkedStorageSnapshot(buffer);
+		readLinkedStorageSnapshot(buffer, player.registryAccess());
 		return context;
 	}
 
-	public static void readLinkedStorageSnapshot(FriendlyByteBuf buffer) {
+	public static void readLinkedStorageSnapshot(FriendlyByteBuf buffer, RegistryAccess registryAccess) {
 		if (buffer.readBoolean()) {
 			UUID groupId = buffer.readUUID();
 			long revision = buffer.readVarLong();
-			ContainerContents contents = ContainerContents.CODEC.parse(NbtOps.INSTANCE, Objects.requireNonNull(buffer.readNbt())).getOrThrow();
+			ContainerContents contents = ContainerContents.CODEC
+					.parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), Objects.requireNonNull(buffer.readNbt())).getOrThrow();
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
 		}

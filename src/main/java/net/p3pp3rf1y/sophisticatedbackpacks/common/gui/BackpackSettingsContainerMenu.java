@@ -42,7 +42,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	}
 
 	public static BackpackSettingsContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new BackpackSettingsContainerMenu(windowId, playerInventory.player, BackpackContext.fromBuffer(buffer, playerInventory.player.level()));
+		return new BackpackSettingsContainerMenu(windowId, playerInventory.player, BackpackContext.fromBuffer(buffer, playerInventory.player));
 	}
 
 	@Override
