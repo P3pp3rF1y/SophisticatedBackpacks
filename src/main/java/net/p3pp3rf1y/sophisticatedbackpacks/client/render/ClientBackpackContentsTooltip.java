@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStora
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsPayload;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
@@ -34,7 +35,7 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 	public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
 		BackpackItem.getLinkedStorageEndpointRole(backpack).ifPresent(role -> ClientLinkedStorageTooltip.renderRole(font, x, y, guiGraphics, role,
 				backpack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT).groupId()));
-		extractTooltip(getBackpackWrapper(), font, x, y + getRoleHeaderHeight(), guiGraphics);
+		extractTooltip(font, x, y + getRoleHeaderHeight(), guiGraphics);
 	}
 
 	@Override
@@ -66,6 +67,11 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 					: BackpackLinkedStorageResolver.resolve(minecraft.level, backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 		return BackpackWrapper.fromStack(backpack);
+	}
+
+	@Override
+	protected IStorageWrapper getTooltipStorageWrapper() {
+		return getBackpackWrapper();
 	}
 
 	private int getRoleHeaderHeight() {
