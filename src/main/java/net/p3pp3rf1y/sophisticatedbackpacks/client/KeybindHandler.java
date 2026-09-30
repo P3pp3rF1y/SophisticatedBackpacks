@@ -30,6 +30,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackTranslationHelper
 import net.p3pp3rf1y.sophisticatedbackpacks.network.*;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
+import org.lwjgl.sdl.SDLScancode;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,33 +41,33 @@ public class KeybindHandler {
 	private KeybindHandler() {
 	}
 
-	private static final int KEY_B = 66;
-	private static final int KEY_C = 67;
-	private static final int KEY_Z = 90;
-	private static final int KEY_X = 88;
-	private static final int KEY_UNKNOWN = -1;
+	private static final int KEY_B = SDLScancode.SDL_SCANCODE_B;
+	private static final int KEY_C = SDLScancode.SDL_SCANCODE_C;
+	private static final int KEY_Z = SDLScancode.SDL_SCANCODE_Z;
+	private static final int KEY_X = SDLScancode.SDL_SCANCODE_X;
+	private static final int KEY_UNKNOWN = InputConstants.UNKNOWN.getValue();
 	private static final int CHEST_SLOT_INDEX = 38;
 	private static final int OFFHAND_SLOT_INDEX = 40;
 	private static final KeyMapping.Category SOPHISTICATEDBACKPACKS_CATEGORY = new KeyMapping.Category(SophisticatedBackpacks.getIdentifier("main"));
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYBOARD.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_4 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_4"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYBOARD.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_3 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_3"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYBOARD.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_2 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_2"),
-			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_X), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYBOARD.getOrCreate(KEY_X), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_1 = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_1"),
-			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_Z), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYBOARD.getOrCreate(KEY_Z), SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(0, BACKPACK_TOGGLE_UPGRADE_1, 1, BACKPACK_TOGGLE_UPGRADE_2, 2,
 			BACKPACK_TOGGLE_UPGRADE_3, 3, BACKPACK_TOGGLE_UPGRADE_4, 4, BACKPACK_TOGGLE_UPGRADE_5);
 	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("tool_swap"), KeyConflictContext.IN_GAME,
-			InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
+			InputConstants.Type.KEYBOARD.getOrCreate(KEY_UNKNOWN), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
-			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_C), SOPHISTICATEDBACKPACKS_CATEGORY);
+			KeyConflictContext.IN_GAME, InputConstants.Type.KEYBOARD.getOrCreate(KEY_C), SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_OPEN_KEYBIND = new KeyMapping(BackpackTranslationHelper.INSTANCE.translKeybind("open_backpack"),
-			BackpackKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(KEY_B), SOPHISTICATEDBACKPACKS_CATEGORY);
+			BackpackKeyConflictContext.INSTANCE, InputConstants.Type.KEYBOARD.getOrCreate(KEY_B), SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static void register() {
 		IEventBus eventBus = NeoForge.EVENT_BUS;
@@ -159,7 +160,7 @@ public class KeybindHandler {
 
 		Screen screen = Minecraft.getInstance().gui.screen();
 		if (screen instanceof AbstractContainerScreen<?> containerScreen) {
-			Slot slot = containerScreen.getSlotUnderMouse();
+			Slot slot = containerScreen.getHoveredSlot();
 
 			if (slot != null && slot.container instanceof Inventory) {
 				Optional<String> handlerName = getPlayerInventoryHandlerName(slot.getSlotIndex());

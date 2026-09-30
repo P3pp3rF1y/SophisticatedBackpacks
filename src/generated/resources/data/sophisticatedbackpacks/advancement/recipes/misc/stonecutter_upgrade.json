@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:stonecutter_upgrade"
+        "recipes": "sophisticatedbackpacks:stonecutter_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

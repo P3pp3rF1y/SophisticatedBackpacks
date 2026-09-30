@@ -54,9 +54,9 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		}
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
-		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+		poseStack.rotate(Axis.YP.rotationDegrees(180));
 		DisplayItemAnchor.fromQuad(renderState.displayItemQuad).applyTransform(poseStack, renderState.displayItemZOffset);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(renderState.displayItemRotation));
+		poseStack.rotate(Axis.ZP.rotationDegrees(renderState.displayItemRotation));
 		renderState.displayItem.submit(poseStack, submitNodeCollector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}
@@ -70,10 +70,10 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 	public void submit(BackpackRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
-		poseStack.mulPose(Axis.YN.rotationDegrees(renderState.facing.toYRot()));
+		poseStack.rotate(Axis.YN.rotationDegrees(renderState.facing.toYRot()));
 		poseStack.pushPose();
 		poseStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
+		poseStack.rotate(Axis.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
 		poseStack.popPose();
 		renderItemDisplay(submitNodeCollector, renderState, poseStack);

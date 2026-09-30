@@ -24,7 +24,11 @@
         }
       ],
       "name": "main",
-      "rolls": 1.0
+      "rolls": {
+        "type": "minecraft:uniform",
+        "max": 1,
+        "min": 1
+      }
     }
   ],
   "random_sequence": "sophisticatedbackpacks:inject/chests/bastion_treasure"

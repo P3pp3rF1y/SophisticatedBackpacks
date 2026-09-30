@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:iron_backpack_from_copper"
+        "recipes": "sophisticatedbackpacks:iron_backpack_from_copper"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:mob_catcher_upgrade"
+        "recipes": "sophisticatedbackpacks:mob_catcher_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

@@ -8,13 +8,15 @@
           "name": "sophisticatedbackpacks:diamond_backpack"
         }
       ],
-      "functions": [
-        {
-          "function": "sophisticatedbackpacks:copy_backpack_data"
-        }
-      ],
+      "modifier": {
+        "type": "sophisticatedbackpacks:copy_backpack_data"
+      },
       "name": "main",
-      "rolls": 1.0
+      "rolls": {
+        "type": "minecraft:uniform",
+        "max": 1,
+        "min": 1
+      }
     }
   ],
   "random_sequence": "sophisticatedbackpacks:blocks/diamond_backpack"

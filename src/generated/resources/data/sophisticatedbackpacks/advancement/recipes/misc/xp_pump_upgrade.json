@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:xp_pump_upgrade"
+        "recipes": "sophisticatedbackpacks:xp_pump_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,18 +1,20 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.predicates.ItemPredicate;
 import net.minecraft.advancements.triggers.Criterion;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.Tags;
@@ -28,16 +30,14 @@ import net.p3pp3rf1y.sophisticatedcore.crafting.UpgradeNextTierRecipe;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 
-import java.util.concurrent.CompletableFuture;
-
 public class BackpackRecipeProvider extends RecipeProvider {
 	private static final String HAS_UPGRADE_BASE = "has_upgrade_base";
 	private static final String HAS_SMELTING_UPGRADE = "has_smelting_upgrade";
-	private final HolderLookup.RegistryLookup<Item> items;
+	private final HolderGetter<Item> items;
 
-	public BackpackRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
-		super(provider, recipeOutput);
-		items = provider.lookupOrThrow(Registries.ITEM);
+	public BackpackRecipeProvider(BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+		super(recipes, advancements);
+		items = output.lookup(Registries.ITEM);
 	}
 
 	@Override
@@ -391,21 +391,4 @@ public class BackpackRecipeProvider extends RecipeProvider {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(items, Tags.Items.LEATHERS).build());
 	}
 
-	public static class Runner extends RecipeProvider.Runner {
-
-		protected Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
-			super(packOutput, registries);
-		}
-
-		@Override
-		protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
-			return new BackpackRecipeProvider(provider, recipeOutput);
-		}
-
-		@Override
-		public String getName() {
-			return "Sophisticated Backpacks Recipes";
-		}
-
-	}
 }

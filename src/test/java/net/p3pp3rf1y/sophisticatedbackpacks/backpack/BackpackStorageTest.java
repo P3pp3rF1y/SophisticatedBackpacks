@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -136,11 +137,11 @@ class BackpackStorageTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> Optional<RegistryOps.RegistryInfo<T>> lookupRegistry(ResourceKey<? extends Registry<? extends T>> registryKey) {
+	private static <T> Optional<HolderGetter<T>> lookupRegistry(ResourceKey<? extends Registry<? extends T>> registryKey) {
 		if (registryKey.equals(Registries.ENCHANTMENT)) {
-			return Optional.of((RegistryOps.RegistryInfo<T>) RegistryOps.RegistryInfo.fromRegistryLookup(ENCHANTMENT_LOOKUP));
+			return Optional.of((HolderGetter<T>) ENCHANTMENT_LOOKUP);
 		}
-		return REGISTRY_ACCESS.lookup(registryKey).map(RegistryOps.RegistryInfo::fromRegistryLookup);
+		return REGISTRY_ACCESS.lookup(registryKey).map(lookup -> lookup);
 	}
 
 	private static ListTag legacyAccessLogs(UUID backpackUuid) {

@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:advanced_magnet_upgrade_from_basic"
+        "recipes": "sophisticatedbackpacks:advanced_magnet_upgrade_from_basic"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

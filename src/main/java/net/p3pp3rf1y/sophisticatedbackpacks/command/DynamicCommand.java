@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -189,7 +190,7 @@ public class DynamicCommand {
 		boolean flag = p.getInventory().add(backpack);
 		if (flag && backpack.isEmpty()) {
 			backpack.setCount(1);
-			ItemEntity itemEntity = p.drop(backpack, false);
+			ItemEntity itemEntity = p.drop(backpack, false, Prediction.SERVER_ONLY);
 			if (itemEntity != null) {
 				itemEntity.makeFakeItem();
 			}
@@ -198,14 +199,14 @@ public class DynamicCommand {
 					(RandHelper.getRandomMinusOneToOne(p.getRandom()) * 0.7F + 1.0F) * 2.0F);
 			p.inventoryMenu.broadcastChanges();
 		} else {
-			ItemEntity itementity = p.drop(backpack, false);
+			ItemEntity itementity = p.drop(backpack, false, Prediction.SERVER_ONLY);
 			if (itementity != null) {
 				itementity.setNoPickUpDelay();
 				itementity.setThrower(p);
 			}
 		}
 
-		ItemEntity itemEntity = p.drop(backpack, false);
+		ItemEntity itemEntity = p.drop(backpack, false, Prediction.SERVER_ONLY);
 		if (itemEntity != null) {
 			itemEntity.makeFakeItem();
 		}

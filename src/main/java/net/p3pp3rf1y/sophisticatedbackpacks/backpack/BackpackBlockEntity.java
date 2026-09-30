@@ -150,6 +150,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		backpackWrapper = level == null
 				? BackpackWrapper.fromStack(backpack)
 				: level.isClientSide() ? new BackpackWrapper(backpack) : BackpackLinkedStorageResolver.resolveOrCreate(level, backpack);
+		pendingLoadedBackpack = null;
 		backpackWrapper.setContentsChangeHandler(() -> {
 			setChanged();
 			WorldHelper.notifyBlockUpdate(this);
@@ -185,13 +186,11 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void onLoad() {
 		super.onLoad();
 		if (pendingLoadedBackpack != null) {
-			ItemStack loadedBackpack = pendingLoadedBackpack;
-			pendingLoadedBackpack = null;
-			setBackpack(loadedBackpack);
+			setBackpack(pendingLoadedBackpack);
 		} else if (level != null && backpackWrapper != IBackpackWrapper.Noop.INSTANCE && backpackWrapper.getBackpack().getItem() instanceof BackpackItem) {
 			setBackpack(backpackWrapper.getBackpack());
 		}
-		// Loading defers the backpack stack until onLoad, after loadAdditional already rebuilt the block with default colors.
+		// Re-render after installing the loaded wrapper.
 		if (level != null && level.isClientSide()) {
 			WorldHelper.notifyBlockUpdate(this);
 		}
@@ -241,6 +240,14 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
+	}
+
+	public int getMainColor() {
+		return pendingLoadedBackpack == null ? backpackWrapper.getMainColor() : BackpackItem.getMainColor(pendingLoadedBackpack);
+	}
+
+	public int getAccentColor() {
+		return pendingLoadedBackpack == null ? backpackWrapper.getAccentColor() : BackpackItem.getAccentColor(pendingLoadedBackpack);
 	}
 
 	public void refreshClientContents(UUID contentsUuid) {

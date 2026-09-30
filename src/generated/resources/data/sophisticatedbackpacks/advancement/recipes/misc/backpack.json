@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:backpack"
+        "recipes": "sophisticatedbackpacks:backpack"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

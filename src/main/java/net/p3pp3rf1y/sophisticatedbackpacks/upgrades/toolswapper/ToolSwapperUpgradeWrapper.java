@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.BlockTransformer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -388,9 +390,14 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		return false;
 	}
 
-	private static final Set<ItemAbility> BLOCK_MODIFICATION_ACTIONS = Set.of(AXE_STRIP, AXE_SCRAPE, AXE_WAX_OFF, SHOVEL_FLATTEN, SHEARS_CARVE, SHEARS_HARVEST);
+	private static final Set<ItemAbility> BLOCK_MODIFICATION_ACTIONS = Set.of(SHEARS_CARVE, SHEARS_HARVEST);
 
 	private boolean itemWorksOnBlock(Level level, BlockPos pos, BlockState blockState, Player player, ItemStack stack) {
+		Holder<BlockTransformer> transformer = stack.get(DataComponents.BLOCK_TRANSFORMER);
+		if (transformer != null && transformer.value().transforms().stream().anyMatch(transform -> !transform.disallowedFaces().contains(Direction.UP)
+				&& transform.blockStateProvider().value().getOptionalState(level, level.getRandom(), pos) != null)) {
+			return true;
+		}
 		for (ItemAbility action : BLOCK_MODIFICATION_ACTIONS) {
 			if (stack.canPerformAction(action) && blockState.getToolModifiedState(
 					new UseOnContext(level, player, InteractionHand.MAIN_HAND, stack, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, true)),

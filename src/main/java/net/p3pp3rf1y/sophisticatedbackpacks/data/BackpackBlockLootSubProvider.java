@@ -1,15 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class BackpackBlockLootSubProvider extends BlockLootSubProvider {
-	protected BackpackBlockLootSubProvider(HolderLookup.Provider registries) {
-		super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
+	protected BackpackBlockLootSubProvider(LootTableSubProvider.Context context) {
+		super(Set.of(), FeatureFlags.REGISTRY.allFlags(), context);
 	}
 
 	@Override
@@ -41,7 +41,8 @@ public class BackpackBlockLootSubProvider extends BlockLootSubProvider {
 
 	private static LootTable.Builder dropBackpackWithContents(BackpackItem item) {
 		LootPoolEntryContainer.Builder<?> entry = LootItem.lootTableItem(item);
-		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantValue.exactly(1)).add(entry).apply(CopyBackpackDataFunction.builder());
+		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ContextIntProviders.between(1, 1)).add(entry)
+				.apply(CopyBackpackDataFunction.builder());
 		return LootTable.lootTable().withPool(pool);
 	}
 }

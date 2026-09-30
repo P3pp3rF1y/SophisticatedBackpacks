@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:gold_backpack"
+        "recipes": "sophisticatedbackpacks:gold_backpack"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

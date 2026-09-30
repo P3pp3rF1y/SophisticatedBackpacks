@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:auto_smoking_upgrade"
+        "recipes": "sophisticatedbackpacks:auto_smoking_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

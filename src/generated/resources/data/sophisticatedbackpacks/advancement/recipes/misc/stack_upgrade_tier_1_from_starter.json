@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
+        "recipes": "sophisticatedbackpacks:stack_upgrade_tier_1_from_starter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

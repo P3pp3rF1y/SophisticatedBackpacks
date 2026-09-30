@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:anvil_upgrade"
+        "recipes": "sophisticatedbackpacks:anvil_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

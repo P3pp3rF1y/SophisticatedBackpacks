@@ -7,6 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
@@ -26,7 +27,7 @@ public record InventoryInteractionPayload(BlockPos pos, Direction face) implemen
 		Player player = context.player();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			InventoryInteractionHelper.tryInventoryInteraction(payload.pos, player.level(), backpack, payload.face, player);
-			player.swing(InteractionHand.MAIN_HAND, true);
+			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			return true;
 		});
 	}

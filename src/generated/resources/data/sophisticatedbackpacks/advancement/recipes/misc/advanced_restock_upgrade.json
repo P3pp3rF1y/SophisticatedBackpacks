@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:advanced_restock_upgrade"
+        "recipes": "sophisticatedbackpacks:advanced_restock_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

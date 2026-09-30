@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:advanced_tool_swapper_upgrade"
+        "recipes": "sophisticatedbackpacks:advanced_tool_swapper_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

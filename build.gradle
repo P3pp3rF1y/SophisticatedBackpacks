@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.147'
     id "org.openrewrite.rewrite" version "7.35.0"
     id "net.darkhax.curseforgegradle" version "1.1.15"
     id "com.modrinth.minotaur" version "2.+"
@@ -10,7 +10,7 @@ plugins {
 }
 
 def sharedCodeQualityScript = file('../gradle/code-quality.gradle')
-apply from: sharedCodeQualityScript.exists() ? sharedCodeQualityScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/26.2/gradle/code-quality.gradle'
+apply from: sharedCodeQualityScript.exists() ? sharedCodeQualityScript : 'https://raw.githubusercontent.com/P3pp3rF1y/MultiWorkspace/26.3/gradle/code-quality.gradle'
 
 idea {
     module {
@@ -63,6 +63,12 @@ repositories {
         }
     }
     maven {
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
         url "https://maven.theillusivec4.top/"
         content {
             includeGroup "top.theillusivec4.curios"
@@ -72,6 +78,7 @@ repositories {
         url "https://maven.blamejared.com/"
         content {
             includeGroup "mezz.jei"
+            includeGroup "net.mezzdev.config"
         }
     }
     maven {
@@ -204,33 +211,20 @@ dependencies {
 //    implementation files('/libs/sophisticatedcore-1.20.4-0.6.18.-SNAPSHOT.jar')
 
     compileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-    if (!isClientDataRun) {
-        localRuntime "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-    }
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     //localRuntime "dev.emi:emi-neoforge:${emi_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
     compileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    if (!isClientDataRun) {
-        localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
-        localRuntime "me.shedaniel:RoughlyEnoughItems-default-plugin-neoforge:${rei_version}"
-    }
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-    if (!isClientDataRun) {
-        localRuntime "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-    }
     compileOnly "net.blay09.mods:balm-neoforge:${balm_version}"
-    if (!isClientDataRun) {
-        localRuntime "net.blay09.mods:balm-neoforge:${balm_version}"
-    }
     compileOnly "net.blay09.mods:craftingtweaks-neoforge:${craftingtweaks_version}"
     compileOnly "io.wispforest:accessories-neoforge:${accessories_version}"
     compileOnly "curse.maven:chipped-456956:${chipped_cf_file_id}"
     //localRuntime "curse.maven:chipped-456956:${chipped_cf_file_id}"
     compileOnly "curse.maven:athena-841890:${athena_cf_file_id}"
     //localRuntime "curse.maven:athena-841890:${athena_cf_file_id}"
-    compileOnly "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
-    //localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
+    compileOnly "maven.modrinth:resourceful-lib:${resourcefullib_version}"
+    //localRuntime "maven.modrinth:resourceful-lib:${resourcefullib_version}"
     compileOnly "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
     //localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
     compileOnly "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"

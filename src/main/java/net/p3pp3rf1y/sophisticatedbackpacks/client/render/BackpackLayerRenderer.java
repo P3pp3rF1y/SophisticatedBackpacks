@@ -100,8 +100,8 @@ public class BackpackLayerRenderer<S extends LivingEntityRenderState, M extends 
 			humanoidModel.body.translateAndRotate(poseStack);
 		}
 
-		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
+		poseStack.rotate(Axis.YP.rotationDegrees(180));
+		poseStack.rotate(Axis.ZP.rotationDegrees(180));
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.25f;
 		if (entityType == EntityTypes.WITHER_SKELETON) {

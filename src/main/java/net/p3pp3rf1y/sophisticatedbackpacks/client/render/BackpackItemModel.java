@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ResolvedModel;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.client.resources.model.geometry.QuadCollection;
 import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.resources.Identifier;
@@ -83,7 +84,7 @@ public class BackpackItemModel implements ItemModel {
 		renderLayer.setUsesBlockLight(true);
 		List<BakedQuad> quads = baseModel.getQuads(displayContext);
 		renderLayer.setParticleMaterial(baseModel.particleMaterial());
-		renderLayer.prepareQuadList().addAll(quads);
+		renderLayer.setQuads(ItemQuads.split(quads));
 		SpecialRenderer specialRenderer = new SpecialRenderer();
 		specialRenderer.displayItemQuad = this.displayItemQuad;
 		specialRenderer.setModelRenderParameters(
@@ -197,11 +198,11 @@ public class BackpackItemModel implements ItemModel {
 		@Nullable
 		public BakedQuad displayItemQuad = null;
 		private int[] tintLayers;
-		private List<BakedQuad> baseModel;
+		private ItemQuads baseModel;
 
 		public void setModelRenderParameters(int[] tintLayers, List<BakedQuad> baseModel) {
 			this.tintLayers = tintLayers;
-			this.baseModel = baseModel;
+			this.baseModel = ItemQuads.split(baseModel);
 		}
 
 		@Override
@@ -214,7 +215,7 @@ public class BackpackItemModel implements ItemModel {
 					return;
 				}
 				DisplayItemAnchor.fromQuad(displayItemQuad).applyTransform(poseStack, displayItemZOffset);
-				poseStack.mulPose(Axis.ZP.rotationDegrees(displayItemRotation));
+				poseStack.rotate(Axis.ZP.rotationDegrees(displayItemRotation));
 				displayItem.submit(poseStack, submitNodeCollector, packedLight, packedOverlay, outlineColor);
 			}
 		}

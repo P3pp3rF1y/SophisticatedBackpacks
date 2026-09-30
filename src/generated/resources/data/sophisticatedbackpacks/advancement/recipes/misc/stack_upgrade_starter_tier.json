@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:stack_upgrade_starter_tier"
+        "recipes": "sophisticatedbackpacks:stack_upgrade_starter_tier"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

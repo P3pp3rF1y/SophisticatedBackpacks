@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:crafting_upgrade"
+        "recipes": "sophisticatedbackpacks:crafting_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

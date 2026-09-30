@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.data;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -11,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.predicates.AllOfCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.neoforged.neoforge.common.data.GlobalLootModifierProvider;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
@@ -19,6 +21,7 @@ import net.neoforged.neoforge.common.loot.LootTableIdCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
@@ -53,7 +56,7 @@ public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
 		private final ResourceKey<LootTable> lootTable;
 		private final ResourceKey<LootTable> lootTableToInjectInto;
 
-		protected InjectLootModifier(LootItemCondition[] conditions, int priority, ResourceKey<LootTable> lootTable,
+		protected InjectLootModifier(Optional<Holder<LootItemCondition>> conditions, int priority, ResourceKey<LootTable> lootTable,
 				ResourceKey<LootTable> lootTableToInjectInto) {
 			super(conditions, priority);
 			this.lootTable = lootTable;
@@ -61,8 +64,9 @@ public class BackpackLootModifierProvider extends GlobalLootModifierProvider {
 		}
 
 		protected InjectLootModifier(ResourceKey<LootTable> lootTable, ResourceKey<LootTable> lootTableToInjectInto) {
-			this(new LootItemCondition[]{BackpackLootEnabledCondition.builder().build(),
-					LootTableIdCondition.builder(lootTableToInjectInto.identifier()).build()}, DEFAULT_PRIORITY, lootTable, lootTableToInjectInto);
+			this(Optional.of(Holder.direct(
+					AllOfCondition.allOf(BackpackLootEnabledCondition.builder(), LootTableIdCondition.builder(lootTableToInjectInto.identifier())).build())),
+					DEFAULT_PRIORITY, lootTable, lootTableToInjectInto);
 		}
 
 		@SuppressWarnings({"deprecation", "java:S1874"}) // Need to call getRandomItemsRaw to skip neo calling modifyLoot event and causing infinite loop

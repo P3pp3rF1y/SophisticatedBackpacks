@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.Identifier;
@@ -12,7 +11,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 
@@ -20,6 +19,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class BackpackInjectLootSubProvider implements LootTableSubProvider {
+	private final Context context;
 	private static final String INJECT_FOLDER = "inject/";
 	public static final ResourceKey<LootTable> ABANDONED_MINESHAFT = createInjectLootTableRegistryKey(BuiltInLootTables.ABANDONED_MINESHAFT);
 	public static final ResourceKey<LootTable> BASTION_TREASURE = createInjectLootTableRegistryKey(BuiltInLootTables.BASTION_TREASURE);
@@ -38,10 +38,15 @@ public class BackpackInjectLootSubProvider implements LootTableSubProvider {
 		return ResourceKey.create(Registries.LOOT_TABLE, location);
 	}
 
-	public BackpackInjectLootSubProvider(HolderLookup.Provider registries) {
+	public BackpackInjectLootSubProvider(Context context) {
+		this.context = context;
 	}
 
 	@Override
+	public void run() {
+		generate(context::accept);
+	}
+
 	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> tables) {
 		tables.accept(SPAWN_BONUS_CHEST, getLootTable(0, getItemLootEntry(ModItems.BACKPACK.get(), 100)));
 		tables.accept(SIMPLE_DUNGEON, getLootTable(90, getItemLootEntry(ModItems.BACKPACK.get(), 5), getItemLootEntry(ModItems.COPPER_BACKPACK.get(), 3),
@@ -69,7 +74,7 @@ public class BackpackInjectLootSubProvider implements LootTableSubProvider {
 	}
 
 	private static LootTable.Builder getLootTable(int emptyWeight, LootPoolEntryContainer.Builder<?>... entries) {
-		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantValue.exactly(1));
+		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ContextIntProviders.between(1, 1));
 		for (LootPoolEntryContainer.Builder<?> entry : entries) {
 			pool.add(entry);
 		}

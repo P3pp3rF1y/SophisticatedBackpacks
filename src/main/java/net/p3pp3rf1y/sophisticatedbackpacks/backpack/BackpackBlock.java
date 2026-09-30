@@ -93,7 +93,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	public BackpackBlock(float explosionResistance, Properties properties) {
-		super(properties.mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY));
+		super(properties.mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL).pushReaction(PushReaction.POPPED));
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false)
 				.setValue(RIGHT_TANK, false).setValue(BATTERY, false).setValue(OPEN, false));
 	}
@@ -216,7 +216,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 			if (player.hasInfiniteMaterials() && interactWithBackpackFluidHandlerInCreative(level, pos, hitResult.getDirection(), player, stack)) {
 				return InteractionResult.SUCCESS.heldItemTransformedTo(player.getItemInHand(hand));
 			}
-			if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection())) {
+			if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hitResult.getDirection(), null)) {
 				return InteractionResult.SUCCESS.heldItemTransformedTo(player.getItemInHand(hand));
 			}
 		}

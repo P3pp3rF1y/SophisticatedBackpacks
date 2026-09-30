@@ -1,14 +1,17 @@
 {
   "type": "sophisticatedbackpacks:inject_loot",
-  "conditions": [
-    {
-      "condition": "sophisticatedbackpacks:loot_enabled"
-    },
-    {
-      "condition": "neoforge:loot_table_id",
-      "loot_table_id": "minecraft:chests/abandoned_mineshaft"
-    }
-  ],
+  "condition": {
+    "type": "minecraft:all_of",
+    "terms": [
+      {
+        "type": "sophisticatedbackpacks:loot_enabled"
+      },
+      {
+        "type": "neoforge:loot_table_id",
+        "loot_table_id": "minecraft:chests/abandoned_mineshaft"
+      }
+    ]
+  },
   "loot_table": "sophisticatedbackpacks:inject/chests/abandoned_mineshaft",
   "loot_table_to_inject_into": "minecraft:chests/abandoned_mineshaft"
 }

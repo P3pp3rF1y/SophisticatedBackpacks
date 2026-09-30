@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:smoking_upgrade"
+        "recipes": "sophisticatedbackpacks:smoking_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

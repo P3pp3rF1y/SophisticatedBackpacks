@@ -91,7 +91,7 @@ public final class DisplayItemAnchor {
 
 	public void applyTransform(PoseStack poseStack, int zOffset) {
 		poseStack.translate(centerX, centerY, centerZ);
-		poseStack.mulPose(facingRotation);
+		poseStack.rotate(facingRotation);
 		poseStack.translate(0.0, 0.0, depthOffset - zOffset * scale / DISPLAY_ITEM_PIXEL_SIZE_DIVISOR);
 		poseStack.scale(scale, scale, scale);
 	}

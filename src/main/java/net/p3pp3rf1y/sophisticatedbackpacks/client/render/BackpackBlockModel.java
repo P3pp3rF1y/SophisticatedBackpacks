@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.builders.UVPair;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
@@ -496,10 +497,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			float v1 = v0 + dv;
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
-			qb.setSprite(sprite, ChunkSectionLayer.TRANSLUCENT, net.minecraft.client.renderer.Sheets.translucentBlockItemSheet());
+			qb.setSprite(sprite, ChunkSectionLayer.TRANSLUCENT, Sheets.translucentBlockItemSheet(), Sheets.translucentBlockItemGlintSheet(),
+					Sheets.translucentBlockItemGlintSpecialSheet());
 			qb.setDirection(direction);
 			qb.setTintIndex(-1);
-			qb.setShade(false);
+			qb.setShadeOverride(null);
 			qb.setAmbientOcclusion(false);
 			Vec3i n = direction.getUnitVec3i();
 
@@ -661,10 +663,11 @@ public class BackpackBlockModel implements UnbakedModel {
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
 			BakedQuad.MaterialInfo materialInfo = q.materialInfo();
-			qb.setSprite(materialInfo.sprite(), materialInfo.layer(), materialInfo.itemRenderType());
+			qb.setSprite(materialInfo.sprite(), materialInfo.layer(), materialInfo.itemRenderType(), materialInfo.itemGlintRenderType(),
+					materialInfo.itemGlintSpecialRenderType());
 			qb.setDirection(q.direction());
 			qb.setTintIndex(materialInfo.tintIndex());
-			qb.setShade(materialInfo.shade());
+			qb.setShadeOverride(materialInfo.shadeDirectionOverride());
 			qb.setLightEmission(materialInfo.lightEmission());
 			qb.setAmbientOcclusion(materialInfo.ambientOcclusion());
 			Vec3i n = q.direction().getUnitVec3i();
@@ -752,10 +755,11 @@ public class BackpackBlockModel implements UnbakedModel {
 			BakedQuad.MaterialInfo materialInfo = q.materialInfo();
 
 			QuadBakingVertexConsumer qb = new QuadBakingVertexConsumer();
-			qb.setSprite(newSprite, materialInfo.layer(), materialInfo.itemRenderType());
+			qb.setSprite(newSprite, materialInfo.layer(), materialInfo.itemRenderType(), materialInfo.itemGlintRenderType(),
+					materialInfo.itemGlintSpecialRenderType());
 			qb.setDirection(q.direction());
 			qb.setTintIndex(-1);
-			qb.setShade(materialInfo.shade());
+			qb.setShadeOverride(materialInfo.shadeDirectionOverride());
 			qb.setLightEmission(materialInfo.lightEmission());
 			qb.setAmbientOcclusion(materialInfo.ambientOcclusion());
 

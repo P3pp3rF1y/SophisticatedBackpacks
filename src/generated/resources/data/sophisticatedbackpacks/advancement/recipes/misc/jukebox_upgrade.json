@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:jukebox_upgrade"
+        "recipes": "sophisticatedbackpacks:jukebox_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

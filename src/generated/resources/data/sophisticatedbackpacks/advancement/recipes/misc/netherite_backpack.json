@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:netherite_backpack"
+        "recipes": "sophisticatedbackpacks:netherite_backpack"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

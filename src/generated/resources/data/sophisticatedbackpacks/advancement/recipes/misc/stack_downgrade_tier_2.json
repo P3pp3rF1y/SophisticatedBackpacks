@@ -9,7 +9,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedbackpacks:stack_downgrade_tier_2"
+        "recipes": "sophisticatedbackpacks:stack_downgrade_tier_2"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
