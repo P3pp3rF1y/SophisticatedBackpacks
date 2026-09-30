@@ -163,6 +163,11 @@ public class AnvilUpgradeContainer extends UpgradeContainerBase<AnvilUpgradeWrap
 		protected void onTake(Player player, ItemStack stack) {
 			processingOnTakeLogic = true;
 			super.onTake(player, stack);
+			if (inputSlots.getItem(0).isEmpty()) {
+				setItemName("");
+				upgradeWrapper.setItemName("");
+				nameChangeListener.run();
+			}
 			processingOnTakeLogic = false;
 		}
 	}
