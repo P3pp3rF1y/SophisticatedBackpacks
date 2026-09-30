@@ -9,7 +9,9 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsPayload;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
@@ -37,19 +39,11 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 	public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor guiGraphics) {
 		if (linkedStorageGroupId.isPresent()) {
 			UUID groupId = linkedStorageGroupId.get();
-			if (Minecraft.getInstance().level != null
-					&& ClientLinkedStorageContents.shouldRequestSnapshot(groupId, Minecraft.getInstance().level.getGameTime())) {
-				ClientPacketDistributor
-						.sendToServer(new RequestLinkedStorageContentsPayload(groupId, ClientLinkedStorageContents.getRevision(groupId).orElse(-1L)));
-			}
 			ClientLinkedStorageTooltip.renderRole(font, x, y, guiGraphics, linkedStorageRole.orElseThrow(), groupId);
-			if (Minecraft.getInstance().level != null) {
-				BackpackLinkedStorageResolver.resolve(Minecraft.getInstance().level, backpack)
-						.ifPresent(wrapper -> extractTooltip(wrapper, font, x, y + LINKED_HEADER_HEIGHT, guiGraphics));
-			}
+			extractTooltip(font, x, y + LINKED_HEADER_HEIGHT, guiGraphics);
 			return;
 		}
-		extractTooltip(BackpackWrapper.fromStack(backpack), font, x, y, guiGraphics);
+		extractTooltip(font, x, y, guiGraphics);
 	}
 
 	public ClientBackpackContentsTooltip(BackpackItem.BackpackContentsTooltip tooltip) {
@@ -68,6 +62,22 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 	@Override
 	public int getHeight(Font font) {
 		return super.getHeight(font) + (linkedStorageRole.isPresent() ? LINKED_HEADER_HEIGHT : 0);
+	}
+
+	@Override
+	protected IStorageWrapper getTooltipStorageWrapper() {
+		if (linkedStorageGroupId.isPresent()) {
+			UUID groupId = linkedStorageGroupId.get();
+			Minecraft minecraft = Minecraft.getInstance();
+			if (minecraft.level != null && ClientLinkedStorageContents.shouldRequestSnapshot(groupId, minecraft.level.getGameTime())) {
+				ClientPacketDistributor
+						.sendToServer(new RequestLinkedStorageContentsPayload(groupId, ClientLinkedStorageContents.getRevision(groupId).orElse(-1L)));
+			}
+			return minecraft.level == null
+					? IBackpackWrapper.Noop.INSTANCE
+					: BackpackLinkedStorageResolver.resolve(minecraft.level, backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
+		}
+		return BackpackWrapper.fromStack(backpack);
 	}
 
 	@Override
