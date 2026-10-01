@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.LegacyItemStackMigration;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +31,6 @@ public final class LegacyBackpackDataMigration {
 	private static final String COLUMNS_TAKEN_TAG = "columnsTaken";
 	private static final String TEMPLATE_NAME_TAG = "templateName";
 	private static final String RENDER_INFO_TAG = "renderInfo";
-	private static final String REAL_COUNT_TAG = "realCount";
 	private static final String[] NORMALIZED_LEGACY_TAGS = {CLOTH_COLOR_TAG, BORDER_COLOR_TAG, OPEN_TAB_ID_TAG, SORT_BY_TAG, CONTENTS_UUID_TAG,
 			INVENTORY_SLOTS_TAG, UPGRADE_SLOTS_TAG, LOOT_TABLE_NAME_TAG, LOOT_PERCENTAGE_TAG, COLUMNS_TAKEN_TAG, TEMPLATE_NAME_TAG, RENDER_INFO_TAG};
 
@@ -120,30 +119,8 @@ public final class LegacyBackpackDataMigration {
 	}
 
 	private static void normalizeInventory(CompoundTag contentsNbt, String inventoryTag) {
-		if (!contentsNbt.contains(inventoryTag)) {
-			return;
-		}
-
-		CompoundTag inventoryNbt = contentsNbt.getCompound(inventoryTag);
-		if (!inventoryNbt.contains("Items")) {
-			return;
-		}
-
-		ListTag items = inventoryNbt.getList("Items", Tag.TAG_COMPOUND);
-		for (Tag item : items) {
-			normalizeItemStackCount((CompoundTag) item);
-		}
-	}
-
-	private static void normalizeItemStackCount(CompoundTag itemTag) {
-		if (itemTag.contains("count")) {
-			return;
-		}
-
-		if (itemTag.contains(REAL_COUNT_TAG)) {
-			itemTag.putInt("count", itemTag.getInt(REAL_COUNT_TAG));
-		} else if (itemTag.contains("Count")) {
-			itemTag.putInt("count", itemTag.getByte("Count"));
+		if (contentsNbt.contains(inventoryTag)) {
+			LegacyItemStackMigration.normalizeInventory(contentsNbt.getCompound(inventoryTag));
 		}
 	}
 
@@ -157,14 +134,7 @@ public final class LegacyBackpackDataMigration {
 	}
 
 	private static void normalizeInventoryNbt(CompoundTag inventoryNbt) {
-		if (!inventoryNbt.contains("Items")) {
-			return;
-		}
-
-		ListTag items = inventoryNbt.getList("Items", Tag.TAG_COMPOUND);
-		for (Tag item : items) {
-			normalizeItemStackCount((CompoundTag) item);
-		}
+		LegacyItemStackMigration.normalizeInventory(inventoryNbt);
 	}
 
 	public static Optional<UUID> getContentsUuid(ItemStack backpack) {

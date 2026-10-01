@@ -46,6 +46,7 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.util.LegacyItemStackMigration;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
@@ -260,7 +261,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private ItemStack getBackpackFromNbt(CompoundTag nbt, HolderLookup.Provider registries) {
-		return ItemStack.parseOptional(registries, nbt.getCompound(BACKPACK_DATA_TAG));
+		return ItemStack.parseOptional(registries, LegacyItemStackMigration.normalizeItemStack(nbt.getCompound(BACKPACK_DATA_TAG)));
 	}
 
 	@Override
