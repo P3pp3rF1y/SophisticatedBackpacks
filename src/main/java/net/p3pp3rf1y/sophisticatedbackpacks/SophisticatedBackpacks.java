@@ -55,8 +55,8 @@ public class SophisticatedBackpacks {
 		ContainerContents.SettingsCategoryDataRegistry.register(MobCatcherContentsData.CODEC, MobCatcherContentsData.STREAM_CODEC,
 				MobCatcherStorage.CAPTURED_MOBS_TAG);
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
-		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
-		container.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+		container.registerConfig(ModConfig.Type.SYNCED, Config.SERVER_SPEC);
+		container.registerConfig(ModConfig.Type.LOCAL, Config.COMMON_SPEC);
 		if (dist == Dist.CLIENT && !ModList.get().isLoaded("configured")) {
 			container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
 		}
