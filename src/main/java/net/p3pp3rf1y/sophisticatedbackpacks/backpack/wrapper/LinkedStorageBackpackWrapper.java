@@ -26,6 +26,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 
 import javax.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;

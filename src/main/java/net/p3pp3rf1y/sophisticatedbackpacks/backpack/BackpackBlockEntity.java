@@ -41,6 +41,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 
