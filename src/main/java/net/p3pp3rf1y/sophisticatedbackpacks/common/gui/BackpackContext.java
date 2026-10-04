@@ -179,6 +179,7 @@ public abstract class BackpackContext {
 					.parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), Objects.requireNonNull(buffer.readNbt())).getOrThrow();
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 	}
 
@@ -275,9 +276,7 @@ public abstract class BackpackContext {
 					linkedStorageBackpackWrapper.setBackpackStack(backpackStack);
 				} else if (backpackWrapper == null || backpackWrapper.getBackpack() != backpackStack
 						|| backpackWrapper instanceof LinkedStorageBackpackWrapper) {
-					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-						linkedStorageBackpackWrapper.close();
-					}
+					closeLinkedStorageFacade(backpackWrapper);
 					backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(player.level(), backpackStack);
 					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
 						linkedStorageBackpackWrapper.setCanonicalContentsChangedHandler(() -> syncLinkedBackpackRender(player));
@@ -285,8 +284,16 @@ public abstract class BackpackContext {
 				}
 				return backpackWrapper;
 			}
+			closeLinkedStorageFacade(backpackWrapper);
+			backpackWrapper = null;
 			SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Stack isn't a backpack");
 			return IBackpackWrapper.Noop.INSTANCE;
+		}
+
+		protected static void closeLinkedStorageFacade(@Nullable IBackpackWrapper wrapper) {
+			if (wrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
+				linkedStorageBackpackWrapper.close();
+			}
 		}
 
 		@Override
@@ -384,6 +391,8 @@ public abstract class BackpackContext {
 			return getParentBackpackWrapper(player).map(parent -> {
 				ItemStack stackInSlot = parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex);
 				if (!(stackInSlot.getItem() instanceof BackpackItem)) {
+					closeLinkedStorageFacade(backpackWrapper);
+					backpackWrapper = null;
 					return IBackpackWrapper.Noop.INSTANCE;
 				}
 				LinkedStorageEndpointData endpoint = stackInSlot.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
@@ -391,9 +400,7 @@ public abstract class BackpackContext {
 						&& linkedStorageBackpackWrapper.hasEndpoint(endpoint)) {
 					backpackWrapper.setBackpackStack(stackInSlot);
 				} else if (backpackWrapper == null || backpackWrapper.getBackpack() != stackInSlot || backpackWrapper instanceof LinkedStorageBackpackWrapper) {
-					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-						linkedStorageBackpackWrapper.close();
-					}
+					closeLinkedStorageFacade(backpackWrapper);
 					backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(player.level(), stackInSlot);
 					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
 						linkedStorageBackpackWrapper.setCanonicalContentsChangedHandler(() -> syncLinkedBackpackRender(player));
@@ -571,6 +578,8 @@ public abstract class BackpackContext {
 			return getParentBackpackWrapper(player).map(parent -> {
 				ItemStack stackInSlot = parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex);
 				if (!(stackInSlot.getItem() instanceof BackpackItem)) {
+					Item.closeLinkedStorageFacade(backpackWrapper);
+					backpackWrapper = null;
 					return IBackpackWrapper.Noop.INSTANCE;
 				}
 				LinkedStorageEndpointData endpoint = stackInSlot.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
@@ -578,9 +587,7 @@ public abstract class BackpackContext {
 						&& linkedStorageBackpackWrapper.hasEndpoint(endpoint)) {
 					backpackWrapper.setBackpackStack(stackInSlot);
 				} else if (backpackWrapper == null || backpackWrapper.getBackpack() != stackInSlot || backpackWrapper instanceof LinkedStorageBackpackWrapper) {
-					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-						linkedStorageBackpackWrapper.close();
-					}
+					Item.closeLinkedStorageFacade(backpackWrapper);
 					backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(player.level(), stackInSlot);
 					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
 						linkedStorageBackpackWrapper.setCanonicalContentsChangedHandler(() -> syncLinkedBackpackRender(player));
@@ -761,14 +768,17 @@ public abstract class BackpackContext {
 		public IBackpackWrapper getBackpackWrapper(Player player) {
 			return getParentBackpackWrapper(player).map(parent -> {
 				ItemStack stackInSlot = parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex);
+				if (!(stackInSlot.getItem() instanceof BackpackItem)) {
+					closeLinkedStorageFacade(backpackWrapper);
+					backpackWrapper = null;
+					return IBackpackWrapper.Noop.INSTANCE;
+				}
 				LinkedStorageEndpointData endpoint = stackInSlot.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 				if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper
 						&& linkedStorageBackpackWrapper.hasEndpoint(endpoint)) {
 					linkedStorageBackpackWrapper.setBackpackStack(stackInSlot);
 				} else if (backpackWrapper == null || backpackWrapper.getBackpack() != stackInSlot || backpackWrapper instanceof LinkedStorageBackpackWrapper) {
-					if (backpackWrapper instanceof LinkedStorageBackpackWrapper linkedStorageBackpackWrapper) {
-						linkedStorageBackpackWrapper.close();
-					}
+					closeLinkedStorageFacade(backpackWrapper);
 					backpackWrapper = BackpackLinkedStorageResolver.resolve(player.level(), stackInSlot).orElseGet(() -> {
 						if (stackInSlot.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
 							throw new IllegalStateException("Failed to resolve linked backpack endpoint");
