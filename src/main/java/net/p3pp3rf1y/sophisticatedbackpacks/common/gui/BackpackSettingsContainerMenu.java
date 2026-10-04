@@ -17,8 +17,8 @@ import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSettingsPayload;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -51,13 +51,15 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	public void detectSettingsChangeAndReload() {
 		if (player.level().isClientSide) {
 			Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
-			if (linkedStorageGroupId.isPresent() && ClientLinkedStorageContents.removeUpdatedGroup(linkedStorageGroupId.get())) {
-				ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(linkedStorageGroupId.get())
-						.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + linkedStorageGroupId.get()));
-				storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
-				return;
-			}
 			if (linkedStorageGroupId.isPresent()) {
+				UUID groupId = linkedStorageGroupId.get();
+				boolean snapshotChanged = ClientLinkedStorageContents.removeUpdatedGroup(groupId);
+				boolean settingsChanged = ClientLinkedStorageContents.removeUpdatedSettings(groupId);
+				if (snapshotChanged || settingsChanged) {
+					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
+							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + groupId));
+					storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
+				}
 				return;
 			}
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
@@ -85,8 +87,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
 			Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
 			if (player instanceof ServerPlayer serverPlayer && linkedStorageGroupId.isPresent()) {
-				UUID groupId = linkedStorageGroupId.get();
-				PacketDistributor.sendToPlayer(serverPlayer, LinkedStorageContentsPayload.createSnapshot(serverPlayer.serverLevel(), groupId));
+				PacketDistributor.sendToPlayer(serverPlayer, new LinkedStorageSettingsPayload(linkedStorageGroupId.get(), lastSettingsNbt));
 				return;
 			}
 

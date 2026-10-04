@@ -361,12 +361,13 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	}
 
 	void onCanonicalContentsChanged() {
-		boolean physicalProjectionChanged = synchronizeColumnsTaken() | refreshPhysicalProjection();
+		boolean columnsChanged = synchronizeColumnsTaken();
+		boolean renderProjectionChanged = refreshPhysicalProjection();
 		inventorySlotChangeHandler.run();
 		upgradeCachesInvalidatedHandler.run();
 		onInventoryHandlerRefresh.run();
 		onInventoryForInputOutputHandlerRefresh.run();
-		if (physicalProjectionChanged) {
+		if (columnsChanged || renderProjectionChanged) {
 			onCanonicalContentsChanged.run();
 		}
 	}

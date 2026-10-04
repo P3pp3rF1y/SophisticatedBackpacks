@@ -159,6 +159,7 @@ public abstract class BackpackContext {
 			CompoundTag contents = Objects.requireNonNull(buffer.readNbt());
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 	}
 
