@@ -173,6 +173,7 @@ public abstract class BackpackContext {
 			CompoundTag contents = Objects.requireNonNull(buffer.readNbt());
 			Component groupName = buffer.readComponent();
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 	}
 

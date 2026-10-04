@@ -17,8 +17,10 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
-import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageContentsMessage;
+import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
+
+import java.util.UUID;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
@@ -49,9 +51,12 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 		if (player.level().isClientSide) {
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 			if (endpoint != null) {
-				if (ClientLinkedStorageContents.removeUpdatedGroup(endpoint.groupId())) {
-					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(endpoint.groupId())
-							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()));
+				UUID groupId = endpoint.groupId();
+				boolean snapshotChanged = ClientLinkedStorageContents.removeUpdatedGroup(groupId);
+				boolean settingsChanged = ClientLinkedStorageContents.removeUpdatedSettings(groupId);
+				if (snapshotChanged || settingsChanged) {
+					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
+							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + groupId));
 					storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
 				}
 				return;
@@ -90,8 +95,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(storageWrapper.getBackpack());
 			if (endpoint != null) {
-				PacketHandler.INSTANCE.sendToClient((ServerPlayer) player,
-						LinkedStorageContentsMessage.createSnapshot(((ServerPlayer) player).serverLevel(), endpoint.groupId()));
+				PacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new LinkedStorageSettingsMessage(endpoint.groupId(), lastSettingsNbt));
 				return;
 			}
 
