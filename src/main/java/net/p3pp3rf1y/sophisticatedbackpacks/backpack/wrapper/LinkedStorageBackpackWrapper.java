@@ -321,7 +321,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.fluid.FluidResource>> getItemFluidHandler() {
-		return physicalBackpack.getItemFluidHandler();
+		return canonicalHost.getItemFluidHandler();
 	}
 
 	@Override
@@ -350,12 +350,13 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	}
 
 	void onCanonicalContentsChanged() {
-		boolean projectionChanged = synchronizeColumnsTaken() | refreshPhysicalProjection();
+		boolean columnsChanged = synchronizeColumnsTaken();
+		boolean renderProjectionChanged = refreshPhysicalProjection();
 		inventorySlotChangeHandler.run();
 		upgradeCachesInvalidatedHandler.run();
 		onInventoryHandlerRefresh.run();
 		onInventoryForInputOutputHandlerRefresh.run();
-		if (projectionChanged) {
+		if (columnsChanged || renderProjectionChanged) {
 			onCanonicalContentsChanged.run();
 		}
 	}

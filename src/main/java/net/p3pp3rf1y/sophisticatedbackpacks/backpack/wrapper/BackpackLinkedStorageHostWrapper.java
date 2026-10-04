@@ -6,6 +6,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -37,6 +40,11 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 		getBackpack().set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS,
 				getBackpack().getOrDefault(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, backpackItem.getNumberOfUpgradeSlots()));
 		configureRenderInfo();
+	}
+
+	@Override
+	public Optional<ResourceHandler<FluidResource>> getItemFluidHandler(ItemAccess itemAccess) {
+		return getItemFluidHandler();
 	}
 
 	private static ItemStack requireBackpackVirtualCarrier(ItemStack virtualCarrier) {

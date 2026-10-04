@@ -28,8 +28,8 @@ import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IClientStorageContentsProvider;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
@@ -60,7 +60,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(), storageWrapper.getMainColor(),
 					storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 
-			if (!player.level().isClientSide()) {
+			if (!player.level().isClientSide() && getLinkedStorageGroupId().isEmpty()) {
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
 			}
 		});
@@ -99,7 +99,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			if (player instanceof ServerPlayer serverPlayer) {
 				Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
 				if (linkedStorageGroupId.isPresent()) {
-					PacketDistributor.sendToPlayer(serverPlayer, LinkedStorageContentsPayload.createSnapshot(serverPlayer.level(), linkedStorageGroupId.get()));
+					PacketDistributor.sendToPlayer(serverPlayer,
+							new LinkedStorageSettingsPayload(linkedStorageGroupId.get(), storageWrapper.getSettingsHandler().getSettingsData().copy()));
 					return;
 				}
 				ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
@@ -143,6 +144,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	public void syncClientStorageContentsToClient() {
 		sendStorageSettingsToClient();
+		if (player instanceof ServerPlayer serverPlayer && getLinkedStorageGroupId().isPresent()) {
+			storageWrapper.getContentsUuid().ifPresent(uuid -> {
+				CompoundTag additionalContents = new CompoundTag();
+				storageWrapper.getUpgradeHandler().getWrappersThatImplementFromMainStorage(IClientStorageContentsProvider.class)
+						.forEach(provider -> provider.addClientStorageContents(additionalContents));
+				if (!additionalContents.isEmpty()) {
+					PacketDistributor.sendToPlayer(serverPlayer, new BackpackAdditionalContentsPayload(uuid, additionalContents));
+				}
+			});
+		}
 		refreshAdditionalSlotInfo();
 	}
 
@@ -201,13 +212,16 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	public boolean detectSettingsChangeAndReload() {
 		Optional<UUID> linkedStorageGroupId = getLinkedStorageGroupId();
 		if (linkedStorageGroupId.isPresent()) {
-			if (player.level().isClientSide() && ClientLinkedStorageContents.removeUpdatedGroup(linkedStorageGroupId.get())) {
-				ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(linkedStorageGroupId.get())
-						.orElseThrow(() -> new IllegalStateException("Updated linked Backpack group has no snapshot: " + linkedStorageGroupId.get()));
-				storageWrapper.onContentsUpdated();
-				storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
-				refreshAllSlots();
-				return true;
+			if (player.level().isClientSide()) {
+				UUID groupId = linkedStorageGroupId.get();
+				boolean snapshotChanged = ClientLinkedStorageContents.removeUpdatedGroup(groupId);
+				boolean settingsChanged = ClientLinkedStorageContents.removeUpdatedSettings(groupId);
+				if (snapshotChanged || settingsChanged) {
+					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
+							.orElseThrow(() -> new IllegalStateException("Updated linked Backpack group has no snapshot: " + groupId));
+					storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
+					return true;
+				}
 			}
 			return false;
 		}
