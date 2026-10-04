@@ -422,21 +422,26 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public boolean overrideStackedOnOther(ItemStack storageStack, Slot slot, ClickAction action, Player player) {
-		if (hasCreativeScreenContainerOpen(player) || storageStack.getCount() > 1 || !slot.mayPickup(player) || action != ClickAction.PRIMARY) {
+		if (hasCreativeScreenContainerOpen(player) || storageStack.getCount() > 1 || !slot.mayPickup(player) || action != ClickAction.SECONDARY) {
 			return super.overrideStackedOnOther(storageStack, slot, action, player);
 		}
 
 		ItemStack stackToStash = slot.getItem();
-		int stashed;
-		ItemResource resource = ItemResource.of(stackToStash);
+		int countToTake;
 		try (Transaction tx = Transaction.openRoot()) {
-			stashed = stash(storageStack, resource, stackToStash.getCount(), tx);
+			countToTake = stash(storageStack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
 		}
-		if (stashed > 0) {
-			slot.safeTake(stashed, stashed, player);
-			try (Transaction tx = Transaction.openRoot()) {
-				stash(storageStack, resource, stashed, tx);
-				tx.commit();
+		if (countToTake > 0) {
+			while (countToTake > 0) {
+				ItemStack takeResult = slot.safeTake(countToTake, countToTake, player);
+				if (takeResult.isEmpty()) {
+					break;
+				}
+				try (Transaction tx = Transaction.openRoot()) {
+					stash(storageStack, ItemResource.of(takeResult), takeResult.getCount(), tx);
+					tx.commit();
+				}
+				countToTake -= takeResult.getCount();
 			}
 			return true;
 		}
@@ -447,7 +452,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Override
 	public boolean overrideOtherStackedOnMe(ItemStack storageStack, ItemStack otherStack, Slot slot, ClickAction action, Player player,
 			SlotAccess carriedAccess) {
-		if (hasCreativeScreenContainerOpen(player) || storageStack.getCount() > 1 || !slot.mayPlace(storageStack) || action != ClickAction.PRIMARY) {
+		if (hasCreativeScreenContainerOpen(player) || storageStack.getCount() > 1 || !slot.mayPlace(storageStack) || action != ClickAction.SECONDARY) {
 			return super.overrideOtherStackedOnMe(storageStack, otherStack, slot, action, player, carriedAccess);
 		}
 
