@@ -214,8 +214,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void load(CompoundTag tag) {
 		super.load(tag);
 		ItemStack loadedBackpack = getBackpackFromNbt(tag);
-		if (level != null && level.isClientSide()) {
-			// Chunk update tags can be loaded after onLoad on the client.
+		if (level != null) {
+			// Chunk update tags and contraption restores can be loaded after onLoad.
 			pendingLoadedBackpack = null;
 			setBackpack(loadedBackpack);
 		} else {
