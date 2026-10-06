@@ -6,7 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -66,7 +65,8 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 				return;
 			}
 			ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-			IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolve(player.level(), backpack).orElseGet(() -> new BackpackWrapper(backpack));
+			// Keep the canonical columns unchanged until the menu detects the layout change below.
+			IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		}
