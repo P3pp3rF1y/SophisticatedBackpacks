@@ -232,9 +232,9 @@ dependencies {
     compileOnly "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
     //localRuntime "curse.maven:resourcefullib-570073:${resourcefullib_cf_file_id}"
     compileOnly "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
-    //localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
+    localRuntime "curse.maven:sawmill-964817:${sawmill_cf_file_id}"
     compileOnly "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
-    //localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
+    localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
     testImplementation "org.mockito:mockito-core:5.12.+"
