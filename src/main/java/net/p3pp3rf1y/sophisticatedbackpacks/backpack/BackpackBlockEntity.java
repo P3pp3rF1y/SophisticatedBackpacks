@@ -485,8 +485,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	@Override
-	public void unregisterController() {
-		IControllableStorage.super.unregisterController();
+	public void unregisterControllerListeners() {
+		IControllableStorage.super.unregisterControllerListeners();
 		backpackWrapper.unregisterOnSlotsChangeListener();
 		backpackWrapper.unregisterOnInventoryHandlerRefreshListener();
 	}
@@ -505,6 +505,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		super.onChunkUnloaded();
 		chunkBeingUnloaded = true;
 		if (level instanceof ServerLevel serverLevel) {
+			unloadFromController();
 			LinkedStorageJukeboxPlaybackAnchors.removeBlockAnchor(serverLevel, worldPosition, backpackWrapper.getBackpack());
 		}
 		closeLinkedStorageSubscription();
