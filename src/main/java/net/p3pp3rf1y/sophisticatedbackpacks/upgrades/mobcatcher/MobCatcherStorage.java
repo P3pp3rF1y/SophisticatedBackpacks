@@ -36,11 +36,14 @@ public class MobCatcherStorage {
 	}
 
 	public static List<CapturedMob> getCapturedMobs(IBackpackWrapper backpackWrapper) {
-		return backpackWrapper.getContentsUuid().map(MobCatcherStorage::getCapturedMobs).orElseGet(List::of);
+		return backpackWrapper.getBackpackContents().map(MobCatcherStorage::getCapturedMobs).orElseGet(List::of);
 	}
 
 	public static List<CapturedMob> getCapturedMobs(UUID backpackUuid) {
-		CompoundTag contentsNbt = BackpackStorage.get().getOrCreateBackpackContents(backpackUuid);
+		return BackpackStorage.get().getBackpackContents(backpackUuid).map(MobCatcherStorage::getCapturedMobs).orElseGet(List::of);
+	}
+
+	private static List<CapturedMob> getCapturedMobs(CompoundTag contentsNbt) {
 		List<CapturedMob> capturedMobs = new ArrayList<>();
 		for (Tag tag : contentsNbt.getList(CAPTURED_MOBS_TAG, Tag.TAG_COMPOUND)) {
 			capturedMobs.add(deserialize((CompoundTag) tag));
@@ -169,17 +172,20 @@ public class MobCatcherStorage {
 	}
 
 	private static void saveCapturedMobs(IBackpackWrapper backpackWrapper, List<CapturedMob> capturedMobs) {
-		Optional<UUID> contentsUuid = backpackWrapper.getContentsUuid();
-		if (contentsUuid.isEmpty()) {
+		if (!backpackWrapper.supportsBackpackContents()) {
+			throw new IllegalStateException("Mob Catcher requires a Backpack-native canonical host");
+		}
+		Optional<CompoundTag> contents = backpackWrapper.getBackpackContents();
+		if (contents.isEmpty()) {
 			return;
 		}
-		CompoundTag contentsNbt = BackpackStorage.get().getOrCreateBackpackContents(contentsUuid.get());
+		CompoundTag contentsNbt = contents.get();
 		if (capturedMobs.isEmpty()) {
 			contentsNbt.remove(CAPTURED_MOBS_TAG);
 		} else {
 			contentsNbt.put(CAPTURED_MOBS_TAG, serialize(capturedMobs));
 		}
-		BackpackStorage.get().setDirty();
+		backpackWrapper.markBackpackContentsChanged();
 		attachSlotBlocking(backpackWrapper);
 	}
 

@@ -33,6 +33,7 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	public BackpackLinkedStorageHostWrapper(ILinkedStorageContents contents, ItemStack virtualCarrier) {
 		super(requireBackpackVirtualCarrier(virtualCarrier), new LinkedStorageBackpackContentsSource(contents));
 		this.contents = contents;
+		setUpgradeCachesInvalidatedHandler(contents::onHandlersInvalidated);
 		configureRenderInfo();
 	}
 

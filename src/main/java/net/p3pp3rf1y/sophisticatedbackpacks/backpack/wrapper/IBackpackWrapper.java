@@ -22,10 +22,18 @@ public interface IBackpackWrapper extends IStorageWrapper, ILinkedStorageEndpoin
 
 	IBackpackWrapper setBackpackStack(ItemStack backpackStack);
 
-	@Override
-	BackpackSettingsHandler getSettingsHandler();
-
 	ItemStack getBackpack();
+
+	default boolean supportsBackpackContents() {
+		return true;
+	}
+
+	default Optional<CompoundTag> getBackpackContents() {
+		return Optional.empty();
+	}
+
+	default void markBackpackContentsChanged() {
+	}
 
 	@Override
 	default Optional<LinkedStorageEndpointData> getLinkedStorageEndpoint() {
@@ -87,6 +95,11 @@ public interface IBackpackWrapper extends IStorageWrapper, ILinkedStorageEndpoin
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {
 		public static final Noop INSTANCE = new Noop();
+
+		@Override
+		public boolean supportsBackpackContents() {
+			return false;
+		}
 
 		private final ItemStack backpack = new ItemStack(ModItems.BACKPACK.get());
 		private final BackpackSettingsHandler settingsHandler = new BackpackSettingsHandler(this, new CompoundTag(), () -> {

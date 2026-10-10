@@ -16,11 +16,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageItemEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSnapshotProfile;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 
@@ -44,6 +46,10 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 
 	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack endpoint, LinkedStorageHostDescriptor hostDescriptor) {
+		String compatibilityKey = hostDescriptor.virtualCarrier().getString("compatibilityKey");
+		if (!factoryId().equals(hostDescriptor.factoryId()) && !compatibilityKey.isEmpty() && !"standard".equals(compatibilityKey)) {
+			return Compatibility.INCOMPATIBLE;
+		}
 		UUID storageId = endpoint.get(ModCoreDataComponents.STORAGE_UUID);
 		return storageId != null && BackpackStorage.get(level).getBackpackContents(storageId)
 				.map(BackpackLinkedStorageEndpointAdapter::hasIncompatibleBackpackData).orElse(false) ? Compatibility.HAS_CONTENTS : Compatibility.COMPATIBLE;
@@ -75,16 +81,14 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public void bindEndpoint(ServerLevel level, ItemStack stack, LinkedStorageEndpointData endpoint) {
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		ItemStack primaryCarrier = manager.getHostDescriptor(endpoint.groupId())
-				.map(hostDescriptor -> ItemStack.parseOptional(level.registryAccess(), hostDescriptor.virtualCarrier())).orElseThrow();
+		LinkedStorageHostDescriptor hostDescriptor = manager.getHostDescriptor(endpoint.groupId()).orElseThrow();
 		boolean primaryEndpoint = manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId());
-		// Resolve all canonical state before detaching the ordinary backend so a failed preparation preserves the source Backpack.
 		BackpackWrapper wrapper = new BackpackWrapper(stack);
 		wrapper.removeContentsUuid();
 		if (primaryEndpoint) {
 			manager.resolveContents(endpoint.groupId()).orElseThrow().setColumnsTaken(stack.getOrDefault(ModDataComponents.COLUMNS_TAKEN, 0));
 		}
-		copySlotSizes(stack, primaryCarrier);
+		copyEndpointProfile(level, stack, endpoint, manager, hostDescriptor);
 		stack.set(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT, primaryEndpoint);
 		stack.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, endpoint);
 		stack.remove(ModCoreDataComponents.LINKED_STORAGE_RENDER_REVISION);
@@ -103,8 +107,20 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	public static void synchronizeEndpointProfile(ServerLevel level, ItemStack stack) {
 		LinkedStorageEndpointData endpoint = stack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		LinkedStorageHostDescriptor hostDescriptor = manager.getHostDescriptor(endpoint.groupId()).orElseThrow();
-		copySlotSizes(stack, ItemStack.parseOptional(level.registryAccess(), hostDescriptor.virtualCarrier()));
+		copyEndpointProfile(level, stack, endpoint, manager, manager.getHostDescriptor(endpoint.groupId()).orElseThrow());
+	}
+
+	private static void copyEndpointProfile(ServerLevel level, ItemStack stack, LinkedStorageEndpointData endpoint, LinkedStorageGroupManager manager,
+			LinkedStorageHostDescriptor hostDescriptor) {
+		if (BackpackLinkedStorageHostWrapper.FACTORY_ID.equals(hostDescriptor.factoryId())) {
+			copySlotSizes(stack, ItemStack.parseOptional(level.registryAccess(), hostDescriptor.virtualCarrier()));
+			return;
+		}
+		LinkedStorageSnapshotProfile profile = manager.resolveVirtualHost(endpoint, false).flatMap(ILinkedStorageVirtualHost::getLinkedStorageSnapshotProfile)
+				.orElseThrow();
+		stack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, profile.inventorySlots());
+		stack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, profile.upgradeSlots());
+		stack.set(ModDataComponents.COLUMNS_TAKEN, profile.columnsTaken());
 	}
 
 	public static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result, Container inputs) {

@@ -26,7 +26,7 @@ import java.util.UUID;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.SETTINGS_CONTAINER_TYPE;
 
 public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpackWrapper> implements IContextAwareContainer {
-	static {
+	public static void registerFactories() {
 		addFactory(BackpackMainSettingsCategory.NAME, BackpackMainSettingsContainer::new);
 	}
 
@@ -58,7 +58,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 				if (snapshotChanged || settingsChanged) {
 					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
 							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + groupId));
-					storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
+					storageWrapper.getSettingsHandler().reloadFromStorageContents(contents.getContents());
 				}
 				return;
 			}

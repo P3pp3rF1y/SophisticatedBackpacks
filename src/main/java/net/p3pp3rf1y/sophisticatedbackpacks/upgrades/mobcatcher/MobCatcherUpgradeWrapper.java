@@ -47,6 +47,10 @@ public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgra
 		return upgradeItem.isAdvanced();
 	}
 
+	public Optional<IBackpackWrapper> getBackpackWrapper() {
+		return storageWrapper instanceof IBackpackWrapper backpackWrapper ? Optional.of(backpackWrapper) : Optional.empty();
+	}
+
 	@Override
 	public boolean hideSettingsTab() {
 		return true;

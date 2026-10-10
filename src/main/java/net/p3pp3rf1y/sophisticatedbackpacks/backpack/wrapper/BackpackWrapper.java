@@ -202,6 +202,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return contentsSource.getContents();
 	}
 
+	@Override
+	public Optional<CompoundTag> getBackpackContents() {
+		return contentsSource.getContentsIfPresent();
+	}
+
+	@Override
+	public void markBackpackContentsChanged() {
+		markBackpackContentsDirty();
+	}
+
 	CompoundTag copyContentsForLinkedStorage() {
 		return getBackpackContentsNbt().copy();
 	}
@@ -250,6 +260,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			}
 
 			energyStorage = wrappedStorage;
+			energyStorageInitialized = true;
 		}
 
 		return energyStorage == null || energyStorage.getMaxEnergyStored() == 0 ? Optional.empty() : Optional.of(energyStorage);
@@ -850,6 +861,11 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private class BackpackStorageContentsSource implements IBackpackContentsSource {
+		@Override
+		public Optional<CompoundTag> getContentsIfPresent() {
+			return getBackpackContentsUuid().flatMap(uuid -> BackpackStorage.get().getBackpackContents(uuid));
+		}
+
 		@Override
 		public CompoundTag getContents() {
 			return BackpackStorage.get().getOrCreateBackpackContents(getOrCreateContentsUuid());

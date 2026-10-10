@@ -8,6 +8,10 @@ import java.util.UUID;
 interface IBackpackContentsSource {
 	CompoundTag getContents();
 
+	default Optional<CompoundTag> getContentsIfPresent() {
+		return Optional.of(getContents());
+	}
+
 	void setContents(CompoundTag contents);
 
 	void markDirty();

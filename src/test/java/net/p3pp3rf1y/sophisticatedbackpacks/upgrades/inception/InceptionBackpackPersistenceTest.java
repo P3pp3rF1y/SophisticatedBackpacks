@@ -51,6 +51,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -83,6 +84,88 @@ class InceptionBackpackPersistenceTest {
 		StorageWrapperRepository.clearCache();
 		storageUuids.forEach(BackpackStorage.get()::removeBackpackContents);
 		storageUuids.clear();
+	}
+
+	@Test
+	void isItemValidRejectsContainedBackpackWithDisabledInstalledInception() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				IBackpackWrapper parent = createBackpack();
+				IBackpackWrapper child = createBackpack();
+				parent.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				child.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				child.getUpgradeHandler().getSlotWrappers().get(0).setEnabled(false);
+
+				boolean accepted = parent.getInventoryHandler().isItemValid(0, child.getBackpack());
+
+				assertFalse(accepted);
+			}
+		});
+	}
+
+	@Test
+	void isItemValidRejectsCanonicalDisabledInceptionAndSameGroupEndpointsWithoutPhysicalUpgrades() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				IBackpackWrapper parent = createBackpack();
+				IBackpackWrapper canonicalChild = createBackpack();
+				parent.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				canonicalChild.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				canonicalChild.getUpgradeHandler().getSlotWrappers().get(0).setEnabled(false);
+				ItemStack physicalChild = new ItemStack(ModItems.BACKPACK.get());
+				try (MockedStatic<BackpackWrapper> wrappers = Mockito.mockStatic(BackpackWrapper.class, Mockito.CALLS_REAL_METHODS)) {
+					wrappers.when(() -> BackpackWrapper.fromStack(physicalChild)).thenReturn(canonicalChild);
+
+					boolean canonicalAccepted = parent.getInventoryHandler().isItemValid(0, physicalChild);
+					wrappers.when(() -> BackpackWrapper.fromStack(physicalChild)).thenReturn(parent);
+					boolean sameGroupAccepted = parent.getInventoryHandler().isItemValid(0, physicalChild);
+
+					assertFalse(canonicalAccepted);
+					assertFalse(sameGroupAccepted);
+					assertEquals(0, new BackpackWrapper(physicalChild).getUpgradeHandler().getSlots());
+				}
+			}
+		});
+	}
+
+	@Test
+	void getInventoryForUpgradeProcessingIncludesDifferentCanonicalChildOnceInBothOrders() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				IBackpackWrapper parent = createBackpack();
+				IBackpackWrapper child = createBackpack();
+				child.getInventoryHandler().setStackInSlot(0, new ItemStack(Items.DIAMOND, 7));
+				ItemStack physicalChild = new ItemStack(ModItems.BACKPACK.get());
+				try (MockedStatic<BackpackWrapper> wrappers = Mockito.mockStatic(BackpackWrapper.class, Mockito.CALLS_REAL_METHODS)) {
+					wrappers.when(() -> BackpackWrapper.fromStack(physicalChild)).thenReturn(child);
+					parent.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+					boolean accepted = parent.getInventoryHandler().isItemValid(0, physicalChild);
+					parent.getInventoryHandler().setStackInSlot(0, physicalChild);
+					parent.getInventoryHandler().setStackInSlot(1, new ItemStack(Items.GOLD_INGOT, 3));
+					InceptionUpgradeWrapper upgrade = (InceptionUpgradeWrapper) parent.getUpgradeHandler().getSlotWrappers().get(0);
+
+					for (InventoryOrder order : InventoryOrder.values()) {
+						upgrade.setInventoryOrder(order);
+						ITrackedContentsItemHandler aggregate = parent.getInventoryForUpgradeProcessing();
+
+						assertTrue(accepted);
+						assertEquals(parent.getInventoryHandler().getSlots() + child.getInventoryHandler().getSlots(), aggregate.getSlots());
+						int diamonds = 0;
+						for (int slot = 0; slot < aggregate.getSlots(); slot++) {
+							if (aggregate.getStackInSlot(slot).is(Items.DIAMOND)) {
+								diamonds += aggregate.getStackInSlot(slot).getCount();
+							}
+						}
+						assertEquals(7, diamonds);
+						int childStart = order == InventoryOrder.INCEPTED_FIRST ? 0 : parent.getInventoryHandler().getSlots();
+						assertTrue(aggregate.getStackInSlot(childStart).is(Items.DIAMOND));
+					}
+				}
+			}
+		});
 	}
 
 	@Test

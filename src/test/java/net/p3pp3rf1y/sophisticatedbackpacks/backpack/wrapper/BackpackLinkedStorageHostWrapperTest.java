@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -27,15 +28,21 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -45,14 +52,21 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.CapturedMob;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IDiscHandler;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.*;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -86,6 +100,236 @@ class BackpackLinkedStorageHostWrapperTest {
 		SharedConstants.tryDetectVersion();
 		Bootstrap.bootStrap();
 		loadDefaultConfig(Config.SERVER_SPEC);
+	}
+
+	@Test
+	void reloadFromStorageContentsKeepsBackpackCategoryEditsInTheCurrentRoot() {
+		TestContents contents = new TestContents();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+		SettingsHandler handler = host.getSettingsHandler();
+		MemorySettingsCategory memory = handler.getTypeCategory(MemorySettingsCategory.class);
+		ItemDisplaySettingsCategory display = handler.getTypeCategory(ItemDisplaySettingsCategory.class);
+		CompoundTag replacement = contents.getContents().copy();
+		CompoundTag settings = new CompoundTag();
+		settings.putString("preserved", "current-root");
+		replacement.put("settings", settings);
+		contents.setContents(replacement);
+
+		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+			handler.reloadFromStorageContents(replacement);
+			memory.setFilter(0, new ItemStack(Items.DIAMOND));
+			display.selectSlot(0);
+		}
+
+		assertEquals("current-root", replacement.getCompound("settings").getString("preserved"));
+		assertTrue(memory.getSlotFilterStack(0, false).orElseThrow().is(Items.DIAMOND));
+		assertEquals(List.of(0), display.getSlots());
+		assertSame(memory, handler.getTypeCategory(MemorySettingsCategory.class));
+		assertSame(display, handler.getTypeCategory(ItemDisplaySettingsCategory.class));
+	}
+
+	@Test
+	void setBackpackTemplateCopiesCanonicalRootWithoutLookingUpGroupUuidInBackpackStorage() {
+		TestContents contents = new TestContents();
+		contents.getContents().putString("marker", "canonical");
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+		ResourceLocation name = ResourceLocation.fromNamespaceAndPath("test", "linked_template");
+		BackpackTemplateStorage templates = Mockito.mock(BackpackTemplateStorage.class);
+		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class);
+				MockedStatic<BackpackTemplateStorage> templateStorage = Mockito.mockStatic(BackpackTemplateStorage.class)) {
+			templateStorage.when(BackpackTemplateStorage::get).thenReturn(templates);
+
+			BackpackTemplates.setBackpackTemplate(name, facade);
+
+			ArgumentCaptor<CompoundTag> data = ArgumentCaptor.forClass(CompoundTag.class);
+			Mockito.verify(templates).setBackpackTemplate(Mockito.eq(name), data.capture());
+			String exportedMarker = data.getValue().getCompound("backpackContents").getString("marker");
+			data.getValue().getCompound("backpackContents").putString("marker", "changed");
+
+			assertEquals("canonical", exportedMarker);
+			assertEquals("canonical", contents.getContents().getString("marker"));
+			backpackStorage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void getBackpackContentsKeepsCapturedMobsCanonicalAcrossFacadesAndHostReconstruction() {
+		TestContents contents = new TestContents();
+		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class)) {
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+			CapturedMob mob = new CapturedMob(UUID.randomUUID(), ResourceLocation.withDefaultNamespace("pig"), new CompoundTag(), 0, 1, 1, 1, false, "Pig", 10,
+					10);
+
+			MobCatcherStorage.addCapturedMob(facade, mob);
+			BackpackLinkedStorageHostWrapper restored = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+
+			assertSame(contents.getContents(), facade.getBackpackContents().orElseThrow());
+			assertEquals(List.of(mob), MobCatcherStorage.getCapturedMobs(host));
+			assertEquals(List.of(mob), MobCatcherStorage.getCapturedMobs(restored));
+			backpackStorage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void getBackpackContentsReflectsCapturedMobRemovalFromReconstructedHost() {
+		TestContents contents = new TestContents();
+		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class)) {
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+			CapturedMob mob = new CapturedMob(UUID.randomUUID(), ResourceLocation.withDefaultNamespace("pig"), new CompoundTag(), 0, 1, 1, 1, false, "Pig", 10,
+					10);
+			MobCatcherStorage.addCapturedMob(facade, mob);
+			BackpackLinkedStorageHostWrapper restored = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+
+			MobCatcherStorage.removeCapturedMob(restored, mob.id());
+
+			assertTrue(MobCatcherStorage.getCapturedMobs(facade).isEmpty());
+			backpackStorage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void fillFromTemplateReplacesCanonicalRootThroughBackpackFacadeWithoutOrdinaryStorage() {
+		TestContents contents = new TestContents();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+		ResourceLocation name = ResourceLocation.fromNamespaceAndPath("test", "canonical_apply");
+		CompoundTag template = new CompoundTag();
+		CompoundTag root = new CompoundTag();
+		root.putString("marker", "applied");
+		template.put("backpackContents", root);
+		try (MockedStatic<BackpackTemplates> templates = Mockito.mockStatic(BackpackTemplates.class);
+				MockedStatic<BackpackStorage> storage = Mockito.mockStatic(BackpackStorage.class)) {
+			templates.when(() -> BackpackTemplates.getBackpackTemplate(name)).thenReturn(Optional.of(template));
+
+			facade.setTemplate(name);
+			facade.fillFromTemplate();
+
+			assertEquals("applied", contents.getContents().getString("marker"));
+			assertNotSame(root, contents.getContents());
+			assertFalse(facade.getBackpack().has(ModDataComponents.TEMPLATE_NAME));
+			storage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void fillFromTemplateRejectsStorageHostsInsteadOfSilentlyIgnoringFamilyOperations() {
+		IStorageWrapper storageHost = Mockito.mock(IStorageWrapper.class);
+		Mockito.when(storageHost.getStorageType()).thenReturn("chest");
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), storageHost);
+
+		assertFalse(facade.supportsBackpackContents());
+		assertTrue(facade.getBackpackContents().isEmpty());
+		assertThrows(IllegalStateException.class, () -> facade.fillFromTemplate());
+		assertThrows(IllegalStateException.class, () -> facade.setSlotNumbers(27, 1));
+		assertThrows(IllegalStateException.class, () -> facade.copyDataTo(storageHost));
+		assertThrows(IllegalStateException.class, () -> facade.fillWithLootAndExtraItems(null, BlockPos.ZERO));
+		assertThrows(IllegalStateException.class, () -> facade.setLoot(ResourceLocation.withDefaultNamespace("test"), 1));
+		assertThrows(IllegalStateException.class, () -> facade.setTemplate(ResourceLocation.withDefaultNamespace("test")));
+	}
+
+	@Test
+	void getFluidHandlerAndEnergyStoragePersistCanonicalTransfersAndRebindAfterRootReplacement() {
+		TestContents contents = new TestContents();
+		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS);
+				MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class)) {
+			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			host.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+			host.getUpgradeHandler().setStackInSlot(1, new ItemStack(ModItems.BATTERY_UPGRADE.get()));
+			IStorageFluidHandler fluid = host.getFluidHandler().orElseThrow();
+			IEnergyStorage energy = host.getEnergyStorage().orElseThrow();
+
+			int filled = fluid.fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+			int received = energy.receiveEnergy(100, false);
+			int drained = fluid.drain(250, IFluidHandler.FluidAction.EXECUTE).getAmount();
+			int extracted = energy.extractEnergy(25, false);
+			CompoundTag saved = contents.getContents().copy();
+			contents.setContents(saved.copy());
+			host.onLinkedStorageContentsChanged();
+
+			assertEquals(1000, filled);
+			assertEquals(100, received);
+			assertEquals(250, drained);
+			assertEquals(25, extracted);
+			assertNotSame(fluid, host.getFluidHandler().orElseThrow());
+			assertNotSame(energy, host.getEnergyStorage().orElseThrow());
+			assertSame(host.getEnergyStorage().orElseThrow(), host.getEnergyStorage().orElseThrow());
+			assertEquals(750, host.getFluidHandler().orElseThrow().getFluidInTank(0).getAmount());
+			assertEquals(75, host.getEnergyStorage().orElseThrow().getEnergyStored());
+			backpackStorage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void getFluidHandlerAndEnergyStorageRestoreCanonicalTransfersAfterHostReconstruction() {
+		TestContents contents = new TestContents();
+		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS);
+				MockedStatic<BackpackStorage> storage = Mockito.mockStatic(BackpackStorage.class)) {
+			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			host.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+			host.getUpgradeHandler().setStackInSlot(1, new ItemStack(ModItems.BATTERY_UPGRADE.get()));
+			host.getFluidHandler().orElseThrow().fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+			host.getFluidHandler().orElseThrow().drain(250, IFluidHandler.FluidAction.EXECUTE);
+			host.getEnergyStorage().orElseThrow().receiveEnergy(100, false);
+			host.getEnergyStorage().orElseThrow().extractEnergy(25, false);
+
+			BackpackLinkedStorageHostWrapper restarted = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+
+			assertEquals(750, restarted.getFluidHandler().orElseThrow().getFluidInTank(0).getAmount());
+			assertEquals(75, restarted.getEnergyStorage().orElseThrow().getEnergyStored());
+			storage.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void getFluidHandlerAndEnergyStorageRebindAfterNativeUpgradeRemovalAndReplacement() {
+		TestContents contents = new TestContents();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+		host.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+		host.getUpgradeHandler().setStackInSlot(1, new ItemStack(ModItems.BATTERY_UPGRADE.get()));
+		IStorageFluidHandler fluid = host.getFluidHandler().orElseThrow();
+		IEnergyStorage energy = host.getEnergyStorage().orElseThrow();
+
+		host.getUpgradeHandler().setStackInSlot(0, ItemStack.EMPTY);
+		host.getUpgradeHandler().setStackInSlot(1, ItemStack.EMPTY);
+		boolean fluidAbsentAfterRemoval = host.getFluidHandler().isEmpty();
+		boolean energyAbsentAfterRemoval = host.getEnergyStorage().isEmpty();
+		host.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+		host.getUpgradeHandler().setStackInSlot(1, new ItemStack(ModItems.BATTERY_UPGRADE.get()));
+
+		assertTrue(fluidAbsentAfterRemoval);
+		assertTrue(energyAbsentAfterRemoval);
+		assertNotSame(fluid, host.getFluidHandler().orElseThrow());
+		assertNotSame(energy, host.getEnergyStorage().orElseThrow());
+		assertSame(host.getFluidHandler().orElseThrow(), host.getFluidHandler().orElseThrow());
+		assertSame(host.getEnergyStorage().orElseThrow(), host.getEnergyStorage().orElseThrow());
+	}
+
+	@Test
+	void onVirtualCarrierChangedRebindsNativeResourcesWithoutLosingCanonicalTransfers() {
+		TestContents contents = new TestContents();
+		try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+			registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			host.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+			host.getUpgradeHandler().setStackInSlot(1, new ItemStack(ModItems.BATTERY_UPGRADE.get()));
+			IStorageFluidHandler fluid = host.getFluidHandler().orElseThrow();
+			IEnergyStorage energy = host.getEnergyStorage().orElseThrow();
+			fluid.fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+			energy.receiveEnergy(100, false);
+
+			host.onVirtualCarrierChanged((CompoundTag) new ItemStack(ModItems.NETHERITE_BACKPACK.get()).save(REGISTRY_ACCESS, new CompoundTag()));
+
+			assertNotSame(fluid, host.getFluidHandler().orElseThrow());
+			assertNotSame(energy, host.getEnergyStorage().orElseThrow());
+			assertEquals(1000, host.getFluidHandler().orElseThrow().getFluidInTank(0).getAmount());
+			assertEquals(100, host.getEnergyStorage().orElseThrow().getEnergyStored());
+		}
 	}
 
 	@Test
@@ -606,6 +850,74 @@ class BackpackLinkedStorageHostWrapperTest {
 	}
 
 	@Test
+	void getCompatibilityAcceptsStandardStorageHostsButRejectsLimitedBarrelsWithoutResolvingOrdinaryContents() {
+		BackpackLinkedStorageEndpointAdapter adapter = new BackpackLinkedStorageEndpointAdapter();
+		ServerLevel level = Mockito.mock(ServerLevel.class);
+		ResourceLocation storageFactory = ResourceLocation.parse("sophisticatedstorage:storage");
+		LinkedStorageHostFactories.registerCompatibility(BackpackLinkedStorageHostWrapper.FACTORY_ID, storageFactory);
+		CompoundTag carrier = new CompoundTag();
+		carrier.putString("compatibilityKey", "standard");
+		ItemStack secondary = new ItemStack(ModItems.BACKPACK.get());
+
+		boolean acceptsStorage = adapter.acceptsHostFactory(storageFactory);
+		ILinkedStorageEndpointAdapter.Compatibility standard = adapter.getCompatibility(level, secondary,
+				new LinkedStorageHostDescriptor(storageFactory, carrier));
+		carrier.remove("compatibilityKey");
+		ILinkedStorageEndpointAdapter.Compatibility legacyStandard = adapter.getCompatibility(level, secondary,
+				new LinkedStorageHostDescriptor(storageFactory, carrier));
+		carrier.putString("compatibilityKey", "limited:1");
+		ILinkedStorageEndpointAdapter.Compatibility limited = adapter.getCompatibility(level, secondary,
+				new LinkedStorageHostDescriptor(storageFactory, carrier));
+
+		assertTrue(acceptsStorage);
+		assertEquals(ILinkedStorageEndpointAdapter.Compatibility.COMPATIBLE, standard);
+		assertEquals(ILinkedStorageEndpointAdapter.Compatibility.COMPATIBLE, legacyStandard);
+		assertEquals(ILinkedStorageEndpointAdapter.Compatibility.INCOMPATIBLE, limited);
+		assertFalse(adapter.acceptsHostFactory(ResourceLocation.parse("other:host")));
+		Mockito.verifyNoInteractions(level);
+	}
+
+	@Test
+	void bindEndpointUsesStorageHostProfileAndFacadeKeepsItsNativeUpgradeAndSettingsPlatform() {
+		UUID groupId = UUID.randomUUID();
+		LinkedStorageEndpointData endpoint = new LinkedStorageEndpointData(groupId, UUID.randomUUID());
+		ServerLevel level = Mockito.mock(ServerLevel.class);
+		LinkedStorageGroupsSavedData savedData = Mockito.mock(LinkedStorageGroupsSavedData.class);
+		LinkedStorageGroupManager manager = Mockito.mock(LinkedStorageGroupManager.class);
+		IStorageWrapper host = Mockito.mock(IStorageWrapper.class, Mockito.withSettings().extraInterfaces(ILinkedStorageVirtualHost.class));
+		InventoryHandler inventory = Mockito.mock(InventoryHandler.class);
+		UpgradeHandler upgrades = Mockito.mock(UpgradeHandler.class);
+		SettingsHandler settings = Mockito.mock(SettingsHandler.class);
+		Mockito.when(host.getInventoryHandler()).thenReturn(inventory);
+		Mockito.when(host.getUpgradeHandler()).thenReturn(upgrades);
+		Mockito.when(host.getSettingsHandler()).thenReturn(settings);
+		Mockito.when(host.getStorageType()).thenReturn("chest");
+		Mockito.when(((ILinkedStorageVirtualHost) host).getLinkedStorageSnapshotProfile())
+				.thenReturn(Optional.of(new LinkedStorageSnapshotProfile(Component.literal("Double chest"), 54, 3, 0)));
+		Mockito.when(savedData.manager()).thenReturn(manager);
+		Mockito.when(manager.resolveVirtualHost(endpoint, false)).thenReturn(Optional.of((ILinkedStorageVirtualHost) host));
+		Mockito.when(manager.getHostDescriptor(groupId))
+				.thenReturn(Optional.of(new LinkedStorageHostDescriptor(ResourceLocation.parse("sophisticatedstorage:storage"), new CompoundTag())));
+		ItemStack secondary = new ItemStack(ModItems.BACKPACK.get());
+
+		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class)) {
+			groups.when(() -> LinkedStorageGroupsSavedData.get(level)).thenReturn(savedData);
+			new BackpackLinkedStorageEndpointAdapter().bindEndpoint(level, secondary, endpoint);
+		}
+		LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(secondary), host);
+
+		assertEquals(54, secondary.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS));
+		assertEquals(3, secondary.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS));
+		assertEquals(endpoint, secondary.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT));
+		assertFalse(secondary.get(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT));
+		assertFalse(secondary.has(ModCoreDataComponents.STORAGE_UUID));
+		assertSame(inventory, facade.getInventoryHandler());
+		assertSame(upgrades, facade.getUpgradeHandler());
+		assertSame(settings, facade.getSettingsHandler());
+		assertEquals("chest", facade.getStorageType());
+	}
+
+	@Test
 	void bindEndpointUsesPrimaryGroupStorageSizeForDifferentTierEndpoint() {
 		UUID groupId = UUID.randomUUID();
 		ItemStack primary = new ItemStack(ModItems.DIAMOND_BACKPACK.get());
@@ -817,6 +1129,33 @@ class BackpackLinkedStorageHostWrapperTest {
 		Mockito.verify(inventoryMenu).broadcastChanges();
 		Mockito.verify(tickableUpgrade, Mockito.times(2)).tick(player, level, playerPos);
 		Mockito.verifyNoMoreInteractions(tickableUpgrade);
+	}
+
+	@Test
+	void inventoryTickUpdatesClientCaptureProjectionWhenCanonicalUpgradeAvailabilityChanges() {
+		ItemStack primary = linkedEndpoint(UUID.randomUUID());
+		ServerLevel level = Mockito.mock(ServerLevel.class);
+		Player player = Mockito.mock(Player.class);
+		InventoryMenu inventoryMenu = Mockito.mock(InventoryMenu.class);
+		IBackpackWrapper host = Mockito.mock(IBackpackWrapper.class);
+		UpgradeHandler upgrades = Mockito.mock(UpgradeHandler.class);
+		Mockito.when(host.getUpgradeHandler()).thenReturn(upgrades);
+		setInventoryMenu(player, inventoryMenu);
+		try (MockedStatic<BackpackLinkedStorageResolver> resolver = Mockito.mockStatic(BackpackLinkedStorageResolver.class);
+				MockedStatic<MobCatcherHandler> catcher = Mockito.mockStatic(MobCatcherHandler.class)) {
+			resolver.when(() -> BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(level, primary)).thenReturn(Optional.of(host));
+			catcher.when(() -> MobCatcherHandler.getBestUpgrade(host)).thenReturn(Optional.of(Mockito.mock(MobCatcherUpgradeWrapper.class)),
+					Optional.of(Mockito.mock(MobCatcherUpgradeWrapper.class)), Optional.empty());
+
+			ModItems.BACKPACK.get().inventoryTick(primary, level, player, 0, false);
+			boolean enabledProjection = primary.getOrDefault(ModDataComponents.LINKED_MOB_CATCHER, false);
+			ModItems.BACKPACK.get().inventoryTick(primary, level, player, 0, false);
+			ModItems.BACKPACK.get().inventoryTick(primary, level, player, 0, false);
+
+			assertTrue(enabledProjection);
+			assertFalse(primary.getOrDefault(ModDataComponents.LINKED_MOB_CATCHER, false));
+			Mockito.verify(inventoryMenu, Mockito.times(2)).broadcastChanges();
+		}
 	}
 
 	@Test

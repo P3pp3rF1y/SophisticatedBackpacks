@@ -274,6 +274,7 @@
   "commands.sophisticatedbackpacks.template.list.export": "Export Template",
   "commands.sophisticatedbackpacks.template.list.export.tooltip": "Click to export template '%s' into a datapack",
   "commands.sophisticatedbackpacks.template.backpackempty": "Backpack is empty",
+  "commands.sophisticatedbackpacks.template.unsupported_host": "Templates require a Backpack-primary linked storage group",
   "commands.sophisticatedbackpacks.template.create.nobackpack": "No backpack in main hand found",
   "commands.sophisticatedbackpacks.template.create.alreadyexists": "Template '%s' already exists",
   "commands.sophisticatedbackpacks.template.create.success": "Template '%s' created successfully",

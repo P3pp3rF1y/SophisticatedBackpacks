@@ -27,6 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientLinkedStorageToo
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientMobCatcherHealthTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
@@ -49,6 +50,7 @@ public class SophisticatedBackpacks {
 
 	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedBackpacks(IEventBus modBus, Dist dist, ModContainer container) {
+		BackpackSettingsContainerMenu.registerFactories();
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
 		container.registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);

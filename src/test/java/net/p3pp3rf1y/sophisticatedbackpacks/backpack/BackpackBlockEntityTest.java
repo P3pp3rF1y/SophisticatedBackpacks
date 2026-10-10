@@ -5,17 +5,23 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BackpackBlockEntityTest {
@@ -25,6 +31,18 @@ class BackpackBlockEntityTest {
 	static void setup() {
 		SharedConstants.tryDetectVersion();
 		Bootstrap.bootStrap();
+	}
+
+	@Test
+	void getLinkedStorageBlockEndpointAdapterAcceptsStorageHostsLikeTheBackpackItemAdapter() {
+		BackpackBlockEntity blockEntity = new BackpackBlockEntity(BlockPos.ZERO, ModBlocks.BACKPACK.get().defaultBlockState());
+		LinkedStorageHostFactories.registerCompatibility(BackpackLinkedStorageHostWrapper.FACTORY_ID, ResourceLocation.parse("sophisticatedstorage:storage"));
+
+		ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> adapter = blockEntity.getLinkedStorageBlockEndpointAdapter();
+
+		assertTrue(adapter.acceptsHostFactory(ResourceLocation.parse("sophisticatedstorage:storage")));
+		assertTrue(adapter.acceptsHostFactory(ResourceLocation.parse("sophisticatedbackpacks:backpack")));
+		assertFalse(adapter.acceptsHostFactory(ResourceLocation.parse("other:host")));
 	}
 
 	@Test

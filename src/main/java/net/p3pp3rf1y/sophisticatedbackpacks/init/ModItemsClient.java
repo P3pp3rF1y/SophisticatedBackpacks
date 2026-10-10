@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeTab;
@@ -62,6 +63,7 @@ public class ModItemsClient {
 	}
 
 	private static void onMenuScreenRegister(RegisterMenuScreensEvent event) {
+		BackpackSettingsTabControl.registerFactories();
 		event.register(ModItems.BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
 		event.register(ModItems.SETTINGS_CONTAINER_TYPE.get(), BackpackSettingsScreen::constructScreen);
 

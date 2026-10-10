@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -9,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
@@ -17,6 +19,8 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 
 import java.util.Optional;
@@ -35,6 +39,14 @@ public final class BackpackLinkedStorageResolver {
 			if (contents.isEmpty()) {
 				return Optional.empty();
 			}
+			Optional<CompoundTag> descriptor = ClientLinkedStorageContents.getHostDescriptor(endpoint.groupId());
+			if (descriptor.isPresent() && !descriptor.get().isEmpty()) {
+				CompoundTag hostDescriptor = descriptor.get();
+				return LinkedStorageHostFactories.get(ResourceLocation.parse(hostDescriptor.getString(LinkedStorageHostDescriptor.FACTORY_ID_TAG)))
+						.map(factory -> factory.create(contents.get(), hostDescriptor.getCompound(LinkedStorageHostDescriptor.VIRTUAL_CARRIER_TAG)))
+						.filter(IStorageWrapper.class::isInstance).map(IStorageWrapper.class::cast)
+						.map(host -> new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), host));
+			}
 			ItemStack virtualCarrier = stack.copy();
 			LinkedStorageStackLifecycle.clear(virtualCarrier);
 			virtualCarrier.remove(ModCoreDataComponents.STORAGE_UUID);
@@ -47,7 +59,7 @@ public final class BackpackLinkedStorageResolver {
 			return Optional
 					.of(new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), new BackpackLinkedStorageHostWrapper(contents.get(), virtualCarrier)));
 		}
-		return resolveCanonicalHost(serverLevel, stack, false, true).map(host -> {
+		return resolveStorageHost(serverLevel, stack, false, true).map(host -> {
 			LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(serverLevel).manager();
 			LinkedStorageBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), host);
 			facade.setGroupChangeSubscription(manager.subscribeToGroupChanges(endpoint.groupId(), facade::onCanonicalContentsChanged));
@@ -73,15 +85,15 @@ public final class BackpackLinkedStorageResolver {
 			return Optional.empty();
 		}
 		ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-		return overworld == null ? Optional.empty() : resolveCanonicalHost(overworld, stack, false, false);
+		return overworld == null ? Optional.empty() : resolveCanonicalHost(overworld, stack);
 	}
 
 	public static Optional<IBackpackWrapper> resolveCanonicalHost(ServerLevel level, ItemStack stack) {
-		return resolveCanonicalHost(level, stack, false, false);
+		return resolveStorageHost(level, stack, false, false).map(host -> asBackpackWrapper(stack, host));
 	}
 
 	public static Optional<IBackpackWrapper> resolvePrimaryCanonicalHost(ServerLevel level, ItemStack stack) {
-		return resolveCanonicalHost(level, stack, true, false);
+		return resolveStorageHost(level, stack, true, false).filter(IBackpackWrapper.class::isInstance).map(IBackpackWrapper.class::cast);
 	}
 
 	public static IBackpackWrapper resolveForGlobalUpgradeProcessing(Level level, ItemStack stack) {
@@ -110,7 +122,7 @@ public final class BackpackLinkedStorageResolver {
 		if (stack.getOrDefault(ModCoreDataComponents.LINKED_STORAGE_RENDER_REVISION, -1L) == renderRevision) {
 			return false;
 		}
-		return manager.resolveVirtualHost(endpoint, false).filter(IBackpackWrapper.class::isInstance).map(IBackpackWrapper.class::cast).map(host -> {
+		return manager.resolveVirtualHost(endpoint, false).filter(IStorageWrapper.class::isInstance).map(IStorageWrapper.class::cast).map(host -> {
 			CompoundTag canonicalRenderInfo = host.getRenderInfo().getNbt();
 			stack.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(canonicalRenderInfo));
 			stack.set(ModCoreDataComponents.LINKED_STORAGE_RENDER_REVISION, renderRevision);
@@ -118,7 +130,7 @@ public final class BackpackLinkedStorageResolver {
 		}).orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack render host"));
 	}
 
-	private static Optional<IBackpackWrapper> resolveCanonicalHost(ServerLevel level, ItemStack stack, boolean requirePrimary,
+	private static Optional<IStorageWrapper> resolveStorageHost(ServerLevel level, ItemStack stack, boolean requirePrimary,
 			boolean synchronizePhysicalEndpoint) {
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) != LinkedStorageEndpointStackState.ENDPOINT) {
 			return Optional.empty();
@@ -133,13 +145,17 @@ public final class BackpackLinkedStorageResolver {
 		}
 		ILinkedStorageVirtualHost virtualHost = manager.resolveVirtualHost(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack host for group " + endpoint.groupId()));
-		if (!(virtualHost instanceof IBackpackWrapper backpackHost)) {
-			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a backpack host");
+		if (!(virtualHost instanceof IStorageWrapper storageHost)) {
+			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a storage host");
 		}
 		if (synchronizePhysicalEndpoint) {
 			BackpackLinkedStorageEndpointAdapter.synchronizeEndpointProfile(level, stack);
 			BackpackLinkedStorageEndpointAdapter.synchronizePrimaryCarrier(level, stack);
 		}
-		return Optional.of(backpackHost);
+		return Optional.of(storageHost);
+	}
+
+	private static IBackpackWrapper asBackpackWrapper(ItemStack stack, IStorageWrapper host) {
+		return host instanceof IBackpackWrapper backpackHost ? backpackHost : new LinkedStorageBackpackWrapper(new BackpackWrapper(stack), host);
 	}
 }

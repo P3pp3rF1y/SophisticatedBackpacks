@@ -24,6 +24,16 @@ public class BackpackInventoryHandler extends InventoryHandler {
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
-		return (stack.getItem() instanceof BackpackItem) && !BackpackWrapper.fromStack(stack).getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE);
+		return stack.getItem() instanceof BackpackItem && !hasInstalledInception(new BackpackWrapper(stack))
+				&& !hasInstalledInception(BackpackWrapper.fromStack(stack));
+	}
+
+	private boolean hasInstalledInception(IStorageWrapper wrapper) {
+		for (int slot = 0; slot < wrapper.getUpgradeHandler().getSlots(); slot++) {
+			if (wrapper.getUpgradeHandler().getStackInSlot(slot).getItem() instanceof InceptionUpgradeItem) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

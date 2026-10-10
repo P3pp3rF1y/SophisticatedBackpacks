@@ -104,6 +104,10 @@ public class TemplateCommand {
 		}
 
 		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
+		if (!backpackWrapper.supportsBackpackContents()) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.unsupported_host"));
+			return 5;
+		}
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
 		if (backpackUuid.isEmpty()
 				|| (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {

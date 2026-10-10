@@ -45,9 +45,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LegacyBackpackDataM
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
@@ -350,10 +352,16 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			return;
 		}
 		if (level instanceof ServerLevel serverLevel && LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
-			if (BackpackLinkedStorageResolver.synchronizeRenderProjection(serverLevel, stack)) {
+			Optional<IBackpackWrapper> primaryHost = BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, stack);
+			boolean hasMobCatcher = primaryHost.map(host -> MobCatcherHandler.getBestUpgrade(host).isPresent()).orElse(false);
+			boolean catcherChanged = stack.getOrDefault(ModDataComponents.LINKED_MOB_CATCHER, false) != hasMobCatcher;
+			if (catcherChanged) {
+				stack.set(ModDataComponents.LINKED_MOB_CATCHER, hasMobCatcher);
+			}
+			if (BackpackLinkedStorageResolver.synchronizeRenderProjection(serverLevel, stack) || catcherChanged) {
 				player.inventoryMenu.broadcastChanges();
 			}
-			BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, stack).ifPresent(backpackWrapper -> {
+			primaryHost.ifPresent(backpackWrapper -> {
 				if (player instanceof ServerPlayer serverPlayer) {
 					LinkedStorageJukeboxPlaybackAnchors.refreshPlayerAnchor(serverPlayer, stack);
 				}

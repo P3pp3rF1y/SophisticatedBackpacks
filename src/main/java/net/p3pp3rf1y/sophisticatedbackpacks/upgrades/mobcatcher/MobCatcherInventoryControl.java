@@ -18,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Dimension;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TextureBlitData;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.UV;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -45,19 +46,21 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	private static final Quaternionf ENTITY_CAMERA_ANGLE = new Quaternionf().rotateY((float) Math.PI);
 
 	private final StorageScreenBase<?> screen;
-	private final BackpackContainer menu;
+	private final StorageContainerMenuBase<?> menu;
+	private final IBackpackWrapper backpackWrapper;
 	private final Map<UUID, LivingEntity> capturedMobRenderEntities = new HashMap<>();
 	private final Set<UUID> capturedMobRenderFailures = new HashSet<>();
 
 	public static Optional<MobCatcherInventoryControl> create(StorageScreenBase<?> screen) {
-		return screen.getMenu() instanceof BackpackContainer backpackContainer
-				? Optional.of(new MobCatcherInventoryControl(screen, backpackContainer))
-				: Optional.empty();
+		return screen.getMenu().getStorageWrapper().getUpgradeHandler().getTypeWrappers(MobCatcherUpgradeItem.TYPE).stream()
+				.map(MobCatcherUpgradeWrapper::getBackpackWrapper).flatMap(Optional::stream).findFirst()
+				.map(backpackWrapper -> new MobCatcherInventoryControl(screen, screen.getMenu(), backpackWrapper));
 	}
 
-	private MobCatcherInventoryControl(StorageScreenBase<?> screen, BackpackContainer menu) {
+	private MobCatcherInventoryControl(StorageScreenBase<?> screen, StorageContainerMenuBase<?> menu, IBackpackWrapper backpackWrapper) {
 		this.screen = screen;
 		this.menu = menu;
+		this.backpackWrapper = backpackWrapper;
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 				InventoryScreen.renderEntityInInventory(guiGraphics, x + width / 2F, getRenderBottomY(entity, y, height, scale), scale,
 						ENTITY_RENDER_TRANSLATION, ENTITY_RENDER_ANGLE, ENTITY_CAMERA_ANGLE, entity);
 			});
-			if (hoveredMob.map(mob -> mob.id().equals(capturedMob.id())).orElse(false)) {
+			if (menu instanceof BackpackContainer && hoveredMob.map(mob -> mob.id().equals(capturedMob.id())).orElse(false)) {
 				renderReleaseHint(guiGraphics, x, y, width, height);
 			}
 		}
@@ -88,7 +91,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (button != 0) {
+		if (button != 0 || !(menu instanceof BackpackContainer)) {
 			return false;
 		}
 		Optional<CapturedMob> clickedMob = getHoveredCapturedMob(mouseX, mouseY);
@@ -138,8 +141,10 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 		if (capturedMobRenderFailures.contains(capturedMob.id())) {
 			tooltipLines.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.entity_preview_failed").withStyle(ChatFormatting.RED));
 		}
-		tooltipLines
-				.add(Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		if (menu instanceof BackpackContainer) {
+			tooltipLines.add(
+					Component.translatable("gui.sophisticatedbackpacks.mob_catcher.click_to_release").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		}
 		guiGraphics.renderTooltip(this.screen.getMinecraft().font, tooltipLines,
 				Optional.of(new MobCatcherHealthTooltip(capturedMob.currentHealth(), capturedMob.maxHealth())), mouseX, mouseY);
 	}
@@ -323,7 +328,7 @@ public class MobCatcherInventoryControl extends UpgradeInventoryControlBase {
 	}
 
 	private IBackpackWrapper getBackpackWrapper() {
-		return menu.getStorageWrapper();
+		return backpackWrapper;
 	}
 
 	private record CapturedMobRenderBounds(int x, int y, int width, int height) {
