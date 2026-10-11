@@ -34,6 +34,7 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	public BackpackLinkedStorageHostWrapper(ILinkedStorageContents contents, ItemStack virtualCarrier) {
 		super(requireBackpackVirtualCarrier(virtualCarrier), new LinkedStorageBackpackContentsSource(contents));
 		this.contents = contents;
+		setUpgradeCachesInvalidatedHandler(contents::onHandlersInvalidated);
 		BackpackItem backpackItem = (BackpackItem) getBackpack().getItem();
 		getBackpack().set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS,
 				getBackpack().getOrDefault(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, backpackItem.getNumberOfSlots()));
@@ -55,7 +56,7 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	}
 
 	private void configureRenderInfo() {
-		getRenderDataHandler().setRenderUpdateChangeListener(renderData -> contents.markRenderDirty());
+		getRenderDataHandler().setRenderDataChangeListener(contents::markRenderDirty);
 	}
 
 	public boolean synchronizeEndpointRenderData(RenderData renderData) {

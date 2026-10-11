@@ -31,11 +31,17 @@ import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherCaptureEffectPayload;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageContentsPayload;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 
 import java.util.List;
@@ -52,7 +58,13 @@ public class MobCatcherHandler {
 			return InteractionResult.PASS;
 		}
 
-		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(stack);
+		if (player.level().isClientSide() && stack.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)
+				&& stack.getOrDefault(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT, false)
+				&& stack.getOrDefault(ModDataComponents.LINKED_MOB_CATCHER, false)) {
+			return InteractionResult.SUCCESS;
+		}
+
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.level(), stack);
 		Optional<MobCatcherUpgradeWrapper> upgradeWrapper = getBestUpgrade(backpackWrapper);
 		if (upgradeWrapper.isEmpty()) {
 			return InteractionResult.PASS;
@@ -285,6 +297,19 @@ public class MobCatcherHandler {
 	}
 
 	public static void syncCapturedMobs(ServerPlayer player, IBackpackWrapper backpackWrapper) {
+		Optional<UUID> linkedGroupId = backpackWrapper instanceof BackpackLinkedStorageHostWrapper
+				? backpackWrapper.getContentsUuid()
+				: backpackWrapper.getLinkedStorageEndpoint().map(LinkedStorageEndpointData::groupId);
+		if (linkedGroupId.isPresent()) {
+			UUID groupId = linkedGroupId.orElseThrow();
+			LinkedStorageContentsPayload snapshot = LinkedStorageContentsPayload.createSnapshot(player.level(), groupId);
+			for (ServerPlayer viewer : player.level().getServer().getPlayerList().getPlayers()) {
+				if (viewer.containerMenu instanceof StorageContainerMenuBase<?> menu && menu.getLinkedStorageGroupId().filter(groupId::equals).isPresent()) {
+					PacketDistributor.sendToPlayer(viewer, snapshot);
+				}
+			}
+			return;
+		}
 		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
 			PacketDistributor.sendToPlayer(player,
 					new BackpackContentsPayload(uuid, net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage.get().getOrCreateBackpackContents(uuid)));

@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutFitResult;
 import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutPart;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 
 import java.util.*;
@@ -35,14 +36,17 @@ public class MobCatcherStorage {
 	}
 
 	public static List<CapturedMob> getCapturedMobs(IBackpackWrapper backpackWrapper) {
-		return backpackWrapper.getContentsUuid().map(MobCatcherStorage::getCapturedMobs).orElseGet(List::of);
+		return backpackWrapper.getCanonicalBackpackContents().map(contents -> {
+			MobCatcherContentsData data = contents.settings().getCategoryData(CAPTURED_MOBS_TAG);
+			return data == null ? List.<CapturedMob>of() : data.getCapturedMobs();
+		}).orElseGet(List::of);
 	}
 
 	public static List<CapturedMob> getCapturedMobs(UUID backpackUuid) {
 		return getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(backpackUuid)).getCapturedMobs();
 	}
 
-	private static MobCatcherContentsData getCapturedMobsData(net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents contents) {
+	private static MobCatcherContentsData getCapturedMobsData(ContainerContents contents) {
 		MobCatcherContentsData data = contents.settings().getCategoryData(CAPTURED_MOBS_TAG);
 		if (data == null) {
 			data = new MobCatcherContentsData();
@@ -172,12 +176,15 @@ public class MobCatcherStorage {
 	}
 
 	private static void saveCapturedMobs(IBackpackWrapper backpackWrapper, List<CapturedMob> capturedMobs) {
-		Optional<UUID> contentsUuid = backpackWrapper.getContentsUuid();
-		if (contentsUuid.isEmpty()) {
+		if (!backpackWrapper.supportsBackpackContents()) {
+			throw new IllegalStateException("Mob Catcher requires a Backpack-native canonical host");
+		}
+		Optional<ContainerContents> contents = backpackWrapper.getCanonicalBackpackContents();
+		if (contents.isEmpty()) {
 			return;
 		}
-		getCapturedMobsData(BackpackStorage.get().getOrCreateBackpackContents(contentsUuid.get())).setCapturedMobs(capturedMobs);
-		BackpackStorage.get().setDirty();
+		getCapturedMobsData(contents.get()).setCapturedMobs(capturedMobs);
+		backpackWrapper.markBackpackContentsChanged();
 		attachSlotBlocking(backpackWrapper);
 	}
 

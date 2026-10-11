@@ -11,8 +11,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import net.p3pp3rf1y.sophisticatedcore.util.ValueIOHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BackpackBlockEntityTest {
@@ -34,6 +39,18 @@ class BackpackBlockEntityTest {
 		testBackpack = (BackpackItem) BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("sophisticatedbackpacks", "backpack"));
 		testBackpack.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		Items.AIR.builtInRegistryHolder().bindComponents(DataComponentMap.EMPTY);
+	}
+
+	@Test
+	void getLinkedStorageBlockEndpointAdapterAcceptsStorageHostsLikeTheBackpackItemAdapter() {
+		BackpackBlockEntity blockEntity = new BackpackBlockEntity(BlockPos.ZERO, ModBlocks.BACKPACK.get().defaultBlockState());
+		LinkedStorageHostFactories.registerCompatibility(BackpackLinkedStorageHostWrapper.FACTORY_ID, Identifier.parse("sophisticatedstorage:storage"));
+
+		ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> adapter = blockEntity.getLinkedStorageBlockEndpointAdapter();
+
+		assertTrue(adapter.acceptsHostFactory(Identifier.parse("sophisticatedstorage:storage")));
+		assertTrue(adapter.acceptsHostFactory(Identifier.parse("sophisticatedbackpacks:backpack")));
+		assertFalse(adapter.acceptsHostFactory(Identifier.parse("other:host")));
 	}
 
 	@Test

@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,10 +39,12 @@ public class BackpackTemplates {
 	}
 
 	public static void setBackpackTemplate(Identifier templateName, IBackpackWrapper wrapper) {
+		if (!wrapper.supportsBackpackContents()) {
+			throw new IllegalStateException("Cannot export a backpack template from a non-backpack linked storage host");
+		}
 		Item backpackItem = wrapper.getBackpack().getItem();
-		Optional<UUID> backpackUuid = wrapper.getContentsUuid();
-		backpackUuid.ifPresent(uuid -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem),
-				BackpackStorage.get().getOrCreateBackpackContents(uuid).copy()));
+		wrapper.getCanonicalBackpackContents()
+				.ifPresent(contents -> setBackpackTemplate(templateName, BuiltInRegistries.ITEM.getKey(backpackItem), contents.copy()));
 	}
 
 	public static void setBackpackTemplate(Identifier templateName, Identifier backpackItemRegistryName, ContainerContents contents) {

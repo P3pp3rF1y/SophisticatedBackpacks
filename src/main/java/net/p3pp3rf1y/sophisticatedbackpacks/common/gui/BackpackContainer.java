@@ -219,6 +219,11 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 				if (snapshotChanged || settingsChanged) {
 					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
 							.orElseThrow(() -> new IllegalStateException("Updated linked Backpack group has no snapshot: " + groupId));
+					if (snapshotChanged) {
+						storageWrapper.attachInventorySlotBlockers();
+						storageWrapper.getUpgradeHandler().reloadUpgradesFromData();
+						refreshUpgradeControls();
+					}
 					storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
 					return true;
 				}
@@ -235,7 +240,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		}).orElse(false);
 	}
 
-	private Optional<UUID> getLinkedStorageGroupId() {
+	@Override
+	public Optional<UUID> getLinkedStorageGroupId() {
 		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
 		return Optional.ofNullable(endpoint).map(LinkedStorageEndpointData::groupId);
 	}

@@ -331,7 +331,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			if (!(backpackWrapper.getBackpack().getItem() instanceof BackpackItem)) {
 				return EmptyResourceHandler.instance();
 			}
-			if (!triedUnpackingLoot && level != null && !level.isClientSide()) {
+			if (!triedUnpackingLoot && level != null && !level.isClientSide() && backpackWrapper.supportsBackpackContents()) {
 				backpackWrapper.fillWithLootAndExtraItems(level, getBlockPos());
 				triedUnpackingLoot = true;
 			}
