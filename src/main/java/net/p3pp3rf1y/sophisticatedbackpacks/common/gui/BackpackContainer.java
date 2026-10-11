@@ -36,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK_CONTAINER_TYPE;
 
@@ -217,6 +218,11 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 				if (snapshotChanged || settingsChanged) {
 					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(endpoint.groupId())
 							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + endpoint.groupId()));
+					if (snapshotChanged) {
+						storageWrapper.attachInventorySlotBlockers();
+						storageWrapper.getUpgradeHandler().reloadUpgradesFromData();
+						refreshUpgradeControls();
+					}
 					storageWrapper.getSettingsHandler().reloadFrom(contents.contents().settings());
 					return true;
 				}
@@ -231,6 +237,12 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			}
 			return false;
 		}).orElse(false);
+	}
+
+	@Override
+	public Optional<UUID> getLinkedStorageGroupId() {
+		LinkedStorageEndpointData endpoint = storageWrapper.getBackpack().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		return Optional.ofNullable(endpoint).map(LinkedStorageEndpointData::groupId);
 	}
 
 	@Override

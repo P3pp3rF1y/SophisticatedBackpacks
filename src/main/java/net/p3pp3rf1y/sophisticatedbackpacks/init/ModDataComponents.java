@@ -28,6 +28,9 @@ public class ModDataComponents {
 	public static final Supplier<DataComponentType<Integer>> COLUMNS_TAKEN = DATA_COMPONENT_TYPES.register("columns_taken",
 			() -> new DataComponentType.Builder<Integer>().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
 
+	public static final Supplier<DataComponentType<Boolean>> LINKED_MOB_CATCHER = DATA_COMPONENT_TYPES.register("linked_mob_catcher",
+			() -> new DataComponentType.Builder<Boolean>().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
 	public static final Supplier<DataComponentType<String>> ITEM_NAME = DATA_COMPONENT_TYPES.register("item_name",
 			() -> new DataComponentType.Builder<String>().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 

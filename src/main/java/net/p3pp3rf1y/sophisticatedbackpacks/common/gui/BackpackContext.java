@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
@@ -92,16 +93,17 @@ public abstract class BackpackContext {
 		}
 		ILinkedStorageVirtualHost virtualHost = manager.resolveVirtualHost(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack host for group " + endpoint.groupId()));
-		if (!(virtualHost instanceof IBackpackWrapper host)) {
-			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a backpack host");
+		if (!(virtualHost instanceof IStorageWrapper host)) {
+			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a storage host");
 		}
 		ILinkedStorageContents contents = manager.resolveContents(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack contents for group " + endpoint.groupId()));
 		return Optional.of(new LinkedStorageSnapshot(endpoint.groupId(), manager.getRevision(endpoint.groupId()), contents.contents().copy(),
-				host.getDisplayName(), getBaseInventorySlots(host), host.getUpgradeHandler().size(), host.getColumnsTaken()));
+				host.getDisplayName(), getBaseInventorySlots(host), host.getUpgradeHandler().size(), host.getColumnsTaken(),
+				LinkedStorageContentsPayload.createSnapshot(serverLevel, endpoint.groupId()).hostDescriptor()));
 	}
 
-	private static int getBaseInventorySlots(IBackpackWrapper host) {
+	private static int getBaseInventorySlots(IStorageWrapper host) {
 		return host.getInventoryHandler().size() + host.getColumnsTaken() * host.getNumberOfSlotRows();
 	}
 
@@ -114,6 +116,7 @@ public abstract class BackpackContext {
 		buffer.writeVarInt(snapshot.inventorySlots());
 		buffer.writeVarInt(snapshot.upgradeSlots());
 		buffer.writeVarInt(snapshot.columnsTaken());
+		FriendlyByteBuf.writeNbt(buffer, snapshot.hostDescriptor());
 	}
 
 	public abstract void addToBuffer(FriendlyByteBuf buffer);
@@ -179,6 +182,7 @@ public abstract class BackpackContext {
 					.parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), Objects.requireNonNull(buffer.readNbt())).getOrThrow();
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.updateHostDescriptor(groupId, Objects.requireNonNull(buffer.readNbt()));
 			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 	}
@@ -841,6 +845,6 @@ public abstract class BackpackContext {
 	}
 
 	private record LinkedStorageSnapshot(UUID groupId, long revision, ContainerContents contents, Component groupName, int inventorySlots, int upgradeSlots,
-			int columnsTaken) {
+			int columnsTaken, CompoundTag hostDescriptor) {
 	}
 }

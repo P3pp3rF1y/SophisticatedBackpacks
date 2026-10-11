@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointProvider;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 
 import java.util.Optional;
@@ -25,7 +26,18 @@ public interface IBackpackWrapper extends IStorageWrapper, ILinkedStorageEndpoin
 	IBackpackWrapper setBackpackStack(ItemStack backpackStack);
 
 	@Override
-	BackpackSettingsHandler getSettingsHandler();
+	SettingsHandler getSettingsHandler();
+
+	default boolean supportsBackpackContents() {
+		return true;
+	}
+
+	default Optional<ContainerContents> getCanonicalBackpackContents() {
+		return Optional.empty();
+	}
+
+	default void markBackpackContentsChanged() {
+	}
 
 	ItemStack getBackpack();
 
