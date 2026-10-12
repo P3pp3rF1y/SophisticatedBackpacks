@@ -17,10 +17,18 @@ import java.util.function.IntConsumer;
 
 public interface IBackpackWrapper extends IStorageWrapper, ILinkedStorageEndpointProvider {
 
-	@Override
-	BackpackSettingsHandler getSettingsHandler();
-
 	ItemStack getBackpack();
+
+	default boolean supportsBackpackContents() {
+		return true;
+	}
+
+	default Optional<CompoundTag> getBackpackContents() {
+		return Optional.empty();
+	}
+
+	default void markBackpackContentsChanged() {
+	}
 
 	@Override
 	default Optional<LinkedStorageEndpointData> getLinkedStorageEndpoint() {

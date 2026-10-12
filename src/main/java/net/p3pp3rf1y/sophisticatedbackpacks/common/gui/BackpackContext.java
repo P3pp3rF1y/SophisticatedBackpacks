@@ -29,6 +29,7 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -92,15 +93,19 @@ public abstract class BackpackContext {
 		}
 		ILinkedStorageVirtualHost virtualHost = manager.resolveVirtualHost(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack host for group " + endpoint.groupId()));
-		if (!(virtualHost instanceof IBackpackWrapper host)) {
-			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a backpack host");
+		if (!(virtualHost instanceof IStorageWrapper host)) {
+			throw new IllegalStateException("Linked storage group " + endpoint.groupId() + " does not have a storage host");
 		}
 		ILinkedStorageContents contents = manager.resolveContents(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack contents for group " + endpoint.groupId()));
+		LinkedStorageHostDescriptor descriptor = manager.getHostDescriptor(endpoint.groupId()).orElseThrow();
+		CompoundTag hostDescriptor = new CompoundTag();
+		hostDescriptor.putString(LinkedStorageHostDescriptor.FACTORY_ID_TAG, descriptor.factoryId().toString());
+		hostDescriptor.put(LinkedStorageHostDescriptor.VIRTUAL_CARRIER_TAG, virtualHost.getVirtualCarrierSnapshot().orElseGet(descriptor::virtualCarrier));
 		return Optional.of(new LinkedStorageSnapshot(endpoint.groupId(), manager.getRevision(endpoint.groupId()), contents.getContents().copy(),
 				virtualHost.getLinkedStorageDisplayName().orElse(host.getDisplayName()),
 				host.getInventoryHandler().getSlots() + host.getColumnsTaken() * host.getNumberOfSlotRows(), host.getUpgradeHandler().getSlots(),
-				host.getColumnsTaken()));
+				host.getColumnsTaken(), hostDescriptor));
 	}
 
 	private static void writeLinkedStorageSnapshot(FriendlyByteBuf buffer, LinkedStorageSnapshot snapshot) {
@@ -111,6 +116,7 @@ public abstract class BackpackContext {
 		buffer.writeVarInt(snapshot.inventorySlots());
 		buffer.writeVarInt(snapshot.upgradeSlots());
 		buffer.writeVarInt(snapshot.columnsTaken());
+		buffer.writeNbt(snapshot.hostDescriptor());
 	}
 
 	public abstract void addToBuffer(FriendlyByteBuf packetBuffer);
@@ -173,6 +179,7 @@ public abstract class BackpackContext {
 			CompoundTag contents = Objects.requireNonNull(buffer.readNbt());
 			Component groupName = buffer.readComponent();
 			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.updateHostDescriptor(groupId, Objects.requireNonNull(buffer.readNbt()));
 			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 	}
@@ -860,6 +867,6 @@ public abstract class BackpackContext {
 	}
 
 	private record LinkedStorageSnapshot(UUID groupId, long revision, CompoundTag contents, Component groupName, int inventorySlots, int upgradeSlots,
-			int columnsTaken) {
+			int columnsTaken, CompoundTag hostDescriptor) {
 	}
 }

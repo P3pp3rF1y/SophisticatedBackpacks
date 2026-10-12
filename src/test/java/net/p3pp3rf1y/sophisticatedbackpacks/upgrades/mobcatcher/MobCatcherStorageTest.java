@@ -2,13 +2,36 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 class MobCatcherStorageTest {
+	@Test
+	void capturedMobsUseCanonicalContentsAndNotifyTheirHost() {
+		IBackpackWrapper wrapper = mock(IBackpackWrapper.class);
+		CompoundTag canonicalContents = new CompoundTag();
+		when(wrapper.supportsBackpackContents()).thenReturn(true);
+		when(wrapper.getBackpackContents()).thenReturn(Optional.of(canonicalContents));
+		MobCatcherStorage.addCapturedMob(wrapper, capturedMob(3, 2, 2));
+		assertEquals(1, MobCatcherStorage.getCapturedMobs(wrapper).size());
+		verify(wrapper).markBackpackContentsChanged();
+		verify(wrapper).attachInventorySlotBlockers();
+		verify(wrapper, never()).getContentsUuid();
+	}
+
+	@Test
+	void foreignCanonicalHostCannotPersistMobCatcherData() {
+		IBackpackWrapper wrapper = mock(IBackpackWrapper.class);
+		assertThrows(IllegalStateException.class, () -> MobCatcherStorage.addCapturedMob(wrapper, capturedMob(3, 2, 2)));
+		verify(wrapper, never()).getContentsUuid();
+	}
 	@Test
 	void villagerSizedMobKeepsFootprintCloseToAabbRatioWithoutExcessiveOverfill() {
 		assertEquals(new CapturedMobFootprint(3, 7), MobCatcherStorage.getFootprint(0.6F, 1.95F, 20));

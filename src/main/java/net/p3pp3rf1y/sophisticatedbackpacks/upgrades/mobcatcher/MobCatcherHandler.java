@@ -29,13 +29,21 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.MobCatcherCaptureEffectMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
+import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageContentsMessage;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,12 +59,12 @@ public class MobCatcherHandler {
 		if (!(stack.getItem() instanceof BackpackItem)) {
 			return InteractionResult.PASS;
 		}
-
-		Optional<IBackpackWrapper> backpackWrapper = stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).resolve();
-		if (backpackWrapper.isEmpty()) {
-			return InteractionResult.PASS;
+		if (player.level().isClientSide && isProjectedPrimaryMobCatcher(stack)) {
+			return InteractionResult.SUCCESS;
 		}
-		Optional<MobCatcherUpgradeWrapper> upgradeWrapper = getBestUpgrade(backpackWrapper.get());
+
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.level(), stack);
+		Optional<MobCatcherUpgradeWrapper> upgradeWrapper = getBestUpgrade(backpackWrapper);
 		if (upgradeWrapper.isEmpty()) {
 			return InteractionResult.PASS;
 		}
@@ -65,9 +73,14 @@ public class MobCatcherHandler {
 			return InteractionResult.SUCCESS;
 		}
 
-		CaptureResult result = capture((ServerPlayer) player, backpackWrapper.get(), entity, upgradeWrapper.get().isAdvanced());
+		CaptureResult result = capture((ServerPlayer) player, backpackWrapper, entity, upgradeWrapper.get().isAdvanced());
 		player.displayClientMessage(result.message(), true);
 		return result.success() ? InteractionResult.CONSUME : InteractionResult.FAIL;
+	}
+
+	static boolean isProjectedPrimaryMobCatcher(ItemStack stack) {
+		return LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT
+				&& LinkedStorageStackData.isPrimaryEndpoint(stack) && stack.hasTag() && stack.getTag().getBoolean("linked_mob_catcher");
 	}
 
 	private static CaptureResult capture(ServerPlayer player, IBackpackWrapper backpackWrapper, LivingEntity entity, boolean advanced) {
@@ -137,7 +150,8 @@ public class MobCatcherHandler {
 		if (!(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
-		IBackpackWrapper backpackWrapper = backpackContainer.getBackpackContext().getBackpackWrapper(player);
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveForGlobalUpgradeProcessing(player.serverLevel(),
+				backpackContainer.getBackpackContext().getBackpackWrapper(player).getBackpack());
 		Optional<CapturedMob> capturedMob = MobCatcherStorage.getCapturedMob(backpackWrapper, capturedMobId);
 		if (capturedMob.isEmpty()) {
 			return;
@@ -285,6 +299,21 @@ public class MobCatcherHandler {
 	}
 
 	public static void syncCapturedMobs(ServerPlayer player, IBackpackWrapper backpackWrapper) {
+		Optional<UUID> linkedGroupId = backpackWrapper instanceof BackpackLinkedStorageHostWrapper
+				? backpackWrapper.getContentsUuid()
+				: backpackWrapper.getLinkedStorageEndpoint().map(endpoint -> endpoint.groupId());
+		if (linkedGroupId.isPresent()) {
+			UUID groupId = linkedGroupId.orElseThrow();
+			LinkedStorageContentsMessage snapshot = LinkedStorageContentsMessage.createSnapshot(player.serverLevel(), groupId);
+			for (ServerPlayer viewer : player.server.getPlayerList().getPlayers()) {
+				if (viewer.containerMenu instanceof StorageContainerMenuBase<?> menu
+						&& menu.getStorageWrapper() instanceof ILinkedStorageEndpointProvider provider
+						&& provider.getLinkedStorageEndpoint().filter(endpoint -> endpoint.groupId().equals(groupId)).isPresent()) {
+					PacketHandler.INSTANCE.sendToClient(viewer, snapshot);
+				}
+			}
+			return;
+		}
 		backpackWrapper.getContentsUuid().ifPresent(uuid -> {
 			SBPPacketHandler.INSTANCE.sendToClient(player, new BackpackContentsMessage(uuid, MobCatcherStorage.getCapturedMobsTag(backpackWrapper)));
 			for (ServerPlayer viewer : player.server.getPlayerList().getPlayers()) {

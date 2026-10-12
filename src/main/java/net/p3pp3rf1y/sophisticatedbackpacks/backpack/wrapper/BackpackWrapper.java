@@ -168,6 +168,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return contentsSource.getContents();
 	}
 
+	@Override
+	public Optional<CompoundTag> getBackpackContents() {
+		return getContentsUuid().map(uuid -> getBackpackContentsNbt());
+	}
+
+	@Override
+	public void markBackpackContentsChanged() {
+		contentsSource.markDirty();
+	}
+
 	CompoundTag copyContentsForLinkedStorage() {
 		return getBackpackContentsNbt().copy();
 	}
@@ -508,7 +518,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 
 		CompoundTag backpackContent = templateData.get().getCompound("backpackContents").copy();
-		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), backpackContent);
+		contentsSource.setContents(backpackContent);
 		NBTHelper.removeTag(backpack, TEMPLATE_NAME_TAG);
 	}
 

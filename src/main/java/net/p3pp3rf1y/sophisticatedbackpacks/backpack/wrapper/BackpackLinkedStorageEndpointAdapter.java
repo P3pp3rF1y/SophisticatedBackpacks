@@ -12,10 +12,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageItemEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageVirtualHost;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupManager;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostDescriptor;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSnapshotProfile;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -38,6 +40,10 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 
 	@Override
 	public Compatibility getCompatibility(ServerLevel level, ItemStack stack, LinkedStorageHostDescriptor hostDescriptor) {
+		String compatibilityKey = hostDescriptor.virtualCarrier().getString("compatibilityKey");
+		if (!factoryId().equals(hostDescriptor.factoryId()) && !compatibilityKey.isEmpty() && !"standard".equals(compatibilityKey)) {
+			return Compatibility.INCOMPATIBLE;
+		}
 		return new BackpackWrapper(stack).getContentsUuid().flatMap(BackpackStorage.get(level)::getBackpackContents)
 				.map(BackpackLinkedStorageEndpointAdapter::hasItems).filter(Boolean::booleanValue).map(value -> Compatibility.HAS_CONTENTS)
 				.orElse(Compatibility.COMPATIBLE);
@@ -67,14 +73,22 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public void bindEndpoint(ServerLevel level, ItemStack stack, LinkedStorageEndpointData endpoint) {
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		ItemStack primaryCarrier = ItemStack.of(manager.getHostDescriptor(endpoint.groupId()).orElseThrow().virtualCarrier());
+		LinkedStorageHostDescriptor hostDescriptor = manager.getHostDescriptor(endpoint.groupId()).orElseThrow();
 		BackpackWrapper wrapper = new BackpackWrapper(stack);
 		int columnsTaken = wrapper.getColumnsTaken();
 		wrapper.removeContentsUuid();
 		if (manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId())) {
 			manager.resolveContents(endpoint.groupId()).orElseThrow().setColumnsTaken(columnsTaken);
 		}
-		copySlotSizes(stack, primaryCarrier);
+		if (factoryId().equals(hostDescriptor.factoryId())) {
+			copySlotSizes(stack, ItemStack.of(hostDescriptor.virtualCarrier()));
+		} else {
+			LinkedStorageSnapshotProfile profile = manager.resolveVirtualHost(endpoint, false)
+					.flatMap(ILinkedStorageVirtualHost::getLinkedStorageSnapshotProfile).orElseThrow();
+			stack.getOrCreateTag().putInt("inventorySlots", profile.inventorySlots());
+			stack.getOrCreateTag().putInt("upgradeSlots", profile.upgradeSlots());
+			stack.getOrCreateTag().putInt("columnsTaken", profile.columnsTaken());
+		}
 		LinkedStorageStackData.setEndpoint(stack, endpoint);
 		LinkedStorageStackData.setPrimaryEndpoint(stack, manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId()));
 		LinkedStorageStackData.setRenderRevision(stack, -1);

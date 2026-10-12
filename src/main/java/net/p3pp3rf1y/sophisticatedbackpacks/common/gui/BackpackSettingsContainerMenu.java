@@ -57,7 +57,10 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 				if (snapshotChanged || settingsChanged) {
 					ILinkedStorageContents contents = ClientLinkedStorageContents.getContents(groupId)
 							.orElseThrow(() -> new IllegalStateException("Updated linked backpack group has no snapshot: " + groupId));
-					storageWrapper.getSettingsHandler().reloadFrom(contents.getContents());
+					if (snapshotChanged) {
+						storageWrapper.attachInventorySlotBlockers();
+					}
+					storageWrapper.getSettingsHandler().reloadFromStorageContents(contents.getContents());
 				}
 				return;
 			}

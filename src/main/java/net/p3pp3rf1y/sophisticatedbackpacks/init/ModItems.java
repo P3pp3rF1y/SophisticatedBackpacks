@@ -57,6 +57,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeReci
 import net.p3pp3rf1y.sophisticatedbackpacks.data.CopyBackpackDataFunction;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootEnabledCondition;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootModifierProvider;
+import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackSettingsTabControl;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeTab;
@@ -492,6 +493,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(ADVANCED_ALCHEMY_UPGRADE.getId(), ADVANCED_ALCHEMY_TYPE);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			BackpackSettingsTabControl.registerFactories();
 			MenuScreens.register(BACKPACK_CONTAINER_TYPE.get(), BackpackScreen::constructScreen);
 			MenuScreens.register(SETTINGS_CONTAINER_TYPE.get(), BackpackSettingsScreen::constructScreen);
 

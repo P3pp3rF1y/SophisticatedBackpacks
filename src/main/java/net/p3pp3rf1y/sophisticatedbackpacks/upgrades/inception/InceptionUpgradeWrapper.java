@@ -56,7 +56,9 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	private void initSubBackpacksHandler() {
-		subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler());
+		if (subBackpacksHandler == null) {
+			subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler());
+		}
 	}
 
 	@Override

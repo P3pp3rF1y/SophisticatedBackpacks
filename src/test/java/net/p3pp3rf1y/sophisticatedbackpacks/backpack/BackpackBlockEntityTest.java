@@ -4,9 +4,14 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageHostFactories;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import sun.misc.Unsafe;
@@ -16,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BackpackBlockEntityTest {
@@ -26,6 +32,15 @@ class BackpackBlockEntityTest {
 		SharedConstants.tryDetectVersion();
 		Bootstrap.bootStrap();
 		testBackpack = registerBackpack("backpack_block_entity_persistence_test", 36, 4);
+	}
+
+	@Test
+	void getLinkedStorageBlockEndpointAdapterAcceptsStorageHostsLikeTheBackpackItemAdapter() throws ReflectiveOperationException {
+		LinkedStorageHostFactories.registerCompatibility(BackpackLinkedStorageHostWrapper.FACTORY_ID, new ResourceLocation("sophisticatedstorage", "storage"));
+		ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> adapter = uninitializedBackpackBlockEntity().getLinkedStorageBlockEndpointAdapter();
+		assertTrue(adapter.acceptsHostFactory(new ResourceLocation("sophisticatedstorage", "storage")));
+		assertTrue(adapter.acceptsHostFactory(BackpackLinkedStorageHostWrapper.FACTORY_ID));
+		assertFalse(adapter.acceptsHostFactory(new ResourceLocation("other", "host")));
 	}
 
 	@Test

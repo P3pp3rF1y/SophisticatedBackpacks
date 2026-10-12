@@ -22,6 +22,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateManager;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
@@ -111,7 +112,11 @@ public class TemplateCommand {
 			return 2;
 		}
 
-		IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
+		IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(player.serverLevel(), backpack);
+		if (!backpackWrapper.supportsBackpackContents()) {
+			source.sendFailure(Component.translatable("commands.sophisticatedbackpacks.template.unsupported_host"));
+			return 5;
+		}
 		Optional<UUID> backpackUuid = backpackWrapper.getContentsUuid();
 		if (backpackUuid.isEmpty()
 				|| (InventoryHelper.isEmpty(backpackWrapper.getInventoryHandler()) && InventoryHelper.isEmpty(backpackWrapper.getUpgradeHandler()))) {

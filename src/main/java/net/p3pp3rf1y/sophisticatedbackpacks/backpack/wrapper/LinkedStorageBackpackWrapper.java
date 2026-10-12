@@ -17,6 +17,7 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
@@ -28,7 +29,7 @@ import java.util.function.IntConsumer;
 
 public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	private final BackpackWrapper physicalBackpack;
-	private final IBackpackWrapper canonicalHost;
+	private final IStorageWrapper canonicalHost;
 	@Nullable
 	private final LinkedStorageEndpointData endpoint;
 	private Runnable unsubscribe = () -> {
@@ -49,7 +50,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	};
 	private boolean synchronizingPhysicalProjection = false;
 
-	public LinkedStorageBackpackWrapper(BackpackWrapper physicalBackpack, IBackpackWrapper canonicalHost) {
+	public LinkedStorageBackpackWrapper(BackpackWrapper physicalBackpack, IStorageWrapper canonicalHost) {
 		this.physicalBackpack = physicalBackpack;
 		this.canonicalHost = canonicalHost;
 		endpoint = LinkedStorageStackData.getEndpoint(physicalBackpack.getBackpack());
@@ -176,7 +177,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		return canonicalHost.getUpgradeHandler();
 	}
 	@Override
-	public BackpackSettingsHandler getSettingsHandler() {
+	public SettingsHandler getSettingsHandler() {
 		return canonicalHost.getSettingsHandler();
 	}
 	@Override
@@ -254,7 +255,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	}
 	@Override
 	public String getStorageType() {
-		return physicalBackpack.getStorageType();
+		return canonicalHost.getStorageType();
 	}
 	@Override
 	public Component getDisplayName() {
@@ -264,6 +265,21 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	public ItemStack getBackpack() {
 		return physicalBackpack.getBackpack();
 	}
+
+	@Override
+	public boolean supportsBackpackContents() {
+		return canonicalHost instanceof IBackpackWrapper backpackHost && backpackHost.supportsBackpackContents();
+	}
+
+	@Override
+	public Optional<CompoundTag> getBackpackContents() {
+		return canonicalHost instanceof IBackpackWrapper backpackHost ? backpackHost.getBackpackContents() : Optional.empty();
+	}
+
+	@Override
+	public void markBackpackContentsChanged() {
+		requireBackpackHost("contents update").markBackpackContentsChanged();
+	}
 	@Override
 	public ItemStack cloneBackpack() {
 		ItemStack copy = physicalBackpack.cloneBackpack();
@@ -272,23 +288,23 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	}
 	@Override
 	public void copyDataTo(IStorageWrapper other) {
-		canonicalHost.copyDataTo(other);
+		requireBackpackHost("data copying").copyDataTo(other);
 	}
 	@Override
 	public void setSlotNumbers(int inventorySlots, int upgradeSlots) {
-		canonicalHost.setSlotNumbers(inventorySlots, upgradeSlots);
+		requireBackpackHost("slot resizing").setSlotNumbers(inventorySlots, upgradeSlots);
 	}
 	@Override
 	public void setLoot(ResourceLocation lootTableName, float percentage) {
-		physicalBackpack.setLoot(lootTableName, percentage);
+		requireBackpackHost("loot assignment").setLoot(lootTableName, percentage);
 	}
 	@Override
 	public void setTemplate(ResourceLocation templateName) {
-		physicalBackpack.setTemplate(templateName);
+		requireBackpackHost("template assignment").setTemplate(templateName);
 	}
 	@Override
 	public void fillFromTemplate() {
-		canonicalHost.fillFromTemplate();
+		requireBackpackHost("template application").fillFromTemplate();
 	}
 	@Override
 	public void setContentsUuid(UUID storageUuid) {
@@ -316,6 +332,13 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 		upgradeCachesInvalidatedHandler = handler;
 		canonicalHost.setUpgradeCachesInvalidatedHandler(handler);
 	}
+
+	private IBackpackWrapper requireBackpackHost(String operation) {
+		if (!(canonicalHost instanceof IBackpackWrapper backpackHost)) {
+			throw new IllegalStateException("Backpack " + operation + " requires a Backpack-native canonical host");
+		}
+		return backpackHost;
+	}
 	@Override
 	public void registerOnSlotsChangeListener(IntConsumer listener) {
 		slotsChangeListener = listener;
@@ -330,7 +353,6 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void registerOnInventoryHandlerRefreshListener(Runnable listener) {
 		inventoryRefreshHandler = listener;
-		canonicalHost.registerOnInventoryHandlerRefreshListener(listener);
 	}
 	@Override
 	public void registerOnInventoryInputOutputHandlerRefreshListener(Runnable listener) {
@@ -338,6 +360,7 @@ public class LinkedStorageBackpackWrapper implements IBackpackWrapper {
 	}
 	@Override
 	public void unregisterOnInventoryHandlerRefreshListener() {
-		canonicalHost.unregisterOnInventoryHandlerRefreshListener();
+		inventoryRefreshHandler = () -> {
+		};
 	}
 }

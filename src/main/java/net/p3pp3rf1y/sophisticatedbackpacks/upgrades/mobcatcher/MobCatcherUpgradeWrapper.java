@@ -43,6 +43,10 @@ public class MobCatcherUpgradeWrapper extends UpgradeWrapperBase<MobCatcherUpgra
 		super(storageWrapper, upgrade, upgradeSaveHandler);
 	}
 
+	public Optional<IBackpackWrapper> getBackpackWrapper() {
+		return storageWrapper instanceof IBackpackWrapper backpackWrapper ? Optional.of(backpackWrapper) : Optional.empty();
+	}
+
 	public boolean isAdvanced() {
 		return upgradeItem.isAdvanced();
 	}

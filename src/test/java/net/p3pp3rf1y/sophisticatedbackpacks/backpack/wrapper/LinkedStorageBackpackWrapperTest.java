@@ -36,6 +36,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -151,6 +153,57 @@ class LinkedStorageBackpackWrapperTest {
 	}
 
 	@Test
+	void setBackpackTemplateCopiesCanonicalRootWithoutOrdinaryStorage() {
+		TestContents contents = new TestContents();
+		contents.contents.putString("marker", "canonical");
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, backpack());
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(backpack()), host);
+		net.minecraft.resources.ResourceLocation name = new net.minecraft.resources.ResourceLocation("test", "linked_template");
+		BackpackTemplateStorage templates = mock(BackpackTemplateStorage.class);
+		try (MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class);
+				MockedStatic<BackpackTemplateStorage> storedTemplates = Mockito.mockStatic(BackpackTemplateStorage.class)) {
+			storedTemplates.when(BackpackTemplateStorage::get).thenReturn(templates);
+			BackpackTemplates.setBackpackTemplate(name, facade);
+			org.mockito.ArgumentCaptor<CompoundTag> saved = org.mockito.ArgumentCaptor.forClass(CompoundTag.class);
+			Mockito.verify(templates).setBackpackTemplate(Mockito.eq(name), saved.capture());
+			assertEquals("canonical", saved.getValue().getCompound("backpackContents").getString("marker"));
+			saved.getValue().getCompound("backpackContents").putString("marker", "changed");
+			assertEquals("canonical", contents.contents.getString("marker"));
+			ordinary.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void fillFromTemplateReplacesCanonicalRootWithoutOrdinaryStorage() {
+		TestContents contents = new TestContents();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, backpack());
+		CompoundTag template = new CompoundTag();
+		CompoundTag templateRoot = new CompoundTag();
+		templateRoot.putString("marker", "template");
+		template.put("backpackContents", templateRoot);
+		net.minecraft.resources.ResourceLocation name = new net.minecraft.resources.ResourceLocation("test", "linked_template");
+		host.setTemplate(name);
+		try (MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class);
+				MockedStatic<BackpackTemplates> templates = Mockito.mockStatic(BackpackTemplates.class)) {
+			templates.when(() -> BackpackTemplates.getBackpackTemplate(name)).thenReturn(Optional.of(template));
+			host.fillFromTemplate();
+			assertEquals("template", contents.contents.getString("marker"));
+			ordinary.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void templateOperationsRejectForeignHostsInsteadOfUsingAnOrdinaryBackend() {
+		IStorageWrapper foreignHost = mock(IStorageWrapper.class);
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(backpack()), foreignHost);
+		assertFalse(facade.supportsBackpackContents());
+		assertTrue(facade.getBackpackContents().isEmpty());
+		assertThrows(IllegalStateException.class,
+				() -> BackpackTemplates.setBackpackTemplate(new net.minecraft.resources.ResourceLocation("test", "foreign"), facade));
+		assertThrows(IllegalStateException.class, facade::fillFromTemplate);
+	}
+
+	@Test
 	void linkedContentsRebindsInventoryAndUpgrades() {
 		TestContents contents = new TestContents();
 		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, backpack());
@@ -164,6 +217,21 @@ class LinkedStorageBackpackWrapperTest {
 		assertNotSame(inventory, host.getInventoryHandler());
 		assertNotSame(settings, host.getSettingsHandler());
 		assertNotSame(upgrades, host.getUpgradeHandler());
+	}
+
+	@Test
+	void fillWithLootDelegatesToForeignCanonicalHostWithoutOrdinaryStorage() {
+		IStorageWrapper foreignHost = mock(IStorageWrapper.class);
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(backpack()), foreignHost);
+		Player player = mock(Player.class);
+
+		try (MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class)) {
+			facade.fillWithLoot(player);
+
+			Mockito.verify(foreignHost).fillWithLoot(player);
+			ordinary.verifyNoInteractions();
+			assertThrows(IllegalStateException.class, () -> facade.setLoot(new net.minecraft.resources.ResourceLocation("test", "foreign"), 1));
+		}
 	}
 
 	@Test
@@ -656,13 +724,16 @@ class LinkedStorageBackpackWrapperTest {
 		when(manager.resolveVirtualHost(groupId)).thenReturn(Optional.of(host));
 		when(manager.subscribeToGroupChanges(Mockito.eq(groupId), Mockito.any())).thenReturn(() -> {
 		});
-		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class)) {
+		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class);
+				MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class)) {
 			groups.when(() -> LinkedStorageGroupsSavedData.get(level)).thenReturn(savedData);
 
 			IBackpackWrapper resolved = BackpackLinkedStorageResolver.resolve(level, endpoint).orElseThrow();
 
 			assertSame(host.getInventoryHandler(), resolved.getInventoryHandler());
 			assertEquals(groupId, resolved.getContentsUuid().orElseThrow());
+			assertFalse(endpoint.getTag().hasUUID(BackpackWrapper.CONTENTS_UUID_TAG));
+			ordinary.verifyNoInteractions();
 			Mockito.verify(manager).subscribeToGroupChanges(Mockito.eq(groupId), Mockito.any());
 		}
 	}
