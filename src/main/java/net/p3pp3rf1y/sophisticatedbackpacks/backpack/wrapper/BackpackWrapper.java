@@ -224,6 +224,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return contentsSource.getContents();
 	}
 
+	@Override
+	public Optional<ContainerContents> getCanonicalBackpackContents() {
+		return Optional.of(getBackpackContents());
+	}
+
+	@Override
+	public void markBackpackContentsChanged() {
+		markBackpackContentsDirty();
+	}
+
 	ContainerContents copyContentsForLinkedStorage() {
 		return getBackpackContents().copy();
 	}
@@ -616,7 +626,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return;
 		}
 
-		BackpackStorage.get().setBackpackContents(getOrCreateContentsUuid(), templateData.get().contents());
+		contentsSource.setContents(templateData.get().contents().copy());
+		onContentsUpdated();
 		backpack.remove(ModDataComponents.TEMPLATE_NAME);
 	}
 

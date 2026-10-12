@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackSettingsPayload;
@@ -47,7 +48,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 
 	@Override
 	protected <C extends ISettingsCategory<?, ?>, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
-		if (name.equals(MainSettingsCategory.NAME)) {
+		if (name.equals(MainSettingsCategory.NAME) && storageWrapper.getSettingsHandler() instanceof BackpackSettingsHandler) {
 			// noinspection unchecked
 			return (ISettingsContainerFactory<C, T>) MAIN_SETTINGS_CONTAINER_FACTORY_OVERRIDE;
 		}

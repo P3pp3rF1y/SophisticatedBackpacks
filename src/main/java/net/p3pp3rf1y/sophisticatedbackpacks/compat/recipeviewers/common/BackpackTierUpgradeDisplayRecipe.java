@@ -50,7 +50,8 @@ public record BackpackTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<Craft
 
 	private static void setSlotNumbers(ItemStack stack) {
 		BackpackItem backpackItem = (BackpackItem) stack.getItem();
-		BackpackWrapper.fromStack(stack).setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
+		stack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, backpackItem.getNumberOfSlots());
+		stack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, backpackItem.getNumberOfUpgradeSlots());
 	}
 
 	private static BackpackTierUpgradeVariantPair withComponentsFromResult(BackpackTierUpgradeVariantPair pair, ItemStack resultStack) {

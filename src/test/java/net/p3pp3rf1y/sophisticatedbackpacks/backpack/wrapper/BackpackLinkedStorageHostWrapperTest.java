@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -44,6 +45,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplate;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplateStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
@@ -52,7 +56,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.CapturedMob;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherStorage;
 import net.p3pp3rf1y.sophisticatedcore.api.IDiscHandler;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
@@ -109,7 +116,8 @@ class BackpackLinkedStorageHostWrapperTest {
 		Bootstrap.bootStrap();
 		Bootstrap.validate();
 		bindTestComponents(Items.DIAMOND, Items.DIRT, Items.STICK, ModItems.BACKPACK.get(), ModItems.GOLD_BACKPACK.get(), ModItems.DIAMOND_BACKPACK.get(),
-				ModItems.ADVANCED_REFILL_UPGRADE.get(), ModItems.JUKEBOX_UPGRADE.get());
+				ModItems.ADVANCED_REFILL_UPGRADE.get(), ModItems.JUKEBOX_UPGRADE.get(), ModItems.TANK_UPGRADE.get(), Items.EXPERIENCE_BOTTLE, Items.POTION,
+				Items.GLASS_BOTTLE);
 		loadDefaultConfig(Config.SERVER_SPEC);
 	}
 
@@ -117,6 +125,63 @@ class BackpackLinkedStorageHostWrapperTest {
 		DataComponentMap components = DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build();
 		for (net.minecraft.world.item.Item item : items) {
 			item.builtInRegistryHolder().bindComponents(components);
+		}
+	}
+
+	@Test
+	void foreignCanonicalHostRejectsBackpackOnlyMutationsAndDelegatesResources() {
+		IStorageWrapper storageHost = Mockito.mock(IStorageWrapper.class);
+		Mockito.when(storageHost.getStorageType()).thenReturn("chest");
+		IStorageFluidHandler fluid = Mockito.mock(IStorageFluidHandler.class);
+		Mockito.when(storageHost.getFluidHandler()).thenReturn(Optional.of(fluid));
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), storageHost);
+
+		assertFalse(facade.supportsBackpackContents());
+		assertSame(fluid, facade.getItemFluidHandler().orElseThrow());
+		assertTrue(facade.getCanonicalBackpackContents().isEmpty());
+		assertThrows(IllegalStateException.class, facade::fillFromTemplate);
+		assertThrows(IllegalStateException.class, () -> facade.setSlotNumbers(27, 1));
+		assertThrows(IllegalStateException.class, () -> facade.copyDataTo(storageHost));
+	}
+
+	@Test
+	void linkedTemplateExportCopiesCanonicalContentsWithoutOrdinaryUuidStorage() {
+		TestContentsBinding contents = new TestContentsBinding();
+		contents.contents().settings().setSearchPhrase("original");
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.BACKPACK.get()));
+		IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+		Identifier templateName = Identifier.parse("sophisticatedbackpacks:canonical_export_test");
+		BackpackTemplateStorage templateStorage = Mockito.mock(BackpackTemplateStorage.class);
+
+		try (MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class);
+				MockedStatic<BackpackTemplateStorage> templates = Mockito.mockStatic(BackpackTemplateStorage.class)) {
+			templates.when(BackpackTemplateStorage::get).thenReturn(templateStorage);
+			BackpackTemplates.setBackpackTemplate(templateName, facade);
+			ArgumentCaptor<BackpackTemplate> captured = ArgumentCaptor.forClass(BackpackTemplate.class);
+			Mockito.verify(templateStorage).setBackpackTemplate(Mockito.eq(templateName), captured.capture());
+			assertNotSame(contents.contents(), captured.getValue().contents());
+			assertEquals("original", captured.getValue().contents().settings().searchPhrase());
+			captured.getValue().contents().settings().setSearchPhrase("changed");
+			assertEquals("original", contents.contents().settings().searchPhrase());
+			ordinary.verifyNoInteractions();
+		}
+	}
+
+	@Test
+	void capturedMobsSurviveHostReconstructionAndRemainCanonicalForEveryFacade() {
+		TestContentsBinding contents = new TestContentsBinding();
+		try (MockedStatic<BackpackStorage> ordinary = Mockito.mockStatic(BackpackStorage.class)) {
+			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			IBackpackWrapper facade = new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.BACKPACK.get())), host);
+			CapturedMob mob = new CapturedMob(UUID.randomUUID(), Identifier.parse("minecraft:pig"), new CompoundTag(), 0, 1, 1, 1, false, "Pig", 10, 10);
+			MobCatcherStorage.addCapturedMob(facade, mob);
+			BackpackLinkedStorageHostWrapper reconstructed = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+			assertSame(contents.contents(), facade.getCanonicalBackpackContents().orElseThrow());
+			assertEquals(List.of(mob), MobCatcherStorage.getCapturedMobs(reconstructed));
+			assertTrue(contents.dirtyCount > 0);
+			MobCatcherStorage.removeCapturedMob(reconstructed, mob.id());
+			assertTrue(MobCatcherStorage.getCapturedMobs(facade).isEmpty());
+			ordinary.verifyNoInteractions();
 		}
 	}
 
@@ -451,6 +516,35 @@ class BackpackLinkedStorageHostWrapperTest {
 
 		assertEquals(0, contents.dirtyCount);
 		assertEquals(1, contents.renderDirtyCount);
+	}
+
+	@Test
+	void getUpgradeHandlerRemovingLastTankUpdatesOtherLinkedBackpackRenderData() {
+		AtomicReference<LinkedStorageBackpackWrapper> primary = new AtomicReference<>();
+		AtomicReference<LinkedStorageBackpackWrapper> secondary = new AtomicReference<>();
+		TestContentsBinding contents = new TestContentsBinding() {
+			@Override
+			public void markRenderDirty() {
+				super.markRenderDirty();
+				primary.get().onCanonicalContentsChanged();
+				secondary.get().onCanonicalContentsChanged();
+			}
+		};
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, new ItemStack(ModItems.DIAMOND_BACKPACK.get()));
+		primary.set(new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.DIAMOND_BACKPACK.get())), host));
+		secondary.set(new LinkedStorageBackpackWrapper(new BackpackWrapper(new ItemStack(ModItems.DIAMOND_BACKPACK.get())), host));
+		host.getUpgradeHandler().getSlotWrappers();
+		secondary.get().getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+		assertTrue(primary.get().getBackpack().get(ModCoreDataComponents.RENDER_DATA).tanks().containsKey(TankPosition.LEFT));
+		assertTrue(secondary.get().getBackpack().get(ModCoreDataComponents.RENDER_DATA).tanks().containsKey(TankPosition.LEFT));
+		int renderDirtyCountAfterInsertion = contents.renderDirtyCount;
+
+		secondary.get().getUpgradeHandler().setStackInSlot(0, ItemStack.EMPTY);
+
+		assertTrue(host.getRenderDataHandler().getTankRenderData().isEmpty());
+		assertTrue(contents.renderDirtyCount > renderDirtyCountAfterInsertion);
+		assertTrue(primary.get().getBackpack().get(ModCoreDataComponents.RENDER_DATA).tanks().isEmpty());
+		assertTrue(secondary.get().getBackpack().get(ModCoreDataComponents.RENDER_DATA).tanks().isEmpty());
 	}
 
 	@Test
