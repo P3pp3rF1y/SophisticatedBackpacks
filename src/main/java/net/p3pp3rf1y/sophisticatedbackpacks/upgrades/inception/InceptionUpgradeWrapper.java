@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeAccessModifier;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapperAccessor;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
@@ -25,6 +26,7 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 			IFluidHandlerWrapperUpgrade,
 			IEnergyStorageUpgradeWrapper {
 	private SubBackpacksHandler subBackpacksHandler = null;
+	private InventoryHandler subBackpacksInventory = null;
 
 	public InceptionUpgradeWrapper(IStorageWrapper backpackWrapper, ItemStack upgrade, Consumer<ItemStack> upgradeSaveHandler) {
 		super(backpackWrapper, upgrade, upgradeSaveHandler);
@@ -56,7 +58,14 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	}
 
 	private void initSubBackpacksHandler() {
-		subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler());
+		InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
+		if (subBackpacksHandler == null || subBackpacksInventory != inventoryHandler) {
+			subBackpacksHandler = new SubBackpacksHandler(inventoryHandler);
+			subBackpacksInventory = inventoryHandler;
+		} else {
+			// Reuse the inventory listener while still refreshing expired nested-wrapper caches.
+			subBackpacksHandler.refresh();
+		}
 	}
 
 	@Override

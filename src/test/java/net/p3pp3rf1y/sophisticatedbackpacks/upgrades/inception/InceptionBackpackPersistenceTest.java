@@ -31,18 +31,21 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.IUpgradeWrapperAccessor;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.CodecHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -83,6 +86,52 @@ class InceptionBackpackPersistenceTest {
 		StorageWrapperRepository.clearCache();
 		storageUuids.forEach(BackpackStorage.get()::removeBackpackContents);
 		storageUuids.clear();
+	}
+
+	@Test
+	void repeatedInceptionInitializationReusesHandlerAndRefreshesNestedWrappers() throws Throwable {
+		runOnServerThread(() -> {
+			IStorageWrapper storageWrapper = Mockito.mock(IStorageWrapper.class);
+			InventoryHandler inventoryHandler = Mockito.mock(InventoryHandler.class);
+			Mockito.when(storageWrapper.getInventoryHandler()).thenReturn(inventoryHandler);
+			InceptionUpgradeWrapper upgrade = new InceptionUpgradeWrapper(storageWrapper, new ItemStack(ModItems.INCEPTION_UPGRADE.get()), stack -> {
+			});
+
+			try (MockedConstruction<SubBackpacksHandler> handlers = Mockito.mockConstruction(SubBackpacksHandler.class)) {
+				for (int i = 0; i < 1_000; i++) {
+					upgrade.wrapAccessor(Mockito.mock(IUpgradeWrapperAccessor.class));
+				}
+
+				assertEquals(1, handlers.constructed().size());
+				Mockito.verify(handlers.constructed().getFirst(), Mockito.times(999)).refresh();
+			}
+		});
+	}
+
+	@Test
+	void inceptionInitializationRebindsWhenUnderlyingInventoryChanges() throws Throwable {
+		runOnServerThread(() -> {
+			IStorageWrapper storageWrapper = Mockito.mock(IStorageWrapper.class);
+			InventoryHandler firstInventory = Mockito.mock(InventoryHandler.class);
+			InventoryHandler replacementInventory = Mockito.mock(InventoryHandler.class);
+			Mockito.when(storageWrapper.getInventoryHandler()).thenReturn(firstInventory, firstInventory, replacementInventory, replacementInventory);
+			InceptionUpgradeWrapper upgrade = new InceptionUpgradeWrapper(storageWrapper, new ItemStack(ModItems.INCEPTION_UPGRADE.get()), stack -> {
+			});
+			List<Object> boundInventories = new ArrayList<>();
+
+			try (MockedConstruction<SubBackpacksHandler> handlers = Mockito.mockConstruction(SubBackpacksHandler.class,
+					(handler, context) -> boundInventories.add(context.arguments().getFirst()))) {
+				for (int i = 0; i < 4; i++) {
+					upgrade.wrapAccessor(Mockito.mock(IUpgradeWrapperAccessor.class));
+				}
+
+				assertEquals(2, handlers.constructed().size());
+				assertSame(firstInventory, boundInventories.getFirst());
+				assertSame(replacementInventory, boundInventories.get(1));
+				Mockito.verify(handlers.constructed().getFirst()).refresh();
+				Mockito.verify(handlers.constructed().get(1)).refresh();
+			}
+		});
 	}
 
 	@Test
