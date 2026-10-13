@@ -12,6 +12,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeType;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class MobCatcherUpgradeItem extends UpgradeItemBase<MobCatcherUpgradeWrapper> {
@@ -40,9 +41,11 @@ public class MobCatcherUpgradeItem extends UpgradeItemBase<MobCatcherUpgradeWrap
 
 	@Override
 	public UpgradeSlotChangeResult canRemoveUpgradeFrom(IStorageWrapper storageWrapper, boolean isClientSide) {
-		if (!(storageWrapper instanceof IBackpackWrapper backpackWrapper)) {
+		Optional<IBackpackWrapper> canonicalBackpack = findCanonicalBackpack(storageWrapper);
+		if (canonicalBackpack.isEmpty()) {
 			return UpgradeSlotChangeResult.success();
 		}
+		IBackpackWrapper backpackWrapper = canonicalBackpack.get();
 		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(backpackWrapper);
 		return capturedMobs.isEmpty()
 				? UpgradeSlotChangeResult.success()
@@ -52,17 +55,27 @@ public class MobCatcherUpgradeItem extends UpgradeItemBase<MobCatcherUpgradeWrap
 
 	@Override
 	public UpgradeSlotChangeResult canSwapUpgradeFor(ItemStack upgradeStackToPut, int upgradeSlot, IStorageWrapper storageWrapper, boolean isClientSide) {
-		if (!(storageWrapper instanceof IBackpackWrapper backpackWrapper)) {
+		Optional<IBackpackWrapper> canonicalBackpack = findCanonicalBackpack(storageWrapper);
+		if (canonicalBackpack.isEmpty()) {
 			return UpgradeSlotChangeResult.success();
 		}
 		if (upgradeStackToPut.getItem() instanceof MobCatcherUpgradeItem mobCatcherUpgradeItem && mobCatcherUpgradeItem.isAdvanced()) {
 			return UpgradeSlotChangeResult.success();
 		}
+		IBackpackWrapper backpackWrapper = canonicalBackpack.get();
 		List<CapturedMob> capturedMobs = MobCatcherStorage.getCapturedMobs(backpackWrapper);
 		return MobCatcherStorage.canFitBasicTier(backpackWrapper, Config.SERVER.mobCatcherUpgrade.basicMaxSlotCost.get())
 				? UpgradeSlotChangeResult.success()
 				: UpgradeSlotChangeResult.fail(Component.translatable("gui.sophisticatedbackpacks.status.mob_catcher_mobs_need_advanced"), Set.of(upgradeSlot),
 						getOccupiedCapturedMobSlots(backpackWrapper, capturedMobs), Set.of());
+	}
+
+	private Optional<IBackpackWrapper> findCanonicalBackpack(IStorageWrapper storageWrapper) {
+		if (storageWrapper instanceof IBackpackWrapper backpackWrapper) {
+			return Optional.of(backpackWrapper);
+		}
+		return storageWrapper.getUpgradeHandler().getTypeWrappers(TYPE).stream().map(MobCatcherUpgradeWrapper::getBackpackWrapper).flatMap(Optional::stream)
+				.findFirst();
 	}
 
 	private Set<Integer> getMobCatcherUpgradeSlots(IBackpackWrapper backpackWrapper) {
