@@ -12,26 +12,49 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 public class SubBackpacksHandler {
 	private final Map<Integer, IStorageWrapper> subBackpacks = new LinkedHashMap<>();
 
 	private final InventoryHandler inventoryHandler;
 	private final boolean cacheSubBackpackWrappers;
+	private final IntConsumer contentsChangedListener = this::onContentsChanged;
 	private final Set<Consumer<Collection<IStorageWrapper>>> refreshListeners = new HashSet<>();
 	private final Set<Consumer<Collection<IStorageWrapper>>> beforeRefreshListeners = new HashSet<>();
+	private final Set<Runnable> upgradeCachesInvalidatedListeners = new HashSet<>();
 	private long lastWrapperCacheChangeCounter;
 
 	public SubBackpacksHandler(InventoryHandler inventoryHandler, boolean cacheSubBackpackWrappers) {
 		this.inventoryHandler = inventoryHandler;
 		this.cacheSubBackpackWrappers = cacheSubBackpackWrappers;
-		this.inventoryHandler.addListener(this::onContentsChanged);
+		ensureInventoryListenerRegistered();
+	}
 
-		refreshSubBackpacks();
+	public void ensureInventoryListenerRegistered() {
+		inventoryHandler.removeListener(contentsChangedListener);
+		inventoryHandler.addListener(contentsChangedListener);
+		refreshSubBackpacksIfChanged();
 	}
 
 	public void addRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
 		refreshListeners.add(listener);
+	}
+
+	public void removeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
+		refreshListeners.remove(listener);
+	}
+
+	public void addUpgradeCachesInvalidatedListener(Runnable listener) {
+		upgradeCachesInvalidatedListeners.add(listener);
+	}
+
+	public void removeUpgradeCachesInvalidatedListener(Runnable listener) {
+		upgradeCachesInvalidatedListeners.remove(listener);
+	}
+
+	public void onUpgradeCachesInvalidated() {
+		List.copyOf(upgradeCachesInvalidatedListeners).forEach(Runnable::run);
 	}
 
 	public Collection<IStorageWrapper> getSubBackpacks() {
@@ -63,7 +86,10 @@ public class SubBackpacksHandler {
 		if (lastWrapperCacheChangeCounter == wrapperCacheChangeCounter) {
 			return;
 		}
+		refreshSubBackpacksIfChanged();
+	}
 
+	private void refreshSubBackpacksIfChanged() {
 		Map<Integer, IStorageWrapper> refreshedSubBackpacks = getSubBackpacksFromInventory();
 		lastWrapperCacheChangeCounter = StorageWrapperRepository.getWrapperCacheChangeCounter();
 		if (subBackpacks.equals(refreshedSubBackpacks)) {
@@ -103,7 +129,7 @@ public class SubBackpacksHandler {
 	}
 
 	private void runRefreshListeners(Set<Consumer<Collection<IStorageWrapper>>> refreshListeners) {
-		for (Consumer<Collection<IStorageWrapper>> refreshListener : refreshListeners) {
+		for (Consumer<Collection<IStorageWrapper>> refreshListener : List.copyOf(refreshListeners)) {
 			refreshListener.accept(subBackpacks.values());
 		}
 	}
@@ -137,5 +163,9 @@ public class SubBackpacksHandler {
 
 	public void addBeforeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
 		beforeRefreshListeners.add(listener);
+	}
+
+	public void removeBeforeRefreshListener(Consumer<Collection<IStorageWrapper>> listener) {
+		beforeRefreshListeners.remove(listener);
 	}
 }

@@ -28,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplate;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
@@ -137,14 +138,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 			return new BackpackWrapper(stack);
 		}
 
-		IBackpackWrapper backpackWrapper = StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
-		backpackWrapper.getContentsUuid().ifPresent(uuid -> StorageWrapperRepository.registerStorageWrapper(uuid, backpackWrapper));
-		return backpackWrapper;
-		/*
-		 * TODO try to add uuid based caching in the future UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID); if (uuid == null) { return
-		 * StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new); } else { return
-		 * StorageWrapperRepository.getStorageWrapper(uuid, IBackpackWrapper.class, BackpackWrapper::new); }
-		 */
+		UUID storageUuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
+		return StorageWrapperRepository.getStorageWrapper(storageUuid, stack, IBackpackWrapper.class, BackpackWrapper::new).setBackpackStack(stack);
 	}
 
 	public static Optional<IBackpackWrapper> fromExistingData(ItemStack stack) {
@@ -156,6 +151,23 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	public static IBackpackWrapper fromStackNoCache(ItemStack stack) {
+		return new BackpackWrapper(stack, false);
+	}
+
+	public static IBackpackWrapper fromStackNoUuidCache(ItemStack stack) {
+		if (!(stack.getItem() instanceof BackpackItem)) {
+			return Noop.INSTANCE;
+		}
+		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
+			Optional<IBackpackWrapper> canonicalHost = BackpackLinkedStorageResolver.resolveServerCanonicalHost(stack);
+			if (canonicalHost.isPresent()) {
+				return canonicalHost.get();
+			}
+			if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+				throw new IllegalStateException("Failed to resolve linked backpack endpoint");
+			}
+			return Noop.INSTANCE;
+		}
 		return new BackpackWrapper(stack, false);
 	}
 
@@ -253,11 +265,17 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return new ItemAccessBackpackInventoryHandler(itemAccess);
 	}
 
+	public static Optional<EnergyHandler> getItemEnergyHandler(ItemAccess itemAccess) {
+		EnergyHandler handler = new ItemAccessBackpackEnergyHandler(itemAccess);
+		return handler.getCapacityAsLong() == 0 ? Optional.empty() : Optional.of(handler);
+	}
+
 	@Override
 	public Optional<IStorageFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
 			IStorageFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
-			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
+			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler()
+					.getWrappersThatImplementFromMainStorage(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
 				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler, getBackpackStack());
@@ -283,13 +301,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public Optional<EnergyHandler> getEnergyHandler() {
 		if (!energyStorageInitialized) {
-			EnergyHandler wrappedStorage = getUpgradeHandler().getWrappersThatImplement(EnergyHandler.class).stream().findFirst().orElse(null);
+			EnergyHandler wrappedStorage = getUpgradeHandler().getWrappersThatImplementFromMainStorage(EnergyHandler.class).stream().findFirst().orElse(null);
 
-			for (IEnergyHandlerUpgradeWrapper energyStorageWrapperUpgrade : getUpgradeHandler().getWrappersThatImplement(IEnergyHandlerUpgradeWrapper.class)) {
+			for (IEnergyHandlerUpgradeWrapper energyStorageWrapperUpgrade : getUpgradeHandler()
+					.getWrappersThatImplementFromMainStorage(IEnergyHandlerUpgradeWrapper.class)) {
 				wrappedStorage = energyStorageWrapperUpgrade.wrapStorage(wrappedStorage);
 			}
 
 			energyStorage = wrappedStorage;
+			energyStorageInitialized = true;
 		}
 
 		return energyStorage == null || energyStorage.getCapacityAsInt() == 0 ? Optional.empty() : Optional.of(energyStorage);
@@ -312,7 +332,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 			Supplier<Runnable> getSaveHandler = () -> backpackSaveHandler;
 			renderDataHandler = new RenderDataHandler(
 					Optional.ofNullable(backpack.get(ModCoreDataComponents.RENDER_DATA)).map(RenderData::copy).orElseGet(RenderData::new), renderData -> {
-						backpack.set(ModCoreDataComponents.RENDER_DATA, renderData.copy());
+						getBackpackStack().set(ModCoreDataComponents.RENDER_DATA, renderData.copy());
 						getSaveHandler.get().run();
 					});
 		}
@@ -342,23 +362,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 		UpgradeHandler handler = upgradeHandler;
 		if (handler == null) {
 			if (getContentsUuid().isPresent()) {
-				handler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContents(), this::markBackpackContentsDirty, () -> {
-					InventoryHandler inventoryHandler = this.handler;
-					if (inventoryHandler != null) {
-						inventoryHandler.clearListeners();
-						inventoryHandler.setBaseSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
-					}
-					inventoryHandler = getInventoryHandler();
-					inventoryHandler.clearListeners();
-					inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
-					inventoryIOHandler = null;
-					inventoryModificationHandler = null;
-					fluidHandlerInitialized = false;
-					fluidHandler = null;
-					energyStorageInitialized = false;
-					energyStorage = null;
-					upgradeCachesInvalidatedHandler.run();
-				}) {
+				handler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContents(), this::markBackpackContentsDirty,
+						this::onUpgradeCachesInvalidated) {
 					@Override
 					public boolean isValid(int index, ItemResource resource) {
 						return super.isValid(index, resource) && (resource.isEmpty() || resource.is(ModItems.BACKPACK_UPGRADE_TAG));
@@ -370,6 +375,20 @@ public class BackpackWrapper implements IBackpackWrapper {
 			upgradeHandler = handler;
 		}
 		return handler;
+	}
+
+	private void onUpgradeCachesInvalidated() {
+		InventoryHandler inventoryHandler = handler;
+		if (inventoryHandler != null) {
+			inventoryHandler.clearListeners();
+			inventoryHandler.setBaseSlotLimit(StackUpgradeItem.getInventorySlotLimit(this));
+		}
+		inventoryHandler = getInventoryHandler();
+		inventoryHandler.clearListeners();
+		inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
+		clearUpgradeProcessingHandlers();
+		inventoryIOHandler = null;
+		upgradeCachesInvalidatedHandler.run();
 	}
 
 	@Override
@@ -547,6 +566,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void setSlotNumbers(int numberOfInventorySlots, int numberOfUpgradeSlots) {
 		setNumberOfInventorySlots(numberOfInventorySlots);
 		setNumberOfUpgradeSlots(numberOfUpgradeSlots);
+		onContentsUpdated();
 	}
 
 	@Override
@@ -633,12 +653,16 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public void setContentsUuid(UUID storageUuid) {
 		ItemStack backpackStack = getBackpackStack();
+		boolean uuidChanged = getContentsUuid().filter(uuid -> !uuid.equals(storageUuid)).map(uuid -> {
+			StorageWrapperRepository.removeStorageWrapper(uuid, this);
+			return true;
+		}).orElse(false);
 		backpackStack.set(ModCoreDataComponents.STORAGE_UUID, storageUuid);
 		StorageWrapperRepository.setStorageWrapper(backpackStack, this);
-		StorageWrapperRepository.registerStorageWrapper(storageUuid, this);
-		/*
-		 * TODO add in the future StorageWrapperRepository.migrateToUuid(this, backpack, storageUuid);
-		 */
+		StorageWrapperRepository.setStorageWrapper(storageUuid, this);
+		if (uuidChanged) {
+			onContentsUpdated();
+		}
 	}
 
 	@Override
@@ -647,10 +671,12 @@ public class BackpackWrapper implements IBackpackWrapper {
 			getContentsUuid().ifPresent(BackpackStorage.get()::removeBackpackContents);
 		}
 		removeContentsUUIDTag();
+		onContentsUpdated();
 	}
 
 	@Override
 	public void removeContentsUUIDTag() {
+		getContentsUuid().ifPresent(uuid -> StorageWrapperRepository.removeStorageWrapper(uuid, this));
 		getBackpackStack().remove(ModCoreDataComponents.STORAGE_UUID);
 	}
 
@@ -730,21 +756,41 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void refreshInventoryForUpgradeProcessing() {
+		clearUpgradeProcessingHandlers();
+		refreshInventoryForInputOutput();
+	}
+
+	private void clearUpgradeProcessingHandlers() {
+		if (inventoryModificationHandler != null) {
+			inventoryModificationHandler.onBeforeDeconstruct();
+		}
+		if (fluidHandler instanceof InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
+		if (energyStorage instanceof InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
 		inventoryModificationHandler = null;
 		fluidHandler = null;
 		fluidHandlerInitialized = false;
 		energyStorage = null;
 		energyStorageInitialized = false;
-		refreshInventoryForInputOutput();
 	}
 
 	@Override
 	public void onContentsUpdated() {
+		UpgradeHandler previousUpgradeHandler = upgradeHandler;
+		if (previousUpgradeHandler != null) {
+			previousUpgradeHandler.onBeforeDeconstruct();
+		}
 		handler = null;
 		upgradeHandler = null;
 		settingsHandler = null;
 		refreshInventoryForUpgradeProcessing();
 		onInventoryHandlerRefresh.run();
+		if (previousUpgradeHandler != null) {
+			previousUpgradeHandler.notifyRefreshCallbacks();
+		}
 	}
 
 	@Override
@@ -821,32 +867,97 @@ public class BackpackWrapper implements IBackpackWrapper {
 		}
 	}
 
-	private static class ItemAccessBackpackFluidHandler implements ResourceHandler<FluidResource> {
+	private record MutableBackpackDelegate<T>(ItemStack backpackStack, IBackpackWrapper wrapper, T delegate) {
+	}
+
+	private static class ItemAccessStackExchange {
 		private final ItemAccess itemAccess;
 
-		private ItemAccessBackpackFluidHandler(ItemAccess itemAccess) {
+		private ItemAccessStackExchange(ItemAccess itemAccess) {
 			this.itemAccess = itemAccess;
 		}
 
-		private record MutableBackpackDelegate(ItemStack backpackStack, ResourceHandler<FluidResource> delegate) {
+		private void exchangeOnRootCommit(MutableBackpackDelegate<?> mutableDelegate, TransactionContext tx) {
+			new RootCommitJournal(() -> exchangeBackpackStack(mutableDelegate)).updateSnapshots(tx);
+		}
+
+		private boolean exchange(MutableBackpackDelegate<?> mutableDelegate, TransactionContext tx) {
+			Optional<ItemStack> currentBackpackStack = getCurrentBackpackStack(mutableDelegate.backpackStack());
+			if (currentBackpackStack.isEmpty()) {
+				return false;
+			}
+			copyRenderDataToBackpackStack(mutableDelegate.wrapper(), currentBackpackStack.get());
+			int accessAmount = itemAccess.getAmount();
+			return accessAmount > 0 && itemAccess.exchange(ItemResource.of(currentBackpackStack.get()), accessAmount, tx) == accessAmount;
+		}
+
+		private void exchangeBackpackStack(MutableBackpackDelegate<?> mutableDelegate) {
+			if (mutableDelegate.backpackStack().isEmpty()) {
+				return;
+			}
+
+			try (Transaction tx = Transaction.openRoot()) {
+				if (exchange(mutableDelegate, tx)) {
+					tx.commit();
+				}
+			}
+		}
+
+		private Optional<ItemStack> getCurrentBackpackStack(ItemStack expectedStack) {
+			if (itemAccess.getAmount() <= 0) {
+				return Optional.empty();
+			}
+			ItemResource currentResource = itemAccess.getResource();
+			if (!currentResource.test(currentStack -> currentStack.is(expectedStack.getItem())
+					&& Objects.equals(currentStack.get(ModCoreDataComponents.STORAGE_UUID), expectedStack.get(ModCoreDataComponents.STORAGE_UUID))
+					&& Objects.equals(currentStack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT),
+							expectedStack.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)))) {
+				return Optional.empty();
+			}
+			return Optional.of(currentResource.toStack());
+		}
+
+		private static void copyRenderDataToBackpackStack(IBackpackWrapper wrapper, ItemStack backpackStack) {
+			backpackStack.set(ModCoreDataComponents.RENDER_DATA, wrapper.getRenderDataHandler().getData().copy());
+		}
+	}
+
+	private static ItemStack getBackpackStack(ItemAccess itemAccess) {
+		int accessAmount = itemAccess.getAmount();
+		ItemStack backpackStack = itemAccess.getResource().toStack(accessAmount);
+		if (accessAmount <= 0 || !(backpackStack.getItem() instanceof BackpackItem)) {
+			return ItemStack.EMPTY;
+		}
+		return backpackStack.has(ModCoreDataComponents.STORAGE_UUID)
+				|| LinkedStorageStackLifecycle.classifyEndpoint(backpackStack) == LinkedStorageEndpointStackState.ENDPOINT ? backpackStack : ItemStack.EMPTY;
+	}
+
+	private static class ItemAccessBackpackFluidHandler implements ResourceHandler<FluidResource> {
+		private final ItemAccess itemAccess;
+		private final ItemAccessStackExchange stackExchange;
+
+		private ItemAccessBackpackFluidHandler(ItemAccess itemAccess) {
+			this.itemAccess = itemAccess;
+			stackExchange = new ItemAccessStackExchange(itemAccess);
 		}
 
 		private Optional<ResourceHandler<FluidResource>> getDelegate() {
-			ItemStack backpackStack = itemAccess.getResource().toStack(itemAccess.getAmount());
+			ItemStack backpackStack = getBackpackStack(itemAccess);
 			if (backpackStack.isEmpty()) {
 				return Optional.empty();
 			}
-			return new BackpackWrapper(backpackStack).getFluidHandler().map(FluidHandlerItemWrapper::new);
+			IBackpackWrapper wrapper = fromStack(backpackStack);
+			return wrapper.getFluidHandler().map(FluidHandlerItemWrapper::new);
 		}
 
-		private Optional<MutableBackpackDelegate> getWritableDelegate() {
-			ItemStack backpackStack = itemAccess.getResource().toStack(itemAccess.getAmount());
+		private Optional<MutableBackpackDelegate<ResourceHandler<FluidResource>>> getWritableDelegate() {
+			ItemStack backpackStack = getBackpackStack(itemAccess);
 			if (backpackStack.isEmpty()) {
 				return Optional.empty();
 			}
 
-			BackpackWrapper wrapper = new BackpackWrapper(backpackStack);
-			return wrapper.getFluidHandler().map(FluidHandlerItemWrapper::new).map(delegate -> new MutableBackpackDelegate(backpackStack, delegate));
+			IBackpackWrapper wrapper = fromStack(backpackStack);
+			return wrapper.getFluidHandler().map(FluidHandlerItemWrapper::new).map(delegate -> new MutableBackpackDelegate<>(backpackStack, wrapper, delegate));
 		}
 
 		@Override
@@ -876,123 +987,161 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		@Override
 		public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
-			return getWritableDelegate().map(mutableDelegate -> {
-				int inserted = mutableDelegate.delegate().insert(index, resource, amount, tx);
-				if (inserted > 0) {
-					itemAccess.exchange(ItemResource.of(mutableDelegate.backpackStack()), itemAccess.getAmount(), tx);
+			try (Transaction nestedTx = Transaction.open(tx)) {
+				Optional<MutableBackpackDelegate<ResourceHandler<FluidResource>>> mutableDelegate = getWritableDelegate();
+				if (mutableDelegate.isEmpty()) {
+					return 0;
 				}
-				return inserted;
-			}).orElse(0);
+				int inserted = mutableDelegate.get().delegate().insert(index, resource, amount, nestedTx);
+				if (inserted > 0 && stackExchange.exchange(mutableDelegate.get(), nestedTx)) {
+					nestedTx.commit();
+					return inserted;
+				}
+			}
+			return 0;
 		}
 
 		@Override
 		public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
-			return getWritableDelegate().map(mutableDelegate -> {
-				int extracted = mutableDelegate.delegate().extract(index, resource, amount, tx);
-				if (extracted > 0) {
-					itemAccess.exchange(ItemResource.of(mutableDelegate.backpackStack()), itemAccess.getAmount(), tx);
+			try (Transaction nestedTx = Transaction.open(tx)) {
+				Optional<MutableBackpackDelegate<ResourceHandler<FluidResource>>> mutableDelegate = getWritableDelegate();
+				if (mutableDelegate.isEmpty()) {
+					return 0;
 				}
-				return extracted;
-			}).orElse(0);
+				int extracted = mutableDelegate.get().delegate().extract(index, resource, amount, nestedTx);
+				if (extracted > 0 && stackExchange.exchange(mutableDelegate.get(), nestedTx)) {
+					nestedTx.commit();
+					return extracted;
+				}
+			}
+			return 0;
 		}
 	}
 
 	private static class ItemAccessBackpackInventoryHandler implements ResourceHandler<ItemResource> {
 		private final ItemAccess itemAccess;
-		private final RootCommitJournal exchangeBackpackStackJournal = new RootCommitJournal(this::exchangeBackpackStack);
-		@Nullable
-		private ItemStack backpackStackToExchange = null;
-		@Nullable
-		private ResourceHandler<ItemResource> delegate = null;
-		@Nullable
-		private ItemStack delegateBackpackStack = null;
+		private final ItemAccessStackExchange stackExchange;
 
 		private ItemAccessBackpackInventoryHandler(ItemAccess itemAccess) {
 			this.itemAccess = itemAccess;
+			stackExchange = new ItemAccessStackExchange(itemAccess);
 		}
 
-		private Optional<ResourceHandler<ItemResource>> getDelegate() {
-			ItemStack currentBackpackStack = getBackpackStack();
-			if (currentBackpackStack.isEmpty()) {
-				delegate = null;
-				delegateBackpackStack = null;
+		private Optional<MutableBackpackDelegate<ResourceHandler<ItemResource>>> getDelegate() {
+			ItemStack backpackStack = getBackpackStack(itemAccess);
+			if (backpackStack.isEmpty()) {
 				return Optional.empty();
 			}
 
-			if (delegate != null && delegateBackpackStack != null && ItemStack.isSameItemSameComponents(currentBackpackStack, delegateBackpackStack)) {
-				return Optional.of(delegate);
-			}
-
-			delegateBackpackStack = currentBackpackStack;
-			delegate = new BackpackWrapper(delegateBackpackStack, false).getInventoryForInputOutput();
-			return Optional.of(delegate);
+			IBackpackWrapper wrapper = fromStack(backpackStack);
+			return Optional.of(new MutableBackpackDelegate<>(backpackStack, wrapper, wrapper.getInventoryForInputOutput()));
 		}
 
 		@Override
 		public int size() {
-			return getDelegate().map(ResourceHandler::size).orElse(0);
+			return getDelegate().map(delegate -> delegate.delegate().size()).orElse(0);
 		}
 
 		@Override
 		public ItemResource getResource(int index) {
-			return getDelegate().map(delegate -> delegate.getResource(index)).orElse(ItemResource.EMPTY);
+			return getDelegate().map(delegate -> delegate.delegate().getResource(index)).orElse(ItemResource.EMPTY);
 		}
 
 		@Override
 		public long getAmountAsLong(int index) {
-			return getDelegate().map(delegate -> delegate.getAmountAsLong(index)).orElse(0L);
+			return getDelegate().map(delegate -> delegate.delegate().getAmountAsLong(index)).orElse(0L);
 		}
 
 		@Override
 		public long getCapacityAsLong(int index, ItemResource resource) {
-			return getDelegate().map(delegate -> delegate.getCapacityAsLong(index, resource)).orElse(0L);
+			return getDelegate().map(delegate -> delegate.delegate().getCapacityAsLong(index, resource)).orElse(0L);
 		}
 
 		@Override
 		public boolean isValid(int index, ItemResource resource) {
-			return getDelegate().map(delegate -> delegate.isValid(index, resource)).orElse(false);
+			return getDelegate().map(delegate -> delegate.delegate().isValid(index, resource)).orElse(false);
 		}
 
 		@Override
 		public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
-			int inserted = getDelegate().map(delegate -> delegate.insert(index, resource, amount, tx)).orElse(0);
+			Optional<MutableBackpackDelegate<ResourceHandler<ItemResource>>> mutableDelegate = getDelegate();
+			if (mutableDelegate.isEmpty()) {
+				return 0;
+			}
+			int inserted = mutableDelegate.get().delegate().insert(index, resource, amount, tx);
 			if (inserted > 0) {
-				exchangeBackpackStack(tx);
+				stackExchange.exchangeOnRootCommit(mutableDelegate.get(), tx);
 			}
 			return inserted;
 		}
 
 		@Override
 		public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
-			int extracted = getDelegate().map(delegate -> delegate.extract(index, resource, amount, tx)).orElse(0);
+			Optional<MutableBackpackDelegate<ResourceHandler<ItemResource>>> mutableDelegate = getDelegate();
+			if (mutableDelegate.isEmpty()) {
+				return 0;
+			}
+			int extracted = mutableDelegate.get().delegate().extract(index, resource, amount, tx);
 			if (extracted > 0) {
-				exchangeBackpackStack(tx);
+				stackExchange.exchangeOnRootCommit(mutableDelegate.get(), tx);
 			}
 			return extracted;
 		}
+	}
 
-		private ItemStack getBackpackStack() {
-			int accessAmount = itemAccess.getAmount();
-			ItemStack backpackStack = itemAccess.getResource().toStack(accessAmount);
-			return accessAmount > 0 && backpackStack.has(ModCoreDataComponents.STORAGE_UUID) ? backpackStack : ItemStack.EMPTY;
+	private static class ItemAccessBackpackEnergyHandler implements EnergyHandler {
+		private final ItemAccess itemAccess;
+		private final ItemAccessStackExchange stackExchange;
+
+		private ItemAccessBackpackEnergyHandler(ItemAccess itemAccess) {
+			this.itemAccess = itemAccess;
+			stackExchange = new ItemAccessStackExchange(itemAccess);
 		}
 
-		private void exchangeBackpackStack(TransactionContext tx) {
-			backpackStackToExchange = delegateBackpackStack;
-			exchangeBackpackStackJournal.updateSnapshots(tx);
+		private Optional<MutableBackpackDelegate<EnergyHandler>> getDelegate() {
+			ItemStack backpackStack = getBackpackStack(itemAccess);
+			if (backpackStack.isEmpty()) {
+				return Optional.empty();
+			}
+
+			IBackpackWrapper wrapper = fromStack(backpackStack);
+			return wrapper.getEnergyHandler().map(delegate -> new MutableBackpackDelegate<>(backpackStack, wrapper, delegate));
 		}
 
-		private void exchangeBackpackStack() {
-			ItemStack backpackStack = backpackStackToExchange;
-			backpackStackToExchange = null;
-			if (backpackStack == null || backpackStack.isEmpty()) {
-				return;
-			}
+		@Override
+		public long getAmountAsLong() {
+			return getDelegate().map(delegate -> delegate.delegate().getAmountAsLong()).orElse(0L);
+		}
 
-			try (Transaction tx = Transaction.openRoot()) {
-				itemAccess.exchange(ItemResource.of(backpackStack), itemAccess.getAmount(), tx);
-				tx.commit();
+		@Override
+		public long getCapacityAsLong() {
+			return getDelegate().map(delegate -> delegate.delegate().getCapacityAsLong()).orElse(0L);
+		}
+
+		@Override
+		public int insert(int amount, TransactionContext tx) {
+			Optional<MutableBackpackDelegate<EnergyHandler>> mutableDelegate = getDelegate();
+			if (mutableDelegate.isEmpty()) {
+				return 0;
 			}
+			int inserted = mutableDelegate.get().delegate().insert(amount, tx);
+			if (inserted > 0) {
+				stackExchange.exchangeOnRootCommit(mutableDelegate.get(), tx);
+			}
+			return inserted;
+		}
+
+		@Override
+		public int extract(int amount, TransactionContext tx) {
+			Optional<MutableBackpackDelegate<EnergyHandler>> mutableDelegate = getDelegate();
+			if (mutableDelegate.isEmpty()) {
+				return 0;
+			}
+			int extracted = mutableDelegate.get().delegate().extract(amount, tx);
+			if (extracted > 0) {
+				stackExchange.exchangeOnRootCommit(mutableDelegate.get(), tx);
+			}
+			return extracted;
 		}
 	}
 
