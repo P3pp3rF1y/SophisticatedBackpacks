@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IInventoryWrapperUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
 import org.jspecify.annotations.Nullable;
@@ -34,5 +35,11 @@ public class InventoryModificationHandler {
 		}
 
 		modifiedInventoryHandler = wrappedHandler;
+	}
+
+	public void onBeforeDeconstruct() {
+		if (modifiedInventoryHandler instanceof InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
 	}
 }

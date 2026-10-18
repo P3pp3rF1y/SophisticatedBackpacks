@@ -3,31 +3,43 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class InceptionInventoryHandler implements ITrackedContentsItemResourceHandler {
+public class InceptionInventoryHandler implements ITrackedContentsItemResourceHandler, InceptionHandler {
 	private final ITrackedContentsItemResourceHandler wrappedInventoryHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 	private List<ITrackedContentsItemResourceHandler> handlers;
 	private int[] baseIndex;
 	private int totalSize;
+	private boolean handlersInvalidated;
+	private final Consumer<Collection<IStorageWrapper>> refreshListener = subBackpacks -> refreshHandlerDelegate();
+	private final Runnable upgradeCachesInvalidatedListener = () -> handlersInvalidated = true;
 
 	public InceptionInventoryHandler(ITrackedContentsItemResourceHandler wrappedInventoryHandler, InventoryOrder inventoryOrder,
 			SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
-		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlerDelegate());
+		subBackpacksHandler.addRefreshListener(refreshListener);
+		subBackpacksHandler.addUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 
 		refreshHandlerDelegate();
+	}
+
+	@Override
+	public void onBeforeDeconstruct() {
+		subBackpacksHandler.removeRefreshListener(refreshListener);
+		subBackpacksHandler.removeUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 	}
 
 	private void refreshHandlerDelegate() {
@@ -52,6 +64,10 @@ public class InceptionInventoryHandler implements ITrackedContentsItemResourceHa
 
 	private void refreshSubBackpacks() {
 		subBackpacksHandler.refresh();
+		if (handlersInvalidated) {
+			refreshHandlerDelegate();
+			handlersInvalidated = false;
+		}
 	}
 
 	@Override

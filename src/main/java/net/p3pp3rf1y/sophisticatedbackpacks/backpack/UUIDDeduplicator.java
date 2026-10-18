@@ -4,10 +4,16 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,63 +26,79 @@ public class UUIDDeduplicator {
 	}
 
 	public static void checkForDuplicateBackpacksAndRemoveTheirUUID(Player player, UUID backpackUuid, ItemStack backpack) {
-		IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
+		if (isLinkedEndpoint(backpack)) {
+			return;
+		}
+
+		IBackpackWrapper backpackToKeep = BackpackWrapper.fromStackNoUuidCache(backpack);
+		List<IBackpackWrapper> duplicateBackpacks = new ArrayList<>();
 		PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
-			if (otherBackpack != backpack) {
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(otherBackpack);
+			if (otherBackpack != backpack && !isLinkedEndpoint(otherBackpack)) {
+				IBackpackWrapper wrapper = BackpackWrapper.fromStackNoUuidCache(otherBackpack);
 				wrapper.getContentsUuid().ifPresent(uuid -> {
 					if (uuid.equals(backpackUuid)) {
-						dedupeBackpackWrappers(backpackWrapper, wrapper);
+						duplicateBackpacks.add(wrapper);
 					}
 				});
 			}
 			return false;
 		});
+		for (IBackpackWrapper duplicateBackpack : duplicateBackpacks) {
+			backpackToKeep = dedupeBackpackWrappers(backpackToKeep, duplicateBackpack);
+		}
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
 		ItemStack newBackpackStack = newBackpackItemEntity.getItem();
-		if (!(newBackpackStack.getItem() instanceof BackpackItem)) {
+		if (!(newBackpackStack.getItem() instanceof BackpackItem) || isLinkedEndpoint(newBackpackStack)) {
 			return;
 		}
 
-		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStack(newBackpackStack);
+		IBackpackWrapper newBackpackWrapper = BackpackWrapper.fromStackNoUuidCache(newBackpackStack);
 		newBackpackWrapper.getContentsUuid().ifPresent(backpackId -> dedupeBackpackItemEntityInArea(newBackpackWrapper, newBackpackItemEntity, backpackId));
 	}
 
 	private static void dedupeBackpackItemEntityInArea(IBackpackWrapper newBackpackWrapper, ItemEntity newBackpackItemEntity, UUID backpackId) {
+		IBackpackWrapper backpackToKeep = newBackpackWrapper;
 		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10),
 				Entity::isAlive)) {
 			if (entity != newBackpackItemEntity) {
-				checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity);
+				backpackToKeep = dedupeMatchingEntityBackpack(backpackToKeep, backpackId, entity);
 			}
 		}
 	}
 
-	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
+	private static IBackpackWrapper dedupeMatchingEntityBackpack(IBackpackWrapper backpackToKeep, UUID backpackId, ItemEntity entity) {
 		ItemStack entityStack = entity.getItem();
-		if (!(entityStack.getItem() instanceof BackpackItem)) {
-			return false;
+		if (!(entityStack.getItem() instanceof BackpackItem) || isLinkedEndpoint(entityStack)) {
+			return backpackToKeep;
 		}
 
-		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStack(entityStack);
-		return entityBackpackWrapper.getContentsUuid().map(backpackId -> {
-			if (backpackId.equals(newBackpackId)) {
-				dedupeBackpackWrappers(newBackpackWrapper, entityBackpackWrapper);
-				return true;
-			}
-			return false;
-		}).orElse(false);
+		IBackpackWrapper entityBackpackWrapper = BackpackWrapper.fromStackNoUuidCache(entityStack);
+		return entityBackpackWrapper.getContentsUuid().filter(backpackId::equals).map(uuid -> dedupeBackpackWrappers(backpackToKeep, entityBackpackWrapper))
+				.orElse(backpackToKeep);
 	}
 
 	public static IBackpackWrapper dedupeBackpackWrappers(IBackpackWrapper firstBackpackWrapper, IBackpackWrapper secondBackpackWrapper) {
+		boolean firstLinked = isLinkedStorageWrapper(firstBackpackWrapper);
+		boolean secondLinked = isLinkedStorageWrapper(secondBackpackWrapper);
+		if (firstLinked || secondLinked) {
+			return firstLinked && !secondLinked ? secondBackpackWrapper : firstBackpackWrapper;
+		}
+
 		if (isFirstBackpackPreferred(firstBackpackWrapper, secondBackpackWrapper)) {
 			removeUuid(secondBackpackWrapper);
-			return firstBackpackWrapper;
+			return rebindCanonicalWrapper(firstBackpackWrapper);
 		}
 
 		removeUuid(firstBackpackWrapper);
-		return secondBackpackWrapper;
+		return rebindCanonicalWrapper(secondBackpackWrapper);
+	}
+
+	private static IBackpackWrapper rebindCanonicalWrapper(IBackpackWrapper physicalWrapper) {
+		IBackpackWrapper canonicalWrapper = BackpackWrapper.fromStack(physicalWrapper.getBackpack());
+		canonicalWrapper.onContentsUpdated();
+		return canonicalWrapper;
 	}
 
 	public static boolean isFirstBackpackPreferred(IBackpackWrapper firstBackpackWrapper, IBackpackWrapper secondBackpackWrapper) {
@@ -90,5 +112,13 @@ public class UUIDDeduplicator {
 	private static void removeUuid(IBackpackWrapper backpackWrapper) {
 		backpackWrapper.removeContentsUUIDTag();
 		backpackWrapper.onContentsUpdated();
+	}
+
+	private static boolean isLinkedEndpoint(ItemStack stack) {
+		return LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT;
+	}
+
+	private static boolean isLinkedStorageWrapper(IBackpackWrapper wrapper) {
+		return wrapper instanceof BackpackLinkedStorageHostWrapper || wrapper instanceof LinkedStorageBackpackWrapper;
 	}
 }

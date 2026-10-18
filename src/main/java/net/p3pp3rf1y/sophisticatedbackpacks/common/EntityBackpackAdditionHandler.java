@@ -41,12 +41,10 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.DiscHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeWrapper;
@@ -356,10 +354,7 @@ public class EntityBackpackAdditionHandler {
 				});
 				tx.commit();
 			}
-			UUID backpackUuid = backpack.remove(ModCoreDataComponents.STORAGE_UUID);
-			if (backpackUuid != null) {
-				BackpackStorage.get().removeBackpackContents(backpackUuid);
-			}
+			backpackwrapper.removeContentsUuid();
 			backpack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(inventoryItems));
 		}
 	}
@@ -403,7 +398,7 @@ public class EntityBackpackAdditionHandler {
 		if (!(stack.getItem() instanceof BackpackItem)) {
 			return;
 		}
-		BackpackWrapper.fromStack(stack).getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid));
+		BackpackWrapper.fromStack(stack).removeContentsUuid();
 	}
 
 	public static void onLivingUpdate(EntityTickEvent.Post event) {
