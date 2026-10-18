@@ -41,6 +41,7 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -183,6 +184,14 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			return Optional.ofNullable(BackpackItemClient.getTooltipImage(stack));
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public void onCraftedBy(ItemStack itemStack, Player player) {
+		super.onCraftedBy(itemStack, player);
+		if (player.level() instanceof ServerLevel serverLevel) {
+			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, itemStack);
+		}
 	}
 
 	@Override

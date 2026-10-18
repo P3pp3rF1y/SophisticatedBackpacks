@@ -503,7 +503,8 @@ public class ModItems {
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerItem(Capabilities.Item.ITEM, (stack, itemAccess) -> {
 			IBackpackWrapper backpackWrapper = getCapabilityWrapper(stack);
-			return backpackWrapper.getContentsUuid().isEmpty() ? EmptyResourceHandler.instance() : backpackWrapper.getInventoryForInputOutput();
+			ItemAccess access = itemAccess == null ? ItemAccess.forStack(stack) : itemAccess;
+			return backpackWrapper.getContentsUuid().isEmpty() ? EmptyResourceHandler.instance() : BackpackWrapper.getItemInventoryHandler(access);
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.Fluid.ITEM, (stack, itemAccess) -> {
 			if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
@@ -512,8 +513,10 @@ public class ModItems {
 			ItemAccess access = itemAccess == null ? ItemAccess.forStack(stack) : itemAccess;
 			return getCapabilityWrapper(stack).getItemFluidHandler(access).orElse(null);
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
-		event.registerItem(Capabilities.Energy.ITEM, (stack, v) -> getCapabilityWrapper(stack).getEnergyHandler().orElse(null), BACKPACK.get(),
-				COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		event.registerItem(Capabilities.Energy.ITEM, (stack, itemAccess) -> {
+			ItemAccess access = itemAccess == null ? ItemAccess.forStack(stack) : itemAccess;
+			return BackpackWrapper.getItemEnergyHandler(access).orElse(null);
+		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 
 	private static IBackpackWrapper getCapabilityWrapper(ItemStack stack) {
