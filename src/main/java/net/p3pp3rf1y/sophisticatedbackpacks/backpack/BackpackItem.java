@@ -38,6 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -341,8 +342,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void onCraftedBy(ItemStack stack, Level level, Player player) {
+		super.onCraftedBy(stack, level, player);
 		if (level instanceof ServerLevel) {
 			EnderLinkerEndpointRecipe.issueCraftClaim(player, stack);
+			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade((ServerLevel) level, stack);
 		}
 	}
 

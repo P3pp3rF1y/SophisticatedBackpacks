@@ -7,15 +7,18 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
-public class InceptionFluidHandler implements IStorageFluidHandler {
+public class InceptionFluidHandler implements IStorageFluidHandler, InceptionHandler {
 	@Nullable
 	private final IStorageFluidHandler wrappedFluidHandler;
 	private final InventoryOrder inventoryOrder;
@@ -24,6 +27,9 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	protected int[] baseIndex;
 	protected int tankCount;
 	private final ItemStack backpack;
+	private boolean handlersInvalidated;
+	private final Consumer<Collection<IStorageWrapper>> refreshListener = subBackpacks -> refreshHandlers();
+	private final Runnable upgradeCachesInvalidatedListener = () -> handlersInvalidated = true;
 
 	public InceptionFluidHandler(@Nullable IStorageFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder,
 			SubBackpacksHandler subBackpacksHandler) {
@@ -31,8 +37,15 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 		this.backpack = backpack;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
-		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlers());
+		subBackpacksHandler.addRefreshListener(refreshListener);
+		subBackpacksHandler.addUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 		refreshHandlers();
+	}
+
+	@Override
+	public void onBeforeDeconstruct() {
+		subBackpacksHandler.removeRefreshListener(refreshListener);
+		subBackpacksHandler.removeUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 	}
 
 	private void refreshHandlers() {
@@ -52,14 +65,24 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 			baseIndex[i] = index;
 		}
 		tankCount = index;
+		handlersInvalidated = false;
+	}
+
+	private void refreshHandlersIfNeeded() {
+		subBackpacksHandler.refresh();
+		if (handlersInvalidated) {
+			refreshHandlers();
+		}
 	}
 
 	@Override
 	public int getTanks() {
+		refreshHandlersIfNeeded();
 		return tankCount;
 	}
 
 	private int getHandlerIndexForTank(int slot) {
+		refreshHandlersIfNeeded();
 		if (slot < 0) {
 			return -1;
 		}
@@ -109,6 +132,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public int fill(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
+		refreshHandlersIfNeeded();
 		int filled = 0;
 		FluidStack toFill = resource;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
@@ -129,6 +153,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public FluidStack drain(TagKey<Fluid> resourceTag, int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+		refreshHandlersIfNeeded();
 		FluidStack drainedStack = FluidStack.EMPTY;
 		FluidStack stackToDrain = FluidStack.EMPTY;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
@@ -155,6 +180,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public FluidStack drain(FluidStack resource, FluidAction action, boolean ignoreInOutLimit) {
+		refreshHandlersIfNeeded();
 		int drained = 0;
 		FluidStack toDrain = resource;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
@@ -176,6 +202,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public FluidStack drain(int maxDrain, FluidAction action, boolean ignoreInOutLimit) {
+		refreshHandlersIfNeeded();
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
 			FluidStack drained = fluidHandler.drain(maxDrain, action, ignoreInOutLimit);
 			if (!drained.isEmpty()) {

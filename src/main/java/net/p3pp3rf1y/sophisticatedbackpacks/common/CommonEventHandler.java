@@ -55,6 +55,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPay
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
@@ -154,7 +156,7 @@ public class CommonEventHandler {
 				if (runSlownessLogic) {
 					allBackpacks.add(backpack);
 				}
-				if (runDedupeLogic) {
+				if (runDedupeLogic && LinkedStorageStackLifecycle.classifyEndpoint(backpack) != LinkedStorageEndpointStackState.ENDPOINT) {
 					addBackpackIdIfUniqueOrDedupe(backpackIds, BackpackWrapper.fromStack(backpack));
 				}
 				return false;

@@ -33,4 +33,10 @@ public class InventoryModificationHandler {
 
 		modifiedInventoryHandler = wrappedHandler;
 	}
+
+	public void onBeforeDeconstruct() {
+		if (modifiedInventoryHandler instanceof net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
+	}
 }

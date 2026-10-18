@@ -27,6 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -164,6 +165,33 @@ class InceptionBackpackPersistenceTest {
 						assertTrue(aggregate.getStackInSlot(childStart).is(Items.DIAMOND));
 					}
 				}
+			}
+		});
+	}
+
+	@Test
+	void retainedParentFluidHandlerRefreshesNestedInceptionTankWithoutDuplication() throws Throwable {
+		runOnServerThread(() -> {
+			try (MockedStatic<RegistryHelper> registryHelper = Mockito.mockStatic(RegistryHelper.class, Mockito.CALLS_REAL_METHODS)) {
+				registryHelper.when(RegistryHelper::getRegistryAccess).thenReturn(Optional.of(REGISTRY_ACCESS));
+				IBackpackWrapper parent = createBackpack();
+				IBackpackWrapper child = createBackpack();
+				IBackpackWrapper grandchild = createBackpack();
+				parent.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				child.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
+				grandchild.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+				child.getInventoryHandler().setStackInSlot(0, grandchild.getBackpack());
+				parent.getInventoryHandler().setStackInSlot(0, child.getBackpack());
+				IStorageFluidHandler retainedHandler = parent.getFluidHandler().orElseThrow();
+				assertEquals(1, retainedHandler.getTanks());
+
+				grandchild.getUpgradeHandler().setStackInSlot(0, ItemStack.EMPTY);
+				assertSame(retainedHandler, parent.getFluidHandler().orElseThrow());
+				assertEquals(0, retainedHandler.getTanks());
+
+				grandchild.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+				assertSame(retainedHandler, parent.getFluidHandler().orElseThrow());
+				assertEquals(1, retainedHandler.getTanks());
 			}
 		});
 	}

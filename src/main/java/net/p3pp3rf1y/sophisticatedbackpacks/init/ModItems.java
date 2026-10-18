@@ -501,7 +501,7 @@ public class ModItems {
 			if (!Config.SERVER.itemFluidHandlerEnabled.get()) {
 				return null;
 			}
-			return getCapabilityWrapper(stack).getItemFluidHandler().orElse(null);
+			return BackpackWrapper.getCapabilityFluidHandler(stack).orElse(null);
 		}, BACKPACK.get(), COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 		event.registerItem(Capabilities.EnergyStorage.ITEM, (stack, v) -> getCapabilityWrapper(stack).getEnergyStorage().orElse(null), BACKPACK.get(),
 				COPPER_BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());

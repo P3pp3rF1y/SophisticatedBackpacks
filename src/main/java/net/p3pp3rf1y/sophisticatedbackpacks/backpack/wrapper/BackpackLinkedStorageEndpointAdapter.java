@@ -129,15 +129,33 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 			return false;
 		}
 		LinkedStorageEndpointData endpoint = result.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+		if (!hasOriginalEndpoint(inputs, endpoint, result)) {
+			return false;
+		}
+		return completePrimaryTierUpgrade(level, result, endpoint, backpackItem);
+	}
+
+	public static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result) {
+		if (LinkedStorageStackLifecycle.classifyEndpoint(result) != LinkedStorageEndpointStackState.ENDPOINT
+				|| !(result.getItem() instanceof BackpackItem backpackItem)) {
+			return false;
+		}
+		return completePrimaryTierUpgrade(level, result, result.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT), backpackItem);
+	}
+
+	private static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result, LinkedStorageEndpointData endpoint, BackpackItem backpackItem) {
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		if (!manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId()) || !hasOriginalEndpoint(inputs, endpoint, result)) {
+		if (!manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId())) {
 			return false;
 		}
 
 		LinkedStorageHostDescriptor hostDescriptor = manager.getHostDescriptor(endpoint.groupId()).orElseThrow();
+		ItemStack existingCarrier = ItemStack.parseOptional(level.registryAccess(), hostDescriptor.virtualCarrier());
+		if (existingCarrier.is(result.getItem())) {
+			return false;
+		}
 		setSlotSizes(result, backpackItem);
 		result.set(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT, true);
-		ItemStack existingCarrier = ItemStack.parseOptional(level.registryAccess(), hostDescriptor.virtualCarrier());
 		ItemStack upgradedCarrier = result.copyWithCount(1);
 		upgradedCarrier.remove(ModCoreDataComponents.STORAGE_UUID);
 		LinkedStorageStackLifecycle.clear(upgradedCarrier);
