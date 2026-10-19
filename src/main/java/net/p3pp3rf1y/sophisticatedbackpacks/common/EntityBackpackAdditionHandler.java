@@ -34,7 +34,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -401,8 +400,7 @@ public class EntityBackpackAdditionHandler {
 		if (!(stack.getItem() instanceof BackpackItem)) {
 			return;
 		}
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
+		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(IBackpackWrapper::removeContentsUuid);
 	}
 
 	public static void onLivingUpdate(LivingEvent.LivingTickEvent event) {

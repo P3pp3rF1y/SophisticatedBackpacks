@@ -52,6 +52,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -146,6 +147,14 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	public static boolean shouldRenderUpgradeActivity(ItemStack backpackStack) {
 		return getLinkedStorageEndpointRole(backpackStack).map(role -> role == LinkedStorageEndpointRole.PRIMARY).orElse(true);
+	}
+
+	@Override
+	public void onCraftedBy(ItemStack stack, Level level, Player player) {
+		super.onCraftedBy(stack, level, player);
+		if (level instanceof ServerLevel serverLevel) {
+			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, stack);
+		}
 	}
 
 	@Override

@@ -53,6 +53,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
@@ -157,8 +158,10 @@ public class CommonEventHandler {
 					allBackpacks.add(backpack);
 				}
 				if (runDedupeLogic) {
-					backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-							.ifPresent(backpackWrapper -> addBackpackIdIfUniqueOrDedupe(backpackIds, backpackWrapper));
+					if (LinkedStorageStackData.getEndpoint(backpack) == null) {
+						backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+								.ifPresent(backpackWrapper -> addBackpackIdIfUniqueOrDedupe(backpackIds, backpackWrapper));
+					}
 				}
 				return false;
 			});
@@ -175,6 +178,9 @@ public class CommonEventHandler {
 	}
 
 	private static void addBackpackIdIfUniqueOrDedupe(Map<UUID, IBackpackWrapper> backpackIds, IBackpackWrapper backpackWrapper) {
+		if (backpackWrapper.getLinkedStorageEndpoint().isPresent()) {
+			return;
+		}
 		backpackWrapper.getContentsUuid().ifPresent(backpackId -> {
 			IBackpackWrapper existingBackpackWrapper = backpackIds.get(backpackId);
 			if (existingBackpackWrapper == null || existingBackpackWrapper.getBackpack() == backpackWrapper.getBackpack()) {

@@ -3,31 +3,43 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
+public class InceptionInventoryHandler implements ITrackedContentsItemHandler, InceptionHandler {
 	private IItemHandlerModifiable combinedInventories;
 	private final ITrackedContentsItemHandler wrappedInventoryHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 	private List<ITrackedContentsItemHandler> handlers;
+	private final Consumer<Collection<IStorageWrapper>> refreshListener = sbs -> refreshHandlerDelegate();
+	private boolean handlersInvalidated;
+	private final Runnable upgradeCachesInvalidatedListener = () -> handlersInvalidated = true;
 
 	public InceptionInventoryHandler(ITrackedContentsItemHandler wrappedInventoryHandler, InventoryOrder inventoryOrder,
 			SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedInventoryHandler = wrappedInventoryHandler;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
-		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlerDelegate());
+		subBackpacksHandler.addRefreshListener(refreshListener);
+		subBackpacksHandler.addUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 
 		refreshHandlerDelegate();
+	}
+
+	@Override
+	public void onBeforeDeconstruct() {
+		subBackpacksHandler.removeRefreshListener(refreshListener);
+		subBackpacksHandler.removeUpgradeCachesInvalidatedListener(upgradeCachesInvalidatedListener);
 	}
 
 	private void refreshHandlerDelegate() {
@@ -53,45 +65,60 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 				return remaining;
 			}
 		};
+		handlersInvalidated = false;
+	}
+
+	private void refreshHandlersIfNeeded() {
+		if (handlersInvalidated) {
+			refreshHandlerDelegate();
+		}
 	}
 
 	@Override
 	public void setStackInSlot(int slot, ItemStack stack) {
+		refreshHandlersIfNeeded();
 		combinedInventories.setStackInSlot(slot, stack);
 	}
 
 	@Override
 	public int getSlots() {
+		refreshHandlersIfNeeded();
 		return combinedInventories.getSlots();
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int slot) {
+		refreshHandlersIfNeeded();
 		return combinedInventories.getStackInSlot(slot);
 	}
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		refreshHandlersIfNeeded();
 		return combinedInventories.insertItem(slot, stack, simulate);
 	}
 
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
+		refreshHandlersIfNeeded();
 		return combinedInventories.extractItem(slot, amount, simulate);
 	}
 
 	@Override
 	public int getSlotLimit(int slot) {
+		refreshHandlersIfNeeded();
 		return combinedInventories.getSlotLimit(slot);
 	}
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
+		refreshHandlersIfNeeded();
 		return combinedInventories.isItemValid(slot, stack);
 	}
 
 	@Override
 	public ItemStack insertItem(ItemStack stack, boolean simulate) {
+		refreshHandlersIfNeeded();
 		ItemStack remainingStack = stack;
 		for (IItemHandlerSimpleInserter handler : handlers) {
 			remainingStack = handler.insertItem(remainingStack, simulate);
@@ -105,6 +132,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 
 	@Override
 	public Set<ItemStackKey> getTrackedStacks() {
+		refreshHandlersIfNeeded();
 		Set<ItemStackKey> ret = new HashSet<>();
 		handlers.forEach(h -> ret.addAll(h.getTrackedStacks()));
 		return ret;
@@ -113,26 +141,31 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	@Override
 	public void registerTrackingListeners(Consumer<ItemStackKey> onAddStackKey, Consumer<ItemStackKey> onRemoveStackKey, Runnable onAddFirstEmptySlot,
 			Runnable onRemoveLastEmptySlot) {
+		refreshHandlersIfNeeded();
 		handlers.forEach(h -> h.registerTrackingListeners(onAddStackKey, onRemoveStackKey, onAddFirstEmptySlot, onRemoveLastEmptySlot));
 	}
 
 	@Override
 	public void unregisterStackKeyListeners() {
+		refreshHandlersIfNeeded();
 		handlers.forEach(ITrackedContentsItemHandler::unregisterStackKeyListeners);
 	}
 
 	@Override
 	public boolean hasEmptySlots() {
+		refreshHandlersIfNeeded();
 		return handlers.stream().anyMatch(ITrackedContentsItemHandler::hasEmptySlots);
 	}
 
 	@Override
 	public boolean isInsertBlocked() {
+		refreshHandlersIfNeeded();
 		return handlers.stream().allMatch(ITrackedContentsItemHandler::isInsertBlocked);
 	}
 
 	@Override
 	public ItemStack extractItem(ItemStack stack, boolean simulate) {
+		refreshHandlersIfNeeded();
 		ItemStack remaining = stack;
 		for (ITrackedContentsItemHandler handler : handlers) {
 			ItemStack extracted = handler.extractItem(remaining, simulate);

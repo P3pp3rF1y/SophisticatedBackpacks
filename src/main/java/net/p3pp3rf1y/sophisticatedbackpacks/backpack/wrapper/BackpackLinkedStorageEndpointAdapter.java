@@ -106,20 +106,43 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 
 	public static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result, Container inputs) {
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(result);
+		return endpoint != null && result.getItem() instanceof BackpackItem item && hasOriginalEndpoint(inputs, endpoint, result)
+				&& completePrimaryTierUpgrade(level, result, endpoint, item);
+	}
+
+	public static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result) {
+		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(result);
 		if (endpoint == null || !(result.getItem() instanceof BackpackItem item)) {
 			return false;
 		}
+		return completePrimaryTierUpgrade(level, result, endpoint, item);
+	}
+
+	private static boolean completePrimaryTierUpgrade(ServerLevel level, ItemStack result, LinkedStorageEndpointData endpoint, BackpackItem item) {
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(level).manager();
-		if (!manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId()) || !hasOriginalEndpoint(inputs, endpoint, result)) {
+		if (!manager.isPrimaryEndpoint(endpoint.groupId(), endpoint.endpointId())) {
+			return false;
+		}
+		LinkedStorageHostDescriptor previous = manager.getHostDescriptor(endpoint.groupId()).orElse(null);
+		if (previous == null) {
+			return false;
+		}
+		ItemStack existingCarrier = ItemStack.of(previous.virtualCarrier());
+		if (existingCarrier.getItem() == result.getItem()) {
 			return false;
 		}
 		result.getOrCreateTag().putInt("inventorySlots", item.getNumberOfSlots());
 		result.getOrCreateTag().putInt("upgradeSlots", item.getNumberOfUpgradeSlots());
-		ItemStack carrier = result.copy();
+		LinkedStorageStackData.setPrimaryEndpoint(result, true);
+		ItemStack carrier = result.copyWithCount(1);
 		carrier.removeTagKey(BackpackWrapper.CONTENTS_UUID_TAG);
 		LinkedStorageStackLifecycle.clear(carrier);
+		CompoundTag existingTag = existingCarrier.getTag();
+		if (existingTag != null && existingTag.contains(BackpackRenderInfo.RENDER_INFO_TAG, Tag.TAG_COMPOUND)) {
+			carrier.getOrCreateTag().put(BackpackRenderInfo.RENDER_INFO_TAG, existingTag.getCompound(BackpackRenderInfo.RENDER_INFO_TAG).copy());
+		}
 		return manager.updatePrimaryHostDescriptor(endpoint.groupId(), endpoint.endpointId(),
-				new LinkedStorageHostDescriptor(BackpackLinkedStorageHostWrapper.FACTORY_ID, carrier.save(new CompoundTag())));
+				new LinkedStorageHostDescriptor(previous.factoryId(), carrier.save(new CompoundTag())));
 	}
 
 	private static boolean hasOriginalEndpoint(Container inputs, LinkedStorageEndpointData endpoint, ItemStack result) {

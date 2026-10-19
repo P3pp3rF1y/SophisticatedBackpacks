@@ -27,12 +27,14 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.ListenerList;
 import net.minecraftforge.eventbus.LockHelper;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventListenerHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -43,6 +45,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionWrapperAccessor;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.SubBackpacksHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IDiscHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -95,6 +99,65 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class LinkedStorageBackpackWrapperTest {
+	@Test
+	void removeContentsUuidRebuildsInitializedHandlers() {
+		BackpackStorage storage = mock(BackpackStorage.class);
+		when(storage.getOrCreateBackpackContents(Mockito.any())).thenAnswer(invocation -> new CompoundTag());
+		BackpackWrapper wrapper = new BackpackWrapper(backpack());
+
+		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class)) {
+			backpackStorage.when(BackpackStorage::get).thenReturn(storage);
+			InventoryHandler previousHandler = wrapper.getInventoryHandler();
+			UUID removedUuid = wrapper.getContentsUuid().orElseThrow();
+
+			wrapper.removeContentsUuid();
+
+			assertNotSame(previousHandler, wrapper.getInventoryHandler());
+			assertFalse(removedUuid.equals(wrapper.getContentsUuid().orElseThrow()));
+			Mockito.verify(storage).removeBackpackContents(removedUuid);
+		}
+	}
+
+	@Test
+	void fillFromTemplateRebuildsInitializedHandlers() {
+		BackpackStorage storage = mock(BackpackStorage.class);
+		when(storage.getOrCreateBackpackContents(Mockito.any())).thenAnswer(invocation -> new CompoundTag());
+		BackpackWrapper wrapper = new BackpackWrapper(backpack());
+		net.minecraft.resources.ResourceLocation name = new net.minecraft.resources.ResourceLocation("test", "handler_replacement");
+		CompoundTag template = new CompoundTag();
+		template.put("backpackContents", new CompoundTag());
+		wrapper.setTemplate(name);
+
+		try (MockedStatic<BackpackStorage> backpackStorage = Mockito.mockStatic(BackpackStorage.class);
+				MockedStatic<BackpackTemplates> templates = Mockito.mockStatic(BackpackTemplates.class)) {
+			backpackStorage.when(BackpackStorage::get).thenReturn(storage);
+			templates.when(() -> BackpackTemplates.getBackpackTemplate(name)).thenReturn(Optional.of(template));
+			InventoryHandler previousHandler = wrapper.getInventoryHandler();
+
+			wrapper.fillFromTemplate();
+
+			assertNotSame(previousHandler, wrapper.getInventoryHandler());
+			Mockito.verify(storage).setBackpackContents(Mockito.eq(wrapper.getContentsUuid().orElseThrow()), Mockito.any(CompoundTag.class));
+		}
+	}
+
+	@Test
+	void getEnergyStorageInitializesAggregateOnlyOnceAndKeepsItsIdentity() {
+		BackpackWrapper wrapper = Mockito.spy(new BackpackWrapper(backpack()));
+		UpgradeHandler upgrades = mock(UpgradeHandler.class);
+		IEnergyStorage battery = mock(IEnergyStorage.class);
+		IEnergyStorage aggregate = mock(IEnergyStorage.class);
+		IEnergyStorageUpgradeWrapper inception = mock(IEnergyStorageUpgradeWrapper.class);
+		Mockito.doReturn(upgrades).when(wrapper).getUpgradeHandler();
+		when(upgrades.getWrappersThatImplementFromMainStorage(IEnergyStorage.class)).thenReturn(List.of(battery));
+		when(upgrades.getWrappersThatImplementFromMainStorage(IEnergyStorageUpgradeWrapper.class)).thenReturn(List.of(inception));
+		when(inception.wrapStorage(battery)).thenReturn(aggregate);
+		when(aggregate.getMaxEnergyStored()).thenReturn(100);
+
+		assertSame(aggregate, wrapper.getEnergyStorage().orElseThrow());
+		assertSame(aggregate, wrapper.getEnergyStorage().orElseThrow());
+		Mockito.verify(inception).wrapStorage(battery);
+	}
 	private static BackpackItem testBackpack;
 	private static BackpackItem goldBackpack;
 	private static BackpackItem diamondBackpack;
@@ -217,6 +280,29 @@ class LinkedStorageBackpackWrapperTest {
 		assertNotSame(inventory, host.getInventoryHandler());
 		assertNotSame(settings, host.getSettingsHandler());
 		assertNotSame(upgrades, host.getUpgradeHandler());
+	}
+
+	@Test
+	void generalContentsAndLayoutReplacementNotifyOldUpgradeSubscribersAfterHandlerRebinding() {
+		TestContents contents = new TestContents();
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(contents, backpack());
+		for (int replacement = 0; replacement < 3; replacement++) {
+			UpgradeHandler previous = host.getUpgradeHandler();
+			InventoryHandler oldInventory = host.getInventoryHandler();
+			AtomicReference<UpgradeHandler> observed = new AtomicReference<>();
+			previous.addRefreshCallback(() -> observed.set(host.getUpgradeHandler()));
+			if (replacement == 0) {
+				host.onContentsNbtUpdated();
+			} else if (replacement == 1) {
+				contents.setContents(new CompoundTag());
+				host.onLinkedStorageContentsChanged();
+			} else {
+				host.onLinkedStorageLayoutChanged();
+			}
+			assertSame(host.getUpgradeHandler(), observed.get());
+			assertNotSame(previous, observed.get());
+			assertNotSame(oldInventory, host.getInventoryHandler());
+		}
 	}
 
 	@Test
@@ -692,6 +778,8 @@ class LinkedStorageBackpackWrapperTest {
 
 		when(savedData.manager()).thenReturn(manager);
 		when(manager.isPrimaryEndpoint(groupId, endpointId)).thenReturn(true);
+		when(manager.getHostDescriptor(groupId))
+				.thenReturn(Optional.of(new LinkedStorageHostDescriptor(BackpackLinkedStorageHostWrapper.FACTORY_ID, source.save(new CompoundTag()))));
 		when(manager.updatePrimaryHostDescriptor(Mockito.eq(groupId), Mockito.eq(endpointId), Mockito.any())).thenReturn(true);
 		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class)) {
 			groups.when(() -> LinkedStorageGroupsSavedData.get(level)).thenReturn(savedData);
@@ -707,6 +795,115 @@ class LinkedStorageBackpackWrapperTest {
 		assertSame(goldBackpack, upgradedCarrier.getItem());
 		assertEquals(54, upgradedCarrier.getTag().getInt("inventorySlots"));
 		assertEquals(6, upgradedCarrier.getTag().getInt("upgradeSlots"));
+	}
+
+	@Test
+	void compatibleForeignFactoryTierUpgradePreservesFactoryAndNormalizesPrimaryMarkerAndCount() {
+		UUID groupId = UUID.randomUUID();
+		UUID endpointId = UUID.randomUUID();
+		ItemStack original = backpack();
+		ItemStack result = backpack(goldBackpack);
+		result.setCount(4);
+		LinkedStorageStackData.setEndpoint(result, new LinkedStorageEndpointData(groupId, endpointId));
+		LinkedStorageStackData.setPrimaryEndpoint(result, false);
+		CompoundTag render = new CompoundTag();
+		render.putString("marker", "foreign-canonical");
+		original.getOrCreateTag().put(BackpackRenderInfo.RENDER_INFO_TAG, render);
+		net.minecraft.resources.ResourceLocation foreignFactory = new net.minecraft.resources.ResourceLocation("test", "compatible");
+		LinkedStorageHostDescriptor foreign = new LinkedStorageHostDescriptor(foreignFactory, original.save(new CompoundTag()));
+		ServerLevel level = mock(ServerLevel.class);
+		LinkedStorageGroupsSavedData savedData = mock(LinkedStorageGroupsSavedData.class);
+		LinkedStorageGroupManager manager = mock(LinkedStorageGroupManager.class);
+		when(savedData.manager()).thenReturn(manager);
+		when(manager.isPrimaryEndpoint(groupId, endpointId)).thenReturn(true);
+		AtomicReference<LinkedStorageHostDescriptor> current = new AtomicReference<>(foreign);
+		when(manager.getHostDescriptor(groupId)).thenAnswer(ignored -> Optional.of(current.get()));
+		when(manager.updatePrimaryHostDescriptor(Mockito.eq(groupId), Mockito.eq(endpointId), Mockito.any())).thenAnswer(invocation -> {
+			current.set(invocation.getArgument(2));
+			return true;
+		});
+		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class)) {
+			groups.when(() -> LinkedStorageGroupsSavedData.get(level)).thenReturn(savedData);
+			assertTrue(BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(level, result));
+			assertFalse(BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(level, result));
+		}
+		assertTrue(LinkedStorageStackData.isPrimaryEndpoint(result));
+		assertEquals(4, result.getCount());
+		assertEquals(foreignFactory, current.get().factoryId());
+		ItemStack carrier = ItemStack.of(current.get().virtualCarrier());
+		assertEquals(1, carrier.getCount());
+		assertEquals(render, carrier.getTag().getCompound(BackpackRenderInfo.RENDER_INFO_TAG));
+		assertEquals(LinkedStorageEndpointStackState.UNLINKED, LinkedStorageStackLifecycle.classifyEndpoint(carrier));
+		Mockito.verify(manager, Mockito.times(1)).updatePrimaryHostDescriptor(Mockito.eq(groupId), Mockito.eq(endpointId), Mockito.any());
+	}
+
+	@Test
+	void onCraftedByCompletesPrimaryTierUpgradeOnceAndPreservesCanonicalRender() {
+		UUID groupId = UUID.randomUUID();
+		UUID endpointId = UUID.randomUUID();
+		ItemStack original = backpack();
+		ItemStack result = backpack(goldBackpack);
+		LinkedStorageStackData.setEndpoint(result, new LinkedStorageEndpointData(groupId, endpointId));
+		CompoundTag render = new CompoundTag();
+		render.putString("marker", "canonical");
+		original.getOrCreateTag().put(BackpackRenderInfo.RENDER_INFO_TAG, render);
+		ServerLevel level = mock(ServerLevel.class);
+		LinkedStorageGroupsSavedData savedData = mock(LinkedStorageGroupsSavedData.class);
+		LinkedStorageGroupManager manager = mock(LinkedStorageGroupManager.class);
+		when(savedData.manager()).thenReturn(manager);
+		when(manager.isPrimaryEndpoint(groupId, endpointId)).thenReturn(true);
+		java.util.concurrent.atomic.AtomicReference<LinkedStorageHostDescriptor> current = new java.util.concurrent.atomic.AtomicReference<>(
+				new LinkedStorageHostDescriptor(BackpackLinkedStorageHostWrapper.FACTORY_ID, original.save(new CompoundTag())));
+		when(manager.getHostDescriptor(groupId)).thenAnswer(invocation -> Optional.of(current.get()));
+		when(manager.updatePrimaryHostDescriptor(Mockito.eq(groupId), Mockito.eq(endpointId), Mockito.any())).thenAnswer(invocation -> {
+			current.set(invocation.getArgument(2));
+			return true;
+		});
+		try (MockedStatic<LinkedStorageGroupsSavedData> groups = Mockito.mockStatic(LinkedStorageGroupsSavedData.class)) {
+			groups.when(() -> LinkedStorageGroupsSavedData.get(level)).thenReturn(savedData);
+
+			goldBackpack.onCraftedBy(result, level, mock(net.minecraft.world.entity.player.Player.class));
+			assertFalse(BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(level, result, new SimpleContainer(original)));
+		}
+
+		org.mockito.ArgumentCaptor<LinkedStorageHostDescriptor> descriptor = org.mockito.ArgumentCaptor.forClass(LinkedStorageHostDescriptor.class);
+		Mockito.verify(manager, Mockito.times(1)).updatePrimaryHostDescriptor(Mockito.eq(groupId), Mockito.eq(endpointId), descriptor.capture());
+		assertEquals(render, ItemStack.of(descriptor.getValue().virtualCarrier()).getTag().getCompound(BackpackRenderInfo.RENDER_INFO_TAG));
+	}
+
+	@Test
+	void virtualCarrierTierReplacementNotifiesExistingUpgradeSubscribersAfterRebinding() {
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), backpack());
+		java.util.concurrent.atomic.AtomicReference<ItemStack> observed = new java.util.concurrent.atomic.AtomicReference<>();
+		host.getUpgradeHandler().addRefreshCallback(() -> observed.set(host.getBackpack()));
+		ItemStack upgraded = backpack(goldBackpack);
+
+		host.onVirtualCarrierChanged(upgraded.save(new CompoundTag()));
+
+		assertSame(goldBackpack, observed.get().getItem());
+		assertSame(goldBackpack, host.getBackpack().getItem());
+	}
+
+	@Test
+	void virtualCarrierTierReplacementRebindsContainingInceptionParent() throws ReflectiveOperationException {
+		BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(new TestContents(), backpack());
+		InventoryHandler inventory = mock(InventoryHandler.class);
+		SubBackpacksHandler children = new SubBackpacksHandler(inventory);
+		Field field = SubBackpacksHandler.class.getDeclaredField("subBackpacks");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		Map<Integer, IStorageWrapper> tracked = (Map<Integer, IStorageWrapper>) field.get(children);
+		tracked.put(0, host);
+		IStorageWrapper parent = mock(IStorageWrapper.class);
+		UpgradeHandler parentUpgrades = mock(UpgradeHandler.class);
+		when(parent.getUpgradeHandler()).thenReturn(parentUpgrades);
+		InceptionWrapperAccessor accessor = new InceptionWrapperAccessor(parent, children);
+
+		host.onVirtualCarrierChanged(backpack(goldBackpack).save(new CompoundTag()));
+		host.getUpgradeHandler().refreshWrappersThatImplementAndTypeWrappers();
+
+		Mockito.verify(parentUpgrades, Mockito.times(2)).notifyRefreshCallbacks();
+		accessor.onBeforeDeconstruct();
 	}
 
 	@Test

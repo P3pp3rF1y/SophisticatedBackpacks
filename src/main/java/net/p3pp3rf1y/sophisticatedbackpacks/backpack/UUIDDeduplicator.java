@@ -7,7 +7,10 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,46 +23,60 @@ public class UUIDDeduplicator {
 	}
 
 	public static void checkForDuplicateBackpacksAndRemoveTheirUUID(Player player, UUID backpackUuid, ItemStack backpack) {
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-				.ifPresent(backpackWrapper -> PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
-					if (otherBackpack != backpack) {
-						otherBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-								.ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid -> {
-									if (uuid.equals(backpackUuid)) {
-										dedupeBackpackWrappers(backpackWrapper, wrapper);
-									}
-								}));
-					}
-					return false;
-				}));
+		if (LinkedStorageStackData.getEndpoint(backpack) != null) {
+			return;
+		}
+		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+			List<IBackpackWrapper> duplicates = new ArrayList<>();
+			PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
+				if (otherBackpack != backpack && LinkedStorageStackData.getEndpoint(otherBackpack) == null) {
+					otherBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+							.ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid -> {
+								if (uuid.equals(backpackUuid)) {
+									duplicates.add(wrapper);
+								}
+							}));
+				}
+				return false;
+			});
+			IBackpackWrapper winner = backpackWrapper;
+			for (IBackpackWrapper duplicate : duplicates) {
+				winner = dedupeBackpackWrappers(winner, duplicate);
+			}
+		});
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
+		if (LinkedStorageStackData.getEndpoint(newBackpackItemEntity.getItem()) != null) {
+			return;
+		}
 		newBackpackItemEntity.getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(newBackpackWrapper -> newBackpackWrapper
 				.getContentsUuid().ifPresent(backpackId -> dedupeBackpackItemEntityInArea(newBackpackWrapper, newBackpackItemEntity, backpackId)));
 	}
 
 	private static void dedupeBackpackItemEntityInArea(IBackpackWrapper newBackpackWrapper, ItemEntity newBackpackItemEntity, UUID backpackId) {
+		IBackpackWrapper winner = newBackpackWrapper;
 		for (ItemEntity entity : newBackpackItemEntity.level().getEntitiesOfClass(ItemEntity.class, newBackpackItemEntity.getBoundingBox().inflate(10),
 				Entity::isAlive)) {
-			if (entity != newBackpackItemEntity) {
-				checkEntityBackpackIdMatchAndRemoveIfItDoes(newBackpackWrapper, backpackId, entity);
+			if (entity != newBackpackItemEntity && LinkedStorageStackData.getEndpoint(entity.getItem()) == null) {
+				winner = checkEntityBackpackIdMatchAndRemoveIfItDoes(winner, backpackId, entity);
 			}
 		}
 	}
 
-	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
-		return entity.getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).resolve()
-				.map(wrapper -> wrapper.getContentsUuid().map(backpackId -> {
-					if (backpackId.equals(newBackpackId)) {
-						dedupeBackpackWrappers(newBackpackWrapper, wrapper);
-						return true;
-					}
-					return false;
-				}).orElse(false)).orElse(false);
+	private static IBackpackWrapper checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
+		return entity
+				.getItem().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).resolve().map(wrapper -> wrapper.getContentsUuid()
+						.filter(newBackpackId::equals).map(backpackId -> dedupeBackpackWrappers(newBackpackWrapper, wrapper)).orElse(newBackpackWrapper))
+				.orElse(newBackpackWrapper);
 	}
 
 	public static IBackpackWrapper dedupeBackpackWrappers(IBackpackWrapper firstBackpackWrapper, IBackpackWrapper secondBackpackWrapper) {
+		boolean firstLinked = firstBackpackWrapper.getLinkedStorageEndpoint().isPresent();
+		boolean secondLinked = secondBackpackWrapper.getLinkedStorageEndpoint().isPresent();
+		if (firstLinked || secondLinked) {
+			return firstLinked && !secondLinked ? secondBackpackWrapper : firstBackpackWrapper;
+		}
 		if (isFirstBackpackPreferred(firstBackpackWrapper, secondBackpackWrapper)) {
 			removeUuid(secondBackpackWrapper);
 			return firstBackpackWrapper;

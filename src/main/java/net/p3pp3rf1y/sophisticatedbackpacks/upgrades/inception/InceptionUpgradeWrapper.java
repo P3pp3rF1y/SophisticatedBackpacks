@@ -58,6 +58,8 @@ public class InceptionUpgradeWrapper extends UpgradeWrapperBase<InceptionUpgrade
 	private void initSubBackpacksHandler() {
 		if (subBackpacksHandler == null) {
 			subBackpacksHandler = new SubBackpacksHandler(storageWrapper.getInventoryHandler());
+		} else {
+			subBackpacksHandler.ensureInventoryListenerRegistered();
 		}
 	}
 

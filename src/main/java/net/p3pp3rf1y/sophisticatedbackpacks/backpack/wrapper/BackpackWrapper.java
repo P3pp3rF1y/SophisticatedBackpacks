@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
@@ -201,7 +202,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public Optional<IStorageFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
 			IStorageFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
-			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
+			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler()
+					.getWrappersThatImplementFromMainStorage(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
 				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler, backpack);
@@ -217,13 +219,15 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public Optional<IEnergyStorage> getEnergyStorage() {
 		if (!energyStorageInitialized) {
-			IEnergyStorage wrappedStorage = getUpgradeHandler().getWrappersThatImplement(IEnergyStorage.class).stream().findFirst().orElse(null);
+			IEnergyStorage wrappedStorage = getUpgradeHandler().getWrappersThatImplementFromMainStorage(IEnergyStorage.class).stream().findFirst().orElse(null);
 
-			for (IEnergyStorageUpgradeWrapper energyStorageWrapperUpgrade : getUpgradeHandler().getWrappersThatImplement(IEnergyStorageUpgradeWrapper.class)) {
+			for (IEnergyStorageUpgradeWrapper energyStorageWrapperUpgrade : getUpgradeHandler()
+					.getWrappersThatImplementFromMainStorage(IEnergyStorageUpgradeWrapper.class)) {
 				wrappedStorage = energyStorageWrapperUpgrade.wrapStorage(wrappedStorage);
 			}
 
 			energyStorage = wrappedStorage;
+			energyStorageInitialized = true;
 		}
 
 		return energyStorage == null || energyStorage.getMaxEnergyStored() == 0 ? Optional.empty() : Optional.of(energyStorage);
@@ -265,11 +269,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 					inventoryHandler.clearListeners();
 					inventoryHandler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 					inventoryIOHandler = null;
-					inventoryModificationHandler = null;
-					fluidHandlerInitialized = false;
-					fluidHandler = null;
-					energyStorageInitialized = false;
-					energyStorage = null;
+					clearWrapperGraphs();
 					upgradeCachesInvalidatedHandler.run();
 				}) {
 					@Override
@@ -519,6 +519,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		CompoundTag backpackContent = templateData.get().getCompound("backpackContents").copy();
 		contentsSource.setContents(backpackContent);
+		onContentsNbtUpdated();
 		NBTHelper.removeTag(backpack, TEMPLATE_NAME_TAG);
 	}
 
@@ -531,6 +532,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public void removeContentsUuid() {
 		getContentsUuid().ifPresent(BackpackStorage.get()::removeBackpackContents);
 		removeContentsUUIDTag();
+		onContentsNbtUpdated();
 	}
 
 	@Override
@@ -608,21 +610,42 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void refreshInventoryForUpgradeProcessing() {
+		clearWrapperGraphs();
+		refreshInventoryForInputOutput();
+	}
+
+	private void clearWrapperGraphs() {
+		if (inventoryModificationHandler != null) {
+			inventoryModificationHandler.onBeforeDeconstruct();
+		}
+		if (fluidHandler instanceof InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
+		if (energyStorage instanceof InceptionHandler inceptionHandler) {
+			inceptionHandler.onBeforeDeconstruct();
+		}
 		inventoryModificationHandler = null;
 		fluidHandler = null;
 		fluidHandlerInitialized = false;
 		energyStorage = null;
 		energyStorageInitialized = false;
-		refreshInventoryForInputOutput();
 	}
 
 	@Override
 	public void onContentsNbtUpdated() {
+		clearWrapperGraphs();
+		UpgradeHandler previousUpgradeHandler = upgradeHandler;
+		if (previousUpgradeHandler != null) {
+			previousUpgradeHandler.onBeforeDeconstruct();
+		}
 		handler = null;
 		upgradeHandler = null;
 		settingsHandler = null;
 		refreshInventoryForUpgradeProcessing();
 		onInventoryHandlerRefresh.run();
+		if (previousUpgradeHandler != null) {
+			previousUpgradeHandler.notifyRefreshCallbacks();
+		}
 	}
 
 	@Override
