@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -106,13 +107,13 @@ public class EntityBackpackAdditionHandler {
 		VanillaDiscHandler.setDiscBlockListGetter(Config.SERVER.entityBackpackAdditions.discBlockList);
 	}
 
-	static void handleBackpackAdditionOnSpawn(Monster monster, LevelAccessor level) {
+	static void handleBackpackAdditionOnSpawn(Monster monster, LevelAccessor level, MobSpawnType spawnType) {
 		RandomSource rnd = level.getRandom();
 		if (!shouldAddBackpack(monster, rnd)) {
 			return;
 		}
 
-		if (shouldDeferBackpackAddition(level)) {
+		if (shouldDeferBackpackAddition(level, spawnType)) {
 			setPendingBackpackAddition(monster, true);
 			return;
 		}
@@ -126,9 +127,9 @@ public class EntityBackpackAdditionHandler {
 				&& (!(monster instanceof Raider raider) || raider.getCurrentRaid() == null);
 	}
 
-	private static boolean shouldDeferBackpackAddition(LevelAccessor level) {
+	private static boolean shouldDeferBackpackAddition(LevelAccessor level, MobSpawnType spawnType) {
 		MinecraftServer server = level.getServer();
-		return server == null || !server.isSameThread();
+		return spawnType == MobSpawnType.TRIAL_SPAWNER || server == null || !server.isSameThread();
 	}
 
 	private static void addBackpack(Monster monster, LevelAccessor level, RandomSource rnd) {
@@ -272,6 +273,10 @@ public class EntityBackpackAdditionHandler {
 		if (hasSpawnedBackpack(event.getEntity())) {
 			LivingEntity mob = event.getEntity();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
+			if (!(backpack.getItem() instanceof BackpackItem)) {
+				clearSpawnedBackpackData(mob);
+				return;
+			}
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
 			if (shouldDropBackpack(event, additionsConfig, mob, backpack)) {
 				putJukeboxItemsInContainerAndRemoveStorageUuid(event, backpack);
