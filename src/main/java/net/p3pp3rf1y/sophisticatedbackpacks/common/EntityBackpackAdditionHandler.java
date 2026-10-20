@@ -280,6 +280,10 @@ public class EntityBackpackAdditionHandler {
 		if (hasSpawnedBackpack(event.getEntity())) {
 			LivingEntity mob = event.getEntity();
 			ItemStack backpack = mob.getItemBySlot(EquipmentSlot.CHEST);
+			if (!(backpack.getItem() instanceof BackpackItem)) {
+				clearSpawnedBackpackData(mob);
+				return;
+			}
 			Config.Server.EntityBackpackAdditionsConfig additionsConfig = Config.SERVER.entityBackpackAdditions;
 			if (shouldDropBackpack(event, additionsConfig, mob, backpack)) {
 				putJukeboxItemsInContainerAndRemoveStorageUuid(event, backpack);
