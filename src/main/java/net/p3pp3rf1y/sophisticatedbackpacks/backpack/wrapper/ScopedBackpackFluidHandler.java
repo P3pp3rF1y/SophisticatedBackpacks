@@ -28,7 +28,9 @@ class ScopedBackpackFluidHandler implements IFluidHandlerItem {
 		try {
 			return operation.get();
 		} finally {
-			wrapper.setBackpackStack(original);
+			if (!original.isEmpty()) {
+				wrapper.setBackpackStack(original);
+			}
 		}
 	}
 
