@@ -35,16 +35,16 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable CompoundTag renderI
 		if (!backpackContainer.canApplyClientInfo(payload.slotIndex)) {
 			return;
 		}
+		if (payload.slotIndex >= player.getInventory().items.size()) {
+			return;
+		}
+		// Let the menu detect the layout change before updating its potentially shared backpack stack.
+		backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
 		if (payload.slotIndex >= 0) {
-			if (payload.slotIndex >= player.getInventory().items.size()) {
-				return;
-			}
 			ItemStack backpack = player.getInventory().items.get(payload.slotIndex);
-			// Keep the canonical columns unchanged until the menu detects the layout change below.
 			IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
 			backpackWrapper.getRenderInfo().deserializeFrom(payload.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
 		}
-		backpackContainer.syncClientInfo(payload.renderInfoNbt, payload.columnsTaken);
 	}
 }
