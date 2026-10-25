@@ -44,6 +44,9 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullLazy;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
@@ -415,7 +418,10 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				} else if (cap == ForgeCapabilities.ITEM_HANDLER) {
 					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
 				} else if (cap == ForgeCapabilities.FLUID_HANDLER_ITEM && Boolean.TRUE.equals(Config.SERVER.itemFluidHandlerEnabled.get())) {
-					return wrapper.getFluidHandler().<LazyOptional<T>>map(handler -> LazyOptional.of(() -> handler).cast()).orElseGet(LazyOptional::empty);
+					return wrapper.getFluidHandler()
+							.<LazyOptional<T>>map(
+									handler -> LazyOptional.of(() -> wrapperForLinkedEndpoint ? new FluidHandlerItemWrapper(stack, handler) : handler).cast())
+							.orElseGet(LazyOptional::empty);
 				} else if (cap == ForgeCapabilities.ENERGY) {
 					return wrapper.getEnergyStorage().<LazyOptional<T>>map(storage -> LazyOptional.of(() -> storage).cast()).orElseGet(LazyOptional::empty);
 				}
@@ -438,6 +444,56 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				}
 			}
 		};
+	}
+
+	private static class FluidHandlerItemWrapper implements IFluidHandlerItem {
+		private final ItemStack container;
+		private final IFluidHandler delegate;
+
+		private FluidHandlerItemWrapper(ItemStack container, IFluidHandler delegate) {
+			this.container = container;
+			this.delegate = delegate;
+		}
+
+		@Override
+		public ItemStack getContainer() {
+			return container;
+		}
+
+		@Override
+		public int getTanks() {
+			return delegate.getTanks();
+		}
+
+		@Override
+		public FluidStack getFluidInTank(int tank) {
+			return delegate.getFluidInTank(tank);
+		}
+
+		@Override
+		public int getTankCapacity(int tank) {
+			return delegate.getTankCapacity(tank);
+		}
+
+		@Override
+		public boolean isFluidValid(int tank, FluidStack stack) {
+			return delegate.isFluidValid(tank, stack);
+		}
+
+		@Override
+		public int fill(FluidStack resource, FluidAction action) {
+			return delegate.fill(resource, action);
+		}
+
+		@Override
+		public FluidStack drain(FluidStack resource, FluidAction action) {
+			return delegate.drain(resource, action);
+		}
+
+		@Override
+		public FluidStack drain(int maxDrain, FluidAction action) {
+			return delegate.drain(maxDrain, action);
+		}
 	}
 
 	@Override

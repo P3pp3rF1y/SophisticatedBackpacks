@@ -33,6 +33,8 @@ import net.minecraftforge.eventbus.ListenerList;
 import net.minecraftforge.eventbus.LockHelper;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventListenerHelper;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
@@ -179,6 +181,17 @@ class LinkedStorageBackpackWrapperTest {
 			Config.SERVER_SPEC.correct(config);
 			Config.SERVER_SPEC.acceptConfig(config);
 		}
+	}
+
+	@Test
+	void linkedFluidAdapterReturnsPhysicalEndpoint() throws ReflectiveOperationException {
+		ItemStack endpoint = linkedEndpoint(UUID.randomUUID());
+		Class<?> adapter = Class.forName("net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem$FluidHandlerItemWrapper");
+		var constructor = adapter.getDeclaredConstructor(ItemStack.class, IFluidHandler.class);
+		constructor.setAccessible(true);
+		IFluidHandlerItem handler = (IFluidHandlerItem) constructor.newInstance(endpoint, mock(IFluidHandler.class));
+
+		assertSame(endpoint, handler.getContainer());
 	}
 
 	@SuppressWarnings("unchecked")
