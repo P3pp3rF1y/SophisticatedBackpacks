@@ -36,6 +36,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
@@ -229,6 +230,20 @@ class BackpackLinkedStorageHostWrapperTest {
 		assertThrows(IllegalStateException.class, () -> facade.fillWithLootAndExtraItems(null, BlockPos.ZERO));
 		assertThrows(IllegalStateException.class, () -> facade.setLoot(ResourceLocation.withDefaultNamespace("test"), 1));
 		assertThrows(IllegalStateException.class, () -> facade.setTemplate(ResourceLocation.withDefaultNamespace("test")));
+	}
+
+	@Test
+	void getCapabilityFluidHandlerReturnsPhysicalLinkedEndpoint() {
+		ItemStack endpoint = linkedEndpoint(UUID.randomUUID());
+		IBackpackWrapper host = Mockito.mock(IBackpackWrapper.class);
+		Mockito.when(host.getFluidHandler()).thenReturn(Optional.of(Mockito.mock(IStorageFluidHandler.class)));
+		try (MockedStatic<BackpackLinkedStorageResolver> resolver = Mockito.mockStatic(BackpackLinkedStorageResolver.class)) {
+			resolver.when(() -> BackpackLinkedStorageResolver.resolveServerCanonicalHost(endpoint)).thenReturn(Optional.of(host));
+
+			IFluidHandlerItem handler = BackpackWrapper.getCapabilityFluidHandler(endpoint).orElseThrow();
+
+			assertSame(endpoint, handler.getContainer());
+		}
 	}
 
 	@Test

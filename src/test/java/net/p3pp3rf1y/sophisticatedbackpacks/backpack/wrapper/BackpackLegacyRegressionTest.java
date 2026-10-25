@@ -232,6 +232,22 @@ class BackpackLegacyRegressionTest {
 	}
 
 	@Test
+	void getFluidInTankReadsMovedStackAfterCachedOwnerIsEmptied() {
+		IBackpackWrapper wrapper = createBackpack(ModItems.BACKPACK.get().getNumberOfSlots());
+		ItemStack original = wrapper.getBackpack();
+		wrapper.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.TANK_UPGRADE.get()));
+		assertTrue(FluidUtil.getFluidHandler(original).orElseThrow().getFluidInTank(0).isEmpty());
+		ItemStack moved = original.copyAndClear();
+		assertTrue(original.isEmpty());
+		assertSame(original, wrapper.getBackpack());
+
+		FluidStack fluid = FluidUtil.getFluidHandler(moved).orElseThrow().getFluidInTank(0);
+
+		assertTrue(fluid.isEmpty());
+		assertSame(moved, wrapper.getBackpack());
+	}
+
+	@Test
 	void failedFluidUtilProbesKeepPhysicalOwnerAndCacheCardinality() throws Throwable {
 		runOnServerThread(() -> {
 			ItemStack original = new ItemStack(ModItems.BACKPACK.get());

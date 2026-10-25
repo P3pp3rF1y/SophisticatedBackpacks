@@ -133,14 +133,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	public static Optional<IFluidHandlerItem> getCapabilityFluidHandler(ItemStack stack) {
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
-			return fromStack(stack).getItemFluidHandler();
+			return fromStack(stack).getFluidHandler().map(handler -> new FluidHandlerItemWrapper(stack, handler));
 		}
 		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
 		if (uuid == null) {
 			return fromStack(stack).getItemFluidHandler();
 		}
 		BackpackWrapper wrapper = StorageWrapperRepository.getStorageWrapper(uuid, stack, BackpackWrapper.class, BackpackWrapper::new);
-		return wrapper.getFluidHandler().map(handler -> new ScopedBackpackFluidHandler(stack, wrapper, handler));
+		return wrapper.getFluidHandler().map(handler -> new FluidHandlerItemWrapper(stack, wrapper, handler));
 	}
 
 	public static Optional<IBackpackWrapper> fromExistingData(ItemStack stack) {
@@ -861,10 +861,33 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private static class FluidHandlerItemWrapper implements IFluidHandlerItem {
 		private final IFluidHandler delegate;
 		private final ItemStack container;
+		@Nullable
+		private final BackpackWrapper wrapper;
 
 		public FluidHandlerItemWrapper(ItemStack container, IFluidHandler delegate) {
+			this(container, null, delegate);
+		}
+
+		public FluidHandlerItemWrapper(ItemStack container, @Nullable BackpackWrapper wrapper, IFluidHandler delegate) {
 			this.container = container;
+			this.wrapper = wrapper;
 			this.delegate = delegate;
+		}
+
+		private <T> T onContainer(Supplier<T> operation) {
+			if (wrapper == null) {
+				return operation.get();
+			}
+			ItemStack original = wrapper.getBackpack();
+			if (original == container) {
+				return operation.get();
+			}
+			wrapper.setBackpackStack(container);
+			T result = operation.get();
+			if (!original.isEmpty()) {
+				wrapper.setBackpackStack(original);
+			}
+			return result;
 		}
 
 		@Override
@@ -874,37 +897,37 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		@Override
 		public int getTanks() {
-			return delegate.getTanks();
+			return onContainer(delegate::getTanks);
 		}
 
 		@Override
 		public FluidStack getFluidInTank(int tank) {
-			return delegate.getFluidInTank(tank);
+			return onContainer(() -> delegate.getFluidInTank(tank));
 		}
 
 		@Override
 		public int getTankCapacity(int tank) {
-			return delegate.getTankCapacity(tank);
+			return onContainer(() -> delegate.getTankCapacity(tank));
 		}
 
 		@Override
 		public boolean isFluidValid(int tank, FluidStack stack) {
-			return delegate.isFluidValid(tank, stack);
+			return onContainer(() -> delegate.isFluidValid(tank, stack));
 		}
 
 		@Override
 		public int fill(FluidStack resource, FluidAction action) {
-			return delegate.fill(resource, action);
+			return onContainer(() -> delegate.fill(resource, action));
 		}
 
 		@Override
 		public FluidStack drain(FluidStack resource, FluidAction action) {
-			return delegate.drain(resource, action);
+			return onContainer(() -> delegate.drain(resource, action));
 		}
 
 		@Override
 		public FluidStack drain(int maxDrain, FluidAction action) {
-			return delegate.drain(maxDrain, action);
+			return onContainer(() -> delegate.drain(maxDrain, action));
 		}
 	}
 
