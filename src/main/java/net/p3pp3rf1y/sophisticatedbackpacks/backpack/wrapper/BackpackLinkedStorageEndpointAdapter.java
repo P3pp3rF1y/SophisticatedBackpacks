@@ -12,6 +12,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.*;
@@ -65,6 +66,11 @@ public class BackpackLinkedStorageEndpointAdapter implements ILinkedStorageItemE
 	@Override
 	public ContainerContents copyCanonicalContents(ServerLevel level, ItemStack stack) {
 		return new BackpackWrapper(stack).copyContentsForLinkedStorage();
+	}
+
+	@Override
+	public SortBy getSortBy(ServerLevel level, ItemStack stack) {
+		return stack.getOrDefault(ModCoreDataComponents.SORT_BY, SortBy.NAME);
 	}
 
 	@Override

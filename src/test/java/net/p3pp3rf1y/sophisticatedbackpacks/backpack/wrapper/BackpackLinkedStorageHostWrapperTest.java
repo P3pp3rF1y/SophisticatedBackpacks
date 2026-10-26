@@ -70,6 +70,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherUpgrad
 import net.p3pp3rf1y.sophisticatedcore.api.IDiscHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
@@ -1612,6 +1613,7 @@ class BackpackLinkedStorageHostWrapperTest {
 		private int dirtyCount;
 		private int renderDirtyCount;
 		private int columnsTaken;
+		private SortBy sortBy = SortBy.NAME;
 
 		private TestContents() {
 			this(UUID.randomUUID());
@@ -1654,6 +1656,16 @@ class BackpackLinkedStorageHostWrapperTest {
 		@Override
 		public void setColumnsTaken(int columnsTaken) {
 			this.columnsTaken = columnsTaken;
+		}
+
+		@Override
+		public SortBy getSortBy() {
+			return sortBy;
+		}
+
+		@Override
+		public void setSortBy(SortBy sortBy) {
+			this.sortBy = sortBy;
 		}
 	}
 }
