@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageContents;
@@ -95,6 +96,16 @@ public class BackpackLinkedStorageHostWrapper extends BackpackWrapper implements
 	@Override
 	public int getColumnsTaken() {
 		return contents.getColumnsTaken();
+	}
+
+	@Override
+	public SortBy getSortBy() {
+		return contents.getSortBy();
+	}
+
+	@Override
+	public void setSortBy(SortBy sortBy) {
+		contents.setSortBy(sortBy);
 	}
 
 	@Override

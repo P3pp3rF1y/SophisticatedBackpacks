@@ -28,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
@@ -99,7 +100,7 @@ public abstract class BackpackContext {
 		ILinkedStorageContents contents = manager.resolveContents(endpoint.groupId())
 				.orElseThrow(() -> new IllegalStateException("Failed to resolve linked backpack contents for group " + endpoint.groupId()));
 		return Optional.of(new LinkedStorageSnapshot(endpoint.groupId(), manager.getRevision(endpoint.groupId()), contents.contents().copy(),
-				host.getDisplayName(), getBaseInventorySlots(host), host.getUpgradeHandler().size(), host.getColumnsTaken(),
+				host.getDisplayName(), getBaseInventorySlots(host), host.getUpgradeHandler().size(), host.getColumnsTaken(), contents.getSortBy(),
 				LinkedStorageContentsPayload.createSnapshot(serverLevel, endpoint.groupId()).hostDescriptor()));
 	}
 
@@ -116,6 +117,7 @@ public abstract class BackpackContext {
 		buffer.writeVarInt(snapshot.inventorySlots());
 		buffer.writeVarInt(snapshot.upgradeSlots());
 		buffer.writeVarInt(snapshot.columnsTaken());
+		buffer.writeEnum(snapshot.sortBy());
 		FriendlyByteBuf.writeNbt(buffer, snapshot.hostDescriptor());
 	}
 
@@ -181,7 +183,8 @@ public abstract class BackpackContext {
 			ContainerContents contents = ContainerContents.CODEC
 					.parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), Objects.requireNonNull(buffer.readNbt())).getOrThrow();
 			Component groupName = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.decode(buffer);
-			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt());
+			ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, buffer.readVarInt(), buffer.readVarInt(), buffer.readVarInt(),
+					buffer.readEnum(SortBy.class));
 			ClientLinkedStorageContents.updateHostDescriptor(groupId, Objects.requireNonNull(buffer.readNbt()));
 			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
@@ -845,6 +848,6 @@ public abstract class BackpackContext {
 	}
 
 	private record LinkedStorageSnapshot(UUID groupId, long revision, ContainerContents contents, Component groupName, int inventorySlots, int upgradeSlots,
-			int columnsTaken, CompoundTag hostDescriptor) {
+			int columnsTaken, SortBy sortBy, CompoundTag hostDescriptor) {
 	}
 }
