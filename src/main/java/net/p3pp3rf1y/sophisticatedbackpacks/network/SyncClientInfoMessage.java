@@ -60,16 +60,16 @@ public class SyncClientInfoMessage implements ISplittableMessage {
 		if (!backpackContainer.canApplyClientInfo(msg.slotIndex)) {
 			return;
 		}
+		if (msg.slotIndex >= player.getInventory().items.size()) {
+			return;
+		}
+		// Let the menu detect the layout change before updating its potentially shared backpack stack.
+		backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
 		if (msg.slotIndex >= 0) {
-			if (msg.slotIndex >= player.getInventory().items.size()) {
-				return;
-			}
 			ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-			// Keep the canonical columns unchanged until the menu detects the layout change below.
 			IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		}
-		backpackContainer.syncClientInfo(msg.renderInfoNbt, msg.columnsTaken);
 	}
 }
