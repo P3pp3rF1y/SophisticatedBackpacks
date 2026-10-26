@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import org.jspecify.annotations.Nullable;
@@ -31,14 +32,19 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, in
 		if (payload.data == null || !(player.containerMenu instanceof BackpackContainer backpackContainer)) {
 			return;
 		}
+		if (!backpackContainer.canApplyClientInfo(payload.slotIndex)) {
+			return;
+		}
+		if (payload.slotIndex >= player.getInventory().getNonEquipmentItems().size()) {
+			return;
+		}
+		// Let the menu detect the layout change before updating its potentially shared backpack stack.
+		backpackContainer.syncClientInfo(payload.data, payload.columnsTaken);
 		if (payload.slotIndex >= 0) {
 			ItemStack backpack = player.getInventory().getItem(payload.slotIndex);
-			IBackpackWrapper backpackWrapper = BackpackWrapper.fromStack(backpack);
-			backpackWrapper.getRenderDataHandler().reloadFrom(payload.data);
+			IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
+			backpack.set(ModCoreDataComponents.RENDER_DATA, payload.data.copy());
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
-		}
-		if (backpackContainer.canApplyClientInfo(payload.slotIndex)) {
-			backpackContainer.syncClientInfo(payload.data, payload.columnsTaken);
 		}
 	}
 }
