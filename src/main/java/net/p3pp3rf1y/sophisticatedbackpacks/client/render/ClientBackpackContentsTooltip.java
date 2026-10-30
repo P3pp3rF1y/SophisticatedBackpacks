@@ -4,19 +4,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItemClient;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsPayload;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.RequestLinkedStorageContentsPayload;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -70,8 +68,7 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 			UUID groupId = linkedStorageGroupId.get();
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.level != null && ClientLinkedStorageContents.shouldRequestSnapshot(groupId, minecraft.level.getGameTime())) {
-				ClientPacketDistributor
-						.sendToServer(new RequestLinkedStorageContentsPayload(groupId, ClientLinkedStorageContents.getRevision(groupId).orElse(-1L)));
+				BackpackItemClient.sendContentsRequest(backpack, groupId);
 			}
 			return minecraft.level == null
 					? IBackpackWrapper.Noop.INSTANCE
@@ -82,10 +79,6 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		if (linkedStorageGroupId.isPresent()) {
-			ClientPacketDistributor.sendToServer(new RequestLinkedStorageContentsPayload(uuid, ClientLinkedStorageContents.getRevision(uuid).orElse(-1L)));
-		} else {
-			ClientPacketDistributor.sendToServer(new RequestBackpackInventoryContentsPayload(uuid));
-		}
+		BackpackItemClient.sendContentsRequest(backpack, uuid);
 	}
 }
