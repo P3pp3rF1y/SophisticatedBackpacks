@@ -80,8 +80,6 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackS
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
-import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedcore.network.RequestLinkedStorageContentsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
@@ -203,8 +201,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
 		if (worldIn != null && worldIn.isClientSide && endpoint != null
 				&& ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), worldIn.getGameTime())) {
-			long revision = ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L);
-			PacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageContentsMessage(endpoint.groupId(), revision));
+			BackpackItemClient.sendContentsRequest(stack, endpoint.groupId());
 		}
 		if (flagIn == TooltipFlag.ADVANCED) {
 			LinkedStorageEndpointData advancedEndpoint = LinkedStorageStackData.getEndpoint(stack);
@@ -236,8 +233,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			if (linkedStorageRole.isPresent() && !Screen.hasShiftDown() && (mc.player == null || mc.player.containerMenu.getCarried().isEmpty())) {
 				LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(stack);
 				if (mc.player != null && ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), mc.player.level().getGameTime())) {
-					PacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageContentsMessage(endpoint.groupId(),
-							ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L)));
+					BackpackItemClient.sendContentsRequest(stack, endpoint.groupId());
 				}
 				ret.set(new LinkedStorageTooltip(linkedStorageRole.get(), endpoint.groupId()));
 				return;

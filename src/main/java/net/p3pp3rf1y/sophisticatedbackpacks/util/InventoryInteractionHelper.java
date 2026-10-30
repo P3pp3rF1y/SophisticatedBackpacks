@@ -29,12 +29,13 @@ public class InventoryInteractionHelper {
 	}
 
 	public static boolean tryInventoryInteraction(BlockPos pos, Level world, ItemStack backpack, Direction face, Player player) {
-		if (Config.SERVER.noInteractionBlocks.isBlockInteractionDisallowed(world.getBlockState(pos).getBlock())) {
+		if (world != player.level() || !world.hasChunkAt(pos) || !player.canReach(pos, 0) || !WorldHelper.playerMayInteract(player, pos)
+				|| Config.SERVER.noInteractionBlocks.isBlockInteractionDisallowed(world.getBlockState(pos).getBlock())) {
 			return false;
 		}
 
 		return WorldHelper
-				.getBlockEntity(world, pos).map(
+				.getLoadedBlockEntity(world, pos).map(
 						te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
 								.map(itemHandler -> player.level().isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
 										.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player)).orElse(false))

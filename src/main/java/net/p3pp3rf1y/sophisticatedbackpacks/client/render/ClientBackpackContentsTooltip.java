@@ -6,16 +6,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItemClient;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.RequestBackpackInventoryContentsMessage;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
-import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
-import net.p3pp3rf1y.sophisticatedcore.network.RequestLinkedStorageContentsMessage;
 
 import java.util.UUID;
 
@@ -60,8 +57,7 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 			LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(backpack);
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.level != null && ClientLinkedStorageContents.shouldRequestSnapshot(endpoint.groupId(), minecraft.level.getGameTime())) {
-				PacketHandler.INSTANCE.sendToServer(
-						new RequestLinkedStorageContentsMessage(endpoint.groupId(), ClientLinkedStorageContents.getRevision(endpoint.groupId()).orElse(-1L)));
+				BackpackItemClient.sendContentsRequest(backpack, endpoint.groupId());
 			}
 			return BackpackLinkedStorageResolver.resolve(Minecraft.getInstance().level, backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
@@ -75,10 +71,6 @@ public class ClientBackpackContentsTooltip extends ClientStorageContentsTooltipB
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		if (BackpackItem.getLinkedStorageEndpointRole(backpack).isPresent()) {
-			PacketHandler.INSTANCE.sendToServer(new RequestLinkedStorageContentsMessage(uuid, ClientLinkedStorageContents.getRevision(uuid).orElse(-1L)));
-		} else {
-			SBPPacketHandler.INSTANCE.sendToServer(new RequestBackpackInventoryContentsMessage(uuid));
-		}
+		BackpackItemClient.sendContentsRequest(backpack, uuid);
 	}
 }
