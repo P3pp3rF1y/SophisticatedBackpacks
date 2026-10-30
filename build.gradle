@@ -231,7 +231,7 @@ dependencies {
     //localRuntime "curse.maven:moonlightlib-499980:${moonlightlib_cf_file_id}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
-    testImplementation "org.mockito:mockito-core:5.12.+"
+    testImplementation "org.mockito:mockito-core:5.20.+"
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 /*
@@ -269,7 +269,6 @@ neoForge.ideSyncTask generateModMetadata
 def runRecipeViewerRegressionTests = gradle.startParameter.taskNames.any { it == 'recipeViewerRegressionTest' || it == "${project.path}:recipeViewerRegressionTest" } || project.hasProperty('recipeViewerRegression')
 
 test {
-    jvmArgs '-Dnet.bytebuddy.experimental=true'
     inputs.property('recipeViewerRegressionMode', runRecipeViewerRegressionTests)
     useJUnitPlatform {
         if (runRecipeViewerRegressionTests) {

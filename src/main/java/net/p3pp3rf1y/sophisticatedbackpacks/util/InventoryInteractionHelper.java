@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemResourceHandlerInteractionU
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.CapabilityHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
 
@@ -29,6 +30,10 @@ public class InventoryInteractionHelper {
 	}
 
 	public static boolean tryInventoryInteraction(BlockPos pos, Level level, ItemStack backpack, Direction face, Player player) {
+		if (level != player.level() || !level.hasChunkAt(pos) || !player.isWithinBlockInteractionRange(pos, 0) || !WorldHelper.playerMayInteract(player, pos)) {
+			return false;
+		}
+
 		if (Config.SERVER.noInteractionBlocks.isBlockInteractionDisallowed(level.getBlockState(pos).getBlock())) {
 			return false;
 		}
