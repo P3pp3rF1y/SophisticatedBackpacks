@@ -5,11 +5,15 @@ import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.recipe.VanillaEmiRecipeCategories;
+import dev.emi.emi.api.stack.Comparison;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.BackpackRecipeViewerDisplays;
@@ -21,6 +25,7 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerD
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.CraftingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiCraftingRecipeHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
@@ -28,9 +33,13 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.GroupedCraftingE
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.SmithingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
@@ -64,16 +73,41 @@ public class BackpackEmiPlugin implements EmiPlugin {
 
 	@Override
 	public void register(EmiRegistry registry) {
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
+		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
+		EmiCraftingRecipeHandler craftingHandler = new EmiCraftingRecipeHandler();
 		registerGuiHandlers(registry);
-		registerRecipes(registry);
-		registerDefaultComparisons(registry);
+		registerRecipes(registry, catalog, subtypeInterpreters, craftingHandler);
+		registerDefaultComparisons(registry, catalog, subtypeInterpreters);
 		registerRecipeHandlers(registry);
+		registry.addRecipeHandler(MenuType.CRAFTING, craftingHandler);
 		registerWorkstations(registry);
 	}
 
-	private void registerDefaultComparisons(EmiRegistry registry) {
-		getSubtypeInterpreters()
-				.forEach((item, subtypeInterpreter) -> registry.setDefaultComparison(EmiStack.of(item), EmiSubtypeInterpreter.of(subtypeInterpreter)));
+	private void registerDefaultComparisons(EmiRegistry registry, IRecipeViewerDisplayCatalog catalog,
+			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
+		List<ItemStack> indexedStacks = Stream.of(
+				catalog.getCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+						.flatMap(variant -> Stream.concat(variant.inputs().stream(), variant.outputs().stream())),
+				catalog.getSmithingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+						.flatMap(variant -> Stream.of(variant.base(), variant.result())),
+				catalog.getGroupedCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+						.flatMap(recipe -> recipe.value().getResultStacks().stream()))
+				.flatMap(stacks -> stacks).toList();
+		subtypeInterpreters.forEach((item, subtypeInterpreter) -> {
+			Comparison comparison = EmiSubtypeInterpreter.of(subtypeInterpreter);
+			if (item instanceof BackpackItem) {
+				Set<Object> indexedSubtypes = indexedStacks.stream().filter(stack -> stack.is(item)).map(subtypeInterpreter::getComparableData)
+						.collect(Collectors.toSet());
+				Object undyedSubtype = subtypeInterpreter.getComparableData(new ItemStack(item));
+				// EMI cannot generate focused recipes. Unindexed tint pairs use the fixed undyed upgrade display.
+				comparison = Comparison.compareData(stack -> {
+					Object subtype = subtypeInterpreter.getComparableData(stack.getItemStack());
+					return indexedSubtypes.contains(subtype) ? subtype : undyedSubtype;
+				});
+			}
+			registry.setDefaultComparison(EmiStack.of(item), comparison);
+		});
 	}
 
 	private void registerGuiHandlers(EmiRegistry registry) {
@@ -98,17 +132,27 @@ public class BackpackEmiPlugin implements EmiPlugin {
 		registry.addDragDropHandler(BackpackSettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
 	}
 
-	private void registerRecipes(EmiRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
-		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
+	private void registerRecipes(EmiRegistry registry, IRecipeViewerDisplayCatalog catalog, Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters,
+			EmiCraftingRecipeHandler craftingHandler) {
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() != null && catalog.replacesCraftingRecipe(recipe.getBackingRecipe()));
-		catalog.getGroupedCraftingSpecs().stream().flatMap(spec -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec.recipeHolder()).stream())
-				.forEach(registry::addRecipe);
+		catalog.getGroupedCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+				.flatMap(recipeHolder -> GroupedCraftingEmiRecipe.ofGroupedUsageAndFocusedRecipes(recipeHolder).stream()).forEach(recipe -> {
+					craftingHandler.addRecipe(recipe);
+					registry.addRecipe(recipe);
+				});
 		catalog.getCraftingRecipes().stream().filter(recipeHolder -> !catalog.replacesCraftingRecipe(recipeHolder))
-				.map(recipeHolder -> EmiClientRecipeHelper.wrapSyntheticShapedRecipe(recipeHolder.id(), recipeHolder.value())).forEach(registry::addRecipe);
+				.map(recipeHolder -> EmiClientRecipeHelper.wrapSyntheticShapedRecipe(recipeHolder.id().identifier(), recipeHolder.value())).forEach(recipe -> {
+					// Keep the multi-dye example exact even when its tint pair falls back to undyed for upgrade lookup.
+					recipe.getOutputs().forEach(stack -> Optional.ofNullable(subtypeInterpreters.get(stack.getItemStack().getItem()))
+							.ifPresent(interpreter -> stack.comparison(EmiSubtypeInterpreter.of(interpreter))));
+					registry.addRecipe(recipe);
+				});
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() != null && recipe.getBackingRecipe().value() instanceof SmithingBackpackUpgradeRecipe);
 
-		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
+		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(recipe -> {
+			craftingHandler.addRecipe(recipe);
+			registry.addRecipe(recipe);
+		});
 
 		catalog.getSmithingSpecs().stream().flatMap(spec -> SmithingSpecEmiRecipe.of(spec).stream()).forEach(registry::addRecipe);
 	}
