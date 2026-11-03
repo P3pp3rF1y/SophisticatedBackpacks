@@ -58,6 +58,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
@@ -186,6 +187,9 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		}
+		if (!hasSecurityAccess(player, pos)) {
+			return InteractionResult.FAIL;
+		}
 
 		ItemStack heldItem = player.getMainHandItem();
 		if (player.isShiftKeyDown() && heldItem.isEmpty()) {
@@ -208,6 +212,10 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 
 	private static boolean hasPermissionsToPickup(Player player, BlockPos pos) {
 		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(be -> {
+			if (!SecurityUpgradeHandler.claimOrCheckAccess(player, be.getStorageWrapper())) {
+				SecurityUpgradeHandler.displayAccessDenied(player);
+				return false;
+			}
 			if (be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream()
 					.anyMatch(w -> !player.hasPermissions(w.getPermissionLevel()))) {
 				player.displayClientMessage(
@@ -221,6 +229,9 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Override
 	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hitResult) {
+		if (!level.isClientSide && !hasSecurityAccess(player, pos)) {
+			return ItemInteractionResult.FAIL;
+		}
 		if (!stack.isEmpty() && stack.getCapability(Capabilities.FluidHandler.ITEM) instanceof IFluidHandlerItem) {
 			WorldHelper.getBlockEntity(level, pos, BackpackBlockEntity.class).flatMap(be -> be.getBackpackWrapper().getFluidHandler())
 					.ifPresent(backpackFluidHandler -> CapabilityHelper.runOnItemHandler(player, playerInventory -> {
@@ -239,6 +250,16 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 			return ItemInteractionResult.SUCCESS;
 		}
 		return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+	}
+
+	private static boolean hasSecurityAccess(Player player, BlockPos pos) {
+		return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(backpackBlockEntity -> {
+			if (SecurityUpgradeHandler.claimOrCheckAccess(player, backpackBlockEntity.getStorageWrapper())) {
+				return true;
+			}
+			SecurityUpgradeHandler.displayAccessDenied(player);
+			return false;
+		}).orElse(true);
 	}
 
 	private Component getBackpackDisplayName(Level level, BlockPos pos) {

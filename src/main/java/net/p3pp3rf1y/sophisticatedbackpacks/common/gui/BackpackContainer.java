@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
@@ -210,6 +211,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	protected void onUpgradeChanged() {
 		super.onUpgradeChanged();
+		SecurityUpgradeHandler.bindToPlayer(player, storageWrapper);
 		backpackContext.onUpgradeChanged(player);
 	}
 
@@ -221,6 +223,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 		@Override
 		protected void onUpgradeChanged() {
 			super.onUpgradeChanged();
+			SecurityUpgradeHandler.bindToPlayer(player, storageWrapper);
 			backpackContext.onUpgradeChanged(player);
 		}
 	}
