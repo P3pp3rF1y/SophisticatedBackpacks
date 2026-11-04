@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.DatapackBackpackTemplateMan
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAccessProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageHostWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LegacyBackpackUpgradeDataMigration;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
@@ -50,6 +51,7 @@ public class SophisticatedBackpacks {
 
 	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedBackpacks(IEventBus modBus, Dist dist, ModContainer container) {
+		LegacyBackpackUpgradeDataMigration.registerMigrators();
 		BackpackSettingsContainerMenu.registerFactories();
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		container.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
