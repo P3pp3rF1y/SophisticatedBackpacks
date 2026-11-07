@@ -60,6 +60,7 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsPayload;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.infinity.InfinityUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -84,6 +85,7 @@ public class CommonEventHandler {
 		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
 		eventBus.addListener(this::onPlayerChangedDimension);
 		eventBus.addListener(this::onPlayerRespawn);
+		eventBus.addListener(this::onPlayerClone);
 		eventBus.addListener(this::onWorldTick);
 		eventBus.addListener(this::interactWithEntity);
 		eventBus.addListener(this::handleBreakBackpackWithInfinityUpgrade);
@@ -200,6 +202,25 @@ public class CommonEventHandler {
 
 	private void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
 		sendPlayerSettingsToClient(event.getEntity());
+	}
+
+	private void onPlayerClone(PlayerEvent.Clone event) {
+		if (!event.isWasDeath() || !(event.getOriginal() instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) {
+			return;
+		}
+
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> {
+			if (LinkedStorageStackLifecycle.classifyEndpoint(backpack) == LinkedStorageEndpointStackState.ENDPOINT) {
+				if (LinkedStorageJukeboxPlaybackAnchors.isPlayerAnchor(level, backpack, player.getUUID())) {
+					BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(level, backpack)
+							.ifPresent(host -> host.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(jukebox -> jukebox.stop(player)));
+					BackpackLinkedStorageResolver.synchronizeRenderProjection(level, backpack);
+				}
+			} else {
+				BackpackWrapper.fromStack(backpack).getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(jukebox -> jukebox.stop(player));
+			}
+			return false;
+		});
 	}
 
 	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
