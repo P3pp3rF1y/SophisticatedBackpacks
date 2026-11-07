@@ -66,6 +66,11 @@ public class LinkedStorageJukeboxPlaybackAnchors {
 		return getPrimaryEndpoint(level, stack).isPresent();
 	}
 
+	public static boolean isPlayerAnchor(ServerLevel level, ItemStack stack, UUID playerId) {
+		return getPrimaryEndpoint(level, stack).map(endpoint -> ANCHORS.get(endpoint.groupId())).filter(PlayerAnchor.class::isInstance)
+				.map(PlayerAnchor.class::cast).map(PlayerAnchor::playerId).filter(playerId::equals).isPresent();
+	}
+
 	private static Optional<LinkedStorageEndpointData> getPrimaryEndpoint(ServerLevel level, ItemStack stack) {
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) != LinkedStorageEndpointStackState.ENDPOINT) {
 			return Optional.empty();
