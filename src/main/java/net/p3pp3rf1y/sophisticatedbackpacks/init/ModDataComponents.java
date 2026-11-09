@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapMode;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class ModDataComponents {
@@ -31,6 +33,12 @@ public class ModDataComponents {
 
 	public static final Supplier<DataComponentType<Boolean>> LINKED_MOB_CATCHER = DATA_COMPONENT_TYPES.register("linked_mob_catcher",
 			() -> new DataComponentType.Builder<Boolean>().networkSynchronized(ByteBufCodecs.BOOL).build());
+
+	public static final Supplier<DataComponentType<UUID>> SECURITY_OWNER = DATA_COMPONENT_TYPES.register("security_owner",
+			() -> new DataComponentType.Builder<UUID>().persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC).build());
+
+	public static final Supplier<DataComponentType<String>> SECURITY_OWNER_NAME = DATA_COMPONENT_TYPES.register("security_owner_name",
+			() -> new DataComponentType.Builder<String>().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 
 	public static final Supplier<DataComponentType<String>> ITEM_NAME = DATA_COMPONENT_TYPES.register("item_name",
 			() -> new DataComponentType.Builder<String>().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());

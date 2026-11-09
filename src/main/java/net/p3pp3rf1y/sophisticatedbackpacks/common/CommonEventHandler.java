@@ -54,6 +54,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPayload;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
@@ -88,7 +89,7 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onPlayerClone);
 		eventBus.addListener(this::onWorldTick);
 		eventBus.addListener(this::interactWithEntity);
-		eventBus.addListener(this::handleBreakBackpackWithInfinityUpgrade);
+		eventBus.addListener(this::handleBreakProtectedBackpack);
 		eventBus.addListener(this::onBackpackCrafted);
 		eventBus.addListener(this::onServerStopped);
 	}
@@ -317,17 +318,22 @@ public class CommonEventHandler {
 		}
 	}
 
-	private void handleBreakBackpackWithInfinityUpgrade(BlockEvent.BreakEvent event) {
+	private void handleBreakProtectedBackpack(BlockEvent.BreakEvent event) {
 		Player player = event.getPlayer();
 
 		if (!(event.getState().getBlock() instanceof BackpackBlock)) {
 			return;
 		}
 
-		if (WorldHelper
-				.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class).map(backpackBlockEntity -> backpackBlockEntity.getStorageWrapper()
-						.getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream().anyMatch(w -> !player.hasPermissions(w.getPermissionLevel())))
-				.orElse(false)) {
+		Optional<BackpackBlockEntity> backpackBlockEntity = WorldHelper.getBlockEntity(event.getLevel(), event.getPos(), BackpackBlockEntity.class);
+		if (backpackBlockEntity.map(be -> !SecurityUpgradeHandler.claimOrCheckAccess(player, be.getStorageWrapper())).orElse(false)) {
+			event.setCanceled(true);
+			SecurityUpgradeHandler.displayAccessDenied(player);
+			return;
+		}
+
+		if (backpackBlockEntity.map(be -> be.getStorageWrapper().getUpgradeHandler().getTypeWrappers(InfinityUpgradeItem.TYPE).stream()
+				.anyMatch(w -> !player.hasPermissions(w.getPermissionLevel()))).orElse(false)) {
 			event.setCanceled(true);
 			player.displayClientMessage(SBPTranslationHelper.INSTANCE.translStatusMessage("infinity_upgrade_only_admin_break").withStyle(ChatFormatting.RED),
 					true);
