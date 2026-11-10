@@ -326,6 +326,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public IBackpackWrapper setBackpackStack(ItemStack backpack) {
+		int previousNumberOfInventorySlots = numberOfInventorySlots;
+		int previousNumberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.backpack = backpack;
 		cacheSlotNumbers();
 		if (renderDataHandler == null) {
@@ -337,6 +339,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 					});
 		}
 		renderDataValidationPending = true;
+		if (!contentsSource.usesCanonicalSlotNumbers() && previousNumberOfInventorySlots >= 0
+				&& (previousNumberOfInventorySlots != numberOfInventorySlots || previousNumberOfUpgradeSlots != numberOfUpgradeSlots)) {
+			onContentsUpdated();
+		}
 		return this;
 	}
 
