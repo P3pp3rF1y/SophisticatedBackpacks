@@ -77,11 +77,18 @@ class BackpackWrapperUuidCacheTest {
 		Bootstrap.bootStrap();
 		Bootstrap.validate();
 		ModItems.BACKPACK.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
+		ModItems.IRON_BACKPACK.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		ModItems.GOLD_BACKPACK.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
+		ModItems.DIAMOND_BACKPACK.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
+		ModItems.NETHERITE_BACKPACK.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		ModItems.INCEPTION_UPGRADE.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		ModItems.BATTERY_UPGRADE.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		ModItems.TANK_UPGRADE.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
+		ModItems.STACK_UPGRADE_TIER_3.get().builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		Items.STICK.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
+		Items.COBBLESTONE.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
+		Items.IRON_INGOT.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
+		Items.REDSTONE.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
 		Items.EXPERIENCE_BOTTLE.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
 		Items.POTION.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 1).build());
 		Items.GLASS_BOTTLE.builtInRegistryHolder().bindComponents(DataComponentMap.builder().set(DataComponents.MAX_STACK_SIZE, 64).build());
@@ -215,7 +222,7 @@ class BackpackWrapperUuidCacheTest {
 		runOnServerThread(() -> {
 			IBackpackWrapper parent = BackpackWrapper.fromStack(new ItemStack(ModItems.BACKPACK.get()));
 			IBackpackWrapper child = BackpackWrapper.fromStack(new ItemStack(ModItems.BACKPACK.get()));
-			parent.setSlotNumbers(1, 1);
+			parent.setSlotNumbers(ModItems.BACKPACK.get().getNumberOfSlots(), ModItems.BACKPACK.get().getNumberOfUpgradeSlots());
 			child.setSlotNumbers(1, 1);
 			parent.getInventoryHandler();
 			child.getInventoryHandler();
@@ -778,7 +785,7 @@ class BackpackWrapperUuidCacheTest {
 			ILinkedStorageContents linkedContents = Mockito.mock(ILinkedStorageContents.class);
 			Mockito.when(linkedContents.groupId()).thenReturn(groupId);
 			Mockito.when(linkedContents.contents()).thenReturn(contents);
-			BackpackLinkedStorageHostWrapper host = new BackpackLinkedStorageHostWrapper(linkedContents, new ItemStack(ModItems.BACKPACK.get()));
+			BackpackLinkedStorageHostWrapper host = Mockito.spy(new BackpackLinkedStorageHostWrapper(linkedContents, new ItemStack(ModItems.BACKPACK.get())));
 			ItemStack endpoint = new ItemStack(ModItems.BACKPACK.get());
 			endpoint.set(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT, new LinkedStorageEndpointData(groupId, UUID.randomUUID()));
 			IBackpackWrapper parent = createOneSlotInceptionBackpack();
@@ -810,6 +817,7 @@ class BackpackWrapperUuidCacheTest {
 				assertEquals(expectedUpgradedInventorySize, upgradedInventorySize);
 				assertNotSame(previousHostUpgradeHandler, upgradedHostUpgradeHandler);
 				assertEquals(1, upgradedRefreshCallbackCount);
+				Mockito.verify(host).onContentsUpdated();
 			}
 		});
 	}
@@ -982,6 +990,86 @@ class BackpackWrapperUuidCacheTest {
 	}
 
 	@Test
+	void setBackpackStackRebuildsHandlersAfterGoldDiamondNetheriteReplacement() throws Throwable {
+		runOnServerThread(() -> {
+			ItemStack gold = new ItemStack(ModItems.GOLD_BACKPACK.get());
+			IBackpackWrapper wrapper = BackpackWrapper.fromStack(gold);
+			wrapper.getInventoryHandler().setStackInSlot(0, new ItemStack(Items.COBBLESTONE, 256));
+			wrapper.getInventoryHandler().setStackInSlot(1, new ItemStack(Items.IRON_INGOT, 37));
+			wrapper.getInventoryHandler().setStackInSlot(2, new ItemStack(Items.REDSTONE, 128));
+			wrapper.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.STACK_UPGRADE_TIER_3.get()));
+			UUID storageUuid = wrapper.getContentsUuid().orElseThrow();
+			storageUuids.add(storageUuid);
+			InventoryHandler goldInventoryHandler = wrapper.getInventoryHandler();
+			UpgradeHandler goldUpgradeHandler = wrapper.getUpgradeHandler();
+
+			ItemStack diamond = replacementWithTierSlotNumbers(gold, ModItems.DIAMOND_BACKPACK.get());
+			ItemStack netherite = replacementWithTierSlotNumbers(diamond, ModItems.NETHERITE_BACKPACK.get());
+			IBackpackWrapper diamondWrapper = BackpackWrapper.fromStack(diamond);
+			IBackpackWrapper netheriteWrapper = BackpackWrapper.fromStack(netherite);
+			InventoryHandler netheriteInventoryHandler = netheriteWrapper.getInventoryHandler();
+			UpgradeHandler netheriteUpgradeHandler = netheriteWrapper.getUpgradeHandler();
+
+			assertSame(wrapper, diamondWrapper);
+			assertSame(wrapper, netheriteWrapper);
+			assertEquals(storageUuid, netheriteWrapper.getContentsUuid().orElseThrow());
+			assertNotSame(goldInventoryHandler, netheriteInventoryHandler);
+			assertNotSame(goldUpgradeHandler, netheriteUpgradeHandler);
+			assertEquals(ModItems.NETHERITE_BACKPACK.get().getNumberOfSlots(), netheriteInventoryHandler.size());
+			assertEquals(ModItems.NETHERITE_BACKPACK.get().getNumberOfUpgradeSlots(), netheriteUpgradeHandler.size());
+			assertTrue(netheriteInventoryHandler.getStackInSlot(0).is(Items.COBBLESTONE));
+			assertEquals(256, netheriteInventoryHandler.getStackInSlot(0).getCount());
+			assertTrue(netheriteInventoryHandler.getStackInSlot(1).is(Items.IRON_INGOT));
+			assertEquals(37, netheriteInventoryHandler.getStackInSlot(1).getCount());
+			assertTrue(netheriteInventoryHandler.getStackInSlot(2).is(Items.REDSTONE));
+			assertEquals(128, netheriteInventoryHandler.getStackInSlot(2).getCount());
+			assertTrue(netheriteUpgradeHandler.getStackInSlot(0).is(ModItems.STACK_UPGRADE_TIER_3.get()));
+		});
+	}
+
+	@Test
+	void setBackpackStackRebuildsHandlersAfterIronGoldDiamondReplacement() throws Throwable {
+		runOnServerThread(() -> {
+			ItemStack iron = new ItemStack(ModItems.IRON_BACKPACK.get());
+			IBackpackWrapper wrapper = BackpackWrapper.fromStack(iron);
+			InventoryHandler ironInventoryHandler = wrapper.getInventoryHandler();
+			UpgradeHandler ironUpgradeHandler = wrapper.getUpgradeHandler();
+			UUID storageUuid = wrapper.getContentsUuid().orElseThrow();
+			storageUuids.add(storageUuid);
+
+			ItemStack gold = replacementWithTierSlotNumbers(iron, ModItems.GOLD_BACKPACK.get());
+			ItemStack diamond = replacementWithTierSlotNumbers(gold, ModItems.DIAMOND_BACKPACK.get());
+			BackpackWrapper.fromStack(gold);
+			IBackpackWrapper diamondWrapper = BackpackWrapper.fromStack(diamond);
+
+			assertSame(wrapper, diamondWrapper);
+			assertEquals(storageUuid, diamondWrapper.getContentsUuid().orElseThrow());
+			assertNotSame(ironInventoryHandler, diamondWrapper.getInventoryHandler());
+			assertNotSame(ironUpgradeHandler, diamondWrapper.getUpgradeHandler());
+			assertEquals(ModItems.DIAMOND_BACKPACK.get().getNumberOfSlots(), diamondWrapper.getInventoryHandler().size());
+			assertEquals(ModItems.DIAMOND_BACKPACK.get().getNumberOfUpgradeSlots(), diamondWrapper.getUpgradeHandler().size());
+		});
+	}
+
+	@Test
+	void setBackpackStackKeepsHandlersForSameDimensions() throws Throwable {
+		runOnServerThread(() -> {
+			ItemStack source = new ItemStack(ModItems.GOLD_BACKPACK.get());
+			IBackpackWrapper wrapper = BackpackWrapper.fromStack(source);
+			InventoryHandler inventoryHandler = wrapper.getInventoryHandler();
+			UpgradeHandler upgradeHandler = wrapper.getUpgradeHandler();
+			storageUuids.add(wrapper.getContentsUuid().orElseThrow());
+			ItemStack replacement = source.copy();
+
+			IBackpackWrapper reboundWrapper = BackpackWrapper.fromStack(replacement);
+
+			assertSame(wrapper, reboundWrapper);
+			assertSame(inventoryHandler, reboundWrapper.getInventoryHandler());
+			assertSame(upgradeHandler, reboundWrapper.getUpgradeHandler());
+		});
+	}
+
+	@Test
 	void setContentsUuidEvictsOldMappingAndRefreshesHandlers() throws Throwable {
 		runOnServerThread(() -> {
 			ItemStack stack = new ItemStack(ModItems.BACKPACK.get());
@@ -1099,6 +1187,14 @@ class BackpackWrapperUuidCacheTest {
 		wrapper.getUpgradeHandler().setStackInSlot(0, new ItemStack(ModItems.INCEPTION_UPGRADE.get()));
 		storageUuids.add(wrapper.getContentsUuid().orElseThrow());
 		return wrapper;
+	}
+
+	private static ItemStack replacementWithTierSlotNumbers(ItemStack source, BackpackItem backpackItem) {
+		ItemStack replacement = new ItemStack(backpackItem);
+		replacement.applyComponents(source.getComponents());
+		replacement.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, backpackItem.getNumberOfSlots());
+		replacement.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, backpackItem.getNumberOfUpgradeSlots());
+		return replacement;
 	}
 
 	private IBackpackWrapper createBatteryBackpack() {
