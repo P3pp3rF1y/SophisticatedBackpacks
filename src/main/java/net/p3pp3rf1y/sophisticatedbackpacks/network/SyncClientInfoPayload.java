@@ -12,9 +12,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.util.StreamCodecHelper;
 import org.jspecify.annotations.Nullable;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, int columnsTaken) implements CustomPacketPayload {
 	public static final Type<SyncClientInfoPayload> TYPE = new Type<>(SophisticatedBackpacks.getIdentifier("sync_client_info"));
@@ -38,6 +42,7 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, in
 		if (payload.slotIndex >= player.getInventory().getNonEquipmentItems().size()) {
 			return;
 		}
+		Optional<UUID> menuUuid = backpackContainer.getStorageWrapper().getContentsUuid();
 		// Let the menu detect the layout change before updating its potentially shared backpack stack.
 		backpackContainer.syncClientInfo(payload.data, payload.columnsTaken);
 		if (payload.slotIndex >= 0) {
@@ -45,6 +50,10 @@ public record SyncClientInfoPayload(int slotIndex, @Nullable RenderData data, in
 			IBackpackWrapper backpackWrapper = new BackpackWrapper(backpack);
 			backpack.set(ModCoreDataComponents.RENDER_DATA, payload.data.copy());
 			backpackWrapper.setColumnsTaken(payload.columnsTaken, false);
+			Optional<UUID> heldUuid = backpackWrapper.getContentsUuid();
+			if (heldUuid.isPresent() && !heldUuid.equals(menuUuid)) {
+				StorageWrapperRepository.invalidateStorageWrapperContents(heldUuid.get(), backpackWrapper);
+			}
 		}
 	}
 }
