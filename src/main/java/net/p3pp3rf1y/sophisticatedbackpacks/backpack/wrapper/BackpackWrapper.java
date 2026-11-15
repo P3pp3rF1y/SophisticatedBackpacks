@@ -1001,6 +1001,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}
 				int inserted = mutableDelegate.get().delegate().insert(index, resource, amount, nestedTx);
 				if (inserted > 0 && stackExchange.exchange(mutableDelegate.get(), nestedTx)) {
+					stackExchange.exchangeOnRootCommit(mutableDelegate.get(), nestedTx);
 					nestedTx.commit();
 					return inserted;
 				}
@@ -1017,6 +1018,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 				}
 				int extracted = mutableDelegate.get().delegate().extract(index, resource, amount, nestedTx);
 				if (extracted > 0 && stackExchange.exchange(mutableDelegate.get(), nestedTx)) {
+					stackExchange.exchangeOnRootCommit(mutableDelegate.get(), nestedTx);
 					nestedTx.commit();
 					return extracted;
 				}
