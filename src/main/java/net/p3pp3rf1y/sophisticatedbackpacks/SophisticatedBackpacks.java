@@ -71,6 +71,7 @@ public class SophisticatedBackpacks {
 
 		modBus.addListener(SophisticatedBackpacks::setup);
 		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(DataGenerators::gatherRegistryEntries);
 		Config.SERVER.initListeners(modBus);
 		modBus.addListener(SophisticatedBackpacks::clientSetup);
 		BackpackCommand.init(modBus);
