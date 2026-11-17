@@ -17,6 +17,7 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -378,22 +379,24 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfInventorySlots(ItemStack backpackStack, int defaultNumberOfInventorySlots) {
 		Integer storedNumberOfInventorySlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
-		int resolvedNumberOfInventorySlots = contentsSource.usesCanonicalSlotNumbers() && storedNumberOfInventorySlots != null
-				? storedNumberOfInventorySlots
-				: Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots, defaultNumberOfInventorySlots);
+		int resolvedNumberOfInventorySlots = storedNumberOfInventorySlots != null
+				&& (!Config.SERVER_SPEC.isLoaded() || contentsSource.usesCanonicalSlotNumbers())
+						? storedNumberOfInventorySlots
+						: Math.max(storedNumberOfInventorySlots == null ? defaultNumberOfInventorySlots : storedNumberOfInventorySlots,
+								defaultNumberOfInventorySlots);
 		numberOfInventorySlots = resolvedNumberOfInventorySlots;
-		if (storedNumberOfInventorySlots == null || storedNumberOfInventorySlots < resolvedNumberOfInventorySlots) {
+		if (Config.SERVER_SPEC.isLoaded() && (storedNumberOfInventorySlots == null || storedNumberOfInventorySlots < resolvedNumberOfInventorySlots)) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, resolvedNumberOfInventorySlots);
 		}
 	}
 
 	private void cacheNumberOfUpgradeSlots(ItemStack backpackStack, int defaultNumberOfUpgradeSlots) {
 		Integer storedNumberOfUpgradeSlots = backpackStack.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
-		int resolvedNumberOfUpgradeSlots = contentsSource.usesCanonicalSlotNumbers() && storedNumberOfUpgradeSlots != null
+		int resolvedNumberOfUpgradeSlots = storedNumberOfUpgradeSlots != null && (!Config.SERVER_SPEC.isLoaded() || contentsSource.usesCanonicalSlotNumbers())
 				? storedNumberOfUpgradeSlots
 				: Math.max(storedNumberOfUpgradeSlots == null ? defaultNumberOfUpgradeSlots : storedNumberOfUpgradeSlots, defaultNumberOfUpgradeSlots);
 		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
-		if (storedNumberOfUpgradeSlots == null || storedNumberOfUpgradeSlots < resolvedNumberOfUpgradeSlots) {
+		if (Config.SERVER_SPEC.isLoaded() && (storedNumberOfUpgradeSlots == null || storedNumberOfUpgradeSlots < resolvedNumberOfUpgradeSlots)) {
 			backpackStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, resolvedNumberOfUpgradeSlots);
 		}
 	}
