@@ -25,6 +25,7 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -84,7 +85,7 @@ public class CommonEventHandler {
 		eventBus.addListener(ServerStorageSoundHandler::tick);
 		eventBus.addListener(this::onBlockClick);
 		eventBus.addListener(this::onAttackEntity);
-		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
+		eventBus.addListener(this::onLivingUpdate);
 		eventBus.addListener(this::onPlayerLoggedIn);
 		eventBus.addListener(this::onPlayerChangedDimension);
 		eventBus.addListener(this::onPlayerRespawn);
@@ -270,6 +271,9 @@ public class CommonEventHandler {
 	}
 
 	private void onLivingSpecialSpawn(MobSpawnEvent.FinalizeSpawn event) {
+		if (event.getLevel().isClientSide()) {
+			return;
+		}
 		Entity entity = event.getEntity();
 		if (entity instanceof Monster monster && monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 			EntityBackpackAdditionHandler.handleBackpackAdditionOnSpawn(monster, event.getLevel());
@@ -277,28 +281,50 @@ public class CommonEventHandler {
 	}
 
 	private void onLivingDrops(LivingDropsEvent event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleBackpackDrop(event);
 	}
 
 	private void onLivingConversionPre(LivingConversionEvent.Pre event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleLivingConversionPre(event);
 	}
 
 	private void onLivingConversion(LivingConversionEvent.Post event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleLivingConversion(event);
 	}
 
 	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		if (event.getEntity() instanceof Creeper creeper) {
 			EntityBackpackAdditionHandler.removeBeneficialEffects(creeper);
 		}
 	}
 
 	private void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
+		if (event.getLevel().isClientSide()) {
+			return;
+		}
 		if (!(event.getEntity() instanceof Monster)) {
 			return;
 		}
 		EntityBackpackAdditionHandler.removeBackpackUuid((Monster) event.getEntity(), event.getLevel());
+	}
+
+	private void onLivingUpdate(LivingEvent.LivingTickEvent event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
+		EntityBackpackAdditionHandler.onLivingUpdate(event);
 	}
 
 	private void onItemPickup(EntityItemPickupEvent event) {

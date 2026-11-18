@@ -15,6 +15,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
@@ -308,18 +309,22 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cacheNumberOfInventorySlots(int defaultNumberOfInventorySlots) {
 		Optional<Integer> storedNumberOfInventorySlots = NBTHelper.getInt(backpack, INVENTORY_SLOTS_TAG);
-		int resolvedNumberOfInventorySlots = Math.max(storedNumberOfInventorySlots.orElse(defaultNumberOfInventorySlots), defaultNumberOfInventorySlots);
+		int resolvedNumberOfInventorySlots = storedNumberOfInventorySlots.isPresent() && !Config.SERVER_SPEC.isLoaded()
+				? storedNumberOfInventorySlots.get()
+				: Math.max(storedNumberOfInventorySlots.orElse(defaultNumberOfInventorySlots), defaultNumberOfInventorySlots);
 		numberOfInventorySlots = resolvedNumberOfInventorySlots;
-		if (storedNumberOfInventorySlots.isEmpty() || storedNumberOfInventorySlots.get() < resolvedNumberOfInventorySlots) {
+		if (Config.SERVER_SPEC.isLoaded() && (storedNumberOfInventorySlots.isEmpty() || storedNumberOfInventorySlots.get() < resolvedNumberOfInventorySlots)) {
 			NBTHelper.setInteger(backpack, INVENTORY_SLOTS_TAG, resolvedNumberOfInventorySlots);
 		}
 	}
 
 	private void cacheNumberOfUpgradeSlots(int defaultNumberOfUpgradeSlots) {
 		Optional<Integer> storedNumberOfUpgradeSlots = NBTHelper.getInt(backpack, UPGRADE_SLOTS_TAG);
-		int resolvedNumberOfUpgradeSlots = Math.max(storedNumberOfUpgradeSlots.orElse(defaultNumberOfUpgradeSlots), defaultNumberOfUpgradeSlots);
+		int resolvedNumberOfUpgradeSlots = storedNumberOfUpgradeSlots.isPresent() && !Config.SERVER_SPEC.isLoaded()
+				? storedNumberOfUpgradeSlots.get()
+				: Math.max(storedNumberOfUpgradeSlots.orElse(defaultNumberOfUpgradeSlots), defaultNumberOfUpgradeSlots);
 		numberOfUpgradeSlots = resolvedNumberOfUpgradeSlots;
-		if (storedNumberOfUpgradeSlots.isEmpty() || storedNumberOfUpgradeSlots.get() < resolvedNumberOfUpgradeSlots) {
+		if (Config.SERVER_SPEC.isLoaded() && (storedNumberOfUpgradeSlots.isEmpty() || storedNumberOfUpgradeSlots.get() < resolvedNumberOfUpgradeSlots)) {
 			NBTHelper.setInteger(backpack, UPGRADE_SLOTS_TAG, resolvedNumberOfUpgradeSlots);
 		}
 	}

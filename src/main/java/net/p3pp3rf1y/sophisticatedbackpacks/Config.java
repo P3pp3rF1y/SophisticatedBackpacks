@@ -415,13 +415,25 @@ public class Config {
 		public static class BackpackConfig {
 			public final ForgeConfigSpec.IntValue inventorySlotCount;
 			public final ForgeConfigSpec.IntValue upgradeSlotCount;
+			private final int inventorySlotCountDefault;
+			private final int upgradeSlotCountDefault;
 
 			public BackpackConfig(ForgeConfigSpec.Builder builder, String backpackPrefix, int inventorySlotCountDefault, int upgradeSlotCountDefault) {
+				this.inventorySlotCountDefault = inventorySlotCountDefault;
+				this.upgradeSlotCountDefault = upgradeSlotCountDefault;
 				builder.comment(backpackPrefix + " Backpack Settings").push(backpackPrefix.toLowerCase(Locale.ENGLISH) + "Backpack");
 				inventorySlotCount = builder.comment("Number of inventory slots in the backpack").defineInRange("inventorySlotCount", inventorySlotCountDefault,
 						1, 144);
 				upgradeSlotCount = builder.comment("Number of upgrade slots in the backpack").defineInRange("upgradeSlotCount", upgradeSlotCountDefault, 0, 10);
 				builder.pop();
+			}
+
+			public int getInventorySlotCount() {
+				return SERVER_SPEC.isLoaded() ? inventorySlotCount.get() : inventorySlotCountDefault;
+			}
+
+			public int getUpgradeSlotCount() {
+				return SERVER_SPEC.isLoaded() ? upgradeSlotCount.get() : upgradeSlotCountDefault;
 			}
 		}
 

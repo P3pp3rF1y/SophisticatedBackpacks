@@ -169,22 +169,22 @@ public class ModItems {
 	private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SophisticatedBackpacks.MOD_ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
-			() -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.leatherBackpack::getInventorySlotCount, Config.SERVER.leatherBackpack::getUpgradeSlotCount,
 					ModBlocks.BACKPACK));
 	public static final RegistryObject<BackpackItem> COPPER_BACKPACK = ITEMS.register("copper_backpack",
-			() -> new BackpackItem(Config.SERVER.copperBackpack.inventorySlotCount::get, Config.SERVER.copperBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.copperBackpack::getInventorySlotCount, Config.SERVER.copperBackpack::getUpgradeSlotCount,
 					ModBlocks.COPPER_BACKPACK));
 	public static final RegistryObject<BackpackItem> IRON_BACKPACK = ITEMS.register("iron_backpack",
-			() -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.ironBackpack::getInventorySlotCount, Config.SERVER.ironBackpack::getUpgradeSlotCount,
 					ModBlocks.IRON_BACKPACK));
 	public static final RegistryObject<BackpackItem> GOLD_BACKPACK = ITEMS.register("gold_backpack",
-			() -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.goldBackpack::getInventorySlotCount, Config.SERVER.goldBackpack::getUpgradeSlotCount,
 					ModBlocks.GOLD_BACKPACK));
 	public static final RegistryObject<BackpackItem> DIAMOND_BACKPACK = ITEMS.register("diamond_backpack",
-			() -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.diamondBackpack::getInventorySlotCount, Config.SERVER.diamondBackpack::getUpgradeSlotCount,
 					ModBlocks.DIAMOND_BACKPACK));
 	public static final RegistryObject<BackpackItem> NETHERITE_BACKPACK = ITEMS.register("netherite_backpack",
-			() -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get,
+			() -> new BackpackItem(Config.SERVER.netheriteBackpack::getInventorySlotCount, Config.SERVER.netheriteBackpack::getUpgradeSlotCount,
 					ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
 
 	public static final ResourceLocation BACKPACK_UPGRADE_TAG_NAME = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "upgrade");
