@@ -148,22 +148,22 @@ public class ModItems {
 	private static final DeferredRegister.Entities ENTITY_TYPES = DeferredRegister.createEntities(SophisticatedBackpacks.MOD_ID);
 
 	public static final DeferredHolder<Item, BackpackItem> BACKPACK = ITEMS.registerItem("backpack",
-			properties -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.leatherBackpack::getInventorySlotCount, Config.SERVER.leatherBackpack::getUpgradeSlotCount,
 					ModBlocks.BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> COPPER_BACKPACK = ITEMS.registerItem("copper_backpack",
-			properties -> new BackpackItem(Config.SERVER.copperBackpack.inventorySlotCount::get, Config.SERVER.copperBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.copperBackpack::getInventorySlotCount, Config.SERVER.copperBackpack::getUpgradeSlotCount,
 					ModBlocks.COPPER_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> IRON_BACKPACK = ITEMS.registerItem("iron_backpack",
-			properties -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.ironBackpack::getInventorySlotCount, Config.SERVER.ironBackpack::getUpgradeSlotCount,
 					ModBlocks.IRON_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> GOLD_BACKPACK = ITEMS.registerItem("gold_backpack",
-			properties -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.goldBackpack::getInventorySlotCount, Config.SERVER.goldBackpack::getUpgradeSlotCount,
 					ModBlocks.GOLD_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> DIAMOND_BACKPACK = ITEMS.registerItem("diamond_backpack",
-			properties -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.diamondBackpack::getInventorySlotCount, Config.SERVER.diamondBackpack::getUpgradeSlotCount,
 					ModBlocks.DIAMOND_BACKPACK, properties));
 	public static final DeferredHolder<Item, BackpackItem> NETHERITE_BACKPACK = ITEMS.registerItem("netherite_backpack",
-			properties -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get,
+			properties -> new BackpackItem(Config.SERVER.netheriteBackpack::getInventorySlotCount, Config.SERVER.netheriteBackpack::getUpgradeSlotCount,
 					ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant, properties));
 
 	public static final Identifier BACKPACK_UPGRADE_TAG_NAME = Identifier.fromNamespaceAndPath(SophisticatedBackpacks.MOD_ID, "upgrade");

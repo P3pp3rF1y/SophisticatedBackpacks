@@ -39,6 +39,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -92,7 +93,7 @@ public class CommonEventHandler {
 		eventBus.addListener(this::onEntityLeaveWorld);
 		eventBus.addListener(this::onBlockClick);
 		eventBus.addListener(this::onAttackEntity);
-		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
+		eventBus.addListener(this::onLivingUpdate);
 		eventBus.addListener(this::onPlayerChangedDimension);
 		eventBus.addListener(this::onPlayerRespawn);
 		eventBus.addListener(this::onPlayerClone);
@@ -275,6 +276,9 @@ public class CommonEventHandler {
 	}
 
 	private void onLivingSpecialSpawn(FinalizeSpawnEvent event) {
+		if (event.getLevel().isClientSide()) {
+			return;
+		}
 		Entity entity = event.getEntity();
 		if (entity instanceof Monster monster && monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 			EntityBackpackAdditionHandler.handleBackpackAdditionOnSpawn(monster, event.getLevel(), event.getSpawnType());
@@ -282,28 +286,50 @@ public class CommonEventHandler {
 	}
 
 	private void onLivingDrops(LivingDropsEvent event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleBackpackDrop(event);
 	}
 
 	private void onLivingConversionPre(LivingConversionEvent.Pre event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleLivingConversionPre(event);
 	}
 
 	private void onLivingConversion(LivingConversionEvent.Post event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		EntityBackpackAdditionHandler.handleLivingConversion(event);
 	}
 
 	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
 		if (event.getEntity() instanceof Creeper creeper) {
 			EntityBackpackAdditionHandler.removeBeneficialEffects(creeper);
 		}
 	}
 
 	private void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
+		if (event.getLevel().isClientSide()) {
+			return;
+		}
 		if (!(event.getEntity() instanceof Monster)) {
 			return;
 		}
 		EntityBackpackAdditionHandler.removeBackpackUuid((Monster) event.getEntity(), event.getLevel());
+	}
+
+	private void onLivingUpdate(EntityTickEvent.Post event) {
+		if (event.getEntity().level().isClientSide()) {
+			return;
+		}
+		EntityBackpackAdditionHandler.onLivingUpdate(event);
 	}
 
 	private void onItemPickup(ItemEntityPickupEvent.Pre event) {
