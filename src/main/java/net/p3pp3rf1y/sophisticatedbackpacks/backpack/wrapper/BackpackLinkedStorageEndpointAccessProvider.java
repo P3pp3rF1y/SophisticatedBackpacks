@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAccessProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.ItemStackReference;
@@ -13,10 +14,15 @@ public class BackpackLinkedStorageEndpointAccessProvider implements ILinkedStora
 		if (reference.containerId() != ItemStackReference.EQUIPMENT_HANDLER) {
 			return ItemStack.EMPTY;
 		}
-		return PlayerInventoryProvider.get().getPlayerInventoryHandler(reference.handlerName())
+		ItemStack backpack = PlayerInventoryProvider.get().getPlayerInventoryHandler(reference.handlerName())
 				.filter(handler -> handler.getIdentifiers(player).contains(reference.identifier()) && reference.slot() >= 0
 						&& reference.slot() < handler.getSlotCount(player, reference.identifier()))
 				.map(handler -> handler.getStackInSlot(player, reference.identifier(), reference.slot()))
 				.filter(stack -> stack.getItem() instanceof BackpackItem).orElse(ItemStack.EMPTY);
+		if (backpack.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		return BackpackLinkedStorageResolver.resolve(player.level(), backpack).filter(wrapper -> SecurityUpgradeHandler.checkAccess(player, wrapper))
+				.map(wrapper -> backpack).orElse(ItemStack.EMPTY);
 	}
 }

@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoPayload;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -341,7 +342,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return true;
+			return SecurityUpgradeHandler.checkAccess(player, getBackpackWrapper(player));
 		}
 	}
 
@@ -519,7 +520,8 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity && player.canInteractWithBlock(pos, 4.0F);
+			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity && player.canInteractWithBlock(pos, 4.0F)
+					&& SecurityUpgradeHandler.checkAccess(player, getBackpackWrapper(player));
 		}
 
 		@Override
@@ -677,7 +679,8 @@ public abstract class BackpackContext {
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return otherPlayer.isAlive() && player.canInteractWithEntity(otherPlayer, 4.0F);
+			return otherPlayer.isAlive() && player.canInteractWithEntity(otherPlayer, 4.0F)
+					&& SecurityUpgradeHandler.checkAccess(player, getBackpackWrapper(player));
 		}
 
 		@Override

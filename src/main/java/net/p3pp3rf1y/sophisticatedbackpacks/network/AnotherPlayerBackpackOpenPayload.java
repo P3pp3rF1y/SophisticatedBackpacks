@@ -11,11 +11,13 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.settings.main.MainSettingsCategory;
 
@@ -35,9 +37,10 @@ public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements C
 			return;
 		}
 
-		if (player.level().getEntity(payload.anotherPlayerId) instanceof Player anotherPlayer) {
+		if (player.level().getEntity(payload.anotherPlayerId) instanceof Player anotherPlayer && anotherPlayer.isAlive()
+				&& player.canInteractWithEntity(anotherPlayer, 4.0F)) {
 			PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
-				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
+				if (canAnotherPlayerOpenBackpack(player, anotherPlayer, backpack)) {
 
 					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
 					player.openMenu(new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
@@ -50,8 +53,12 @@ public record AnotherPlayerBackpackOpenPayload(int anotherPlayerId) implements C
 		}
 	}
 
-	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {
-		MainSettingsCategory<?> category = BackpackWrapper.fromStack(backpack).getSettingsHandler().getGlobalSettingsCategory();
+	private static boolean canAnotherPlayerOpenBackpack(Player player, Player anotherPlayer, ItemStack backpack) {
+		IStorageWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(player.level(), backpack);
+		if (!SecurityUpgradeHandler.claimOrCheckAccess(player, backpackWrapper)) {
+			return false;
+		}
+		MainSettingsCategory<?> category = backpackWrapper.getSettingsHandler().getGlobalSettingsCategory();
 		return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category,
 				BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);
 	}

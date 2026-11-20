@@ -51,6 +51,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher.MobCatcherHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
@@ -331,6 +332,11 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		ItemStack stack = player.getItemInHand(hand);
 
 		if (!level.isClientSide) {
+			IBackpackWrapper backpackWrapper = BackpackLinkedStorageResolver.resolveOrCreate(level, stack);
+			if (!SecurityUpgradeHandler.claimOrCheckAccess(player, backpackWrapper)) {
+				SecurityUpgradeHandler.displayAccessDenied(player);
+				return InteractionResultHolder.fail(stack);
+			}
 			String handlerName = hand == InteractionHand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : 0;
 			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);

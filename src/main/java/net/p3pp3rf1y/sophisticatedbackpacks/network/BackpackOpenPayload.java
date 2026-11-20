@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
@@ -77,16 +78,28 @@ public record BackpackOpenPayload(int slotIndex, String identifier, String handl
 	}
 
 	private static void findAndOpenFirstBackpack(Player player) {
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
+		boolean[] accessDenied = {false};
+		boolean opened = PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
+			if (!SecurityUpgradeHandler.claimOrCheckAccess(player, backpackContext.getBackpackWrapper(player))) {
+				accessDenied[0] = true;
+				return false;
+			}
 			player.openMenu(
 					new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false),
 					buffer -> backpackContext.toBuffer(buffer, player));
 			return true;
 		});
+		if (!opened && accessDenied[0]) {
+			SecurityUpgradeHandler.displayAccessDenied(player);
+		}
 	}
 
 	private static void openBackpack(Player player, BackpackContext backpackContext) {
+		if (!SecurityUpgradeHandler.claimOrCheckAccess(player, backpackContext.getBackpackWrapper(player))) {
+			SecurityUpgradeHandler.displayAccessDenied(player);
+			return;
+		}
 		player.openMenu(
 				new SophisticatedMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player), false),
 				buffer -> backpackContext.toBuffer(buffer, player));

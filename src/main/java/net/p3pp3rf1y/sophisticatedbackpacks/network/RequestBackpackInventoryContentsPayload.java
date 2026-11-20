@@ -13,6 +13,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.security.SecurityUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -46,6 +48,9 @@ public record RequestBackpackInventoryContentsPayload(UUID backpackUuid, ItemSta
 		}
 		if (!(stack.getItem() instanceof BackpackItem) || stack.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)
 				|| !payload.backpackUuid.equals(stack.get(ModCoreDataComponents.STORAGE_UUID))) {
+			return;
+		}
+		if (!SecurityUpgradeHandler.checkAccess(player, BackpackWrapper.fromStack(stack))) {
 			return;
 		}
 		CompoundTag backpackContents = BackpackStorage.get().getBackpackContents(payload.backpackUuid).orElse(null);

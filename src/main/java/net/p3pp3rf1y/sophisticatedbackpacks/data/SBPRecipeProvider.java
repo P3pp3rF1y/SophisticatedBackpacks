@@ -153,6 +153,10 @@ public class SBPRecipeProvider extends RecipeProvider {
 				.define('S', Tags.Items.NETHER_STARS).define('C', Items.END_CRYSTAL).unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(recipeOutput);
 
+		ShapeBasedRecipeBuilder.shaped(ModItems.SECURITY_UPGRADE.get()).pattern("IRI").pattern("TBT").pattern("IRI").define('B', ModItems.UPGRADE_BASE.get())
+				.define('I', Tags.Items.INGOTS_IRON).define('R', Tags.Items.DUSTS_REDSTONE).define('T', Items.TRIPWIRE_HOOK)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get())).save(recipeOutput);
+
 		ShapeBasedRecipeBuilder.shaped(ModItems.SMELTING_UPGRADE.get()).pattern("RIR").pattern("IBI").pattern("RFR").define('B', ModItems.UPGRADE_BASE.get())
 				.define('R', Tags.Items.DUSTS_REDSTONE).define('I', Tags.Items.INGOTS_IRON).define('F', Items.FURNACE)
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get())).save(recipeOutput);
