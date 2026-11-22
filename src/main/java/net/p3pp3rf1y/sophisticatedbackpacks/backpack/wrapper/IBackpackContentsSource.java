@@ -8,11 +8,19 @@ import java.util.UUID;
 interface IBackpackContentsSource {
 	ContainerContents getContents();
 
+	default Optional<ContainerContents> getContentsIfPresent() {
+		return Optional.of(getContents());
+	}
+
 	void setContents(ContainerContents contents);
 
 	void markDirty();
 
 	Optional<UUID> getContentsUuid();
+
+	default boolean hasContents() {
+		return getContentsUuid().isPresent();
+	}
 
 	default boolean usesLegacyBackpackDataMigration() {
 		return false;
