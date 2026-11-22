@@ -19,6 +19,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -48,6 +49,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
@@ -177,6 +179,12 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void onCraftedBy(ItemStack itemStack, Player player) {
 		super.onCraftedBy(itemStack, player);
 		if (player.level() instanceof ServerLevel serverLevel) {
+			if (itemStack.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID.get())) {
+				if (player.containerMenu instanceof SmithingMenu) {
+					BackpackUpgradeRecipe.completeTierUpgrade(serverLevel, player, itemStack, null);
+				}
+				return;
+			}
 			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, itemStack);
 		}
 	}
@@ -322,8 +330,13 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot slot) {
-		if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying()
-				|| (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null)) {
+		if (level.isClientSide() || !(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying()) {
+			return;
+		}
+		if (stack.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID.get())) {
+			BackpackUpgradeRecipe.completeTierUpgrade(level, player, stack, null);
+		}
+		if (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && slot == null) {
 			return;
 		}
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
