@@ -22,6 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -46,6 +47,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LegacyBackpackDataM
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingBackpackItemEntity;
@@ -345,6 +347,12 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		super.onCraftedBy(stack, level, player);
 		if (level instanceof ServerLevel) {
 			EnderLinkerEndpointRecipe.issueCraftClaim(player, stack);
+			if (stack.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID)) {
+				if (player.containerMenu instanceof SmithingMenu) {
+					BackpackUpgradeRecipe.completeTierUpgrade((ServerLevel) level, player, stack, null);
+				}
+				return;
+			}
 			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade((ServerLevel) level, stack);
 		}
 	}
@@ -353,6 +361,9 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
 		if (!(entity instanceof Player player) || player.isSpectator() || player.isDeadOrDying()) {
 			return;
+		}
+		if (level instanceof ServerLevel serverLevel && stack.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID)) {
+			BackpackUpgradeRecipe.completeTierUpgrade(serverLevel, player, stack, null);
 		}
 		if (level instanceof ServerLevel serverLevel && LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
 			Optional<IBackpackWrapper> primaryHost = BackpackLinkedStorageResolver.resolvePrimaryCanonicalHost(serverLevel, stack);

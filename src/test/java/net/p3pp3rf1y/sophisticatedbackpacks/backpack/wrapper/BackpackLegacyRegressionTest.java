@@ -9,7 +9,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
@@ -23,12 +25,16 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackTemplates;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.UUIDDeduplicator;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutFitResult;
+import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutFitter;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.StorageWrapperRepository;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -42,6 +48,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -426,6 +433,59 @@ class BackpackLegacyRegressionTest {
 
 			adapter.verify(() -> BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(level, crafted));
 		}
+	}
+
+	@Test
+	void inventoryTickCompletesDeliveredTierUpgradeOnceAndRemovesMarkers() {
+		UUID operationId = UUID.randomUUID();
+		ItemStack delivered = new ItemStack(ModItems.DIAMOND_BACKPACK.get());
+		delivered.set(ModDataComponents.TIER_UPGRADE_SOURCE_COLUMNS, 9);
+		delivered.set(ModDataComponents.TIER_UPGRADE_SOURCE_INVENTORY_SLOTS, 81);
+		delivered.set(ModDataComponents.TIER_UPGRADE_SOURCE_UPGRADE_SLOTS, 4);
+		delivered.set(ModDataComponents.TIER_UPGRADE_OPERATION_ID, operationId);
+		Player player = Mockito.mock(Player.class);
+		Inventory inventory = new Inventory(player);
+		inventory.items.set(0, delivered);
+		AbstractContainerMenu menu = Mockito.mock(AbstractContainerMenu.class);
+		player.containerMenu = menu;
+		Mockito.when(menu.getCarried()).thenReturn(ItemStack.EMPTY);
+		Mockito.when(player.getInventory()).thenReturn(inventory);
+		Mockito.when(player.isSpectator()).thenReturn(false);
+		Mockito.when(player.isDeadOrDying()).thenReturn(false);
+		ServerLevel level = Mockito.mock(ServerLevel.class);
+		BackpackWrapper source = Mockito.mock(BackpackWrapper.class);
+		IBackpackWrapper wrapper = Mockito.mock(IBackpackWrapper.class);
+		InventoryHandler inventoryHandler = Mockito.mock(InventoryHandler.class);
+		UpgradeHandler upgradeHandler = Mockito.mock(UpgradeHandler.class);
+		InventoryLayoutFitResult fitResult = Mockito.mock(InventoryLayoutFitResult.class);
+		Mockito.when(wrapper.getInventoryHandler()).thenReturn(inventoryHandler);
+		Mockito.when(wrapper.getUpgradeHandler()).thenReturn(upgradeHandler);
+		Mockito.when(inventoryHandler.getSlots()).thenReturn(108);
+		Mockito.when(wrapper.getColumnsTaken()).thenReturn(0);
+		Mockito.when(wrapper.getNumberOfSlotRows()).thenReturn(9);
+		Mockito.when(source.getInventoryLayoutParts(9, 12)).thenReturn(List.of());
+		Mockito.when(upgradeHandler.getWrappersThatImplement(ITickableUpgrade.class)).thenReturn(List.of());
+		Mockito.when(fitResult.fits()).thenReturn(true);
+		boolean onlyWornBefore = Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get();
+
+		try (MockedStatic<BackpackWrapper> wrappers = Mockito.mockStatic(BackpackWrapper.class);
+				MockedStatic<InventoryLayoutFitter> fitter = Mockito.mockStatic(InventoryLayoutFitter.class)) {
+			wrappers.when(() -> BackpackWrapper.createDetachedInventoryLayoutView(delivered, 81, 4)).thenReturn(source);
+			wrappers.when(() -> BackpackWrapper.fromStack(delivered)).thenReturn(wrapper);
+			fitter.when(() -> InventoryLayoutFitter.fit(Mockito.anyList(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(fitResult);
+			Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.set(true);
+
+			ModItems.DIAMOND_BACKPACK.get().inventoryTick(delivered, level, player, 0, false);
+			ModItems.DIAMOND_BACKPACK.get().inventoryTick(delivered, level, player, 0, false);
+		} finally {
+			Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.set(onlyWornBefore);
+		}
+
+		Mockito.verify(wrapper).applyInventoryLayout(fitResult, 12);
+		assertFalse(delivered.has(ModDataComponents.TIER_UPGRADE_SOURCE_COLUMNS));
+		assertFalse(delivered.has(ModDataComponents.TIER_UPGRADE_SOURCE_INVENTORY_SLOTS));
+		assertFalse(delivered.has(ModDataComponents.TIER_UPGRADE_SOURCE_UPGRADE_SLOTS));
+		assertFalse(delivered.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID));
 	}
 
 	@Test

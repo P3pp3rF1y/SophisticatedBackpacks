@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayout;
 import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutFitResult;
 import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayoutPart;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -273,7 +274,7 @@ public class MobCatcherStorage {
 
 	public static int getColumns(IBackpackWrapper backpackWrapper) {
 		int slots = backpackWrapper.getInventoryHandler().getSlots() + backpackWrapper.getColumnsTaken() * backpackWrapper.getNumberOfSlotRows();
-		return (slots <= 81 ? 9 : 12) - backpackWrapper.getColumnsTaken();
+		return InventoryLayout.getEffectiveColumns(slots, backpackWrapper.getColumnsTaken());
 	}
 
 	private static String getLayoutPartId(CapturedMob capturedMob) {

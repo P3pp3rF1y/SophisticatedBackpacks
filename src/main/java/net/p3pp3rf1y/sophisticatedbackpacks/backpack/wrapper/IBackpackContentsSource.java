@@ -18,6 +18,10 @@ interface IBackpackContentsSource {
 
 	Optional<UUID> getContentsUuid();
 
+	default boolean hasContents() {
+		return getContentsUuid().isPresent();
+	}
+
 	default boolean usesLegacyBackpackDataMigration() {
 		return false;
 	}

@@ -9,13 +9,9 @@ import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointStackState;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 
 import java.util.Optional;
 
@@ -41,14 +37,10 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 	public ItemStack assemble(SmithingRecipeInput inv, HolderLookup.Provider registryAccess) {
 		ItemStack upgradedBackpack = result.copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-			getBackpack(inv).map(ItemStack::getComponents).ifPresent(upgradedBackpack::applyComponents);
+			ItemStack sourceBackpack = getBackpack(inv).orElseThrow();
+			upgradedBackpack.applyComponents(sourceBackpack.getComponents());
 			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
-			if (LinkedStorageStackLifecycle.classifyEndpoint(upgradedBackpack) == LinkedStorageEndpointStackState.ENDPOINT) {
-				BackpackUpgradeRecipe.setSlotNumbers(upgradedBackpack, backpackItem);
-			} else {
-				IBackpackWrapper wrapper = BackpackWrapper.fromStack(upgradedBackpack);
-				wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
-			}
+			BackpackUpgradeRecipe.prepareInventoryLayout(sourceBackpack, upgradedBackpack, backpackItem);
 		}
 		return upgradedBackpack;
 	}

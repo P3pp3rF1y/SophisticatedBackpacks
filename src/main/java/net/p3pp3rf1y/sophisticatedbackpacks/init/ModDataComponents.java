@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill.RefillUpgradeWrapper
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper.ToolSwapMode;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class ModDataComponents {
@@ -31,6 +33,15 @@ public class ModDataComponents {
 
 	public static final Supplier<DataComponentType<Boolean>> LINKED_MOB_CATCHER = DATA_COMPONENT_TYPES.register("linked_mob_catcher",
 			() -> new DataComponentType.Builder<Boolean>().networkSynchronized(ByteBufCodecs.BOOL).build());
+
+	public static final Supplier<DataComponentType<Integer>> TIER_UPGRADE_SOURCE_COLUMNS = DATA_COMPONENT_TYPES.register("tier_upgrade_source_columns",
+			() -> new DataComponentType.Builder<Integer>().networkSynchronized(ByteBufCodecs.INT).build());
+	public static final Supplier<DataComponentType<Integer>> TIER_UPGRADE_SOURCE_INVENTORY_SLOTS = DATA_COMPONENT_TYPES
+			.register("tier_upgrade_source_inventory_slots", () -> new DataComponentType.Builder<Integer>().networkSynchronized(ByteBufCodecs.INT).build());
+	public static final Supplier<DataComponentType<Integer>> TIER_UPGRADE_SOURCE_UPGRADE_SLOTS = DATA_COMPONENT_TYPES
+			.register("tier_upgrade_source_upgrade_slots", () -> new DataComponentType.Builder<Integer>().networkSynchronized(ByteBufCodecs.INT).build());
+	public static final Supplier<DataComponentType<UUID>> TIER_UPGRADE_OPERATION_ID = DATA_COMPONENT_TYPES.register("tier_upgrade_operation_id",
+			() -> new DataComponentType.Builder<UUID>().networkSynchronized(UUIDUtil.STREAM_CODEC).build());
 
 	public static final Supplier<DataComponentType<String>> ITEM_NAME = DATA_COMPONENT_TYPES.register("item_name",
 			() -> new DataComponentType.Builder<String>().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());

@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
@@ -28,6 +29,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayout;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.*;
@@ -132,6 +134,26 @@ public class BackpackWrapper implements IBackpackWrapper {
 		return StorageWrapperRepository.getStorageWrapper(stack, IBackpackWrapper.class, BackpackWrapper::new);
 	}
 
+	public static BackpackWrapper createDetachedInventoryLayoutView(ItemStack backpackStack, int inventorySlots, int upgradeSlots) {
+		ItemStack detachedBackpack = backpackStack.copy();
+		CompoundTag contents = getDetachedContents(backpackStack);
+		BackpackWrapper wrapper = new BackpackWrapper(detachedBackpack, new DetachedBackpackContentsSource(contents));
+		wrapper.numberOfInventorySlots = inventorySlots;
+		wrapper.numberOfUpgradeSlots = upgradeSlots;
+		return wrapper;
+	}
+
+	private static CompoundTag getDetachedContents(ItemStack backpackStack) {
+		UUID contentsUuid = backpackStack.get(ModCoreDataComponents.STORAGE_UUID);
+		if (contentsUuid == null) {
+			contentsUuid = LegacyBackpackDataMigration.getContentsUuid(backpackStack).orElse(null);
+		}
+		if (contentsUuid != null) {
+			return BackpackStorage.get().getBackpackContents(contentsUuid).map(CompoundTag::copy).orElseGet(CompoundTag::new);
+		}
+		return backpackStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+	}
+
 	public static Optional<IFluidHandlerItem> getCapabilityFluidHandler(ItemStack stack) {
 		if (LinkedStorageStackLifecycle.classifyEndpoint(stack) == LinkedStorageEndpointStackState.ENDPOINT) {
 			return fromStack(stack).getFluidHandler().map(handler -> new FluidHandlerItemWrapper(stack, handler));
@@ -199,8 +221,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getNumberOfSlotRows() {
-		int itemInventorySlots = getNumberOfInventorySlots();
-		return (int) Math.ceil(itemInventorySlots <= 81 ? (double) itemInventorySlots / 9 : (double) itemInventorySlots / 12);
+		return InventoryLayout.getNumberOfRows(getNumberOfInventorySlots());
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
@@ -310,7 +331,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackSettingsHandler getSettingsHandler() {
 		if (settingsHandler == null) {
-			if (getContentsUuid().isPresent()) {
+			if (contentsSource.hasContents()) {
 				settingsHandler = new BackpackSettingsHandler(this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
 			} else {
 				settingsHandler = Noop.INSTANCE.getSettingsHandler();
@@ -323,7 +344,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public UpgradeHandler getUpgradeHandler() {
 		UpgradeHandler handler = upgradeHandler;
 		if (handler == null) {
-			if (getContentsUuid().isPresent()) {
+			if (contentsSource.hasContents()) {
 				handler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty,
 						this::onUpgradeCachesInvalidated) {
 					@Override
@@ -962,6 +983,38 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 		@Override
 		public boolean usesLegacyBackpackDataMigration() {
+			return true;
+		}
+	}
+
+	private static class DetachedBackpackContentsSource implements IBackpackContentsSource {
+		private CompoundTag contents;
+
+		private DetachedBackpackContentsSource(CompoundTag contents) {
+			this.contents = contents;
+		}
+
+		@Override
+		public CompoundTag getContents() {
+			return contents;
+		}
+
+		@Override
+		public void setContents(CompoundTag contents) {
+			this.contents = contents;
+		}
+
+		@Override
+		public void markDirty() {
+		}
+
+		@Override
+		public Optional<UUID> getContentsUuid() {
+			return Optional.empty();
+		}
+
+		@Override
+		public boolean hasContents() {
 			return true;
 		}
 	}

@@ -49,7 +49,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.LinkedStorageJukeboxPlaybackAnchors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModPayloads;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenPayload;
@@ -100,7 +102,12 @@ public class CommonEventHandler {
 
 	private void onBackpackCrafted(PlayerEvent.ItemCraftedEvent event) {
 		if (event.getEntity().level() instanceof ServerLevel serverLevel) {
-			BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, event.getCrafting(), event.getInventory());
+			ItemStack crafted = event.getCrafting();
+			if (crafted.has(ModDataComponents.TIER_UPGRADE_OPERATION_ID)) {
+				BackpackUpgradeRecipe.completeTierUpgrade(serverLevel, event.getEntity(), crafted, event.getInventory());
+			} else {
+				BackpackLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, crafted, event.getInventory());
+			}
 		}
 	}
 

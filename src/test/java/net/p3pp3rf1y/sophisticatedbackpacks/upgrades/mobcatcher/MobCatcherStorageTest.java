@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -35,6 +37,25 @@ class MobCatcherStorageTest {
 	@Test
 	void targetSlotKeepsCapturedMobWithinTargetBoundsWhenColumnsShrink() {
 		assertEquals(5, MobCatcherStorage.getTargetSlot(capturedMob(7, 2, 2), 9, 7, 18));
+	}
+
+	@Test
+	void getTargetSlotTranslatesCapturedMobCoordinatesFromNineToTwelveColumns() {
+		assertEquals(20, MobCatcherStorage.getTargetSlot(capturedMob(17, 2, 2), 9, 12, 81));
+	}
+
+	@Test
+	void getColumnsReconstructsPartialRowBaseSlotsAfterColumnsAreTaken() {
+		IBackpackWrapper backpackWrapper = mock(IBackpackWrapper.class);
+		InventoryHandler inventoryHandler = mock(InventoryHandler.class);
+		when(backpackWrapper.getInventoryHandler()).thenReturn(inventoryHandler);
+		when(backpackWrapper.getColumnsTaken()).thenReturn(2);
+		when(backpackWrapper.getNumberOfSlotRows()).thenReturn(7);
+		when(inventoryHandler.getSlots()).thenReturn(68);
+
+		int columns = MobCatcherStorage.getColumns(backpackWrapper);
+
+		assertEquals(10, columns);
 	}
 
 	private CapturedMob capturedMob(int slot, int width, int height) {
