@@ -27,6 +27,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.InventoryLayout;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -111,6 +112,23 @@ public class BackpackWrapper implements IBackpackWrapper {
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
 
+	public static BackpackWrapper createDetachedInventoryLayoutView(ItemStack backpackStack, int inventorySlots, int upgradeSlots) {
+		ItemStack detachedBackpack = backpackStack.copy();
+		CompoundTag contents = getDetachedContents(backpackStack);
+		BackpackWrapper wrapper = new BackpackWrapper(detachedBackpack, new DetachedBackpackContentsSource(contents));
+		wrapper.numberOfInventorySlots = inventorySlots;
+		wrapper.numberOfUpgradeSlots = upgradeSlots;
+		return wrapper;
+	}
+
+	private static CompoundTag getDetachedContents(ItemStack backpackStack) {
+		CompoundTag tag = backpackStack.getTag();
+		if (tag != null && tag.hasUUID(CONTENTS_UUID_TAG)) {
+			return BackpackStorage.get().getBackpackContents(tag.getUUID(CONTENTS_UUID_TAG)).map(CompoundTag::copy).orElseGet(CompoundTag::new);
+		}
+		return tag == null ? new CompoundTag() : tag.copy();
+	}
+
 	@Override
 	public void setContentsChangeHandler(Runnable saveHandler) {
 		backpackSaveHandler = saveHandler;
@@ -157,8 +175,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public int getNumberOfSlotRows() {
-		int itemInventorySlots = getNumberOfInventorySlots();
-		return (int) Math.ceil(itemInventorySlots <= 81 ? (double) itemInventorySlots / 9 : (double) itemInventorySlots / 12);
+		return InventoryLayout.getNumberOfRows(getNumberOfInventorySlots());
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
@@ -172,7 +189,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public Optional<CompoundTag> getBackpackContents() {
-		return getContentsUuid().map(uuid -> getBackpackContentsNbt());
+		return contentsSource.hasContents() ? Optional.of(getBackpackContentsNbt()) : Optional.empty();
 	}
 
 	@Override
@@ -246,7 +263,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public BackpackSettingsHandler getSettingsHandler() {
 		if (settingsHandler == null) {
-			if (getContentsUuid().isPresent()) {
+			if (contentsSource.hasContents()) {
 				settingsHandler = new BackpackSettingsHandler(this, getBackpackContentsNbt(), this::markBackpackContentsDirty);
 			} else {
 				settingsHandler = Noop.INSTANCE.getSettingsHandler();
@@ -259,7 +276,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	public UpgradeHandler getUpgradeHandler() {
 		UpgradeHandler handler = upgradeHandler;
 		if (handler == null) {
-			if (getContentsUuid().isPresent()) {
+			if (contentsSource.hasContents()) {
 				handler = new UpgradeHandler(getNumberOfUpgradeSlots(), this, getBackpackContentsNbt(), this::markBackpackContentsDirty, () -> {
 					InventoryHandler inventoryHandler = this.handler;
 					if (inventoryHandler != null) {
@@ -709,6 +726,38 @@ public class BackpackWrapper implements IBackpackWrapper {
 		@Override
 		public Optional<UUID> getContentsUuid() {
 			return NBTHelper.getUniqueId(backpack, CONTENTS_UUID_TAG);
+		}
+	}
+
+	private static class DetachedBackpackContentsSource implements IBackpackContentsSource {
+		private CompoundTag contents;
+
+		private DetachedBackpackContentsSource(CompoundTag contents) {
+			this.contents = contents;
+		}
+
+		@Override
+		public CompoundTag getContents() {
+			return contents;
+		}
+
+		@Override
+		public void setContents(CompoundTag contents) {
+			this.contents = contents;
+		}
+
+		@Override
+		public void markDirty() {
+		}
+
+		@Override
+		public Optional<UUID> getContentsUuid() {
+			return Optional.empty();
+		}
+
+		@Override
+		public boolean hasContents() {
+			return true;
 		}
 	}
 }

@@ -9,12 +9,10 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.util.thread.SidedThreadGroups;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
-import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -44,15 +42,12 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 	public ItemStack assemble(Container inv, RegistryAccess registryAccess) {
 		ItemStack upgradedBackpack = result.copy();
 		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-			getBackpack(inv).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
-			if (LinkedStorageStackData.getEndpoint(upgradedBackpack) != null) {
-				upgradedBackpack.getOrCreateTag().putInt("inventorySlots", backpackItem.getNumberOfSlots());
-				upgradedBackpack.getOrCreateTag().putInt("upgradeSlots", backpackItem.getNumberOfUpgradeSlots());
-			} else {
-				upgradedBackpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
-						.ifPresent(wrapper -> wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots()));
+			ItemStack sourceBackpack = getBackpack(inv).orElseThrow();
+			if (sourceBackpack.getTag() != null) {
+				upgradedBackpack.setTag(sourceBackpack.getTag().copy());
 			}
+			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
+			BackpackUpgradeRecipe.prepareInventoryLayout(sourceBackpack, upgradedBackpack, backpackItem);
 		}
 		return upgradedBackpack;
 	}

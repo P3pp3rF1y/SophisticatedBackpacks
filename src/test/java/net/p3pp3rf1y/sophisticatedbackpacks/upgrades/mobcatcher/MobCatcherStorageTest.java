@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.mobcatcher;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -19,7 +20,9 @@ class MobCatcherStorageTest {
 		CompoundTag canonicalContents = new CompoundTag();
 		when(wrapper.supportsBackpackContents()).thenReturn(true);
 		when(wrapper.getBackpackContents()).thenReturn(Optional.of(canonicalContents));
+
 		MobCatcherStorage.addCapturedMob(wrapper, capturedMob(3, 2, 2));
+
 		assertEquals(1, MobCatcherStorage.getCapturedMobs(wrapper).size());
 		verify(wrapper).markBackpackContentsChanged();
 		verify(wrapper).attachInventorySlotBlockers();
@@ -29,32 +32,60 @@ class MobCatcherStorageTest {
 	@Test
 	void foreignCanonicalHostCannotPersistMobCatcherData() {
 		IBackpackWrapper wrapper = mock(IBackpackWrapper.class);
+
 		assertThrows(IllegalStateException.class, () -> MobCatcherStorage.addCapturedMob(wrapper, capturedMob(3, 2, 2)));
+
 		verify(wrapper, never()).getContentsUuid();
 	}
+
 	@Test
 	void villagerSizedMobKeepsFootprintCloseToAabbRatioWithoutExcessiveOverfill() {
+
 		assertEquals(new CapturedMobFootprint(3, 7), MobCatcherStorage.getFootprint(0.6F, 1.95F, 20));
 	}
 
 	@Test
 	void cowSizedMobUsesModeratelyWideFootprint() {
+
 		assertEquals(new CapturedMobFootprint(4, 5), MobCatcherStorage.getFootprint(0.9F, 1.4F, 20));
 	}
 
 	@Test
 	void chickenSizedMobStaysCompact() {
+
 		assertEquals(new CapturedMobFootprint(2, 2), MobCatcherStorage.getFootprint(0.4F, 0.7F, 4));
 	}
 
 	@Test
 	void tallHostileSizedMobCanStillUseTallFootprint() {
+
 		assertEquals(new CapturedMobFootprint(4, 10), MobCatcherStorage.getFootprint(0.6F, 1.95F, 40));
 	}
 
 	@Test
 	void targetSlotKeepsCapturedMobWithinTargetBoundsWhenColumnsShrink() {
+
 		assertEquals(5, MobCatcherStorage.getTargetSlot(capturedMob(7, 2, 2), 9, 7, 18));
+	}
+
+	@Test
+	void getTargetSlotTranslatesCapturedMobCoordinatesFromNineToTwelveColumns() {
+
+		assertEquals(20, MobCatcherStorage.getTargetSlot(capturedMob(17, 2, 2), 9, 12, 81));
+	}
+
+	@Test
+	void getColumnsReconstructsPartialRowBaseSlotsAfterColumnsAreTaken() {
+		IBackpackWrapper backpackWrapper = mock(IBackpackWrapper.class);
+		InventoryHandler inventoryHandler = mock(InventoryHandler.class);
+		when(backpackWrapper.getInventoryHandler()).thenReturn(inventoryHandler);
+		when(backpackWrapper.getColumnsTaken()).thenReturn(2);
+		when(backpackWrapper.getNumberOfSlotRows()).thenReturn(7);
+		when(inventoryHandler.getSlots()).thenReturn(68);
+
+		int columns = MobCatcherStorage.getColumns(backpackWrapper);
+
+		assertEquals(10, columns);
 	}
 
 	private CapturedMob capturedMob(int slot, int width, int height) {

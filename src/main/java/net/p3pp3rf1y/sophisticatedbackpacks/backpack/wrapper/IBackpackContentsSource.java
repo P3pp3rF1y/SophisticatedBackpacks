@@ -14,6 +14,10 @@ interface IBackpackContentsSource {
 
 	Optional<UUID> getContentsUuid();
 
+	default boolean hasContents() {
+		return getContentsUuid().isPresent();
+	}
+
 	default boolean usesCanonicalSlotNumbers() {
 		return false;
 	}
